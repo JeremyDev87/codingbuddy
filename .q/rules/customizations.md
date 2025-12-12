@@ -1,0 +1,53 @@
+# Amazon Q Customizations
+
+## Common AI Rules
+
+This project follows shared coding rules from `.ai-rules/` for consistency across all AI assistants.
+
+### Workflow Modes (PLAN/ACT/EVAL)
+
+Refer to `.ai-rules/rules/core.md`:
+- **PLAN**: Create implementation plans
+- **ACT**: Execute code changes
+- **EVAL**: Quality assessment and improvements
+
+### Project Setup
+
+Refer to `.ai-rules/rules/project.md`:
+- **Tech Stack**: Next.js 16, React 19, TypeScript 5.8
+- **Architecture**: Layered structure (app → widgets → features → entities → shared)
+- **Development Rules**: File naming, import/export conventions
+
+### Coding Standards
+
+Refer to `.ai-rules/rules/augmented-coding.md`:
+- **TDD Workflow**: Red → Green → Refactor
+- **Code Quality**: SOLID principles, DRY, 90%+ coverage
+- **Testing**: No mocking, test real behavior
+
+### Specialist Expertise
+
+Refer to `.ai-rules/agents/*.json`:
+- Frontend development patterns
+- Security best practices
+- Performance optimization
+- Accessibility guidelines
+
+## Amazon Q Specific Features
+
+### AWS Integration
+- Leverage Q's AWS knowledge for deployment
+- Use Q's security scanning with our security rules
+- Apply Q's cost optimization suggestions
+
+### Language Support
+- Respond in Korean (한국어) as per project standard
+- Use technical Korean terminology
+
+## Full Documentation
+
+- Core Workflow: `.ai-rules/rules/core.md`
+- Project Setup: `.ai-rules/rules/project.md`
+- Coding Principles: `.ai-rules/rules/augmented-coding.md`
+- Specialist Agents: `.ai-rules/agents/README.md`
+- Integration Guide: `.ai-rules/adapters/q.md`

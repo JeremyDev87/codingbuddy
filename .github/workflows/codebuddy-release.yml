@@ -1,0 +1,51 @@
+name: codebuddy-release
+
+on:
+  release:
+    types: [published]
+
+env:
+  NODE_OPTIONS: --max_old_space_size=4096
+
+defaults:
+  run:
+    working-directory: mcp-server
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build
+        run: yarn build
+
+      - name: Publish
+        run: |
+          # Extract version from tag (remove 'refs/tags/' and 'v' prefix)
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          TAG_NAME="${TAG_NAME#v}"
+          echo "Publishing version: $TAG_NAME"
+          npm version "$TAG_NAME" --no-git-tag-version
+          yarn npm publish
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_REF: ${{ github.ref }}
+
+      - name: Output version number
+        run: |
+          name=$(jq -r .name package.json)
+          version=$(jq -r .version package.json)
+          echo "Published $name@$version"

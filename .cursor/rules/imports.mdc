@@ -1,0 +1,148 @@
+---
+description: Common AI Rules Import - References shared rules from .ai-rules/
+globs:
+alwaysApply: true
+---
+
+# Common AI Rules Reference
+
+This project uses shared AI coding rules from `.ai-rules/` directory for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
+
+## 📚 Core Workflow Rules
+
+**Source**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+
+### Work Modes
+
+You have three modes of operation:
+
+1. **PLAN mode** - Define a plan without making changes
+2. **ACT mode** - Execute the plan and make changes
+3. **EVAL mode** - Analyze results and propose improvements
+
+**Mode Flow**:
+- Start in PLAN mode by default
+- Move to ACT when user types `ACT`
+- Return to PLAN after ACT completes (automatic)
+- Move to EVAL only when user explicitly types `EVAL`
+
+**Mode Indicators**:
+- Print `# Mode: PLAN` in plan mode
+- Print `# Mode: ACT` in act mode
+- Print `# Mode: EVAL` in eval mode
+
+### Agent System
+
+**Auto-activated Agents**:
+- **Frontend Developer** (`.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
+- **Code Reviewer** (`.ai-rules/agents/code-reviewer.json`): EVAL mode
+
+**Specialist Agents** (12 available):
+- Architecture, Test Strategy, Performance, Security
+- Accessibility, SEO, Design System, Documentation
+- Code Quality, DevOps Engineer
+
+For complete workflow details, see [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+
+---
+
+## 🏗️ Project Setup
+
+**Source**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+
+### Tech Stack
+- Framework: Next.js 16.0.1 (App Router)
+- React: 19.2.0
+- TypeScript: 5.8.3
+- Package Manager: Yarn 4.2.2
+- Runtime: Node.js 24.11.0
+
+### Project Structure
+```
+src/
+├── app/          # Next.js App Router
+├── entities/     # Domain entities (business logic)
+├── features/     # Feature-specific UI components
+├── widgets/      # Composite widgets
+└── shared/       # Common modules
+```
+
+### Development Rules
+- **Layer dependency**: app → widgets → features → entities → shared
+- **Pure/impure separation**: Separate files for pure and impure functions
+- **Server Components**: Default, Client Components only when necessary
+- **Test coverage**: 90%+ goal
+
+For complete project setup, see [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+
+---
+
+## 🎯 Augmented Coding Principles
+
+**Source**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+
+### TDD Cycle (Strict Adherence)
+
+Follow the **Red → Green → Refactor** cycle:
+
+1. **Red**: Write a failing test that defines functionality
+2. **Green**: Implement minimum code needed to pass
+3. **Refactor**: Improve structure only after tests pass
+
+### Core Principles
+- **TDD for core logic** (entities, shared/utils, shared/hooks)
+- **Test-after for UI** (features, widgets)
+- **SOLID principles** and code quality standards
+- **90%+ test coverage** goal
+- **No mocking** - test real behavior with actual implementations
+
+### Code Quality Standards
+- TypeScript strict mode (no `any`)
+- DRY (Don't Repeat Yourself)
+- Keep methods small (10-20 lines max)
+- Minimize state, prefer pure functions
+- Tidy First: Separate structural vs behavioral changes
+
+For complete augmented coding guide, see [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+
+---
+
+## 🤖 Specialist Agents
+
+**Source**: [.ai-rules/agents/](../../.ai-rules/agents/)
+
+All specialist agents are defined in `.ai-rules/agents/` directory:
+
+| Agent | Expertise | Use Cases |
+|-------|-----------|-----------|
+| Frontend Developer | React/Next.js, TDD, design system | Component implementation, Server Actions |
+| Code Reviewer | Quality evaluation, architecture | Code review, production readiness |
+| Security Specialist | OAuth 2.0, JWT, XSS/CSRF | Authentication, security audit |
+| Accessibility Specialist | WCAG 2.1 AA, ARIA | A11y compliance, screen readers |
+| Performance Specialist | Bundle size, Core Web Vitals | Performance tuning, optimization |
+| +7 more specialists | Various domains | See agents README |
+
+For complete agent documentation, see [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
+
+---
+
+## 💬 Communication
+
+- **Always respond in Korean (한국어)**
+- User frequently modifies code directly, so **always read code and refresh information** instead of relying on memory
+- **Start by understanding current code state** for every question
+
+---
+
+## 📖 Full Documentation
+
+For comprehensive guides:
+- **Core Rules**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+- **Project Setup**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+- **Augmented Coding**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+- **Agents System**: [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
+- **Integration Guide**: [.ai-rules/adapters/cursor.md](../../.ai-rules/adapters/cursor.md)
+
+---
+
+**Note**: This file references common AI rules from `.ai-rules/` directory. All AI assistants (Cursor, Claude Code, Antigravity, etc.) share the same rules for consistency.

@@ -1,0 +1,63 @@
+name: codebuddy-canary
+
+on:
+  push:
+    branches:
+      - master
+      - stag-**
+    paths:
+      - 'mcp-server/**'
+      - .github/workflows/codebuddy-canary.yml
+
+jobs:
+  publish-canary:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp-server
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Restore dependencies from cache
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ./mcp-server/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      - name: Build
+        run: yarn build
+
+      - name: Publish canary
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMIT_SHA=${GITHUB_SHA::7}
+          VERSION="0.0.0-canary.${TIMESTAMP}.${COMMIT_SHA}"
+          cat <<< "$( jq --arg v "$VERSION" '.version = $v' package.json )" > package.json
+          yarn npm publish --tag canary
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+
+      - name: Output canary version number
+        run: |
+          name=$(jq -r .name package.json)
+          version=$(jq -r .version package.json)
+          yarn dlx action-status --context "Published $name" --state success --description $version --url "https://unpkg.com/$name@$version/"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
