@@ -42,3 +42,9 @@ coverage/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Yarn PnP (Zero-install 미사용)
+.pnp.*
+
+# AI
+mcp.json
