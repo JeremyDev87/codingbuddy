@@ -26,7 +26,7 @@ Add the following configuration to your Claude Desktop config:
   "mcpServers": {
     "codebuddy-rules": {
       "command": "npx",
-      "args": ["@wishket/codebuddy"]
+      "args": ["codingbuddy"]
     }
   }
 }
@@ -35,7 +35,7 @@ Add the following configuration to your Claude Desktop config:
 ### Option 2: Global Installation
 
 ```bash
-npm install -g @wishket/codebuddy
+npm install -g codingbuddy
 ```
 
 Then configure Claude Desktop:
@@ -151,5 +151,5 @@ Automated via GitHub Actions on `master` push.
 The workflow will:
 1. Detect version change.
 2. Create a GitHub Release (e.g., `v1.0.1`).
-3. Publish to NPM as `@wishket/codebuddy`.
+3. Publish to NPM as `codingbuddy`.
 

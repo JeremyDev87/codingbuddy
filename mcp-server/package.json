@@ -1,5 +1,5 @@
 {
-  "name": "@wishket/codebuddy",
+  "name": "codingbuddy",
   "version": "1.0.0",
   "description": "Multi-AI Rules MCP Server",
   "main": "dist/main.js",

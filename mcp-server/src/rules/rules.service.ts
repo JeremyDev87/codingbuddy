@@ -12,7 +12,7 @@ export class RulesService {
   constructor() {
     // 경로 탐색 전략:
     // 1. 환경변수로 직접 지정된 경우 우선 사용
-    // 2. NPM 패키지로 설치된 경우: node_modules/@wishket/codebuddy/.ai-rules
+    // 2. NPM 패키지로 설치된 경우: node_modules/codingbuddy/.ai-rules
     // 3. 개발 환경: mcp-server/../.ai-rules
     //
     // 빌드 후 구조: dist/rules/rules.service.js
