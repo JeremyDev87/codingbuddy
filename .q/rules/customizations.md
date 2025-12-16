@@ -14,7 +14,7 @@ Refer to `.ai-rules/rules/core.md`:
 ### Project Setup
 
 Refer to `.ai-rules/rules/project.md`:
-- **Tech Stack**: Next.js 16, React 19, TypeScript 5.8
+- **Tech Stack**: 프로젝트의 package.json 참조
 - **Architecture**: Layered structure (app → widgets → features → entities → shared)
 - **Development Rules**: File naming, import/export conventions
 

@@ -21,10 +21,7 @@ Follow the common rules defined in `.ai-rules/` for consistency across all AI co
 
 **Source**: `.ai-rules/rules/project.md`
 
-**Tech Stack**:
-- Next.js 16.0.1, React 19.2.0, TypeScript 5.8.3
-- Yarn 4.2.2, Node.js 24.11.0
-- @wishket/design-system, Tailwind CSS, React Query
+**Tech Stack**: 프로젝트의 `package.json` 참조
 
 **Architecture**:
 - Layered structure: app → widgets → features → entities → shared

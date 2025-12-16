@@ -51,11 +51,8 @@ For complete workflow details, see [.ai-rules/rules/core.md](../../.ai-rules/rul
 **Source**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
 
 ### Tech Stack
-- Framework: Next.js 16.0.1 (App Router)
-- React: 19.2.0
-- TypeScript: 5.8.3
-- Package Manager: Yarn 4.2.2
-- Runtime: Node.js 24.11.0
+
+프로젝트의 `package.json`을 참조하세요.
 
 ### Project Structure
 ```

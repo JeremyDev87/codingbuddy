@@ -34,11 +34,8 @@ See full workflow details in [.ai-rules/rules/core.md](../../.ai-rules/rules/cor
 **Source**: `.ai-rules/rules/project.md`
 
 #### Tech Stack
-- Framework: Next.js 16.0.1 (App Router)
-- React: 19.2.0
-- TypeScript: 5.8.3
-- Package Manager: Yarn 4.2.2
-- Runtime: Node.js 24.11.0
+
+프로젝트의 `package.json`을 참조하세요.
 
 #### Project Structure
 ```
@@ -83,7 +80,7 @@ Available specialist agents:
 - **Security Specialist** - OAuth 2.0, JWT, XSS/CSRF protection
 - **Accessibility Specialist** - WCAG 2.1 AA compliance
 - **SEO Specialist** - Metadata API, structured data
-- **Design System Specialist** - @wishket/design-system usage
+- **Design System Specialist** - Design system usage
 - **Documentation Specialist** - Documentation quality
 - **Code Quality Specialist** - SOLID, DRY, complexity
 - **DevOps Engineer** - Docker, Datadog, deployment

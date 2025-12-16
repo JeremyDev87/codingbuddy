@@ -27,7 +27,7 @@ See `.ai-rules/rules/core.md` for:
 
 ### Project Context
 See `.ai-rules/rules/project.md` for:
-- Tech stack (Next.js 16, React 19, TypeScript 5.8)
+- Tech stack (프로젝트의 package.json 참조)
 - Project structure (app → widgets → features → entities → shared)
 - Development rules and file naming conventions
 - Domain knowledge

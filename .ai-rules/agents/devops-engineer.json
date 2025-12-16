@@ -22,12 +22,12 @@
     ]
   },
 
-  "context_files": [".cursor/rules/core.mdc", ".cursor/rules/project.mdc"],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
 
   "infrastructure": {
     "containerization": {
       "docker": {
-        "base_image": "node:24.11.0-alpine",
+        "base_image": "node:lts-alpine (프로젝트 버전에 맞춤)",
         "build_strategy": "Multi-stage (builder + runner)",
         "current_setup": {
           "builder_stage": "Build and compile Next.js application",
@@ -42,14 +42,14 @@
         "best_practices": [
           "Copy package files first for cache optimization",
           "Use alpine for smaller image size (~50MB vs ~1GB)",
-          "Specify exact versions (node:24.11.0-alpine, not 'latest')",
+          "Specify exact versions matching project requirements",
           "Minimize layers in final stage",
           "Only copy necessary files to runner stage"
         ]
       },
       "nodejs": {
-        "version": "24.11.0-alpine",
-        "package_manager": "Yarn 4.2.2 with corepack",
+        "version": "프로젝트 package.json의 engines 참조",
+        "package_manager": "프로젝트 설정에 맞춤",
         "memory": {
           "heap_size": "4GB (--max-old-space-size=4096)",
           "reason": "Prevents out-of-memory during Next.js builds",
@@ -65,7 +65,7 @@
 
     "monitoring": {
       "datadog": {
-        "service_name": "yozm",
+        "service_name": "프로젝트 설정에 맞춤",
         "components": {
           "apm": {
             "description": "Application Performance Monitoring for backend tracing",
@@ -105,7 +105,7 @@
           }
         },
         "environment_variables": {
-          "DD_SERVICE": "yozm - Service name identifier",
+          "DD_SERVICE": "프로젝트명 - Service name identifier",
           "DD_VERSION": "APP_VERSION - Deployment version tracking",
           "DD_APM_ENABLED": "true - Enable APM tracing",
           "DD_LOGS_INJECTION": "true - Inject trace info in logs",
@@ -207,7 +207,7 @@
       "✅ Cache optimization: Copy package.json/yarn.lock first, then source code",
       "✅ .dockerignore: Exclude node_modules, tests, docs, .git, coverage",
       "✅ Alpine Linux: Use for smaller image (~50MB base vs ~1GB)",
-      "✅ Exact versions: Specify node:24.11.0-alpine, yarn@4.2.2",
+      "✅ Exact versions: Specify versions matching project requirements",
       "✅ Layer minimization: Combine commands, remove build artifacts",
       "✅ Security: Run as non-root when possible, no secrets in image"
     ],
@@ -264,9 +264,9 @@
   },
 
   "reference": {
-    "project_rules": ".cursor/rules/",
-    "dockerfile": "Multi-stage build with node:24.11.0-alpine",
-    "tech_stack_reference": "See .cursor/rules/project.mdc 'Tech Stack' section",
+    "project_rules": ".ai-rules/rules/",
+    "dockerfile": "Multi-stage build with node:lts-alpine",
+    "tech_stack_reference": "See .ai-rules/rules/project.md or project's package.json",
     "official_docs": {
       "docker": "https://docs.docker.com/build/building/multi-stage/",
       "nextjs_docker": "https://nextjs.org/docs/app/building-your-application/deploying#docker-image",

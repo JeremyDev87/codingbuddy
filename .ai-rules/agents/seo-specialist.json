@@ -21,7 +21,7 @@
       "Plan and verify SEO best practices"
     ]
   },
-  "context_files": [".cursor/rules/core.mdc", ".cursor/rules/project.mdc"],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
   "modes": {
     "planning": {
       "activation": {

@@ -75,10 +75,8 @@ All AI coded assistants share the same:
 ### 2. `rules/project.md` - Project Setup
 
 **Tech Stack:**
-- Next.js 16.0.1, React 19.2.0, TypeScript 5.8.3
-- Yarn 4.2.2, Node.js 24.11.0
-- @wishket/design-system, Tailwind CSS
-- Jest, Cypress, React Query
+
+프로젝트의 `package.json`을 참조하세요. AI 규칙에서는 특정 패키지 버전을 고정하지 않습니다.
 
 **Architecture:**
 ```
@@ -124,7 +122,7 @@ src/
 | **Security Specialist**      | OAuth 2.0, JWT, XSS/CSRF            | Authentication, security audit           |
 | **Accessibility Specialist** | WCAG 2.1 AA, ARIA                   | A11y compliance, screen readers          |
 | **SEO Specialist**           | Metadata API, structured data       | Search optimization, social sharing      |
-| **Design System Specialist** | @wishket/design-system              | Component usage, design tokens           |
+| **Design System Specialist** | Design system, Tailwind CSS         | Component usage, design tokens           |
 | **Documentation Specialist** | Technical writing, AI prompts       | Documentation quality, clarity           |
 | **Code Quality Specialist**  | SOLID, DRY, complexity              | Code quality planning/review             |
 | **DevOps Engineer**          | Docker, Datadog, deployment         | Infrastructure, monitoring               |

@@ -154,7 +154,7 @@ Create actionable implementation plans following TDD and augmented coding princi
 ## 🎨 Design System Planning
 (When design system planning is needed)
 - Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.planning for comprehensive design system planning
-- [@wishket/design-system component selection]
+- [Design system component selection]
 - [twJoin/twMerge usage planning]
 - [Design tokens (w- prefix) planning]
 - [Typography component planning]
@@ -242,7 +242,7 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 2. **Implement Components** (via Frontend Developer Agent)
    - 🔴 Server Components as default
    - Convert to Client Components only when necessary
-   - Use @wishket/design-system components first
+   - Use design system components first
    - Apply twJoin/twMerge for className
    - Follow design tokens (w- prefix)
    - 🔴 **Required**: Follow Frontend Developer Agent's component strategy
@@ -319,7 +319,7 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 ## 🎨 Design System Implementation Verification
 (When design system implementation verification is needed)
 - Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.implementation for comprehensive design system implementation verification
-- [@wishket/design-system component usage verification]
+- [Design system component usage verification]
 - [twJoin/twMerge usage verification]
 - [Design tokens (w- prefix) verification]
 
@@ -366,7 +366,7 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 - For TDD: Verify test file exists before implementation, test fails first (Red), then passes (Green)
 - For Test-After: Verify component exists before test file
 - Verify Server Components default (no 'use client' unless needed)
-- Verify @wishket/design-system components used first
+- Verify design system components used first
 - Implementation Specialist Agents should be referenced when verifying respective areas (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
 ---
@@ -415,8 +415,8 @@ Self-improvement through iterative refinement
      - **Required**: When evaluating accessibility, reference Accessibility Specialist Agent (`.ai-rules/agents/accessibility-specialist.json`) framework for WCAG 2.1 AA compliance verification
    - 🔴 SEO (metadata, structured data)
      - **Required**: When evaluating SEO, reference SEO Specialist Agent (`.ai-rules/agents/seo-specialist.json`) framework for metadata, structured data, and search engine optimization assessment
-   - 🔴 Design System (@wishket/design-system usage)
-     - **Required**: When evaluating design system usage, reference Design System Specialist Agent (`.ai-rules/agents/design-system-specialist.json`) framework for @wishket/design-system usage, twJoin/twMerge, and design tokens assessment
+   - 🔴 Design System (design system usage)
+     - **Required**: When evaluating design system usage, reference Design System Specialist Agent (`.ai-rules/agents/design-system-specialist.json`) framework for design system usage, twJoin/twMerge, and design tokens assessment
    - 🔴 Documentation Quality (documentation, cursor rules, AI prompts)
      - **Required**: When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment
 
@@ -516,7 +516,7 @@ Self-improvement through iterative refinement
 ## 🎨 Design System Assessment
 (When design system evaluation is needed)
 - Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) for comprehensive design system review
-- [@wishket/design-system component usage review]
+- [Design system component usage review]
 - [twJoin/twMerge usage verification]
 - [Design tokens (w- prefix) validation]
 - [Typography component assessment]
@@ -579,7 +579,7 @@ Key principles:
 Specialized agents available in `.ai-rules/agents/` directory:
 
 **Frontend Developer** (`.ai-rules/agents/frontend-developer.json`)
-- **Expertise**: React 19/Next.js 16, Server Components/Actions, TDD, @wishket/design-system
+- **Expertise**: React 19/Next.js 16, Server Components/Actions, TDD, design system
 - **Use when**: 🔴 **STRICT**: When in PLAN or ACT mode, this Agent **MUST** be activated automatically
 - **Key traits**: Server-first, design system priority, twJoin/twMerge, accessibility/SEO focused
 
@@ -631,7 +631,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - **Integration**: Code Reviewer Agent utilizes SEO Specialist framework during EVAL mode SEO assessment
 
 **Design System Specialist** (`.ai-rules/agents/design-system-specialist.json`)
-- **Expertise**: @wishket/design-system usage, twJoin/twMerge, design tokens (w- prefix), Typography component
+- **Expertise**: Design system usage, twJoin/twMerge, design tokens (w- prefix), Typography component
 - **Use when**: Design system framework is referenced within EVAL mode for comprehensive design system assessment
 - **Key traits**: Design system-focused, component priority enforcement, token usage expertise, className composition
 - **Integration**: Code Reviewer Agent utilizes Design System Specialist framework during EVAL mode design system assessment
@@ -661,7 +661,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - Writing tests with TDD workflow
 - React/Next.js component logic and state management
 - Accessibility (a11y) and SEO improvements
-- Design system integration (@wishket/design-system)
+- Design system integration
 - Performance optimization at React/component level
 - Server Components and Server Actions implementation
 
@@ -669,7 +669,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - PLAN/ACT MODE request must activate this Agent automatically
 - All implementations must follow TDD cycle (core logic) or Test-After (UI)
 - Server Components as default, Client Components only when necessary
-- Must use @wishket/design-system components first
+- Must use design system components first
 - Must follow code quality checklist (TypeScript strict, 90%+ coverage, etc.)
 - Respond in Korean as specified in Frontend Developer Agent communication.language
 
@@ -875,7 +875,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 ✅ **Use for (Integrated with EVAL):**
 - Design system assessment is automatically included in EVAL mode via Code Reviewer Agent
 - Code Reviewer references Design System Specialist framework when evaluating design system usage
-- @wishket/design-system component usage review
+- Design system component usage review
 - twJoin/twMerge usage verification
 - Design tokens (w- prefix) validation
 - Typography component assessment
@@ -883,7 +883,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 🔴 **Required Rules:**
 - Design system evaluation is part of EVAL mode mandatory perspectives
 - Code Reviewer Agent references Design System Specialist framework for comprehensive design system assessment
-- Reference @wishket/design-system, twJoin/twMerge, design tokens standards
+- Reference design system, twJoin/twMerge, design tokens standards
 - Provide specific design system improvement recommendations
 
 ❌ **Don't use for:**

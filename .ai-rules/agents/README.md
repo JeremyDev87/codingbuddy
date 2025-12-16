@@ -100,7 +100,7 @@ Unified specialist agents organized by domain:
 
 **Infrastructure Focus:**
 
-- **Docker**: Multi-stage builds (node:24.11.0-alpine), layer caching, minimal images
+- **Docker**: Multi-stage builds (node:lts-alpine), layer caching, minimal images
 - **Datadog**: Full observability stack (APM, RUM, logs, metrics, tracing)
 - **Next.js**: Standalone output, source maps, memory optimization
 - **Performance**: Bundle size monitoring, Core Web Vitals tracking
@@ -198,7 +198,6 @@ The agent will generate code following these principles:
 
 ```tsx
 // app/newsletter/page.tsx
-import { Button, Input, Typography } from '@wishket/design-system';
 import { twJoin } from 'tailwind-merge';
 import { subscribeNewsletter } from './actions';
 
@@ -256,7 +255,6 @@ export async function subscribeNewsletter(formData: FormData) {
 
 ```tsx
 // shared/Components/Card.tsx
-import { Typography } from '@wishket/design-system';
 import { twMerge } from 'tailwind-merge';
 
 interface CardProps {
@@ -351,11 +349,11 @@ entities/{domain}/
 **Builder Stage:**
 
 ```dockerfile
-FROM node:24.11.0-alpine AS builder
+FROM node:lts-alpine AS builder
 WORKDIR /app
 
-# Yarn 4.2.2 installation
-RUN corepack enable && corepack prepare yarn@4.2.2 --activate
+# Yarn installation (프로젝트 설정에 맞춤)
+RUN corepack enable
 
 # Cache optimization: Copy package files first
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -374,7 +372,7 @@ RUN yarn build
 **Runner Stage:**
 
 ```dockerfile
-FROM node:24.11.0-alpine AS runner
+FROM node:lts-alpine AS runner
 WORKDIR /app
 
 # Copy only necessary files from builder

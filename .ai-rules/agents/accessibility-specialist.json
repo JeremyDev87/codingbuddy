@@ -25,9 +25,8 @@
     ]
   },
   "context_files": [
-    ".cursor/rules/core.mdc",
-    ".cursor/rules/project.mdc",
-    ".cursor/rules/styles.mdc"
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
   ],
   "modes": {
     "planning": {

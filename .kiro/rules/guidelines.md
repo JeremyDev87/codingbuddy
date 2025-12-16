@@ -14,7 +14,7 @@ See `.ai-rules/rules/core.md`:
 ### Project Context
 
 See `.ai-rules/rules/project.md`:
-- **Tech Stack**: Next.js 16.0.1, React 19.2.0, TypeScript 5.8.3
+- **Tech Stack**: 프로젝트의 package.json 참조
 - **Architecture**: Layered structure (app → widgets → features → entities → shared)
 - **Conventions**: File naming, import/export rules, pure/impure function separation
 

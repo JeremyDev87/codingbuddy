@@ -23,10 +23,9 @@
   },
 
   "context_files": [
-    ".cursor/rules/core.mdc",
-    ".cursor/rules/project.mdc",
-    ".cursor/rules/augmented-coding.mdc",
-    ".cursor/rules/styles.mdc"
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md",
+    ".ai-rules/rules/augmented-coding.md"
   ],
 
   "activation": {
@@ -111,7 +110,7 @@
       "test_quality": "When evaluating tests, reference Test Strategy Specialist Agent framework (`.cursor/agents/test-strategy-specialist.json`) modes.evaluation for test coverage, TDD workflow, and test quality assessment",
       "performance": "When evaluating performance, reference Performance Specialist Agent framework (`.cursor/agents/performance-specialist.json`) for bundle size, rendering optimization, and Core Web Vitals assessment",
       "seo": "When evaluating SEO, reference SEO Specialist Agent framework (`.cursor/agents/seo-specialist.json`) for metadata, structured data, and search engine optimization assessment",
-      "design_system": "When evaluating design system usage, reference Design System Specialist Agent framework (`.cursor/agents/design-system-specialist.json`) for @wishket/design-system usage, twJoin/twMerge, and design tokens assessment",
+      "design_system": "When evaluating design system usage, reference Design System Specialist Agent framework (`.cursor/agents/design-system-specialist.json`) for design system usage, twJoin/twMerge, and design tokens assessment",
       "documentation_quality": "When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent framework (`.cursor/agents/documentation-specialist.json`) modes.evaluation for clarity, completeness, consistency, actionability, structure, and references assessment"
     },
 

@@ -24,7 +24,7 @@ Refer to `.ai-rules/rules/core.md` for detailed workflow guidance.
 
 ### Tech Stack & Project Structure
 - See `.ai-rules/rules/project.md` for complete project setup
-- Next.js 16, React 19, TypeScript 5.8
+- 프로젝트의 package.json 참조
 - Layered architecture: app → widgets → features → entities → shared
 
 ### Coding Standards
