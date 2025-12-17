@@ -1,20 +1,26 @@
-name: codebuddy-canary
+name: codebuddy-dev
 
 on:
   push:
-    branches:
+    branches-ignore:
       - master
       - stag-**
     paths:
       - 'mcp-server/**'
-      - .github/workflows/codebuddy-canary.yml
+      - '.ai-rules/**'
+      - '.antigravity/**'
+      - '.claude/**'
+      - '.codex/**'
+      - '.cursor/**'
+      - 'scripts/**'
+      - .github/workflows/codebuddy-dev.yml
 
 permissions:
   statuses: write
   contents: read
 
 jobs:
-  publish-canary:
+  publish-dev:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,18 +53,18 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Publish canary
+      - name: Publish dev
         run: |
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           COMMIT_SHA=${GITHUB_SHA::7}
-          VERSION="0.0.0-canary.${TIMESTAMP}.${COMMIT_SHA}"
+          VERSION="0.0.0-dev.${TIMESTAMP}.${COMMIT_SHA}"
           cat <<< "$( jq --arg v "$VERSION" '.version = $v' package.json )" > package.json
-          yarn npm publish --tag canary
+          yarn npm publish --tag dev
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
 
-      - name: Output canary version number
+      - name: Output dev version number
         run: |
           name=$(jq -r .name package.json)
           version=$(jq -r .version package.json)
