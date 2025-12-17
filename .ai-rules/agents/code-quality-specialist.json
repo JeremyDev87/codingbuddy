@@ -43,15 +43,15 @@
         ],
         "mandatory_checklist": {
           "🔴 solid_principles_plan": {
-            "rule": "MUST plan SOLID principles application - See .cursor/rules/augmented-coding.mdc 'Code Quality Standards' section",
+            "rule": "MUST plan SOLID principles application - See augmented-coding.md 'Code Quality Standards' section",
             "verification_key": "solid_principles_plan"
           },
           "🔴 dry_principle_plan": {
-            "rule": "MUST plan DRY strategy (code duplication elimination) - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST plan DRY strategy (code duplication elimination) - See augmented-coding.md",
             "verification_key": "dry_principle_plan"
           },
           "🔴 complexity_plan": {
-            "rule": "MUST plan complexity management (target: 10-20 lines per function) - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST plan complexity management (target: 10-20 lines per function) - See augmented-coding.md",
             "verification_key": "complexity_plan"
           },
           "🔴 function_size_plan": {
@@ -59,7 +59,7 @@
             "verification_key": "function_size_plan"
           },
           "🔴 design_patterns_plan": {
-            "rule": "MUST plan design patterns usage - See .cursor/rules/project.mdc 'Tech Stack' section",
+            "rule": "MUST plan design patterns usage - See project.md 'Tech Stack' section",
             "verification_key": "design_patterns_plan"
           },
           "🔴 naming_plan": {
@@ -165,15 +165,15 @@
         ],
         "mandatory_checklist": {
           "🔴 solid_principles_verification": {
-            "rule": "MUST verify SOLID principles are followed - See .cursor/rules/augmented-coding.mdc 'Code Quality Standards' section",
+            "rule": "MUST verify SOLID principles are followed - See augmented-coding.md 'Code Quality Standards' section",
             "verification_key": "solid_principles_verification"
           },
           "🔴 dry_principle_verification": {
-            "rule": "MUST verify code duplication is eliminated - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify code duplication is eliminated - See augmented-coding.md",
             "verification_key": "dry_principle_verification"
           },
           "🔴 complexity_verification": {
-            "rule": "MUST verify cyclomatic complexity is acceptable (target: 10-20 lines per function) - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify cyclomatic complexity is acceptable (target: 10-20 lines per function) - See augmented-coding.md",
             "verification_key": "complexity_verification"
           },
           "🔴 function_size_verification": {
@@ -181,7 +181,7 @@
             "verification_key": "function_size_verification"
           },
           "🔴 design_patterns_verification": {
-            "rule": "MUST verify latest React/Next.js patterns are used correctly - See .cursor/rules/project.mdc 'Tech Stack' section",
+            "rule": "MUST verify latest React/Next.js patterns are used correctly - See project.md 'Tech Stack' section",
             "verification_key": "design_patterns_verification"
           },
           "🔴 naming_verification": {
@@ -292,15 +292,15 @@
         ],
         "mandatory_checklist": {
           "🔴 solid_principles": {
-            "rule": "MUST verify SOLID principles are followed - See .cursor/rules/augmented-coding.mdc 'Code Quality Standards' section",
+            "rule": "MUST verify SOLID principles are followed - See augmented-coding.md 'Code Quality Standards' section",
             "verification_key": "solid_principles"
           },
           "🔴 dry_principle": {
-            "rule": "MUST verify code duplication is eliminated - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify code duplication is eliminated - See augmented-coding.md",
             "verification_key": "dry_principle"
           },
           "🔴 complexity": {
-            "rule": "MUST verify cyclomatic complexity is acceptable (target: 10-20 lines per function) - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify cyclomatic complexity is acceptable (target: 10-20 lines per function) - See augmented-coding.md",
             "verification_key": "complexity"
           },
           "🔴 naming": {
@@ -312,7 +312,7 @@
             "verification_key": "function_size"
           },
           "🔴 design_patterns": {
-            "rule": "MUST verify latest React/Next.js patterns are used correctly - See .cursor/rules/project.mdc 'Tech Stack' section",
+            "rule": "MUST verify latest React/Next.js patterns are used correctly - See project.md 'Tech Stack' section",
             "verification_key": "design_patterns"
           },
           "🔴 language": {
@@ -538,7 +538,7 @@
       "complexity": "Cyclomatic Complexity - McCabe",
       "react_patterns": "React 19 Official Docs: https://react.dev",
       "nextjs_patterns": "Next.js 16 Official Docs: https://nextjs.org/docs",
-      "project_quality": "See .cursor/rules/augmented-coding.mdc 'Code Quality Standards' section"
+      "project_quality": "See augmented-coding.md 'Code Quality Standards' section"
     }
   },
   "communication": {
@@ -559,8 +559,8 @@
       "cyclomatic_complexity": "Cyclomatic Complexity metrics",
       "react_patterns": "React 19 Official Docs: https://react.dev",
       "nextjs_patterns": "Next.js 16 Official Docs: https://nextjs.org/docs",
-      "project_quality": "See .cursor/rules/augmented-coding.mdc 'Code Quality Standards' section"
+      "project_quality": "See augmented-coding.md 'Code Quality Standards' section"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

@@ -12,7 +12,7 @@
       "TDD (Test-Driven Development)",
       "Augmented Coding Practices"
     ],
-    "tech_stack_reference": "See .cursor/rules/project.mdc 'Tech Stack' section for version information",
+    "tech_stack_reference": "See project.md 'Tech Stack' section for version information",
     "responsibilities": [
       "Develop React/Next.js components following TDD cycle",
       "Write comprehensive unit tests with 90%+ coverage",
@@ -37,11 +37,11 @@
         "verification_key": "language"
       },
       "🔴 tdd_cycle": {
-        "rule": "MUST follow TDD cycle for core logic (Red → Green → Refactor) - See .cursor/rules/augmented-coding.mdc 'TDD Cycle (Strict Adherence)'",
+        "rule": "MUST follow TDD cycle for core logic (Red → Green → Refactor) - See augmented-coding.md 'TDD Cycle (Strict Adherence)'",
         "verification_key": "tdd_cycle"
       },
       "🔴 test_after": {
-        "rule": "MUST follow Test-After approach for UI components - See .cursor/rules/augmented-coding.mdc 'UI Components (Test-After)'",
+        "rule": "MUST follow Test-After approach for UI components - See augmented-coding.md 'UI Components (Test-After)'",
         "verification_key": "test_after"
       },
       "🔴 server_components": {
@@ -49,7 +49,7 @@
         "verification_key": "server_components"
       },
       "🔴 design_system": {
-        "rule": "MUST use project design system components first - See .cursor/rules/project.mdc 'Tech Stack' section for design system package name and .cursor/rules/styles.mdc for usage guidelines",
+        "rule": "MUST use project design system components first - See project.md 'Tech Stack' section for design system package name and the project's design system documentation for usage guidelines",
         "verification_key": "design_system"
       },
       "🔴 type_safety": {
@@ -73,7 +73,7 @@
       "tdd_cycle": "Check test file exists before implementation file, verify test fails first (Red), then passes (Green), then refactor",
       "test_after": "Verify component implementation exists before test file, test covers user interactions and state changes",
       "server_components": "Verify no 'use client' directive unless interactive features are present, check Server Components are default",
-      "design_system": "Verify project design system imports exist (see .cursor/rules/project.mdc 'Tech Stack'), check custom components are only used when design system lacks equivalent (see .cursor/rules/styles.mdc)",
+      "design_system": "Verify project design system imports exist (see project.md 'Tech Stack'), check custom components are only used when design system lacks equivalent (see the project's design system documentation)",
       "type_safety": "Verify no 'any' type usage, check all function parameters and return types are explicitly defined",
       "test_coverage": "Run coverage command, verify 90%+ coverage for core logic, check test files follow naming convention (*.unit.spec.tsx)",
       "structure": "Verify file naming follows convention ({Feature}.tsx, {Feature}.types.ts, etc.), check workflow.steps order is respected",
@@ -108,54 +108,54 @@
         "Automatic return to PLAN mode after ACT completes"
       ],
       "activation_rule": "🔴 **STRICT**: This Agent MUST be automatically activated under above conditions",
-      "output_format": "Follow core.mdc Plan Mode / Act Mode Output Format, applying this Agent's workflow framework"
+      "output_format": "Follow core.md Plan Mode / Act Mode Output Format, applying this Agent's workflow framework"
     },
     "planning_framework": {
       "mandatory_planning_perspectives": [
-        "🔴 Architecture Planning: Layer placement, dependency direction, type definitions - Reference: .cursor/agents/architecture-specialist.json modes.planning framework for comprehensive architecture planning",
-        "🔴 Test Strategy Planning: TDD vs Test-After, coverage planning, test structure - Reference: .cursor/agents/test-strategy-specialist.json modes.planning framework for comprehensive test strategy planning",
-        "🔴 Performance Planning: Bundle size, code splitting, rendering optimization - Reference: .cursor/agents/performance-specialist.json modes.planning framework for comprehensive performance planning",
-        "🔴 Security Planning: Authentication, authorization, input validation, XSS/CSRF protection - Reference: .cursor/agents/security-specialist.json modes.planning framework for comprehensive security planning",
-        "🔴 Accessibility Planning: WCAG 2.1 AA compliance, ARIA, keyboard navigation - Reference: .cursor/agents/accessibility-specialist.json modes.planning framework for comprehensive accessibility planning",
-        "🔴 SEO Planning: Metadata, structured data, Open Graph, Twitter Cards - Reference: .cursor/agents/seo-specialist.json modes.planning framework for comprehensive SEO planning",
-        "🔴 Design System Planning: design system usage, twJoin/twMerge, design tokens - Reference: .cursor/agents/design-system-specialist.json modes.planning framework for comprehensive design system planning",
-        "🔴 Documentation Planning: Code comments, type definitions, JSDoc, README - Reference: .cursor/agents/documentation-specialist.json modes.planning framework for comprehensive documentation planning",
-        "🔴 Code Quality Planning: SOLID principles, DRY strategy, complexity management - Reference: .cursor/agents/code-quality-specialist.json modes.planning framework for comprehensive code quality planning"
+        "🔴 Architecture Planning: Layer placement, dependency direction, type definitions - Reference: .ai-rules/agents/architecture-specialist.json modes.planning framework for comprehensive architecture planning",
+        "🔴 Test Strategy Planning: TDD vs Test-After, coverage planning, test structure - Reference: .ai-rules/agents/test-strategy-specialist.json modes.planning framework for comprehensive test strategy planning",
+        "🔴 Performance Planning: Bundle size, code splitting, rendering optimization - Reference: .ai-rules/agents/performance-specialist.json modes.planning framework for comprehensive performance planning",
+        "🔴 Security Planning: Authentication, authorization, input validation, XSS/CSRF protection - Reference: .ai-rules/agents/security-specialist.json modes.planning framework for comprehensive security planning",
+        "🔴 Accessibility Planning: WCAG 2.1 AA compliance, ARIA, keyboard navigation - Reference: .ai-rules/agents/accessibility-specialist.json modes.planning framework for comprehensive accessibility planning",
+        "🔴 SEO Planning: Metadata, structured data, Open Graph, Twitter Cards - Reference: .ai-rules/agents/seo-specialist.json modes.planning framework for comprehensive SEO planning",
+        "🔴 Design System Planning: design system usage, twJoin/twMerge, design tokens - Reference: .ai-rules/agents/design-system-specialist.json modes.planning framework for comprehensive design system planning",
+        "🔴 Documentation Planning: Code comments, type definitions, JSDoc, README - Reference: .ai-rules/agents/documentation-specialist.json modes.planning framework for comprehensive documentation planning",
+        "🔴 Code Quality Planning: SOLID principles, DRY strategy, complexity management - Reference: .ai-rules/agents/code-quality-specialist.json modes.planning framework for comprehensive code quality planning"
       ],
       "planning_specialist_integration": {
-        "architecture": "When planning architecture, layer placement, or dependency design, reference Architecture Specialist Agent framework (`.cursor/agents/architecture-specialist.json`) modes.planning for layer placement, dependency direction, and module structure planning",
-        "test_strategy": "When planning test strategy, test coverage, or test structure, reference Test Strategy Specialist Agent framework (`.cursor/agents/test-strategy-specialist.json`) modes.planning for TDD vs Test-After decisions, coverage planning, and test structure design",
-        "performance": "When planning performance optimization, bundle size, or rendering optimization, reference Performance Specialist Agent framework (`.cursor/agents/performance-specialist.json`) modes.planning for bundle size optimization, code splitting, and Core Web Vitals planning",
-        "security": "When planning authentication, authorization, or security features, reference Security Specialist Agent framework (`.cursor/agents/security-specialist.json`) modes.planning for authentication, authorization, and security vulnerability prevention planning",
-        "accessibility": "When planning UI components, forms, or accessibility features, reference Accessibility Specialist Agent framework (`.cursor/agents/accessibility-specialist.json`) modes.planning for WCAG 2.1 AA compliance planning, ARIA attributes, and keyboard navigation planning",
-        "seo": "When planning pages, metadata, or SEO features, reference SEO Specialist Agent framework (`.cursor/agents/seo-specialist.json`) modes.planning for metadata planning, structured data planning, and search engine optimization planning",
-        "design_system": "When planning UI components, styling, or design system usage, reference Design System Specialist Agent framework (`.cursor/agents/design-system-specialist.json`) modes.planning for design system component selection, twJoin/twMerge planning, and design token planning",
-        "documentation": "When planning documentation, code comments, or technical writing, reference Documentation Specialist Agent framework (`.cursor/agents/documentation-specialist.json`) modes.planning for documentation planning, code comments planning, and technical writing planning",
-        "code_quality": "When planning code quality standards, SOLID principles application, DRY strategy, or complexity management, reference Code Quality Specialist Agent framework (`.cursor/agents/code-quality-specialist.json`) modes.planning for SOLID principles planning, DRY strategy planning, complexity management planning, and design patterns planning"
+        "architecture": "When planning architecture, layer placement, or dependency design, reference Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) modes.planning for layer placement, dependency direction, and module structure planning",
+        "test_strategy": "When planning test strategy, test coverage, or test structure, reference Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.planning for TDD vs Test-After decisions, coverage planning, and test structure design",
+        "performance": "When planning performance optimization, bundle size, or rendering optimization, reference Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) modes.planning for bundle size optimization, code splitting, and Core Web Vitals planning",
+        "security": "When planning authentication, authorization, or security features, reference Security Specialist Agent framework (`.ai-rules/agents/security-specialist.json`) modes.planning for authentication, authorization, and security vulnerability prevention planning",
+        "accessibility": "When planning UI components, forms, or accessibility features, reference Accessibility Specialist Agent framework (`.ai-rules/agents/accessibility-specialist.json`) modes.planning for WCAG 2.1 AA compliance planning, ARIA attributes, and keyboard navigation planning",
+        "seo": "When planning pages, metadata, or SEO features, reference SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) modes.planning for metadata planning, structured data planning, and search engine optimization planning",
+        "design_system": "When planning UI components, styling, or design system usage, reference Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.planning for design system component selection, twJoin/twMerge planning, and design token planning",
+        "documentation": "When planning documentation, code comments, or technical writing, reference Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.planning for documentation planning, code comments planning, and technical writing planning",
+        "code_quality": "When planning code quality standards, SOLID principles application, DRY strategy, or complexity management, reference Code Quality Specialist Agent framework (`.ai-rules/agents/code-quality-specialist.json`) modes.planning for SOLID principles planning, DRY strategy planning, complexity management planning, and design patterns planning"
       }
     },
     "implementation_framework": {
       "mandatory_implementation_perspectives": [
-        "🔴 Architecture Implementation: Layer placement, dependency direction, type definitions - Reference: .cursor/agents/architecture-specialist.json modes.implementation framework for comprehensive architecture implementation verification",
-        "🔴 Test Strategy Implementation: TDD vs Test-After, coverage, test structure - Reference: .cursor/agents/test-strategy-specialist.json modes.implementation framework for comprehensive test strategy implementation verification",
-        "🔴 Performance Implementation: Bundle size, code splitting, rendering optimization - Reference: .cursor/agents/performance-specialist.json modes.implementation framework for comprehensive performance implementation verification",
-        "🔴 Security Implementation: Authentication, authorization, input validation, XSS/CSRF protection - Reference: .cursor/agents/security-specialist.json modes.implementation framework for comprehensive security implementation verification",
-        "🔴 Accessibility Implementation: WCAG 2.1 AA compliance, ARIA, keyboard navigation - Reference: .cursor/agents/accessibility-specialist.json modes.implementation framework for comprehensive accessibility implementation verification",
-        "🔴 SEO Implementation: Metadata, structured data, Open Graph, Twitter Cards - Reference: .cursor/agents/seo-specialist.json modes.implementation framework for comprehensive SEO implementation verification",
-        "🔴 Design System Implementation: design system usage, twJoin/twMerge, design tokens - Reference: .cursor/agents/design-system-specialist.json modes.implementation framework for comprehensive design system implementation verification",
-        "🔴 Documentation Implementation: Code comments, type definitions, JSDoc, README - Reference: .cursor/agents/documentation-specialist.json modes.implementation framework for comprehensive documentation implementation verification",
-        "🔴 Code Quality Implementation: SOLID principles, DRY verification, complexity verification - Reference: .cursor/agents/code-quality-specialist.json modes.implementation framework for comprehensive code quality implementation verification"
+        "🔴 Architecture Implementation: Layer placement, dependency direction, type definitions - Reference: .ai-rules/agents/architecture-specialist.json modes.implementation framework for comprehensive architecture implementation verification",
+        "🔴 Test Strategy Implementation: TDD vs Test-After, coverage, test structure - Reference: .ai-rules/agents/test-strategy-specialist.json modes.implementation framework for comprehensive test strategy implementation verification",
+        "🔴 Performance Implementation: Bundle size, code splitting, rendering optimization - Reference: .ai-rules/agents/performance-specialist.json modes.implementation framework for comprehensive performance implementation verification",
+        "🔴 Security Implementation: Authentication, authorization, input validation, XSS/CSRF protection - Reference: .ai-rules/agents/security-specialist.json modes.implementation framework for comprehensive security implementation verification",
+        "🔴 Accessibility Implementation: WCAG 2.1 AA compliance, ARIA, keyboard navigation - Reference: .ai-rules/agents/accessibility-specialist.json modes.implementation framework for comprehensive accessibility implementation verification",
+        "🔴 SEO Implementation: Metadata, structured data, Open Graph, Twitter Cards - Reference: .ai-rules/agents/seo-specialist.json modes.implementation framework for comprehensive SEO implementation verification",
+        "🔴 Design System Implementation: design system usage, twJoin/twMerge, design tokens - Reference: .ai-rules/agents/design-system-specialist.json modes.implementation framework for comprehensive design system implementation verification",
+        "🔴 Documentation Implementation: Code comments, type definitions, JSDoc, README - Reference: .ai-rules/agents/documentation-specialist.json modes.implementation framework for comprehensive documentation implementation verification",
+        "🔴 Code Quality Implementation: SOLID principles, DRY verification, complexity verification - Reference: .ai-rules/agents/code-quality-specialist.json modes.implementation framework for comprehensive code quality implementation verification"
       ],
       "implementation_specialist_integration": {
-        "architecture": "When implementing architecture, layer placement, or dependency design, reference Architecture Specialist Agent framework (`.cursor/agents/architecture-specialist.json`) modes.implementation for layer placement verification, dependency direction verification, and module structure validation",
-        "test_strategy": "When implementing tests, test coverage, or test structure, reference Test Strategy Specialist Agent framework (`.cursor/agents/test-strategy-specialist.json`) modes.implementation for TDD vs Test-After verification, coverage verification, and test structure validation",
-        "performance": "When implementing performance optimization, bundle size, or rendering optimization, reference Performance Specialist Agent framework (`.cursor/agents/performance-specialist.json`) modes.implementation for bundle size verification, code splitting verification, and Core Web Vitals validation",
-        "security": "When implementing authentication, authorization, or security features, reference Security Specialist Agent framework (`.cursor/agents/security-specialist.json`) modes.implementation for authentication verification, authorization verification, and security vulnerability prevention validation",
-        "accessibility": "When implementing UI components, forms, or accessibility features, reference Accessibility Specialist Agent framework (`.cursor/agents/accessibility-specialist.json`) modes.implementation for WCAG 2.1 AA compliance verification, ARIA attributes verification, and keyboard navigation validation",
-        "seo": "When implementing pages, metadata, or SEO features, reference SEO Specialist Agent framework (`.cursor/agents/seo-specialist.json`) modes.implementation for metadata verification, structured data verification, and search engine optimization validation",
-        "design_system": "When implementing UI components, styling, or design system usage, reference Design System Specialist Agent framework (`.cursor/agents/design-system-specialist.json`) modes.implementation for design system component usage verification, twJoin/twMerge verification, and design token validation",
-        "documentation": "When implementing documentation, code comments, or technical writing, reference Documentation Specialist Agent framework (`.cursor/agents/documentation-specialist.json`) modes.implementation for code comments verification, type definitions verification, and technical writing validation",
-        "code_quality": "When implementing code quality standards, SOLID principles, DRY strategy, or complexity management, reference Code Quality Specialist Agent framework (`.cursor/agents/code-quality-specialist.json`) modes.implementation for SOLID principles verification, DRY principle verification, complexity verification, and design patterns verification"
+        "architecture": "When implementing architecture, layer placement, or dependency design, reference Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) modes.implementation for layer placement verification, dependency direction verification, and module structure validation",
+        "test_strategy": "When implementing tests, test coverage, or test structure, reference Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.implementation for TDD vs Test-After verification, coverage verification, and test structure validation",
+        "performance": "When implementing performance optimization, bundle size, or rendering optimization, reference Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) modes.implementation for bundle size verification, code splitting verification, and Core Web Vitals validation",
+        "security": "When implementing authentication, authorization, or security features, reference Security Specialist Agent framework (`.ai-rules/agents/security-specialist.json`) modes.implementation for authentication verification, authorization verification, and security vulnerability prevention validation",
+        "accessibility": "When implementing UI components, forms, or accessibility features, reference Accessibility Specialist Agent framework (`.ai-rules/agents/accessibility-specialist.json`) modes.implementation for WCAG 2.1 AA compliance verification, ARIA attributes verification, and keyboard navigation validation",
+        "seo": "When implementing pages, metadata, or SEO features, reference SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) modes.implementation for metadata verification, structured data verification, and search engine optimization validation",
+        "design_system": "When implementing UI components, styling, or design system usage, reference Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.implementation for design system component usage verification, twJoin/twMerge verification, and design token validation",
+        "documentation": "When implementing documentation, code comments, or technical writing, reference Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.implementation for code comments verification, type definitions verification, and technical writing validation",
+        "code_quality": "When implementing code quality standards, SOLID principles, DRY strategy, or complexity management, reference Code Quality Specialist Agent framework (`.ai-rules/agents/code-quality-specialist.json`) modes.implementation for SOLID principles verification, DRY principle verification, complexity verification, and design patterns verification"
       }
     }
   },
@@ -163,13 +163,13 @@
   "workflow": {
     "core_logic": {
       "approach": "TDD (Test-First)",
-      "applies_to_reference": "See .cursor/rules/project.mdc 'Project Structure' section - Apply TDD to directories containing core logic (typically entities with apis/models subdirectories, shared/utils, shared/hooks, or similar structure based on project architecture)",
-      "reference": "See .cursor/rules/augmented-coding.mdc 'Core Logic (Test-First TDD)' section for complete workflow, steps, and core rules"
+      "applies_to_reference": "See project.md 'Project Structure' section - Apply TDD to directories containing core logic (typically entities with apis/models subdirectories, shared/utils, shared/hooks, or similar structure based on project architecture)",
+      "reference": "See augmented-coding.md 'Core Logic (Test-First TDD)' section for complete workflow, steps, and core rules"
     },
     "ui_components": {
       "approach": "Test-After",
-      "applies_to_reference": "See .cursor/rules/project.mdc 'Project Structure' section - Apply Test-After to UI component directories (typically features, widgets, shared/Components, or similar structure based on project architecture)",
-      "reference": "See .cursor/rules/augmented-coding.mdc 'UI Components (Test-After)' section for complete workflow and steps"
+      "applies_to_reference": "See project.md 'Project Structure' section - Apply Test-After to UI component directories (typically features, widgets, shared/Components, or similar structure based on project architecture)",
+      "reference": "See augmented-coding.md 'UI Components (Test-After)' section for complete workflow and steps"
     }
   },
 
@@ -177,7 +177,7 @@
     "modern_approach": {
       "research_habit": "Actively search web for latest Next.js/React patterns and best practices",
       "stay_updated": "Regularly check official docs for new features and improvements",
-      "tech_stack_reference": "See .cursor/rules/project.mdc 'Tech Stack' section for React and Next.js versions",
+      "tech_stack_reference": "See project.md 'Tech Stack' section for React and Next.js versions",
       "react_features": {
         "reference": "Check official React documentation for version-specific features (see tech_stack_reference above)",
         "common_patterns": [
@@ -287,25 +287,25 @@
 
   "code_quality_checklist": [
     "✅ TypeScript: No `any` usage, all types explicit",
-    "✅ Test Coverage: Maintain 90%+ coverage (See .cursor/rules/augmented-coding.mdc 'Testing Standards')",
+    "✅ Test Coverage: Maintain 90%+ coverage (See augmented-coding.md 'Testing Standards')",
     "✅ Pure/Impure Separation: Different files",
-    "✅ Layer Architecture: Respect boundaries - See .cursor/rules/project.mdc 'Project Structure' section for dependency direction",
-    "✅ No Mocking: Write real, working code only (See .cursor/rules/augmented-coding.mdc 'Testing Standards')",
+    "✅ Layer Architecture: Respect boundaries - See project.md 'Project Structure' section for dependency direction",
+    "✅ No Mocking: Write real, working code only (See augmented-coding.md 'Testing Standards')",
     "✅ ESLint: Zero linting errors",
-    "✅ Commit Discipline: Follow Tidy First Approach (See .cursor/rules/augmented-coding.mdc 'Commit Discipline')",
+    "✅ Commit Discipline: Follow Tidy First Approach (See augmented-coding.md 'Commit Discipline')",
     "✅ Server Components: Use by default, Client Components only when needed",
     "✅ Server Actions: Prefer for mutations over API routes",
     "✅ HTML/CSS First: Avoid JavaScript for layout and styling when possible",
     "✅ SEO: Metadata API used, structured data present",
     "✅ Accessibility: Semantic HTML, ARIA, keyboard navigation, WCAG AA",
     "✅ Responsive: Mobile-first Tailwind utilities with proper breakpoints",
-    "✅ Design System: Use project design system components - See .cursor/rules/project.mdc 'Tech Stack' and .cursor/rules/styles.mdc",
-    "✅ ClassName Composition: Use twJoin/twMerge, never string concatenation - See .cursor/rules/styles.mdc",
-    "✅ Design Tokens: Use design system token prefix - See .cursor/rules/styles.mdc 'Color Tokens' section"
+    "✅ Design System: Use project design system components - See project.md 'Tech Stack' and the project's design system documentation",
+    "✅ ClassName Composition: Use twJoin/twMerge, never string concatenation - See the project's design system documentation",
+    "✅ Design Tokens: Use design system token prefix - See the project's design system documentation 'Color Tokens' section"
   ],
 
   "tdd_cycle": {
-    "reference": "See .cursor/rules/augmented-coding.mdc 'TDD Cycle (Strict Adherence)' section",
+    "reference": "See augmented-coding.md 'TDD Cycle (Strict Adherence)' section",
     "summary": "Follow Red → Green → Refactor cycle religiously",
     "core_rules": [
       "Write one test at a time",
@@ -316,7 +316,7 @@
   },
 
   "ai_monitoring": {
-    "reference": "See .cursor/rules/augmented-coding.mdc 'AI Monitoring Checkpoints' section",
+    "reference": "See augmented-coding.md 'AI Monitoring Checkpoints' section",
     "warning_signs_summary": [
       "🚨 Generating unnecessary loops",
       "🚨 Adding unrequested features",
@@ -333,7 +333,7 @@
   },
 
   "commit_rules": {
-    "reference": "See .cursor/rules/augmented-coding.mdc 'Commit Discipline' and 'Tidy First Approach' sections",
+    "reference": "See augmented-coding.md 'Commit Discipline' and 'Tidy First Approach' sections",
     "key_principle": "Separate structural changes from behavioral changes. Never mix them in same commit.",
     "commit_when": [
       "ALL tests are passing",
@@ -344,8 +344,8 @@
   },
 
   "design_system": {
-    "reference": "See .cursor/rules/project.mdc 'Tech Stack' section for design system package and .cursor/rules/styles.mdc for comprehensive design system guidelines",
-    "key_principles_reference": "See .cursor/rules/styles.mdc 'Component Usage', 'ClassName Composition', 'Color Tokens', 'Typography', 'Responsive Design' sections",
+    "reference": "See project.md 'Tech Stack' section for design system package and the project's design system documentation for comprehensive design system guidelines",
+    "key_principles_reference": "See the project's design system documentation 'Component Usage', 'ClassName Composition', 'Color Tokens', 'Typography', 'Responsive Design' sections",
     "critical_rules": [
       "Never use string concatenation for className",
       "Never use arbitrary color values",
@@ -374,7 +374,7 @@
   },
   "reference": {
     "augmented_coding": {
-      "source": ".cursor/rules/augmented-coding.mdc",
+      "source": "augmented-coding.md",
       "description": "Complete TDD principles, workflow, commit discipline, AI monitoring, and testing standards",
       "key_sections": [
         "TDD Cycle (Strict Adherence)",
@@ -388,8 +388,8 @@
       ],
       "original_source": "https://tidyfirst.substack.com/p/augmented-coding-beyond-the-vibes"
     },
-    "project_rules": ".cursor/rules/",
-    "tech_stack_reference": "See .cursor/rules/project.mdc 'Tech Stack' section",
+    "project_rules": "See .ai-rules/rules/",
+    "tech_stack_reference": "See project.md 'Tech Stack' section",
     "official_docs": {
       "react": "https://react.dev",
       "nextjs": "https://nextjs.org/docs",

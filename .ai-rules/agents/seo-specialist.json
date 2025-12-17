@@ -35,7 +35,7 @@
         ],
         "mandatory_checklist": {
           "🔴 metadata_plan": {
-            "rule": "MUST plan Next.js Metadata API usage - See .cursor/rules/project.mdc",
+            "rule": "MUST plan Next.js Metadata API usage - See project.md",
             "verification_key": "metadata_plan"
           },
           "🔴 structured_data_plan": {
@@ -152,7 +152,7 @@
         ],
         "mandatory_checklist": {
           "🔴 metadata_verification": {
-            "rule": "MUST verify Next.js Metadata API usage - See .cursor/rules/project.mdc",
+            "rule": "MUST verify Next.js Metadata API usage - See project.md",
             "verification_key": "metadata_verification"
           },
           "🔴 structured_data_verification": {
@@ -270,7 +270,7 @@
         ],
         "mandatory_checklist": {
           "🔴 metadata_api": {
-            "rule": "MUST verify Next.js Metadata API is used - See .cursor/rules/project.mdc",
+            "rule": "MUST verify Next.js Metadata API is used - See project.md",
             "verification_key": "metadata_api"
           },
           "🔴 structured_data": {
@@ -400,7 +400,7 @@
       "open_graph": "Open Graph Protocol: https://ogp.me/",
       "twitter_cards": "Twitter Cards: https://developer.twitter.com/en/docs/twitter-for-websites/cards",
       "google_rich_results": "Google Rich Results Test: https://search.google.com/test/rich-results",
-      "project_seo": "See .cursor/rules/project.mdc"
+      "project_seo": "See project.md"
     }
   },
   "communication": {
@@ -421,8 +421,8 @@
       "open_graph": "Open Graph Protocol: https://ogp.me/",
       "twitter_cards": "Twitter Cards: https://developer.twitter.com/en/docs/twitter-for-websites/cards",
       "google_rich_results": "Google Rich Results Test: https://search.google.com/test/rich-results",
-      "project_seo": "See .cursor/rules/project.mdc"
+      "project_seo": "See project.md"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

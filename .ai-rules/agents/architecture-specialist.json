@@ -42,19 +42,19 @@
         ],
         "mandatory_checklist": {
           "🔴 layer_placement": {
-            "rule": "MUST plan correct layer placement (app → widgets → features → entities → shared) - See .cursor/rules/project.mdc 'Project Structure' section",
+            "rule": "MUST plan correct layer placement (app → widgets → features → entities → shared) - See project.md 'Project Structure' section",
             "verification_key": "layer_placement"
           },
           "🔴 dependency_direction": {
-            "rule": "MUST plan dependency direction (lower layers cannot import upper layers) - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST plan dependency direction (lower layers cannot import upper layers) - See project.md 'Development Rules' section",
             "verification_key": "dependency_direction"
           },
           "🔴 type_definitions": {
-            "rule": "MUST plan TypeScript type definitions (no any type) - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST plan TypeScript type definitions (no any type) - See project.md 'Development Rules' section",
             "verification_key": "type_definitions"
           },
           "🔴 pure_impure_separation": {
-            "rule": "MUST plan pure/impure function separation into different files - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST plan pure/impure function separation into different files - See project.md 'Development Rules' section",
             "verification_key": "pure_impure_separation"
           },
           "🔴 module_structure": {
@@ -171,19 +171,19 @@
         ],
         "mandatory_checklist": {
           "🔴 layer_placement_verification": {
-            "rule": "MUST verify files are in correct layer (app → widgets → features → entities → shared) - See .cursor/rules/project.mdc 'Project Structure' section",
+            "rule": "MUST verify files are in correct layer (app → widgets → features → entities → shared) - See project.md 'Project Structure' section",
             "verification_key": "layer_placement_verification"
           },
           "🔴 dependency_direction_verification": {
-            "rule": "MUST verify dependency direction is correct (lower layers cannot import upper layers) - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify dependency direction is correct (lower layers cannot import upper layers) - See project.md 'Development Rules' section",
             "verification_key": "dependency_direction_verification"
           },
           "🔴 type_definitions_verification": {
-            "rule": "MUST verify TypeScript type definitions are complete (no any type) - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify TypeScript type definitions are complete (no any type) - See project.md 'Development Rules' section",
             "verification_key": "type_definitions_verification"
           },
           "🔴 pure_impure_separation_verification": {
-            "rule": "MUST verify pure/impure functions are separated into different files - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify pure/impure functions are separated into different files - See project.md 'Development Rules' section",
             "verification_key": "pure_impure_separation_verification"
           },
           "🔴 module_structure_verification": {
@@ -301,19 +301,19 @@
         ],
         "mandatory_checklist": {
           "🔴 layer_boundaries": {
-            "rule": "MUST verify layer boundaries are respected (app → widgets → features → entities → shared) - See .cursor/rules/project.mdc 'Project Structure' section",
+            "rule": "MUST verify layer boundaries are respected (app → widgets → features → entities → shared) - See project.md 'Project Structure' section",
             "verification_key": "layer_boundaries"
           },
           "🔴 dependency_direction": {
-            "rule": "MUST verify lower layers do not import upper layers - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify lower layers do not import upper layers - See project.md 'Development Rules' section",
             "verification_key": "dependency_direction"
           },
           "🔴 type_safety": {
-            "rule": "MUST verify TypeScript any type is not used - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify TypeScript any type is not used - See project.md 'Development Rules' section",
             "verification_key": "type_safety"
           },
           "🔴 pure_impure_separation": {
-            "rule": "MUST verify pure and impure functions are separated into different files - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify pure and impure functions are separated into different files - See project.md 'Development Rules' section",
             "verification_key": "pure_impure_separation"
           },
           "🔴 module_organization": {
@@ -325,7 +325,7 @@
             "verification_key": "circular_dependencies"
           },
           "🔴 import_export": {
-            "rule": "MUST verify import/export patterns follow project conventions - See .cursor/rules/project.mdc 'File Naming Convention' section",
+            "rule": "MUST verify import/export patterns follow project conventions - See project.md 'File Naming Convention' section",
             "verification_key": "import_export"
           },
           "🔴 language": {
@@ -473,8 +473,8 @@
       "dependency_rule": "Dependency Rule - Clean Architecture",
       "type_safety": "TypeScript Strict Mode Best Practices",
       "pure_functions": "Pure vs Impure Functions - Functional Programming",
-      "project_structure": "See .cursor/rules/project.mdc 'Project Structure' section",
-      "development_rules": "See .cursor/rules/project.mdc 'Development Rules' section"
+      "project_structure": "See project.md 'Project Structure' section",
+      "development_rules": "See project.md 'Development Rules' section"
     }
   },
   "communication": {
@@ -494,9 +494,9 @@
       "dependency_rule": "Dependency Rule - Clean Architecture",
       "typescript_strict": "TypeScript Strict Mode: https://www.typescriptlang.org/docs/handbook/tsconfig.html#strict",
       "pure_functions": "Pure vs Impure Functions",
-      "project_structure": "See .cursor/rules/project.mdc 'Project Structure' section",
-      "development_rules": "See .cursor/rules/project.mdc 'Development Rules' section"
+      "project_structure": "See project.md 'Project Structure' section",
+      "development_rules": "See project.md 'Development Rules' section"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

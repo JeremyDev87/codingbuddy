@@ -40,11 +40,11 @@
         ],
         "mandatory_checklist": {
           "🔴 authentication_plan": {
-            "rule": "MUST plan authentication implementation (OAuth 2.0, JWT) - See .cursor/rules/project.mdc",
+            "rule": "MUST plan authentication implementation (OAuth 2.0, JWT) - See project.md",
             "verification_key": "authentication_plan"
           },
           "🔴 authorization_plan": {
-            "rule": "MUST plan authorization checks - See .cursor/rules/project.mdc",
+            "rule": "MUST plan authorization checks - See project.md",
             "verification_key": "authorization_plan"
           },
           "🔴 input_validation": {
@@ -52,15 +52,15 @@
             "verification_key": "input_validation"
           },
           "🔴 csrf_protection": {
-            "rule": "MUST plan CSRF protection - See .cursor/rules/project.mdc",
+            "rule": "MUST plan CSRF protection - See project.md",
             "verification_key": "csrf_protection"
           },
           "🔴 xss_prevention": {
-            "rule": "MUST plan XSS prevention mechanisms - See .cursor/rules/project.mdc",
+            "rule": "MUST plan XSS prevention mechanisms - See project.md",
             "verification_key": "xss_prevention"
           },
           "🔴 rate_limiting": {
-            "rule": "MUST plan rate limiting for authentication endpoints - See .cursor/rules/project.mdc",
+            "rule": "MUST plan rate limiting for authentication endpoints - See project.md",
             "verification_key": "rate_limiting"
           },
           "🔴 language": {
@@ -159,11 +159,11 @@
         ],
         "mandatory_checklist": {
           "🔴 authentication_verification": {
-            "rule": "MUST verify authentication implementation (OAuth 2.0, JWT) - See .cursor/rules/project.mdc",
+            "rule": "MUST verify authentication implementation (OAuth 2.0, JWT) - See project.md",
             "verification_key": "authentication_verification"
           },
           "🔴 authorization_verification": {
-            "rule": "MUST verify authorization checks - See .cursor/rules/project.mdc",
+            "rule": "MUST verify authorization checks - See project.md",
             "verification_key": "authorization_verification"
           },
           "🔴 input_validation_verification": {
@@ -171,15 +171,15 @@
             "verification_key": "input_validation_verification"
           },
           "🔴 csrf_protection_verification": {
-            "rule": "MUST verify CSRF protection - See .cursor/rules/project.mdc",
+            "rule": "MUST verify CSRF protection - See project.md",
             "verification_key": "csrf_protection_verification"
           },
           "🔴 xss_prevention_verification": {
-            "rule": "MUST verify XSS prevention mechanisms - See .cursor/rules/project.mdc",
+            "rule": "MUST verify XSS prevention mechanisms - See project.md",
             "verification_key": "xss_prevention_verification"
           },
           "🔴 rate_limiting_verification": {
-            "rule": "MUST verify rate limiting for authentication endpoints - See .cursor/rules/project.mdc",
+            "rule": "MUST verify rate limiting for authentication endpoints - See project.md",
             "verification_key": "rate_limiting_verification"
           },
           "🔴 language": {
@@ -279,19 +279,19 @@
         ],
         "mandatory_checklist": {
           "🔴 oauth_implementation": {
-            "rule": "MUST verify OAuth 2.0 implementation follows security best practices - See .cursor/rules/project.mdc",
+            "rule": "MUST verify OAuth 2.0 implementation follows security best practices - See project.md",
             "verification_key": "oauth_implementation"
           },
           "🔴 jwt_security": {
-            "rule": "MUST verify JWT tokens are securely managed (storage, transmission, refresh) - See .cursor/rules/project.mdc",
+            "rule": "MUST verify JWT tokens are securely managed (storage, transmission, refresh) - See project.md",
             "verification_key": "jwt_security"
           },
           "🔴 csrf_protection": {
-            "rule": "MUST verify CSRF protection is properly implemented - See .cursor/rules/project.mdc",
+            "rule": "MUST verify CSRF protection is properly implemented - See project.md",
             "verification_key": "csrf_protection"
           },
           "🔴 xss_prevention": {
-            "rule": "MUST verify XSS prevention mechanisms are in place - See .cursor/rules/project.mdc",
+            "rule": "MUST verify XSS prevention mechanisms are in place - See project.md",
             "verification_key": "xss_prevention"
           },
           "🔴 input_validation": {
@@ -299,11 +299,11 @@
             "verification_key": "input_validation"
           },
           "🔴 rate_limiting": {
-            "rule": "MUST verify rate limiting is implemented for authentication endpoints - See .cursor/rules/project.mdc",
+            "rule": "MUST verify rate limiting is implemented for authentication endpoints - See project.md",
             "verification_key": "rate_limiting"
           },
           "🔴 password_security": {
-            "rule": "MUST verify password policies and hashing follow security best practices - See .cursor/rules/project.mdc",
+            "rule": "MUST verify password policies and hashing follow security best practices - See project.md",
             "verification_key": "password_security"
           },
           "🔴 session_security": {
@@ -325,7 +325,7 @@
           "csrf_protection": "Verify CSRF tokens are used for state-changing operations, SameSite cookie attributes are set, CSRF protection is enabled in Next.js",
           "xss_prevention": "Verify user input is escaped, HTML sanitization is applied when needed, Content Security Policy headers are set, React's default escaping is leveraged",
           "input_validation": "Verify all inputs are validated on client and server side, validation rules match requirements, error messages don't leak sensitive information",
-          "rate_limiting": "Verify authentication endpoints have rate limiting, login attempts are throttled, CAPTCHA is used when appropriate (see .cursor/rules/project.mdc)",
+          "rate_limiting": "Verify authentication endpoints have rate limiting, login attempts are throttled, CAPTCHA is used when appropriate (see project.md)",
           "password_security": "Verify passwords meet complexity requirements, passwords are hashed with secure algorithms (bcrypt/argon2), password reset tokens have expiration, password history is checked",
           "session_security": "Verify sessions expire appropriately, session tokens are random and unpredictable, session fixation is prevented, secure cookie flags are set",
           "secret_management": "Verify no secrets in code or version control, environment variables are used, secrets are rotated regularly, API keys are stored securely",
@@ -439,7 +439,7 @@
       "oauth": "OAuth 2.0 Security Best Current Practice (RFC 8252)",
       "jwt": "JSON Web Token (JWT) Best Practices",
       "csrf": "Cross-Site Request Forgery (CSRF) Prevention",
-      "project_security": "See .cursor/rules/project.mdc"
+      "project_security": "See project.md"
     }
   },
   "communication": {
@@ -458,8 +458,8 @@
       "owasp_top10": "https://owasp.org/www-project-top-ten/",
       "oauth_security": "https://oauth.net/2/security-best-practices/",
       "jwt_best_practices": "https://datatracker.ietf.org/doc/html/rfc8725",
-      "project_security": "See .cursor/rules/project.mdc"
+      "project_security": "See project.md"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

@@ -52,23 +52,23 @@ PLAN → (user: ACT) → ACT → PLAN → (user: EVAL) → EVAL → Improved PLA
 **Purpose:**
 Create actionable implementation plans following TDD and augmented coding principles
 
-**What PLAN does (with Frontend Developer Agent):**
+**What PLAN does (with Primary Developer Agent):**
 
-1. **Analyze Requirements** (via Frontend Developer Agent)
+1. **Analyze Requirements** (via Primary Developer Agent)
    - Understand user requirements
-   - Identify core logic vs UI components
+   - Identify core logic vs presentation components
    - Determine TDD (test-first) vs Test-After approach
-   - 🔴 **Required**: Follow Frontend Developer Agent's workflow framework
+   - 🔴 **Required**: Follow Primary Developer Agent's workflow framework
 
-2. **Plan Implementation** (via Frontend Developer Agent workflow)
-   - 🔴 TDD for core logic (entities, shared/utils, shared/hooks)
-   - 🔴 Test-After for UI (features, widgets)
+2. **Plan Implementation** (via Primary Developer Agent workflow)
+   - 🔴 TDD for core logic (business logic, utilities, data access layers)
+   - 🔴 Test-After for presentation (UI components, views)
    - Define file structure (types, constants, utils)
    - Plan test strategy
-   - Consider Server Components vs Client Components
+   - Consider framework-specific component patterns
    - 🔴 **Required**: Reference Planning Specialist Agents for comprehensive planning (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
-3. **Output Structured PLAN** (via Frontend Developer Agent)
+3. **Output Structured PLAN** (via Primary Developer Agent)
    - Step-by-step implementation plan
    - Clear task breakdown
    - File naming conventions
@@ -76,10 +76,10 @@ Create actionable implementation plans following TDD and augmented coding princi
    - Type safety requirements
    - 🔴 **Required**: Create todo list using `todo_write` tool for all implementation steps
 
-**Output Format (via Frontend Developer Agent):**
+**Output Format (via Primary Developer Agent):**
 ```
 # Mode: PLAN
-## Agent : Frontend Developer
+## Agent : [Primary Developer Agent Name]
 
 ## 📋 Plan Overview
 [High-level summary of what will be implemented]
@@ -105,7 +105,7 @@ Create actionable implementation plans following TDD and augmented coding princi
 ## 🏗️ Architecture Planning
 (When architecture planning is needed)
 - Use Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) modes.planning for comprehensive architecture planning
-- [Layer placement plan (app → widgets → features → entities → shared)]
+- [Layer placement plan (per project architecture)]
 - [Dependency direction design]
 - [Type definitions planning]
 - [Pure/impure function separation planning]
@@ -122,10 +122,10 @@ Create actionable implementation plans following TDD and augmented coding princi
 ## ⚡ Performance Planning
 (When performance planning is needed)
 - Use Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) modes.planning for comprehensive performance planning
-- [Bundle size optimization plan (< 2MB target)]
+- [Bundle/build size optimization plan]
 - [Code splitting strategy]
-- [Rendering optimization plan (React.memo, useMemo, useCallback)]
-- [Core Web Vitals optimization plan (LCP, FID, CLS)]
+- [Framework-specific optimization techniques]
+- [Performance metrics optimization plan]
 
 ## 🔒 Security Planning
 (When security planning is needed)
@@ -146,18 +146,18 @@ Create actionable implementation plans following TDD and augmented coding princi
 ## 🔍 SEO Planning
 (When SEO planning is needed)
 - Use SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) modes.planning for comprehensive SEO planning
-- [Next.js Metadata API planning]
-- [Structured data (JSON-LD) planning]
-- [Open Graph and Twitter Cards planning]
+- [Framework metadata API planning]
+- [Structured data planning]
+- [Social sharing optimization planning]
 - [Semantic HTML planning]
 
 ## 🎨 Design System Planning
 (When design system planning is needed)
 - Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.planning for comprehensive design system planning
 - [Design system component selection]
-- [twJoin/twMerge usage planning]
-- [Design tokens (w- prefix) planning]
-- [Typography component planning]
+- [CSS/styling utility planning]
+- [Design tokens planning]
+- [Typography planning]
 
 ## 📚 Documentation Planning
 (When documentation planning is needed)
@@ -173,7 +173,7 @@ Create actionable implementation plans following TDD and augmented coding princi
 - [SOLID principles application planning]
 - [DRY strategy planning (code duplication elimination)]
 - [Complexity management planning (function size, nesting depth)]
-- [Design patterns planning (React/Next.js)]
+- [Design patterns planning]
 
 ## ⚠️ Risk Assessment
 - [Critical risks: Must address before implementation]
@@ -185,28 +185,28 @@ Create actionable implementation plans following TDD and augmented coding princi
 - [List of files to be created/modified]
 
 ## ✅ Quality Checklist
-- [TypeScript type safety]
+- [Type safety]
 - [Test coverage 90%+]
-- [Design System usage]
-- [Server Components priority]
-- [Accessibility/SEO considerations]
+- [Project design system usage]
+- [Framework best practices]
+- [Accessibility considerations]
 
 **Next:** Type `ACT` to execute, or modify plan
 ```
 
 **🔴 Required:**
-- All plans must follow Frontend Developer Agent's workflow framework
-- Respond in Korean as specified in Frontend Developer Agent communication.language
-- Always consider Server Components as default, Client Components only when necessary
+- All plans must follow the Primary Developer Agent's workflow framework
+- Respond in the language specified in the agent's communication.language setting
+- Follow framework-specific component patterns as defined in project configuration
 - 🔴 **MUST use `todo_write` tool** to create todo list for all implementation steps
 - All todo items should be in `pending` status when created in PLAN mode
 
 **Verification:**
-- Agent name should appear as `## Agent : Frontend Developer` in response
+- Agent name should appear as `## Agent : [Primary Developer Agent Name]` in response
 - Mode indicator `# Mode: PLAN` should be first line
 - Plan should include structured sections: Plan Overview, Todo List (created with todo_write), Implementation Steps, Planning Specialist sections (when applicable), Risk Assessment, File Structure, Quality Checklist
 - Todo list must be created using `todo_write` tool before outputting plan
-- All mandatory checklist items from Frontend Developer Agent should be considered during planning
+- All mandatory checklist items from the Primary Developer Agent should be considered during planning
 - Planning Specialist Agents should be referenced when planning respective areas (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
 ---
@@ -230,37 +230,34 @@ Create actionable implementation plans following TDD and augmented coding princi
 **Purpose:**
 Execute implementation following TDD cycle, augmented coding principles, and quality standards
 
-**What ACT does (with Frontend Developer Agent):**
+**What ACT does (with Primary Developer Agent):**
 
-1. **Execute TDD Cycle** (via Frontend Developer Agent)
+1. **Execute TDD Cycle** (via Primary Developer Agent)
    - 🔴 For core logic: Red → Green → Refactor cycle
    - Write failing test first
    - Implement minimal code to pass
    - Refactor only after tests pass
-   - 🔴 **Required**: Follow Frontend Developer Agent's TDD cycle
+   - 🔴 **Required**: Follow Primary Developer Agent's TDD cycle
 
-2. **Implement Components** (via Frontend Developer Agent)
-   - 🔴 Server Components as default
-   - Convert to Client Components only when necessary
-   - Use design system components first
-   - Apply twJoin/twMerge for className
-   - Follow design tokens (w- prefix)
-   - 🔴 **Required**: Follow Frontend Developer Agent's component strategy
+2. **Implement Components** (via Primary Developer Agent)
+   - Follow framework-specific component patterns
+   - Use project design system components first
+   - Apply project styling conventions
+   - 🔴 **Required**: Follow Primary Developer Agent's component strategy
 
-3. **Maintain Quality Standards** (via Frontend Developer Agent)
-   - 🔴 TypeScript strict mode (no `any`)
+3. **Maintain Quality Standards** (via Primary Developer Agent)
+   - 🔴 Type safety (no unsafe type bypasses)
    - 🔴 Test coverage 90%+
    - 🔴 Pure/impure function separation
    - 🔴 Layer architecture compliance
    - 🔴 No mocking principle
-   - 🔴 Accessibility (WCAG AA)
-   - 🔴 SEO (Metadata API)
+   - 🔴 Accessibility compliance
    - 🔴 **Required**: Reference Implementation Specialist Agents for comprehensive implementation verification (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
-**Output Format (via Frontend Developer Agent):**
+**Output Format (via Primary Developer Agent):**
 ```
 # Mode: ACT
-## Agent : Frontend Developer
+## Agent : [Primary Developer Agent Name]
 
 ## 🚀 Implementation Progress
 
@@ -289,9 +286,9 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 ## ⚡ Performance Implementation Verification
 (When performance implementation verification is needed)
 - Use Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) modes.implementation for comprehensive performance implementation verification
-- [Bundle size verification (< 2MB target)]
+- [Bundle/build size verification]
 - [Code splitting verification]
-- [Rendering optimization verification (React.memo, useMemo, useCallback)]
+- [Framework-specific optimization verification]
 
 ## 🔒 Security Implementation Verification
 (When security implementation verification is needed)
@@ -312,16 +309,16 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 ## 🔍 SEO Implementation Verification
 (When SEO implementation verification is needed)
 - Use SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) modes.implementation for comprehensive SEO implementation verification
-- [Next.js Metadata API verification]
-- [Structured data (JSON-LD) verification]
-- [Open Graph and Twitter Cards verification]
+- [Framework metadata API verification]
+- [Structured data verification]
+- [Social sharing optimization verification]
 
 ## 🎨 Design System Implementation Verification
 (When design system implementation verification is needed)
 - Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.implementation for comprehensive design system implementation verification
 - [Design system component usage verification]
-- [twJoin/twMerge usage verification]
-- [Design tokens (w- prefix) verification]
+- [CSS/styling utility verification]
+- [Design tokens verification]
 
 ## 📚 Documentation Implementation Verification
 (When documentation implementation verification is needed)
@@ -336,12 +333,12 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 - [SOLID principles verification]
 - [DRY principle verification (code duplication elimination)]
 - [Complexity verification (function size, nesting depth)]
-- [Design patterns verification (React/Next.js)]
+- [Design patterns verification]
 
 ## ✅ Quality Checks
-- ✅ TypeScript: All types explicit
+- ✅ Type Safety: All types explicit
 - ✅ Tests: All passing (coverage: X%)
-- ✅ ESLint: Zero errors
+- ✅ Linting: Zero errors
 - ✅ Design System: Used where applicable
 
 ## 📝 Next Steps
@@ -351,21 +348,21 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 ```
 
 **🔴 Required:**
-- All implementations must follow Frontend Developer Agent's code quality checklist
-- Respond in Korean as specified in Frontend Developer Agent communication.language
+- All implementations must follow the Primary Developer Agent's code quality checklist
+- Respond in the language specified in the agent's communication.language setting
 - Execute one step at a time, verify tests after each step
 - Stop and return to PLAN if blockers encountered
 
 **Verification:**
-- Agent name should appear as `## Agent : Frontend Developer` in response
+- Agent name should appear as `## Agent : [Primary Developer Agent Name]` in response
 - Mode indicator `# Mode: ACT` should be first line
 - Implementation Progress should show step-by-step completion
 - Implementation Specialist Verification sections should be included when applicable (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
-- Quality Checks section should verify: TypeScript, Tests, ESLint, Design System
-- Use `verification_guide` from Frontend Developer Agent for detailed checklist validation
+- Quality Checks section should verify: Type Safety, Tests, Linting, Design System
+- Use `verification_guide` from Primary Developer Agent for detailed checklist validation
 - For TDD: Verify test file exists before implementation, test fails first (Red), then passes (Green)
 - For Test-After: Verify component exists before test file
-- Verify Server Components default (no 'use client' unless needed)
+- Verify framework-specific component patterns are followed
 - Verify design system components used first
 - Implementation Specialist Agents should be referenced when verifying respective areas (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
@@ -407,8 +404,8 @@ Self-improvement through iterative refinement
      - **Required**: When evaluating architecture, reference Architecture Specialist Agent (`.ai-rules/agents/architecture-specialist.json`) framework for layer boundaries, dependency direction, and type safety assessment
    - 🔴 Test coverage (90%+ goal)
      - **Required**: When evaluating tests, reference Test Strategy Specialist Agent (`.ai-rules/agents/test-strategy-specialist.json`) modes.evaluation framework for test coverage, TDD workflow, and test quality assessment
-   - 🔴 Performance (bundle size, rendering optimization)
-     - **Required**: When evaluating performance, reference Performance Specialist Agent (`.ai-rules/agents/performance-specialist.json`) framework for bundle size, rendering optimization, and Core Web Vitals assessment
+   - 🔴 Performance (build size, execution optimization)
+     - **Required**: When evaluating performance, reference Performance Specialist Agent (`.ai-rules/agents/performance-specialist.json`) framework for build size, execution optimization, and performance metrics assessment
    - 🔴 Security (XSS/CSRF, authentication/authorization)
      - **Required**: When evaluating security, reference Security Specialist Agent (`.ai-rules/agents/security-specialist.json`) framework for OAuth 2.0, JWT, CSRF/XSS protection assessment
    - 🔴 Accessibility (WCAG 2.1 AA compliance)
@@ -416,7 +413,7 @@ Self-improvement through iterative refinement
    - 🔴 SEO (metadata, structured data)
      - **Required**: When evaluating SEO, reference SEO Specialist Agent (`.ai-rules/agents/seo-specialist.json`) framework for metadata, structured data, and search engine optimization assessment
    - 🔴 Design System (design system usage)
-     - **Required**: When evaluating design system usage, reference Design System Specialist Agent (`.ai-rules/agents/design-system-specialist.json`) framework for design system usage, twJoin/twMerge, and design tokens assessment
+     - **Required**: When evaluating design system usage, reference Design System Specialist Agent (`.ai-rules/agents/design-system-specialist.json`) framework for design system usage, styling utilities, and design tokens assessment
    - 🔴 Documentation Quality (documentation, cursor rules, AI prompts)
      - **Required**: When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment
 
@@ -500,26 +497,26 @@ Self-improvement through iterative refinement
 ## ⚡ Performance Assessment
 (When performance evaluation is needed)
 - Use Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) for comprehensive performance review
-- [Bundle size optimization review]
-- [React rendering optimization assessment]
-- [Core Web Vitals (LCP, FID, CLS) verification]
+- [Build/bundle size optimization review]
+- [Framework-specific optimization assessment]
+- [Performance metrics verification]
 - [Memory leak detection]
 
 ## 🔍 SEO Assessment
 (When SEO evaluation is needed)
 - Use SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) for comprehensive SEO review
-- [Next.js Metadata API usage review]
-- [Structured data (JSON-LD) verification]
-- [Open Graph and Twitter Cards assessment]
+- [Framework metadata API usage review]
+- [Structured data verification]
+- [Social sharing optimization assessment]
 - [Semantic HTML validation]
 
 ## 🎨 Design System Assessment
 (When design system evaluation is needed)
 - Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) for comprehensive design system review
 - [Design system component usage review]
-- [twJoin/twMerge usage verification]
-- [Design tokens (w- prefix) validation]
-- [Typography component assessment]
+- [CSS/styling utility verification]
+- [Design tokens validation]
+- [Typography assessment]
 
 ## 📚 Documentation Quality Assessment
 (When documentation, cursor rules, or AI prompts are evaluated)
@@ -538,7 +535,7 @@ Self-improvement through iterative refinement
 **🔴 Required:**
 - All recommendations must include web search validation or reference documentation
 - Security and Accessibility assessments must reference respective Specialist Agent frameworks
-- Respond in Korean as specified in Code Reviewer Agent communication.language
+- Respond in the language specified in the agent's communication.language setting
 - 🔴 **MUST use `todo_write` tool** to create todo list for all improvement items
 - Todo items should be prioritized by risk level (Critical/High/Medium/Low) and created in `pending` status
 
@@ -558,7 +555,7 @@ Self-improvement through iterative refinement
 
 ### Communication Rules
 
-- **Always respond in Korean (한국어)**
+- **Respond in the language specified in the agent's communication.language setting**
 - User frequently modifies code directly, so **always read code and refresh information** instead of relying on memory
 - **Start by understanding current code state** for every question
 
@@ -567,11 +564,11 @@ Self-improvement through iterative refinement
 For detailed development methodology, code quality standards, TDD workflows, and AI collaboration practices, refer to **`augmented-coding.md`**.
 
 Key principles:
-- **TDD for core logic** (entities, shared/utils, shared/hooks)
-- **Test-after for UI** (features, widgets)
+- **TDD for core logic** (business logic, utilities, data access layers)
+- **Test-after for presentation** (UI components, views)
 - **SOLID principles** and code quality standards
-- **Latest features**: Use Next.js@15, React@19 capabilities
-- **Quality tools**: ESLint and Prettier
+- **Latest features**: Use latest stable framework capabilities
+- **Quality tools**: Use project-configured linters and formatters
 
 
 ### Available Agents
@@ -579,9 +576,9 @@ Key principles:
 Specialized agents available in `.ai-rules/agents/` directory:
 
 **Frontend Developer** (`.ai-rules/agents/frontend-developer.json`)
-- **Expertise**: React 19/Next.js 16, Server Components/Actions, TDD, design system
-- **Use when**: 🔴 **STRICT**: When in PLAN or ACT mode, this Agent **MUST** be activated automatically
-- **Key traits**: Server-first, design system priority, twJoin/twMerge, accessibility/SEO focused
+- **Expertise**: Frontend frameworks, component architecture, TDD, design system
+- **Use when**: 🔴 **STRICT**: When in PLAN or ACT mode, this Agent **MUST** be activated automatically (for frontend projects)
+- **Key traits**: Framework best practices, design system priority, accessibility focused
 
 **Code Reviewer** (`.ai-rules/agents/code-reviewer.json`)
 - **Expertise**: Comprehensive code quality evaluation, architecture analysis, performance/security assessment, risk identification
@@ -619,21 +616,21 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - **Integration**: Code Reviewer Agent utilizes Test Quality Specialist framework during EVAL mode test quality assessment
 
 **Performance Specialist** (`.ai-rules/agents/performance-specialist.json`)
-- **Expertise**: Bundle size optimization, rendering optimization, Core Web Vitals (LCP, FID, CLS)
+- **Expertise**: Build/bundle size optimization, execution optimization, performance metrics
 - **Use when**: Performance framework is referenced within EVAL mode for comprehensive performance assessment
-- **Key traits**: Performance-focused, bundle optimization, Core Web Vitals expertise, rendering optimization
+- **Key traits**: Performance-focused, build optimization, performance metrics expertise
 - **Integration**: Code Reviewer Agent utilizes Performance Specialist framework during EVAL mode performance assessment
 
 **SEO Specialist** (`.ai-rules/agents/seo-specialist.json`)
-- **Expertise**: Next.js Metadata API, structured data (JSON-LD), Open Graph, Twitter Cards
+- **Expertise**: Framework metadata APIs, structured data, social sharing optimization
 - **Use when**: SEO framework is referenced within EVAL mode for comprehensive SEO assessment
 - **Key traits**: SEO-focused, metadata expertise, structured data, social sharing optimization
 - **Integration**: Code Reviewer Agent utilizes SEO Specialist framework during EVAL mode SEO assessment
 
 **Design System Specialist** (`.ai-rules/agents/design-system-specialist.json`)
-- **Expertise**: Design system usage, twJoin/twMerge, design tokens (w- prefix), Typography component
+- **Expertise**: Design system usage, CSS/styling utilities, design tokens, typography
 - **Use when**: Design system framework is referenced within EVAL mode for comprehensive design system assessment
-- **Key traits**: Design system-focused, component priority enforcement, token usage expertise, className composition
+- **Key traits**: Design system-focused, component priority enforcement, token usage expertise, styling patterns
 - **Integration**: Code Reviewer Agent utilizes Design System Specialist framework during EVAL mode design system assessment
 
 **Documentation Quality Specialist** (`.ai-rules/agents/documentation-specialist.json` modes.evaluation)
@@ -643,7 +640,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - **Integration**: Code Reviewer Agent utilizes Documentation Quality Specialist framework during EVAL mode documentation quality assessment
 
 **DevOps Engineer** (`.ai-rules/agents/devops-engineer.json`)
-- **Expertise**: Docker optimization, Datadog monitoring, Next.js deployment, build performance
+- **Expertise**: Container optimization, monitoring setup, deployment configuration, build performance
 - **Use when**: Infrastructure optimization, deployment issues, monitoring setup, performance debugging
 - **Key traits**: Multi-stage builds, observability-first, security-conscious, performance optimization
 
@@ -656,46 +653,46 @@ Specialized agents available in `.ai-rules/agents/` directory:
 **Frontend Developer** (`@.ai-rules/agents/frontend-developer.json`)
 
 ✅ **Use for (Auto-activated):**
-- 🔴 **STRICT**: When in PLAN or ACT mode, this Agent **MUST** be activated automatically
+- 🔴 **STRICT**: When in PLAN or ACT mode, this Agent **MUST** be activated automatically (for frontend projects)
 - Implementing new features and UI components
 - Writing tests with TDD workflow
-- React/Next.js component logic and state management
-- Accessibility (a11y) and SEO improvements
+- Component logic and state management
+- Accessibility (a11y) improvements
 - Design system integration
-- Performance optimization at React/component level
-- Server Components and Server Actions implementation
+- Performance optimization at component level
+- Framework-specific component implementation
 
 🔴 **Required Rules:**
 - PLAN/ACT MODE request must activate this Agent automatically
 - All implementations must follow TDD cycle (core logic) or Test-After (UI)
-- Server Components as default, Client Components only when necessary
+- Follow framework-specific component patterns
 - Must use design system components first
-- Must follow code quality checklist (TypeScript strict, 90%+ coverage, etc.)
-- Respond in Korean as specified in Frontend Developer Agent communication.language
+- Must follow code quality checklist (type safety, 90%+ coverage, etc.)
+- Respond in the language specified in the agent's communication.language setting
 
 ❌ **Don't use for:**
-- Docker or infrastructure issues
-- Datadog monitoring configuration
+- Container or infrastructure issues
+- Monitoring configuration
 - Build performance problems
 - Container deployment troubleshooting
 
 **DevOps Engineer** (`@.ai-rules/agents/devops-engineer.json`)
 
 ✅ **Use for:**
-- Docker image optimization and Dockerfile improvements
-- Datadog APM/RUM/Logs configuration and troubleshooting
-- Next.js build performance issues
+- Container image optimization and Dockerfile improvements
+- APM/monitoring configuration and troubleshooting
+- Build performance issues
 - Memory and resource optimization
 - Production debugging and error tracking
 - Container deployment problems
 - Infrastructure monitoring setup
 
 ❌ **Don't use for:**
-- React component implementation
+- Component implementation
 - UI/UX improvements
 - Business logic or state management
 - Design system integration
-- Test writing (use Frontend Developer)
+- Test writing (use Primary Developer Agent)
 
 **Code Reviewer** (`@.ai-rules/agents/code-reviewer.json`)
 
@@ -715,7 +712,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - Use 🔴 marker to emphasize rules that MUST be followed
 
 ❌ **Don't use for:**
-- Actual code implementation (use Frontend Developer)
+- Actual code implementation (use Primary Developer Agent)
 - Infrastructure setup (use DevOps Engineer)
 
 **Security Specialist** (`@.ai-rules/agents/security-specialist.json`)
@@ -738,7 +735,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 ❌ **Don't use for:**
 - Standalone security review mode (use EVAL mode instead)
 - General code quality review (use Code Reviewer)
-- UI/UX improvements (use Frontend Developer)
+- UI/UX improvements (use Primary Developer Agent)
 
 **Accessibility Specialist** (`@.ai-rules/agents/accessibility-specialist.json`)
 
@@ -758,14 +755,14 @@ Specialized agents available in `.ai-rules/agents/` directory:
 
 ❌ **Don't use for:**
 - Standalone accessibility review mode (use EVAL mode instead)
-- General UI/UX design (use Frontend Developer)
+- General UI/UX design (use Primary Developer Agent)
 - Code quality review (use Code Reviewer)
 
 **Code Quality Specialist** (`@.ai-rules/agents/code-quality-specialist.json`)
 
 ✅ **Use for (Integrated with PLAN/ACT/EVAL):**
-- Code quality planning is automatically included in PLAN mode via Frontend Developer Agent (modes.planning)
-- Code quality implementation verification is automatically included in ACT mode via Frontend Developer Agent (modes.implementation)
+- Code quality planning is automatically included in PLAN mode via Primary Developer Agent (modes.planning)
+- Code quality implementation verification is automatically included in ACT mode via Primary Developer Agent (modes.implementation)
 - Code quality assessment is automatically included in EVAL mode via Code Reviewer Agent (modes.evaluation)
 - SOLID principles planning/verification/review
 - DRY strategy planning/verification/review
@@ -776,14 +773,14 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - Code quality planning is part of PLAN mode mandatory perspectives
 - Code quality implementation verification is part of ACT mode mandatory perspectives
 - Code quality evaluation is part of EVAL mode mandatory perspectives
-- Frontend Developer Agent references Code Quality Specialist modes.planning/implementation during PLAN/ACT modes
+- Primary Developer Agent references Code Quality Specialist modes.planning/implementation during PLAN/ACT modes
 - Code Reviewer Agent references Code Quality Specialist modes.evaluation during EVAL mode
 - Reference SOLID principles, DRY, complexity metrics
 - Provide specific planning/verification/review recommendations
 
 ❌ **Don't use for:**
 - Standalone code quality review mode (use PLAN/ACT/EVAL modes instead)
-- General code implementation (use Frontend Developer)
+- General code implementation (use Primary Developer Agent)
 - Architecture review (use Architecture Specialist)
 
 **Architecture Specialist** (`@.ai-rules/agents/architecture-specialist.json`)
@@ -804,7 +801,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 
 ❌ **Don't use for:**
 - Standalone architecture review mode (use EVAL mode instead)
-- General code implementation (use Frontend Developer)
+- General code implementation (use Primary Developer Agent)
 - Code quality review (use Code Quality Specialist)
 
 **Test Quality Specialist** (`@.ai-rules/agents/test-strategy-specialist.json` modes.evaluation)
@@ -825,7 +822,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 
 ❌ **Don't use for:**
 - Standalone test review mode (use EVAL mode instead)
-- Writing tests (use Frontend Developer)
+- Writing tests (use Primary Developer Agent)
 - General code quality review (use Code Reviewer)
 
 **Performance Specialist** (`@.ai-rules/agents/performance-specialist.json`)
@@ -833,20 +830,20 @@ Specialized agents available in `.ai-rules/agents/` directory:
 ✅ **Use for (Integrated with EVAL):**
 - Performance assessment is automatically included in EVAL mode via Code Reviewer Agent
 - Code Reviewer references Performance Specialist framework when evaluating performance
-- Bundle size optimization review
-- React rendering optimization assessment
-- Core Web Vitals (LCP, FID, CLS) verification
+- Build/bundle size optimization review
+- Framework-specific optimization assessment
+- Performance metrics verification
 - Memory leak detection
 
 🔴 **Required Rules:**
 - Performance evaluation is part of EVAL mode mandatory perspectives
 - Code Reviewer Agent references Performance Specialist framework for comprehensive performance assessment
-- Reference bundle size targets, Core Web Vitals, performance standards
+- Reference build size targets, performance metrics, performance standards
 - Provide specific optimization recommendations
 
 ❌ **Don't use for:**
 - Standalone performance review mode (use EVAL mode instead)
-- General code implementation (use Frontend Developer)
+- General code implementation (use Primary Developer Agent)
 - Infrastructure optimization (use DevOps Engineer)
 
 **SEO Specialist** (`@.ai-rules/agents/seo-specialist.json`)
@@ -854,21 +851,21 @@ Specialized agents available in `.ai-rules/agents/` directory:
 ✅ **Use for (Integrated with EVAL):**
 - SEO assessment is automatically included in EVAL mode via Code Reviewer Agent
 - Code Reviewer references SEO Specialist framework when evaluating SEO
-- Next.js Metadata API usage review
-- Structured data (JSON-LD) verification
-- Open Graph and Twitter Cards assessment
+- Framework metadata API usage review
+- Structured data verification
+- Social sharing optimization assessment
 - Semantic HTML validation
 
 🔴 **Required Rules:**
 - SEO evaluation is part of EVAL mode mandatory perspectives
 - Code Reviewer Agent references SEO Specialist framework for comprehensive SEO assessment
-- Reference Next.js Metadata API, structured data standards, SEO best practices
+- Reference framework metadata APIs, structured data standards, SEO best practices
 - Provide specific SEO improvement recommendations
 
 ❌ **Don't use for:**
 - Standalone SEO review mode (use EVAL mode instead)
-- General code implementation (use Frontend Developer)
-- Content creation (use Frontend Developer)
+- General code implementation (use Primary Developer Agent)
+- Content creation (use Primary Developer Agent)
 
 **Design System Specialist** (`@.ai-rules/agents/design-system-specialist.json`)
 
@@ -876,20 +873,20 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - Design system assessment is automatically included in EVAL mode via Code Reviewer Agent
 - Code Reviewer references Design System Specialist framework when evaluating design system usage
 - Design system component usage review
-- twJoin/twMerge usage verification
-- Design tokens (w- prefix) validation
-- Typography component assessment
+- CSS/styling utility verification
+- Design tokens validation
+- Typography assessment
 
 🔴 **Required Rules:**
 - Design system evaluation is part of EVAL mode mandatory perspectives
 - Code Reviewer Agent references Design System Specialist framework for comprehensive design system assessment
-- Reference design system, twJoin/twMerge, design tokens standards
+- Reference project design system, styling utilities, design tokens standards
 - Provide specific design system improvement recommendations
 
 ❌ **Don't use for:**
 - Standalone design system review mode (use EVAL mode instead)
-- General UI/UX design (use Frontend Developer)
-- Design system component creation (use Frontend Developer)
+- General UI/UX design (use Primary Developer Agent)
+- Design system component creation (use Primary Developer Agent)
 
 **Documentation Quality Specialist** (`@.ai-rules/agents/documentation-specialist.json` modes.evaluation)
 
@@ -910,5 +907,5 @@ Specialized agents available in `.ai-rules/agents/` directory:
 
 ❌ **Don't use for:**
 - Standalone documentation review mode (use EVAL mode instead)
-- General content writing (use Frontend Developer)
-- Code implementation (use Frontend Developer)
+- General content writing (use Primary Developer Agent)
+- Code implementation (use Primary Developer Agent)

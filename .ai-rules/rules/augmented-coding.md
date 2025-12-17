@@ -26,38 +26,36 @@ Follow the **Red → Green → Refactor** cycle religiously:
 - Run all tests after each change
 - Never skip the refactor step
 
-### Project-Specific TDD Strategy
+### TDD Strategy by Code Type
 
 #### Core Logic (Test-First TDD)
 Apply strict TDD to:
-- `entities/apis/` - API call functions
-- `entities/models/` - React Query hooks
-- `shared/utils/` - Utility functions
-- `shared/hooks/` - Custom hooks with business logic
+- API call functions
+- Data models and hooks
+- Utility functions
+- Custom hooks with business logic
 
 **Workflow:**
-1. Write failing test (`*.unit.spec.tsx`)
+1. Write failing test
    - Define expected behavior
    - Cover edge cases
    - Cover error cases
-2. Define types (`*.types.ts`)
+2. Define types
 3. Implement minimal code
 4. Verify all tests pass
 5. Refactor for clarity
 
 #### UI Components (Test-After)
 For visual components, implement first, then test:
-- `features/` - Feature components
-- `widgets/` - Composite widgets
-- `shared/Components/` - Reusable UI components
+- Feature components
+- Composite widgets
+- Reusable UI components
 
 **Workflow:**
-1. Define types (`*.types.ts`)
-2. Define constants (`*.constants.ts`)
+1. Define types
+2. Define constants
 3. Implement component
-   - Main component (`{Feature}.tsx`)
-   - Sub-components (`{Feature}.parts.tsx`)
-4. Write tests (`*.unit.spec.tsx`)
+4. Write tests
 5. Refactor
 
 ---
@@ -106,7 +104,7 @@ When both types of changes are needed:
 
 ### Commit Messages
 - **Structural**: `refactor: extract validation logic to utils`
-- **Behavioral**: `feat: add email subscription endpoint`
+- **Behavioral**: `feat: add user registration endpoint`
 
 Use small, frequent commits rather than large, infrequent ones.
 
@@ -198,7 +196,7 @@ Use descriptive names that explain behavior:
 ```typescript
 // ✅ Good
 it('returns error when email format is invalid', () => {})
-it('successfully subscribes user with valid email', () => {})
+it('successfully creates user with valid data', () => {})
 
 // ❌ Bad
 it('test1', () => {})
@@ -207,15 +205,15 @@ it('handles input', () => {})
 
 ### Test Organization
 ```typescript
-describe('NewsletterSubscription', () => {
-  describe('when email is valid', () => {
-    it('creates subscription record', () => {})
-    it('sends confirmation email', () => {})
+describe('UserRegistration', () => {
+  describe('when input is valid', () => {
+    it('creates user record', () => {})
+    it('sends welcome email', () => {})
   })
 
-  describe('when email is invalid', () => {
+  describe('when input is invalid', () => {
     it('returns validation error', () => {})
-    it('does not create subscription', () => {})
+    it('does not create user', () => {})
   })
 })
 ```
@@ -230,16 +228,16 @@ describe('NewsletterSubscription', () => {
 
 ## Example Workflow
 
-### Building a Newsletter Subscription Feature
+### Building a Feature with TDD
 
 #### Step 1: Write First Test (Red)
 ```typescript
-describe('useNewsletterSubscribeMutation', () => {
-  it('successfully subscribes with valid email', async () => {
-    const { result } = renderHook(() => useNewsletterSubscribeMutation());
+describe('useCreateUserMutation', () => {
+  it('successfully creates user with valid data', async () => {
+    const { result } = renderHook(() => useCreateUserMutation());
 
     await act(async () => {
-      await result.current.mutate('test@example.com');
+      await result.current.mutate({ email: 'test@example.com', name: 'Test' });
     });
 
     expect(result.current.isSuccess).toBe(true);
@@ -249,30 +247,30 @@ describe('useNewsletterSubscribeMutation', () => {
 
 #### Step 2: Minimal Implementation (Green)
 ```typescript
-export const useNewsletterSubscribeMutation = () => {
+export const useCreateUserMutation = () => {
   return useMutation({
-    mutationFn: async (email: string) => {
-      const { data } = await clientAxios.post('/newsletter/', { email });
-      return data;
+    mutationFn: async (data: CreateUserInput) => {
+      const response = await api.post('/users', data);
+      return response.data;
     },
   });
 };
 ```
 
 #### Step 3: Verify Tests Pass
-Run `yarn test:unit` → All green ✅
+Run tests → All green ✅
 
 #### Step 4: Refactor (If Needed)
-Extract email validation, improve error handling, etc.
+Extract validation, improve error handling, etc.
 
 #### Step 5: Commit
 ```bash
-git commit -m "feat: add newsletter subscription mutation hook"
+git commit -m "feat: add create user mutation hook"
 ```
 
 #### Step 6: Next Test
 ```typescript
-it('returns error when email is invalid', async () => {
+it('returns error when data is invalid', async () => {
   // ... next increment
 });
 ```
@@ -286,9 +284,8 @@ Repeat until feature is complete.
 This file defines **HOW** we write code with AI.
 
 See also:
-- `core.mdc` - PLAN/ACT modes and communication rules
-- `project.mdc` - Tech stack, architecture, and project context
-- `styles.mdc` - Design system guidelines
+- `core.md` - PLAN/ACT/EVAL modes and communication rules
+- `project.md` - Tech stack, architecture, and project context
 
 ---
 

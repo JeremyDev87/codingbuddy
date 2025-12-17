@@ -41,19 +41,19 @@
         ],
         "mandatory_checklist": {
           "🔴 bundle_size_plan": {
-            "rule": "MUST plan bundle size optimization (target: < 2MB) - See .cursor/rules/project.mdc 'Performance & Optimization' section",
+            "rule": "MUST plan bundle size optimization (target: < 2MB) - See project.md 'Performance & Optimization' section",
             "verification_key": "bundle_size_plan"
           },
           "🔴 code_splitting": {
-            "rule": "MUST plan code splitting with dynamic imports - See .cursor/rules/project.mdc",
+            "rule": "MUST plan code splitting with dynamic imports - See project.md",
             "verification_key": "code_splitting"
           },
           "🔴 rendering_optimization": {
-            "rule": "MUST plan React rendering optimization (memo, useMemo, useCallback) - See .cursor/rules/project.mdc",
+            "rule": "MUST plan React rendering optimization (memo, useMemo, useCallback) - See project.md",
             "verification_key": "rendering_optimization"
           },
           "🔴 image_optimization": {
-            "rule": "MUST plan Next.js Image component usage - See .cursor/rules/project.mdc",
+            "rule": "MUST plan Next.js Image component usage - See project.md",
             "verification_key": "image_optimization"
           },
           "🔴 core_web_vitals": {
@@ -189,19 +189,19 @@
         ],
         "mandatory_checklist": {
           "🔴 bundle_size_verification": {
-            "rule": "MUST verify bundle size optimization (target: < 2MB) - See .cursor/rules/project.mdc 'Performance & Optimization' section",
+            "rule": "MUST verify bundle size optimization (target: < 2MB) - See project.md 'Performance & Optimization' section",
             "verification_key": "bundle_size_verification"
           },
           "🔴 code_splitting_verification": {
-            "rule": "MUST verify code splitting with dynamic imports - See .cursor/rules/project.mdc",
+            "rule": "MUST verify code splitting with dynamic imports - See project.md",
             "verification_key": "code_splitting_verification"
           },
           "🔴 rendering_optimization_verification": {
-            "rule": "MUST verify React rendering optimization (memo, useMemo, useCallback) - See .cursor/rules/project.mdc",
+            "rule": "MUST verify React rendering optimization (memo, useMemo, useCallback) - See project.md",
             "verification_key": "rendering_optimization_verification"
           },
           "🔴 image_optimization_verification": {
-            "rule": "MUST verify Next.js Image component usage - See .cursor/rules/project.mdc",
+            "rule": "MUST verify Next.js Image component usage - See project.md",
             "verification_key": "image_optimization_verification"
           },
           "🔴 core_web_vitals_verification": {
@@ -339,19 +339,19 @@
         ],
         "mandatory_checklist": {
           "🔴 bundle_size": {
-            "rule": "MUST verify bundle size is optimized (target: < 2MB) - See .cursor/rules/project.mdc 'Performance & Optimization' section",
+            "rule": "MUST verify bundle size is optimized (target: < 2MB) - See project.md 'Performance & Optimization' section",
             "verification_key": "bundle_size"
           },
           "🔴 rendering_optimization": {
-            "rule": "MUST verify React rendering optimization is used appropriately (memo, useMemo, useCallback) - See .cursor/rules/project.mdc",
+            "rule": "MUST verify React rendering optimization is used appropriately (memo, useMemo, useCallback) - See project.md",
             "verification_key": "rendering_optimization"
           },
           "🔴 code_splitting": {
-            "rule": "MUST verify code splitting is used with dynamic imports - See .cursor/rules/project.mdc",
+            "rule": "MUST verify code splitting is used with dynamic imports - See project.md",
             "verification_key": "code_splitting"
           },
           "🔴 image_optimization": {
-            "rule": "MUST verify Next.js Image component is used for images - See .cursor/rules/project.mdc",
+            "rule": "MUST verify Next.js Image component is used for images - See project.md",
             "verification_key": "image_optimization"
           },
           "🔴 memory_leaks": {
@@ -502,7 +502,7 @@
       "core_web_vitals": "Core Web Vitals: https://web.dev/vitals/",
       "bundle_optimization": "Webpack Bundle Optimization",
       "nextjs_performance": "Next.js Performance: https://nextjs.org/docs/app/building-your-application/optimizing",
-      "project_performance": "See .cursor/rules/project.mdc 'Performance & Optimization' section"
+      "project_performance": "See project.md 'Performance & Optimization' section"
     }
   },
   "communication": {
@@ -522,8 +522,8 @@
       "react_performance": "React Performance: https://react.dev/learn/render-and-commit",
       "nextjs_optimization": "Next.js Optimization: https://nextjs.org/docs/app/building-your-application/optimizing",
       "bundle_analysis": "Webpack Bundle Analyzer",
-      "project_performance": "See .cursor/rules/project.mdc 'Performance & Optimization' section"
+      "project_performance": "See project.md 'Performance & Optimization' section"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

@@ -41,27 +41,27 @@
         ],
         "mandatory_checklist": {
           "🔴 semantic_html": {
-            "rule": "MUST plan proper HTML5 semantic elements - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST plan proper HTML5 semantic elements - See project.md 'UX & Accessibility' section",
             "verification_key": "semantic_html"
           },
           "🔴 aria_attributes": {
-            "rule": "MUST plan ARIA labels, roles, and live regions - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST plan ARIA labels, roles, and live regions - See project.md 'UX & Accessibility' section",
             "verification_key": "aria_attributes"
           },
           "🔴 keyboard_navigation": {
-            "rule": "MUST plan full keyboard navigation (Tab, Enter, Escape, Arrow keys) - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST plan full keyboard navigation (Tab, Enter, Escape, Arrow keys) - See project.md 'UX & Accessibility' section",
             "verification_key": "keyboard_navigation"
           },
           "🔴 focus_management": {
-            "rule": "MUST plan visible focus indicators and logical focus order - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST plan visible focus indicators and logical focus order - See project.md 'UX & Accessibility' section",
             "verification_key": "focus_management"
           },
           "🔴 color_contrast": {
-            "rule": "MUST plan WCAG AA contrast ratios (4.5:1 for text) - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST plan WCAG AA contrast ratios (4.5:1 for text) - See project.md 'UX & Accessibility' section",
             "verification_key": "color_contrast"
           },
           "🔴 form_accessibility": {
-            "rule": "MUST plan proper labels, error messages, and validation feedback - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST plan proper labels, error messages, and validation feedback - See project.md 'UX & Accessibility' section",
             "verification_key": "form_accessibility"
           },
           "🔴 language": {
@@ -180,27 +180,27 @@
         ],
         "mandatory_checklist": {
           "🔴 semantic_html_verification": {
-            "rule": "MUST verify proper HTML5 semantic elements - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST verify proper HTML5 semantic elements - See project.md 'UX & Accessibility' section",
             "verification_key": "semantic_html_verification"
           },
           "🔴 aria_attributes_verification": {
-            "rule": "MUST verify ARIA labels, roles, and live regions - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST verify ARIA labels, roles, and live regions - See project.md 'UX & Accessibility' section",
             "verification_key": "aria_attributes_verification"
           },
           "🔴 keyboard_navigation_verification": {
-            "rule": "MUST verify full keyboard navigation (Tab, Enter, Escape, Arrow keys) - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST verify full keyboard navigation (Tab, Enter, Escape, Arrow keys) - See project.md 'UX & Accessibility' section",
             "verification_key": "keyboard_navigation_verification"
           },
           "🔴 focus_management_verification": {
-            "rule": "MUST verify visible focus indicators and logical focus order - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST verify visible focus indicators and logical focus order - See project.md 'UX & Accessibility' section",
             "verification_key": "focus_management_verification"
           },
           "🔴 color_contrast_verification": {
-            "rule": "MUST verify WCAG AA contrast ratios (4.5:1 for text) - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST verify WCAG AA contrast ratios (4.5:1 for text) - See project.md 'UX & Accessibility' section",
             "verification_key": "color_contrast_verification"
           },
           "🔴 form_accessibility_verification": {
-            "rule": "MUST verify proper labels, error messages, and validation feedback - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST verify proper labels, error messages, and validation feedback - See project.md 'UX & Accessibility' section",
             "verification_key": "form_accessibility_verification"
           },
           "🔴 language": {
@@ -320,35 +320,35 @@
         ],
         "mandatory_checklist": {
           "🔴 semantic_html": {
-            "rule": "MUST use proper HTML5 semantic elements - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST use proper HTML5 semantic elements - See project.md 'UX & Accessibility' section",
             "verification_key": "semantic_html"
           },
           "🔴 aria_attributes": {
-            "rule": "MUST add ARIA labels, roles, and live regions appropriately - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST add ARIA labels, roles, and live regions appropriately - See project.md 'UX & Accessibility' section",
             "verification_key": "aria_attributes"
           },
           "🔴 keyboard_navigation": {
-            "rule": "MUST ensure full keyboard navigation (Tab, Enter, Escape, Arrow keys) - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST ensure full keyboard navigation (Tab, Enter, Escape, Arrow keys) - See project.md 'UX & Accessibility' section",
             "verification_key": "keyboard_navigation"
           },
           "🔴 focus_management": {
-            "rule": "MUST provide visible focus indicators and logical focus order - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST provide visible focus indicators and logical focus order - See project.md 'UX & Accessibility' section",
             "verification_key": "focus_management"
           },
           "🔴 color_contrast": {
-            "rule": "MUST maintain WCAG AA contrast ratios (4.5:1 for text) - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST maintain WCAG AA contrast ratios (4.5:1 for text) - See project.md 'UX & Accessibility' section",
             "verification_key": "color_contrast"
           },
           "🔴 form_accessibility": {
-            "rule": "MUST provide proper labels, error messages, and validation feedback - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST provide proper labels, error messages, and validation feedback - See project.md 'UX & Accessibility' section",
             "verification_key": "form_accessibility"
           },
           "🔴 image_alt_text": {
-            "rule": "MUST provide descriptive alt text for all images - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST provide descriptive alt text for all images - See project.md 'UX & Accessibility' section",
             "verification_key": "image_alt_text"
           },
           "🔴 screen_reader": {
-            "rule": "MUST ensure compatibility with VoiceOver/NVDA - See .cursor/rules/project.mdc 'UX & Accessibility' section",
+            "rule": "MUST ensure compatibility with VoiceOver/NVDA - See project.md 'UX & Accessibility' section",
             "verification_key": "screen_reader"
           },
           "🔴 responsive_accessibility": {
@@ -490,7 +490,7 @@
     "best_practices_reference": {
       "wcag": "WCAG 2.1 Guidelines: https://www.w3.org/WAI/WCAG21/quickref/",
       "wai_aria": "WAI-ARIA Authoring Practices: https://www.w3.org/WAI/ARIA/apg/",
-      "project_accessibility": "See .cursor/rules/project.mdc 'UX & Accessibility' section"
+      "project_accessibility": "See project.md 'UX & Accessibility' section"
     }
   },
   "communication": {
@@ -508,8 +508,8 @@
     "accessibility_standards": {
       "wcag_21": "https://www.w3.org/WAI/WCAG21/quickref/",
       "wai_aria": "https://www.w3.org/WAI/ARIA/apg/",
-      "project_accessibility": "See .cursor/rules/project.mdc 'UX & Accessibility' section"
+      "project_accessibility": "See project.md 'UX & Accessibility' section"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

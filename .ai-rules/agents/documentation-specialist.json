@@ -41,11 +41,11 @@
         ],
         "mandatory_checklist": {
           "🔴 code_comments_plan": {
-            "rule": "MUST plan code comments for complex logic - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST plan code comments for complex logic - See augmented-coding.md",
             "verification_key": "code_comments_plan"
           },
           "🔴 type_definitions_plan": {
-            "rule": "MUST plan TypeScript type definitions as documentation - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST plan TypeScript type definitions as documentation - See project.md 'Development Rules' section",
             "verification_key": "type_definitions_plan"
           },
           "🔴 jsdoc_plan": {
@@ -166,11 +166,11 @@
         ],
         "mandatory_checklist": {
           "🔴 code_comments_verification": {
-            "rule": "MUST verify code comments for complex logic - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify code comments for complex logic - See augmented-coding.md",
             "verification_key": "code_comments_verification"
           },
           "🔴 type_definitions_verification": {
-            "rule": "MUST verify TypeScript type definitions as documentation - See .cursor/rules/project.mdc 'Development Rules' section",
+            "rule": "MUST verify TypeScript type definitions as documentation - See project.md 'Development Rules' section",
             "verification_key": "type_definitions_verification"
           },
           "🔴 jsdoc_verification": {
@@ -490,14 +490,14 @@
     },
     "evaluation_targets": {
       "cursor_rules": [
-        ".cursor/rules/*.mdc files",
-        "Core rules (core.mdc)",
-        "Project rules (project.mdc)",
-        "Coding standards (augmented-coding.mdc)",
-        "Style guides (styles.mdc)"
+        ".ai-rules/rules/*.md files",
+        "Core rules (core.md)",
+        "Project rules (project.md)",
+        "Coding standards (augmented-coding.md)",
+        "Style guides (project design system documentation)"
       ],
       "agent_definitions": [
-        ".cursor/agents/*.json files",
+        ".ai-rules/agents/*.json files",
         "Frontend Developer Agent",
         "Code Reviewer Agent",
         "Specialist Agents",
@@ -516,7 +516,7 @@
       "jsdoc": "JSDoc Documentation: https://jsdoc.app/",
       "technical_writing": "Technical Writing Best Practices",
       "prompt_engineering": "AI Prompt Engineering: https://www.promptingguide.ai/",
-      "project_documentation": "See .cursor/rules/project.mdc 'Development Rules' section"
+      "project_documentation": "See project.md 'Development Rules' section"
     }
   },
   "communication": {
@@ -537,8 +537,8 @@
       "jsdoc": "JSDoc Documentation: https://jsdoc.app/",
       "technical_writing": "Technical Writing Best Practices",
       "prompt_engineering": "AI Prompt Engineering: https://www.promptingguide.ai/",
-      "project_documentation": "See .cursor/rules/project.mdc 'Development Rules' section"
+      "project_documentation": "See project.md 'Development Rules' section"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

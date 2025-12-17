@@ -2,7 +2,7 @@
 
 This directory contains shared coding rules and guidelines used across multiple AI coding assistants (Cursor, Claude Code, Codex, Antigravity, Amazon Q, Kiro, etc.) for consistent development practices.
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 .ai-rules/
@@ -12,33 +12,16 @@ This directory contains shared coding rules and guidelines used across multiple 
 │   ├── project.md        # Tech stack, architecture, project context
 │   └── augmented-coding.md  # TDD principles, code quality standards
 ├── agents/                # Specialist agent definitions (JSON)
-│   ├── README.md         # Agent system guide
-│   ├── frontend-developer.json
-│   ├── code-reviewer.json
-│   ├── accessibility-specialist.json
-│   ├── architecture-specialist.json
-│   ├── code-quality-specialist.json
-│   ├── design-system-specialist.json
-│   ├── documentation-specialist.json
-│   ├── devops-engineer.json
-│   ├── performance-specialist.json
-│   ├── security-specialist.json
-│   ├── seo-specialist.json
-│   └── test-strategy-specialist.json
+│   └── *.json            # Domain specialist agents
 └── adapters/              # AI tool-specific integration guides
-    ├── cursor.md         # Cursor integration
-    ├── claude-code.md    # Claude Code/Projects integration
-    ├── codex.md          # GitHub Copilot / Codex integration
-    ├── antigravity.md    # Antigravity (Gemini) integration
-    ├── q.md              # Amazon Q integration
-    └── kiro.md           # Kiro integration
+    └── *.md              # Integration guides per tool
 ```
 
-## 🎯 Purpose
+## Purpose
 
 ### Single Source of Truth
 
-All AI coded assistants share the same:
+All AI coding assistants share the same:
 - **Workflow modes** (PLAN/ACT/EVAL)
 - **Code quality standards** (TDD, SOLID, 90%+ test coverage)
 - **Project context** (tech stack, architecture, conventions)
@@ -46,13 +29,13 @@ All AI coded assistants share the same:
 
 ### Benefits
 
-✅ **Consistency**: All AI tools follow identical coding standards  
-✅ **Maintainability**: Update rules once, all tools benefit  
-✅ **Extensibility**: Easy to add new AI tools  
-✅ **Flexibility**: Tool-specific customizations via adapters  
-✅ **Team Alignment**: Everyone uses the same guidelines regardless of AI tool preference
+- **Consistency**: All AI tools follow identical coding standards
+- **Maintainability**: Update rules once, all tools benefit
+- **Extensibility**: Easy to add new AI tools
+- **Flexibility**: Tool-specific customizations via adapters
+- **Team Alignment**: Everyone uses the same guidelines regardless of AI tool preference
 
-## 📚 Core Rules Overview
+## Core Rules Overview
 
 ### 1. `rules/core.md` - Workflow & Communication
 
@@ -67,32 +50,17 @@ All AI coded assistants share the same:
 - Return to PLAN after ACT completes (automatic)
 - Enter EVAL only when explicitly requested
 
-**Agent System:**
-- Frontend Developer (auto-activated in PLAN/ACT)
-- Code Reviewer (auto-activated in EVAL)
-- 10+ specialist agents for domain expertise
-
 ### 2. `rules/project.md` - Project Setup
 
-**Tech Stack:**
+**Purpose:** Define project-specific context that AI assistants need.
 
-프로젝트의 `package.json`을 참조하세요. AI 규칙에서는 특정 패키지 버전을 고정하지 않습니다.
+**Contents (customize per project):**
+- Tech stack and dependencies
+- Project structure and architecture
+- Development rules and conventions
+- Code review checklist
 
-**Architecture:**
-```
-src/
-├── app/       # Next.js App Router
-├── entities/  # Domain entities (business logic)
-├── features/  # Feature-specific UI components
-├── widgets/   # Composite widgets
-└── shared/    # Common modules
-```
-
-**Development Rules:**
-- Layer dependency: app → widgets → features → entities → shared
-- Pure/impure function separation
-- Server Components as default
-- 90%+ test coverage goal
+> **Note**: This file is a template. Each project should customize it based on their tech stack and architecture.
 
 ### 3. `rules/augmented-coding.md` - TDD & Quality
 
@@ -108,61 +76,36 @@ src/
 - TypeScript strict mode (no `any`)
 - Tidy First approach (separate structural vs behavioral changes)
 
-## 🤖 Specialist Agents
+## Specialist Agents
 
-12 specialist agents provide domain-specific expertise:
+Specialist agents provide domain-specific expertise:
 
-| Agent                        | Expertise                           | Use Cases                                |
-| ---------------------------- | ----------------------------------- | ---------------------------------------- |
-| **Frontend Developer**       | React/Next.js, TDD, design system   | Component implementation, Server Actions |
-| **Code Reviewer**            | Quality evaluation, architecture    | Code review, production readiness        |
-| **Architecture Specialist**  | Layer boundaries, dependencies      | System design, refactoring               |
-| **Test Strategy Specialist** | Test coverage, TDD workflow         | Testing strategy, quality assurance      |
-| **Performance Specialist**   | Bundle size, rendering optimization | Performance tuning, Core Web Vitals      |
-| **Security Specialist**      | OAuth 2.0, JWT, XSS/CSRF            | Authentication, security audit           |
-| **Accessibility Specialist** | WCAG 2.1 AA, ARIA                   | A11y compliance, screen readers          |
-| **SEO Specialist**           | Metadata API, structured data       | Search optimization, social sharing      |
-| **Design System Specialist** | Design system, Tailwind CSS         | Component usage, design tokens           |
-| **Documentation Specialist** | Technical writing, AI prompts       | Documentation quality, clarity           |
-| **Code Quality Specialist**  | SOLID, DRY, complexity              | Code quality planning/review             |
-| **DevOps Engineer**          | Docker, Datadog, deployment         | Infrastructure, monitoring               |
+| Agent | Expertise | Use Cases |
+|-------|-----------|-----------|
+| **Code Reviewer** | Quality evaluation, architecture | Code review, production readiness |
+| **Architecture Specialist** | Layer boundaries, dependencies | System design, refactoring |
+| **Test Strategy Specialist** | Test coverage, TDD workflow | Testing strategy, quality assurance |
+| **Performance Specialist** | Optimization, profiling | Performance tuning, bottleneck analysis |
+| **Security Specialist** | Authentication, vulnerabilities | Security audit, secure coding |
+| **Accessibility Specialist** | WCAG 2.1 AA, ARIA | A11y compliance, screen readers |
+| **Documentation Specialist** | Technical writing, clarity | Documentation quality |
+| **Code Quality Specialist** | SOLID, DRY, complexity | Code quality planning/review |
+| **DevOps Engineer** | CI/CD, containerization, monitoring | Infrastructure, deployment |
 
 See `agents/README.md` for detailed agent documentation.
 
-## 🔌 AI Tool Integration
+## AI Tool Integration
 
 Each AI tool has its own integration guide in `adapters/`:
 
-### Cursor
-- Uses `.cursor/rules/imports.mdc` to reference common rules
-- Maintains Cursor-specific features (globs, alwaysApply)
-- See `adapters/cursor.md`
+- **Cursor**: `adapters/cursor.md`
+- **Claude Code**: `adapters/claude-code.md`
+- **GitHub Copilot / Codex**: `adapters/codex.md`
+- **Antigravity**: `adapters/antigravity.md`
+- **Amazon Q**: `adapters/q.md`
+- **Kiro**: `adapters/kiro.md`
 
-### Claude Code
-- Uses `.claude/rules/custom-instructions.md`
-- Integrates with Claude Projects
-- See `adapters/claude-code.md`
-
-### GitHub Copilot / Codex
-- Uses `.github/copilot-instructions.md` or `.codex/rules/`
-- Provides context for code completions
-- See `adapters/codex.md`
-
-### Antigravity
-- Uses `.antigravity/rules/instructions.md`
-- Leverages task boundaries and artifacts
-- See `adapters/antigravity.md`
-
-### Amazon Q
-- Uses `.q/rules/customizations.md`
-- Combines AWS expertise with project standards
-- See `adapters/q.md`
-
-### Kiro
-- Uses `.kiro/rules/guidelines.md`
-- See `adapters/kiro.md`
-
-## 🚀 Getting Started
+## Getting Started
 
 ### For New AI Tool
 
@@ -177,27 +120,27 @@ Each AI tool has its own integration guide in `adapters/`:
 2. **Remove duplicates**: Rely on common rules first
 3. **Keep tool-specific features**: Maintain what's unique to each tool
 
-## 📝 Usage Examples
+## Usage Examples
 
 ### Workflow Example
 
 ```
-User: 새로운 뉴스레터 구독 기능 만들어줘
+User: Create a new feature for user registration
 
 AI: # Mode: PLAN
     [References .ai-rules/rules/core.md workflow]
-    [Uses .ai-rules/rules/project.md tech stack]
+    [Uses .ai-rules/rules/project.md context]
     [Applies .ai-rules/rules/augmented-coding.md TDD]
 
 User: ACT
 
 AI: # Mode: ACT
-    [Executes with .ai-rules/agents/frontend-developer.json]
+    [Executes implementation]
 
 User: EVAL
 
 AI: # Mode: EVAL
-    [Evaluates with .ai-rules/agents/code-reviewer.json]
+    [Evaluates with code-reviewer.json framework]
 ```
 
 ### Referencing Rules
@@ -205,126 +148,63 @@ AI: # Mode: EVAL
 In any AI tool:
 - `@.ai-rules/rules/core.md` - Workflow guidance
 - `@.ai-rules/rules/project.md` - Project context
-- `@.ai-rules/agents/frontend-developer.json` - Development expertise
+- `@.ai-rules/agents/*.json` - Specialist expertise
 
-## 🔧 Maintenance
+## Maintenance
 
 ### Updating Rules
 
 **For changes affecting all AI tools:**
 1. Edit files in `.ai-rules/rules/` or `.ai-rules/agents/`
-2. Commit changes: `git commit -m "docs: update common AI rules - [reason]"`
+2. Commit changes
 3. All AI tools automatically use updated rules
 
 **For tool-specific changes:**
 1. Edit only that tool's config (e.g., `.cursor/rules/`)
 2. Common rules remain unchanged
-3. Tool-specific overrides apply
 
 ### Update Checklist
 
 After modifying `.ai-rules/`:
 - [ ] Rules are AI-agnostic (no tool-specific syntax)
+- [ ] Rules are technology-agnostic (no framework-specific content)
 - [ ] All markdown files are valid
 - [ ] Agent JSON files are valid
-- [ ] Tested in at least 2 AI tools
 - [ ] Documentation updated if needed
 
-### Validation
-
-Run the validation script (coming soon):
-```bash
-./scripts/validate-rules.sh
-```
-
-This checks:
-- Common rule files exist
-- Markdown syntax is valid
-- JSON files are valid
-- AI tool configs reference common rules correctly
-
-## 🏗️ Architecture Principles
+## Architecture Principles
 
 ### Design Decisions
 
 1. **AI-Agnostic Format**: Use standard markdown and JSON
-2. **Modular Structure**: Separate concerns (workflow, project, quality)
-3. **Tool Adapters**: Each tool translates common rules to its format
-4. **Single Source of Truth**: `.ai-rules/` is authoritative
-5. **Override Hierarchy**: Tool-specific > Common rules (see below)
+2. **Technology-Agnostic**: No framework-specific examples in common rules
+3. **Modular Structure**: Separate concerns (workflow, project, quality)
+4. **Tool Adapters**: Each tool translates common rules to its format
+5. **Single Source of Truth**: `.ai-rules/` is authoritative
 
 ### Override Hierarchy
 
-When rules conflict between common rules and tool-specific configurations, the priority is:
+When rules conflict between common rules and tool-specific configurations:
 
 **Priority Order** (highest to lowest):
-1. **Tool-specific rules** (e.g., `.cursor/rules/cursor-specific.mdc`)
+1. **Tool-specific rules** (e.g., `.cursor/rules/`)
 2. **Common rules** (`.ai-rules/rules/*.md`)
 3. **Default AI behavior** (tool's built-in defaults)
-
-**Example**:
-```
-Scenario: Code formatting preference conflict
-- .ai-rules/rules/project.md: "Use 2 spaces for indentation"
-- .cursor/rules/cursor-specific.mdc: "Use tabs for indentation"
-
-Result for Cursor: Tabs (tool-specific wins)
-Result for Claude: 2 spaces (uses common rules)
-```
-
-**Best Practice**:
-- Keep tool-specific rules minimal
-- Only override when truly necessary for that tool
-- Document why override is needed
 
 ### File Format Choices
 
 - **Markdown (.md)**: Universal, readable, supported by all tools
 - **JSON (.json)**: Structured data for agent definitions
-- **Tool-specific**: Each tool keeps its native format (e.g., Cursor's .mdc)
+- **Tool-specific**: Each tool keeps its native format
 
-## 📊 Impact
-
-### Before (Tool-Specific Rules)
-```
-.cursor/         6 rule files
-.claude/         6 rule files
-.antigravity/    6 rule files
-.q/              6 rule files
-.kiro/           6 rule files
-.codex/          6 rule files
------------------------------------
-Total:          36 files to maintain
-Update time:    6x per change
-Consistency:    ❌ Often diverges
-```
-
-### After (Common Rules)
-```
-.ai-rules/       3 rule files + 12 agent files
-.cursor/         1 reference file
-.claude/         1 reference file
-.antigravity/    1 reference file
-.q/              1 reference file
-.kiro/           1 reference file
-.codex/          1 reference file
------------------------------------
-Total:          21 files (15 common, 6 refs)
-Update time:    1x per change
-Consistency:    ✅ Always in sync
-```
-
-**Time Savings**: 90% reduction in rule update time  
-**Consistency**: 100% alignment across all tools
-
-## 🤝 Contributing
+## Contributing
 
 ### Adding New Rules
 
 1. Determine scope: All tools or tool-specific?
 2. If all tools: Add to `.ai-rules/rules/`
 3. If tool-specific: Add to `.{tool}/rules/`
-4. Test with multiple AI tools
+4. Ensure content is technology-agnostic
 5. Update relevant documentation
 
 ### Adding New AI Tools
@@ -335,23 +215,10 @@ Consistency:    ✅ Always in sync
 4. Reference common rules from `.ai-rules/`
 5. Document tool-specific features
 
-## 📖 Further Reading
+## Further Reading
 
 - **Workflow Details**: `rules/core.md`
 - **Project Setup**: `rules/project.md`
 - **TDD & Quality**: `rules/augmented-coding.md`
 - **Agent System**: `agents/README.md`
 - **Tool Integration**: `adapters/*.md`
-
-## 📧 Support
-
-For questions or issues with common AI rules:
-1. Check the relevant adapter guide in `adapters/`
-2. Review the specific rule file in `rules/`
-3. Consult the agent documentation in `agents/README.md`
-
----
-
-**Version**: 1.0.0  
-**Last Updated**: 2025-11-20  
-**Maintained  by**: Development Team

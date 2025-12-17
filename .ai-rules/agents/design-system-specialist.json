@@ -40,23 +40,23 @@
         ],
         "mandatory_checklist": {
           "🔴 design_system_priority": {
-            "rule": "MUST plan design system components first - See .cursor/rules/styles.mdc 'Philosophy' section",
+            "rule": "MUST plan design system components first - See the project's design system documentation 'Philosophy' section",
             "verification_key": "design_system_priority"
           },
           "🔴 twjoin_twmerge_plan": {
-            "rule": "MUST plan twJoin/twMerge usage for className (never string concatenation) - See .cursor/rules/styles.mdc 'ClassName Composition' section",
+            "rule": "MUST plan twJoin/twMerge usage for className (never string concatenation) - See the project's design system documentation 'ClassName Composition' section",
             "verification_key": "twjoin_twmerge_plan"
           },
           "🔴 design_tokens_plan": {
-            "rule": "MUST plan design tokens with w- prefix (never arbitrary values) - See .cursor/rules/styles.mdc 'Color Tokens' section",
+            "rule": "MUST plan design tokens with w- prefix (never arbitrary values) - See the project's design system documentation 'Color Tokens' section",
             "verification_key": "design_tokens_plan"
           },
           "🔴 typography_plan": {
-            "rule": "MUST plan Typography component usage for text - See .cursor/rules/styles.mdc 'Typography' section",
+            "rule": "MUST plan Typography component usage for text - See the project's design system documentation 'Typography' section",
             "verification_key": "typography_plan"
           },
           "🔴 responsive_plan": {
-            "rule": "MUST plan responsive breakpoints correctly - See .cursor/rules/styles.mdc 'Responsive Design' section",
+            "rule": "MUST plan responsive breakpoints correctly - See the project's design system documentation 'Responsive Design' section",
             "verification_key": "responsive_plan"
           },
           "🔴 custom_component_plan": {
@@ -167,23 +167,23 @@
         ],
         "mandatory_checklist": {
           "🔴 design_system_priority_verification": {
-            "rule": "MUST verify design system components are used first - See .cursor/rules/styles.mdc 'Philosophy' section",
+            "rule": "MUST verify design system components are used first - See the project's design system documentation 'Philosophy' section",
             "verification_key": "design_system_priority_verification"
           },
           "🔴 twjoin_twmerge_verification": {
-            "rule": "MUST verify twJoin/twMerge is used for className (never string concatenation) - See .cursor/rules/styles.mdc 'ClassName Composition' section",
+            "rule": "MUST verify twJoin/twMerge is used for className (never string concatenation) - See the project's design system documentation 'ClassName Composition' section",
             "verification_key": "twjoin_twmerge_verification"
           },
           "🔴 design_tokens_verification": {
-            "rule": "MUST verify design tokens with w- prefix are used (never arbitrary values) - See .cursor/rules/styles.mdc 'Color Tokens' section",
+            "rule": "MUST verify design tokens with w- prefix are used (never arbitrary values) - See the project's design system documentation 'Color Tokens' section",
             "verification_key": "design_tokens_verification"
           },
           "🔴 typography_verification": {
-            "rule": "MUST verify Typography component is used for text content - See .cursor/rules/styles.mdc 'Typography' section",
+            "rule": "MUST verify Typography component is used for text content - See the project's design system documentation 'Typography' section",
             "verification_key": "typography_verification"
           },
           "🔴 responsive_verification": {
-            "rule": "MUST verify responsive breakpoints are used correctly - See .cursor/rules/styles.mdc 'Responsive Design' section",
+            "rule": "MUST verify responsive breakpoints are used correctly - See the project's design system documentation 'Responsive Design' section",
             "verification_key": "responsive_verification"
           },
           "🔴 custom_component_verification": {
@@ -295,23 +295,23 @@
         ],
         "mandatory_checklist": {
           "🔴 design_system_priority": {
-            "rule": "MUST verify design system components are used first - See .cursor/rules/styles.mdc 'Philosophy' section",
+            "rule": "MUST verify design system components are used first - See the project's design system documentation 'Philosophy' section",
             "verification_key": "design_system_priority"
           },
           "🔴 twjoin_twmerge": {
-            "rule": "MUST verify twJoin/twMerge is used for className composition (never string concatenation) - See .cursor/rules/styles.mdc 'ClassName Composition' section",
+            "rule": "MUST verify twJoin/twMerge is used for className composition (never string concatenation) - See the project's design system documentation 'ClassName Composition' section",
             "verification_key": "twjoin_twmerge"
           },
           "🔴 design_tokens": {
-            "rule": "MUST verify design tokens with w- prefix are used (never arbitrary values) - See .cursor/rules/styles.mdc 'Color Tokens' section",
+            "rule": "MUST verify design tokens with w- prefix are used (never arbitrary values) - See the project's design system documentation 'Color Tokens' section",
             "verification_key": "design_tokens"
           },
           "🔴 typography_component": {
-            "rule": "MUST verify Typography component is used for text content - See .cursor/rules/styles.mdc 'Typography' section",
+            "rule": "MUST verify Typography component is used for text content - See the project's design system documentation 'Typography' section",
             "verification_key": "typography_component"
           },
           "🔴 responsive_design": {
-            "rule": "MUST verify responsive breakpoints are used correctly - See .cursor/rules/styles.mdc 'Responsive Design' section",
+            "rule": "MUST verify responsive breakpoints are used correctly - See the project's design system documentation 'Responsive Design' section",
             "verification_key": "responsive_design"
           },
           "🔴 custom_components": {
@@ -452,7 +452,7 @@
       "tailwind_merge": "tailwind-merge: https://github.com/dcastil/tailwind-merge",
       "design_tokens": "Design tokens with w- prefix",
       "typography": "Typography component for all text",
-      "project_styles": "See .cursor/rules/styles.mdc for comprehensive design system guidelines"
+      "project_styles": "See the project's design system documentation for comprehensive design system guidelines"
     }
   },
   "communication": {
@@ -471,8 +471,8 @@
       "design_system": "Tailwind CSS with design tokens",
       "tailwind_merge": "tailwind-merge: https://github.com/dcastil/tailwind-merge",
       "design_tokens": "Design tokens with w- prefix",
-      "project_styles": "See .cursor/rules/styles.mdc for comprehensive design system guidelines"
+      "project_styles": "See the project's design system documentation for comprehensive design system guidelines"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

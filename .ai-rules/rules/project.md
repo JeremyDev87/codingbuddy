@@ -2,62 +2,56 @@
 
 ## Project Overview
 
-프로젝트별로 정의하세요. 이 파일은 범용 AI 규칙 템플릿입니다.
+Define per project. This file is a universal AI rules template.
 
 ## Tech Stack
 
-프로젝트의 `package.json`을 참조하세요. AI 규칙에서는 특정 패키지 버전을 고정하지 않습니다.
+Refer to the project's `package.json`. AI rules do not pin specific package versions.
 
 ## Project Structure
 
-Layered architecture with clear separation of concerns:
+Define per project. Below is a layered architecture example:
 
 ```
 src/
-├── app/                    # Next.js App Router
+├── app/                    # Entry point / Router
 │   ├── api/               # API Routes
-│   ├── magazine/          # Main page routing
+│   ├── (pages)/           # Page routing
 │   ├── layout.tsx         # Root layout
 │   └── globals.css        # Global styles
 │
 ├── entities/              # Domain entities (business logic)
-│   ├── {domain}/
-│   │   ├── apis/          # API call functions (*.ts)
-│   │   ├── models/        # React Query hooks (*.ts, *.tsx)
-│   │   ├── types.ts       # Type definitions
-│   │   └── index.ts       # Public API
-│   └── (e.g.) article, author, collection, newsletter
+│   └── {domain}/
+│       ├── apis/          # API call functions (*.ts)
+│       ├── models/        # Data models / hooks (*.ts, *.tsx)
+│       ├── types.ts       # Type definitions
+│       └── index.ts       # Public API
 │
 ├── features/              # Feature-specific UI components
-│   ├── {Feature}/
-│   │   ├── {Feature}.tsx          # Main component
-│   │   ├── {Feature}.parts.tsx    # Sub-components
-│   │   ├── {Feature}.types.ts     # Type definitions
-│   │   ├── {Feature}.constants.ts # Constants
-│   │   ├── {Feature}.unit.spec.tsx # Unit tests
-│   │   └── index.ts               # Export
-│   └── (e.g.) AppBar, Article, Author, Collection, Landing
+│   └── {Feature}/
+│       ├── {Feature}.tsx          # Main component
+│       ├── {Feature}.parts.tsx    # Sub-components
+│       ├── {Feature}.types.ts     # Type definitions
+│       ├── {Feature}.constants.ts # Constants
+│       ├── {Feature}.unit.spec.tsx # Unit tests
+│       └── index.ts               # Export
 │
 ├── widgets/               # Composite widgets (multiple features combined)
-│   ├── {Widget}/
-│   │   ├── {Widget}.tsx           # Main widget
-│   │   ├── {Widget}.parts.tsx     # Sub-components
-│   │   └── index.ts
-│   └── (e.g.) ArticleDetailMain, CollectionDetail
+│   └── {Widget}/
+│       ├── {Widget}.tsx           # Main widget
+│       ├── {Widget}.parts.tsx     # Sub-components
+│       └── index.ts
 │
-├── shared/                # Common modules (used across the project)
-│   ├── Components/        # Reusable UI components
-│   ├── hooks/            # Custom hooks
-│   ├── providers/        # React Context Providers
-│   ├── utils/            # Utility functions
-│   ├── types/            # Common type definitions
-│   ├── constants/        # Common constants
-│   ├── api/              # Axios instance, error handlers
-│   ├── auth/             # Authentication logic
-│   └── services/         # Business services
-│
-├── middleware.ts          # Next.js middleware
-└── instrumentation.ts     # Datadog monitoring setup
+└── shared/                # Common modules (used across the project)
+    ├── components/        # Reusable UI components
+    ├── hooks/            # Custom hooks
+    ├── providers/        # Context providers / State management
+    ├── utils/            # Utility functions
+    ├── types/            # Common type definitions
+    ├── constants/        # Common constants
+    ├── api/              # API client, error handlers
+    ├── auth/             # Authentication logic
+    └── services/         # Business services
 ```
 
 ## Development Rules
@@ -66,10 +60,10 @@ src/
 
 #### Core Principles
 - **Never use mocking**: Write only real, working code
-- **Type Safety**: Follow TypeScript strict mode (`strict: true`)
-- **Latest React Features**: Utilize latest React capabilities (Server Components, etc.)
+- **Type Safety**: Follow strict type checking mode
+- **Latest Framework Features**: Utilize latest framework capabilities
 - **Component Naming**: PascalCase, use clear names that indicate functionality
-- **React import**: Use named imports for React types (`import { type ReactNode, type FC } from 'react';`)
+- **Type imports**: Use named imports for types (e.g., `import { type SomeType } from 'module';`)
 
 #### File Naming Convention
 - **Component**: `{Feature}.tsx`
@@ -77,13 +71,13 @@ src/
 - **Types**: `{Feature}.types.ts` or `types.ts`
 - **Constants**: `{Feature}.constants.ts` or `constants.ts`
 - **Utils**: `{Feature}.utils.ts`
-- **Unit Tests**: `{Feature}.unit.spec.tsx`
-- **E2E Tests**: `{Feature}.cy.ts`
+- **Unit Tests**: `{Feature}.unit.spec.tsx` or `{Feature}.test.ts`
+- **E2E Tests**: `{Feature}.e2e.ts` or `{Feature}.cy.ts`
 - **Module Export**: `index.ts`
 
 #### Import/Export Rules
 - Each module exports only public API through `index.ts`
-- Use absolute paths: `@/` (src directory), `@test/` (test directory)
+- Use absolute paths configured in the project (e.g., `@/`, `~/`)
 - Layer dependency direction: `app → widgets → features → entities → shared`
 
 ### 2. Pure vs Impure Function Separation
@@ -98,34 +92,35 @@ Example:
 // validation.utils.ts - Pure function
 export const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-// newsletter.api.ts - Impure function
-export const subscribeNewsletter = async (email: string) => { /* API call */ };
+// user.api.ts - Impure function
+export const createUser = async (data: UserData) => { /* API call */ };
 
 // ❌ Bad: Mixed
-// newsletter.ts - Mixed together
+// user.ts - Mixed together
 export const validateEmail = (email: string) => { /* ... */ };
-export const subscribeNewsletter = async (email: string) => { /* ... */ };
+export const createUser = async (data: UserData) => { /* ... */ };
 ```
 
 ### 3. Script Commands
 
+Refer to the project's `package.json` scripts section. Common commands:
+
 ```bash
 # Development
-yarn dev          # Start dev server (Turbopack, port 3000)
-yarn build        # Production build (standalone output)
+yarn dev          # Start dev server
+yarn build        # Production build
 yarn start        # Start production server
 
 # Code Quality
-yarn lint         # ESLint check
+yarn lint         # Linting check
+yarn format       # Code formatting
 
 # Testing
-yarn test:unit    # Jest unit tests (*.unit.spec.tsx)
-yarn test:e2e     # Cypress E2E tests
-yarn e2e:open     # Cypress interactive mode
-
-# Git Hooks
-yarn prepare      # Husky setup
+yarn test         # Run tests
+yarn test:coverage # Run tests with coverage
 ```
+
+Actual commands may vary per project. Check the project's package.json.
 
 ## Development Workflow
 
@@ -137,25 +132,24 @@ For detailed TDD workflows, testing strategies, and code quality practices, refe
 - Core logic (entities, shared/utils, hooks): TDD (test-first)
 - UI components (features, widgets): Test-after
 - Coverage goal: 90%+
-- File naming: `*.unit.spec.tsx` for unit tests, `*.cy.ts` for E2E
 
 ### Code Review Checklist
 
 #### Required Checks
 - [ ] **TypeScript Type Safety**: No `any` usage, all types explicitly defined
 - [ ] **Test Coverage**: Maintain 90%+ coverage
-- [ ] **ESLint Rules**: Resolve all linting errors
+- [ ] **Linting Rules**: Resolve all linting errors
 - [ ] **Pure/Impure Separation**: Separate files for pure and impure functions
 
 #### Architecture & Design
 - [ ] **Layer Architecture**: Respect layer boundaries and separation of concerns
 - [ ] **Dependency Direction**: app → widgets → features → entities → shared
-- [ ] **Component Reusability**: DRY principle, utilize shared/Components
+- [ ] **Component Reusability**: DRY principle, utilize shared components
 - [ ] **Code quality**: See `augmented-coding.md` for SOLID, TDD, and refactoring standards
 
 #### Performance & Optimization
-- [ ] **React Optimization**: Proper use of React.memo, useMemo, useCallback
-- [ ] **Image Optimization**: Use Next.js Image component
+- [ ] **Framework Optimization**: Proper use of framework-specific optimization techniques
+- [ ] **Image Optimization**: Use framework's Image component
 - [ ] **Bundle Size**: Code splitting with dynamic imports
 - [ ] **Rendering Optimization**: Prevent unnecessary re-renders
 
@@ -163,7 +157,7 @@ For detailed TDD workflows, testing strategies, and code quality practices, refe
 - [ ] **Responsive Design**: Support mobile/tablet/desktop
 - [ ] **Accessibility (a11y)**: ARIA attributes, keyboard navigation
 - [ ] **Loading States**: Provide loading UI (Skeleton, Spinner, etc.)
-- [ ] **Error Handling**: Utilize react-error-boundary
+- [ ] **Error Handling**: Utilize error boundaries
 
 ## Important Guidelines
 
@@ -171,7 +165,7 @@ For detailed TDD workflows, testing strategies, and code quality practices, refe
 
 - **Mock data or fake implementations**: Only real API integration allowed
 - **Type `any` usage**: Explicitly define all types
-- **Direct DOM manipulation**: Use React patterns
+- **Direct DOM manipulation**: Use framework patterns
 - **Leave console.log in production code**: Development only
 - **Mix pure/impure functions**: Must separate into different files
 - **Reverse layer dependencies**: Lower layers cannot import upper layers
@@ -183,7 +177,6 @@ For detailed TDD workflows, testing strategies, and code quality practices, refe
 - **Consider accessibility (a11y)**
 - **Apply performance optimizations**
 - **Utilize error boundaries**
-- **Manage server state with React Query**
 - **Follow augmented coding practices** (see `augmented-coding.md`)
 
 ### 3. Problem-Solving Priority
@@ -195,13 +188,13 @@ For detailed TDD workflows, testing strategies, and code quality practices, refe
 
 ### 4. Design System Usage
 
-See **`styles.mdc`** for comprehensive design system guidelines including:
-- Design system component usage
-- twJoin/twMerge for className composition
-- Design tokens (w- prefix)
-- Typography component patterns
-- Responsive breakpoints
+Refer to the project's design system documentation. General guidelines:
+- Prioritize project design system components
+- Use className composition utilities as defined in project
+- Maintain design token consistency
+- Follow typography patterns
+- Respect responsive breakpoints
 
 ---
 
-이 가이드는 AI 어시스턴트가 프로젝트를 이해하고 일관된 코드를 생성하는 데 도움을 줍니다.
+This guide helps AI assistants understand the project and generate consistent code.

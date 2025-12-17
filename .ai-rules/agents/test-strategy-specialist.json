@@ -41,19 +41,19 @@
         ],
         "mandatory_checklist": {
           "🔴 tdd_vs_test_after": {
-            "rule": "MUST decide TDD (core logic) vs Test-After (UI) approach - See .cursor/rules/augmented-coding.mdc 'TDD Cycle' section",
+            "rule": "MUST decide TDD (core logic) vs Test-After (UI) approach - See augmented-coding.md 'TDD Cycle' section",
             "verification_key": "tdd_vs_test_after"
           },
           "🔴 test_coverage_plan": {
-            "rule": "MUST plan test coverage goal (90%+ for core logic) - See .cursor/rules/augmented-coding.mdc 'Testing Standards' section",
+            "rule": "MUST plan test coverage goal (90%+ for core logic) - See augmented-coding.md 'Testing Standards' section",
             "verification_key": "test_coverage_plan"
           },
           "🔴 test_file_structure": {
-            "rule": "MUST plan test file structure (*.unit.spec.tsx for unit tests) - See .cursor/rules/project.mdc 'File Naming Convention' section",
+            "rule": "MUST plan test file structure (*.unit.spec.tsx for unit tests) - See project.md 'File Naming Convention' section",
             "verification_key": "test_file_structure"
           },
           "🔴 test_naming": {
-            "rule": "MUST plan test naming strategy (descriptive behavior names) - See .cursor/rules/augmented-coding.mdc 'Testing Best Practices' section",
+            "rule": "MUST plan test naming strategy (descriptive behavior names) - See augmented-coding.md 'Testing Best Practices' section",
             "verification_key": "test_naming"
           },
           "🔴 edge_cases": {
@@ -61,7 +61,7 @@
             "verification_key": "edge_cases"
           },
           "🔴 no_mocking": {
-            "rule": "MUST plan no mocking approach - See .cursor/rules/project.mdc 'Important Guidelines' section",
+            "rule": "MUST plan no mocking approach - See project.md 'Important Guidelines' section",
             "verification_key": "no_mocking"
           },
           "🔴 language": {
@@ -212,19 +212,19 @@
         ],
         "mandatory_checklist": {
           "🔴 tdd_vs_test_after_verification": {
-            "rule": "MUST verify TDD (core logic) vs Test-After (UI) approach is followed - See .cursor/rules/augmented-coding.mdc 'TDD Cycle' section",
+            "rule": "MUST verify TDD (core logic) vs Test-After (UI) approach is followed - See augmented-coding.md 'TDD Cycle' section",
             "verification_key": "tdd_vs_test_after_verification"
           },
           "🔴 test_coverage_verification": {
-            "rule": "MUST verify test coverage is 90%+ for core logic - See .cursor/rules/augmented-coding.mdc 'Testing Standards' section",
+            "rule": "MUST verify test coverage is 90%+ for core logic - See augmented-coding.md 'Testing Standards' section",
             "verification_key": "test_coverage_verification"
           },
           "🔴 test_file_structure_verification": {
-            "rule": "MUST verify test file structure (*.unit.spec.tsx for unit tests) - See .cursor/rules/project.mdc 'File Naming Convention' section",
+            "rule": "MUST verify test file structure (*.unit.spec.tsx for unit tests) - See project.md 'File Naming Convention' section",
             "verification_key": "test_file_structure_verification"
           },
           "🔴 test_naming_verification": {
-            "rule": "MUST verify test naming strategy (descriptive behavior names) - See .cursor/rules/augmented-coding.mdc 'Testing Best Practices' section",
+            "rule": "MUST verify test naming strategy (descriptive behavior names) - See augmented-coding.md 'Testing Best Practices' section",
             "verification_key": "test_naming_verification"
           },
           "🔴 edge_cases_verification": {
@@ -232,7 +232,7 @@
             "verification_key": "edge_cases_verification"
           },
           "🔴 no_mocking_verification": {
-            "rule": "MUST verify no mocking approach is followed - See .cursor/rules/project.mdc 'Important Guidelines' section",
+            "rule": "MUST verify no mocking approach is followed - See project.md 'Important Guidelines' section",
             "verification_key": "no_mocking_verification"
           },
           "🔴 language": {
@@ -335,27 +335,27 @@
         ],
         "mandatory_checklist": {
           "🔴 test_coverage": {
-            "rule": "MUST verify test coverage is 90%+ for core logic - See .cursor/rules/augmented-coding.mdc 'Testing Standards' section",
+            "rule": "MUST verify test coverage is 90%+ for core logic - See augmented-coding.md 'Testing Standards' section",
             "verification_key": "test_coverage"
           },
           "🔴 tdd_workflow": {
-            "rule": "MUST verify TDD workflow is followed for core logic (entities, shared/utils, shared/hooks) - See .cursor/rules/augmented-coding.mdc 'TDD Cycle' section",
+            "rule": "MUST verify TDD workflow is followed for core logic (entities, shared/utils, shared/hooks) - See augmented-coding.md 'TDD Cycle' section",
             "verification_key": "tdd_workflow"
           },
           "🔴 test_after_ui": {
-            "rule": "MUST verify Test-After approach is used for UI components (features, widgets) - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify Test-After approach is used for UI components (features, widgets) - See augmented-coding.md",
             "verification_key": "test_after_ui"
           },
           "🔴 no_mocking": {
-            "rule": "MUST verify no mocking is used - See .cursor/rules/project.mdc 'Important Guidelines' section",
+            "rule": "MUST verify no mocking is used - See project.md 'Important Guidelines' section",
             "verification_key": "no_mocking"
           },
           "🔴 test_naming": {
-            "rule": "MUST verify test names clearly describe behavior - See .cursor/rules/augmented-coding.mdc 'Testing Best Practices' section",
+            "rule": "MUST verify test names clearly describe behavior - See augmented-coding.md 'Testing Best Practices' section",
             "verification_key": "test_naming"
           },
           "🔴 test_organization": {
-            "rule": "MUST verify tests are organized with describe/it pattern - See .cursor/rules/augmented-coding.mdc",
+            "rule": "MUST verify tests are organized with describe/it pattern - See augmented-coding.md",
             "verification_key": "test_organization"
           },
           "🔴 edge_cases": {
@@ -516,7 +516,7 @@
       "testing_library": "Testing Library - Testing from user perspective",
       "coverage": "Code Coverage Best Practices",
       "no_mocking": "No Mocking Principle - Real implementations only",
-      "project_testing": "See .cursor/rules/augmented-coding.mdc 'Testing Best Practices' section"
+      "project_testing": "See augmented-coding.md 'Testing Best Practices' section"
     }
   },
   "communication": {
@@ -536,8 +536,8 @@
       "testing_library": "Testing Library Docs: https://testing-library.com",
       "coverage": "Code Coverage Metrics",
       "jest": "Jest Official Docs: https://jestjs.io",
-      "project_testing": "See .cursor/rules/augmented-coding.mdc 'Testing Best Practices' section"
+      "project_testing": "See augmented-coding.md 'Testing Best Practices' section"
     },
-    "project_rules": ".cursor/rules/"
+    "project_rules": "See .ai-rules/rules/"
   }
 }

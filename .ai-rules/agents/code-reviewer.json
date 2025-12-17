@@ -91,27 +91,27 @@
 
   "evaluation_framework": {
     "mandatory_perspectives": [
-      "🔴 Code Quality: SOLID principles, DRY, complexity - Reference: .cursor/rules/augmented-coding.mdc Code Quality Standards and .cursor/agents/code-quality-specialist.json modes.evaluation framework for comprehensive code quality assessment",
-      "🔴 Architecture: Layer boundaries, dependency direction, type safety - Reference: .cursor/rules/project.mdc and .cursor/agents/architecture-specialist.json modes.evaluation framework for comprehensive architecture assessment",
-      "🔴 Test Coverage: 90%+ goal achievement - Reference: .cursor/rules/augmented-coding.mdc Testing Standards and .cursor/agents/test-strategy-specialist.json modes.evaluation framework for comprehensive test quality assessment",
-      "🔴 Performance: Bundle size, rendering optimization, memory - Reference: .cursor/rules/project.mdc and .cursor/agents/performance-specialist.json modes.evaluation framework for comprehensive performance assessment",
-      "🔴 Security: XSS/CSRF, authentication/authorization, input validation - Reference: .cursor/rules/project.mdc and .cursor/agents/security-specialist.json modes.evaluation framework for comprehensive security assessment",
-      "🔴 Accessibility: WCAG 2.1 AA compliance - Reference: .cursor/rules/project.mdc 'UX & Accessibility' section and .cursor/agents/accessibility-specialist.json modes.evaluation framework for comprehensive accessibility assessment",
-      "🔴 SEO: Metadata, structured data - Reference: .cursor/rules/project.mdc and .cursor/agents/seo-specialist.json modes.evaluation framework for comprehensive SEO assessment",
-      "🔴 Design System: Project design system usage - Reference: .cursor/rules/project.mdc 'Tech Stack' section, .cursor/rules/styles.mdc and .cursor/agents/design-system-specialist.json modes.evaluation framework for comprehensive design system assessment",
-      "🔴 Documentation Quality: Documentation, cursor rules, and AI prompt quality - Reference: .cursor/agents/documentation-specialist.json modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment",
-      "Design Patterns: Latest React/Next.js patterns - See .cursor/rules/project.mdc 'Tech Stack' section for versions and .cursor/agents/code-quality-specialist.json for design pattern assessment"
+      "🔴 Code Quality: SOLID principles, DRY, complexity - Reference: augmented-coding.md Code Quality Standards and .ai-rules/agents/code-quality-specialist.json modes.evaluation framework for comprehensive code quality assessment",
+      "🔴 Architecture: Layer boundaries, dependency direction, type safety - Reference: project.md and .ai-rules/agents/architecture-specialist.json modes.evaluation framework for comprehensive architecture assessment",
+      "🔴 Test Coverage: 90%+ goal achievement - Reference: augmented-coding.md Testing Standards and .ai-rules/agents/test-strategy-specialist.json modes.evaluation framework for comprehensive test quality assessment",
+      "🔴 Performance: Bundle size, rendering optimization, memory - Reference: project.md and .ai-rules/agents/performance-specialist.json modes.evaluation framework for comprehensive performance assessment",
+      "🔴 Security: XSS/CSRF, authentication/authorization, input validation - Reference: project.md and .ai-rules/agents/security-specialist.json modes.evaluation framework for comprehensive security assessment",
+      "🔴 Accessibility: WCAG 2.1 AA compliance - Reference: project.md 'UX & Accessibility' section and .ai-rules/agents/accessibility-specialist.json modes.evaluation framework for comprehensive accessibility assessment",
+      "🔴 SEO: Metadata, structured data - Reference: project.md and .ai-rules/agents/seo-specialist.json modes.evaluation framework for comprehensive SEO assessment",
+      "🔴 Design System: Project design system usage - Reference: project.md 'Tech Stack' section, the project's design system documentation and .ai-rules/agents/design-system-specialist.json modes.evaluation framework for comprehensive design system assessment",
+      "🔴 Documentation Quality: Documentation, cursor rules, and AI prompt quality - Reference: .ai-rules/agents/documentation-specialist.json modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment",
+      "Design Patterns: Latest React/Next.js patterns - See project.md 'Tech Stack' section for versions and .ai-rules/agents/code-quality-specialist.json for design pattern assessment"
     ],
     "specialist_agent_integration": {
-      "security": "When evaluating security-related code, reference Security Specialist Agent framework (`.cursor/agents/security-specialist.json`) for OAuth 2.0, JWT, CSRF/XSS assessment checklist and risk assessment methodology",
-      "accessibility": "When evaluating UI components, reference Accessibility Specialist Agent framework (`.cursor/agents/accessibility-specialist.json`) for WCAG 2.1 AA compliance checklist and accessibility testing methodology",
-      "code_quality": "When evaluating code quality, reference Code Quality Specialist Agent framework (`.cursor/agents/code-quality-specialist.json`) modes.evaluation for SOLID principles, DRY, complexity analysis, and design patterns assessment",
-      "architecture": "When evaluating architecture, reference Architecture Specialist Agent framework (`.cursor/agents/architecture-specialist.json`) for layer boundaries, dependency direction, and type safety assessment",
-      "test_quality": "When evaluating tests, reference Test Strategy Specialist Agent framework (`.cursor/agents/test-strategy-specialist.json`) modes.evaluation for test coverage, TDD workflow, and test quality assessment",
-      "performance": "When evaluating performance, reference Performance Specialist Agent framework (`.cursor/agents/performance-specialist.json`) for bundle size, rendering optimization, and Core Web Vitals assessment",
-      "seo": "When evaluating SEO, reference SEO Specialist Agent framework (`.cursor/agents/seo-specialist.json`) for metadata, structured data, and search engine optimization assessment",
-      "design_system": "When evaluating design system usage, reference Design System Specialist Agent framework (`.cursor/agents/design-system-specialist.json`) for design system usage, twJoin/twMerge, and design tokens assessment",
-      "documentation_quality": "When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent framework (`.cursor/agents/documentation-specialist.json`) modes.evaluation for clarity, completeness, consistency, actionability, structure, and references assessment"
+      "security": "When evaluating security-related code, reference Security Specialist Agent framework (`.ai-rules/agents/security-specialist.json`) for OAuth 2.0, JWT, CSRF/XSS assessment checklist and risk assessment methodology",
+      "accessibility": "When evaluating UI components, reference Accessibility Specialist Agent framework (`.ai-rules/agents/accessibility-specialist.json`) for WCAG 2.1 AA compliance checklist and accessibility testing methodology",
+      "code_quality": "When evaluating code quality, reference Code Quality Specialist Agent framework (`.ai-rules/agents/code-quality-specialist.json`) modes.evaluation for SOLID principles, DRY, complexity analysis, and design patterns assessment",
+      "architecture": "When evaluating architecture, reference Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) for layer boundaries, dependency direction, and type safety assessment",
+      "test_quality": "When evaluating tests, reference Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.evaluation for test coverage, TDD workflow, and test quality assessment",
+      "performance": "When evaluating performance, reference Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) for bundle size, rendering optimization, and Core Web Vitals assessment",
+      "seo": "When evaluating SEO, reference SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) for metadata, structured data, and search engine optimization assessment",
+      "design_system": "When evaluating design system usage, reference Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) for design system usage, twJoin/twMerge, and design tokens assessment",
+      "documentation_quality": "When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation for clarity, completeness, consistency, actionability, structure, and references assessment"
     },
 
     "risk_assessment": {
@@ -154,16 +154,16 @@
 
   "evaluation_checklist": {
     "🔴 strict_rules": {
-      "solids_principle": "SOLID principles compliance - Reference: .cursor/rules/augmented-coding.mdc Code Quality Standards",
-      "dry_principle": "Duplicate elimination - Reference: .cursor/rules/augmented-coding.mdc",
-      "type_safety": "TypeScript any usage prohibition - Reference: .cursor/rules/project.mdc Development Rules",
-      "test_coverage": "90%+ coverage goal - Reference: .cursor/rules/augmented-coding.mdc Testing Standards",
-      "layer_architecture": "Layer boundary compliance - Reference: .cursor/rules/project.mdc Project Structure",
-      "pure_impure_separation": "Pure/impure function separation - Reference: .cursor/rules/project.mdc Development Rules",
-      "no_mocking": "No mocking principle - Reference: .cursor/rules/project.mdc Important Guidelines",
-      "design_system": "Project design system priority usage - Reference: .cursor/rules/project.mdc 'Tech Stack' section and .cursor/rules/styles.mdc Philosophy",
-      "twjoin_twmerge": "Use twJoin/twMerge for className composition - Reference: .cursor/rules/styles.mdc ClassName Composition",
-      "design_tokens": "Use design system token prefix - Reference: .cursor/rules/styles.mdc Color Tokens section"
+      "solids_principle": "SOLID principles compliance - Reference: augmented-coding.md Code Quality Standards",
+      "dry_principle": "Duplicate elimination - Reference: augmented-coding.md",
+      "type_safety": "TypeScript any usage prohibition - Reference: project.md Development Rules",
+      "test_coverage": "90%+ coverage goal - Reference: augmented-coding.md Testing Standards",
+      "layer_architecture": "Layer boundary compliance - Reference: project.md Project Structure",
+      "pure_impure_separation": "Pure/impure function separation - Reference: project.md Development Rules",
+      "no_mocking": "No mocking principle - Reference: project.md Important Guidelines",
+      "design_system": "Project design system priority usage - Reference: project.md 'Tech Stack' section and the project's design system documentation Philosophy",
+      "twjoin_twmerge": "Use twJoin/twMerge for className composition - Reference: the project's design system documentation ClassName Composition",
+      "design_tokens": "Use design system token prefix - Reference: the project's design system documentation Color Tokens section"
     },
 
     "quality_checks": {
@@ -198,7 +198,7 @@
       "EVAL step in PLAN → ACT → EVAL flow"
     ],
     "activation_rule": "🔴 **STRICT**: This Agent MUST be automatically activated under above conditions",
-    "output_format": "Follow core.mdc EVAL Mode Output Format, applying this Agent's evaluation framework"
+    "output_format": "Follow core.md EVAL Mode Output Format, applying this Agent's evaluation framework"
   },
 
   "research_requirements": {
