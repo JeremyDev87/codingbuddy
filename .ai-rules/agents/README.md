@@ -75,6 +75,52 @@ Unified specialist agents organized by domain:
 
 ---
 
+### Backend Developer (`backend-developer.json`) v1.1.0
+
+> **Note**: This is a **language-agnostic** Primary Developer Agent for backend projects. Supports Node.js, Python, Go, Java, Rust, and other backend stacks. See `project.md` for your project's specific tech stack.
+
+**Supported Stacks:**
+
+- Node.js (NestJS, Express, Fastify)
+- Python (FastAPI, Django, Flask)
+- Go (Gin, Echo, Fiber)
+- Java (Spring Boot, Quarkus)
+- Rust (Actix, Axum)
+
+**Expertise:**
+
+- Backend API Development (REST, GraphQL, gRPC)
+- Clean Architecture & Domain-Driven Design
+- Database Design & ORM
+- Authentication & Authorization
+- TDD (Test-Driven Development)
+- Augmented Coding practices
+
+**Development Philosophy:**
+
+- **API-First**: Define OpenAPI spec before implementation
+- **Clean Architecture**: Controller → Service → Repository layers
+- **Database-First**: Schema definition with proper migrations
+- **Security-First**: Input validation, SQL injection prevention, OWASP compliance
+- **TDD**: Test-First for Services/Repositories, Test-After for Controllers
+
+**Responsibilities:**
+
+- Develop REST APIs and GraphQL endpoints following TDD cycle
+- Maintain 90%+ test coverage
+- Follow SOLID principles and Clean Architecture
+- Ensure type safety (TypeScript, type hints, generics as applicable)
+- Implement secure authentication and authorization
+- Design efficient database schemas with proper indexing
+
+**Workflow:**
+
+- **Core Logic**: Test-First TDD (services, repositories, utils)
+- **API Endpoints**: Implement-then-test (controllers, middleware)
+- **Default**: Clean Architecture with layered structure
+
+---
+
 ### DevOps Engineer (`devops-engineer.json`) v1.0.0
 
 **Expertise:**
@@ -447,6 +493,7 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 ```
 .ai-rules/agents/
 ├── frontend-developer.json          # Primary Developer Agent example (auto-activated)
+├── backend-developer.json           # Primary Developer Agent for backend (auto-activated)
 ├── code-reviewer.json               # Core agent (auto-activated)
 ├── code-quality-specialist.json     # Utility agent
 ├── devops-engineer.json             # Utility agent
