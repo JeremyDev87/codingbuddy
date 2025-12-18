@@ -74,7 +74,7 @@ REQUIRED_AGENTS=(
   "accessibility-specialist"
   "architecture-specialist"
   "code-quality-specialist"
-  "design-system-specialist"
+  "ui-ux-designer"
   "documentation-specialist"
   "devops-engineer"
   "performance-specialist"

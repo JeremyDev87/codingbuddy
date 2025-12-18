@@ -151,13 +151,13 @@ Create actionable implementation plans following TDD and augmented coding princi
 - [Social sharing optimization planning]
 - [Semantic HTML planning]
 
-## 🎨 Design System Planning
-(When design system planning is needed)
-- Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.planning for comprehensive design system planning
-- [Design system component selection]
-- [CSS/styling utility planning]
-- [Design tokens planning]
-- [Typography planning]
+## 🎨 UI/UX Design Planning
+(When UI/UX design planning is needed)
+- Use UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) modes.planning for comprehensive UI/UX design planning
+- [Visual hierarchy planning]
+- [User flow optimization]
+- [Interaction patterns planning]
+- [Responsive design strategy]
 
 ## 📚 Documentation Planning
 (When documentation planning is needed)
@@ -313,12 +313,12 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 - [Structured data verification]
 - [Social sharing optimization verification]
 
-## 🎨 Design System Implementation Verification
-(When design system implementation verification is needed)
-- Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) modes.implementation for comprehensive design system implementation verification
-- [Design system component usage verification]
-- [CSS/styling utility verification]
-- [Design tokens verification]
+## 🎨 UI/UX Design Implementation Verification
+(When UI/UX design implementation verification is needed)
+- Use UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) modes.implementation for comprehensive UI/UX design implementation verification
+- [Visual hierarchy verification]
+- [Interaction states verification]
+- [Responsive design verification]
 
 ## 📚 Documentation Implementation Verification
 (When documentation implementation verification is needed)
@@ -412,8 +412,8 @@ Self-improvement through iterative refinement
      - **Required**: When evaluating accessibility, reference Accessibility Specialist Agent (`.ai-rules/agents/accessibility-specialist.json`) framework for WCAG 2.1 AA compliance verification
    - 🔴 SEO (metadata, structured data)
      - **Required**: When evaluating SEO, reference SEO Specialist Agent (`.ai-rules/agents/seo-specialist.json`) framework for metadata, structured data, and search engine optimization assessment
-   - 🔴 Design System (design system usage)
-     - **Required**: When evaluating design system usage, reference Design System Specialist Agent (`.ai-rules/agents/design-system-specialist.json`) framework for design system usage, styling utilities, and design tokens assessment
+   - 🔴 UI/UX Design (visual hierarchy, UX patterns)
+     - **Required**: When evaluating UI/UX design, reference UI/UX Designer Agent (`.ai-rules/agents/ui-ux-designer.json`) framework for visual hierarchy, UX laws, and interaction patterns assessment
    - 🔴 Documentation Quality (documentation, cursor rules, AI prompts)
      - **Required**: When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment
 
@@ -510,13 +510,13 @@ Self-improvement through iterative refinement
 - [Social sharing optimization assessment]
 - [Semantic HTML validation]
 
-## 🎨 Design System Assessment
-(When design system evaluation is needed)
-- Use Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) for comprehensive design system review
-- [Design system component usage review]
-- [CSS/styling utility verification]
-- [Design tokens validation]
-- [Typography assessment]
+## 🎨 UI/UX Design Assessment
+(When UI/UX design evaluation is needed)
+- Use UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) for comprehensive UI/UX design review
+- [Visual hierarchy assessment]
+- [User flow evaluation]
+- [Interaction patterns review]
+- [Responsive design verification]
 
 ## 📚 Documentation Quality Assessment
 (When documentation, cursor rules, or AI prompts are evaluated)
@@ -627,11 +627,11 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - **Key traits**: SEO-focused, metadata expertise, structured data, social sharing optimization
 - **Integration**: Code Reviewer Agent utilizes SEO Specialist framework during EVAL mode SEO assessment
 
-**Design System Specialist** (`.ai-rules/agents/design-system-specialist.json`)
-- **Expertise**: Design system usage, CSS/styling utilities, design tokens, typography
-- **Use when**: Design system framework is referenced within EVAL mode for comprehensive design system assessment
-- **Key traits**: Design system-focused, component priority enforcement, token usage expertise, styling patterns
-- **Integration**: Code Reviewer Agent utilizes Design System Specialist framework during EVAL mode design system assessment
+**UI/UX Designer** (`.ai-rules/agents/ui-ux-designer.json`)
+- **Expertise**: Visual design principles, UX laws, interaction patterns, user flow optimization
+- **Use when**: UI/UX design framework is referenced within EVAL mode for comprehensive design assessment
+- **Key traits**: Design principles-focused, UX best practices, visual hierarchy, interaction design
+- **Integration**: Code Reviewer Agent utilizes UI/UX Designer framework during EVAL mode design assessment
 
 **Documentation Quality Specialist** (`.ai-rules/agents/documentation-specialist.json` modes.evaluation)
 - **Expertise**: Documentation quality assessment, AI prompt engineering, cursor rules evaluation, technical writing standards
@@ -867,26 +867,26 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - General code implementation (use Primary Developer Agent)
 - Content creation (use Primary Developer Agent)
 
-**Design System Specialist** (`@.ai-rules/agents/design-system-specialist.json`)
+**UI/UX Designer** (`@.ai-rules/agents/ui-ux-designer.json`)
 
 ✅ **Use for (Integrated with EVAL):**
-- Design system assessment is automatically included in EVAL mode via Code Reviewer Agent
-- Code Reviewer references Design System Specialist framework when evaluating design system usage
-- Design system component usage review
-- CSS/styling utility verification
-- Design tokens validation
-- Typography assessment
+- UI/UX design assessment is automatically included in EVAL mode via Code Reviewer Agent
+- Code Reviewer references UI/UX Designer framework when evaluating design quality
+- Visual hierarchy assessment
+- User flow evaluation
+- Interaction patterns review
+- Responsive design verification
 
 🔴 **Required Rules:**
-- Design system evaluation is part of EVAL mode mandatory perspectives
-- Code Reviewer Agent references Design System Specialist framework for comprehensive design system assessment
-- Reference project design system, styling utilities, design tokens standards
-- Provide specific design system improvement recommendations
+- UI/UX design evaluation is part of EVAL mode mandatory perspectives
+- Code Reviewer Agent references UI/UX Designer framework for comprehensive design assessment
+- Reference design principles, UX laws, interaction patterns
+- Provide specific design improvement recommendations
 
 ❌ **Don't use for:**
-- Standalone design system review mode (use EVAL mode instead)
-- General UI/UX design (use Primary Developer Agent)
-- Design system component creation (use Primary Developer Agent)
+- Standalone design review mode (use EVAL mode instead)
+- Implementation-specific styling (project-level design system configuration)
+- UI component creation (use Primary Developer Agent)
 
 **Documentation Quality Specialist** (`@.ai-rules/agents/documentation-specialist.json` modes.evaluation)
 

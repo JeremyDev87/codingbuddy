@@ -19,7 +19,7 @@ Unified specialist agents organized by domain:
 
 - **Accessibility** (`accessibility-specialist.json`)
 - **Architecture** (`architecture-specialist.json`)
-- **Design System** (`design-system-specialist.json`)
+- **UI/UX Design** (`ui-ux-designer.json`)
 - **Documentation** (`documentation-specialist.json`)
 - **Performance** (`performance-specialist.json`)
 - **Security** (`security-specialist.json`)
@@ -53,8 +53,8 @@ Unified specialist agents organized by domain:
 - **Server-First**: Defaults to Server Components, uses Client Components only when needed
 - **Server Actions**: Prefers Server Actions over API routes for mutations
 - **HTML/CSS First**: Solves with HTML/CSS before JavaScript
-- **Design System First**: Always prefers project design system components
-- **ClassName Composition**: Uses twJoin/twMerge, never string concatenation
+- **Design Principles**: Visual hierarchy, CRAP principles, UX laws
+- **User Experience**: User flow optimization, interaction patterns
 - **Accessibility**: WCAG AA compliance with semantic HTML
 - **SEO**: Comprehensive metadata and structured data
 
@@ -194,7 +194,7 @@ Unified specialist agents organized by domain:
 - Security: XSS/CSRF, authentication/authorization (Reference: `project.md`)
 - Accessibility: WCAG 2.1 AA compliance (Reference: `project.md`)
 - SEO: Metadata, structured data (Reference: `project.md`)
-- Design System: Project design system usage (Reference: project's design system docs)
+- UI/UX Design: Visual hierarchy, UX laws, interaction patterns (Reference: `ui-ux-designer.json`)
 
 **Risk Assessment:**
 
@@ -499,7 +499,7 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 ├── devops-engineer.json             # Utility agent
 ├── accessibility-specialist.json    # Domain specialist
 ├── architecture-specialist.json     # Domain specialist
-├── design-system-specialist.json    # Domain specialist
+├── ui-ux-designer.json              # Domain specialist
 ├── documentation-specialist.json    # Domain specialist
 ├── performance-specialist.json      # Domain specialist
 ├── security-specialist.json         # Domain specialist

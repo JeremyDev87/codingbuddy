@@ -98,7 +98,7 @@
       "🔴 Security: XSS/CSRF, authentication/authorization, input validation - Reference: project.md and .ai-rules/agents/security-specialist.json modes.evaluation framework for comprehensive security assessment",
       "🔴 Accessibility: WCAG 2.1 AA compliance - Reference: project.md 'UX & Accessibility' section and .ai-rules/agents/accessibility-specialist.json modes.evaluation framework for comprehensive accessibility assessment",
       "🔴 SEO: Metadata, structured data - Reference: project.md and .ai-rules/agents/seo-specialist.json modes.evaluation framework for comprehensive SEO assessment",
-      "🔴 Design System: Project design system usage - Reference: project.md 'Tech Stack' section, the project's design system documentation and .ai-rules/agents/design-system-specialist.json modes.evaluation framework for comprehensive design system assessment",
+      "🔴 UI/UX Design: Visual hierarchy, UX laws, interaction patterns - Reference: .ai-rules/agents/ui-ux-designer.json modes.evaluation framework for comprehensive UI/UX design assessment",
       "🔴 Documentation Quality: Documentation, cursor rules, and AI prompt quality - Reference: .ai-rules/agents/documentation-specialist.json modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment",
       "Design Patterns: Latest React/Next.js patterns - See project.md 'Tech Stack' section for versions and .ai-rules/agents/code-quality-specialist.json for design pattern assessment"
     ],
@@ -110,7 +110,7 @@
       "test_quality": "When evaluating tests, reference Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.evaluation for test coverage, TDD workflow, and test quality assessment",
       "performance": "When evaluating performance, reference Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) for bundle size, rendering optimization, and Core Web Vitals assessment",
       "seo": "When evaluating SEO, reference SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) for metadata, structured data, and search engine optimization assessment",
-      "design_system": "When evaluating design system usage, reference Design System Specialist Agent framework (`.ai-rules/agents/design-system-specialist.json`) for design system usage, twJoin/twMerge, and design tokens assessment",
+      "ui_ux_design": "When evaluating UI/UX design, reference UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) for visual hierarchy, UX laws, and interaction patterns assessment",
       "documentation_quality": "When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation for clarity, completeness, consistency, actionability, structure, and references assessment"
     },
 
