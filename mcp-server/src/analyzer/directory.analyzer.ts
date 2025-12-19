@@ -1,8 +1,8 @@
-import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
 import type { DirectoryAnalysis, ArchitecturePattern } from './analyzer.types';
 import { shouldIgnore, getDefaultIgnorePatterns } from '../config/ignore.parser';
+import { safeReadDirWithTypes } from '../shared/file.utils';
 
 /**
  * Architecture pattern definition
@@ -157,32 +157,28 @@ async function scanDirectory(
     return { files, dirs };
   }
 
-  try {
-    const entries = await fs.readdir(currentPath, { withFileTypes: true });
+  const entries = await safeReadDirWithTypes(currentPath);
 
-    for (const entry of entries) {
-      const entryRelativePath = relativePath
-        ? `${relativePath}/${entry.name}`
-        : entry.name;
+  for (const entry of entries) {
+    const entryRelativePath = relativePath
+      ? `${relativePath}/${entry.name}`
+      : entry.name;
 
-      // Check if should be ignored
-      if (shouldIgnore(entryRelativePath, ignorePatterns)) {
-        continue;
-      }
-
-      if (entry.isDirectory()) {
-        dirs.push(entryRelativePath);
-
-        // Recursively scan subdirectories
-        const subResult = await scanDirectory(rootPath, ignorePatterns, entryRelativePath);
-        files.push(...subResult.files);
-        dirs.push(...subResult.dirs);
-      } else if (entry.isFile()) {
-        files.push(entryRelativePath);
-      }
+    // Check if should be ignored
+    if (shouldIgnore(entryRelativePath, ignorePatterns)) {
+      continue;
     }
-  } catch {
-    // Ignore permission errors
+
+    if (entry.isDirectory()) {
+      dirs.push(entryRelativePath);
+
+      // Recursively scan subdirectories
+      const subResult = await scanDirectory(rootPath, ignorePatterns, entryRelativePath);
+      files.push(...subResult.files);
+      dirs.push(...subResult.dirs);
+    } else if (entry.isFile()) {
+      files.push(entryRelativePath);
+    }
   }
 
   return { files, dirs };

@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { CodeSample, CodeCategory } from './analyzer.types';
+import { pathContainsSegment } from '../shared/path.utils';
 
 /**
  * Language detection by file extension
@@ -126,18 +127,6 @@ export function isCodeFile(filePath: string): boolean {
 }
 
 /**
- * Check if path contains a directory (handles both /dir/ and dir/ at start)
- */
-function pathContainsDir(lowerPath: string, dirName: string): boolean {
-  return (
-    lowerPath.includes(`/${dirName}/`) ||
-    lowerPath.includes(`\\${dirName}\\`) ||
-    lowerPath.startsWith(`${dirName}/`) ||
-    lowerPath.startsWith(`${dirName}\\`)
-  );
-}
-
-/**
  * Categorize a file based on its path and name
  */
 export function categorizeFile(filePath: string): CodeCategory {
@@ -156,7 +145,7 @@ export function categorizeFile(filePath: string): CodeCategory {
 
   // API/Route files (check before hooks to avoid false positives like 'users.ts')
   if (
-    pathContainsDir(lower, 'api') ||
+    pathContainsSegment(filePath, 'api') ||
     fileName === 'route.ts' ||
     fileName === 'route.js'
   ) {
@@ -164,17 +153,17 @@ export function categorizeFile(filePath: string): CodeCategory {
   }
 
   // Service files
-  if (pathContainsDir(lower, 'services') || fileName.includes('.service.')) {
+  if (pathContainsSegment(filePath, 'services') || fileName.includes('.service.')) {
     return 'service';
   }
 
   // Model/Entity files
-  if (pathContainsDir(lower, 'models') || pathContainsDir(lower, 'entities')) {
+  if (pathContainsSegment(filePath, 'models') || pathContainsSegment(filePath, 'entities')) {
     return 'model';
   }
 
   // Hook files (React hooks pattern - useXxx where X is uppercase)
-  if (pathContainsDir(lower, 'hooks')) {
+  if (pathContainsSegment(filePath, 'hooks')) {
     return 'hook';
   }
   // Check for useXxx pattern (use followed by uppercase letter)
@@ -184,13 +173,13 @@ export function categorizeFile(filePath: string): CodeCategory {
   }
 
   // Component files
-  if (pathContainsDir(lower, 'components') || pathContainsDir(lower, 'ui')) {
+  if (pathContainsSegment(filePath, 'components') || pathContainsSegment(filePath, 'ui')) {
     return 'component';
   }
 
   // Page files
   if (
-    pathContainsDir(lower, 'pages') ||
+    pathContainsSegment(filePath, 'pages') ||
     fileName === 'page.tsx' ||
     fileName === 'page.ts' ||
     fileName === 'page.jsx' ||
@@ -201,15 +190,15 @@ export function categorizeFile(filePath: string): CodeCategory {
 
   // Utility files
   if (
-    pathContainsDir(lower, 'utils') ||
-    pathContainsDir(lower, 'lib') ||
-    pathContainsDir(lower, 'helpers')
+    pathContainsSegment(filePath, 'utils') ||
+    pathContainsSegment(filePath, 'lib') ||
+    pathContainsSegment(filePath, 'helpers')
   ) {
     return 'util';
   }
 
   // Config files
-  if (pathContainsDir(lower, 'config')) {
+  if (pathContainsSegment(filePath, 'config')) {
     return 'config';
   }
 

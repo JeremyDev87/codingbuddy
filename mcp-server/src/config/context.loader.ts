@@ -1,6 +1,6 @@
-import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
+import { safeReadDirWithTypes, tryReadFile } from '../shared/file.utils';
 
 /**
  * Default context directory name
@@ -91,23 +91,18 @@ export function isLoadableFile(filePath: string): boolean {
  */
 async function getAllFiles(dirPath: string, basePath: string = ''): Promise<string[]> {
   const files: string[] = [];
+  const entries = await safeReadDirWithTypes(dirPath);
 
-  try {
-    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
+    const fullPath = path.join(dirPath, entry.name);
 
-    for (const entry of entries) {
-      const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
-      const fullPath = path.join(dirPath, entry.name);
-
-      if (entry.isDirectory()) {
-        const subFiles = await getAllFiles(fullPath, relativePath);
-        files.push(...subFiles);
-      } else if (entry.isFile()) {
-        files.push(relativePath);
-      }
+    if (entry.isDirectory()) {
+      const subFiles = await getAllFiles(fullPath, relativePath);
+      files.push(...subFiles);
+    } else if (entry.isFile()) {
+      files.push(relativePath);
     }
-  } catch {
-    // Directory doesn't exist or can't be read
   }
 
   return files;
@@ -121,20 +116,20 @@ async function loadContextFile(
   relativePath: string,
 ): Promise<ContextFile | null> {
   const fullPath = path.join(contextDir, relativePath);
+  const content = await tryReadFile(fullPath);
 
-  try {
-    const content = await fs.readFile(fullPath, 'utf-8');
-    const extension = path.extname(relativePath).toLowerCase();
-
-    return {
-      path: relativePath,
-      content,
-      type: getContextFileType(relativePath),
-      extension,
-    };
-  } catch {
+  if (content === undefined) {
     return null;
   }
+
+  const extension = path.extname(relativePath).toLowerCase();
+
+  return {
+    path: relativePath,
+    content,
+    type: getContextFileType(relativePath),
+    extension,
+  };
 }
 
 /**

@@ -1,4 +1,3 @@
-import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
 import type {
@@ -7,6 +6,7 @@ import type {
   EslintSummary,
   PrettierSummary,
 } from './analyzer.types';
+import { tryReadFile } from '../shared/file.utils';
 
 /**
  * Known config file patterns by type
@@ -171,15 +171,13 @@ export async function analyzeConfigs(
     if (!pattern.includes('*')) {
       const filePath = path.join(projectRoot, pattern);
       if (existsSync(filePath)) {
-        try {
-          const content = await fs.readFile(filePath, 'utf-8');
+        const content = await tryReadFile(filePath);
+        if (content !== undefined) {
           const parsed = parseTsConfig(content, pattern);
           if (parsed) {
             result.typescript = parsed;
             break;
           }
-        } catch {
-          // Ignore read errors
         }
       }
     }
@@ -190,15 +188,13 @@ export async function analyzeConfigs(
   for (const fileName of eslintJsonFiles) {
     const filePath = path.join(projectRoot, fileName);
     if (existsSync(filePath)) {
-      try {
-        const content = await fs.readFile(filePath, 'utf-8');
+      const content = await tryReadFile(filePath);
+      if (content !== undefined) {
         const parsed = parseEslintConfig(content, fileName, getEslintFormat(fileName));
         if (parsed) {
           result.eslint = parsed;
           break;
         }
-      } catch {
-        // Ignore read errors
       }
     }
   }
@@ -221,15 +217,13 @@ export async function analyzeConfigs(
   for (const fileName of prettierJsonFiles) {
     const filePath = path.join(projectRoot, fileName);
     if (existsSync(filePath)) {
-      try {
-        const content = await fs.readFile(filePath, 'utf-8');
+      const content = await tryReadFile(filePath);
+      if (content !== undefined) {
         const parsed = parsePrettierConfig(content, fileName);
         if (parsed) {
           result.prettier = parsed;
           break;
         }
-      } catch {
-        // Ignore read errors
       }
     }
   }
