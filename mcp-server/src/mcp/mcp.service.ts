@@ -14,6 +14,8 @@ import {
 import { RulesService } from '../rules/rules.service';
 import { KeywordService } from '../keyword/keyword.service';
 import { KEYWORD_SERVICE } from '../keyword/keyword.module';
+import { ConfigService } from '../config/config.service';
+import type { CodingBuddyConfig } from '../config/config.schema';
 
 @Injectable()
 export class McpService implements OnModuleInit {
@@ -23,6 +25,7 @@ export class McpService implements OnModuleInit {
   constructor(
     private rulesService: RulesService,
     @Inject(KEYWORD_SERVICE) private keywordService: KeywordService,
+    private configService: ConfigService,
   ) {
     this.server = new Server(
       {
@@ -66,6 +69,14 @@ export class McpService implements OnModuleInit {
 
       return {
         resources: [
+          // Project configuration resource
+          {
+            uri: 'config://project',
+            name: 'Project Configuration',
+            mimeType: 'application/json',
+            description:
+              'Project-specific configuration including tech stack, architecture, and conventions',
+          },
           ...coreRules.map(rule => ({
             uri: `rules://${rule}`,
             name: rule,
@@ -84,6 +95,29 @@ export class McpService implements OnModuleInit {
 
     this.server.setRequestHandler(ReadResourceRequestSchema, async request => {
       const uri = request.params.uri;
+
+      // Handle config://project resource
+      if (uri === 'config://project') {
+        try {
+          const projectConfig = await this.configService.getProjectConfig();
+          return {
+            contents: [
+              {
+                uri: uri,
+                mimeType: 'application/json',
+                text: JSON.stringify(projectConfig, null, 2),
+              },
+            ],
+          };
+        } catch {
+          throw new McpError(
+            ErrorCode.InternalError,
+            'Failed to load project configuration',
+          );
+        }
+      }
+
+      // Handle rules:// resources
       if (!uri.startsWith('rules://')) {
         throw new McpError(ErrorCode.InvalidRequest, 'Invalid URI scheme');
       }
@@ -140,7 +174,7 @@ export class McpService implements OnModuleInit {
           {
             name: 'parse_mode',
             description:
-              'Parse workflow mode keyword from prompt and return mode-specific rules',
+              'Parse workflow mode keyword from prompt and return mode-specific rules with project language setting',
             inputSchema: {
               type: 'object',
               properties: {
@@ -153,6 +187,16 @@ export class McpService implements OnModuleInit {
               required: ['prompt'],
             },
           },
+          {
+            name: 'get_project_config',
+            description:
+              'Get project configuration including tech stack, architecture, conventions, and language settings',
+            inputSchema: {
+              type: 'object',
+              properties: {},
+              required: [],
+            },
+          },
         ],
       };
     });
@@ -160,67 +204,18 @@ export class McpService implements OnModuleInit {
     this.server.setRequestHandler(CallToolRequestSchema, async request => {
       const { name, arguments: args } = request.params;
 
-      if (name === 'search_rules') {
-        const query = String(args?.query);
-        const results = await this.rulesService.searchRules(query);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(results, null, 2),
-            },
-          ],
-        };
+      switch (name) {
+        case 'search_rules':
+          return this.handleSearchRules(args);
+        case 'get_agent_details':
+          return this.handleGetAgentDetails(args);
+        case 'parse_mode':
+          return this.handleParseMode(args);
+        case 'get_project_config':
+          return this.handleGetProjectConfig();
+        default:
+          throw new McpError(ErrorCode.MethodNotFound, `Tool not found: ${name}`);
       }
-
-      if (name === 'get_agent_details') {
-        const agentName = String(args?.agentName);
-        try {
-          const agent = await this.rulesService.getAgent(agentName);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify(agent, null, 2),
-              },
-            ],
-          };
-        } catch {
-          return {
-            isError: true,
-            content: [
-              { type: 'text', text: `Agent '${agentName}' not found.` },
-            ],
-          };
-        }
-      }
-
-      if (name === 'parse_mode') {
-        const prompt = String(args?.prompt ?? '');
-        try {
-          const result = await this.keywordService.parseMode(prompt);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
-          };
-        } catch (error) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text',
-                text: `Failed to parse mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
-              },
-            ],
-          };
-        }
-      }
-
-      throw new McpError(ErrorCode.MethodNotFound, `Tool not found: ${name}`);
     });
   }
 
@@ -230,7 +225,8 @@ export class McpService implements OnModuleInit {
         prompts: [
           {
             name: 'activate_agent',
-            description: 'Activate a specific specialist agent with context',
+            description:
+              'Activate a specific specialist agent with project context',
             arguments: [
               {
                 name: 'role',
@@ -250,6 +246,8 @@ export class McpService implements OnModuleInit {
           const agent = await this.rulesService.getAgent(role);
           const coreRules =
             await this.rulesService.getRuleContent('rules/core.md');
+          const settings = await this.configService.getSettings();
+          const projectContext = this.formatProjectContext(settings);
 
           return {
             messages: [
@@ -257,7 +255,7 @@ export class McpService implements OnModuleInit {
                 role: 'user',
                 content: {
                   type: 'text',
-                  text: `Activate Agent: ${agent.name}\n\nRole: ${agent.role}\n\nGoals:\n${agent.goals.join('\n')}\n\nWorkflow:\n${agent.workflow.join('\n')}\n\nCore Rules Context:\n${coreRules.substring(0, 1000)}... (truncated)`,
+                  text: `Activate Agent: ${agent.name}\n\nRole: ${agent.role}\n\nGoals:\n${agent.goals.join('\n')}\n\nWorkflow:\n${agent.workflow.join('\n')}\n\n${projectContext}\n\nCore Rules Context:\n${coreRules.substring(0, 1000)}... (truncated)`,
                 },
               },
             ],
@@ -271,5 +269,123 @@ export class McpService implements OnModuleInit {
       }
       throw new McpError(ErrorCode.MethodNotFound, 'Prompt not found');
     });
+  }
+
+  // ============================================================================
+  // Tool Handlers
+  // ============================================================================
+
+  private async handleSearchRules(args: Record<string, unknown> | undefined) {
+    const query = String(args?.query);
+    const results = await this.rulesService.searchRules(query);
+    return this.jsonResponse(results);
+  }
+
+  private async handleGetAgentDetails(args: Record<string, unknown> | undefined) {
+    const agentName = String(args?.agentName);
+    try {
+      const agent = await this.rulesService.getAgent(agentName);
+      return this.jsonResponse(agent);
+    } catch {
+      return this.errorResponse(`Agent '${agentName}' not found.`);
+    }
+  }
+
+  private async handleParseMode(args: Record<string, unknown> | undefined) {
+    const prompt = String(args?.prompt ?? '');
+    try {
+      const result = await this.keywordService.parseMode(prompt);
+      const language = await this.configService.getLanguage();
+      return this.jsonResponse({ ...result, language });
+    } catch (error) {
+      return this.errorResponse(
+        `Failed to parse mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  private async handleGetProjectConfig() {
+    try {
+      const settings = await this.configService.getSettings();
+      return this.jsonResponse(settings);
+    } catch (error) {
+      return this.errorResponse(
+        `Failed to get project config: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  // ============================================================================
+  // Response Helpers
+  // ============================================================================
+
+  private jsonResponse(data: unknown) {
+    return {
+      content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+    };
+  }
+
+  private errorResponse(message: string) {
+    return {
+      isError: true,
+      content: [{ type: 'text', text: message }],
+    };
+  }
+
+  // ============================================================================
+  // Formatters
+  // ============================================================================
+
+  /**
+   * Format project configuration as context string for AI prompts
+   */
+  private formatProjectContext(settings: CodingBuddyConfig): string {
+    const sections: string[] = ['Project Context:'];
+
+    if (settings.projectName) {
+      sections.push(`- Project: ${settings.projectName}`);
+    }
+
+    if (settings.language) {
+      sections.push(`- Response Language: ${settings.language}`);
+    }
+
+    if (settings.techStack) {
+      const techItems: string[] = [];
+      if (settings.techStack.frontend?.length) {
+        techItems.push(`Frontend: ${settings.techStack.frontend.join(', ')}`);
+      }
+      if (settings.techStack.backend?.length) {
+        techItems.push(`Backend: ${settings.techStack.backend.join(', ')}`);
+      }
+      if (settings.techStack.languages?.length) {
+        techItems.push(`Languages: ${settings.techStack.languages.join(', ')}`);
+      }
+      if (settings.techStack.database?.length) {
+        techItems.push(`Database: ${settings.techStack.database.join(', ')}`);
+      }
+      if (techItems.length > 0) {
+        sections.push(`- Tech Stack: ${techItems.join('; ')}`);
+      }
+    }
+
+    if (settings.architecture?.pattern) {
+      sections.push(`- Architecture: ${settings.architecture.pattern}`);
+    }
+
+    if (settings.testStrategy?.approach) {
+      sections.push(`- Test Strategy: ${settings.testStrategy.approach}`);
+    }
+
+    if (settings.conventions?.style) {
+      sections.push(`- Code Style: ${settings.conventions.style}`);
+    }
+
+    // Return empty string if no meaningful context
+    if (sections.length === 1) {
+      return '';
+    }
+
+    return sections.join('\n');
   }
 }

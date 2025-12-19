@@ -2,9 +2,10 @@
   "name": "codingbuddy",
   "version": "1.0.0",
   "description": "Multi-AI Rules MCP Server",
-  "main": "dist/main.js",
+  "main": "dist/src/main.js",
   "bin": {
-    "codingbuddy-mcp": "./dist/main.js"
+    "codingbuddy": "./dist/src/cli/cli.js",
+    "codingbuddy-mcp": "./dist/src/main.js"
   },
   "files": [
     "dist",
@@ -15,16 +16,17 @@
     "access": "public"
   },
   "scripts": {
-    "prepublishOnly": "cp -r ../.ai-rules . && yarn build && chmod +x dist/main.js",
+    "prepublishOnly": "cp -r ../.ai-rules . && yarn build && chmod +x dist/src/main.js dist/src/cli/cli.js",
     "postpublish": "rm -rf .ai-rules",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js",
+    "start": "node dist/src/main.js",
     "start:dev": "ts-node src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@modelcontextprotocol/sdk": "^1.0.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",
