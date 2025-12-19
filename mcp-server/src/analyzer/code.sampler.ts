@@ -76,6 +76,10 @@ export const LANGUAGE_EXTENSIONS: Record<string, string> = {
   // GraphQL
   '.graphql': 'graphql',
   '.gql': 'graphql',
+
+  // Framework-specific
+  '.vue': 'vue',
+  '.svelte': 'svelte',
 };
 
 /**

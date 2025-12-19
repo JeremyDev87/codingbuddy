@@ -34,6 +34,11 @@ describe('code.sampler', () => {
       expect(detectLanguage('main.py')).toBe('python');
     });
 
+    it('should detect Vue and Svelte files', () => {
+      expect(detectLanguage('App.vue')).toBe('vue');
+      expect(detectLanguage('Component.svelte')).toBe('svelte');
+    });
+
     it('should return unknown for unrecognized extensions', () => {
       expect(detectLanguage('file.xyz')).toBe('unknown');
       expect(detectLanguage('noextension')).toBe('unknown');
