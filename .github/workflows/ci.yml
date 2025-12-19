@@ -1,28 +1,20 @@
-name: codingbuddy-dev
+name: CI
 
 on:
-  push:
-    branches-ignore:
-      - master
-      - stag-**
+  pull_request:
+    branches:
+      - main
     paths:
       - 'mcp-server/**'
       - '.ai-rules/**'
-      - '.antigravity/**'
-      - '.claude/**'
-      - '.codex/**'
-      - '.cursor/**'
-      - 'scripts/**'
-      - .github/workflows/dev.yml
+      - '.github/workflows/ci.yml'
 
 permissions:
-  statuses: write
   contents: read
 
 jobs:
   # ─────────────── Setup Job ───────────────
   install-dependencies:
-    if: github.repository == 'JeremyDev87/codingbuddy'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -193,47 +185,3 @@ jobs:
 
       - name: Build
         run: yarn build
-
-  # ─────────────── CD Job ───────────────
-  publish-dev:
-    needs: [lint-check, prettier-check, type-check, unit-test-check, circular-check, build-check]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
-      - name: Restore dependencies from cache
-        uses: actions/cache@v4
-        with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
-
-      - name: Build
-        run: yarn build
-
-      - name: Publish dev
-        run: |
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          COMMIT_SHA=${GITHUB_SHA::7}
-          VERSION="0.0.0-dev.${TIMESTAMP}.${COMMIT_SHA}"
-          cat <<< "$( jq --arg v "$VERSION" '.version = $v' package.json )" > package.json
-          yarn npm publish --tag dev
-        env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
-
-      - name: Output dev version number
-        run: |
-          name=$(jq -r .name package.json)
-          version=$(jq -r .version package.json)
-          yarn dlx action-status --context "Published $name" --state success --description $version --url "https://unpkg.com/$name@$version/"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
