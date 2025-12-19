@@ -90,7 +90,7 @@ describe('file.utils', () => {
         { name: 'file.txt', isFile: () => true, isDirectory: () => false },
         { name: 'subdir', isFile: () => false, isDirectory: () => true },
       ];
-      vi.mocked(fs.readdir).mockResolvedValue(mockEntries as unknown as ReturnType<typeof fs.readdir>);
+      vi.mocked(fs.readdir).mockResolvedValue(mockEntries as unknown as Awaited<ReturnType<typeof fs.readdir>>);
 
       const result = await safeReadDirWithTypes('/path/to/dir');
 
