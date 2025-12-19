@@ -1,6 +1,6 @@
-import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
+import { safeReadFile } from '../shared/file.utils';
 
 /**
  * Default ignore file name
@@ -68,21 +68,21 @@ export async function loadIgnoreFile(projectRoot: string): Promise<IgnoreParseRe
     };
   }
 
-  try {
-    const content = await fs.readFile(ignorePath, 'utf-8');
-    const patterns = parseIgnoreContent(content);
+  const content = await safeReadFile(ignorePath);
 
-    return {
-      patterns,
-      source: ignorePath,
-    };
-  } catch {
-    // If file can't be read, return empty patterns
+  if (content === null) {
     return {
       patterns: [],
       source: null,
     };
   }
+
+  const patterns = parseIgnoreContent(content);
+
+  return {
+    patterns,
+    source: ignorePath,
+  };
 }
 
 /**

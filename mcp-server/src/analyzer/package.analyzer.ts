@@ -1,4 +1,3 @@
-import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
 import type {
@@ -6,6 +5,7 @@ import type {
   DetectedFramework,
   FrameworkCategory,
 } from './analyzer.types';
+import { safeReadFile } from '../shared/file.utils';
 
 /**
  * Framework detection definition
@@ -171,8 +171,13 @@ export async function analyzePackage(projectRoot: string): Promise<PackageInfo |
     return null;
   }
 
+  const content = await safeReadFile(packagePath);
+
+  if (content === null) {
+    return null;
+  }
+
   try {
-    const content = await fs.readFile(packagePath, 'utf-8');
     const parsed = parsePackageJson(content);
     const frameworks = detectFrameworks(parsed.dependencies, parsed.devDependencies);
 
