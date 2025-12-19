@@ -1,12 +1,49 @@
-# Codingbuddy Rules MCP Server
+# Codingbuddy MCP Server
 
-A NestJS-based Model Context Protocol (MCP) server that exposes the Multi-AI Rules System (`.ai-rules/`) to AI clients.
+A NestJS-based Model Context Protocol (MCP) server that provides AI coding assistants with project-specific context and rules.
+
+## Quick Start
+
+```bash
+# Initialize project configuration (AI-powered)
+npx codingbuddy init
+
+# This analyzes your project and creates codingbuddy.config.js
+```
 
 ## Features
 
-- **Resources**: Access rule files directly (`rules://core`, `rules://agents/frontend-developer`, etc.)
-- **Tools**: Search rules (`search_rules`) and get agent profiles (`get_agent_details`).
-- **Prompts**: Activate agents with context (`activate_agent`).
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `codingbuddy init` | Analyze project and generate configuration |
+| `codingbuddy --help` | Show help |
+| `codingbuddy --version` | Show version |
+
+### MCP Resources
+
+| Resource | Description |
+|----------|-------------|
+| `config://project` | Project configuration (tech stack, architecture, language) |
+| `rules://rules/core.md` | Core workflow rules |
+| `rules://rules/project.md` | Project setup rules |
+| `rules://agents/{name}.json` | Specialist agent definitions |
+
+### MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `get_project_config` | Get project configuration settings |
+| `search_rules` | Search through rules and guidelines |
+| `get_agent_details` | Get detailed profile of a specialist agent |
+| `parse_mode` | Parse PLAN/ACT/EVAL workflow mode (includes language setting) |
+
+### MCP Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `activate_agent` | Activate a specialist agent with project context |
 
 ## Prerequisites
 
@@ -26,11 +63,13 @@ Add the following configuration to your Claude Desktop config:
   "mcpServers": {
     "codingbuddy-rules": {
       "command": "npx",
-      "args": ["codingbuddy"]
+      "args": ["codingbuddy-mcp"]
     }
   }
 }
 ```
+
+> **Note**: Use `codingbuddy-mcp` for the MCP server. The `codingbuddy` command is for CLI operations like `init`.
 
 ### Option 2: Global Installation
 
@@ -63,7 +102,7 @@ yarn build
   "mcpServers": {
     "codingbuddy-rules": {
       "command": "node",
-      "args": ["/ABSOLUTE/PATH/TO/codingbuddy/mcp-server/dist/main.js"]
+      "args": ["/ABSOLUTE/PATH/TO/codingbuddy/mcp-server/dist/src/main.js"]
     }
   }
 }
@@ -100,6 +139,91 @@ The server will start in SSE mode, exposing:
 | `MCP_TRANSPORT` | Transport mode (`stdio` or `sse`) | `stdio` |
 | `PORT` | HTTP port for SSE mode | `3000` |
 | `CODINGBUDDY_RULES_DIR` | Custom path to `.ai-rules` directory | Auto-detected |
+| `CODINGBUDDY_PROJECT_ROOT` | Project root for config loading | Current directory |
+| `ANTHROPIC_API_KEY` | API key for `codingbuddy init` | Required for init |
+
+## Project Configuration
+
+### Initialize Configuration
+
+```bash
+# Basic usage (requires ANTHROPIC_API_KEY env var)
+npx codingbuddy init
+
+# With options
+npx codingbuddy init --format json        # Output as JSON instead of JS
+npx codingbuddy init --force              # Overwrite existing config
+npx codingbuddy init /path/to/project     # Specify project path
+npx codingbuddy init --api-key sk-...     # Pass API key directly
+```
+
+### Configuration File
+
+The `codingbuddy init` command creates a `codingbuddy.config.js` file:
+
+```javascript
+module.exports = {
+  // Response language (ko, en, ja, etc.)
+  language: 'ko',
+
+  // Project metadata
+  projectName: 'my-awesome-app',
+  description: 'A modern web application',
+
+  // Technology stack
+  techStack: {
+    languages: ['TypeScript'],
+    frontend: ['React', 'Next.js', 'Tailwind CSS'],
+    backend: ['Node.js', 'Prisma'],
+    database: ['PostgreSQL'],
+    tools: ['ESLint', 'Prettier', 'Vitest'],
+  },
+
+  // Architecture pattern
+  architecture: {
+    pattern: 'feature-sliced-design',
+    structure: ['app', 'widgets', 'features', 'entities', 'shared'],
+  },
+
+  // Coding conventions
+  conventions: {
+    style: 'airbnb',
+    naming: {
+      files: 'kebab-case',
+      components: 'PascalCase',
+      functions: 'camelCase',
+    },
+  },
+
+  // Testing strategy
+  testStrategy: {
+    approach: 'tdd',
+    frameworks: ['Vitest', 'Playwright'],
+    coverage: 80,
+  },
+};
+```
+
+### File Structure
+
+```
+my-project/
+├── codingbuddy.config.js     # Main configuration
+├── .codingignore             # Files to ignore (gitignore syntax)
+└── .codingbuddy/             # Additional context (optional)
+    └── context/
+        ├── architecture.md   # Architecture documentation
+        └── api-guide.md      # API usage guide
+```
+
+### How AI Uses Configuration
+
+When you use an AI assistant with this MCP server:
+
+1. **Language**: AI responds in your configured language
+2. **Tech Stack**: AI provides code examples using your frameworks
+3. **Architecture**: AI suggests structures following your patterns
+4. **Conventions**: AI follows your naming and style rules
 
 ## Development
 
@@ -119,7 +243,7 @@ The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a web-
 yarn build
 
 # Run with Inspector
-npx @modelcontextprotocol/inspector node dist/main.js
+npx @modelcontextprotocol/inspector node dist/src/main.js
 ```
 
 ### 2. Manual Test Script
