@@ -52,6 +52,44 @@ PLAN → (user: ACT) → ACT → PLAN → (user: EVAL) → EVAL → Improved PLA
 **Purpose:**
 Create actionable implementation plans following TDD and augmented coding principles
 
+---
+
+### Clarification Phase (Optional)
+
+**Purpose:**
+Resolve ambiguous requirements through sequential Q&A before creating a plan.
+
+**Trigger Condition:**
+- AI assesses user request for ambiguity
+- If unclear scope, constraints, priority, or expected behavior detected → Start Clarification Phase
+- If requirements are already clear → Skip directly to Plan creation
+
+**Phase Rules:**
+1. **Single Question Rule** - Ask only ONE question per message
+2. **Progress Indicator** - Display "Question N/M" format (estimate M, adjust as needed)
+3. **Multiple-Choice First** - Provide A/B/C options whenever possible
+4. **Custom Input Allowed** - Always allow "Other" option for user's own input
+5. **Language Setting** - Follow agent's `communication.language` setting; if not set, detect from user's input language
+
+**Question Flow:**
+1. Analyze request → Identify ambiguous points → Estimate question count
+2. Present Question 1/N (multiple-choice format)
+3. Wait for user response
+4. Continue until all clarifications complete
+5. Summarize all collected information in a table
+6. Get user confirmation ("Yes" / request modification)
+7. Proceed to Plan creation with clarified requirements
+
+**Skip Conditions:**
+- User explicitly requests to skip: "Skip clarification" or "Just create the plan"
+- Requirements are detailed and unambiguous
+- User provides comprehensive specification document
+
+**Reference:**
+See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
+
+---
+
 **What PLAN does (with Primary Developer Agent):**
 
 1. **Analyze Requirements** (via Primary Developer Agent)

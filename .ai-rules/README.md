@@ -9,6 +9,7 @@ This directory contains shared coding rules and guidelines used across multiple 
 ├── README.md              # This file - overview and usage guide
 ├── rules/                 # Common coding rules (AI-agnostic)
 │   ├── core.md           # Workflow modes (PLAN/ACT/EVAL), communication
+│   ├── clarification-guide.md  # Clarification Phase guidelines for PLAN mode
 │   ├── project.md        # Tech stack, architecture, project context
 │   └── augmented-coding.md  # TDD principles, code quality standards
 ├── agents/                # Specialist agent definitions (JSON)
@@ -40,9 +41,15 @@ All AI coding assistants share the same:
 ### 1. `rules/core.md` - Workflow & Communication
 
 **Workflow Modes:**
-- **PLAN**: Define implementation plan without making changes
+- **PLAN**: Define implementation plan (includes optional Clarification Phase)
 - **ACT**: Execute the plan and make code changes
 - **EVAL**: Analyze results and propose improvements
+
+**Clarification Phase (Optional in PLAN):**
+- Triggers when AI detects ambiguous requirements (2+ unclear items)
+- Sequential Q&A with progress indicator (Question N/M)
+- Multiple-choice questions preferred for easy response
+- See `rules/clarification-guide.md` for detailed guidelines
 
 **Key Principles:**
 - Start in PLAN mode by default
@@ -218,6 +225,7 @@ When rules conflict between common rules and tool-specific configurations:
 ## Further Reading
 
 - **Workflow Details**: `rules/core.md`
+- **Clarification Phase**: `rules/clarification-guide.md`
 - **Project Setup**: `rules/project.md`
 - **TDD & Quality**: `rules/augmented-coding.md`
 - **Agent System**: `agents/README.md`
