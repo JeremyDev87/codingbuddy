@@ -194,6 +194,31 @@ jobs:
       - name: Build
         run: yarn build
 
+  # ─────────────── Rules Validation ───────────────
+  rules-validation:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Validate AI Rules
+        run: |
+          echo "📋 Validating JSON Schema..."
+          yarn dlx ajv-cli validate -s .ai-rules/schemas/agent.schema.json -d ".ai-rules/agents/*.json" --spec=draft7
+
+          echo ""
+          echo "📝 Linting Markdown files..."
+          yarn dlx markdownlint-cli2 ".ai-rules/**/*.md"
+
+          echo ""
+          echo "✅ All rules validation passed!"
+
   # ─────────────── Security Scan ───────────────
   security-check:
     needs: install-dependencies

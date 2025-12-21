@@ -205,6 +205,27 @@ yarn test src/mcp/mcp.service.spec.ts
 yarn lint && yarn format:check && yarn typecheck && yarn test:coverage && yarn circular && yarn build
 ```
 
+### Rules Validation
+
+Validate `.ai-rules/` files before committing:
+
+```bash
+# Full validation (structure + schema + markdown)
+yarn validate:rules
+
+# Schema validation only
+yarn validate:rules:schema
+
+# Markdown linting only
+yarn validate:rules:markdown
+```
+
+The validation includes:
+- Directory structure checks
+- Required file existence
+- JSON syntax and schema validation (agent files)
+- Markdown linting
+
 ### Building
 
 ```bash

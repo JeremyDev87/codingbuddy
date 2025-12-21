@@ -30,7 +30,10 @@
     "format:check": "prettier --check 'src/**/*.ts'",
     "typecheck": "tsc --noEmit",
     "circular": "madge --circular --extensions ts src/",
-    "validate": "yarn lint && yarn format:check && yarn typecheck && yarn test && yarn circular"
+    "validate": "yarn lint && yarn format:check && yarn typecheck && yarn test && yarn circular",
+    "validate:rules": "cd .. && ./scripts/validate-rules.sh",
+    "validate:rules:schema": "cd .. && ./scripts/validate-rules.sh --schema-only",
+    "validate:rules:markdown": "cd .. && ./scripts/validate-rules.sh --markdown-only"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

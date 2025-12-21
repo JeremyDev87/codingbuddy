@@ -1,0 +1,258 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://codingbuddy.dev/schemas/agent.schema.json",
+  "title": "Codingbuddy Agent Definition",
+  "description": "Schema for AI agent definition files in .ai-rules/agents/",
+  "type": "object",
+  "required": ["name", "description", "role", "context_files"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the agent",
+      "minLength": 1,
+      "examples": ["Frontend Developer", "Code Reviewer", "Security Specialist"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the agent's purpose and expertise",
+      "minLength": 10
+    },
+    "role": {
+      "type": "object",
+      "description": "Agent's role definition including title, expertise, and responsibilities",
+      "required": ["title"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Official role title",
+          "minLength": 1
+        },
+        "expertise": {
+          "type": "array",
+          "description": "List of expertise areas",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "responsibilities": {
+          "type": "array",
+          "description": "List of responsibilities",
+          "items": { "type": "string" }
+        },
+        "tech_stack_reference": {
+          "type": "string",
+          "description": "Reference to tech stack documentation"
+        }
+      },
+      "additionalProperties": true
+    },
+    "context_files": {
+      "type": "array",
+      "description": "List of context files to load for this agent",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.ai-rules/.*"
+      },
+      "minItems": 1,
+      "examples": [[".ai-rules/rules/core.md", ".ai-rules/rules/project.md"]]
+    },
+    "activation": {
+      "type": "object",
+      "description": "Activation configuration for developer/reviewer agents",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "description": "Condition that triggers this agent"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Strict rule for activation"
+        },
+        "mandatory_checklist": {
+          "type": "object",
+          "description": "Checklist items that must be followed",
+          "additionalProperties": true
+        },
+        "verification_guide": {
+          "type": "object",
+          "description": "Guide for verifying checklist items",
+          "additionalProperties": { "type": "string" }
+        },
+        "execution_order": {
+          "type": "object",
+          "description": "Order of execution for different modes",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "workflow_integration": {
+          "type": "object",
+          "description": "How this agent integrates with workflow"
+        },
+        "planning_framework": {
+          "type": "object",
+          "description": "Framework for planning mode"
+        },
+        "implementation_framework": {
+          "type": "object",
+          "description": "Framework for implementation mode"
+        }
+      },
+      "additionalProperties": true
+    },
+    "modes": {
+      "type": "object",
+      "description": "Mode-specific configuration for specialist agents",
+      "properties": {
+        "planning": {
+          "type": "object",
+          "description": "Planning mode configuration"
+        },
+        "implementation": {
+          "type": "object",
+          "description": "Implementation mode configuration"
+        },
+        "evaluation": {
+          "type": "object",
+          "description": "Evaluation mode configuration"
+        }
+      },
+      "additionalProperties": true
+    },
+    "workflow": {
+      "type": "object",
+      "description": "Workflow configuration",
+      "additionalProperties": true
+    },
+    "development_philosophy": {
+      "type": "object",
+      "description": "Development philosophy and approach",
+      "additionalProperties": true
+    },
+    "code_quality_checklist": {
+      "type": "array",
+      "description": "Code quality checklist items",
+      "items": { "type": "string" }
+    },
+    "tdd_cycle": {
+      "type": "object",
+      "description": "TDD cycle configuration",
+      "additionalProperties": true
+    },
+    "ai_monitoring": {
+      "type": "object",
+      "description": "AI behavior monitoring configuration",
+      "additionalProperties": true
+    },
+    "commit_rules": {
+      "type": "object",
+      "description": "Commit rules and discipline",
+      "additionalProperties": true
+    },
+    "design_system": {
+      "type": "object",
+      "description": "Design system configuration",
+      "additionalProperties": true
+    },
+    "communication": {
+      "type": "object",
+      "description": "Communication preferences",
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "Response language preference"
+        },
+        "approach": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "reference_style": {
+          "type": "string"
+        },
+        "emphasis": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "file_naming": {
+      "type": "object",
+      "description": "File naming conventions",
+      "additionalProperties": true
+    },
+    "reference": {
+      "type": "object",
+      "description": "Reference links and documentation",
+      "additionalProperties": true
+    },
+    "shared_framework": {
+      "type": "object",
+      "description": "Shared framework configuration for specialist agents",
+      "additionalProperties": true
+    },
+    "persona": {
+      "type": "object",
+      "description": "Agent persona configuration",
+      "additionalProperties": true
+    },
+    "evaluation_framework": {
+      "type": "object",
+      "description": "Evaluation framework for reviewer agents",
+      "additionalProperties": true
+    },
+    "evaluation_output_format": {
+      "type": "object",
+      "description": "Output format for evaluations",
+      "additionalProperties": true
+    },
+    "evaluation_checklist": {
+      "type": "object",
+      "description": "Evaluation checklist",
+      "additionalProperties": true
+    },
+    "improvement_prioritization": {
+      "type": "object",
+      "description": "Improvement prioritization rules",
+      "additionalProperties": true
+    },
+    "workflow_integration": {
+      "type": "object",
+      "description": "Workflow integration configuration",
+      "additionalProperties": true
+    },
+    "research_requirements": {
+      "type": "object",
+      "description": "Research requirements for evidence-based recommendations",
+      "additionalProperties": true
+    },
+    "quality_gates": {
+      "type": "object",
+      "description": "Quality gate definitions",
+      "additionalProperties": true
+    },
+    "infrastructure": {
+      "type": "object",
+      "description": "Infrastructure configuration (DevOps)",
+      "additionalProperties": true
+    },
+    "best_practices": {
+      "type": "object",
+      "description": "Best practices guidelines",
+      "additionalProperties": true
+    },
+    "checklist": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      ],
+      "description": "General checklist (can be object or array)"
+    }
+  },
+  "additionalProperties": true
+}

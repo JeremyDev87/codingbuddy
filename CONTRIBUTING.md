@@ -98,6 +98,9 @@ yarn test          # Unit tests
 yarn test:coverage # Coverage (must be 80%+)
 yarn circular      # Circular dependency check
 yarn build         # Build verification
+
+# If you modified .ai-rules/ files:
+yarn validate:rules  # Validate rules structure, schema, and markdown
 ```
 
 ### 5. Submit a Pull Request
