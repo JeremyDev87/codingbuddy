@@ -29,7 +29,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -58,7 +58,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -82,7 +82,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -106,7 +106,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -130,7 +130,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -154,7 +154,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -178,7 +178,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -203,7 +203,7 @@ jobs:
         working-directory: mcp-server
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup node.js
         uses: actions/setup-node@v4
