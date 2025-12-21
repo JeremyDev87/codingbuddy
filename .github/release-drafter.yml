@@ -32,7 +32,7 @@ categories:
       - 'documentation'
       - 'Documentation' 
   - title: '🧰 Maintenance'
-    label:
+    labels:
       - 'chore'
       - 'Chore'
       - 'ci'
@@ -40,7 +40,7 @@ categories:
       - 'build'
       - 'Build'
   - title: '🛠 Dependencies'
-    label:
+    labels:
       - 'dependencies'    
       - 'Dependencies'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
