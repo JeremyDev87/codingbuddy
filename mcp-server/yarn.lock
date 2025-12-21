@@ -635,17 +635,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:^10.0.0":
-  version: 10.4.20
-  resolution: "@nestjs/common@npm:10.4.20"
+"@nestjs/common@npm:^11.1.9":
+  version: 11.1.9
+  resolution: "@nestjs/common@npm:11.1.9"
   dependencies:
-    file-type: "npm:20.4.1"
+    file-type: "npm:21.1.0"
     iterare: "npm:1.2.1"
+    load-esm: "npm:1.0.3"
     tslib: "npm:2.8.1"
     uid: "npm:2.0.2"
   peerDependencies:
-    class-transformer: "*"
-    class-validator: "*"
+    class-transformer: ">=0.4.1"
+    class-validator: ">=0.13.2"
     reflect-metadata: ^0.1.12 || ^0.2.0
     rxjs: ^7.1.0
   peerDependenciesMeta:
@@ -653,7 +654,7 @@ __metadata:
       optional: true
     class-validator:
       optional: true
-  checksum: 10c0/d1a1b3d67798a8a07e5dfe7c55c6d499ac4750531cad0ef5fd5ceef0e2cfc01ae0adcba501d27987e7f4044af0f41fec05d4391d047baa6069419c49daff7e8c
+  checksum: 10c0/1189834d51eb4c50157f82fafd15e3098adc3bf2eba979f2603135af25559373306c0e98b787271f137259e04070ed4550d6fa3df988a034a989878a01a98f35
   languageName: node
   linkType: hard
 
@@ -933,14 +934,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tokenizer/inflate@npm:^0.2.6":
-  version: 0.2.7
-  resolution: "@tokenizer/inflate@npm:0.2.7"
+"@tokenizer/inflate@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "@tokenizer/inflate@npm:0.3.1"
   dependencies:
-    debug: "npm:^4.4.0"
+    debug: "npm:^4.4.1"
     fflate: "npm:^0.8.2"
     token-types: "npm:^6.0.0"
-  checksum: 10c0/75bd0c510810dfd62be9d963216b5852cde021e1f8aab43b37662bc6aa75e65fd7277fcab7d463186b55cee36a5b61129916161bdb2a7d18064016156c7daf4f
+  checksum: 10c0/6321c28ae6346e527837ef9a9242129213b57aa7b9a3752c2275f10e67985a3e0adbb3397db36c3ff3f982f16bfa53aab0f9e04d59955d86ed53fa80aec34be5
   languageName: node
   linkType: hard
 
@@ -2239,7 +2240,7 @@ __metadata:
     "@eslint/js": "npm:^9.39.2"
     "@modelcontextprotocol/sdk": "npm:^1.0.1"
     "@nestjs/cli": "npm:^10.0.0"
-    "@nestjs/common": "npm:^10.0.0"
+    "@nestjs/common": "npm:^11.1.9"
     "@nestjs/config": "npm:^3.0.0"
     "@nestjs/core": "npm:^10.0.0"
     "@nestjs/platform-express": "npm:^11.1.9"
@@ -2434,7 +2435,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.5, debug@npm:^4.4.0":
+"debug@npm:4, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.5, debug@npm:^4.4.0, debug@npm:^4.4.1":
   version: 4.4.3
   resolution: "debug@npm:4.4.3"
   dependencies:
@@ -3249,15 +3250,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-type@npm:20.4.1":
-  version: 20.4.1
-  resolution: "file-type@npm:20.4.1"
+"file-type@npm:21.1.0":
+  version: 21.1.0
+  resolution: "file-type@npm:21.1.0"
   dependencies:
-    "@tokenizer/inflate": "npm:^0.2.6"
-    strtok3: "npm:^10.2.0"
+    "@tokenizer/inflate": "npm:^0.3.1"
+    strtok3: "npm:^10.3.1"
     token-types: "npm:^6.0.0"
     uint8array-extras: "npm:^1.4.0"
-  checksum: 10c0/ae6f65e537205a9a3e07ae574de74ed5210aa78899d6478351a466f97e3f17096b93d74cb97f3fce7488bc8486a21e449ab076ec358ed06984f4a9a8f48a9f55
+  checksum: 10c0/e48676b147ada39b57827f933ac6ba85eb56257a8368c7efb5ae31f68496cf61a9bb42c79b84e6c0ac593ced1fc38b78312932457d148b61db6df7738493e0e7
   languageName: node
   linkType: hard
 
@@ -4171,6 +4172,13 @@ __metadata:
   version: 1.2.4
   resolution: "lines-and-columns@npm:1.2.4"
   checksum: 10c0/3da6ee62d4cd9f03f5dc90b4df2540fb85b352081bee77fe4bbcd12c9000ead7f35e0a38b8d09a9bb99b13223446dd8689ff3c4959807620726d788701a83d2d
+  languageName: node
+  linkType: hard
+
+"load-esm@npm:1.0.3":
+  version: 1.0.3
+  resolution: "load-esm@npm:1.0.3"
+  checksum: 10c0/285a3666a29c11f7b466bb70ee3582af32893d03ed91b68be939c656a15afd27f3683f5f8d56b52834ce2911ecf1c84e515e6048248fb5268a89b724a8ddbf65
   languageName: node
   linkType: hard
 
@@ -5777,7 +5785,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strtok3@npm:^10.2.0":
+"strtok3@npm:^10.3.1":
   version: 10.3.4
   resolution: "strtok3@npm:10.3.4"
   dependencies:
