@@ -143,8 +143,8 @@ jobs:
           path: ./mcp-server/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
 
-      - name: Test
-        run: yarn test
+      - name: Test with coverage
+        run: yarn test:coverage
 
   circular-check:
     needs: install-dependencies
@@ -194,9 +194,9 @@ jobs:
       - name: Build
         run: yarn build
 
-  # ─────────────── CD Job ───────────────
-  publish-dev:
-    needs: [lint-check, prettier-check, type-check, unit-test-check, circular-check, build-check]
+  # ─────────────── Security Scan ───────────────
+  security-check:
+    needs: install-dependencies
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -216,24 +216,6 @@ jobs:
           path: ./mcp-server/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
 
-      - name: Build
-        run: yarn build
-
-      - name: Publish dev
-        run: |
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          COMMIT_SHA=${GITHUB_SHA::7}
-          VERSION="0.0.0-dev.${TIMESTAMP}.${COMMIT_SHA}"
-          cat <<< "$( jq --arg v "$VERSION" '.version = $v' package.json )" > package.json
-          yarn npm publish --tag dev
-        env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
-
-      - name: Output dev version number
-        run: |
-          name=$(jq -r .name package.json)
-          version=$(jq -r .version package.json)
-          yarn dlx action-status --context "Published $name" --state success --description $version --url "https://unpkg.com/$name@$version/"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Security audit
+        run: yarn npm audit --severity high
+        continue-on-error: true
