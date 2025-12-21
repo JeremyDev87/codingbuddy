@@ -1,6 +1,6 @@
 # Codingbuddy MCP Server
 
-[![CI](https://github.com/Codingbuddydev/codingbuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/Codingbuddydev/codingbuddy/actions/workflows/ci.yml)
+[![CI](https://github.com/Codingbuddydev/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/Codingbuddydev/codingbuddy/actions/workflows/dev.yml)
 
 A NestJS-based Model Context Protocol (MCP) server that provides AI coding assistants with project-specific context and rules.
 
