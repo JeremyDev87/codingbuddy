@@ -1,30 +1,48 @@
 ---
-name: Feature Change/Add
-about: Create a ticket for changes or additions to custom hooks or utility functions.
-title: ''
-labels: 'feat'
+name: Feature Request
+about: Suggest a new feature or enhancement
+title: '[Feature] '
+labels: enhancement
+assignees: ''
 ---
 
-## Description of the Feature
+## Problem Statement
 
-Describe the feature you are adding or modifying, including the expected behavior and the current issue it addresses.
+A clear description of the problem you're trying to solve.
 
-- e.g., Add a new custom hook for managing user authentication state.
+Example: "I'm always frustrated when..."
 
-## Plan / Design
+## Proposed Solution
 
-Outline the plan or design for implementing the feature.
+A clear description of what you want to happen.
 
-- e.g.
-- Add a new custom hook named useAuth.
-- Create functions inside the hook to handle login, logout, and authentication state.
-- Integrate useAuth with the existing components.
-- Write unit tests to cover different scenarios and edge cases.
-- Update documentation with usage examples.
+## Alternative Solutions
+
+Any alternative solutions or features you've considered.
+
+## Use Case
+
+Describe a specific scenario where this feature would be useful.
+
+```
+Example workflow:
+1. User does X
+2. Feature enables Y
+3. Result is Z
+```
 
 ## Additional Context
 
-Provide any additional context or references.
+- Related issues or PRs
+- Links to relevant documentation
+- Screenshots or mockups (if applicable)
 
-- Links to related Slack discussions, Trello cards, Confluence pages, GitHub issues, or PRs.
-- Any relevant resources or references that may help with the implementation.
+## Implementation Ideas (Optional)
+
+If you have ideas on how this could be implemented, share them here.
+
+## Checklist
+
+- [ ] I have searched existing issues to avoid duplicates
+- [ ] I have provided a clear problem statement
+- [ ] I have described the expected behavior

@@ -1,39 +1,50 @@
-### Description
+## Summary
 
-Provide a concise description of the changes made in this pull request.
+Brief description of changes (1-3 sentences).
 
-- [ ] New custom hook
-- [ ] New utility function
-- [ ] Bug fix
-- [ ] Refactoring
-- [ ] Documentation update
+## Related Issues
 
-### Implementation Details (Proposed changes)
+- Fixes #(issue number)
+- Related to #(issue number)
 
-Explain the technical details of your implementation. Why did you choose this particular approach?
+## Changes Made
 
 - Change 1
 - Change 2
 - Change 3
 
-### How to test
+## Type of Change
 
-Provide instructions to test the changes made by this PR.
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to change)
+- [ ] Documentation update
+- [ ] Refactoring (no functional changes)
+- [ ] CI/CD changes
 
-### Screenshots (if applicable)
+## Testing
 
-Include screenshots, code snippets, or any other visual aids that help illustrate the changes or enhancements.
+Describe how you tested your changes:
 
-|AS-IS|TO-BE|
-|--|--|
-|Before Change|After Change|
+- [ ] Unit tests added/updated
+- [ ] Manual testing performed
+- [ ] Tested with MCP Inspector
 
-|Category|Content|
-|--|--|
-|Title|Screenshot|
+## Checklist
 
-### Reference
+- [ ] My code follows the project's coding standards
+- [ ] I have run `yarn lint` and fixed any issues
+- [ ] I have run `yarn format:check` and fixed any issues
+- [ ] I have run `yarn typecheck` and fixed any issues
+- [ ] I have run `yarn test` and all tests pass
+- [ ] I have run `yarn test:coverage` and coverage meets threshold
+- [ ] I have updated documentation (if applicable)
+- [ ] My commit messages follow conventional commits
 
-Link any related issues or provide a reference to the issue this PR resolves.
+## Screenshots (if applicable)
 
-- Closes # (issue number)
+Add screenshots to help explain your changes.
+
+## Additional Notes
+
+Any additional information reviewers should know.
