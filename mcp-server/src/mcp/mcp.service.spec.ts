@@ -356,4 +356,180 @@ describe('McpService', () => {
       expect(text).toContain('airbnb');
     });
   });
+
+  describe('Error handling', () => {
+    describe('Resources errors', () => {
+      it('should throw error for invalid URI scheme', async () => {
+        const handler = handlers.get('resources/read');
+        expect(handler).toBeDefined();
+
+        await expect(
+          handler!({ params: { uri: 'invalid://something' } }),
+        ).rejects.toThrow('Invalid URI scheme');
+      });
+
+      it('should throw error when rules resource not found', async () => {
+        vi.mocked(mockRulesService.getRuleContent!).mockRejectedValue(
+          new Error('File not found'),
+        );
+
+        const handler = handlers.get('resources/read');
+        expect(handler).toBeDefined();
+
+        await expect(
+          handler!({ params: { uri: 'rules://nonexistent.md' } }),
+        ).rejects.toThrow('Resource not found');
+      });
+
+      it('should throw error when config://project fails to load', async () => {
+        handlers.clear();
+        const failingConfigService = createMockConfigService({});
+        vi.mocked(failingConfigService.getProjectConfig!).mockRejectedValue(
+          new Error('Config load error'),
+        );
+
+        const service = new McpService(
+          mockRulesService as RulesService,
+          mockKeywordService as KeywordService,
+          failingConfigService as ConfigService,
+        );
+        service.onModuleInit();
+
+        const handler = handlers.get('resources/read');
+        expect(handler).toBeDefined();
+
+        await expect(
+          handler!({ params: { uri: 'config://project' } }),
+        ).rejects.toThrow('Failed to load project configuration');
+      });
+    });
+
+    describe('Tools errors', () => {
+      it('should throw error for unknown tool', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        await expect(
+          handler!({ params: { name: 'unknown_tool', arguments: {} } }),
+        ).rejects.toThrow('Tool not found: unknown_tool');
+      });
+
+      it('should return error response when get_agent_details fails', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
+          new Error('Agent not found'),
+        );
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_details',
+            arguments: { agentName: 'invalid' },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain("Agent 'invalid' not found");
+      });
+
+      it('should return error response when parse_mode fails', async () => {
+        vi.mocked(mockKeywordService.parseMode!).mockRejectedValue(
+          new Error('Parse error'),
+        );
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: { name: 'parse_mode', arguments: { prompt: 'INVALID test' } },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('Failed to parse mode');
+      });
+
+      it('should return error response when get_project_config fails', async () => {
+        handlers.clear();
+        const failingConfigService = createMockConfigService({});
+        vi.mocked(failingConfigService.getSettings!).mockRejectedValue(
+          new Error('Settings error'),
+        );
+
+        const service = new McpService(
+          mockRulesService as RulesService,
+          mockKeywordService as KeywordService,
+          failingConfigService as ConfigService,
+        );
+        service.onModuleInit();
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: { name: 'get_project_config', arguments: {} },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain(
+          'Failed to get project config',
+        );
+      });
+    });
+
+    describe('Prompts errors', () => {
+      it('should throw error when agent not found in activate_agent', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
+          new Error('Agent not found'),
+        );
+
+        const handler = handlers.get('prompts/get');
+        expect(handler).toBeDefined();
+
+        await expect(
+          handler!({
+            params: {
+              name: 'activate_agent',
+              arguments: { role: 'invalid-agent' },
+            },
+          }),
+        ).rejects.toThrow("Agent 'invalid-agent' not found");
+      });
+
+      it('should throw error for unknown prompt', async () => {
+        const handler = handlers.get('prompts/get');
+        expect(handler).toBeDefined();
+
+        await expect(
+          handler!({ params: { name: 'unknown_prompt', arguments: {} } }),
+        ).rejects.toThrow('Prompt not found');
+      });
+    });
+  });
+
+  describe('startStdio', () => {
+    it('should connect server with StdioServerTransport', async () => {
+      const service = new McpService(
+        mockRulesService as RulesService,
+        mockKeywordService as KeywordService,
+        mockConfigService as ConfigService,
+      );
+
+      // Should not throw
+      await expect(service.startStdio()).resolves.not.toThrow();
+    });
+  });
+
+  describe('getServer', () => {
+    it('should return the MCP server instance', () => {
+      const service = new McpService(
+        mockRulesService as RulesService,
+        mockKeywordService as KeywordService,
+        mockConfigService as ConfigService,
+      );
+
+      const server = service.getServer();
+      expect(server).toBeDefined();
+    });
+  });
 });
