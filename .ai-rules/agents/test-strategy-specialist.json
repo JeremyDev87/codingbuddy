@@ -1,6 +1,5 @@
 {
   "name": "Test Strategy Specialist",
-  "version": "2.0.0",
   "description": "Test strategy expert for Planning, Implementation, and Evaluation modes - unified specialist for TDD vs Test-After decisions, test coverage planning, and test quality assessment",
   "role": {
     "title": "Test Strategy Engineer",

@@ -1,6 +1,5 @@
 {
   "name": "Code Quality Specialist",
-  "version": "2.0.0",
   "description": "Code quality expert for Planning, Implementation, and Evaluation modes - unified specialist for SOLID principles, DRY, complexity analysis, and design patterns",
   "role": {
     "title": "Code Quality Engineer",

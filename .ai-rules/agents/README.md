@@ -2,6 +2,62 @@
 
 AI Agent definitions for specialized development roles.
 
+---
+
+## Table of Contents
+
+- [Quick Reference: Which Agent?](#quick-reference-which-agent)
+- [Available Agents](#available-agents)
+  - [Core Agents](#core-agents-auto-activated)
+  - [Domain Specialists](#domain-specialists)
+  - [Utility Agents](#utility-agents)
+- [Agent Details](#agent-details)
+- [Usage](#usage)
+- [Workflow Modes](#workflow-modes)
+- [Agent Structure](#agent-structure)
+- [Adding New Agents](#adding-new-agents)
+- [Best Practices](#best-practices)
+
+---
+
+## Quick Reference: Which Agent?
+
+| 작업 유형 | 추천 에이전트 | 파일 |
+|----------|-------------|------|
+| **React/Next.js 개발** | Frontend Developer | `frontend-developer.json` |
+| **백엔드 API 개발** | Backend Developer | `backend-developer.json` |
+| **코드 리뷰 (EVAL)** | Code Reviewer | `code-reviewer.json` |
+| **아키텍처 설계** | Architecture Specialist | `architecture-specialist.json` |
+| **테스트 전략** | Test Strategy Specialist | `test-strategy-specialist.json` |
+| **성능 최적화** | Performance Specialist | `performance-specialist.json` |
+| **보안 검토** | Security Specialist | `security-specialist.json` |
+| **접근성 검토** | Accessibility Specialist | `accessibility-specialist.json` |
+| **SEO 최적화** | SEO Specialist | `seo-specialist.json` |
+| **UI/UX 디자인** | UI/UX Designer | `ui-ux-designer.json` |
+| **문서화** | Documentation Specialist | `documentation-specialist.json` |
+| **코드 품질** | Code Quality Specialist | `code-quality-specialist.json` |
+| **인프라/배포** | DevOps Engineer | `devops-engineer.json` |
+
+### Agent Summary
+
+| Agent | 한 줄 설명 |
+|-------|-----------|
+| Frontend Developer | React/Next.js TDD 기반 프론트엔드 개발 |
+| Backend Developer | 멀티스택 지원 백엔드 API 개발 (Node, Python, Go, Java, Rust) |
+| Code Reviewer | EVAL 모드 자동 활성화, 다차원 코드 품질 평가 |
+| Architecture Specialist | 레이어 경계, 의존성 방향, Clean Architecture |
+| Test Strategy Specialist | TDD 전략, 테스트 커버리지, 테스트 품질 |
+| Performance Specialist | Core Web Vitals, 번들 최적화, 렌더링 성능 |
+| Security Specialist | OWASP, 인증/인가, XSS/CSRF 방어 |
+| Accessibility Specialist | WCAG 2.1 AA, 시맨틱 HTML, 스크린 리더 |
+| SEO Specialist | 메타데이터, JSON-LD, Open Graph |
+| UI/UX Designer | 비주얼 계층, UX 법칙, 인터랙션 패턴 |
+| Documentation Specialist | 코드 주석, JSDoc, 문서 품질 평가 |
+| Code Quality Specialist | SOLID, DRY, 복잡도 분석 |
+| DevOps Engineer | Docker, 모니터링, 배포 최적화 |
+
+---
+
 ## Available Agents
 
 ### Core Agents (Auto-activated)
@@ -33,7 +89,9 @@ Unified specialist agents organized by domain:
 
 ---
 
-### Primary Developer Agent Example: Frontend Developer (`frontend-developer.json`) v1.3.0
+## Agent Details
+
+### Primary Developer Agent Example: Frontend Developer (`frontend-developer.json`)
 
 > **Note**: This is an example Primary Developer Agent for React/Next.js projects. Create your own agent (e.g., `backend-developer.json`, `mobile-developer.json`) following this pattern for other tech stacks.
 
@@ -75,7 +133,7 @@ Unified specialist agents organized by domain:
 
 ---
 
-### Backend Developer (`backend-developer.json`) v1.1.0
+### Backend Developer (`backend-developer.json`)
 
 > **Note**: This is a **language-agnostic** Primary Developer Agent for backend projects. Supports Node.js, Python, Go, Java, Rust, and other backend stacks. See `project.md` for your project's specific tech stack.
 
@@ -121,7 +179,7 @@ Unified specialist agents organized by domain:
 
 ---
 
-### DevOps Engineer (`devops-engineer.json`) v1.0.0
+### DevOps Engineer (`devops-engineer.json`)
 
 **Expertise:**
 
@@ -567,7 +625,6 @@ Create a new JSON file following this structure:
 ```json
 {
   "name": "Agent Name",
-  "version": "1.0.0",
   "description": "Brief description",
   "role": {
     "title": "Role Title",

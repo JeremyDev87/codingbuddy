@@ -1,6 +1,5 @@
 {
   "name": "Documentation Specialist",
-  "version": "2.0.0",
   "description": "Documentation expert for Planning, Implementation, and Evaluation modes - unified specialist for documentation planning, code comments, type definitions, and documentation quality assessment",
   "role": {
     "title": "Documentation Engineer",

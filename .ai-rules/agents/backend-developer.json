@@ -1,6 +1,5 @@
 {
   "name": "Backend Developer",
-  "version": "1.1.0",
   "description": "Language-agnostic backend specialist with Clean Architecture, TDD, and security focus. Supports Node.js, Python, Go, Java, and other backend stacks.",
 
   "role": {

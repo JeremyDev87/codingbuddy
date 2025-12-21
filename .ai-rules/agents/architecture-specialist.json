@@ -1,6 +1,5 @@
 {
   "name": "Architecture Specialist",
-  "version": "2.0.0",
   "description": "Architecture expert for Planning, Implementation, and Evaluation modes - unified specialist for layer placement, dependency direction, and type safety",
   "role": {
     "title": "Architecture Engineer",

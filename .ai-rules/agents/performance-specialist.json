@@ -1,6 +1,5 @@
 {
   "name": "Performance Specialist",
-  "version": "2.0.0",
   "description": "Performance expert for Planning, Implementation, and Evaluation modes - unified specialist for bundle size optimization, rendering optimization, and Core Web Vitals",
   "role": {
     "title": "Performance Engineer",
