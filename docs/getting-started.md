@@ -1,0 +1,211 @@
+# Getting Started
+
+Get up and running with Codingbuddy in minutes.
+
+## Prerequisites
+
+- **Node.js**: v18 or higher
+- **AI Tool**: Any supported AI coding assistant ([see full list](./supported-tools.md))
+
+## Quick Start
+
+### Step 1: Initialize Your Project
+
+```bash
+# Set your Anthropic API key (required for project analysis)
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Initialize Codingbuddy in your project
+npx codingbuddy init
+```
+
+This command analyzes your project and creates a `codingbuddy.config.js` file with:
+
+- Detected tech stack (languages, frameworks, tools)
+- Architecture patterns
+- Coding conventions
+- Testing strategy
+
+### Step 2: Configure Your AI Tool
+
+Add Codingbuddy to your AI assistant. Here's an example for Claude Desktop:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["codingbuddy-mcp"]
+    }
+  }
+}
+```
+
+For other AI tools, see [Supported Tools](./supported-tools.md).
+
+### Step 3: Start Coding
+
+Your AI assistant now has access to:
+
+- **Project context**: Tech stack, architecture, conventions
+- **Workflow modes**: PLAN → ACT → EVAL
+- **Specialist agents**: Security, performance, accessibility experts
+
+Try it:
+
+```
+You: PLAN Create a user authentication feature
+
+AI: # Mode: PLAN
+    I'll design an authentication feature following your project's patterns...
+```
+
+## Configuration
+
+### Generated Config File
+
+The `codingbuddy.config.js` file customizes AI behavior:
+
+```javascript
+module.exports = {
+  // AI responds in this language
+  language: 'en',
+
+  // Project metadata
+  projectName: 'my-app',
+
+  // Technology stack
+  techStack: {
+    languages: ['TypeScript'],
+    frontend: ['React', 'Next.js'],
+    backend: ['Node.js'],
+  },
+
+  // Architecture pattern
+  architecture: {
+    pattern: 'feature-sliced-design',
+  },
+
+  // Coding conventions
+  conventions: {
+    naming: {
+      files: 'kebab-case',
+      components: 'PascalCase',
+    },
+  },
+
+  // Testing approach
+  testStrategy: {
+    approach: 'tdd',
+    coverage: 80,
+  },
+};
+```
+
+See [Configuration Schema](./config-schema.md) for all options.
+
+### Additional Context
+
+Add project-specific documentation that AI should know about:
+
+```
+my-project/
+├── codingbuddy.config.js
+└── .codingbuddy/
+    └── context/
+        ├── architecture.md    # System architecture docs
+        └── api-conventions.md # API design guidelines
+```
+
+### Ignore Patterns
+
+Create `.codingignore` to exclude files from AI analysis:
+
+```gitignore
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+
+# Sensitive files
+.env*
+*.pem
+```
+
+## Using Workflow Modes
+
+### PLAN Mode (Default)
+
+Start with planning before making changes:
+
+```
+You: PLAN Add dark mode support
+
+AI: # Mode: PLAN
+
+    ## Implementation Plan
+    1. Create theme context...
+    2. Add toggle component...
+    3. Persist preference...
+```
+
+### ACT Mode
+
+Execute the plan with code changes:
+
+```
+You: ACT
+
+AI: # Mode: ACT
+
+    Creating theme context...
+    [Makes code changes following TDD]
+```
+
+### EVAL Mode
+
+Review and improve implementation:
+
+```
+You: EVAL
+
+AI: # Mode: EVAL
+
+    ## Code Review
+    - ✅ Theme context properly typed
+    - ⚠️ Consider adding system preference detection
+```
+
+## Using Specialist Agents
+
+Activate domain experts for specific tasks:
+
+```
+You: Activate the security-specialist agent to review authentication
+
+AI: [Activates security-specialist]
+
+    ## Security Review
+    - Password hashing: ✅ Using bcrypt
+    - Session management: ⚠️ Consider shorter token expiry
+    ...
+```
+
+Available specialists:
+
+- `security-specialist` - Security audits
+- `performance-specialist` - Optimization
+- `accessibility-specialist` - WCAG compliance
+- `code-reviewer` - Code quality
+- And [other specialists](../.ai-rules/agents/README.md)
+
+## Next Steps
+
+- [Supported Tools](./supported-tools.md) - Setup guides for each AI tool
+- [Philosophy](./philosophy.md) - Understanding the design principles
+- [API Reference](./api.md) - MCP server capabilities
+- [Development Guide](./development.md) - Contributing to Codingbuddy
