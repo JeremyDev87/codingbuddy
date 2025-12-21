@@ -48,6 +48,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Clarification Phase** for PLAN mode (`rules/clarification-guide.md`)
+  - Optional phase triggered when AI detects ambiguous requirements
+  - Sequential Q&A with progress indicator (Question N/M format)
+  - Multiple-choice questions preferred for easy response
+  - Ambiguity assessment checklist (6 categories, triggers on 2+ unclear)
+  - Question count guidelines (2-7 questions based on complexity)
+  - Korean/English output format support
+  - Updated `rules/core.md` with Clarification Phase section
+
 ### Planned
 - Real-world usage testing across all 6 AI tools
 - Performance metrics collection
