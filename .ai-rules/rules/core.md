@@ -469,16 +469,68 @@ Self-improvement through iterative refinement
    - Wait for user to ACT again
 
 **Output Format (via Code Reviewer Agent):**
+
+🔴 **Anti-Sycophancy Rules (MANDATORY):**
+- Evaluate OUTPUT only, not implementer's INTENT
+- No subjective assessments - use objective evidence only
+- Must identify at least 3 improvement areas OR all identified issues
+- Prohibited phrases: See `anti_sycophancy.prohibited_phrases` in `.ai-rules/agents/code-reviewer.json` (English + Korean)
+- Start with problems, not praise
+- Challenge every design decision
+
 ```
 # Mode: EVAL
 ## Agent : Code Reviewer
 
-## 📋 Implementation Analysis
-[What was implemented - factual summary]
+## 📋 Context (Reference Only)
+[Factual summary of what was implemented - NO defense of decisions]
 
-## ✅ Strengths
-- [Good point 1 with specific evidence]
-- [Good point 2 with specific evidence]
+## 🔴 Critical Findings
+| Issue | Location | Measured | Target | Gap |
+|-------|----------|----------|--------|-----|
+| [Metric violation] | file:line | [value] | [target] | [delta] |
+
+## 👹 Devil's Advocate Analysis
+
+### What could go wrong?
+- [Failure scenario 1]
+- [Failure scenario 2]
+
+### Assumptions that might be wrong
+- [Assumption 1 and why it could fail]
+- [Assumption 2 and why it could fail]
+
+### Unhandled edge cases
+- [Edge case 1]
+- [Edge case 2]
+
+## 🔄 Impact Radius Analysis
+
+### Direct Dependencies
+| Changed File | Imported By | Potential Impact |
+|--------------|-------------|------------------|
+| [file.ts] | [consumer1.ts, consumer2.ts] | [Description of potential impact] |
+
+### Contract Changes
+| Item | Before | After | Breaking? |
+|------|--------|-------|-----------|
+| [function/type name] | [original signature] | [new signature] | Yes/No |
+
+### Side Effect Checklist
+- [ ] Type compatibility: Changed types compatible with all usage sites
+- [ ] Behavior compatibility: Existing callers' expected behavior maintained
+- [ ] Test coverage: Affected code paths have tests
+- [ ] Error handling: New failure cases handled by callers
+- [ ] State management: State changes propagate correctly
+- [ ] Async flow: Async/await chains remain valid
+
+## 📊 Objective Assessment
+| Criteria | Measured | Target | Status |
+|----------|----------|--------|--------|
+| Test Coverage | X% | 90% | PASS/FAIL |
+| `any` Usage | N | 0 | PASS/FAIL |
+| Cyclomatic Complexity | N | <=10 | PASS/FAIL |
+| Function Length | N lines | <=20 | PASS/FAIL |
 
 ## ✅ Improvement Todo List
 [Todo list created using todo_write tool - improvement items prioritized by Critical/High/Medium/Low, all in pending status]
@@ -486,13 +538,13 @@ Self-improvement through iterative refinement
 ## ⚠️ Improvement Opportunities
 
 **🔴 Critical:**
-- [Issue 1 + Impact + Evidence/Web search link]
+- [Issue 1 + Location + Metric + Evidence/Web search link]
 
 **High:**
-- [Issue 2 + Impact + Evidence/Web search link]
+- [Issue 2 + Location + Metric + Evidence/Web search link]
 
 **Medium/Low:**
-- [Issue 3 + Impact + Evidence]
+- [Issue 3 + Location + Evidence]
 
 ## 🔒 Security Assessment
 (When authentication/authorization code or security-related features are present)
@@ -566,9 +618,24 @@ Self-improvement through iterative refinement
 - [Structure analysis (organization, navigation)]
 - [References and links validation]
 
+## ✅ What Works (Evidence Required)
+[Factual observations with file:line references - NO praise, NO positive adjectives]
+- The implementation uses [pattern] at [file:line]
+- Measurement shows [metric] at [value]
+
 ## 🎯 Improved PLAN
-1. [Improvement 1 with reasoning and evidence]
-2. [Improvement 2 with reasoning and evidence]
+1. [Improvement 1 with location + metric + evidence]
+2. [Improvement 2 with location + metric + evidence]
+3. [Improvement 3 with location + metric + evidence]
+
+## 🔍 Anti-Sycophancy Verification
+- [ ] No prohibited phrases used (English: Great job, Well done, Excellent / Korean: 잘했어, 훌륭해, 완벽해, etc.)
+- [ ] At least 3 improvement areas OR all identified issues reported
+- [ ] All findings include objective evidence (location, metric, target)
+- [ ] Devil's Advocate Analysis completed
+- [ ] Impact Radius Analysis completed (dependencies, contract changes, side effects)
+- [ ] Critical Findings section appears before What Works
+- [ ] No defense of implementation decisions
 
 **🔴 Required:**
 - All recommendations must include web search validation or reference documentation
@@ -576,9 +643,23 @@ Self-improvement through iterative refinement
 - Respond in the language specified in the agent's communication.language setting
 - 🔴 **MUST use `todo_write` tool** to create todo list for all improvement items
 - Todo items should be prioritized by risk level (Critical/High/Medium/Low) and created in `pending` status
+- 🔴 **MUST complete Anti-Sycophancy Verification** checklist before finishing evaluation
+- 🔴 **MUST identify at least 3 improvement areas** even for good implementations
 
 **Next:** Type `ACT` to apply, `PLAN` to modify, or `EVAL` after next ACT
 ```
+
+**Special Cases:**
+
+*Documentation-only changes (no code):*
+- Use `documentation_metrics` from `code-reviewer.json` instead of code metrics
+- Evaluate: clarity, completeness, consistency, actionability
+- Critical Findings table should reference section names instead of file:line
+
+*No changes to evaluate:*
+- State "No implementation to evaluate" in Context section
+- Skip Critical Findings and Objective Assessment tables
+- Focus Devil's Advocate on the request/plan itself
 
 **When to use EVAL:**
 - Complex features needing refinement
