@@ -2458,7 +2458,6 @@ __metadata:
     zod: "npm:^4.2.1"
   bin:
     codingbuddy: ./dist/src/cli/cli.js
-    codingbuddy-mcp: ./dist/src/main.js
   languageName: unknown
   linkType: soft
 

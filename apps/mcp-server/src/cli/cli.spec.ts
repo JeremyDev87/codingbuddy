@@ -9,6 +9,12 @@ describe('cli', () => {
       expect(result.command).toBe('init');
     });
 
+    it('should parse mcp command', () => {
+      const result = parseArgs(['mcp']);
+
+      expect(result.command).toBe('mcp');
+    });
+
     it('should parse init with --force flag', () => {
       const result = parseArgs(['init', '--force']);
 
@@ -89,6 +95,7 @@ describe('cli', () => {
         .join('');
       expect(output).toContain('codingbuddy');
       expect(output).toContain('init');
+      expect(output).toContain('mcp');
       expect(output).toContain('--help');
     });
   });

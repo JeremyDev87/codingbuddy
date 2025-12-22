@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Multi-AI Rules MCP Server",
   "main": "dist/src/main.js",
-  "bin": {
-    "codingbuddy": "./dist/src/cli/cli.js",
-    "codingbuddy-mcp": "./dist/src/main.js"
-  },
+  "bin": "./dist/src/cli/cli.js",
   "files": [
     "dist",
     "README.md"
