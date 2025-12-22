@@ -14,12 +14,12 @@ Codingbuddy funciona con múltiples asistentes de codificación de IA a través 
 
 | Herramienta | Método de integración | Guía de configuración |
 |-------------|----------------------|----------------------|
-| [Claude Code](#claude-code) | Servidor MCP | [Guía](../../.ai-rules/adapters/claude-code.md) |
-| [Cursor](#cursor) | Directorio Rules | [Guía](../../.ai-rules/adapters/cursor.md) |
-| [GitHub Copilot / Codex](#github-copilot--codex) | Archivo Instructions | [Guía](../../.ai-rules/adapters/codex.md) |
-| [Antigravity](#antigravity) | Directorio Config | [Guía](../../.ai-rules/adapters/antigravity.md) |
-| [Amazon Q](#amazon-q) | Directorio Rules | [Guía](../../.ai-rules/adapters/q.md) |
-| [Kiro](#kiro) | Directorio Spec | [Guía](../../.ai-rules/adapters/kiro.md) |
+| [Claude Code](#claude-code) | Servidor MCP | [Guía](../../packages/rules/.ai-rules/adapters/claude-code.md) |
+| [Cursor](#cursor) | Directorio Rules | [Guía](../../packages/rules/.ai-rules/adapters/cursor.md) |
+| [GitHub Copilot / Codex](#github-copilot--codex) | Archivo Instructions | [Guía](../../packages/rules/.ai-rules/adapters/codex.md) |
+| [Antigravity](#antigravity) | Directorio Config | [Guía](../../packages/rules/.ai-rules/adapters/antigravity.md) |
+| [Amazon Q](#amazon-q) | Directorio Rules | [Guía](../../packages/rules/.ai-rules/adapters/q.md) |
+| [Kiro](#kiro) | Directorio Spec | [Guía](../../packages/rules/.ai-rules/adapters/kiro.md) |
 
 ## Claude Code
 
@@ -54,7 +54,7 @@ Claude Code se conecta a través de MCP, proporcionando acceso completo a la con
 - Llamadas a herramientas (search_rules, get_agent_details, parse_mode)
 - Plantillas de prompts (activate_agent)
 
-[Guía completa](../../.ai-rules/adapters/claude-code.md)
+[Guía completa](../../packages/rules/.ai-rules/adapters/claude-code.md)
 
 ## Cursor
 
@@ -72,11 +72,11 @@ Cursor usa `.cursor/rules/` para instrucciones específicas del proyecto.
 
 # Reglas del proyecto
 
-Sigue las reglas comunes de `.ai-rules/`:
+Sigue las reglas comunes de `packages/rules/.ai-rules/`:
 
-- Flujo de trabajo: @.ai-rules/rules/core.md
-- Calidad: @.ai-rules/rules/augmented-coding.md
-- Contexto: @.ai-rules/rules/project.md
+- Flujo de trabajo: @packages/rules/.ai-rules/rules/core.md
+- Calidad: @packages/rules/.ai-rules/rules/augmented-coding.md
+- Contexto: @packages/rules/.ai-rules/rules/project.md
 ```
 
 ### Características
@@ -85,7 +85,7 @@ Sigue las reglas comunes de `.ai-rules/`:
 - Personalización específica del proyecto
 - Contexto de agentes a través de referencias de archivos
 
-[Guía completa](../../.ai-rules/adapters/cursor.md)
+[Guía completa](../../packages/rules/.ai-rules/adapters/cursor.md)
 
 ## GitHub Copilot / Codex
 
@@ -102,7 +102,7 @@ GitHub Copilot usa `.github/copilot-instructions.md` para instrucciones personal
 
 # Estándares de codificación
 
-Sigue las directrices de `.ai-rules/rules/`:
+Sigue las directrices de `packages/rules/.ai-rules/rules/`:
 
 ## Flujo de trabajo
 Usar flujo PLAN → ACT → EVAL definido en core.md
@@ -119,7 +119,7 @@ Usar flujo PLAN → ACT → EVAL definido en core.md
 - Configuración a nivel de repositorio
 - Configuración compartida por equipo
 
-[Guía completa](../../.ai-rules/adapters/codex.md)
+[Guía completa](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ## Antigravity
 
@@ -137,8 +137,8 @@ Antigravity (basado en Gemini) usa `.antigravity/` para configuración.
 
 # Directrices del proyecto
 
-Referencia: .ai-rules/rules/core.md
-Referencia: .ai-rules/rules/augmented-coding.md
+Referencia: packages/rules/.ai-rules/rules/core.md
+Referencia: packages/rules/.ai-rules/rules/augmented-coding.md
 ```
 
 ### Características
@@ -147,7 +147,7 @@ Referencia: .ai-rules/rules/augmented-coding.md
 - Referencias de archivos de reglas
 - Conciencia del contexto del proyecto
 
-[Guía completa](../../.ai-rules/adapters/antigravity.md)
+[Guía completa](../../packages/rules/.ai-rules/adapters/antigravity.md)
 
 ## Amazon Q
 
@@ -165,11 +165,11 @@ Amazon Q Developer usa `.q/rules/` para reglas personalizadas.
 
 # Estándares de desarrollo
 
-Sigue .ai-rules/ para prácticas de codificación consistentes.
+Sigue packages/rules/.ai-rules/ para prácticas de codificación consistentes.
 
 Archivos clave:
-- .ai-rules/rules/core.md (flujo de trabajo)
-- .ai-rules/rules/augmented-coding.md (TDD)
+- packages/rules/.ai-rules/rules/core.md (flujo de trabajo)
+- packages/rules/.ai-rules/rules/augmented-coding.md (TDD)
 ```
 
 ### Características
@@ -178,7 +178,7 @@ Archivos clave:
 - Características empresariales
 - Soporte de reglas personalizadas
 
-[Guía completa](../../.ai-rules/adapters/q.md)
+[Guía completa](../../packages/rules/.ai-rules/adapters/q.md)
 
 ## Kiro
 
@@ -196,7 +196,7 @@ Kiro usa `.kiro/` para especificaciones y archivos de dirección.
 
 # Dirección del proyecto
 
-Aplicar reglas de .ai-rules/:
+Aplicar reglas de packages/rules/.ai-rules/:
 - Modos de flujo de trabajo (PLAN/ACT/EVAL)
 - Desarrollo TDD
 - Estándares de calidad de código
@@ -208,15 +208,15 @@ Aplicar reglas de .ai-rules/:
 - Sistema de archivos de dirección
 - Integración de gestión de tareas
 
-[Guía completa](../../.ai-rules/adapters/kiro.md)
+[Guía completa](../../packages/rules/.ai-rules/adapters/kiro.md)
 
 ## Añadir nuevas herramientas
 
 Codingbuddy está diseñado para soportar herramientas de IA adicionales:
 
-1. Crear guía de adaptador en `.ai-rules/adapters/{tool}.md`
+1. Crear guía de adaptador en `packages/rules/.ai-rules/adapters/{tool}.md`
 2. Crear directorio de herramienta `.{tool}/`
-3. Referenciar reglas comunes de `.ai-rules/`
+3. Referenciar reglas comunes de `packages/rules/.ai-rules/`
 
 Consulta [Guía de contribución](../../CONTRIBUTING.md) para más detalles.
 

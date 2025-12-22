@@ -14,12 +14,12 @@ Codingbuddy는 통합 규칙 시스템을 통해 여러 AI 코딩 어시스턴�
 
 | 도구 | 통합 방식 | 설정 가이드 |
 |------|-----------|-------------|
-| [Claude Code](#claude-code) | MCP 서버 | [가이드](../../.ai-rules/adapters/claude-code.md) |
-| [Cursor](#cursor) | Rules 디렉토리 | [가이드](../../.ai-rules/adapters/cursor.md) |
-| [GitHub Copilot / Codex](#github-copilot--codex) | Instructions 파일 | [가이드](../../.ai-rules/adapters/codex.md) |
-| [Antigravity](#antigravity) | Config 디렉토리 | [가이드](../../.ai-rules/adapters/antigravity.md) |
-| [Amazon Q](#amazon-q) | Rules 디렉토리 | [가이드](../../.ai-rules/adapters/q.md) |
-| [Kiro](#kiro) | Spec 디렉토리 | [가이드](../../.ai-rules/adapters/kiro.md) |
+| [Claude Code](#claude-code) | MCP 서버 | [가이드](../../packages/rules/.ai-rules/adapters/claude-code.md) |
+| [Cursor](#cursor) | Rules 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/cursor.md) |
+| [GitHub Copilot / Codex](#github-copilot--codex) | Instructions 파일 | [가이드](../../packages/rules/.ai-rules/adapters/codex.md) |
+| [Antigravity](#antigravity) | Config 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/antigravity.md) |
+| [Amazon Q](#amazon-q) | Rules 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/q.md) |
+| [Kiro](#kiro) | Spec 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/kiro.md) |
 
 ## Claude Code
 
@@ -54,7 +54,7 @@ Claude Code는 MCP를 통해 연결되어 프로젝트 설정, 규칙, 전문가
 - 도구 호출 (search_rules, get_agent_details, parse_mode)
 - 프롬프트 템플릿 (activate_agent)
 
-[전체 가이드](../../.ai-rules/adapters/claude-code.md)
+[전체 가이드](../../packages/rules/.ai-rules/adapters/claude-code.md)
 
 ## Cursor
 
@@ -72,11 +72,11 @@ Cursor는 프로젝트별 지침을 위해 `.cursor/rules/`를 사용합니다.
 
 # 프로젝트 규칙
 
-`.ai-rules/`의 공통 규칙을 따릅니다:
+`packages/rules/.ai-rules/`의 공통 규칙을 따릅니다:
 
-- 워크플로우: @.ai-rules/rules/core.md
-- 품질: @.ai-rules/rules/augmented-coding.md
-- 컨텍스트: @.ai-rules/rules/project.md
+- 워크플로우: @packages/rules/.ai-rules/rules/core.md
+- 품질: @packages/rules/.ai-rules/rules/augmented-coding.md
+- 컨텍스트: @packages/rules/.ai-rules/rules/project.md
 ```
 
 ### 기능
@@ -85,7 +85,7 @@ Cursor는 프로젝트별 지침을 위해 `.cursor/rules/`를 사용합니다.
 - 프로젝트별 커스터마이징
 - 파일 참조를 통한 에이전트 컨텍스트
 
-[전체 가이드](../../.ai-rules/adapters/cursor.md)
+[전체 가이드](../../packages/rules/.ai-rules/adapters/cursor.md)
 
 ## GitHub Copilot / Codex
 
@@ -102,7 +102,7 @@ GitHub Copilot은 커스텀 지침을 위해 `.github/copilot-instructions.md`�
 
 # 코딩 표준
 
-`.ai-rules/rules/`의 가이드라인을 따릅니다:
+`packages/rules/.ai-rules/rules/`의 가이드라인을 따릅니다:
 
 ## 워크플로우
 core.md에 정의된 PLAN → ACT → EVAL 워크플로우 사용
@@ -119,7 +119,7 @@ core.md에 정의된 PLAN → ACT → EVAL 워크플로우 사용
 - 저장소 전체 설정
 - 팀 공유 설정
 
-[전체 가이드](../../.ai-rules/adapters/codex.md)
+[전체 가이드](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ## Antigravity
 
@@ -137,8 +137,8 @@ Antigravity (Gemini 기반)는 설정을 위해 `.antigravity/`를 사용합니�
 
 # 프로젝트 가이드라인
 
-참조: .ai-rules/rules/core.md
-참조: .ai-rules/rules/augmented-coding.md
+참조: packages/rules/.ai-rules/rules/core.md
+참조: packages/rules/.ai-rules/rules/augmented-coding.md
 ```
 
 ### 기능
@@ -147,7 +147,7 @@ Antigravity (Gemini 기반)는 설정을 위해 `.antigravity/`를 사용합니�
 - 규칙 파일 참조
 - 프로젝트 컨텍스트 인식
 
-[전체 가이드](../../.ai-rules/adapters/antigravity.md)
+[전체 가이드](../../packages/rules/.ai-rules/adapters/antigravity.md)
 
 ## Amazon Q
 
@@ -165,11 +165,11 @@ Amazon Q Developer는 커스텀 규칙을 위해 `.q/rules/`를 사용합니다.
 
 # 개발 표준
 
-일관된 코딩 관행을 위해 .ai-rules/를 따릅니다.
+일관된 코딩 관행을 위해 packages/rules/.ai-rules/를 따릅니다.
 
 주요 파일:
-- .ai-rules/rules/core.md (워크플로우)
-- .ai-rules/rules/augmented-coding.md (TDD)
+- packages/rules/.ai-rules/rules/core.md (워크플로우)
+- packages/rules/.ai-rules/rules/augmented-coding.md (TDD)
 ```
 
 ### 기능
@@ -178,7 +178,7 @@ Amazon Q Developer는 커스텀 규칙을 위해 `.q/rules/`를 사용합니다.
 - 엔터프라이즈 기능
 - 커스텀 규칙 지원
 
-[전체 가이드](../../.ai-rules/adapters/q.md)
+[전체 가이드](../../packages/rules/.ai-rules/adapters/q.md)
 
 ## Kiro
 
@@ -196,7 +196,7 @@ Kiro는 사양과 스티어링 파일을 위해 `.kiro/`를 사용합니다.
 
 # 프로젝트 스티어링
 
-.ai-rules/의 규칙 적용:
+packages/rules/.ai-rules/의 규칙 적용:
 - 워크플로우 모드 (PLAN/ACT/EVAL)
 - TDD 개발
 - 코드 품질 표준
@@ -208,15 +208,15 @@ Kiro는 사양과 스티어링 파일을 위해 `.kiro/`를 사용합니다.
 - 스티어링 파일 시스템
 - 작업 관리 통합
 
-[전체 가이드](../../.ai-rules/adapters/kiro.md)
+[전체 가이드](../../packages/rules/.ai-rules/adapters/kiro.md)
 
 ## 새 도구 추가하기
 
 Codingbuddy는 추가 AI 도구를 지원하도록 설계되었습니다:
 
-1. `.ai-rules/adapters/{tool}.md`에 어댑터 가이드 생성
+1. `packages/rules/.ai-rules/adapters/{tool}.md`에 어댑터 가이드 생성
 2. `.{tool}/` 도구 디렉토리 생성
-3. `.ai-rules/`의 공통 규칙 참조
+3. `packages/rules/.ai-rules/`의 공통 규칙 참조
 
 자세한 내용은 [기여하기](../../CONTRIBUTING.md)를 참조하세요.
 

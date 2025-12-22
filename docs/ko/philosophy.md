@@ -61,13 +61,13 @@ Codingbuddy는 모든 AI 어시스턴트와 호환되는 통합 규칙 시스템
 ### 단일 소스
 
 ```
-.ai-rules/           ← 권위 있는 소스
+packages/rules/.ai-rules/           ← 권위 있는 소스
 ├── rules/           ← 핵심 규칙 (워크플로우, 품질, 프로젝트)
 ├── agents/          ← 전문가 지식
 └── adapters/        ← 도구별 통합 가이드
 ```
 
-모든 AI 도구 설정이 `.ai-rules/`를 참조합니다. 한 번 수정하면 모든 도구에 적용됩니다.
+모든 AI 도구 설정이 `packages/rules/.ai-rules/`를 참조합니다. 한 번 수정하면 모든 도구에 적용됩니다.
 
 ### 관심사의 분리
 
@@ -132,5 +132,5 @@ PLAN → ACT → EVAL
 
 - [시작하기](./getting-started.md) - 빠른 설정 가이드
 - [지원 도구](./supported-tools.md) - AI 도구 통합
-- [핵심 규칙](../../.ai-rules/rules/core.md) - 워크플로우 상세
-- [에이전트 시스템](../../.ai-rules/agents/README.md) - 전문가 에이전트
+- [핵심 규칙](../../packages/rules/.ai-rules/rules/core.md) - 워크플로우 상세
+- [에이전트 시스템](../../packages/rules/.ai-rules/agents/README.md) - 전문가 에이전트

@@ -209,7 +209,7 @@ AI：[security-specialistを有効化]
 - `performance-specialist` - パフォーマンス最適化
 - `accessibility-specialist` - WCAGコンプライアンス
 - `code-reviewer` - コード品質
-- その他[専門家](../../.ai-rules/agents/README.md)
+- その他[専門家](../../packages/rules/.ai-rules/agents/README.md)
 
 ## 次のステップ
 

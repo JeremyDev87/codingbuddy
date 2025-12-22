@@ -6,8 +6,8 @@ on:
       - master
       - stag-**
     paths:
-      - 'mcp-server/**'
-      - '.ai-rules/**'
+      - 'apps/mcp-server/**'
+      - 'packages/rules/**'
       - '.antigravity/**'
       - '.claude/**'
       - '.codex/**'
@@ -23,9 +23,6 @@ jobs:
   publish-canary:
     if: github.repository == 'JeremyDev87/codingbuddy'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -35,23 +32,14 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Restore dependencies from cache
-        id: cache
-        uses: actions/cache@v5
-        with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --immutable
 
-      - name: Build
-        run: yarn build
+      - name: Build mcp-server
+        run: yarn workspace codingbuddy build
 
-      - name: Publish canary
+      - name: Publish rules canary
+        working-directory: packages/rules
         run: |
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           COMMIT_SHA=${GITHUB_SHA::7}
@@ -62,7 +50,21 @@ jobs:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
 
+      - name: Publish mcp-server canary
+        working-directory: apps/mcp-server
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMIT_SHA=${GITHUB_SHA::7}
+          VERSION="0.0.0-canary.${TIMESTAMP}.${COMMIT_SHA}"
+          # Update version and replace workspace dependency with canary version
+          cat <<< "$( jq --arg v "$VERSION" '.version = $v | .dependencies["codingbuddy-rules"] = $v' package.json )" > package.json
+          yarn npm publish --tag canary
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+
       - name: Output canary version number
+        working-directory: apps/mcp-server
         run: |
           name=$(jq -r .name package.json)
           version=$(jq -r .version package.json)

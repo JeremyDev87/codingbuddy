@@ -31,30 +31,32 @@ git clone https://github.com/Codingbuddydev/codingbuddy.git
 cd codingbuddy
 
 # Install dependencies
-cd mcp-server
 yarn install
 
 # Run tests to verify setup
-yarn test
+yarn workspace codingbuddy test
 
 # Start development server
-yarn start:dev
+yarn workspace codingbuddy start:dev
 ```
 
 ### Project Structure
 
 ```
 codingbuddy/
-├── .ai-rules/           # Shared AI coding rules
-│   ├── rules/           # Core rules (markdown)
-│   ├── agents/          # Specialist agent definitions (JSON)
-│   └── adapters/        # Tool-specific integration guides
-├── mcp-server/          # NestJS-based MCP server
-│   └── src/
-│       ├── mcp/         # MCP protocol handlers
-│       ├── rules/       # Rules service
-│       ├── config/      # Configuration loading
-│       └── keyword/     # Keyword parsing
+├── apps/
+│   └── mcp-server/      # NestJS-based MCP server (codingbuddy)
+│       └── src/
+│           ├── mcp/     # MCP protocol handlers
+│           ├── rules/   # Rules service
+│           ├── config/  # Configuration loading
+│           └── keyword/ # Keyword parsing
+├── packages/
+│   └── rules/           # AI rules package (codingbuddy-rules)
+│       └── .ai-rules/   # Shared AI coding rules
+│           ├── rules/   # Core rules (markdown)
+│           ├── agents/  # Specialist agent definitions (JSON)
+│           └── adapters/# Tool-specific integration guides
 └── docs/                # Documentation
 ```
 
@@ -88,19 +90,20 @@ git checkout -b docs/what-you-are-documenting
 ### 4. Test Your Changes
 
 ```bash
-cd mcp-server
+# Run all checks at once
+yarn workspace codingbuddy validate
 
-# Run all checks
-yarn lint          # ESLint
-yarn format:check  # Prettier
-yarn typecheck     # TypeScript
-yarn test          # Unit tests
-yarn test:coverage # Coverage (must be 80%+)
-yarn circular      # Circular dependency check
-yarn build         # Build verification
+# Or run individual checks
+yarn workspace codingbuddy lint          # ESLint
+yarn workspace codingbuddy format:check  # Prettier
+yarn workspace codingbuddy typecheck     # TypeScript
+yarn workspace codingbuddy test          # Unit tests
+yarn workspace codingbuddy test:coverage # Coverage (must be 80%+)
+yarn workspace codingbuddy circular      # Circular dependency check
+yarn workspace codingbuddy build         # Build verification
 
-# If you modified .ai-rules/ files:
-yarn validate:rules  # Validate rules structure, schema, and markdown
+# If you modified packages/rules/.ai-rules/ files:
+yarn workspace codingbuddy validate:rules  # Validate rules structure, schema, and markdown
 ```
 
 ### 5. Submit a Pull Request
@@ -134,12 +137,12 @@ We use ESLint and Prettier for code formatting:
 
 ```bash
 # Check formatting
-yarn lint
-yarn format:check
+yarn workspace codingbuddy lint
+yarn workspace codingbuddy format:check
 
 # Auto-fix
-yarn lint:fix
-yarn format
+yarn workspace codingbuddy lint:fix
+yarn workspace codingbuddy format
 ```
 
 ### Testing
@@ -150,10 +153,10 @@ yarn format
 
 ```bash
 # Run tests
-yarn test
+yarn workspace codingbuddy test
 
 # Run with coverage
-yarn test:coverage
+yarn workspace codingbuddy test:coverage
 ```
 
 ## Commit Messages

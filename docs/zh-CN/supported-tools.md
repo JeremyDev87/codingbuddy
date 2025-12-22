@@ -14,12 +14,12 @@ Codingbuddy 通过统一的规则系统与多个 AI 编程助手配合使用。
 
 | 工具 | 集成方式 | 设置指南 |
 |------|----------|----------|
-| [Claude Code](#claude-code) | MCP 服务器 | [指南](../../.ai-rules/adapters/claude-code.md) |
-| [Cursor](#cursor) | Rules 目录 | [指南](../../.ai-rules/adapters/cursor.md) |
-| [GitHub Copilot / Codex](#github-copilot--codex) | Instructions 文件 | [指南](../../.ai-rules/adapters/codex.md) |
-| [Antigravity](#antigravity) | Config 目录 | [指南](../../.ai-rules/adapters/antigravity.md) |
-| [Amazon Q](#amazon-q) | Rules 目录 | [指南](../../.ai-rules/adapters/q.md) |
-| [Kiro](#kiro) | Spec 目录 | [指南](../../.ai-rules/adapters/kiro.md) |
+| [Claude Code](#claude-code) | MCP 服务器 | [指南](../../packages/rules/.ai-rules/adapters/claude-code.md) |
+| [Cursor](#cursor) | Rules 目录 | [指南](../../packages/rules/.ai-rules/adapters/cursor.md) |
+| [GitHub Copilot / Codex](#github-copilot--codex) | Instructions 文件 | [指南](../../packages/rules/.ai-rules/adapters/codex.md) |
+| [Antigravity](#antigravity) | Config 目录 | [指南](../../packages/rules/.ai-rules/adapters/antigravity.md) |
+| [Amazon Q](#amazon-q) | Rules 目录 | [指南](../../packages/rules/.ai-rules/adapters/q.md) |
+| [Kiro](#kiro) | Spec 目录 | [指南](../../packages/rules/.ai-rules/adapters/kiro.md) |
 
 ## Claude Code
 
@@ -54,7 +54,7 @@ Claude Code 通过 MCP 连接，提供对项目配置、规则和专家代理的
 - 工具调用（search_rules、get_agent_details、parse_mode）
 - 提示模板（activate_agent）
 
-[完整指南](../../.ai-rules/adapters/claude-code.md)
+[完整指南](../../packages/rules/.ai-rules/adapters/claude-code.md)
 
 ## Cursor
 
@@ -72,11 +72,11 @@ Cursor 使用 `.cursor/rules/` 进行项目特定的指令配置。
 
 # 项目规则
 
-遵循 `.ai-rules/` 中的通用规则：
+遵循 `packages/rules/.ai-rules/` 中的通用规则：
 
-- 工作流：@.ai-rules/rules/core.md
-- 质量：@.ai-rules/rules/augmented-coding.md
-- 上下文：@.ai-rules/rules/project.md
+- 工作流：@packages/rules/.ai-rules/rules/core.md
+- 质量：@packages/rules/.ai-rules/rules/augmented-coding.md
+- 上下文：@packages/rules/.ai-rules/rules/project.md
 ```
 
 ### 功能
@@ -85,7 +85,7 @@ Cursor 使用 `.cursor/rules/` 进行项目特定的指令配置。
 - 项目特定的自定义
 - 通过文件引用访问代理上下文
 
-[完整指南](../../.ai-rules/adapters/cursor.md)
+[完整指南](../../packages/rules/.ai-rules/adapters/cursor.md)
 
 ## GitHub Copilot / Codex
 
@@ -102,7 +102,7 @@ GitHub Copilot 使用 `.github/copilot-instructions.md` 进行自定义指令配
 
 # 编码标准
 
-遵循 `.ai-rules/rules/` 中的指南：
+遵循 `packages/rules/.ai-rules/rules/` 中的指南：
 
 ## 工作流
 使用 core.md 中定义的 PLAN → ACT → EVAL 工作流
@@ -119,7 +119,7 @@ GitHub Copilot 使用 `.github/copilot-instructions.md` 进行自定义指令配
 - 仓库范围的设置
 - 团队共享配置
 
-[完整指南](../../.ai-rules/adapters/codex.md)
+[完整指南](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ## Antigravity
 
@@ -137,8 +137,8 @@ Antigravity（基于 Gemini）使用 `.antigravity/` 进行配置。
 
 # 项目指南
 
-引用：.ai-rules/rules/core.md
-引用：.ai-rules/rules/augmented-coding.md
+引用：packages/rules/.ai-rules/rules/core.md
+引用：packages/rules/.ai-rules/rules/augmented-coding.md
 ```
 
 ### 功能
@@ -147,7 +147,7 @@ Antigravity（基于 Gemini）使用 `.antigravity/` 进行配置。
 - 规则文件引用
 - 项目上下文感知
 
-[完整指南](../../.ai-rules/adapters/antigravity.md)
+[完整指南](../../packages/rules/.ai-rules/adapters/antigravity.md)
 
 ## Amazon Q
 
@@ -165,11 +165,11 @@ Amazon Q Developer 使用 `.q/rules/` 进行自定义规则配置。
 
 # 开发标准
 
-遵循 .ai-rules/ 以保持一致的编码实践。
+遵循 packages/rules/.ai-rules/ 以保持一致的编码实践。
 
 关键文件：
-- .ai-rules/rules/core.md（工作流）
-- .ai-rules/rules/augmented-coding.md（TDD）
+- packages/rules/.ai-rules/rules/core.md（工作流）
+- packages/rules/.ai-rules/rules/augmented-coding.md（TDD）
 ```
 
 ### 功能
@@ -178,7 +178,7 @@ Amazon Q Developer 使用 `.q/rules/` 进行自定义规则配置。
 - 企业功能
 - 自定义规则支持
 
-[完整指南](../../.ai-rules/adapters/q.md)
+[完整指南](../../packages/rules/.ai-rules/adapters/q.md)
 
 ## Kiro
 
@@ -196,7 +196,7 @@ Kiro 使用 `.kiro/` 进行规范和引导文件配置。
 
 # 项目引导
 
-应用 .ai-rules/ 中的规则：
+应用 packages/rules/.ai-rules/ 中的规则：
 - 工作流模式（PLAN/ACT/EVAL）
 - TDD 开发
 - 代码质量标准
@@ -208,15 +208,15 @@ Kiro 使用 `.kiro/` 进行规范和引导文件配置。
 - 引导文件系统
 - 任务管理集成
 
-[完整指南](../../.ai-rules/adapters/kiro.md)
+[完整指南](../../packages/rules/.ai-rules/adapters/kiro.md)
 
 ## 添加新工具
 
 Codingbuddy 设计为支持额外的 AI 工具：
 
-1. 在 `.ai-rules/adapters/{tool}.md` 创建适配器指南
+1. 在 `packages/rules/.ai-rules/adapters/{tool}.md` 创建适配器指南
 2. 创建工具目录 `.{tool}/`
-3. 引用 `.ai-rules/` 中的通用规则
+3. 引用 `packages/rules/.ai-rules/` 中的通用规则
 
 详情请参阅[贡献指南](../../CONTRIBUTING.md)。
 

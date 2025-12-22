@@ -169,7 +169,7 @@ You can also use `codingbuddy.config.json`:
 ### Rule File Structure
 
 ```
-.ai-rules/
+packages/rules/.ai-rules/
 ├── rules/
 │   ├── core.md              # Workflow rules (PLAN/ACT/EVAL)
 │   ├── project.md           # Project-specific guidelines
@@ -180,7 +180,7 @@ You can also use `codingbuddy.config.json`:
 
 ### Modifying Core Rules
 
-Edit `.ai-rules/rules/core.md` to customize workflow:
+Edit `packages/rules/.ai-rules/rules/core.md` to customize workflow:
 
 ```markdown
 # Core Workflow Rules
@@ -203,7 +203,7 @@ Edit `.ai-rules/rules/core.md` to customize workflow:
 
 ### Project-Specific Rules
 
-Edit `.ai-rules/rules/project.md` for your project:
+Edit `packages/rules/.ai-rules/rules/project.md` for your project:
 
 ```markdown
 # Project Rules
@@ -226,10 +226,10 @@ Edit `.ai-rules/rules/project.md` for your project:
 
 ### Adding Custom Rules
 
-Create new rule files in `.ai-rules/rules/`:
+Create new rule files in `packages/rules/.ai-rules/rules/`:
 
 ```markdown
-# .ai-rules/rules/api-guidelines.md
+# packages/rules/.ai-rules/rules/api-guidelines.md
 
 # API Design Guidelines
 
@@ -249,8 +249,8 @@ Reference in your agents:
 ```json
 {
   "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/api-guidelines.md"
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/api-guidelines.md"
   ]
 }
 ```
@@ -261,7 +261,7 @@ Reference in your agents:
 
 ### Agent File Structure
 
-Create JSON files in `.ai-rules/agents/`:
+Create JSON files in `packages/rules/.ai-rules/agents/`:
 
 ```json
 {
@@ -281,8 +281,8 @@ Create JSON files in `.ai-rules/agents/`:
   },
 
   "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/project.md"
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/project.md"
   ],
 
   "workflow": {
@@ -323,8 +323,8 @@ Create JSON files in `.ai-rules/agents/`:
   },
 
   "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/project.md"
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/project.md"
   ],
 
   "workflow": {
@@ -369,7 +369,7 @@ Create JSON files in `.ai-rules/agents/`:
   },
 
   "context_files": [
-    ".ai-rules/rules/core.md"
+    "packages/rules/.ai-rules/rules/core.md"
   ],
 
   "workflow": {
@@ -511,7 +511,7 @@ If a new version has breaking changes:
 
 ### Configuration Management
 
-1. **Version control** - Track `.ai-rules/` in git
+1. **Version control** - Track `packages/rules/.ai-rules/` in git
 2. **Document changes** - Add comments explaining customizations
 3. **Team alignment** - Share configuration with team
 4. **Regular updates** - Keep up with new features

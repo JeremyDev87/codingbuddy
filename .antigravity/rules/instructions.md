@@ -2,11 +2,11 @@
 
 ## Common AI Rules Reference
 
-This project follows shared AI coding rules from `.ai-rules/` for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
+This project follows shared AI coding rules from `packages/rules/.ai-rules/` for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
 
 ### 📚 Core Workflow (PLAN/ACT/EVAL)
 
-**Source**: `.ai-rules/rules/core.md`
+**Source**: `packages/rules/.ai-rules/rules/core.md`
 
 #### Work Modes
 
@@ -27,11 +27,11 @@ You have three modes of operation:
 - Print `# Mode: ACT` in act mode
 - Print `# Mode: EVAL` in eval mode
 
-See full workflow details in [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+See full workflow details in [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 
 ### 🏗️ Project Context
 
-**Source**: `.ai-rules/rules/project.md`
+**Source**: `packages/rules/.ai-rules/rules/project.md`
 
 #### Tech Stack
 
@@ -47,11 +47,11 @@ src/
 └── shared/       # Common modules
 ```
 
-See full project setup in [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+See full project setup in [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
 
 ### 🎯 Augmented Coding Principles
 
-**Source**: `.ai-rules/rules/augmented-coding.md`
+**Source**: `packages/rules/.ai-rules/rules/augmented-coding.md`
 
 #### TDD Cycle
 1. **Red**: Write a failing test
@@ -65,11 +65,11 @@ See full project setup in [.ai-rules/rules/project.md](../../.ai-rules/rules/pro
 - **90%+ test coverage** goal
 - **No mocking** - test real behavior
 
-See full augmented coding guide in [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+See full augmented coding guide in [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
 
 ### 🤖 Specialist Agents
 
-**Source**: `.ai-rules/agents/`
+**Source**: `packages/rules/.ai-rules/agents/`
 
 Available specialist agents:
 - **Frontend Developer** - React/Next.js, TDD, design system
@@ -85,7 +85,7 @@ Available specialist agents:
 - **Code Quality Specialist** - SOLID, DRY, complexity
 - **DevOps Engineer** - Docker, Datadog, deployment
 
-See agent details in [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
+See agent details in [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
 
 ## Antigravity-Specific Features
 
@@ -105,4 +105,4 @@ Use `task_boundary` tool for tracking progress in different modes:
 
 ---
 
-For full integration guide, see [.ai-rules/adapters/antigravity.md](../../.ai-rules/adapters/antigravity.md)
+For full integration guide, see [packages/rules/.ai-rules/adapters/antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md)

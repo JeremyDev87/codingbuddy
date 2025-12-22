@@ -75,18 +75,18 @@ npx codingbuddy init
 ## 工作原理
 
 ```
-.ai-rules/                 ← 共享规则（单一数据源）
+packages/rules/.ai-rules/  ← 共享规则（单一数据源）
 ├── rules/                 ← 核心规则（工作流、质量）
 ├── agents/                ← 专家代理（安全、性能等）
 └── adapters/              ← 工具特定的集成指南
 
-.cursor/                   ← Cursor 引用 .ai-rules/
-.claude/                   ← Claude Code 引用 .ai-rules/
-.codex/                    ← GitHub Copilot 引用 .ai-rules/
+.cursor/                   ← Cursor 引用 packages/rules/.ai-rules/
+.claude/                   ← Claude Code 引用 packages/rules/.ai-rules/
+.codex/                    ← GitHub Copilot 引用 packages/rules/.ai-rules/
 ...
 ```
 
-所有 AI 工具配置都引用同一个 `.ai-rules/` 目录。只需修改一次规则，所有工具都会遵循更新后的标准。
+所有 AI 工具配置都引用同一个 `packages/rules/.ai-rules/` 目录。只需修改一次规则，所有工具都会遵循更新后的标准。
 
 ## 贡献
 

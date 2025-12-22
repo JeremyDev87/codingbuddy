@@ -10,15 +10,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 codingbuddy/
-├── .ai-rules/           # Shared AI coding rules (single source of truth)
-│   ├── rules/           # Core rules (workflow, project, augmented-coding)
-│   ├── agents/          # 12 specialist agent definitions (JSON)
-│   └── adapters/        # Tool-specific integration guides
-├── mcp-server/          # NestJS-based MCP server
-│   └── src/
-│       ├── main.ts      # Entry point (stdio/SSE transport)
-│       ├── mcp/         # MCP protocol handlers
-│       └── rules/       # Rules service (file reading, search)
+├── apps/
+│   └── mcp-server/      # NestJS-based MCP server
+│       └── src/
+│           ├── main.ts  # Entry point (stdio/SSE transport)
+│           ├── mcp/     # MCP protocol handlers
+│           └── rules/   # Rules service (file reading, search)
+├── packages/
+│   └── rules/           # AI coding rules package (codingbuddy-rules)
+│       └── .ai-rules/   # Shared AI coding rules (single source of truth)
+│           ├── rules/   # Core rules (workflow, project, augmented-coding)
+│           ├── agents/  # 12 specialist agent definitions (JSON)
+│           └── adapters/# Tool-specific integration guides
 ├── .cursor/             # Cursor AI config
 ├── .claude/             # Claude Code config
 ├── .antigravity/        # Antigravity (Gemini) config
@@ -29,20 +32,19 @@ codingbuddy/
 
 ## Commands
 
-### MCP Server (mcp-server/)
+### MCP Server (apps/mcp-server/)
 
 ```bash
-cd mcp-server
+# From root directory
+yarn workspace codingbuddy start:dev   # Run with ts-node
+yarn workspace codingbuddy build       # Compile TypeScript
+yarn workspace codingbuddy test        # Run tests
 
-# Development
+# Or from apps/mcp-server/
+cd apps/mcp-server
 yarn start:dev          # Run with ts-node
-
-# Build & Run
 yarn build              # Compile TypeScript
 yarn start              # Run compiled version
-
-# Publishing
-yarn prepublishOnly     # Prepare for npm publish (copies .ai-rules, builds)
 ```
 
 ### Environment Variables

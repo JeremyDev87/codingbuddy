@@ -2,11 +2,11 @@
 
 ## Project Rules
 
-Follow the common rules defined in `.ai-rules/` for consistency across all AI coding assistants.
+Follow the common rules defined in `packages/rules/.ai-rules/` for consistency across all AI coding assistants.
 
 ### 📚 Core Workflow
 
-**Source**: `.ai-rules/rules/core.md`
+**Source**: `packages/rules/.ai-rules/rules/core.md`
 
 **Work Modes**:
 - **PLAN mode**: Create implementation plans with TDD approach
@@ -19,7 +19,7 @@ Follow the common rules defined in `.ai-rules/` for consistency across all AI co
 
 ### 🏗️ Project Context
 
-**Source**: `.ai-rules/rules/project.md`
+**Source**: `packages/rules/.ai-rules/rules/project.md`
 
 **Tech Stack**: 프로젝트의 `package.json` 참조
 
@@ -30,7 +30,7 @@ Follow the common rules defined in `.ai-rules/` for consistency across all AI co
 
 ### 🎯 Code Quality
 
-**Source**: `.ai-rules/rules/augmented-coding.md`
+**Source**: `packages/rules/.ai-rules/rules/augmented-coding.md`
 
 **TDD Cycle**: Red (failing test) → Green (minimal code) → Refactor
 
@@ -43,7 +43,7 @@ Follow the common rules defined in `.ai-rules/` for consistency across all AI co
 
 ### 🤖 Specialist Agents
 
-**Source**: `.ai-rules/agents/`
+**Source**: `packages/rules/.ai-rules/agents/`
 
 **Available Specialists** (12 agents):
 - Frontend Developer, Code Reviewer
@@ -51,7 +51,7 @@ Follow the common rules defined in `.ai-rules/` for consistency across all AI co
 - Accessibility, SEO, Design System, Documentation
 - Code Quality, DevOps Engineer
 
-See [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md) for details.
+See [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md) for details.
 
 ## Keyword Invocation
 
@@ -68,18 +68,18 @@ See [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md) for details.
 - Always respond in **Korean (한국어)**
 - Use structured markdown formatting
 - Provide clear, actionable feedback
-- Reference project context from `.ai-rules/rules/project.md`
+- Reference project context from `packages/rules/.ai-rules/rules/project.md`
 - Follow PLAN → ACT → EVAL workflow when appropriate
 
 ## Full Documentation
 
 For comprehensive guides:
-- **Core Rules**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
-- **Project Setup**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
-- **Augmented Coding**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
-- **Agents System**: [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
-- **Claude Integration**: [.ai-rules/adapters/claude-code.md](../../.ai-rules/adapters/claude-code.md)
+- **Core Rules**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
+- **Project Setup**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
+- **Augmented Coding**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
+- **Agents System**: [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
+- **Claude Integration**: [packages/rules/.ai-rules/adapters/claude-code.md](../../packages/rules/.ai-rules/adapters/claude-code.md)
 
 ---
 
-**Note**: These instructions reference common AI rules from `.ai-rules/` directory shared across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro) for consistency.
+**Note**: These instructions reference common AI rules from `packages/rules/.ai-rules/` directory shared across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro) for consistency.

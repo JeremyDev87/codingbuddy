@@ -75,18 +75,18 @@ Claude Desktop設定に追加（`~/Library/Application Support/Claude/claude_des
 ## 仕組み
 
 ```
-.ai-rules/                 ← 共有ルール（単一ソース）
+packages/rules/.ai-rules/  ← 共有ルール（単一ソース）
 ├── rules/                 ← コアルール（ワークフロー、品質）
 ├── agents/                ← スペシャリスト専門知識（セキュリティ、パフォーマンスなど）
 └── adapters/              ← ツール固有の統合ガイド
 
-.cursor/                   ← Cursorが.ai-rules/を参照
-.claude/                   ← Claude Codeが.ai-rules/を参照
-.codex/                    ← GitHub Copilotが.ai-rules/を参照
+.cursor/                   ← Cursorがpackages/rules/.ai-rules/を参照
+.claude/                   ← Claude Codeがpackages/rules/.ai-rules/を参照
+.codex/                    ← GitHub Copilotがpackages/rules/.ai-rules/を参照
 ...
 ```
 
-すべてのAIツール設定が同じ`.ai-rules/`ディレクトリを参照します。ルールを一度変更すれば、すべてのツールが更新された標準に従います。
+すべてのAIツール設定が同じ`packages/rules/.ai-rules/`ディレクトリを参照します。ルールを一度変更すれば、すべてのツールが更新された標準に従います。
 
 ## コントリビューション
 

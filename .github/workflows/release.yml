@@ -7,10 +7,6 @@ on:
 env:
   NODE_OPTIONS: --max_old_space_size=4096
 
-defaults:
-  run:
-    working-directory: mcp-server
-
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -26,22 +22,37 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build
-        run: yarn build
+      - name: Build mcp-server
+        run: yarn workspace codingbuddy build
 
-      - name: Publish
+      - name: Publish rules
+        working-directory: packages/rules
         run: |
-          # Extract version from tag (remove 'refs/tags/' and 'v' prefix)
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           TAG_NAME="${TAG_NAME#v}"
-          echo "Publishing version: $TAG_NAME"
+          echo "Publishing codingbuddy-rules version: $TAG_NAME"
           npm version "$TAG_NAME" --no-git-tag-version
           yarn npm publish
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_REF: ${{ github.ref }}
 
+      - name: Publish mcp-server
+        working-directory: apps/mcp-server
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          TAG_NAME="${TAG_NAME#v}"
+          echo "Publishing codingbuddy version: $TAG_NAME"
+          npm version "$TAG_NAME" --no-git-tag-version
+          # Replace workspace dependency with actual version
+          cat <<< "$( jq --arg v "$TAG_NAME" '.dependencies["codingbuddy-rules"] = $v' package.json )" > package.json
+          yarn npm publish
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_REF: ${{ github.ref }}
+
       - name: Output version number
+        working-directory: apps/mcp-server
         run: |
           name=$(jq -r .name package.json)
           version=$(jq -r .version package.json)

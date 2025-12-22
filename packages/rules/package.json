@@ -1,0 +1,32 @@
+{
+  "name": "codingbuddy-rules",
+  "version": "1.0.0",
+  "description": "AI coding rules for consistent practices across AI assistants",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    ".ai-rules"
+  ],
+  "keywords": [
+    "ai",
+    "coding",
+    "rules",
+    "claude",
+    "cursor",
+    "codex",
+    "mcp"
+  ],
+  "author": "JeremyDev87",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JeremyDev87/codingbuddy",
+    "directory": "packages/rules"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "yarn@4.11.0"
+}

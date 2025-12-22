@@ -12,11 +12,8 @@ export class RulesService {
   constructor() {
     // 경로 탐색 전략:
     // 1. 환경변수로 직접 지정된 경우 우선 사용
-    // 2. NPM 패키지로 설치된 경우: node_modules/codingbuddy/.ai-rules
-    // 3. 개발 환경: mcp-server/../.ai-rules
-    //
-    // 빌드 후 구조: dist/src/rules/rules.service.js
-    // 개발 환경: src/rules/rules.service.ts
+    // 2. codingbuddy-rules 패키지에서 경로 가져오기
+    // 3. 개발 환경 폴백: require.resolve 실패 시
 
     if (process.env.CODINGBUDDY_RULES_DIR) {
       this.rulesDir = process.env.CODINGBUDDY_RULES_DIR;
@@ -24,23 +21,41 @@ export class RulesService {
       return;
     }
 
-    // 빌드 후: dist/src/rules → 패키지 루트로 3단계 상위
-    // 개발 환경: src/rules → 패키지 루트로 2단계 상위
-    const isBuilt =
-      __dirname.includes('/dist/') || __dirname.includes('\\dist\\');
-    const stepsUp = isBuilt ? '../../..' : '../..';
-    const packageRoot = path.resolve(__dirname, stepsUp);
+    try {
+      // codingbuddy-rules 패키지에서 rulesPath 가져오기
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { rulesPath } = require('codingbuddy-rules');
+      this.rulesDir = rulesPath;
+      this.logger.log(`Rules directory set from package: ${this.rulesDir}`);
+    } catch {
+      // 개발 환경 폴백: 패키지를 찾을 수 없는 경우
+      this.logger.warn(
+        'codingbuddy-rules package not found, using development fallback',
+      );
+      this.rulesDir = this.findDevRulesDir();
+      this.logger.log(`Rules directory set to: ${this.rulesDir}`);
+    }
+  }
 
-    // 1. 패키지 루트의 .ai-rules (NPM 설치 시)
-    let candidate = path.join(packageRoot, '.ai-rules');
+  private findDevRulesDir(): string {
+    // 개발 환경에서 packages/rules/.ai-rules 또는 루트의 .ai-rules 심볼릭 링크 찾기
+    // 빌드 후: dist/src/rules → 4단계 상위가 apps/mcp-server
+    // 개발 환경: src/rules → 3단계 상위가 apps/mcp-server
+    const candidates = [
+      path.resolve(__dirname, '../../../../packages/rules/.ai-rules'), // 빌드 후
+      path.resolve(__dirname, '../../../packages/rules/.ai-rules'), // 개발 환경
+      path.resolve(__dirname, '../../../../.ai-rules'), // 심볼릭 링크 (빌드 후)
+      path.resolve(__dirname, '../../../.ai-rules'), // 심볼릭 링크 (개발)
+    ];
 
-    if (!this.checkExists(candidate)) {
-      // 2. 개발 환경 (mcp-server/../.ai-rules)
-      candidate = path.resolve(packageRoot, '../.ai-rules');
+    for (const candidate of candidates) {
+      if (this.checkExists(candidate)) {
+        return candidate;
+      }
     }
 
-    this.rulesDir = candidate;
-    this.logger.log(`Rules directory set to: ${this.rulesDir}`);
+    // 마지막 폴백
+    return candidates[0];
   }
 
   private checkExists(pathStr: string): boolean {

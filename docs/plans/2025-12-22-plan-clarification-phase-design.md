@@ -118,7 +118,7 @@ Areas requiring clarification:
 
 ## Files Created/Modified
 
-### 1. NEW: `.ai-rules/rules/clarification-guide.md`
+### 1. NEW: `packages/rules/.ai-rules/rules/clarification-guide.md`
 
 Purpose: Guidelines for AI to generate contextual clarification questions.
 
@@ -189,7 +189,7 @@ Purpose: Guidelines for AI to generate contextual clarification questions.
 
 ---
 
-### 2. MODIFIED: `.ai-rules/rules/core.md`
+### 2. MODIFIED: `packages/rules/.ai-rules/rules/core.md`
 
 Location: Inside "Plan Mode" section, before "What PLAN does"
 
@@ -228,7 +228,7 @@ Resolve ambiguous requirements through sequential Q&A before creating a plan.
 - User provides comprehensive specification document
 
 **Reference:**
-See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
+See `packages/rules/.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 ```
 
 ---

@@ -80,7 +80,7 @@ interface ParseModeResult {
 
 ## 설정 파일 구조
 
-**파일 위치:** `.ai-rules/keyword-modes.json`
+**파일 위치:** `packages/rules/.ai-rules/keyword-modes.json`
 
 ```json
 {
@@ -110,7 +110,7 @@ interface ParseModeResult {
 ### 새로 생성할 파일
 
 ```
-.ai-rules/
+packages/rules/.ai-rules/
 └── keyword-modes.json          # 모드별 규칙 매핑 설정
 
 mcp-server/src/
@@ -225,7 +225,7 @@ describe('KeywordService', () => {
 
 ## 구현 태스크
 
-- [ ] `.ai-rules/keyword-modes.json` 설정 파일 생성
+- [ ] `packages/rules/.ai-rules/keyword-modes.json` 설정 파일 생성
 - [ ] `keyword.types.ts` 타입 정의
 - [ ] `keyword.service.ts` 파싱 로직 구현
 - [ ] `keyword.service.spec.ts` 테스트 작성 (100% 커버리지)

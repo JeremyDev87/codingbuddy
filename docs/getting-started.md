@@ -209,7 +209,7 @@ Available specialists:
 - `performance-specialist` - Optimization
 - `accessibility-specialist` - WCAG compliance
 - `code-reviewer` - Code quality
-- And [other specialists](../.ai-rules/agents/README.md)
+- And [other specialists](../packages/rules/.ai-rules/agents/README.md)
 
 ## Next Steps
 

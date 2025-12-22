@@ -61,13 +61,13 @@ Las mejores prácticas provienen de la experiencia del mundo real:
 ### Fuente única de verdad
 
 ```
-.ai-rules/           ← Fuente autoritativa
+packages/rules/.ai-rules/           ← Fuente autoritativa
 ├── rules/           ← Reglas principales (flujo de trabajo, calidad, proyecto)
 ├── agents/          ← Conocimiento especializado
 └── adapters/        ← Guías de integración específicas por herramienta
 ```
 
-Todas las configuraciones de herramientas de IA referencian `.ai-rules/`. Actualiza una vez, todas las herramientas se benefician.
+Todas las configuraciones de herramientas de IA referencian `packages/rules/.ai-rules/`. Actualiza una vez, todas las herramientas se benefician.
 
 ### Separación de responsabilidades
 
@@ -132,5 +132,5 @@ Este flujo de trabajo previene la trampa común de que los asistentes de IA salt
 
 - [Primeros pasos](./getting-started.md) - Guía de configuración rápida
 - [Herramientas compatibles](./supported-tools.md) - Integración de herramientas de IA
-- [Reglas principales](../../.ai-rules/rules/core.md) - Detalles del flujo de trabajo
-- [Sistema de agentes](../../.ai-rules/agents/README.md) - Agentes especialistas
+- [Reglas principales](../../packages/rules/.ai-rules/rules/core.md) - Detalles del flujo de trabajo
+- [Sistema de agentes](../../packages/rules/.ai-rules/agents/README.md) - Agentes especialistas

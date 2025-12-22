@@ -1,14 +1,14 @@
-# Remove Project-Specific Information from .ai-rules/
+# Remove Project-Specific Information from packages/rules/.ai-rules/
 
 ## Background
 
-`.ai-rules/` was designed as a **universal AI rules template that can be shared across multiple projects**. However, it currently contains hardcoded domain, structure, and configuration information from a specific project, making it **unusable in other projects**.
+`packages/rules/.ai-rules/` was designed as a **universal AI rules template that can be shared across multiple projects**. However, it currently contains hardcoded domain, structure, and configuration information from a specific project, making it **unusable in other projects**.
 
 ## Problem
 
 ### 1. Not Reusable
 
-When copying `.ai-rules/` to another project:
+When copying `packages/rules/.ai-rules/` to another project:
 - References **non-existent domain directories** like `magazine/`, `article/`, `newsletter/`
 - Guides to use **undefined scripts** like `yarn test:unit`, `yarn e2e:open`
 - References **non-existent files** like `styles.mdc`
@@ -17,15 +17,15 @@ When AI follows these rules, it causes **incorrect code generation** and **confu
 
 ### 2. Maintenance Difficulty
 
-When project-specific information exists in `.ai-rules/`:
+When project-specific information exists in `packages/rules/.ai-rules/`:
 - Structure changes require **updating two places** (project + .ai-rules) simultaneously
 - **Unclear distinction** between "universal" and "project-specific" information
 
 ### 3. Design Principle Violation
 
-Original `.ai-rules/` design:
+Original `packages/rules/.ai-rules/` design:
 ```
-.ai-rules/          → Universal rules (Single Source of Truth)
+packages/rules/.ai-rules/          → Universal rules (Single Source of Truth)
 .cursor/, .claude/  → Tool-specific references + Project customizations
 ```
 
@@ -35,7 +35,7 @@ The current state violates this principle.
 
 ## Goal
 
-Make `.ai-rules/` a **universal template instantly applicable to any project**.
+Make `packages/rules/.ai-rules/` a **universal template instantly applicable to any project**.
 
 ### Expected Benefits
 
@@ -84,7 +84,7 @@ Make `.ai-rules/` a **universal template instantly applicable to any project**.
 
 ### Required
 
-- [ ] No `magazine`, `newsletter`, `article`, `author`, `collection` keywords in `.ai-rules/`
+- [ ] No `magazine`, `newsletter`, `article`, `author`, `collection` keywords in `packages/rules/.ai-rules/`
 - [ ] No specific version references like `Next.js@15`, `React@19`
 - [ ] No `styles.mdc` references
 - [ ] All `.mdc` extension references corrected to `.md`
@@ -93,10 +93,10 @@ Make `.ai-rules/` a **universal template instantly applicable to any project**.
 
 ```bash
 # Commands below should return no results
-grep -r "magazine\|newsletter\|article\|author\|collection" .ai-rules/
-grep -r "Next.js@\|React@" .ai-rules/
-grep -r "styles.mdc" .ai-rules/
-grep -r "\.mdc" .ai-rules/
+grep -r "magazine\|newsletter\|article\|author\|collection" packages/rules/.ai-rules/
+grep -r "Next.js@\|React@" packages/rules/.ai-rules/
+grep -r "styles.mdc" packages/rules/.ai-rules/
+grep -r "\.mdc" packages/rules/.ai-rules/
 ```
 
 ---
@@ -113,5 +113,5 @@ Simply deleting project-specific information reduces the usefulness of guideline
 
 ### Related Documents
 
-- `.ai-rules/README.md` - Overall system documentation
-- `.ai-rules/adapters/*.md` - Tool-specific integration guides
+- `packages/rules/.ai-rules/README.md` - Overall system documentation
+- `packages/rules/.ai-rules/adapters/*.md` - Tool-specific integration guides

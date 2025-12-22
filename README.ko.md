@@ -75,18 +75,18 @@ Claude Desktop 설정 파일에 추가 (`~/Library/Application Support/Claude/cl
 ## 작동 방식
 
 ```
-.ai-rules/                 ← 공유 규칙 (단일 소스)
+packages/rules/.ai-rules/  ← 공유 규칙 (단일 소스)
 ├── rules/                 ← 핵심 규칙 (워크플로우, 품질)
 ├── agents/                ← 전문가 에이전트 (보안, 성능 등)
 └── adapters/              ← 도구별 통합 가이드
 
-.cursor/                   ← Cursor가 .ai-rules/ 참조
-.claude/                   ← Claude Code가 .ai-rules/ 참조
-.codex/                    ← GitHub Copilot이 .ai-rules/ 참조
+.cursor/                   ← Cursor가 packages/rules/.ai-rules/ 참조
+.claude/                   ← Claude Code가 packages/rules/.ai-rules/ 참조
+.codex/                    ← GitHub Copilot이 packages/rules/.ai-rules/ 참조
 ...
 ```
 
-모든 AI 도구 설정이 동일한 `.ai-rules/` 디렉토리를 참조합니다. 규칙을 한 번 수정하면 모든 도구가 업데이트된 표준을 따릅니다.
+모든 AI 도구 설정이 동일한 `packages/rules/.ai-rules/` 디렉토리를 참조합니다. 규칙을 한 번 수정하면 모든 도구가 업데이트된 표준을 따릅니다.
 
 ## 기여하기
 

@@ -2,7 +2,8 @@
   "name": "codingbuddy-monorepo",
   "private": true,
   "workspaces": [
-    "mcp-server"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "lint": "eslint .",

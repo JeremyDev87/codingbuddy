@@ -4,7 +4,7 @@
 
 **Goal:** Create actual configuration files for Codex (GitHub Copilot) to achieve the same level of MCP integration as Cursor/Claude
 
-**Architecture:** Include common rules reference and Keyword Invocation settings in `.codex/rules/system-prompt.md` file. Update `.ai-rules/adapters/codex.md` guide document. Document setup method in `docs/codex-adapter-configuration.md`.
+**Architecture:** Include common rules reference and Keyword Invocation settings in `.codex/rules/system-prompt.md` file. Update `packages/rules/.ai-rules/adapters/codex.md` guide document. Document setup method in `docs/codex-adapter-configuration.md`.
 
 **Tech Stack:** Markdown, GitHub Copilot/Codex CLI, MCP Server
 
@@ -25,11 +25,11 @@ Expected: Empty directory confirmed
 ```markdown
 # Codex System Prompt
 
-This project uses shared AI coding rules from `.ai-rules/` directory for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
+This project uses shared AI coding rules from `packages/rules/.ai-rules/` directory for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
 
 ## Core Workflow Rules
 
-**Source**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+**Source**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 
 ### Work Modes
 
@@ -53,21 +53,21 @@ You have three modes of operation:
 ### Agent System
 
 **Auto-activated Agents**:
-- **Frontend Developer** (`.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
-- **Code Reviewer** (`.ai-rules/agents/code-reviewer.json`): EVAL mode
+- **Frontend Developer** (`packages/rules/.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
+- **Code Reviewer** (`packages/rules/.ai-rules/agents/code-reviewer.json`): EVAL mode
 
 **Specialist Agents** (12 available):
 - Architecture, Test Strategy, Performance, Security
 - Accessibility, SEO, Design System, Documentation
 - Code Quality, DevOps Engineer
 
-For complete workflow details, see [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+For complete workflow details, see [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 
 ---
 
 ## Project Setup
 
-**Source**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+**Source**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
 
 ### Tech Stack
 
@@ -89,13 +89,13 @@ src/
 - **Server Components**: Default, Client Components only when necessary
 - **Test coverage**: 90%+ goal
 
-For complete project setup, see [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+For complete project setup, see [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
 
 ---
 
 ## Augmented Coding Principles
 
-**Source**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+**Source**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
 
 ### TDD Cycle (Strict Adherence)
 
@@ -119,15 +119,15 @@ Follow the **Red → Green → Refactor** cycle:
 - Minimize state, prefer pure functions
 - Tidy First: Separate structural vs behavioral changes
 
-For complete augmented coding guide, see [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+For complete augmented coding guide, see [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
 
 ---
 
 ## Specialist Agents
 
-**Source**: [.ai-rules/agents/](../../.ai-rules/agents/)
+**Source**: [packages/rules/.ai-rules/agents/](../../packages/rules/.ai-rules/agents/)
 
-All specialist agents are defined in `.ai-rules/agents/` directory:
+All specialist agents are defined in `packages/rules/.ai-rules/agents/` directory:
 
 | Agent | Expertise | Use Cases |
 |-------|-----------|-----------|
@@ -138,7 +138,7 @@ All specialist agents are defined in `.ai-rules/agents/` directory:
 | Performance Specialist | Bundle size, Core Web Vitals | Performance tuning, optimization |
 | +7 more specialists | Various domains | See agents README |
 
-For complete agent documentation, see [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
+For complete agent documentation, see [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
 
 ---
 
@@ -165,15 +165,15 @@ Example: `PLAN design auth feature` → call parse_mode → work in PLAN mode
 ## Full Documentation
 
 For comprehensive guides:
-- **Core Rules**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
-- **Project Setup**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
-- **Augmented Coding**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
-- **Agents System**: [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
-- **Integration Guide**: [.ai-rules/adapters/codex.md](../../.ai-rules/adapters/codex.md)
+- **Core Rules**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
+- **Project Setup**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
+- **Augmented Coding**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
+- **Agents System**: [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
+- **Integration Guide**: [packages/rules/.ai-rules/adapters/codex.md](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ---
 
-**Note**: This file references common AI rules from `.ai-rules/` directory. All AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro) share the same rules for consistency.
+**Note**: This file references common AI rules from `packages/rules/.ai-rules/` directory. All AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro) share the same rules for consistency.
 ```
 
 **Step 3: Verify file creation**
@@ -214,7 +214,7 @@ This guide explains how to use the Codebuddy MCP server in GitHub Copilot/Codex 
 
 ## Overview
 
-This project uses common AI coding rules from `.ai-rules/` directory. Follow the setup below to leverage these rules in Codex environment.
+This project uses common AI coding rules from `packages/rules/.ai-rules/` directory. Follow the setup below to leverage these rules in Codex environment.
 
 ## Prerequisites
 
@@ -229,7 +229,7 @@ This project uses common AI coding rules from `.ai-rules/` directory. Follow the
 
 This file provides the context needed for Codex to understand project rules:
 
-- Common AI rules reference (`.ai-rules/`)
+- Common AI rules reference (`packages/rules/.ai-rules/`)
 - PLAN/ACT/EVAL workflow modes
 - Keyword Invocation setup
 - TDD and code quality guidelines
@@ -290,7 +290,7 @@ EVAL review security of implemented auth logic
 └── rules/
     └── system-prompt.md    # Codex system prompt (required)
 
-.ai-rules/                  # Common AI rules (shared across all AI tools)
+packages/rules/.ai-rules/                  # Common AI rules (shared across all AI tools)
 ├── rules/
 │   ├── core.md             # Core workflow
 │   ├── project.md          # Project setup
@@ -309,7 +309,7 @@ EVAL review security of implemented auth logic
 | Main Config | `imports.mdc` | `custom-instructions.md` | `system-prompt.md` |
 | MCP Support | ✅ | ✅ | ✅ |
 | Keyword Invocation | ✅ | ✅ | ✅ |
-| Common Rules | `.ai-rules/` | `.ai-rules/` | `.ai-rules/` |
+| Common Rules | `packages/rules/.ai-rules/` | `packages/rules/.ai-rules/` | `packages/rules/.ai-rules/` |
 
 ## Troubleshooting
 
@@ -326,10 +326,10 @@ EVAL review security of implemented auth logic
 
 ## Related Documentation
 
-- [Core Rules](../.ai-rules/rules/core.md)
-- [Project Setup](../.ai-rules/rules/project.md)
-- [Augmented Coding](../.ai-rules/rules/augmented-coding.md)
-- [Codex Integration Guide](../.ai-rules/adapters/codex.md)
+- [Core Rules](../packages/rules/.ai-rules/rules/core.md)
+- [Project Setup](../packages/rules/.ai-rules/rules/project.md)
+- [Augmented Coding](../packages/rules/.ai-rules/rules/augmented-coding.md)
+- [Codex Integration Guide](../packages/rules/.ai-rules/adapters/codex.md)
 - [Keyword Invocation](./keyword-invocation.md)
 ```
 
@@ -353,14 +353,14 @@ git commit -m "docs: add Codex adapter configuration guide
 
 ---
 
-## Task 3: Update .ai-rules/adapters/codex.md
+## Task 3: Update packages/rules/.ai-rules/adapters/codex.md
 
 **Files:**
-- Modify: `.ai-rules/adapters/codex.md:40-77`
+- Modify: `packages/rules/.ai-rules/adapters/codex.md:40-77`
 
 **Step 1: Check current file**
 
-Run: `cat .ai-rules/adapters/codex.md`
+Run: `cat packages/rules/.ai-rules/adapters/codex.md`
 Expected: Existing guide document confirmed
 
 **Step 2: Update - Change Option 2 section to actual implementation**
@@ -373,7 +373,7 @@ Replace existing "### Option 2: Using .codex/ directory" section (lines 40-56) w
 This project includes a pre-configured `.codex/rules/system-prompt.md` file.
 
 **Included features:**
-- Common AI rules reference from `.ai-rules/`
+- Common AI rules reference from `packages/rules/.ai-rules/`
 - PLAN/ACT/EVAL workflow modes
 - Keyword Invocation support
 - TDD and code quality guidelines
@@ -399,7 +399,7 @@ Replace existing Directory Structure section (lines 57-77) with:
 .github/
 └── copilot-instructions.md  # GitHub Copilot instructions (optional)
 
-.ai-rules/                   # Common rules for all AI tools
+packages/rules/.ai-rules/                   # Common rules for all AI tools
 ├── rules/
 │   ├── core.md
 │   ├── project.md
@@ -419,13 +419,13 @@ For detailed setup instructions, see:
 
 **Step 4: Verify file modification**
 
-Run: `cat .ai-rules/adapters/codex.md | grep -A 5 "Option 2"`
+Run: `cat packages/rules/.ai-rules/adapters/codex.md | grep -A 5 "Option 2"`
 Expected: Updated content confirmed
 
 **Step 5: Commit**
 
 ```bash
-git add .ai-rules/adapters/codex.md
+git add packages/rules/.ai-rules/adapters/codex.md
 git commit -m "docs(codex): update adapter guide with actual configuration
 
 - Mark .codex/ option as recommended
@@ -444,7 +444,7 @@ Run:
 ```bash
 ls -la .codex/rules/system-prompt.md
 ls -la docs/codex-adapter-configuration.md
-ls -la .ai-rules/adapters/codex.md
+ls -la packages/rules/.ai-rules/adapters/codex.md
 ```
 Expected: All files exist
 
@@ -453,10 +453,10 @@ Expected: All files exist
 Run:
 ```bash
 # Check files referenced from system-prompt.md
-ls -la .ai-rules/rules/core.md
-ls -la .ai-rules/rules/project.md
-ls -la .ai-rules/rules/augmented-coding.md
-ls -la .ai-rules/agents/README.md
+ls -la packages/rules/.ai-rules/rules/core.md
+ls -la packages/rules/.ai-rules/rules/project.md
+ls -la packages/rules/.ai-rules/rules/augmented-coding.md
+ls -la packages/rules/.ai-rules/agents/README.md
 ```
 Expected: All referenced files exist
 
@@ -473,7 +473,7 @@ Expected: Only committed changes shown or clean
 |------|-------|-------------|
 | Task 1 | `.codex/rules/system-prompt.md` | Create Codex system prompt |
 | Task 2 | `docs/codex-adapter-configuration.md` | Write configuration guide document |
-| Task 3 | `.ai-rules/adapters/codex.md` | Update adapter guide |
+| Task 3 | `packages/rules/.ai-rules/adapters/codex.md` | Update adapter guide |
 | Task 4 | - | Final verification |
 
 **Total commits**: 3

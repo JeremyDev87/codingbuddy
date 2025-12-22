@@ -209,7 +209,7 @@ AI：[激活 security-specialist]
 - `performance-specialist` - 性能优化
 - `accessibility-specialist` - WCAG 合规
 - `code-reviewer` - 代码质量
-- 以及[更多专家](../../.ai-rules/agents/README.md)
+- 以及[更多专家](../../packages/rules/.ai-rules/agents/README.md)
 
 ## 后续步骤
 

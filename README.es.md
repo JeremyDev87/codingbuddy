@@ -75,18 +75,18 @@ Añade a la configuración de Claude Desktop (`~/Library/Application Support/Cla
 ## Cómo funciona
 
 ```
-.ai-rules/                 ← Reglas compartidas (fuente única de verdad)
+packages/rules/.ai-rules/  ← Reglas compartidas (fuente única de verdad)
 ├── rules/                 ← Reglas principales (flujo de trabajo, calidad)
 ├── agents/                ← Experiencia especializada (seguridad, rendimiento, etc.)
 └── adapters/              ← Guías de integración específicas por herramienta
 
-.cursor/                   ← Cursor referencia .ai-rules/
-.claude/                   ← Claude Code referencia .ai-rules/
-.codex/                    ← GitHub Copilot referencia .ai-rules/
+.cursor/                   ← Cursor referencia packages/rules/.ai-rules/
+.claude/                   ← Claude Code referencia packages/rules/.ai-rules/
+.codex/                    ← GitHub Copilot referencia packages/rules/.ai-rules/
 ...
 ```
 
-Todas las configuraciones de herramientas de IA referencian el mismo directorio `.ai-rules/`. Cambia las reglas una vez, y todas las herramientas siguen los estándares actualizados.
+Todas las configuraciones de herramientas de IA referencian el mismo directorio `packages/rules/.ai-rules/`. Cambia las reglas una vez, y todas las herramientas siguen los estándares actualizados.
 
 ## Contribuir
 

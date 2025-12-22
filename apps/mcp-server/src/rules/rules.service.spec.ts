@@ -34,23 +34,21 @@ describe('RulesService', () => {
       );
     });
 
-    it('should use package root .ai-rules when it exists (npm install)', () => {
-      vi.mocked(existsSync).mockReturnValue(true);
-
+    it('should use codingbuddy-rules package or dev fallback', () => {
       const service = new RulesService();
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
+      // Should resolve to .ai-rules path (either from package or dev fallback)
       expect(rulesDir).toContain('.ai-rules');
-      expect(existsSync).toHaveBeenCalled();
     });
 
-    it('should fall back to development path when package root does not exist', () => {
-      vi.mocked(existsSync).mockReturnValue(false);
-
+    it('should find rules directory successfully', () => {
       const service = new RulesService();
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
-      expect(rulesDir).toContain('.ai-rules');
+      // Verify the path contains the expected structure
+      expect(rulesDir).toBeDefined();
+      expect(typeof rulesDir).toBe('string');
     });
   });
 
@@ -328,22 +326,20 @@ describe('RulesService', () => {
   });
 
   describe('checkExists (private method behavior)', () => {
-    it('should handle existsSync returning true', () => {
-      vi.mocked(existsSync).mockReturnValue(true);
-
+    it('should resolve rules directory path', () => {
       const service = new RulesService();
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
-      // When existsSync returns true, should use the first candidate path
+      // Should have resolved to a valid .ai-rules path
       expect(rulesDir).toContain('.ai-rules');
     });
 
-    it('should handle existsSync throwing an error', () => {
+    it('should handle existsSync throwing an error gracefully', () => {
       vi.mocked(existsSync).mockImplementation(() => {
         throw new Error('Permission denied');
       });
 
-      // Should not throw, should fall back gracefully
+      // Should not throw - either package provides path or fallback handles error
       expect(() => new RulesService()).not.toThrow();
     });
   });

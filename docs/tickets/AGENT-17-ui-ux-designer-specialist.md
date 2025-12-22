@@ -29,10 +29,10 @@ Remove the Design System Specialist Agent and add a new UI/UX Designer Specialis
 ### In Scope
 
 1. **Deletion Target**
-   - Remove `.ai-rules/agents/design-system-specialist.json` file
+   - Remove `packages/rules/.ai-rules/agents/design-system-specialist.json` file
 
 2. **New Addition**
-   - Create `.ai-rules/agents/ui-ux-designer.json` file
+   - Create `packages/rules/.ai-rules/agents/ui-ux-designer.json` file
 
 3. **Core Responsibilities of New Agent**
    - Design principle-based UI design guidance
@@ -84,7 +84,7 @@ Remove the Design System Specialist Agent and add a new UI/UX Designer Specialis
 ### File Changes
 
 ```
-.ai-rules/agents/
+packages/rules/.ai-rules/agents/
 ├── design-system-specialist.json  (delete)
 ├── ui-ux-designer.json            (new)
 └── README.md                      (update required)
@@ -126,7 +126,7 @@ Remove the Design System Specialist Agent and add a new UI/UX Designer Specialis
 ### Breaking Changes
 
 - If there are configurations referencing the existing `design-system-specialist` agent, change them to `ui-ux-designer`
-- Project-specific design system rules should be defined separately in the project's `.ai-rules/rules/project.md`
+- Project-specific design system rules should be defined separately in the project's `packages/rules/.ai-rules/rules/project.md`
 
 ### Upgrade Steps
 

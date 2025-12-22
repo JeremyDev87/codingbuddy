@@ -42,7 +42,6 @@ cd codingbuddy
 ### 2. Install Dependencies
 
 ```bash
-cd mcp-server
 yarn install
 ```
 
@@ -50,20 +49,20 @@ yarn install
 
 ```bash
 # Run tests
-yarn test
+yarn workspace codingbuddy test
 
 # Build the project
-yarn build
+yarn workspace codingbuddy build
 
 # Start in development mode
-yarn start:dev
+yarn workspace codingbuddy start:dev
 ```
 
 ### 4. Test with MCP Inspector
 
 ```bash
-yarn build
-npx @modelcontextprotocol/inspector node dist/src/main.js
+yarn workspace codingbuddy build
+npx @modelcontextprotocol/inspector node apps/mcp-server/dist/src/main.js
 ```
 
 ## Project Architecture
@@ -72,40 +71,43 @@ npx @modelcontextprotocol/inspector node dist/src/main.js
 
 ```
 codingbuddy/
-├── .ai-rules/                    # AI coding rules (single source of truth)
-│   ├── rules/                    # Core rules
-│   │   ├── core.md               # PLAN/ACT/EVAL workflow
-│   │   ├── project.md            # Project setup guidelines
-│   │   └── augmented-coding.md   # TDD and coding practices
-│   ├── agents/                   # Specialist agent definitions
-│   │   ├── frontend-developer.json
-│   │   ├── backend-developer.json
-│   │   ├── code-reviewer.json
-│   │   └── ...
-│   └── adapters/                 # Tool-specific integrations
-├── mcp-server/                   # NestJS MCP server
-│   ├── src/
-│   │   ├── main.ts               # Entry point
-│   │   ├── app.module.ts         # Root module
-│   │   ├── mcp/                  # MCP protocol handlers
-│   │   │   ├── mcp.module.ts
-│   │   │   ├── mcp.service.ts    # Resources, Tools, Prompts
-│   │   │   └── mcp.controller.ts # SSE transport
-│   │   ├── rules/                # Rules file access
-│   │   │   ├── rules.module.ts
-│   │   │   └── rules.service.ts
-│   │   ├── config/               # Configuration loading
-│   │   │   ├── config.module.ts
-│   │   │   ├── config.service.ts
-│   │   │   ├── config.loader.ts
-│   │   │   └── config.schema.ts
-│   │   ├── keyword/              # Mode keyword parsing
-│   │   │   └── keyword.service.ts
-│   │   └── shared/               # Shared utilities
-│   ├── test/                     # Test utilities
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── vitest.config.ts
+├── apps/
+│   └── mcp-server/               # NestJS MCP server (codingbuddy)
+│       ├── src/
+│       │   ├── main.ts           # Entry point
+│       │   ├── app.module.ts     # Root module
+│       │   ├── mcp/              # MCP protocol handlers
+│       │   │   ├── mcp.module.ts
+│       │   │   ├── mcp.service.ts    # Resources, Tools, Prompts
+│       │   │   └── mcp.controller.ts # SSE transport
+│       │   ├── rules/            # Rules file access
+│       │   │   ├── rules.module.ts
+│       │   │   └── rules.service.ts
+│       │   ├── config/           # Configuration loading
+│       │   │   ├── config.module.ts
+│       │   │   ├── config.service.ts
+│       │   │   ├── config.loader.ts
+│       │   │   └── config.schema.ts
+│       │   ├── keyword/          # Mode keyword parsing
+│       │   │   └── keyword.service.ts
+│       │   └── shared/           # Shared utilities
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── vitest.config.ts
+├── packages/
+│   └── rules/                    # AI rules package (codingbuddy-rules)
+│       ├── .ai-rules/            # AI coding rules (single source of truth)
+│       │   ├── rules/            # Core rules
+│       │   │   ├── core.md       # PLAN/ACT/EVAL workflow
+│       │   │   ├── project.md    # Project setup guidelines
+│       │   │   └── augmented-coding.md  # TDD and coding practices
+│       │   ├── agents/           # Specialist agent definitions
+│       │   │   ├── frontend-developer.json
+│       │   │   ├── code-reviewer.json
+│       │   │   └── ...
+│       │   └── adapters/         # Tool-specific integrations
+│       ├── index.js              # Package entry point
+│       └── package.json
 ├── docs/                         # Documentation
 ├── CLAUDE.md                     # Claude Code instructions
 ├── CONTRIBUTING.md               # Contribution guidelines
@@ -168,56 +170,56 @@ Client Request
 
 ```bash
 # Start development server with hot reload
-yarn start:dev
+yarn workspace codingbuddy start:dev
 
 # Run linting
-yarn lint
-yarn lint:fix
+yarn workspace codingbuddy lint
+yarn workspace codingbuddy lint:fix
 
 # Run formatting
-yarn format:check
-yarn format
+yarn workspace codingbuddy format:check
+yarn workspace codingbuddy format
 
 # Run type checking
-yarn typecheck
+yarn workspace codingbuddy typecheck
 ```
 
 ### Testing
 
 ```bash
 # Run all tests
-yarn test
+yarn workspace codingbuddy test
 
 # Run tests in watch mode
-yarn test:watch
+yarn workspace codingbuddy test:watch
 
 # Run tests with coverage
-yarn test:coverage
+yarn workspace codingbuddy test:coverage
 
 # Run specific test file
-yarn test src/mcp/mcp.service.spec.ts
+yarn workspace codingbuddy test src/mcp/mcp.service.spec.ts
 ```
 
 ### Quality Checks
 
 ```bash
 # All checks (run before commit)
-yarn lint && yarn format:check && yarn typecheck && yarn test:coverage && yarn circular && yarn build
+yarn workspace codingbuddy validate
 ```
 
 ### Rules Validation
 
-Validate `.ai-rules/` files before committing:
+Validate `packages/rules/.ai-rules/` files before committing:
 
 ```bash
 # Full validation (structure + schema + markdown)
-yarn validate:rules
+yarn workspace codingbuddy validate:rules
 
 # Schema validation only
-yarn validate:rules:schema
+yarn workspace codingbuddy validate:rules:schema
 
 # Markdown linting only
-yarn validate:rules:markdown
+yarn workspace codingbuddy validate:rules:markdown
 ```
 
 The validation includes:
@@ -230,10 +232,10 @@ The validation includes:
 
 ```bash
 # Production build
-yarn build
+yarn workspace codingbuddy build
 
 # Run production build
-node dist/src/main.js
+node apps/mcp-server/dist/src/main.js
 ```
 
 ## Debugging
@@ -251,8 +253,8 @@ Create `.vscode/launch.json`:
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": ["start:dev"],
-      "cwd": "${workspaceFolder}/mcp-server",
+      "runtimeArgs": ["workspace", "codingbuddy", "start:dev"],
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     },
@@ -261,8 +263,8 @@ Create `.vscode/launch.json`:
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": ["test", "--run"],
-      "cwd": "${workspaceFolder}/mcp-server",
+      "runtimeArgs": ["workspace", "codingbuddy", "test", "--run"],
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     }
@@ -356,8 +358,7 @@ vi.spyOn(service, 'method').mockResolvedValue('result');
 ### Local Build
 
 ```bash
-cd mcp-server
-yarn build
+yarn workspace codingbuddy build
 ```
 
 ### Docker Build
@@ -365,33 +366,39 @@ yarn build
 From repository root:
 
 ```bash
-docker build -f mcp-server/Dockerfile -t codingbuddy-rules-mcp .
+docker build -f apps/mcp-server/Dockerfile -t codingbuddy-mcp .
 ```
 
 ### Docker Run
 
 ```bash
 # Stdio mode (for CLI integration)
-docker run codingbuddy-rules-mcp
+docker run codingbuddy-mcp
 
 # SSE mode (for HTTP integration)
-docker run -p 3000:3000 -e MCP_TRANSPORT=sse codingbuddy-rules-mcp
+docker run -p 3000:3000 -e MCP_TRANSPORT=sse codingbuddy-mcp
 ```
 
 ### NPM Publishing
 
-Publishing is automated via GitHub Actions on push to master:
+Publishing is automated via GitHub Actions on release:
 
-1. Update version: `npm version patch|minor|major`
-2. Push to master
-3. GitHub Actions creates release and publishes to npm
+1. Create a GitHub release with version tag (e.g., `v1.0.0`)
+2. GitHub Actions automatically publishes both packages:
+   - `codingbuddy-rules` (packages/rules)
+   - `codingbuddy` (apps/mcp-server)
 
 ### Manual Publishing
 
 ```bash
-cd mcp-server
-yarn prepublishOnly  # Copies .ai-rules and builds
-npm publish
+# Build first
+yarn workspace codingbuddy build
+
+# Publish rules package
+cd packages/rules && npm publish
+
+# Publish MCP server
+cd apps/mcp-server && npm publish
 ```
 
 ---

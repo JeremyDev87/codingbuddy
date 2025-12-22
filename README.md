@@ -75,18 +75,18 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 ## How It Works
 
 ```
-.ai-rules/                 ← Shared rules (single source of truth)
+packages/rules/.ai-rules/  ← Shared rules (single source of truth)
 ├── rules/                 ← Core rules (workflow, quality)
 ├── agents/                ← Specialist expertise (security, performance, etc.)
 └── adapters/              ← Tool-specific integration guides
 
-.cursor/                   ← Cursor references .ai-rules/
-.claude/                   ← Claude Code references .ai-rules/
-.codex/                    ← GitHub Copilot references .ai-rules/
+.cursor/                   ← Cursor references packages/rules/.ai-rules/
+.claude/                   ← Claude Code references packages/rules/.ai-rules/
+.codex/                    ← GitHub Copilot references packages/rules/.ai-rules/
 ...
 ```
 
-All AI tool configurations reference the same `.ai-rules/` directory. Change the rules once, and every tool follows the updated standards.
+All AI tool configurations reference the same `packages/rules/.ai-rules/` directory. Change the rules once, and every tool follows the updated standards.
 
 ## Contributing
 

@@ -14,12 +14,12 @@ Codingbuddyは統一されたルールシステムを通じて複数のAIコー�
 
 | ツール | 統合方法 | セットアップガイド |
 |--------|----------|-------------------|
-| [Claude Code](#claude-code) | MCPサーバー | [ガイド](../../.ai-rules/adapters/claude-code.md) |
-| [Cursor](#cursor) | Rulesディレクトリ | [ガイド](../../.ai-rules/adapters/cursor.md) |
-| [GitHub Copilot / Codex](#github-copilot--codex) | Instructionsファイル | [ガイド](../../.ai-rules/adapters/codex.md) |
-| [Antigravity](#antigravity) | Configディレクトリ | [ガイド](../../.ai-rules/adapters/antigravity.md) |
-| [Amazon Q](#amazon-q) | Rulesディレクトリ | [ガイド](../../.ai-rules/adapters/q.md) |
-| [Kiro](#kiro) | Specディレクトリ | [ガイド](../../.ai-rules/adapters/kiro.md) |
+| [Claude Code](#claude-code) | MCPサーバー | [ガイド](../../packages/rules/.ai-rules/adapters/claude-code.md) |
+| [Cursor](#cursor) | Rulesディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/cursor.md) |
+| [GitHub Copilot / Codex](#github-copilot--codex) | Instructionsファイル | [ガイド](../../packages/rules/.ai-rules/adapters/codex.md) |
+| [Antigravity](#antigravity) | Configディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/antigravity.md) |
+| [Amazon Q](#amazon-q) | Rulesディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/q.md) |
+| [Kiro](#kiro) | Specディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/kiro.md) |
 
 ## Claude Code
 
@@ -54,7 +54,7 @@ Claude CodeはMCPを通じて接続し、プロジェクト設定、ルール、
 - ツール呼び出し（search_rules、get_agent_details、parse_mode）
 - プロンプトテンプレート（activate_agent）
 
-[完全なガイド](../../.ai-rules/adapters/claude-code.md)
+[完全なガイド](../../packages/rules/.ai-rules/adapters/claude-code.md)
 
 ## Cursor
 
@@ -72,11 +72,11 @@ Cursorはプロジェクト固有の指示に`.cursor/rules/`を使用します�
 
 # プロジェクトルール
 
-`.ai-rules/`の共通ルールに従います：
+`packages/rules/.ai-rules/`の共通ルールに従います：
 
-- ワークフロー: @.ai-rules/rules/core.md
-- 品質: @.ai-rules/rules/augmented-coding.md
-- コンテキスト: @.ai-rules/rules/project.md
+- ワークフロー: @packages/rules/.ai-rules/rules/core.md
+- 品質: @packages/rules/.ai-rules/rules/augmented-coding.md
+- コンテキスト: @packages/rules/.ai-rules/rules/project.md
 ```
 
 ### 機能
@@ -85,7 +85,7 @@ Cursorはプロジェクト固有の指示に`.cursor/rules/`を使用します�
 - プロジェクト固有のカスタマイズ
 - ファイル参照を通じたエージェントコンテキスト
 
-[完全なガイド](../../.ai-rules/adapters/cursor.md)
+[完全なガイド](../../packages/rules/.ai-rules/adapters/cursor.md)
 
 ## GitHub Copilot / Codex
 
@@ -102,7 +102,7 @@ GitHub Copilotはカスタム指示に`.github/copilot-instructions.md`を使用
 
 # コーディング標準
 
-`.ai-rules/rules/`のガイドラインに従います：
+`packages/rules/.ai-rules/rules/`のガイドラインに従います：
 
 ## ワークフロー
 core.mdで定義されたPLAN → ACT → EVALワークフローを使用
@@ -119,7 +119,7 @@ core.mdで定義されたPLAN → ACT → EVALワークフローを使用
 - リポジトリ全体の設定
 - チーム共有設定
 
-[完全なガイド](../../.ai-rules/adapters/codex.md)
+[完全なガイド](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ## Antigravity
 
@@ -137,8 +137,8 @@ Antigravity（Geminiベース）は設定に`.antigravity/`を使用します。
 
 # プロジェクトガイドライン
 
-参照: .ai-rules/rules/core.md
-参照: .ai-rules/rules/augmented-coding.md
+参照: packages/rules/.ai-rules/rules/core.md
+参照: packages/rules/.ai-rules/rules/augmented-coding.md
 ```
 
 ### 機能
@@ -147,7 +147,7 @@ Antigravity（Geminiベース）は設定に`.antigravity/`を使用します。
 - ルールファイル参照
 - プロジェクトコンテキスト認識
 
-[完全なガイド](../../.ai-rules/adapters/antigravity.md)
+[完全なガイド](../../packages/rules/.ai-rules/adapters/antigravity.md)
 
 ## Amazon Q
 
@@ -165,11 +165,11 @@ Amazon Q Developerはカスタムルールに`.q/rules/`を使用します。
 
 # 開発標準
 
-一貫したコーディングプラクティスのために.ai-rules/に従います。
+一貫したコーディングプラクティスのためにpackages/rules/.ai-rules/に従います。
 
 主要ファイル：
-- .ai-rules/rules/core.md（ワークフロー）
-- .ai-rules/rules/augmented-coding.md（TDD）
+- packages/rules/.ai-rules/rules/core.md（ワークフロー）
+- packages/rules/.ai-rules/rules/augmented-coding.md（TDD）
 ```
 
 ### 機能
@@ -178,7 +178,7 @@ Amazon Q Developerはカスタムルールに`.q/rules/`を使用します。
 - エンタープライズ機能
 - カスタムルールサポート
 
-[完全なガイド](../../.ai-rules/adapters/q.md)
+[完全なガイド](../../packages/rules/.ai-rules/adapters/q.md)
 
 ## Kiro
 
@@ -196,7 +196,7 @@ Kiroは仕様とステアリングファイルに`.kiro/`を使用します。
 
 # プロジェクトステアリング
 
-.ai-rules/のルールを適用：
+packages/rules/.ai-rules/のルールを適用：
 - ワークフローモード（PLAN/ACT/EVAL）
 - TDD開発
 - コード品質標準
@@ -208,15 +208,15 @@ Kiroは仕様とステアリングファイルに`.kiro/`を使用します。
 - ステアリングファイルシステム
 - タスク管理統合
 
-[完全なガイド](../../.ai-rules/adapters/kiro.md)
+[完全なガイド](../../packages/rules/.ai-rules/adapters/kiro.md)
 
 ## 新しいツールの追加
 
 Codingbuddyは追加のAIツールをサポートするよう設計されています：
 
-1. `.ai-rules/adapters/{tool}.md`にアダプターガイドを作成
+1. `packages/rules/.ai-rules/adapters/{tool}.md`にアダプターガイドを作成
 2. `.{tool}/`ツールディレクトリを作成
-3. `.ai-rules/`の共通ルールを参照
+3. `packages/rules/.ai-rules/`の共通ルールを参照
 
 詳細は[貢献ガイド](../../CONTRIBUTING.md)を参照してください。
 

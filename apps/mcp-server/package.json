@@ -9,31 +9,29 @@
   },
   "files": [
     "dist",
-    ".ai-rules",
     "README.md"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "prepublishOnly": "cp -r ../.ai-rules . && yarn build && chmod +x dist/src/main.js dist/src/cli/cli.js",
-    "postpublish": "rm -rf .ai-rules",
-    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn build && chmod +x dist/src/main.js dist/src/cli/cli.js",
+    "build": "yarn tsc -p tsconfig.build.json",
     "start": "node dist/src/main.js",
-    "start:dev": "ts-node src/main.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "format": "prettier --write 'src/**/*.ts'",
-    "format:check": "prettier --check 'src/**/*.ts'",
-    "typecheck": "tsc --noEmit",
-    "circular": "madge --circular --extensions ts src/",
+    "start:dev": "yarn ts-node src/main.ts",
+    "test": "yarn vitest run",
+    "test:watch": "yarn vitest",
+    "test:coverage": "yarn vitest run --coverage",
+    "lint": "yarn eslint src/",
+    "lint:fix": "yarn eslint src/ --fix",
+    "format": "yarn prettier --write 'src/**/*.ts'",
+    "format:check": "yarn prettier --check 'src/**/*.ts'",
+    "typecheck": "yarn tsc --noEmit",
+    "circular": "yarn madge --circular --extensions ts src/",
     "validate": "yarn lint && yarn format:check && yarn typecheck && yarn test && yarn circular",
-    "validate:rules": "cd .. && ./scripts/validate-rules.sh",
-    "validate:rules:schema": "cd .. && ./scripts/validate-rules.sh --schema-only",
-    "validate:rules:markdown": "cd .. && ./scripts/validate-rules.sh --markdown-only"
+    "validate:rules": "cd ../.. && ./scripts/validate-rules.sh",
+    "validate:rules:schema": "cd ../.. && ./scripts/validate-rules.sh --schema-only",
+    "validate:rules:markdown": "cd ../.. && ./scripts/validate-rules.sh --markdown-only"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
@@ -42,6 +40,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.9",
     "@nestjs/platform-express": "^11.1.9",
+    "codingbuddy-rules": "workspace:*",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.2.1"

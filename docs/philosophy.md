@@ -61,13 +61,13 @@ The best practices come from real-world experience:
 ### Single Source of Truth
 
 ```
-.ai-rules/           ← The authoritative source
+packages/rules/.ai-rules/           ← The authoritative source
 ├── rules/           ← Core rules (workflow, quality, project)
 ├── agents/          ← Specialist knowledge
 └── adapters/        ← Tool-specific integration guides
 ```
 
-All AI tool configurations reference `.ai-rules/`. Update once, all tools benefit.
+All AI tool configurations reference `packages/rules/.ai-rules/`. Update once, all tools benefit.
 
 ### Separation of Concerns
 
@@ -132,5 +132,5 @@ This workflow prevents the common pitfall of AI assistants jumping straight into
 
 - [Getting Started](./getting-started.md) - Quick setup guide
 - [Supported Tools](./supported-tools.md) - AI tool integration
-- [Core Rules](../.ai-rules/rules/core.md) - Workflow details
-- [Agents System](../.ai-rules/agents/README.md) - Specialist agents
+- [Core Rules](../packages/rules/.ai-rules/rules/core.md) - Workflow details
+- [Agents System](../packages/rules/.ai-rules/agents/README.md) - Specialist agents

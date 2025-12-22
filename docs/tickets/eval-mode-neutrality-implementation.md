@@ -290,13 +290,13 @@ This document details HOW to implement the neutrality enhancements for EVAL mode
 
 | File | Section | Change Type |
 |------|---------|-------------|
-| `.ai-rules/agents/code-reviewer.json` | `anti_sycophancy` | ADD |
-| `.ai-rules/agents/code-reviewer.json` | `objective_metrics` | ADD |
-| `.ai-rules/agents/code-reviewer.json` | `evaluation_output_format` | MODIFY |
-| `.ai-rules/agents/code-reviewer.json` | `activation.execution_order` | MODIFY |
-| `.ai-rules/agents/code-reviewer.json` | `activation.mandatory_checklist` | MODIFY |
-| `.ai-rules/agents/code-reviewer.json` | `activation.verification_guide` | MODIFY |
-| `.ai-rules/rules/core.md` | EVAL Mode section (409-581) | MODIFY |
+| `packages/rules/.ai-rules/agents/code-reviewer.json` | `anti_sycophancy` | ADD |
+| `packages/rules/.ai-rules/agents/code-reviewer.json` | `objective_metrics` | ADD |
+| `packages/rules/.ai-rules/agents/code-reviewer.json` | `evaluation_output_format` | MODIFY |
+| `packages/rules/.ai-rules/agents/code-reviewer.json` | `activation.execution_order` | MODIFY |
+| `packages/rules/.ai-rules/agents/code-reviewer.json` | `activation.mandatory_checklist` | MODIFY |
+| `packages/rules/.ai-rules/agents/code-reviewer.json` | `activation.verification_guide` | MODIFY |
+| `packages/rules/.ai-rules/rules/core.md` | EVAL Mode section (409-581) | MODIFY |
 
 ---
 

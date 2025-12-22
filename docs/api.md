@@ -437,7 +437,7 @@ Activate a specific specialist agent with project context.
 | Error | Cause | Resolution |
 |-------|-------|------------|
 | `Invalid URI scheme` | URI doesn't start with `rules://` or `config://` | Use correct URI scheme |
-| `Resource not found: {uri}` | Requested rule file doesn't exist | Check file path in `.ai-rules/` |
+| `Resource not found: {uri}` | Requested rule file doesn't exist | Check file path in `packages/rules/.ai-rules/` |
 | `Agent '{name}' not found` | Invalid agent name | Use valid agent name from list |
 | `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config` |
 | `Failed to load project configuration` | Missing or invalid `codingbuddy.config.js` | Run `npx codingbuddy init` |

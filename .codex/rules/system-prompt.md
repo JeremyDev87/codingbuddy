@@ -1,10 +1,10 @@
 # Codex System Prompt
 
-This project uses shared AI coding rules from `.ai-rules/` directory for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
+This project uses shared AI coding rules from `packages/rules/.ai-rules/` directory for consistency across all AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro).
 
 ## 📚 Core Workflow Rules
 
-**Source**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+**Source**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 
 ### Work Modes
 
@@ -28,21 +28,21 @@ You have three modes of operation:
 ### Agent System
 
 **Auto-activated Agents**:
-- **Frontend Developer** (`.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
-- **Code Reviewer** (`.ai-rules/agents/code-reviewer.json`): EVAL mode
+- **Frontend Developer** (`packages/rules/.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
+- **Code Reviewer** (`packages/rules/.ai-rules/agents/code-reviewer.json`): EVAL mode
 
 **Specialist Agents** (12 available):
 - Architecture, Test Strategy, Performance, Security
 - Accessibility, SEO, Design System, Documentation
 - Code Quality, DevOps Engineer
 
-For complete workflow details, see [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
+For complete workflow details, see [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 
 ---
 
 ## 🏗️ Project Setup
 
-**Source**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+**Source**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
 
 ### Tech Stack
 
@@ -64,13 +64,13 @@ src/
 - **Server Components**: Default, Client Components only when necessary
 - **Test coverage**: 90%+ goal
 
-For complete project setup, see [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
+For complete project setup, see [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
 
 ---
 
 ## 🎯 Augmented Coding Principles
 
-**Source**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+**Source**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
 
 ### TDD Cycle (Strict Adherence)
 
@@ -94,15 +94,15 @@ Follow the **Red → Green → Refactor** cycle:
 - Minimize state, prefer pure functions
 - Tidy First: Separate structural vs behavioral changes
 
-For complete augmented coding guide, see [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
+For complete augmented coding guide, see [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
 
 ---
 
 ## 🤖 Specialist Agents
 
-**Source**: [.ai-rules/agents/](../../.ai-rules/agents/)
+**Source**: [packages/rules/.ai-rules/agents/](../../packages/rules/.ai-rules/agents/)
 
-All specialist agents are defined in `.ai-rules/agents/` directory:
+All specialist agents are defined in `packages/rules/.ai-rules/agents/` directory:
 
 | Agent | Expertise | Use Cases |
 |-------|-----------|-----------|
@@ -113,7 +113,7 @@ All specialist agents are defined in `.ai-rules/agents/` directory:
 | Performance Specialist | Bundle size, Core Web Vitals | Performance tuning, optimization |
 | +7 more specialists | Various domains | See agents README |
 
-For complete agent documentation, see [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
+For complete agent documentation, see [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
 
 ---
 
@@ -140,12 +140,12 @@ Example: `PLAN design auth feature` → call parse_mode → work in PLAN mode
 ## 📖 Full Documentation
 
 For comprehensive guides:
-- **Core Rules**: [.ai-rules/rules/core.md](../../.ai-rules/rules/core.md)
-- **Project Setup**: [.ai-rules/rules/project.md](../../.ai-rules/rules/project.md)
-- **Augmented Coding**: [.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md)
-- **Agents System**: [.ai-rules/agents/README.md](../../.ai-rules/agents/README.md)
-- **Integration Guide**: [.ai-rules/adapters/codex.md](../../.ai-rules/adapters/codex.md)
+- **Core Rules**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
+- **Project Setup**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
+- **Augmented Coding**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
+- **Agents System**: [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
+- **Integration Guide**: [packages/rules/.ai-rules/adapters/codex.md](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ---
 
-**Note**: This file references common AI rules from `.ai-rules/` directory. All AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro) share the same rules for consistency.
+**Note**: This file references common AI rules from `packages/rules/.ai-rules/` directory. All AI assistants (Cursor, Claude Code, Antigravity, Codex, Q, Kiro) share the same rules for consistency.

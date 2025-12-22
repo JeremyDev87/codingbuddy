@@ -4,7 +4,7 @@ This guide explains how to use the Codebuddy MCP server in GitHub Copilot/Codex 
 
 ## Overview
 
-This project uses common AI coding rules from `.ai-rules/` directory. Follow the setup below to leverage these rules in Codex environment.
+This project uses common AI coding rules from `packages/rules/.ai-rules/` directory. Follow the setup below to leverage these rules in Codex environment.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ This project uses common AI coding rules from `.ai-rules/` directory. Follow the
 
 This file provides the context needed for Codex to understand project rules:
 
-- Common AI rules reference (`.ai-rules/`)
+- Common AI rules reference (`packages/rules/.ai-rules/`)
 - PLAN/ACT/EVAL workflow modes
 - Keyword Invocation setup
 - TDD and code quality guidelines
@@ -80,7 +80,7 @@ EVAL review security of implemented auth logic
 └── rules/
     └── system-prompt.md    # Codex system prompt (required)
 
-.ai-rules/                  # Common AI rules (shared across all AI tools)
+packages/rules/.ai-rules/                  # Common AI rules (shared across all AI tools)
 ├── rules/
 │   ├── core.md             # Core workflow
 │   ├── project.md          # Project setup
@@ -99,7 +99,7 @@ EVAL review security of implemented auth logic
 | Main Config | `imports.mdc` | `custom-instructions.md` | `system-prompt.md` |
 | MCP Support | ✅ | ✅ | ✅ |
 | Keyword Invocation | ✅ | ✅ | ✅ |
-| Common Rules | `.ai-rules/` | `.ai-rules/` | `.ai-rules/` |
+| Common Rules | `packages/rules/.ai-rules/` | `packages/rules/.ai-rules/` | `packages/rules/.ai-rules/` |
 
 ## Troubleshooting
 
@@ -116,8 +116,8 @@ EVAL review security of implemented auth logic
 
 ## Related Documentation
 
-- [Core Rules](../.ai-rules/rules/core.md)
-- [Project Setup](../.ai-rules/rules/project.md)
-- [Augmented Coding](../.ai-rules/rules/augmented-coding.md)
-- [Codex Integration Guide](../.ai-rules/adapters/codex.md)
+- [Core Rules](../packages/rules/.ai-rules/rules/core.md)
+- [Project Setup](../packages/rules/.ai-rules/rules/project.md)
+- [Augmented Coding](../packages/rules/.ai-rules/rules/augmented-coding.md)
+- [Codex Integration Guide](../packages/rules/.ai-rules/adapters/codex.md)
 - [Keyword Invocation](./keyword-invocation.md)

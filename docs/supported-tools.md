@@ -14,12 +14,12 @@ Codingbuddy works with multiple AI coding assistants through a unified rules sys
 
 | Tool | Integration | Setup Guide |
 |------|-------------|-------------|
-| [Claude Code](#claude-code) | MCP Server | [Guide](../.ai-rules/adapters/claude-code.md) |
-| [Cursor](#cursor) | Rules Directory | [Guide](../.ai-rules/adapters/cursor.md) |
-| [GitHub Copilot / Codex](#github-copilot--codex) | Instructions File | [Guide](../.ai-rules/adapters/codex.md) |
-| [Antigravity](#antigravity) | Config Directory | [Guide](../.ai-rules/adapters/antigravity.md) |
-| [Amazon Q](#amazon-q) | Rules Directory | [Guide](../.ai-rules/adapters/q.md) |
-| [Kiro](#kiro) | Spec Directory | [Guide](../.ai-rules/adapters/kiro.md) |
+| [Claude Code](#claude-code) | MCP Server | [Guide](../packages/rules/.ai-rules/adapters/claude-code.md) |
+| [Cursor](#cursor) | Rules Directory | [Guide](../packages/rules/.ai-rules/adapters/cursor.md) |
+| [GitHub Copilot / Codex](#github-copilot--codex) | Instructions File | [Guide](../packages/rules/.ai-rules/adapters/codex.md) |
+| [Antigravity](#antigravity) | Config Directory | [Guide](../packages/rules/.ai-rules/adapters/antigravity.md) |
+| [Amazon Q](#amazon-q) | Rules Directory | [Guide](../packages/rules/.ai-rules/adapters/q.md) |
+| [Kiro](#kiro) | Spec Directory | [Guide](../packages/rules/.ai-rules/adapters/kiro.md) |
 
 ## Claude Code
 
@@ -54,7 +54,7 @@ Claude Code connects via MCP, providing full access to project configuration, ru
 - Tool calls (search_rules, get_agent_details, parse_mode)
 - Prompt templates (activate_agent)
 
-[Full Guide](../.ai-rules/adapters/claude-code.md)
+[Full Guide](../packages/rules/.ai-rules/adapters/claude-code.md)
 
 ## Cursor
 
@@ -72,11 +72,11 @@ Cursor uses `.cursor/rules/` for project-specific instructions.
 
 # Project Rules
 
-Follow the common rules in `.ai-rules/`:
+Follow the common rules in `packages/rules/.ai-rules/`:
 
-- Workflow: @.ai-rules/rules/core.md
-- Quality: @.ai-rules/rules/augmented-coding.md
-- Context: @.ai-rules/rules/project.md
+- Workflow: @packages/rules/.ai-rules/rules/core.md
+- Quality: @packages/rules/.ai-rules/rules/augmented-coding.md
+- Context: @packages/rules/.ai-rules/rules/project.md
 ```
 
 ### Features
@@ -85,7 +85,7 @@ Follow the common rules in `.ai-rules/`:
 - Project-specific customizations
 - Agent context via file references
 
-[Full Guide](../.ai-rules/adapters/cursor.md)
+[Full Guide](../packages/rules/.ai-rules/adapters/cursor.md)
 
 ## GitHub Copilot / Codex
 
@@ -102,7 +102,7 @@ GitHub Copilot uses `.github/copilot-instructions.md` for custom instructions.
 
 # Coding Standards
 
-Follow the guidelines in `.ai-rules/rules/`:
+Follow the guidelines in `packages/rules/.ai-rules/rules/`:
 
 ## Workflow
 Use PLAN → ACT → EVAL workflow as defined in core.md
@@ -119,7 +119,7 @@ Use PLAN → ACT → EVAL workflow as defined in core.md
 - Repository-wide settings
 - Team-shared configuration
 
-[Full Guide](../.ai-rules/adapters/codex.md)
+[Full Guide](../packages/rules/.ai-rules/adapters/codex.md)
 
 ## Antigravity
 
@@ -137,8 +137,8 @@ Antigravity (Gemini-based) uses `.antigravity/` for configuration.
 
 # Project Guidelines
 
-Reference: .ai-rules/rules/core.md
-Reference: .ai-rules/rules/augmented-coding.md
+Reference: packages/rules/.ai-rules/rules/core.md
+Reference: packages/rules/.ai-rules/rules/augmented-coding.md
 ```
 
 ### Features
@@ -147,7 +147,7 @@ Reference: .ai-rules/rules/augmented-coding.md
 - Rule file references
 - Project context awareness
 
-[Full Guide](../.ai-rules/adapters/antigravity.md)
+[Full Guide](../packages/rules/.ai-rules/adapters/antigravity.md)
 
 ## Amazon Q
 
@@ -165,11 +165,11 @@ Amazon Q Developer uses `.q/rules/` for custom rules.
 
 # Development Standards
 
-Follow .ai-rules/ for consistent coding practices.
+Follow packages/rules/.ai-rules/ for consistent coding practices.
 
 Key files:
-- .ai-rules/rules/core.md (workflow)
-- .ai-rules/rules/augmented-coding.md (TDD)
+- packages/rules/.ai-rules/rules/core.md (workflow)
+- packages/rules/.ai-rules/rules/augmented-coding.md (TDD)
 ```
 
 ### Features
@@ -178,7 +178,7 @@ Key files:
 - Enterprise features
 - Custom rule support
 
-[Full Guide](../.ai-rules/adapters/q.md)
+[Full Guide](../packages/rules/.ai-rules/adapters/q.md)
 
 ## Kiro
 
@@ -196,7 +196,7 @@ Kiro uses `.kiro/` for specifications and steering files.
 
 # Project Steering
 
-Apply rules from .ai-rules/:
+Apply rules from packages/rules/.ai-rules/:
 - Workflow modes (PLAN/ACT/EVAL)
 - TDD development
 - Code quality standards
@@ -208,15 +208,15 @@ Apply rules from .ai-rules/:
 - Steering file system
 - Task management integration
 
-[Full Guide](../.ai-rules/adapters/kiro.md)
+[Full Guide](../packages/rules/.ai-rules/adapters/kiro.md)
 
 ## Adding New Tools
 
 Codingbuddy is designed to support additional AI tools:
 
-1. Create adapter guide in `.ai-rules/adapters/{tool}.md`
+1. Create adapter guide in `packages/rules/.ai-rules/adapters/{tool}.md`
 2. Create tool directory `.{tool}/`
-3. Reference common rules from `.ai-rules/`
+3. Reference common rules from `packages/rules/.ai-rules/`
 
 See [Contributing](../CONTRIBUTING.md) for details.
 

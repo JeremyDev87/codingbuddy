@@ -61,13 +61,13 @@ Codingbuddyは、あらゆるAIアシスタントと互換性のある統一ル�
 ### 単一ソース
 
 ```
-.ai-rules/           ← 権威あるソース
+packages/rules/.ai-rules/           ← 権威あるソース
 ├── rules/           ← コアルール（ワークフロー、品質、プロジェクト）
 ├── agents/          ← 専門知識
 └── adapters/        ← ツール固有の統合ガイド
 ```
 
-すべてのAIツール設定が`.ai-rules/`を参照します。一度更新すれば、すべてのツールに反映されます。
+すべてのAIツール設定が`packages/rules/.ai-rules/`を参照します。一度更新すれば、すべてのツールに反映されます。
 
 ### 関心の分離
 
@@ -132,5 +132,5 @@ PLAN → ACT → EVAL
 
 - [はじめに](./getting-started.md) - クイックセットアップガイド
 - [対応ツール](./supported-tools.md) - AIツール統合
-- [コアルール](../../.ai-rules/rules/core.md) - ワークフロー詳細
-- [エージェントシステム](../../.ai-rules/agents/README.md) - スペシャリストエージェント
+- [コアルール](../../packages/rules/.ai-rules/rules/core.md) - ワークフロー詳細
+- [エージェントシステム](../../packages/rules/.ai-rules/agents/README.md) - スペシャリストエージェント

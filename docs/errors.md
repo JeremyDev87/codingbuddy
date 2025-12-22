@@ -78,10 +78,10 @@ config://project
 Resource not found: rules://rules/custom.md
 ```
 
-**Cause**: The requested rule file doesn't exist in `.ai-rules/` directory.
+**Cause**: The requested rule file doesn't exist in `packages/rules/.ai-rules/` directory.
 
 **Resolution**:
-1. Check if the file exists: `ls .ai-rules/rules/`
+1. Check if the file exists: `ls packages/rules/.ai-rules/rules/`
 2. Verify the path is correct
 3. Create the file if it should exist
 
@@ -97,7 +97,7 @@ Agent 'unknown-agent' not found.
 **Cause**: The specified agent name doesn't match any agent file.
 
 **Resolution**:
-1. List available agents: `ls .ai-rules/agents/`
+1. List available agents: `ls packages/rules/.ai-rules/agents/`
 2. Use the filename without extension (e.g., `frontend-developer`)
 
 **Valid Agent Names**:
@@ -258,24 +258,24 @@ npx codingbuddy init --api-key sk-ant-...
 
 2. **Dependencies installed**:
    ```bash
-   cd mcp-server && yarn install
+   yarn install
    ```
 
 3. **Build successful**:
    ```bash
-   yarn build
+   yarn workspace codingbuddy build
    ```
 
 ---
 
 ### Q: MCP Inspector shows no resources
 
-**A**: Check `.ai-rules/` directory exists and contains files:
+**A**: Check `packages/rules/.ai-rules/` directory exists and contains files:
 
 ```bash
-ls -la .ai-rules/
-ls -la .ai-rules/rules/
-ls -la .ai-rules/agents/
+ls -la packages/rules/.ai-rules/
+ls -la packages/rules/.ai-rules/rules/
+ls -la packages/rules/.ai-rules/agents/
 ```
 
 ---
@@ -309,11 +309,10 @@ ls -la .ai-rules/agents/
 **A**: Rebuild the project:
 
 ```bash
-cd mcp-server
 rm -rf node_modules
 yarn install
-yarn build
-yarn test
+yarn workspace codingbuddy build
+yarn workspace codingbuddy test
 ```
 
 ---
@@ -332,7 +331,7 @@ yarn test
 Run coverage report to identify gaps:
 
 ```bash
-yarn test:coverage
+yarn workspace codingbuddy test:coverage
 ```
 
 ---
@@ -342,8 +341,8 @@ yarn test:coverage
 **A**: Ensure dependencies are installed:
 
 ```bash
-yarn install --production=false
-yarn build
+yarn install
+yarn workspace codingbuddy build
 ```
 
 ---

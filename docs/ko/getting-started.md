@@ -209,7 +209,7 @@ AI: [security-specialist 활성화]
 - `performance-specialist` - 최적화
 - `accessibility-specialist` - WCAG 준수
 - `code-reviewer` - 코드 품질
-- 그 외 [전문가들](../../.ai-rules/agents/README.md)
+- 그 외 [전문가들](../../packages/rules/.ai-rules/agents/README.md)
 
 ## 다음 단계
 

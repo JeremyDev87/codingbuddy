@@ -6,8 +6,8 @@ on:
       - master
       - stag-**
     paths:
-      - 'mcp-server/**'
-      - '.ai-rules/**'
+      - 'apps/mcp-server/**'
+      - 'packages/rules/**'
       - '.antigravity/**'
       - '.claude/**'
       - '.codex/**'
@@ -24,9 +24,6 @@ jobs:
   install-dependencies:
     if: github.repository == 'JeremyDev87/codingbuddy'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -40,8 +37,11 @@ jobs:
         id: cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
 
@@ -53,9 +53,6 @@ jobs:
   lint-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -68,18 +65,18 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Lint
-        run: yarn lint
+        run: yarn workspace codingbuddy lint
 
   prettier-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -92,18 +89,18 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Format check
-        run: yarn format:check
+        run: yarn workspace codingbuddy format:check
 
   type-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -116,18 +113,18 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Type check
-        run: yarn typecheck
+        run: yarn workspace codingbuddy typecheck
 
   unit-test-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -140,18 +137,18 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Test with coverage
-        run: yarn test:coverage
+        run: yarn workspace codingbuddy test:coverage
 
   circular-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -164,18 +161,18 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Circular dependency check
-        run: yarn circular
+        run: yarn workspace codingbuddy circular
 
   build-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -188,11 +185,14 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Build
-        run: yarn build
+        run: yarn workspace codingbuddy build
 
   # ─────────────── Rules Validation ───────────────
   rules-validation:
@@ -210,11 +210,11 @@ jobs:
       - name: Validate AI Rules
         run: |
           echo "📋 Validating JSON Schema..."
-          yarn dlx ajv-cli validate -s .ai-rules/schemas/agent.schema.json -d ".ai-rules/agents/*.json" --spec=draft7
+          yarn dlx ajv-cli validate -s packages/rules/.ai-rules/schemas/agent.schema.json -d "packages/rules/.ai-rules/agents/*.json" --spec=draft7
 
           echo ""
           echo "📝 Linting Markdown files..."
-          yarn dlx markdownlint-cli2 ".ai-rules/**/*.md"
+          yarn dlx markdownlint-cli2 "packages/rules/.ai-rules/**/*.md"
 
           echo ""
           echo "✅ All rules validation passed!"
@@ -223,9 +223,6 @@ jobs:
   security-check:
     needs: install-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-server
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -238,9 +235,12 @@ jobs:
       - name: Restore dependencies from cache
         uses: actions/cache@v5
         with:
-          path: ./mcp-server/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}{1}', github.workspace, '/mcp-server/yarn.lock')) }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
 
       - name: Security audit
-        run: yarn npm audit --severity high
+        run: yarn workspace codingbuddy npm audit --severity high
         continue-on-error: true
