@@ -31,7 +31,7 @@ jobs:
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           TAG_NAME="${TAG_NAME#v}"
           echo "Publishing codingbuddy-rules version: $TAG_NAME"
-          npm version "$TAG_NAME" --no-git-tag-version
+          cat <<< "$( jq --arg v "$TAG_NAME" '.version = $v' package.json )" > package.json
           yarn npm publish
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -43,9 +43,8 @@ jobs:
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           TAG_NAME="${TAG_NAME#v}"
           echo "Publishing codingbuddy version: $TAG_NAME"
-          npm version "$TAG_NAME" --no-git-tag-version
-          # Replace workspace dependency with actual version
-          cat <<< "$( jq --arg v "$TAG_NAME" '.dependencies["codingbuddy-rules"] = $v' package.json )" > package.json
+          # Update version and replace workspace dependency with actual version
+          cat <<< "$( jq --arg v "$TAG_NAME" '.version = $v | .dependencies["codingbuddy-rules"] = $v' package.json )" > package.json
           yarn npm publish
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
