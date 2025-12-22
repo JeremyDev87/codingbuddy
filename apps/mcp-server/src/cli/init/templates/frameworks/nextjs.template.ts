@@ -37,34 +37,34 @@ export const nextjsTemplate: ConfigTemplate = {
   comments: {
     header: `// ============================================================
 // CodingBuddy Configuration
-// Next.js 프로젝트용 설정 파일
+// Next.js Project Configuration File
 //
-// 이 파일은 AI 코딩 어시스턴트가 프로젝트 컨텍스트를 이해하는 데 사용됩니다.
-// 프로젝트에 맞게 값을 수정하세요.
+// This file is used by AI coding assistants to understand project context.
+// Modify the values to match your project.
 // ============================================================`,
-    language: `// 🌍 언어 설정
-  // AI 응답 언어를 지정합니다. ('ko', 'en', 'ja' 등)`,
-    projectInfo: `// 📦 프로젝트 정보
-  // projectName, description은 자동 감지되며 필요시 수정하세요.`,
-    techStack: `// 🛠️ 기술 스택
-  // 자동 감지된 값입니다. 추가 기술이 있으면 배열에 추가하세요.
-  // 예: backend: ['Prisma', 'tRPC'], database: ['PostgreSQL']`,
-    architecture: `// 🏗️ 아키텍처
+    language: `// 🌍 Language Setting
+  // Specify the language for AI responses. ('ko', 'en', 'ja', etc.)`,
+    projectInfo: `// 📦 Project Information
+  // projectName and description are auto-detected. Modify if needed.`,
+    techStack: `// 🛠️ Tech Stack
+  // Auto-detected values. Add additional technologies to the arrays.
+  // Example: backend: ['Prisma', 'tRPC'], database: ['PostgreSQL']`,
+    architecture: `// 🏗️ Architecture
   // pattern: 'feature-based' | 'layered' | 'clean' | 'modular'
   // componentStyle: 'flat' | 'grouped' | 'feature-based'`,
-    conventions: `// 📝 코딩 컨벤션
-  // 프로젝트의 네이밍 규칙을 정의합니다.`,
-    testStrategy: `// 🧪 테스트 전략
-  // approach: 'tdd' (테스트 먼저) | 'test-after' | 'mixed'
-  // coverage: 목표 테스트 커버리지 (%)
+    conventions: `// 📝 Coding Conventions
+  // Define naming rules for your project.`,
+    testStrategy: `// 🧪 Test Strategy
+  // approach: 'tdd' (test first) | 'test-after' | 'mixed'
+  // coverage: Target test coverage (%)
   // mockingStrategy: 'minimal' | 'no-mocks' | 'extensive'`,
     footer: `// ============================================================
-  // 💡 TIP: MCP 사용 시 동기화
+  // 💡 TIP: Sync with MCP
   //
-  // codingbuddy MCP가 프로젝트를 분석하여 설정 업데이트를 제안합니다.
-  // 새로운 의존성 추가 시 'suggest_config_updates' 도구로 확인하세요.
+  // codingbuddy MCP analyzes your project and suggests config updates.
+  // When adding new dependencies, use 'suggest_config_updates' tool to check.
   //
-  // 📚 문서: https://github.com/anthropics/codingbuddy
+  // 📚 Docs: https://github.com/JeremyDev87/codingbuddy
   // ============================================================`,
   },
 };

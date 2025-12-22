@@ -37,27 +37,27 @@ export const reactTemplate: ConfigTemplate = {
   comments: {
     header: `// ============================================================
 // CodingBuddy Configuration
-// React 프로젝트용 설정 파일
+// React Project Configuration File
 //
-// 이 파일은 AI 코딩 어시스턴트가 프로젝트 컨텍스트를 이해하는 데 사용됩니다.
-// 프로젝트에 맞게 값을 수정하세요.
+// This file is used by AI coding assistants to understand project context.
+// Modify the values to match your project.
 // ============================================================`,
-    language: `// 🌍 언어 설정
-  // AI 응답 언어를 지정합니다. ('ko', 'en', 'ja' 등)`,
-    projectInfo: `// 📦 프로젝트 정보`,
-    techStack: `// 🛠️ 기술 스택
-  // 자동 감지된 값입니다. 상태관리, 스타일링 라이브러리 등을 추가하세요.
-  // 예: frontend: ['React', 'Redux', 'Tailwind CSS']`,
-    architecture: `// 🏗️ 아키텍처
+    language: `// 🌍 Language Setting
+  // Specify the language for AI responses. ('ko', 'en', 'ja', etc.)`,
+    projectInfo: `// 📦 Project Information`,
+    techStack: `// 🛠️ Tech Stack
+  // Auto-detected values. Add state management, styling libraries, etc.
+  // Example: frontend: ['React', 'Redux', 'Tailwind CSS']`,
+    architecture: `// 🏗️ Architecture
   // pattern: 'feature-based' | 'atomic' | 'layered'
   // componentStyle: 'flat' | 'grouped' | 'feature-based'`,
-    conventions: `// 📝 코딩 컨벤션`,
-    testStrategy: `// 🧪 테스트 전략
-  // React Testing Library와 함께 사용을 권장합니다.`,
+    conventions: `// 📝 Coding Conventions`,
+    testStrategy: `// 🧪 Test Strategy
+  // Recommended to use with React Testing Library.`,
     footer: `// ============================================================
-  // 💡 TIP: MCP 사용 시 동기화
+  // 💡 TIP: Sync with MCP
   //
-  // codingbuddy MCP가 프로젝트를 분석하여 설정 업데이트를 제안합니다.
+  // codingbuddy MCP analyzes your project and suggests config updates.
   // ============================================================`,
   },
 };

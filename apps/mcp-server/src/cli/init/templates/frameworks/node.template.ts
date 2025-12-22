@@ -34,24 +34,24 @@ export const nodeTemplate: ConfigTemplate = {
   comments: {
     header: `// ============================================================
 // CodingBuddy Configuration
-// Node.js 프로젝트용 설정 파일
+// Node.js Project Configuration File
 //
-// 이 파일은 AI 코딩 어시스턴트가 프로젝트 컨텍스트를 이해하는 데 사용됩니다.
-// 프로젝트에 맞게 값을 수정하세요.
+// This file is used by AI coding assistants to understand project context.
+// Modify the values to match your project.
 // ============================================================`,
-    language: `// 🌍 언어 설정`,
-    projectInfo: `// 📦 프로젝트 정보`,
-    techStack: `// 🛠️ 기술 스택
-  // 사용하는 라이브러리를 추가하세요.
-  // 예: tools: ['Commander', 'Chalk']`,
-    architecture: `// 🏗️ 아키텍처
+    language: `// 🌍 Language Setting`,
+    projectInfo: `// 📦 Project Information`,
+    techStack: `// 🛠️ Tech Stack
+  // Add libraries you use.
+  // Example: tools: ['Commander', 'Chalk']`,
+    architecture: `// 🏗️ Architecture
   // pattern: 'modular' | 'layered' | 'plugin-based'`,
-    conventions: `// 📝 코딩 컨벤션`,
-    testStrategy: `// 🧪 테스트 전략`,
+    conventions: `// 📝 Coding Conventions`,
+    testStrategy: `// 🧪 Test Strategy`,
     footer: `// ============================================================
-  // 💡 TIP: MCP 사용 시 동기화
+  // 💡 TIP: Sync with MCP
   //
-  // codingbuddy MCP가 프로젝트를 분석하여 설정 업데이트를 제안합니다.
+  // codingbuddy MCP analyzes your project and suggests config updates.
   // ============================================================`,
   },
 };

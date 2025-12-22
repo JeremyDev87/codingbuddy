@@ -37,28 +37,28 @@ export const nestjsTemplate: ConfigTemplate = {
   comments: {
     header: `// ============================================================
 // CodingBuddy Configuration
-// NestJS 프로젝트용 설정 파일
+// NestJS Project Configuration File
 //
-// 이 파일은 AI 코딩 어시스턴트가 프로젝트 컨텍스트를 이해하는 데 사용됩니다.
-// 프로젝트에 맞게 값을 수정하세요.
+// This file is used by AI coding assistants to understand project context.
+// Modify the values to match your project.
 // ============================================================`,
-    language: `// 🌍 언어 설정`,
-    projectInfo: `// 📦 프로젝트 정보`,
-    techStack: `// 🛠️ 기술 스택
-  // NestJS 모듈 및 데이터베이스를 추가하세요.
-  // 예: backend: ['NestJS', 'TypeORM'], database: ['PostgreSQL']`,
-    architecture: `// 🏗️ 아키텍처
-  // NestJS는 모듈 기반 레이어드 아키텍처를 사용합니다.
-  // structure: 프로젝트 레이어 구조`,
-    conventions: `// 📝 코딩 컨벤션
-  // NestJS 공식 스타일 가이드를 따릅니다.`,
-    testStrategy: `// 🧪 테스트 전략
-  // NestJS의 @nestjs/testing 모듈을 활용합니다.
-  // e2e 테스트는 test/ 디렉토리에 위치합니다.`,
+    language: `// 🌍 Language Setting`,
+    projectInfo: `// 📦 Project Information`,
+    techStack: `// 🛠️ Tech Stack
+  // Add NestJS modules and databases.
+  // Example: backend: ['NestJS', 'TypeORM'], database: ['PostgreSQL']`,
+    architecture: `// 🏗️ Architecture
+  // NestJS uses module-based layered architecture.
+  // structure: Project layer structure`,
+    conventions: `// 📝 Coding Conventions
+  // Follows NestJS official style guide.`,
+    testStrategy: `// 🧪 Test Strategy
+  // Uses NestJS @nestjs/testing module.
+  // e2e tests are located in the test/ directory.`,
     footer: `// ============================================================
-  // 💡 TIP: MCP 사용 시 동기화
+  // 💡 TIP: Sync with MCP
   //
-  // codingbuddy MCP가 프로젝트를 분석하여 설정 업데이트를 제안합니다.
+  // codingbuddy MCP analyzes your project and suggests config updates.
   // ============================================================`,
   },
 };
