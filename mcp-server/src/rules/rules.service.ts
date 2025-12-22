@@ -15,8 +15,8 @@ export class RulesService {
     // 2. NPM 패키지로 설치된 경우: node_modules/codingbuddy/.ai-rules
     // 3. 개발 환경: mcp-server/../.ai-rules
     //
-    // 빌드 후 구조: dist/rules/rules.service.js
-    // __dirname = dist/rules, 패키지 루트 = dist/rules/../.. = 패키지 루트
+    // 빌드 후 구조: dist/src/rules/rules.service.js
+    // 개발 환경: src/rules/rules.service.ts
 
     if (process.env.CODINGBUDDY_RULES_DIR) {
       this.rulesDir = process.env.CODINGBUDDY_RULES_DIR;
@@ -24,8 +24,12 @@ export class RulesService {
       return;
     }
 
-    // 패키지 루트 (dist/rules -> 2단계 상위)
-    const packageRoot = path.resolve(__dirname, '../..');
+    // 빌드 후: dist/src/rules → 패키지 루트로 3단계 상위
+    // 개발 환경: src/rules → 패키지 루트로 2단계 상위
+    const isBuilt =
+      __dirname.includes('/dist/') || __dirname.includes('\\dist\\');
+    const stepsUp = isBuilt ? '../../..' : '../..';
+    const packageRoot = path.resolve(__dirname, stepsUp);
 
     // 1. 패키지 루트의 .ai-rules (NPM 설치 시)
     let candidate = path.join(packageRoot, '.ai-rules');
