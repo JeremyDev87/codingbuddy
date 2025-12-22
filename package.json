@@ -6,6 +6,8 @@
     "apps/*"
   ],
   "scripts": {
+    "postinstall": "node scripts/link-workspace-bins.js",
+    "build": "yarn workspace codingbuddy build && yarn postinstall",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
