@@ -10,7 +10,8 @@
       "Code refactoring patterns",
       "Design patterns (React/Next.js best practices)",
       "Code readability and maintainability",
-      "Function/method size optimization"
+      "Function/method size optimization",
+      "Naming conventions (variables, functions, components, severity-based evaluation)"
     ],
     "responsibilities": [
       "Plan and verify SOLID principles compliance",
@@ -19,6 +20,7 @@
       "Plan and verify design patterns application",
       "Assess code readability and maintainability",
       "Plan and verify function/method size optimization",
+      "Plan and verify naming conventions compliance",
       "Ensure code follows project quality standards"
     ]
   },
@@ -62,7 +64,7 @@
             "verification_key": "design_patterns_plan"
           },
           "🔴 naming_plan": {
-            "rule": "MUST plan naming conventions (clear intent naming)",
+            "rule": "MUST plan naming conventions per shared_framework.naming_conventions - See severity_levels for violation criteria",
             "verification_key": "naming_plan"
           },
           "🔴 language": {
@@ -76,7 +78,7 @@
           "complexity_plan": "Plan function size targets (10-20 lines max), plan nested conditional limits (3-4 levels), plan complexity reduction strategy, plan complex logic breakdown",
           "function_size_plan": "Plan single responsibility per function, plan function focus and cohesion, plan long function breakdown strategy, plan related function grouping",
           "design_patterns_plan": "Plan React 19/Next.js 16 patterns (Server Components, Server Actions), plan hooks usage, plan component composition, plan state management approach",
-          "naming_plan": "Plan clear intent naming conventions, plan consistent naming patterns, plan names that match their purpose, avoid abbreviations",
+          "naming_plan": "Plan naming conventions per shared_framework.naming_conventions: variables (boolean: isX/hasX, arrays: plural nouns, objects: singular nouns, constants: SCREAMING_SNAKE_CASE), functions (handlers: handleX, getters: getX, validators: validateX/isValidX, transformers: toX/formatX/parseX), components (PascalCase, role-based). Avoid meaningless names (data, info, temp). See allowed_abbreviations for acceptable short forms.",
           "language": "Verify all response text is in Korean, check error messages and comments are in Korean"
         },
         "execution_order": {
@@ -129,19 +131,22 @@
             "No SOLID principles plan",
             "No DRY strategy plan",
             "Complexity target not set",
-            "Function size target not defined"
+            "Function size target not defined",
+            "Meaningless names planned (data, info, temp, result)"
           ],
           "high": [
             "Weak SOLID principles plan",
             "Incomplete DRY strategy",
             "Ambiguous complexity targets",
-            "Missing design patterns plan"
+            "Missing design patterns plan",
+            "Inconsistent naming patterns planned (onClick vs handleSubmit mixed)"
           ],
           "medium": [
             "Could benefit from better SOLID planning",
             "DRY strategy could be more comprehensive",
             "Complexity targets could be refined",
-            "Design patterns plan could be improved"
+            "Design patterns plan could be improved",
+            "Unnecessary abbreviations in naming plan (btn, msg, ctx)"
           ],
           "low": [
             "Minor code quality improvements",
@@ -184,7 +189,7 @@
             "verification_key": "design_patterns_verification"
           },
           "🔴 naming_verification": {
-            "rule": "MUST verify clear intent naming is used",
+            "rule": "MUST verify naming conventions per shared_framework.naming_conventions - Reject meaningless names (data, info, temp)",
             "verification_key": "naming_verification"
           },
           "🔴 language": {
@@ -198,7 +203,7 @@
           "complexity_verification": "Verify functions are 10-20 lines max, nested conditionals are minimal, cyclomatic complexity is low, complex logic is broken into smaller functions",
           "function_size_verification": "Verify functions have single responsibility, functions are focused and cohesive, long functions are broken down, related functions are grouped",
           "design_patterns_verification": "Verify React 19/Next.js 16 patterns are used (Server Components, Server Actions), hooks are used appropriately, component composition is correct, state management follows best practices",
-          "naming_verification": "Verify names clearly express intent, avoid abbreviations, use consistent naming conventions, names match their purpose",
+          "naming_verification": "Verify naming conventions per shared_framework.naming_conventions: variables (boolean: isX/hasX, arrays: plural nouns, objects: singular nouns, constants: SCREAMING_SNAKE_CASE), functions (handlers: handleX, getters: getX, validators: validateX/isValidX, transformers: toX/formatX/parseX), components (PascalCase, role-based). Reject meaningless names (data, info, temp). Only allowed_abbreviations are acceptable.",
           "language": "Verify all response text is in Korean, check error messages and comments are in Korean"
         },
         "execution_order": {
@@ -252,27 +257,33 @@
             "Extensive code duplication found",
             "Very high complexity (>20) detected",
             "Function size >50 lines",
-            "Nesting depth >5 levels"
+            "Nesting depth >5 levels",
+            "Meaningless names used (data, info, temp, result, item, value)",
+            "Misleading names (name doesn't match behavior)"
           ],
           "high": [
             "Significant SOLID violations",
             "Medium code duplication",
             "High complexity (15-20)",
             "Function size 30-50 lines",
-            "Nesting depth 4-5 levels"
+            "Nesting depth 4-5 levels",
+            "Inconsistent naming patterns (onClick vs handleSubmit mixed)",
+            "Boolean without prefix (active vs isActive mixed)"
           ],
           "medium": [
             "Minor SOLID violations",
             "Small code duplication",
             "Acceptable complexity",
             "Function size up to 30 lines",
-            "Nesting depth 3-4 levels"
+            "Nesting depth 3-4 levels",
+            "Unnecessary abbreviations (btn, msg, ctx, usr)",
+            "Overly long names reducing readability"
           ],
           "low": [
             "Code style improvements",
             "Minor optimizations",
             "Optional refactoring",
-            "Naming improvements"
+            "Better naming alternative exists"
           ]
         }
       }
@@ -303,7 +314,7 @@
             "verification_key": "complexity"
           },
           "🔴 naming": {
-            "rule": "MUST verify clear intent naming is used",
+            "rule": "MUST evaluate naming conventions per shared_framework.naming_conventions - Flag violations by severity level",
             "verification_key": "naming"
           },
           "🔴 function_size": {
@@ -323,7 +334,7 @@
           "solid_principles": "Verify Single Responsibility (each function has one reason to change), Open/Closed (open for extension, closed for modification), Liskov Substitution (subtypes must be substitutable), Interface Segregation (no unused interfaces), Dependency Inversion (depend on abstractions)",
           "dry_principle": "Verify no code duplication exists, extracted common logic into reusable functions/components, constants are defined once, similar patterns are abstracted",
           "complexity": "Verify functions are 10-20 lines max, nested conditionals are minimal, cyclomatic complexity is low, complex logic is broken into smaller functions",
-          "naming": "Verify names clearly express intent, avoid abbreviations, use consistent naming conventions, names match their purpose",
+          "naming": "Evaluate naming conventions per shared_framework.naming_conventions: variables (boolean: isX/hasX, arrays: plural nouns, objects: singular nouns, constants: SCREAMING_SNAKE_CASE), functions (handlers: handleX, getters: getX, validators: validateX/isValidX, transformers: toX/formatX/parseX), components (PascalCase, role-based). Flag meaningless names (data, info, temp) as critical. Check allowed_abbreviations for acceptable short forms.",
           "function_size": "Verify functions have single responsibility, functions are focused and cohesive, long functions are broken down, related functions are grouped",
           "design_patterns": "Verify React 19/Next.js 16 patterns are used (Server Components, Server Actions), hooks are used appropriately, component composition is correct, state management follows best practices",
           "language": "Verify all response text is in Korean, check error messages and comments are in Korean"
@@ -451,11 +462,36 @@
             "Code style improvements"
           ]
         },
+        "naming_violations": {
+          "🔴 critical": [
+            "Meaningless names (data, info, temp, result, item, value)",
+            "Single letter variables outside loops (x, y, a, b)",
+            "Misleading names (name doesn't match behavior)",
+            "Hungarian notation misuse (strName, intCount)"
+          ],
+          "high": [
+            "Inconsistent patterns (onClick vs handleSubmit mixed)",
+            "Boolean without prefix (active vs isActive mixed)",
+            "Ambiguous names requiring context to understand",
+            "Handler naming inconsistency"
+          ],
+          "medium": [
+            "Unnecessary abbreviations (btn, msg, ctx, usr)",
+            "Overly long names (authenticatedUserProfileData)",
+            "Inconsistent casing patterns",
+            "Array naming without plural form"
+          ],
+          "low": [
+            "Better alternative exists but current is acceptable",
+            "Minor naming style preferences",
+            "Could be more descriptive"
+          ]
+        },
         "risk_assessment": {
-          "🔴 critical": "Major SOLID violations, extensive duplication, very high complexity (>20), blocking maintainability",
-          "high": "Significant code quality issues affecting maintainability, medium complexity (15-20), some SOLID violations",
-          "medium": "Minor code quality improvements needed, acceptable complexity, small duplication",
-          "low": "Code style improvements, minor optimizations, optional refactoring"
+          "🔴 critical": "Major SOLID violations, extensive duplication, very high complexity (>20), meaningless names (data, info, temp), blocking maintainability",
+          "high": "Significant code quality issues affecting maintainability, medium complexity (15-20), some SOLID violations, inconsistent naming patterns",
+          "medium": "Minor code quality improvements needed, acceptable complexity, small duplication, unnecessary abbreviations in naming",
+          "low": "Code style improvements, minor optimizations, optional refactoring, naming could be improved"
         }
       }
     }
@@ -529,6 +565,115 @@
         "Props drilling instead of composition",
         "Missing error boundaries",
         "Inefficient re-renders"
+      ]
+    },
+    "naming_conventions": {
+      "variables": {
+        "boolean": {
+          "pattern": "isX, hasX, canX, shouldX, willX",
+          "examples": ["isActive", "hasPermission", "canEdit", "shouldRender"],
+          "anti_patterns": ["active", "permission", "edit", "render"]
+        },
+        "arrays_collections": {
+          "pattern": "Plural nouns (users, items, products)",
+          "examples": ["users", "items", "selectedProducts"],
+          "anti_patterns": ["userList", "itemArray", "productCollection"]
+        },
+        "objects": {
+          "pattern": "Singular nouns describing the entity",
+          "examples": ["user", "config", "authState"],
+          "anti_patterns": ["data", "info", "obj", "item"]
+        },
+        "constants": {
+          "pattern": "SCREAMING_SNAKE_CASE for true constants",
+          "examples": ["MAX_RETRY_COUNT", "API_BASE_URL", "DEFAULT_TIMEOUT"],
+          "anti_patterns": ["maxRetryCount", "apiBaseUrl"]
+        }
+      },
+      "functions": {
+        "event_handlers": {
+          "pattern": "handleX (handleClick, handleSubmit, handleChange)",
+          "examples": ["handleClick", "handleSubmit", "handleInputChange"],
+          "anti_patterns": ["onClick", "clickHandler", "onClickHandler"]
+        },
+        "getters": {
+          "pattern": "getX for data retrieval",
+          "examples": ["getUser", "getUserById", "getConfig"],
+          "anti_patterns": ["fetchUser", "retrieveUser", "user"]
+        },
+        "setters": {
+          "pattern": "setX for state updates",
+          "examples": ["setUser", "setIsLoading", "setConfig"],
+          "anti_patterns": ["updateUser", "changeUser"]
+        },
+        "validators": {
+          "pattern": "validateX or isValidX",
+          "examples": ["validateEmail", "isValidPassword", "validateForm"],
+          "anti_patterns": ["checkEmail", "emailCheck", "emailValidator"]
+        },
+        "transformers": {
+          "pattern": "toX, formatX, parseX for data transformation",
+          "examples": ["toJSON", "formatDate", "parseResponse"],
+          "anti_patterns": ["convertToJSON", "dateFormatter"]
+        },
+        "async_operations": {
+          "pattern": "fetchX, loadX for async data fetching",
+          "examples": ["fetchUsers", "loadUserProfile", "fetchData"],
+          "anti_patterns": ["getUsers (if async)", "userData"]
+        }
+      },
+      "components": {
+        "naming": {
+          "pattern": "PascalCase, role-based naming",
+          "examples": ["UserProfile", "LoginForm", "NavigationMenu"],
+          "anti_patterns": ["Profile", "Form", "Menu"]
+        },
+        "props": {
+          "pattern": "Clear intent props",
+          "callback_props": "onX pattern (onSubmit, onChange, onClose)",
+          "boolean_props": "isX, hasX pattern (isDisabled, isLoading, hasError)",
+          "examples": ["onSubmit", "isDisabled", "hasError"],
+          "anti_patterns": ["submit", "disabled", "error"]
+        }
+      },
+      "severity_levels": {
+        "🔴 critical": [
+          "Meaningless names (data, info, temp, result, item, value)",
+          "Single letter variables outside loops (x, y, a, b)",
+          "Misleading names (name doesn't match behavior)",
+          "Hungarian notation misuse (strName, intCount)"
+        ],
+        "high": [
+          "Inconsistent patterns (onClick vs handleSubmit mixed)",
+          "Boolean without prefix (active vs isActive mixed)",
+          "Ambiguous names requiring context to understand"
+        ],
+        "medium": [
+          "Unnecessary abbreviations (btn, msg, ctx, usr)",
+          "Overly long names (authenticatedUserProfileData)",
+          "Inconsistent casing patterns"
+        ],
+        "low": [
+          "Better alternative exists but current is acceptable",
+          "Minor naming style preferences",
+          "Could be more descriptive"
+        ]
+      },
+      "allowed_abbreviations": [
+        "id (identifier)",
+        "url (uniform resource locator)",
+        "api (application programming interface)",
+        "db (database)",
+        "config (configuration)",
+        "props (properties - React specific)",
+        "params (parameters)",
+        "args (arguments)",
+        "env (environment)",
+        "src (source)",
+        "dest (destination)",
+        "prev (previous)",
+        "next (next)",
+        "i, j, k (loop indices)"
       ]
     },
     "best_practices_reference": {
