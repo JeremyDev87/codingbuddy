@@ -14,7 +14,9 @@ Thank you for your interest in contributing to Codingbuddy! This document provid
 
 ## Code of Conduct
 
-Be respectful and inclusive. We welcome contributors of all backgrounds and experience levels.
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold this code.
+
+Please report unacceptable behavior via [GitHub Issues](https://github.com/JeremyDev87/codingbuddy/issues). For sensitive matters, you can use [GitHub Security Advisories](https://github.com/JeremyDev87/codingbuddy/security/advisories/new) to report privately.
 
 ## Getting Started
 
