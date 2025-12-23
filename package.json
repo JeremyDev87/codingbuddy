@@ -1,6 +1,28 @@
 {
   "name": "codingbuddy-monorepo",
   "private": true,
+  "description": "Multi-AI Rules MCP Server - One source of truth for AI coding rules across all AI assistants",
+  "author": "JeremyDev87",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeremyDev87/codingbuddy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JeremyDev87/codingbuddy/issues"
+  },
+  "homepage": "https://github.com/JeremyDev87/codingbuddy#readme",
+  "keywords": [
+    "ai",
+    "coding-assistant",
+    "mcp",
+    "model-context-protocol",
+    "cursor",
+    "claude",
+    "copilot",
+    "coding-rules",
+    "developer-tools"
+  ],
   "workspaces": [
     "packages/*",
     "apps/*"
