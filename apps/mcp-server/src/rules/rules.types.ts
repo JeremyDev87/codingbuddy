@@ -1,10 +1,13 @@
 export interface AgentProfile {
   name: string;
-  role: string;
-  expertise: string[];
-  goals: string[];
-  workflow: string[];
-  output_format: string;
+  description: string;
+  role: {
+    title: string;
+    expertise: string[];
+    tech_stack_reference?: string;
+    responsibilities?: string[];
+  };
+  [key: string]: unknown; // Allow additional fields (passthrough)
 }
 
 export interface SearchResult {

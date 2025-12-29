@@ -81,11 +81,13 @@ const createMockRulesService = (): Partial<RulesService> => ({
     .mockResolvedValue(['frontend-developer', 'code-reviewer']),
   getRuleContent: vi.fn().mockResolvedValue('# Core Rules\nSome content...'),
   getAgent: vi.fn().mockResolvedValue({
-    id: 'frontend-developer',
     name: 'Frontend Developer',
-    role: 'Frontend development specialist',
-    goals: ['Write clean code', 'Follow best practices'],
-    workflow: ['Analyze requirements', 'Implement solution'],
+    description: 'Frontend development specialist',
+    role: {
+      title: 'Senior Frontend Developer',
+      expertise: ['React', 'TypeScript'],
+      responsibilities: ['Write clean code', 'Follow best practices'],
+    },
   }),
   searchRules: vi.fn().mockResolvedValue([]),
 });

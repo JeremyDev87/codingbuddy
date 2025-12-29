@@ -130,10 +130,10 @@ export function parseAgentProfile(data: unknown): ValidatedAgentProfile {
     const result = AgentProfileSchema.safeParse(data);
 
     if (!result.success) {
-      const errorMessage = result.error.errors
-        .map(e => {
-          const path = e.path.length > 0 ? e.path.join('.') : 'root';
-          return `${path}: ${e.message}`;
+      const errorMessage = result.error.issues
+        .map(issue => {
+          const pathStr = issue.path.length > 0 ? issue.path.join('.') : 'root';
+          return `${pathStr}: ${issue.message}`;
         })
         .join(', ');
       throw new AgentSchemaError(
