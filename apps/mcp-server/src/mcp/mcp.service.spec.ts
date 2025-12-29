@@ -9,6 +9,8 @@ import {
   ConfigDiffResult,
 } from '../config/config-diff.service';
 import { AnalyzerService } from '../analyzer/analyzer.service';
+import { SkillRecommendationService } from '../skill/skill-recommendation.service';
+import type { RecommendSkillsResult } from '../skill/skill-recommendation.types';
 
 // Handler function type for MCP request handlers
 type McpHandler = (request: unknown) => Promise<unknown>;
@@ -139,6 +141,21 @@ const createMockAnalyzerService = (): Partial<AnalyzerService> => ({
   analyzeProject: vi.fn().mockResolvedValue(mockAnalysis),
 });
 
+const createMockSkillRecommendationService =
+  (): Partial<SkillRecommendationService> => ({
+    recommendSkills: vi.fn().mockReturnValue({
+      recommendations: [
+        {
+          skillName: 'systematic-debugging',
+          confidence: 'high',
+          matchedPatterns: ['bug', 'debug'],
+          description: 'Systematic approach to debugging',
+        },
+      ],
+      originalPrompt: 'I have a bug in my code',
+    } as RecommendSkillsResult),
+  });
+
 // Import after mocks
 import { McpService } from './mcp.service';
 
@@ -148,6 +165,7 @@ describe('McpService', () => {
   let mockConfigService: Partial<ConfigService>;
   let mockConfigDiffService: Partial<ConfigDiffService>;
   let mockAnalyzerService: Partial<AnalyzerService>;
+  let mockSkillRecommendationService: Partial<SkillRecommendationService>;
 
   const testConfig: CodingBuddyConfig = {
     language: 'ko',
@@ -167,6 +185,7 @@ describe('McpService', () => {
     mockConfigService = createMockConfigService(testConfig);
     mockConfigDiffService = createMockConfigDiffService();
     mockAnalyzerService = createMockAnalyzerService();
+    mockSkillRecommendationService = createMockSkillRecommendationService();
 
     const mcpService = new McpService(
       mockRulesService as RulesService,
@@ -174,6 +193,7 @@ describe('McpService', () => {
       mockConfigService as ConfigService,
       mockConfigDiffService as ConfigDiffService,
       mockAnalyzerService as AnalyzerService,
+      mockSkillRecommendationService as SkillRecommendationService,
     );
     mcpService.onModuleInit();
   });
@@ -384,6 +404,7 @@ describe('McpService', () => {
         emptyConfigService as ConfigService,
         mockConfigDiffService as ConfigDiffService,
         mockAnalyzerService as AnalyzerService,
+        mockSkillRecommendationService as SkillRecommendationService,
       );
       serviceWithEmptyConfig.onModuleInit();
 
@@ -432,6 +453,7 @@ describe('McpService', () => {
         fullConfigService as ConfigService,
         mockConfigDiffService as ConfigDiffService,
         mockAnalyzerService as AnalyzerService,
+        mockSkillRecommendationService as SkillRecommendationService,
       );
       service.onModuleInit();
 
@@ -495,6 +517,7 @@ describe('McpService', () => {
           failingConfigService as ConfigService,
           mockConfigDiffService as ConfigDiffService,
           mockAnalyzerService as AnalyzerService,
+          mockSkillRecommendationService as SkillRecommendationService,
         );
         service.onModuleInit();
 
@@ -565,6 +588,7 @@ describe('McpService', () => {
           failingConfigService as ConfigService,
           mockConfigDiffService as ConfigDiffService,
           mockAnalyzerService as AnalyzerService,
+          mockSkillRecommendationService as SkillRecommendationService,
         );
         service.onModuleInit();
 
@@ -620,6 +644,7 @@ describe('McpService', () => {
         mockConfigService as ConfigService,
         mockConfigDiffService as ConfigDiffService,
         mockAnalyzerService as AnalyzerService,
+        mockSkillRecommendationService as SkillRecommendationService,
       );
 
       // Should not throw
@@ -635,10 +660,276 @@ describe('McpService', () => {
         mockConfigService as ConfigService,
         mockConfigDiffService as ConfigDiffService,
         mockAnalyzerService as AnalyzerService,
+        mockSkillRecommendationService as SkillRecommendationService,
       );
 
       const server = service.getServer();
       expect(server).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // recommend_skills Tool Tests (RED phase - tests should FAIL)
+  // ============================================================================
+
+  describe('recommend_skills tool', () => {
+    describe('Tool Registration', () => {
+      it('should list recommend_skills tool', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string; inputSchema: object }[];
+        };
+        const recommendTool = result.tools.find(
+          t => t.name === 'recommend_skills',
+        );
+
+        expect(recommendTool).toBeDefined();
+        expect(recommendTool!.description).toContain('skill');
+      });
+
+      it('should have correct inputSchema for recommend_skills', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: {
+            name: string;
+            inputSchema: { properties: object; required: string[] };
+          }[];
+        };
+        const recommendTool = result.tools.find(
+          t => t.name === 'recommend_skills',
+        );
+
+        expect(recommendTool).toBeDefined();
+        expect(recommendTool!.inputSchema.properties).toHaveProperty('prompt');
+        expect(recommendTool!.inputSchema.required).toContain('prompt');
+      });
+    });
+
+    describe('Basic Functionality', () => {
+      it('should return recommendations for debugging prompt', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: 'I have a bug in my code' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        expect(result.content[0].type).toBe('text');
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.recommendations).toBeDefined();
+        expect(parsed.recommendations.length).toBeGreaterThan(0);
+        expect(parsed.recommendations[0].skillName).toBe(
+          'systematic-debugging',
+        );
+        expect(
+          mockSkillRecommendationService.recommendSkills,
+        ).toHaveBeenCalledWith('I have a bug in my code');
+      });
+
+      it('should return empty recommendations for unrelated prompt', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.recommendSkills!,
+        ).mockReturnValue({
+          recommendations: [],
+          originalPrompt: 'What is the weather today?',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: 'What is the weather today?' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.recommendations).toEqual([]);
+      });
+
+      it('should include originalPrompt in response', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: 'I have a bug in my code' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.originalPrompt).toBe('I have a bug in my code');
+      });
+    });
+
+    describe('Multi-language Support', () => {
+      it('should work with English prompt', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.recommendSkills!,
+        ).mockReturnValue({
+          recommendations: [
+            {
+              skillName: 'systematic-debugging',
+              confidence: 'high',
+              matchedPatterns: ['bug'],
+              description: 'Systematic approach to debugging',
+            },
+          ],
+          originalPrompt: 'There is a bug in the login feature',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: 'There is a bug in the login feature' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.recommendations).toHaveLength(1);
+        expect(parsed.recommendations[0].skillName).toBe(
+          'systematic-debugging',
+        );
+      });
+
+      it('should work with Korean prompt', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.recommendSkills!,
+        ).mockReturnValue({
+          recommendations: [
+            {
+              skillName: 'systematic-debugging',
+              confidence: 'high',
+              matchedPatterns: ['버그'],
+              description: 'Systematic approach to debugging',
+            },
+          ],
+          originalPrompt: '로그인에 버그가 있습니다',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: '로그인에 버그가 있습니다' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.recommendations).toHaveLength(1);
+        expect(
+          mockSkillRecommendationService.recommendSkills,
+        ).toHaveBeenCalledWith('로그인에 버그가 있습니다');
+      });
+
+      it('should work with Japanese prompt', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.recommendSkills!,
+        ).mockReturnValue({
+          recommendations: [
+            {
+              skillName: 'systematic-debugging',
+              confidence: 'high',
+              matchedPatterns: ['バグ'],
+              description: 'Systematic approach to debugging',
+            },
+          ],
+          originalPrompt: 'ログイン機能にバグがある',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: 'ログイン機能にバグがある' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.recommendations).toHaveLength(1);
+        expect(
+          mockSkillRecommendationService.recommendSkills,
+        ).toHaveBeenCalledWith('ログイン機能にバグがある');
+      });
+    });
+
+    describe('Error Handling', () => {
+      it('should throw error when prompt is missing', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: {},
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('prompt');
+      });
+
+      it('should return empty recommendations for empty prompt', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.recommendSkills!,
+        ).mockReturnValue({
+          recommendations: [],
+          originalPrompt: '',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: '' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.recommendations).toEqual([]);
+        expect(parsed.originalPrompt).toBe('');
+      });
+
+      it('should return error when service throws', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.recommendSkills!,
+        ).mockImplementation(() => {
+          throw new Error('Service error');
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'recommend_skills',
+            arguments: { prompt: 'test prompt' },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('Failed to recommend skills');
+      });
     });
   });
 });

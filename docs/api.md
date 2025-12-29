@@ -426,6 +426,88 @@ Analyze the project and suggest config updates based on detected changes (new fr
 
 ---
 
+### recommend_skills
+
+Recommend skills based on user prompt with multi-language support.
+
+**Input Schema**:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "User prompt to analyze for skill recommendations"
+    }
+  },
+  "required": ["prompt"]
+}
+```
+
+**Request Example**:
+
+```json
+{
+  "name": "recommend_skills",
+  "arguments": {
+    "prompt": "There is a bug in the login"
+  }
+}
+```
+
+**Response Example**:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"recommendations\": [{\"skillName\": \"systematic-debugging\", \"confidence\": \"high\", \"matchedPatterns\": [\"bug\"], \"description\": \"Systematic approach to debugging\"}], \"originalPrompt\": \"There is a bug in the login\"}"
+    }
+  ]
+}
+```
+
+**Response Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `recommendations` | array | List of recommended skills |
+| `recommendations[].skillName` | string | Name of the recommended skill |
+| `recommendations[].confidence` | string | Confidence level (`high`, `medium`, `low`) |
+| `recommendations[].matchedPatterns` | array | Patterns that triggered the recommendation |
+| `recommendations[].description` | string | Brief description of the skill |
+| `originalPrompt` | string | The original prompt that was analyzed |
+
+**Supported Languages**:
+
+| Language | Code | Example Patterns |
+|----------|------|------------------|
+| English | EN | "bug", "error", "build", "component" |
+| Korean | KO | "버그", "에러", "빌드", "컴포넌트" |
+| Japanese | JA | "バグ", "エラー", "ビルド", "コンポーネント" |
+| Chinese | ZH | "错误", "bug", "构建", "组件" |
+| Spanish | ES | "error", "bug", "construir", "componente" |
+
+**Example Usage**:
+
+```typescript
+// English
+recommend_skills({ prompt: "There is a bug in the login" })
+// => recommends: systematic-debugging
+
+// Korean
+recommend_skills({ prompt: "로그인에 버그가 있어" })
+// => recommends: systematic-debugging
+
+// Building UI
+recommend_skills({ prompt: "Build a dashboard component" })
+// => recommends: frontend-design
+```
+
+---
+
 ## Prompts
 
 Prompts provide pre-defined message templates for common workflows.
@@ -502,7 +584,7 @@ Activate a specific specialist agent with project context.
 | `Invalid URI scheme` | URI doesn't start with `rules://` or `config://` | Use correct URI scheme |
 | `Resource not found: {uri}` | Requested rule file doesn't exist | Check file path in `packages/rules/.ai-rules/` |
 | `Agent '{name}' not found` | Invalid agent name | Use valid agent name from list |
-| `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates` |
+| `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates`, `recommend_skills` |
 | `Failed to load project configuration` | Missing or invalid `codingbuddy.config.js` | Run `npx codingbuddy init` |
 
 ---

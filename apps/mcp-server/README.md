@@ -41,6 +41,7 @@ npx codingbuddy init
 | `search_rules` | Search through rules and guidelines |
 | `get_agent_details` | Get detailed profile of a specialist agent |
 | `parse_mode` | Parse PLAN/ACT/EVAL workflow mode (includes language setting) |
+| `recommend_skills` | Recommend skills based on user prompt with multi-language support |
 
 ### MCP Prompts
 

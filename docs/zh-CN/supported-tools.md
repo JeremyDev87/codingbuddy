@@ -51,7 +51,7 @@ Claude Code 通过 MCP 连接，提供对项目配置、规则和专家代理的
 ### 功能
 
 - 完整的 MCP 资源访问（配置、规则、代理）
-- 工具调用（search_rules、get_agent_details、parse_mode）
+- 工具调用（search_rules、get_agent_details、parse_mode、recommend_skills）
 - 提示模板（activate_agent）
 
 [完整指南](../../packages/rules/.ai-rules/adapters/claude-code.md)
