@@ -276,6 +276,71 @@ describe('McpServerlessService', () => {
   });
 
   // ==========================================================================
+  // Path Traversal Protection Tests
+  // ==========================================================================
+
+  describe('path traversal protection', () => {
+    it('should reject path traversal with ../', async () => {
+      const result = await invokeToolHandler(
+        service,
+        'getAgentDetails',
+        '../../../etc/passwd',
+      );
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('not found');
+    });
+
+    it('should reject hidden path traversal', async () => {
+      const result = await invokeToolHandler(
+        service,
+        'getAgentDetails',
+        'frontend-developer/../../secret',
+      );
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('not found');
+    });
+
+    it('should reject absolute paths', async () => {
+      const result = await invokeToolHandler(
+        service,
+        'getAgentDetails',
+        '/etc/passwd',
+      );
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('not found');
+    });
+
+    it('should reject Windows-style path traversal', async () => {
+      const result = await invokeToolHandler(
+        service,
+        'getAgentDetails',
+        '..\\..\\etc\\passwd',
+      );
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('not found');
+    });
+
+    it('should reject null byte injection', async () => {
+      const result = await invokeToolHandler(
+        service,
+        'getAgentDetails',
+        'frontend-developer\x00.txt',
+      );
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('not found');
+    });
+
+    it('should allow valid agent names', async () => {
+      const result = await invokeToolHandler(
+        service,
+        'getAgentDetails',
+        'frontend-developer',
+      );
+      expect(result.isError).toBeUndefined();
+    });
+  });
+
+  // ==========================================================================
   // Error Handling Tests
   // ==========================================================================
 

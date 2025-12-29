@@ -13,6 +13,7 @@ import type {
 import { KEYWORDS } from '../keyword/keyword.types';
 import { loadConfig } from '../config/config.loader';
 import type { CodingBuddyConfig } from '../config/config.schema';
+import { isPathSafe } from '../shared/security.utils';
 
 // ============================================================================
 // Types
@@ -364,6 +365,11 @@ export class McpServerlessService {
   // ============================================================================
 
   private async getRuleContent(relativePath: string): Promise<string> {
+    // Security: Validate path to prevent directory traversal
+    if (!isPathSafe(this.rulesDir, relativePath)) {
+      throw new Error(`Access denied: Invalid path`);
+    }
+
     const fullPath = path.join(this.rulesDir, relativePath);
     try {
       return await fs.readFile(fullPath, 'utf-8');

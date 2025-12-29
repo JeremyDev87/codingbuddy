@@ -3,6 +3,7 @@ import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
 import { AgentProfile, SearchResult } from './rules.types';
+import { isPathSafe } from '../shared/security.utils';
 
 @Injectable()
 export class RulesService {
@@ -66,6 +67,12 @@ export class RulesService {
     }
   }
   async getRuleContent(relativePath: string): Promise<string> {
+    // Security: Validate path to prevent directory traversal
+    if (!isPathSafe(this.rulesDir, relativePath)) {
+      this.logger.warn(`Path traversal attempt blocked: ${relativePath}`);
+      throw new Error(`Access denied: Invalid path`);
+    }
+
     const fullPath = path.join(this.rulesDir, relativePath);
     try {
       return await fs.readFile(fullPath, 'utf-8');

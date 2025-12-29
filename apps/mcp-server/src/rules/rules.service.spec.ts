@@ -90,6 +90,46 @@ describe('RulesService', () => {
         'Failed to read rule file: protected.md',
       );
     });
+
+    describe('path traversal protection', () => {
+      it('should reject path traversal with ../', async () => {
+        await expect(
+          service.getRuleContent('../../../etc/passwd'),
+        ).rejects.toThrow('Access denied: Invalid path');
+      });
+
+      it('should reject hidden path traversal', async () => {
+        await expect(
+          service.getRuleContent('agents/../../secret'),
+        ).rejects.toThrow('Access denied: Invalid path');
+      });
+
+      it('should reject absolute paths', async () => {
+        await expect(service.getRuleContent('/etc/passwd')).rejects.toThrow(
+          'Access denied: Invalid path',
+        );
+      });
+
+      it('should reject Windows-style path traversal', async () => {
+        await expect(
+          service.getRuleContent('..\\..\\etc\\passwd'),
+        ).rejects.toThrow('Access denied: Invalid path');
+      });
+
+      it('should reject null byte injection', async () => {
+        await expect(
+          service.getRuleContent('agents/test.json\x00.txt'),
+        ).rejects.toThrow('Access denied: Invalid path');
+      });
+
+      it('should allow valid relative paths', async () => {
+        vi.mocked(fs.readFile).mockResolvedValue('content');
+
+        const result = await service.getRuleContent('agents/test.json');
+
+        expect(result).toBe('content');
+      });
+    });
   });
 
   describe('listAgents', () => {
