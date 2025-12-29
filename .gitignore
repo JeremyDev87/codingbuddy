@@ -48,6 +48,5 @@ coverage/
 
 # AI
 .mcp.json
-
-# codingbuddy.config.js
 codingbuddy.config.js
+custom.mdc
