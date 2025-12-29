@@ -274,13 +274,17 @@ export class McpService implements OnModuleInit {
           const settings = await this.configService.getSettings();
           const projectContext = this.formatProjectContext(settings);
 
+          const expertise = agent.role.expertise.join(', ');
+          const responsibilities =
+            agent.role.responsibilities?.join('\n- ') ?? '';
+
           return {
             messages: [
               {
                 role: 'user',
                 content: {
                   type: 'text',
-                  text: `Activate Agent: ${agent.name}\n\nRole: ${agent.role}\n\nGoals:\n${agent.goals.join('\n')}\n\nWorkflow:\n${agent.workflow.join('\n')}\n\n${projectContext}\n\nCore Rules Context:\n${coreRules.substring(0, 1000)}... (truncated)`,
+                  text: `Activate Agent: ${agent.name}\n\nDescription: ${agent.description}\n\nRole: ${agent.role.title}\nExpertise: ${expertise}\n\nResponsibilities:\n- ${responsibilities}\n\n${projectContext}\n\nCore Rules Context:\n${coreRules.substring(0, 1000)}... (truncated)`,
                 },
               },
             ],
