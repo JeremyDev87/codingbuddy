@@ -442,6 +442,24 @@ describe('McpServerlessService', () => {
       const data = JSON.parse(result.content[0].text);
       expect(Array.isArray(data)).toBe(true);
     });
+
+    it('should sanitize error messages (not expose internal paths)', async () => {
+      // Create service with path that will cause file system error
+      const invalidService = new McpServerlessService(
+        '/Users/secret/path/that/does/not/exist',
+        TEST_PROJECT_ROOT,
+      );
+
+      const result = await invokeToolHandler(
+        invalidService,
+        'getAgentDetails',
+        'test-agent',
+      );
+
+      // Error should be returned but not contain internal paths
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).not.toContain('/Users/secret');
+    });
   });
 
   // ==========================================================================

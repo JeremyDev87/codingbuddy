@@ -20,6 +20,7 @@ import {
   validatePrompt,
   validateAgentName,
 } from '../shared/validation.constants';
+import { sanitizeError } from '../shared/error.utils';
 
 // ============================================================================
 // Types
@@ -248,7 +249,7 @@ export class McpServerlessService {
       return this.jsonResponse(results);
     } catch (error) {
       return this.errorResponse(
-        `Failed to search rules: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to search rules: ${sanitizeError(error)}`,
       );
     }
   }
@@ -287,7 +288,7 @@ export class McpServerlessService {
       return this.jsonResponse(response);
     } catch (error) {
       return this.errorResponse(
-        `Failed to parse mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to parse mode: ${sanitizeError(error)}`,
       );
     }
   }
@@ -298,7 +299,7 @@ export class McpServerlessService {
       return this.jsonResponse(settings);
     } catch (error) {
       return this.errorResponse(
-        `Failed to get project config: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get project config: ${sanitizeError(error)}`,
       );
     }
   }
@@ -379,7 +380,7 @@ export class McpServerlessService {
       });
     } catch (error) {
       return this.errorResponse(
-        `Failed to suggest config updates: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to suggest config updates: ${sanitizeError(error)}`,
       );
     }
   }

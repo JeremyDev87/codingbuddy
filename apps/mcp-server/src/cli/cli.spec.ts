@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { parseArgs, printUsage, printVersion } from './cli';
+import { parseArgs, printUsage, printVersion, printApiKeyWarning } from './cli';
 
 describe('cli', () => {
   describe('parseArgs', () => {
@@ -121,6 +121,40 @@ describe('cli', () => {
         .map((c: unknown[]) => c[0])
         .join('');
       expect(output).toMatch(/\d+\.\d+\.\d+/);
+    });
+  });
+
+  describe('printApiKeyWarning', () => {
+    let stderrWrite: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      stderrWrite = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should print security warning to stderr', () => {
+      printApiKeyWarning();
+
+      expect(stderrWrite).toHaveBeenCalled();
+      const output = stderrWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toContain('Security Warning');
+      expect(output).toContain('ANTHROPIC_API_KEY');
+    });
+
+    it('should recommend using environment variable', () => {
+      printApiKeyWarning();
+
+      const output = stderrWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toContain('export ANTHROPIC_API_KEY');
     });
   });
 });

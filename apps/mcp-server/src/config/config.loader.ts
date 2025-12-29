@@ -139,6 +139,25 @@ export function validateAndTransform(
 }
 
 /**
+ * Check if a file is a JavaScript config (potentially executable code)
+ */
+export function isJsConfig(filePath: string): boolean {
+  const ext = path.extname(filePath).toLowerCase();
+  return ext === '.js' || ext === '.mjs';
+}
+
+/**
+ * Generate security warning for JavaScript config files
+ */
+export function getJsConfigWarning(filePath: string): string {
+  return (
+    `Security notice: Loading JavaScript config file (${path.basename(filePath)}). ` +
+    'JS configs execute code and may pose security risks in untrusted projects. ' +
+    'Consider using codingbuddy.config.json for safer static configuration.'
+  );
+}
+
+/**
  * Load project configuration from the specified root directory
  *
  * @param projectRoot - Project root directory (defaults to process.cwd())
@@ -162,6 +181,11 @@ export async function loadConfig(
   // Load and validate config
   const raw = await loadConfigFromFile(configPath);
   const { config, warnings } = validateAndTransform(raw, configPath);
+
+  // Add security warning for JS configs
+  if (isJsConfig(configPath)) {
+    warnings.push(getJsConfigWarning(configPath));
+  }
 
   return {
     config,

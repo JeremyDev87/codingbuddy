@@ -114,12 +114,32 @@ export function printVersion(): void {
 }
 
 /**
+ * Print security warning for API key in CLI arguments
+ */
+export function printApiKeyWarning(): void {
+  const warning = `
+⚠️  Security Warning: API key passed via command line argument.
+    This may expose your key in shell history and process lists.
+    Consider using the ANTHROPIC_API_KEY environment variable instead:
+
+    export ANTHROPIC_API_KEY="your-key-here"
+    codingbuddy init
+`;
+  process.stderr.write(warning);
+}
+
+/**
  * Main CLI entry point
  */
 export async function main(
   args: string[] = process.argv.slice(2),
 ): Promise<void> {
   const { command, options } = parseArgs(args);
+
+  // Security warning for API key in CLI args
+  if (options.apiKey) {
+    printApiKeyWarning();
+  }
 
   switch (command) {
     case 'help':

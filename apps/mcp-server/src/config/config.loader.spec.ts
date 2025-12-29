@@ -3,6 +3,8 @@ import {
   CONFIG_FILE_NAMES,
   ConfigLoadError,
   validateAndTransform,
+  isJsConfig,
+  getJsConfigWarning,
 } from './config.loader';
 
 describe('config.loader', () => {
@@ -107,6 +109,45 @@ describe('config.loader', () => {
       expect(() => validateAndTransform(raw, '/path/config.json')).toThrow(
         ConfigLoadError,
       );
+    });
+  });
+
+  describe('isJsConfig', () => {
+    it('should return true for .js files', () => {
+      expect(isJsConfig('/path/codingbuddy.config.js')).toBe(true);
+    });
+
+    it('should return true for .mjs files', () => {
+      expect(isJsConfig('/path/codingbuddy.config.mjs')).toBe(true);
+    });
+
+    it('should return false for .json files', () => {
+      expect(isJsConfig('/path/codingbuddy.config.json')).toBe(false);
+    });
+
+    it('should be case-insensitive', () => {
+      expect(isJsConfig('/path/config.JS')).toBe(true);
+      expect(isJsConfig('/path/config.MJS')).toBe(true);
+    });
+  });
+
+  describe('getJsConfigWarning', () => {
+    it('should include file name in warning', () => {
+      const warning = getJsConfigWarning('/path/to/codingbuddy.config.js');
+
+      expect(warning).toContain('codingbuddy.config.js');
+    });
+
+    it('should mention security risk', () => {
+      const warning = getJsConfigWarning('/path/to/config.js');
+
+      expect(warning).toContain('security');
+    });
+
+    it('should recommend JSON alternative', () => {
+      const warning = getJsConfigWarning('/path/to/config.js');
+
+      expect(warning).toContain('codingbuddy.config.json');
     });
   });
 });
