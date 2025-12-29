@@ -5,6 +5,7 @@ import { RulesModule } from '../rules/rules.module';
 import { KeywordModule } from '../keyword/keyword.module';
 import { CodingBuddyConfigModule } from '../config/config.module';
 import { AnalyzerModule } from '../analyzer/analyzer.module';
+import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { AnalyzerModule } from '../analyzer/analyzer.module';
     AnalyzerModule,
   ],
   controllers: [McpController],
-  providers: [McpService],
+  providers: [McpService, SkillRecommendationService],
   exports: [McpService],
 })
 export class McpModule {}

@@ -17,6 +17,7 @@ import { KEYWORD_SERVICE } from '../keyword/keyword.module';
 import { ConfigService } from '../config/config.service';
 import { ConfigDiffService } from '../config/config-diff.service';
 import { AnalyzerService } from '../analyzer/analyzer.service';
+import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import type { CodingBuddyConfig } from '../config/config.schema';
 
 @Injectable()
@@ -30,6 +31,7 @@ export class McpService implements OnModuleInit {
     private configService: ConfigService,
     private configDiffService: ConfigDiffService,
     private analyzerService: AnalyzerService,
+    private skillRecommendationService: SkillRecommendationService,
   ) {
     this.server = new Server(
       {
@@ -217,6 +219,22 @@ export class McpService implements OnModuleInit {
               required: [],
             },
           },
+          {
+            name: 'recommend_skills',
+            description:
+              'Recommend skills based on user prompt with multi-language support',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                prompt: {
+                  type: 'string',
+                  description:
+                    'User prompt to analyze for skill recommendations',
+                },
+              },
+              required: ['prompt'],
+            },
+          },
         ],
       };
     });
@@ -235,6 +253,8 @@ export class McpService implements OnModuleInit {
           return this.handleGetProjectConfig();
         case 'suggest_config_updates':
           return this.handleSuggestConfigUpdates(args);
+        case 'recommend_skills':
+          return this.handleRecommendSkills(args);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
@@ -371,6 +391,21 @@ export class McpService implements OnModuleInit {
     } catch (error) {
       return this.errorResponse(
         `Failed to suggest config updates: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  private handleRecommendSkills(args: Record<string, unknown> | undefined) {
+    const prompt = args?.prompt;
+    if (typeof prompt !== 'string') {
+      return this.errorResponse('Missing required parameter: prompt');
+    }
+    try {
+      const result = this.skillRecommendationService.recommendSkills(prompt);
+      return this.jsonResponse(result);
+    } catch (error) {
+      return this.errorResponse(
+        `Failed to recommend skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }

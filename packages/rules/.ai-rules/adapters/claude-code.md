@@ -145,3 +145,23 @@ Use `get_skill` MCP tool with skill name:
 - **writing-plans**: For multi-step tasks with specs
 - **executing-plans**: Following written implementation plans
 - **frontend-design**: Building web components or pages
+
+### Auto-Recommend Skills
+
+Use `recommend_skills` MCP tool to get skill recommendations based on user prompt:
+
+```typescript
+// AI can call this to get skill recommendations
+recommend_skills({ prompt: "There is a bug in the login" })
+// => recommends: systematic-debugging
+
+recommend_skills({ prompt: "로그인에 버그가 있어" })
+// => recommends: systematic-debugging (Korean support)
+
+recommend_skills({ prompt: "Build a dashboard component" })
+// => recommends: frontend-design
+```
+
+**Supported Languages:** English, Korean, Japanese, Chinese, Spanish
+
+The tool returns skill recommendations with confidence levels (high/medium) and matched patterns for transparency.

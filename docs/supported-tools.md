@@ -51,7 +51,7 @@ Claude Code connects via MCP, providing full access to project configuration, ru
 ### Features
 
 - Full MCP resource access (config, rules, agents)
-- Tool calls (search_rules, get_agent_details, parse_mode)
+- Tool calls (search_rules, get_agent_details, parse_mode, recommend_skills)
 - Prompt templates (activate_agent)
 
 [Full Guide](../packages/rules/.ai-rules/adapters/claude-code.md)

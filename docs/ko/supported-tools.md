@@ -51,7 +51,7 @@ Claude Code는 MCP를 통해 연결되어 프로젝트 설정, 규칙, 전문가
 ### 기능
 
 - 전체 MCP 리소스 접근 (설정, 규칙, 에이전트)
-- 도구 호출 (search_rules, get_agent_details, parse_mode)
+- 도구 호출 (search_rules, get_agent_details, parse_mode, recommend_skills)
 - 프롬프트 템플릿 (activate_agent)
 
 [전체 가이드](../../packages/rules/.ai-rules/adapters/claude-code.md)

@@ -51,7 +51,7 @@ Claude CodeはMCPを通じて接続し、プロジェクト設定、ルール、
 ### 機能
 
 - 完全なMCPリソースアクセス（設定、ルール、エージェント）
-- ツール呼び出し（search_rules、get_agent_details、parse_mode）
+- ツール呼び出し（search_rules、get_agent_details、parse_mode、recommend_skills）
 - プロンプトテンプレート（activate_agent）
 
 [完全なガイド](../../packages/rules/.ai-rules/adapters/claude-code.md)
