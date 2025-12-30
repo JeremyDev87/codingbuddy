@@ -16,6 +16,7 @@ export type ConceptKeywords = {
 export interface SkillKeywordConfig {
   skillName: string;
   priority: number;
+  description: string;
   concepts: {
     [conceptName: string]: ConceptKeywords;
   };

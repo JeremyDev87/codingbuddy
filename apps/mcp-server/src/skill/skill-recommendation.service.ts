@@ -2,22 +2,20 @@ import { Injectable } from '@nestjs/common';
 import type {
   SkillRecommendation,
   RecommendSkillsResult,
+  ListSkillsResult,
+  ListSkillsOptions,
+  SkillInfo,
 } from './skill-recommendation.types';
 import { getSortedTriggers } from './skill-triggers';
+import { SKILL_KEYWORDS } from './i18n/keywords';
 
 /**
- * Skill descriptions for recommendations
+ * Get skill description from SKILL_KEYWORDS (single source of truth)
  */
-const SKILL_DESCRIPTIONS: Record<string, string> = {
-  'systematic-debugging': 'Systematic approach to debugging',
-  'test-driven-development': 'Test-driven development workflow',
-  brainstorming: 'Explore requirements before implementation',
-  'executing-plans': 'Execute implementation plans with checkpoints',
-  'writing-plans': 'Create implementation plans',
-  'frontend-design': 'Build production-grade UI components',
-  'subagent-driven-development': 'Execute plans in current session',
-  'dispatching-parallel-agents': 'Handle parallel independent tasks',
-};
+function getSkillDescription(skillName: string): string {
+  const skill = SKILL_KEYWORDS.find(s => s.skillName === skillName);
+  return skill?.description ?? `Skill: ${skillName}`;
+}
 
 /**
  * Service for recommending skills based on user prompts
@@ -77,7 +75,7 @@ export class SkillRecommendationService {
         skillName,
         confidence,
         matchedPatterns,
-        description: SKILL_DESCRIPTIONS[skillName] || `Skill: ${skillName}`,
+        description: getSkillDescription(skillName),
       });
     }
 
@@ -102,5 +100,44 @@ export class SkillRecommendationService {
       return 'high';
     }
     return 'medium';
+  }
+
+  /**
+   * Lists all available skills with optional filtering
+   * @param options Optional filtering options
+   * @returns ListSkillsResult with skills and total count
+   * @example
+   * // Get all skills
+   * listSkills()
+   * // => { skills: [...], total: 8 }
+   *
+   * @example
+   * // Filter by minimum priority
+   * listSkills({ minPriority: 20 })
+   * // => { skills: [debugging, executing-plans, writing-plans], total: 3 }
+   */
+  listSkills(options?: ListSkillsOptions): ListSkillsResult {
+    let skills: SkillInfo[] = SKILL_KEYWORDS.map(skill => ({
+      name: skill.skillName,
+      priority: skill.priority,
+      description: skill.description,
+      concepts: Object.keys(skill.concepts),
+    }));
+
+    // Apply filters
+    if (options?.minPriority !== undefined) {
+      skills = skills.filter(s => s.priority >= options.minPriority!);
+    }
+    if (options?.maxPriority !== undefined) {
+      skills = skills.filter(s => s.priority <= options.maxPriority!);
+    }
+
+    // Sort by priority descending
+    skills.sort((a, b) => b.priority - a.priority);
+
+    return {
+      skills,
+      total: skills.length,
+    };
   }
 }

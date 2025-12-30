@@ -13,6 +13,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'systematic-debugging',
     priority: 25,
+    description: 'Systematic approach to debugging',
     concepts: {
       error: {
         en: [
@@ -66,6 +67,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'executing-plans',
     priority: 22,
+    description: 'Execute implementation plans with checkpoints',
     concepts: {
       execute: {
         en: ['execute plan', 'follow plan', 'run plan', 'implement plan'],
@@ -97,6 +99,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'writing-plans',
     priority: 20,
+    description: 'Create implementation plans',
     concepts: {
       plan: {
         en: ['plan', 'roadmap', 'schedule', 'milestone'],
@@ -135,6 +138,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'frontend-design',
     priority: 18,
+    description: 'Build production-grade UI components',
     concepts: {
       ui_element: {
         en: [
@@ -230,6 +234,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'test-driven-development',
     priority: 15,
+    description: 'Test-driven development workflow',
     concepts: {
       tdd: {
         en: ['TDD', 'test first', 'red green', 'test driven'],
@@ -268,6 +273,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'dispatching-parallel-agents',
     priority: 12,
+    description: 'Handle parallel independent tasks',
     concepts: {
       parallel: {
         en: ['parallel', 'concurrent', 'simultaneously', 'at the same time'],
@@ -292,6 +298,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'subagent-driven-development',
     priority: 12,
+    description: 'Execute plans in current session',
     concepts: {
       subagent: {
         en: ['subagent', 'sub-agent'],
@@ -316,6 +323,7 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   {
     skillName: 'brainstorming',
     priority: 10,
+    description: 'Explore requirements before implementation',
     concepts: {
       create: {
         en: ['create', 'build', 'make', 'develop', 'implement'],

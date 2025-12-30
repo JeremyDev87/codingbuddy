@@ -18,6 +18,7 @@ import { ConfigService } from '../config/config.service';
 import { ConfigDiffService } from '../config/config-diff.service';
 import { AnalyzerService } from '../analyzer/analyzer.service';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
+import type { ListSkillsOptions } from '../skill/skill-recommendation.types';
 import type { CodingBuddyConfig } from '../config/config.schema';
 
 @Injectable()
@@ -235,6 +236,24 @@ export class McpService implements OnModuleInit {
               required: ['prompt'],
             },
           },
+          {
+            name: 'list_skills',
+            description: 'List all available skills with optional filtering',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                minPriority: {
+                  type: 'number',
+                  description: 'Minimum priority threshold (inclusive)',
+                },
+                maxPriority: {
+                  type: 'number',
+                  description: 'Maximum priority threshold (inclusive)',
+                },
+              },
+              required: [],
+            },
+          },
         ],
       };
     });
@@ -255,6 +274,8 @@ export class McpService implements OnModuleInit {
           return this.handleSuggestConfigUpdates(args);
         case 'recommend_skills':
           return this.handleRecommendSkills(args);
+        case 'list_skills':
+          return this.handleListSkills(args);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
@@ -406,6 +427,26 @@ export class McpService implements OnModuleInit {
     } catch (error) {
       return this.errorResponse(
         `Failed to recommend skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  private handleListSkills(args: Record<string, unknown> | undefined) {
+    try {
+      const options: ListSkillsOptions = {};
+
+      if (typeof args?.minPriority === 'number') {
+        options.minPriority = args.minPriority;
+      }
+      if (typeof args?.maxPriority === 'number') {
+        options.maxPriority = args.maxPriority;
+      }
+
+      const result = this.skillRecommendationService.listSkills(options);
+      return this.jsonResponse(result);
+    } catch (error) {
+      return this.errorResponse(
+        `Failed to list skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }

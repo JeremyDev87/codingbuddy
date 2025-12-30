@@ -110,6 +110,7 @@ describe('skill-triggers', () => {
         {
           skillName: 'custom-skill',
           priority: 50,
+          description: 'Custom skill for testing',
           concepts: {
             action: {
               en: ['custom', 'test'],
