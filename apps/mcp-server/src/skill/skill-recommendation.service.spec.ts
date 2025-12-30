@@ -337,4 +337,72 @@ describe('SkillRecommendationService', () => {
       expect(result.recommendations[0].skillName).toBe('systematic-debugging');
     });
   });
+
+  describe('listSkills', () => {
+    it('should return all skills sorted by priority descending', () => {
+      const result = service.listSkills();
+
+      expect(result.skills).toBeDefined();
+      expect(result.total).toBeGreaterThan(0);
+      expect(result.skills.length).toBe(result.total);
+
+      // Check sorted by priority descending
+      for (let i = 1; i < result.skills.length; i++) {
+        expect(result.skills[i - 1].priority).toBeGreaterThanOrEqual(
+          result.skills[i].priority,
+        );
+      }
+    });
+
+    it('should include name, priority, description, concepts for each skill', () => {
+      const result = service.listSkills();
+
+      for (const skill of result.skills) {
+        expect(skill.name).toBeDefined();
+        expect(typeof skill.priority).toBe('number');
+        expect(skill.description).toBeDefined();
+        expect(Array.isArray(skill.concepts)).toBe(true);
+      }
+    });
+
+    it('should filter by minPriority', () => {
+      const result = service.listSkills({ minPriority: 20 });
+
+      for (const skill of result.skills) {
+        expect(skill.priority).toBeGreaterThanOrEqual(20);
+      }
+    });
+
+    it('should filter by maxPriority', () => {
+      const result = service.listSkills({ maxPriority: 15 });
+
+      for (const skill of result.skills) {
+        expect(skill.priority).toBeLessThanOrEqual(15);
+      }
+    });
+
+    it('should filter by both minPriority and maxPriority', () => {
+      const result = service.listSkills({ minPriority: 12, maxPriority: 20 });
+
+      expect(result.skills.length).toBeGreaterThan(0);
+      for (const skill of result.skills) {
+        expect(skill.priority).toBeGreaterThanOrEqual(12);
+        expect(skill.priority).toBeLessThanOrEqual(20);
+      }
+    });
+
+    it('should return empty array when minPriority > maxPriority', () => {
+      const result = service.listSkills({ minPriority: 100, maxPriority: 10 });
+
+      expect(result.skills).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+
+    it('should return empty array when no skills match filter criteria', () => {
+      const result = service.listSkills({ minPriority: 1000 });
+
+      expect(result.skills).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+  });
 });

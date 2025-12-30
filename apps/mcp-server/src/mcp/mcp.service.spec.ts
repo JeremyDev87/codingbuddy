@@ -10,7 +10,10 @@ import {
 } from '../config/config-diff.service';
 import { AnalyzerService } from '../analyzer/analyzer.service';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
-import type { RecommendSkillsResult } from '../skill/skill-recommendation.types';
+import type {
+  RecommendSkillsResult,
+  ListSkillsResult,
+} from '../skill/skill-recommendation.types';
 
 // Handler function type for MCP request handlers
 type McpHandler = (request: unknown) => Promise<unknown>;
@@ -154,6 +157,29 @@ const createMockSkillRecommendationService =
       ],
       originalPrompt: 'I have a bug in my code',
     } as RecommendSkillsResult),
+    listSkills: vi.fn().mockReturnValue({
+      skills: [
+        {
+          name: 'systematic-debugging',
+          priority: 100,
+          description: 'Systematic approach to debugging',
+          concepts: ['bug', 'error', 'debug'],
+        },
+        {
+          name: 'test-driven-development',
+          priority: 90,
+          description: 'Test-driven development workflow',
+          concepts: ['test', 'tdd'],
+        },
+        {
+          name: 'brainstorming',
+          priority: 80,
+          description: 'Explore requirements before implementation',
+          concepts: ['design', 'feature'],
+        },
+      ],
+      total: 3,
+    } as ListSkillsResult),
   });
 
 // Import after mocks
@@ -929,6 +955,209 @@ describe('McpService', () => {
 
         expect(result.isError).toBe(true);
         expect(result.content[0].text).toContain('Failed to recommend skills');
+      });
+    });
+  });
+
+  // ============================================================================
+  // list_skills Tool Tests
+  // ============================================================================
+
+  describe('list_skills tool', () => {
+    describe('Tool Registration', () => {
+      it('should list list_skills tool', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string; inputSchema: object }[];
+        };
+        const listTool = result.tools.find(t => t.name === 'list_skills');
+
+        expect(listTool).toBeDefined();
+        expect(listTool!.description).toContain('skills');
+      });
+
+      it('should have correct inputSchema for list_skills', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: {
+            name: string;
+            inputSchema: { properties: object; required: string[] };
+          }[];
+        };
+        const listTool = result.tools.find(t => t.name === 'list_skills');
+
+        expect(listTool).toBeDefined();
+        expect(listTool!.inputSchema.properties).toHaveProperty('minPriority');
+        expect(listTool!.inputSchema.properties).toHaveProperty('maxPriority');
+        expect(listTool!.inputSchema.required).toEqual([]);
+      });
+    });
+
+    describe('Basic Functionality', () => {
+      it('should return all skills when called without options', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'list_skills',
+            arguments: {},
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        expect(result.content[0].type).toBe('text');
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.skills).toBeDefined();
+        expect(parsed.skills.length).toBe(3);
+        expect(parsed.total).toBe(3);
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
+          {},
+        );
+      });
+
+      it('should filter by minPriority', async () => {
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockReturnValue({
+          skills: [
+            {
+              name: 'systematic-debugging',
+              priority: 100,
+              description: 'Systematic approach to debugging',
+              concepts: ['bug', 'error', 'debug'],
+            },
+            {
+              name: 'test-driven-development',
+              priority: 90,
+              description: 'Test-driven development workflow',
+              concepts: ['test', 'tdd'],
+            },
+          ],
+          total: 2,
+        } as ListSkillsResult);
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'list_skills',
+            arguments: { minPriority: 90 },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.skills.length).toBe(2);
+        expect(parsed.total).toBe(2);
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({
+          minPriority: 90,
+        });
+      });
+
+      it('should filter by maxPriority', async () => {
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockReturnValue({
+          skills: [
+            {
+              name: 'brainstorming',
+              priority: 80,
+              description: 'Explore requirements before implementation',
+              concepts: ['design', 'feature'],
+            },
+          ],
+          total: 1,
+        } as ListSkillsResult);
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'list_skills',
+            arguments: { maxPriority: 80 },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.skills.length).toBe(1);
+        expect(parsed.total).toBe(1);
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({
+          maxPriority: 80,
+        });
+      });
+
+      it('should filter by both minPriority and maxPriority', async () => {
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockReturnValue({
+          skills: [
+            {
+              name: 'test-driven-development',
+              priority: 90,
+              description: 'Test-driven development workflow',
+              concepts: ['test', 'tdd'],
+            },
+          ],
+          total: 1,
+        } as ListSkillsResult);
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'list_skills',
+            arguments: { minPriority: 85, maxPriority: 95 },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.skills.length).toBe(1);
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({
+          minPriority: 85,
+          maxPriority: 95,
+        });
+      });
+    });
+
+    describe('Error Handling', () => {
+      it('should return error when service throws', async () => {
+        vi.mocked(
+          mockSkillRecommendationService.listSkills!,
+        ).mockImplementation(() => {
+          throw new Error('Service error');
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'list_skills',
+            arguments: {},
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('Failed to list skills');
+      });
+
+      it('should ignore non-number priority values', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        await handler!({
+          params: {
+            name: 'list_skills',
+            arguments: { minPriority: 'invalid', maxPriority: null },
+          },
+        });
+
+        // Should be called with empty options since non-number values are ignored
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
+          {},
+        );
       });
     });
   });
