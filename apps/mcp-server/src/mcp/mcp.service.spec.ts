@@ -381,6 +381,93 @@ describe('McpService', () => {
       expect(parsedContent.language).toBe('ko');
       expect(parsedContent.mode).toBe('PLAN');
     });
+
+    describe('parse_mode tool description', () => {
+      it('should contain MANDATORY keyword for enforcement', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string }[];
+        };
+        const parseModeTool = result.tools.find(t => t.name === 'parse_mode');
+
+        expect(parseModeTool).toBeDefined();
+        expect(parseModeTool!.description).toContain('MANDATORY');
+      });
+
+      it('should contain MUST directive for strict enforcement', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string }[];
+        };
+        const parseModeTool = result.tools.find(t => t.name === 'parse_mode');
+
+        expect(parseModeTool).toBeDefined();
+        expect(parseModeTool!.description).toContain(
+          'MUST call this tool FIRST',
+        );
+      });
+
+      it('should mention PLAN, ACT, EVAL keywords', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string }[];
+        };
+        const parseModeTool = result.tools.find(t => t.name === 'parse_mode');
+
+        expect(parseModeTool).toBeDefined();
+        expect(parseModeTool!.description).toContain('PLAN');
+        expect(parseModeTool!.description).toContain('ACT');
+        expect(parseModeTool!.description).toContain('EVAL');
+      });
+
+      it('should warn about protocol violation', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string }[];
+        };
+        const parseModeTool = result.tools.find(t => t.name === 'parse_mode');
+
+        expect(parseModeTool).toBeDefined();
+        expect(parseModeTool!.description).toContain('protocol violation');
+      });
+
+      it('should mention localized keyword equivalents (Korean, Japanese, Chinese, Spanish)', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string }[];
+        };
+        const parseModeTool = result.tools.find(t => t.name === 'parse_mode');
+
+        expect(parseModeTool).toBeDefined();
+        expect(parseModeTool!.description).toContain('localized equivalents');
+        // Korean
+        expect(parseModeTool!.description).toContain('계획');
+        expect(parseModeTool!.description).toContain('실행');
+        expect(parseModeTool!.description).toContain('평가');
+        // Japanese
+        expect(parseModeTool!.description).toContain('計画');
+        expect(parseModeTool!.description).toContain('実行');
+        expect(parseModeTool!.description).toContain('評価');
+        // Chinese
+        expect(parseModeTool!.description).toContain('计划');
+        expect(parseModeTool!.description).toContain('执行');
+        expect(parseModeTool!.description).toContain('评估');
+        // Spanish
+        expect(parseModeTool!.description).toContain('PLANIFICAR');
+        expect(parseModeTool!.description).toContain('ACTUAR');
+        expect(parseModeTool!.description).toContain('EVALUAR');
+      });
+    });
   });
 
   describe('Prompts', () => {

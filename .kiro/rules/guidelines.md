@@ -36,6 +36,36 @@ See `packages/rules/.ai-rules/agents/`:
 - Accessibility (WCAG 2.1 AA compliance)
 - SEO, Architecture, Test Strategy, Design System, Documentation, Code Quality, DevOps
 
+## 🔴 MANDATORY: Keyword Mode Detection
+
+<CODINGBUDDY_CRITICAL_RULE>
+
+**When user message starts with PLAN, ACT, or EVAL keyword (or localized: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR):**
+
+1. **IMMEDIATELY** follow the mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
+2. Apply the mode's workflow **EXACTLY**
+3. Do NOT proceed with your own interpretation
+
+**This is MANDATORY, not optional.**
+
+Failure to follow mode rules when these keywords are present will result in:
+- Missed critical checklists (Devil's Advocate Analysis, Impact Radius Analysis)
+- Incomplete evaluations
+- Quality issues not caught before deployment
+
+**Red Flags** (STOP if you think these):
+| Thought | Reality |
+|---------|---------|
+| "I can handle EVAL myself" | NO. Follow mode rules FIRST. |
+| "The rules are similar anyway" | NO. Each mode has specific checklists. |
+| "I already know what to do" | NO. Rules may have been updated. |
+
+</CODINGBUDDY_CRITICAL_RULE>
+
+Example: `EVAL` → **즉시** EVAL 모드 규칙 적용 → Devil's Advocate Analysis 수행
+
+---
+
 ## Kiro-Specific Features
 
 ### Communication

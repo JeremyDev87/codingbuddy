@@ -181,7 +181,7 @@ export class McpService implements OnModuleInit {
           {
             name: 'parse_mode',
             description:
-              'Parse workflow mode keyword from prompt and return mode-specific rules with project language setting',
+              'MANDATORY: When user message starts with PLAN, ACT, or EVAL keyword (or localized equivalents: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR), you MUST call this tool FIRST before any other action. This tool parses the workflow mode and returns critical rules that MUST be followed. Failure to call this tool when these keywords are present is a protocol violation.',
             inputSchema: {
               type: 'object',
               properties: {

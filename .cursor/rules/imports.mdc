@@ -123,15 +123,35 @@ For complete agent documentation, see [.ai-rules/agents/README.md](../../.ai-rul
 
 ---
 
-## Keyword Invocation
+## 🔴 MANDATORY: Keyword Mode Detection
 
-When user prompt starts with `PLAN`, `ACT`, or `EVAL`:
-1. Call `parse_mode` MCP tool with the full prompt
-2. Follow returned `instructions` for the detected mode
-3. Use returned `rules` as context for the task
-4. If `warnings` exist, inform the user
+<CODINGBUDDY_CRITICAL_RULE>
 
-Example: `PLAN design auth feature` → call parse_mode → work in PLAN mode
+**When user message starts with PLAN, ACT, or EVAL keyword (or localized: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR):**
+
+1. **IMMEDIATELY** call `parse_mode` MCP tool with the user's prompt
+2. Follow the returned `instructions` **EXACTLY**
+3. Apply the returned `rules` as context
+4. If `warnings` are present, inform the user
+
+**This is MANDATORY, not optional.**
+
+Failure to call `parse_mode` when these keywords are present will result in:
+- Missed critical checklists (Devil's Advocate Analysis, Impact Radius Analysis)
+- Incomplete evaluations
+- Quality issues not caught before deployment
+
+**Red Flags** (STOP if you think these):
+| Thought | Reality |
+|---------|---------|
+| "I can handle EVAL myself" | NO. Call parse_mode FIRST. |
+| "The rules are similar anyway" | NO. Each mode has specific checklists. |
+| "I'll save a tool call" | NO. parse_mode MUST be called FIRST. |
+| "I already know what to do" | NO. Rules may have been updated. |
+
+</CODINGBUDDY_CRITICAL_RULE>
+
+Example: `PLAN design auth feature` → **즉시** parse_mode 호출 → PLAN 모드로 작업
 
 ---
 

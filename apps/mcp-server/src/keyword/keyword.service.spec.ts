@@ -165,6 +165,216 @@ describe('KeywordService', () => {
         expect(result.originalPrompt).toBe('');
         expect(result.warnings).toContain('No prompt content after keyword');
       });
+
+      it('warns for English + localized multi-keyword (PLAN 계획)', async () => {
+        const result = await service.parseMode('PLAN 계획 some task');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('계획 some task');
+        expect(result.warnings).toContain(
+          'Multiple keywords found, using first',
+        );
+      });
+
+      it('warns for localized + English multi-keyword (계획 PLAN)', async () => {
+        const result = await service.parseMode('계획 PLAN some task');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('PLAN some task');
+        expect(result.warnings).toContain(
+          'Multiple keywords found, using first',
+        );
+      });
+
+      it('warns for localized + localized multi-keyword (계획 실행)', async () => {
+        const result = await service.parseMode('계획 실행 some task');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('실행 some task');
+        expect(result.warnings).toContain(
+          'Multiple keywords found, using first',
+        );
+      });
+
+      it('warns for Japanese multi-keyword (計画 実行)', async () => {
+        const result = await service.parseMode('計画 実行 some task');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('実行 some task');
+        expect(result.warnings).toContain(
+          'Multiple keywords found, using first',
+        );
+      });
+
+      it('warns for Spanish multi-keyword (PLANIFICAR ACTUAR)', async () => {
+        const result = await service.parseMode('PLANIFICAR ACTUAR some task');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('ACTUAR some task');
+        expect(result.warnings).toContain(
+          'Multiple keywords found, using first',
+        );
+      });
+    });
+
+    describe('Korean keywords', () => {
+      it('parses 계획 as PLAN', async () => {
+        const result = await service.parseMode('계획 인증 기능 설계');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('인증 기능 설계');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses 실행 as ACT', async () => {
+        const result = await service.parseMode('실행 로그인 API 구현');
+
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('로그인 API 구현');
+      });
+
+      it('parses 평가 as EVAL', async () => {
+        const result = await service.parseMode('평가 보안 검토');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('보안 검토');
+      });
+
+      it('warns when no content after Korean keyword', async () => {
+        const result = await service.parseMode('평가');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('');
+        expect(result.warnings).toContain('No prompt content after keyword');
+      });
+
+      it('handles mixed Korean keyword with English content', async () => {
+        const result = await service.parseMode('계획 design auth feature');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design auth feature');
+      });
+    });
+
+    describe('Japanese keywords', () => {
+      it('parses 計画 as PLAN', async () => {
+        const result = await service.parseMode('計画 認証機能を設計');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('認証機能を設計');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses 実行 as ACT', async () => {
+        const result = await service.parseMode('実行 ログインAPIを実装');
+
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('ログインAPIを実装');
+      });
+
+      it('parses 評価 as EVAL', async () => {
+        const result = await service.parseMode('評価 セキュリティレビュー');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('セキュリティレビュー');
+      });
+
+      it('warns when no content after Japanese keyword', async () => {
+        const result = await service.parseMode('計画');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('');
+        expect(result.warnings).toContain('No prompt content after keyword');
+      });
+    });
+
+    describe('Chinese keywords', () => {
+      it('parses 计划 as PLAN', async () => {
+        const result = await service.parseMode('计划 设计认证功能');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('设计认证功能');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses 执行 as ACT', async () => {
+        const result = await service.parseMode('执行 实现登录API');
+
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('实现登录API');
+      });
+
+      it('parses 评估 as EVAL', async () => {
+        const result = await service.parseMode('评估 安全审查');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('安全审查');
+      });
+
+      it('warns when no content after Chinese keyword', async () => {
+        const result = await service.parseMode('执行');
+
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('');
+        expect(result.warnings).toContain('No prompt content after keyword');
+      });
+    });
+
+    describe('Spanish keywords', () => {
+      it('parses PLANIFICAR as PLAN (uppercase)', async () => {
+        const result = await service.parseMode(
+          'PLANIFICAR diseño de autenticación',
+        );
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('diseño de autenticación');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses planificar as PLAN (lowercase)', async () => {
+        const result = await service.parseMode(
+          'planificar diseño de autenticación',
+        );
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('diseño de autenticación');
+      });
+
+      it('parses ACTUAR as ACT', async () => {
+        const result = await service.parseMode('ACTUAR implementar API');
+
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('implementar API');
+      });
+
+      it('parses actuar as ACT (lowercase)', async () => {
+        const result = await service.parseMode('actuar implementar API');
+
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('implementar API');
+      });
+
+      it('parses EVALUAR as EVAL', async () => {
+        const result = await service.parseMode('EVALUAR revisión de seguridad');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('revisión de seguridad');
+      });
+
+      it('parses evaluar as EVAL (lowercase)', async () => {
+        const result = await service.parseMode('evaluar revisión de seguridad');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('revisión de seguridad');
+      });
+
+      it('warns when no content after Spanish keyword', async () => {
+        const result = await service.parseMode('EVALUAR');
+
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('');
+        expect(result.warnings).toContain('No prompt content after keyword');
+      });
     });
 
     describe('edge cases', () => {

@@ -1,5 +1,6 @@
 import {
   KEYWORDS,
+  LOCALIZED_KEYWORD_MAP,
   type Mode,
   type RuleContent,
   type ParseModeResult,
@@ -44,21 +45,52 @@ export class KeywordService {
 
     const trimmed = prompt.trim();
     const parts = trimmed.split(/\s+/);
-    const firstWord = parts[0]?.toUpperCase() ?? '';
+    const firstWord = parts[0] ?? '';
+    const firstWordUpper = firstWord.toUpperCase();
 
     let mode: Mode;
     let originalPrompt: string;
 
-    const isKeyword = KEYWORDS.includes(firstWord as Mode);
+    // Check English keywords (case-insensitive)
+    const isEnglishKeyword = KEYWORDS.includes(firstWordUpper as Mode);
+    // Check localized keywords (exact match for CJK, case-insensitive for Spanish)
+    const localizedMode =
+      LOCALIZED_KEYWORD_MAP[firstWord] ?? LOCALIZED_KEYWORD_MAP[firstWordUpper];
 
-    if (isKeyword) {
-      mode = firstWord as Mode;
-      originalPrompt = trimmed.slice(parts[0].length).trim();
+    if (isEnglishKeyword) {
+      mode = firstWordUpper as Mode;
+      originalPrompt = trimmed.slice(firstWord.length).trim();
 
-      // Check for multiple keywords
+      // Check for multiple keywords (English or localized)
       if (parts.length > 1) {
-        const secondWord = parts[1].toUpperCase();
-        if (KEYWORDS.includes(secondWord as Mode)) {
+        const secondWord = parts[1];
+        const secondWordUpper = secondWord.toUpperCase();
+        const isSecondKeyword =
+          KEYWORDS.includes(secondWordUpper as Mode) ||
+          LOCALIZED_KEYWORD_MAP[secondWord] !== undefined ||
+          LOCALIZED_KEYWORD_MAP[secondWordUpper] !== undefined;
+        if (isSecondKeyword) {
+          warnings.push('Multiple keywords found, using first');
+        }
+      }
+
+      // Check for empty content after keyword
+      if (originalPrompt === '') {
+        warnings.push('No prompt content after keyword');
+      }
+    } else if (localizedMode) {
+      mode = localizedMode;
+      originalPrompt = trimmed.slice(firstWord.length).trim();
+
+      // Check for multiple keywords (localized or English)
+      if (parts.length > 1) {
+        const secondWord = parts[1];
+        const secondWordUpper = secondWord.toUpperCase();
+        const isSecondKeyword =
+          KEYWORDS.includes(secondWordUpper as Mode) ||
+          LOCALIZED_KEYWORD_MAP[secondWord] !== undefined ||
+          LOCALIZED_KEYWORD_MAP[secondWordUpper] !== undefined;
+        if (isSecondKeyword) {
           warnings.push('Multiple keywords found, using first');
         }
       }

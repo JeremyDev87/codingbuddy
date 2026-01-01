@@ -53,15 +53,35 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 
 See [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md) for details.
 
-## Keyword Invocation
+## 🔴 MANDATORY: Keyword Mode Detection
 
-사용자 프롬프트가 `PLAN`, `ACT`, `EVAL` 키워드로 시작하면:
-1. `parse_mode` MCP 도구를 호출하여 모드와 규칙을 가져옴
-2. 반환된 `instructions`를 따라 작업 수행
-3. 반환된 `rules`를 컨텍스트로 활용
-4. `warnings`가 있으면 사용자에게 안내
+<CODINGBUDDY_CRITICAL_RULE>
 
-예시: `PLAN 인증 기능 설계` → parse_mode 호출 → PLAN 모드로 작업
+**When user message starts with PLAN, ACT, or EVAL keyword (or localized: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR):**
+
+1. **IMMEDIATELY** call `mcp__codingbuddy__parse_mode` with the user's prompt
+2. Follow the returned `instructions` **EXACTLY**
+3. Apply the returned `rules` as context
+4. If `warnings` are present, inform the user
+
+**This is MANDATORY, not optional.**
+
+Failure to call `parse_mode` when these keywords are present will result in:
+- Missed critical checklists (Devil's Advocate Analysis, Impact Radius Analysis)
+- Incomplete evaluations
+- Quality issues not caught before deployment
+
+**Red Flags** (STOP if you think these):
+| Thought | Reality |
+|---------|---------|
+| "I can handle EVAL myself" | NO. Call parse_mode FIRST. |
+| "The rules are similar anyway" | NO. Each mode has specific checklists. |
+| "I'll save a tool call" | NO. parse_mode MUST be called FIRST. |
+| "I already know what to do" | NO. Rules may have been updated. |
+
+</CODINGBUDDY_CRITICAL_RULE>
+
+예시: `PLAN 인증 기능 설계` → **즉시** parse_mode 호출 → PLAN 모드로 작업
 
 ## Claude Code Specific
 
