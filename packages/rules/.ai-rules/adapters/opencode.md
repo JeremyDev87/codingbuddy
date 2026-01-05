@@ -59,11 +59,70 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     },
     "eval-mode": {
       "description": "EVAL mode - Code quality evaluation", 
-      "mode": "subagent",
+      "mode": "primary",
       "prompt": "{file:packages/rules/.ai-rules/agents/eval-mode.json}\n\n[OpenCode Override]\nMode: EVAL. Always respond in Korean. Provide evidence-based evaluation.",
-      "tools": {
-        "write": false,
-        "edit": false
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "*": "ask"
+        }
+      }
+    },
+    "backend": {
+      "description": "Backend development - Node.js, Python, Go, Java, Rust",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/backend-developer.json}\n\n[OpenCode Override]\nAlways respond in Korean. Follow TDD workflow and clean architecture.",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "architect": {
+      "description": "Architecture and design patterns specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/architecture-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Focus on layer boundaries and dependency direction.",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "tester": {
+      "description": "Test strategy and TDD specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/test-strategy-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Enforce 90%+ coverage and no-mocking principle.",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "security": {
+      "description": "Security audit - OAuth, JWT, XSS/CSRF protection",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/security-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Follow OWASP guidelines.",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "a11y": {
+      "description": "Accessibility - WCAG 2.1 AA compliance",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/accessibility-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Verify ARIA and keyboard navigation.",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "performance": {
+      "description": "Performance optimization specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/performance-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Focus on bundle size and runtime optimization.",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
       }
     }
   },
@@ -85,6 +144,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
 | **act-mode.json** | `act-mode` | ACT mode workflow (delegates to frontend-developer) |
 | **eval-mode.json** | `eval-mode` | EVAL mode workflow (delegates to code-reviewer) |
 | **frontend-developer.json** | N/A (delegate) | Primary development implementation |
+| **backend-developer.json** | `backend` | Backend development (Node.js, Python, Go, Java, Rust) |
 | **code-reviewer.json** | N/A (delegate) | Code quality evaluation implementation |
 | **architecture-specialist.json** | `architect` | Architecture and design patterns |
 | **test-strategy-specialist.json** | `tester` | Test strategy and TDD |
@@ -383,15 +443,15 @@ npx codingbuddy@latest mcp
 
 ```bash
 # Terminal 1: Planning
-opencode --agent plan
+opencode --agent plan-mode
 계획을 세워줘
 
 # Terminal 2: Implementation  
-opencode --agent build
+opencode --agent act-mode
 ACT
 
 # Terminal 3: Review
-opencode --agent reviewer
+opencode --agent eval-mode
 EVAL
 ```
 
