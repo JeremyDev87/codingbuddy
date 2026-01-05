@@ -8,16 +8,22 @@ const mockConfig: KeywordModesConfig = {
       description: 'Task planning and design phase',
       instructions: 'Design first approach.',
       rules: ['rules/core.md'],
+      agent: 'plan-mode',
+      delegates_to: 'frontend-developer',
     },
     ACT: {
       description: 'Actual task execution phase',
       instructions: 'Red-Green-Refactor cycle.',
       rules: ['rules/core.md', 'rules/project.md'],
+      agent: 'act-mode',
+      delegates_to: 'frontend-developer',
     },
     EVAL: {
       description: 'Result review and assessment phase',
       instructions: 'Code quality review.',
       rules: ['rules/core.md'],
+      agent: 'eval-mode',
+      delegates_to: 'code-reviewer',
     },
   },
   defaultMode: 'PLAN',
@@ -28,10 +34,33 @@ const mockRulesContent: Record<string, string> = {
   'rules/project.md': '# Project Rules\nProject content here.',
 };
 
+const mockAgentData: Record<string, any> = {
+  'frontend-developer': {
+    name: 'Frontend Developer',
+    description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+    role: {
+      expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+    },
+  },
+  'code-reviewer': {
+    name: 'Code Reviewer',
+    description: '코드 품질 평가 및 개선 제안 전문가',
+    role: {
+      expertise: [
+        'Code Quality',
+        'SOLID Principles',
+        'Performance',
+        'Security',
+      ],
+    },
+  },
+};
+
 describe('KeywordService', () => {
   let service: KeywordService;
   let mockLoadConfig: () => Promise<KeywordModesConfig>;
   let mockLoadRule: (path: string) => Promise<string>;
+  let mockLoadAgentInfo: (agentName: string) => Promise<any>;
 
   beforeEach(() => {
     mockLoadConfig = vi.fn().mockResolvedValue(mockConfig);
@@ -40,7 +69,16 @@ describe('KeywordService', () => {
       if (content) return Promise.resolve(content);
       return Promise.reject(new Error(`File not found: ${path}`));
     });
-    service = new KeywordService(mockLoadConfig, mockLoadRule);
+    mockLoadAgentInfo = vi.fn().mockImplementation((agentName: string) => {
+      const agentData = mockAgentData[agentName];
+      if (agentData) return Promise.resolve(agentData);
+      return Promise.reject(new Error(`Agent not found: ${agentName}`));
+    });
+    service = new KeywordService(
+      mockLoadConfig,
+      mockLoadRule,
+      mockLoadAgentInfo,
+    );
   });
 
   describe('parseMode', () => {
@@ -54,6 +92,13 @@ describe('KeywordService', () => {
         expect(result.rules).toHaveLength(1);
         expect(result.rules[0].name).toBe('rules/core.md');
         expect(result.warnings).toBeUndefined();
+        expect(result.agent).toBe('plan-mode');
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegate_agent_info).toEqual({
+          name: 'Frontend Developer',
+          description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+        });
       });
 
       it('parses ACT keyword', async () => {
@@ -63,6 +108,13 @@ describe('KeywordService', () => {
         expect(result.originalPrompt).toBe('implement login API');
         expect(result.instructions).toBe('Red-Green-Refactor cycle.');
         expect(result.rules).toHaveLength(2);
+        expect(result.agent).toBe('act-mode');
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegate_agent_info).toEqual({
+          name: 'Frontend Developer',
+          description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+        });
       });
 
       it('parses EVAL keyword', async () => {
@@ -71,6 +123,18 @@ describe('KeywordService', () => {
         expect(result.mode).toBe('EVAL');
         expect(result.originalPrompt).toBe('review security');
         expect(result.instructions).toBe('Code quality review.');
+        expect(result.agent).toBe('eval-mode');
+        expect(result.delegates_to).toBe('code-reviewer');
+        expect(result.delegate_agent_info).toEqual({
+          name: 'Code Reviewer',
+          description: '코드 품질 평가 및 개선 제안 전문가',
+          expertise: [
+            'Code Quality',
+            'SOLID Principles',
+            'Performance',
+            'Security',
+          ],
+        });
       });
     });
 
@@ -506,6 +570,172 @@ describe('KeywordService', () => {
 
       expect(rules).toHaveLength(1);
       expect(rules[0].name).toBe('rules/core.md');
+    });
+  });
+
+  describe('Mode Agent functionality', () => {
+    describe('agent field population', () => {
+      it('includes agent field for modes with agent configured', async () => {
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.agent).toBe('plan-mode');
+      });
+
+      it('does not include agent field when agent is undefined in config', async () => {
+        const configWithoutAgent: KeywordModesConfig = {
+          modes: {
+            PLAN: {
+              description: 'Task planning and design phase',
+              instructions: 'Design first approach.',
+              rules: ['rules/core.md'],
+            },
+            ACT: mockConfig.modes.ACT,
+            EVAL: mockConfig.modes.EVAL,
+          },
+          defaultMode: 'PLAN',
+        };
+        mockLoadConfig = vi.fn().mockResolvedValue(configWithoutAgent);
+        service = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+        );
+
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.agent).toBeUndefined();
+        expect(result.delegates_to).toBeUndefined();
+        expect(result.delegate_agent_info).toBeUndefined();
+      });
+    });
+
+    describe('delegate agent information', () => {
+      it('includes delegate information when delegates_to is configured', async () => {
+        const result = await service.parseMode('ACT implement feature');
+
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegate_agent_info).toEqual({
+          name: 'Frontend Developer',
+          description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+        });
+        expect(mockLoadAgentInfo).toHaveBeenCalledWith('frontend-developer');
+      });
+
+      it('includes different delegate for EVAL mode', async () => {
+        const result = await service.parseMode('EVAL review code');
+
+        expect(result.delegates_to).toBe('code-reviewer');
+        expect(result.delegate_agent_info).toEqual({
+          name: 'Code Reviewer',
+          description: '코드 품질 평가 및 개선 제안 전문가',
+          expertise: [
+            'Code Quality',
+            'SOLID Principles',
+            'Performance',
+            'Security',
+          ],
+        });
+        expect(mockLoadAgentInfo).toHaveBeenCalledWith('code-reviewer');
+      });
+
+      it('handles missing delegate agent gracefully', async () => {
+        mockLoadAgentInfo = vi
+          .fn()
+          .mockRejectedValue(new Error('Agent not found'));
+        service = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+        );
+
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegate_agent_info).toBeUndefined();
+      });
+
+      it('does not call loadAgentInfo when no loadAgentInfoFn provided', async () => {
+        service = new KeywordService(mockLoadConfig, mockLoadRule);
+
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegate_agent_info).toBeUndefined();
+      });
+
+      it('handles agent with incomplete data', async () => {
+        mockLoadAgentInfo = vi.fn().mockResolvedValue({
+          name: 'Incomplete Agent',
+        });
+        service = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+        );
+
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.delegate_agent_info).toEqual({
+          name: 'Incomplete Agent',
+          description: '',
+          expertise: [],
+        });
+      });
+
+      it('uses agentName as fallback when name is missing', async () => {
+        mockLoadAgentInfo = vi.fn().mockResolvedValue({
+          description: 'Test description',
+          role: { expertise: ['test'] },
+        });
+        service = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+        );
+
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.delegate_agent_info).toEqual({
+          name: 'frontend-developer',
+          description: 'Test description',
+          expertise: ['test'],
+        });
+      });
+    });
+
+    describe('backward compatibility', () => {
+      it('maintains backward compatibility for existing fields', async () => {
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design feature');
+        expect(result.instructions).toBe('Design first approach.');
+        expect(result.rules).toHaveLength(1);
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('works with Korean keywords and includes agent information', async () => {
+        const result = await service.parseMode('계획 인증 기능 설계');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('인증 기능 설계');
+        expect(result.agent).toBe('plan-mode');
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegate_agent_info?.name).toBe('Frontend Developer');
+      });
+
+      it('works with default mode and includes agent information', async () => {
+        const result = await service.parseMode('design auth feature');
+
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design auth feature');
+        expect(result.warnings).toContain(
+          'No keyword found, defaulting to PLAN',
+        );
+        expect(result.agent).toBe('plan-mode');
+        expect(result.delegates_to).toBe('frontend-developer');
+      });
     });
   });
 });

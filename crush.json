@@ -1,0 +1,148 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "default_agent": "plan",
+
+  "contextPaths": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/project.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md",
+    "packages/rules/.ai-rules/adapters/opencode.md",
+    "CLAUDE.md",
+    "README.md"
+  ],
+
+  "agents": {
+    "plan": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 8000,
+      "reasoningEffort": "medium",
+      "description": "PLAN mode - Analysis and planning without changes",
+      "systemPrompt": "You are a Frontend Developer Agent in PLAN mode. Always respond in Korean (한국어). Focus on analysis and planning without making file changes. Follow .ai-rules standards for TDD and code quality.",
+      "permissions": {
+        "edit": false,
+        "write": false,
+        "bash": ["git status", "git diff*", "git log*"]
+      }
+    },
+    "build": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 8000,
+      "reasoningEffort": "high",
+      "description": "ACT mode - Full development with all tools",
+      "systemPrompt": "You are a Frontend Developer Agent in ACT mode. Always respond in Korean (한국어). Follow TDD workflow and .ai-rules code quality standards. Implement features step by step.",
+      "permissions": {
+        "edit": true,
+        "write": true,
+        "bash": true
+      }
+    },
+    "reviewer": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 8000,
+      "reasoningEffort": "high",
+      "description": "EVAL mode - Code quality evaluation",
+      "systemPrompt": "You are a Code Reviewer Agent in EVAL mode. Always respond in Korean (한국어). Provide evidence-based evaluation following anti-sycophancy rules. Reference specialist frameworks for comprehensive assessment.",
+      "permissions": {
+        "edit": false,
+        "write": false,
+        "bash": ["git status", "git diff*", "git log*"]
+      }
+    },
+    "architect": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 6000,
+      "reasoningEffort": "high",
+      "description": "Architecture and design patterns specialist",
+      "systemPrompt": "You are an Architecture Specialist. Always respond in Korean (한국어). Focus on layer boundaries, dependency direction, and system design. Apply SOLID principles and architectural patterns.",
+      "permissions": {
+        "edit": false,
+        "write": false,
+        "bash": ["git status", "git diff*"]
+      }
+    },
+    "security": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 6000,
+      "reasoningEffort": "high",
+      "description": "Security audit specialist",
+      "systemPrompt": "You are a Security Specialist. Always respond in Korean (한국어). Focus on OAuth 2.0, JWT security, XSS/CSRF protection, and vulnerability assessment. Provide actionable security recommendations.",
+      "permissions": {
+        "edit": false,
+        "write": false,
+        "bash": ["git status"]
+      }
+    },
+    "performance": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 6000,
+      "reasoningEffort": "medium",
+      "description": "Performance optimization specialist",
+      "systemPrompt": "You are a Performance Specialist. Always respond in Korean (한국어). Focus on bundle size optimization, Core Web Vitals, and execution performance. Provide measurable optimization strategies.",
+      "permissions": {
+        "edit": false,
+        "write": false,
+        "bash": ["npm run build", "yarn build", "git status"]
+      }
+    },
+    "a11y": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 6000,
+      "reasoningEffort": "medium",
+      "description": "Accessibility (WCAG 2.1 AA) specialist",
+      "systemPrompt": "You are an Accessibility Specialist. Always respond in Korean (한국어). Focus on WCAG 2.1 AA compliance, ARIA attributes, keyboard navigation, and screen reader compatibility.",
+      "permissions": {
+        "edit": false,
+        "write": false,
+        "bash": ["git status"]
+      }
+    }
+  },
+
+  "mcp": {
+    "codingbuddy": {
+      "type": "stdio",
+      "command": ["npx", "codingbuddy@latest", "mcp"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": ["npx", "-y", "@upstash/context7-mcp"]
+    },
+    "github": {
+      "type": "stdio",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/jeremy/workspace"
+      ]
+    }
+  },
+
+  "options": {
+    "skills_paths": ["packages/rules/.ai-rules/skills"],
+    "auto_save": true,
+    "session_persistence": true
+  },
+
+  "shortcuts": {
+    "plan": "/agent plan",
+    "act": "/agent build",
+    "eval": "/agent reviewer",
+    "review": "/agent reviewer",
+    "arch": "/agent architect",
+    "sec": "/agent security",
+    "perf": "/agent performance",
+    "a11y": "/agent a11y"
+  }
+}

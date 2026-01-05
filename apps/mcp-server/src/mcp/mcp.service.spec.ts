@@ -98,12 +98,55 @@ const createMockRulesService = (): Partial<RulesService> => ({
 });
 
 const createMockKeywordService = (): Partial<KeywordService> => ({
-  parseMode: vi.fn().mockResolvedValue({
-    mode: 'PLAN',
-    cleanedPrompt: 'Create a login form',
-    instructions: 'Plan the implementation',
-    rules: { core: 'Some rules' },
-    warnings: [],
+  parseMode: vi.fn().mockImplementation(async (prompt: string) => {
+    const trimmed = prompt.trim();
+    const firstWord = trimmed.split(/\s+/)[0]?.toUpperCase();
+
+    if (firstWord === 'ACT') {
+      return {
+        mode: 'ACT',
+        originalPrompt: trimmed.slice(3).trim(),
+        instructions: 'Red-Green-Refactor cycle',
+        rules: [{ name: 'rules/core.md', content: 'Some rules' }],
+        agent: 'act-mode',
+        delegates_to: 'frontend-developer',
+        delegate_agent_info: {
+          name: 'Frontend Developer',
+          description: 'React/Next.js frontend specialist',
+          expertise: ['React', 'TypeScript'],
+        },
+      };
+    } else if (firstWord === 'EVAL') {
+      return {
+        mode: 'EVAL',
+        originalPrompt: trimmed.slice(4).trim(),
+        instructions: 'Code quality review',
+        rules: [{ name: 'rules/core.md', content: 'Some rules' }],
+        agent: 'eval-mode',
+        delegates_to: 'code-reviewer',
+        delegate_agent_info: {
+          name: 'Code Reviewer',
+          description: 'Code quality evaluation specialist',
+          expertise: ['Code Quality', 'SOLID Principles'],
+        },
+      };
+    } else {
+      return {
+        mode: 'PLAN',
+        originalPrompt: trimmed.startsWith('PLAN ')
+          ? trimmed.slice(5)
+          : trimmed,
+        instructions: 'Plan the implementation',
+        rules: [{ name: 'rules/core.md', content: 'Some rules' }],
+        agent: 'plan-mode',
+        delegates_to: 'frontend-developer',
+        delegate_agent_info: {
+          name: 'Frontend Developer',
+          description: 'React/Next.js frontend specialist',
+          expertise: ['React', 'TypeScript'],
+        },
+      };
+    }
   }),
 });
 
@@ -462,6 +505,52 @@ describe('McpService', () => {
       const parsedContent = JSON.parse(result.content[0].text);
       expect(parsedContent.language).toBe('ko');
       expect(parsedContent.mode).toBe('PLAN');
+    });
+
+    it('should include Mode Agent fields in parse_mode response', async () => {
+      const handler = handlers.get('tools/call');
+      expect(handler).toBeDefined();
+
+      const result = (await handler!({
+        params: {
+          name: 'parse_mode',
+          arguments: { prompt: 'ACT implement feature' },
+        },
+      })) as { content: { type: string; text: string }[] };
+
+      expect(result.content).toHaveLength(1);
+      const parsedContent = JSON.parse(result.content[0].text);
+      expect(parsedContent.mode).toBe('ACT');
+      expect(parsedContent.agent).toBe('act-mode');
+      expect(parsedContent.delegates_to).toBe('frontend-developer');
+      expect(parsedContent.delegate_agent_info).toEqual({
+        name: 'Frontend Developer',
+        description: 'React/Next.js frontend specialist',
+        expertise: ['React', 'TypeScript'],
+      });
+    });
+
+    it('should include EVAL mode agent information in parse_mode response', async () => {
+      const handler = handlers.get('tools/call');
+      expect(handler).toBeDefined();
+
+      const result = (await handler!({
+        params: {
+          name: 'parse_mode',
+          arguments: { prompt: 'EVAL review code quality' },
+        },
+      })) as { content: { type: string; text: string }[] };
+
+      expect(result.content).toHaveLength(1);
+      const parsedContent = JSON.parse(result.content[0].text);
+      expect(parsedContent.mode).toBe('EVAL');
+      expect(parsedContent.agent).toBe('eval-mode');
+      expect(parsedContent.delegates_to).toBe('code-reviewer');
+      expect(parsedContent.delegate_agent_info).toEqual({
+        name: 'Code Reviewer',
+        description: 'Code quality evaluation specialist',
+        expertise: ['Code Quality', 'SOLID Principles'],
+      });
     });
 
     describe('parse_mode tool description', () => {

@@ -8,7 +8,7 @@ AI Agent definitions for specialized development roles.
 
 - [Quick Reference: Which Agent?](#quick-reference-which-agent)
 - [Available Agents](#available-agents)
-  - [Core Agents](#core-agents-auto-activated)
+  - [Core Agents](#core-agents-auto-activated-via-delegation)
   - [Domain Specialists](#domain-specialists)
   - [Utility Agents](#utility-agents)
 - [Agent Details](#agent-details)
@@ -58,16 +58,125 @@ AI Agent definitions for specialized development roles.
 
 ---
 
+## Mode Agents
+
+**New Agent Hierarchy**: Mode Agents → Delegate Agents → Specialist Agents
+
+Mode Agents are workflow orchestrators that provide seamless integration with OpenCode and other agent-based AI tools. They automatically delegate to appropriate specialist agents based on the workflow mode.
+
+### Mode Agent Hierarchy
+
+```
+Mode Agents (Workflow Orchestrators)
+├── plan-mode      → delegates to → frontend-developer (or project-specific)
+├── act-mode       → delegates to → frontend-developer (or project-specific)
+└── eval-mode      → delegates to → code-reviewer
+
+Delegate Agents (Implementation Experts)
+├── frontend-developer     # React/Next.js expertise
+├── backend-developer      # Multi-language backend expertise
+└── code-reviewer         # Quality evaluation expertise
+
+Specialist Agents (Domain Experts)
+├── architecture-specialist
+├── security-specialist
+├── accessibility-specialist
+└── ... (other specialists)
+```
+
+### Mode Agent Details
+
+| Mode Agent | Workflow | Delegates To | Purpose |
+|------------|----------|--------------|---------|
+| **plan-mode** | PLAN | frontend-developer (configurable) | Analysis and planning without changes |
+| **act-mode** | ACT | frontend-developer (configurable) | Full development with all tools |
+| **eval-mode** | EVAL | code-reviewer | Code quality evaluation |
+
+**Key Features:**
+- **Seamless Integration**: Works with OpenCode agent system
+- **Automatic Delegation**: Mode Agents handle workflow, Delegates handle implementation
+- **Flexible Configuration**: Delegate target configurable per project
+- **Backward Compatible**: Existing usage patterns continue to work
+
+### Usage with Mode Agents
+
+#### OpenCode/Agent-Based Tools
+
+```bash
+# OpenCode CLI example
+/agent plan-mode
+새로운 기능을 만들어줘
+
+/agent act-mode  
+ACT
+
+/agent eval-mode
+EVAL
+```
+
+#### MCP Integration
+
+When using the `parse_mode` MCP tool, you receive enhanced response with Mode Agent information:
+
+```json
+{
+  "mode": "PLAN",
+  "originalPrompt": "새로운 기능을 만들어줘",
+  "instructions": "설계 우선 접근...",
+  "rules": [{"name": "rules/core.md", "content": "..."}],
+  "warnings": ["No keyword found, defaulting to PLAN"],
+  "agent": "plan-mode",
+  "delegates_to": "frontend-developer",
+  "delegate_agent_info": {
+    "name": "Frontend Developer",
+    "description": "React/Next.js 전문가, TDD 및 디자인 시스템 경험",
+    "expertise": ["React", "Next.js", "TDD", "TypeScript"]
+  }
+}
+```
+
+**Response Fields:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `mode` | string | Yes | Detected mode: "PLAN", "ACT", or "EVAL" |
+| `originalPrompt` | string | Yes | User prompt with keyword removed |
+| `instructions` | string | Yes | Mode-specific instructions |
+| `rules` | array | Yes | Applicable rule files with content |
+| `warnings` | array | No | Parsing warnings (e.g., missing keyword) |
+| `agent` | string | No | Mode Agent name (e.g., "plan-mode") |
+| `delegates_to` | string | No | Delegate agent name (e.g., "frontend-developer") |
+| `delegate_agent_info` | object | No | Delegate agent details (name, description, expertise) |
+
+### Agent Priority System
+
+Agents are listed in priority order:
+1. **Mode Agents** (plan-mode, act-mode, eval-mode)
+2. **Delegate Agents** (alphabetical)
+3. **Specialist Agents** (alphabetical)
+
+This ensures Mode Agents appear first in agent selection interfaces.
+
+---
+
 ## Available Agents
 
-### Core Agents (Auto-activated)
+### Mode Agents (Workflow Orchestrators)
 
-These agents are automatically activated based on workflow mode:
+Mode Agents handle workflow orchestration and delegate to implementation experts:
 
-- **Primary Developer Agent**: Auto-activated in PLAN/ACT mode
+- **Plan Mode** (`plan-mode.json`): Analysis and planning (delegates to primary developer)
+- **Act Mode** (`act-mode.json`): Implementation execution (delegates to primary developer)  
+- **Eval Mode** (`eval-mode.json`): Quality evaluation (delegates to code reviewer)
+
+### Core Agents (Auto-activated via delegation)
+
+These agents are automatically activated via Mode Agent delegation:
+
+- **Primary Developer Agent**: Activated by plan-mode/act-mode
   - Example: `frontend-developer.json` (React/Next.js projects)
   - Customize per project: `backend-developer.json`, `mobile-developer.json`, etc.
-- **Code Reviewer** (`code-reviewer.json`): Auto-activated in EVAL mode
+- **Code Reviewer** (`code-reviewer.json`): Activated by eval-mode
 
 ### Domain Specialists
 

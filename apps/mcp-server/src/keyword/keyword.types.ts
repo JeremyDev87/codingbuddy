@@ -2,6 +2,11 @@ export const KEYWORDS = ['PLAN', 'ACT', 'EVAL'] as const;
 
 export type Mode = (typeof KEYWORDS)[number];
 
+/** Mode Agent names in priority order */
+export const MODE_AGENTS = ['plan-mode', 'act-mode', 'eval-mode'] as const;
+
+export type ModeAgent = (typeof MODE_AGENTS)[number];
+
 /** Localized keywords mapped to their English equivalents */
 export const LOCALIZED_KEYWORD_MAP: Record<string, Mode> = {
   // Korean (한국어)
@@ -30,18 +35,29 @@ export interface RuleContent {
   content: string;
 }
 
+export interface AgentInfo {
+  name: string;
+  description: string;
+  expertise: string[];
+}
+
 export interface ParseModeResult {
   mode: Mode;
   originalPrompt: string;
   instructions: string;
   rules: RuleContent[];
   warnings?: string[];
+  agent?: string;
+  delegates_to?: string;
+  delegate_agent_info?: AgentInfo;
 }
 
 export interface ModeConfig {
   description: string;
   instructions: string;
   rules: string[];
+  agent?: string;
+  delegates_to?: string;
 }
 
 export interface KeywordModesConfig {

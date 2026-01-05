@@ -22,7 +22,11 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           return rulesService.getRuleContent(path);
         };
 
-        return new KeywordService(loadConfig, loadRule);
+        const loadAgent = async (agentName: string): Promise<any> => {
+          return rulesService.getAgent(agentName);
+        };
+
+        return new KeywordService(loadConfig, loadRule, loadAgent);
       },
       inject: [RulesService],
     },

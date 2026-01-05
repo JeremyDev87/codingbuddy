@@ -161,9 +161,9 @@ describe('RulesService', () => {
       const result = await service.listAgents();
 
       expect(result).toEqual([
-        'frontend-developer',
-        'code-reviewer',
         'backend-developer',
+        'code-reviewer',
+        'frontend-developer',
       ]);
     });
 
@@ -177,7 +177,7 @@ describe('RulesService', () => {
 
       const result = await service.listAgents();
 
-      expect(result).toEqual(['frontend-developer', 'code-reviewer']);
+      expect(result).toEqual(['code-reviewer', 'frontend-developer']);
     });
 
     it('should return empty array when directory is empty', async () => {
@@ -545,6 +545,117 @@ describe('RulesService', () => {
       // Custom rule should be first due to higher score
       expect(result[0].source).toBe('custom');
       expect(result[0].score).toBe(3);
+    });
+  });
+
+  describe('Mode Agent functionality', () => {
+    let service: RulesService;
+    let mockCustomService: CustomService;
+
+    beforeEach(() => {
+      process.env.CODINGBUDDY_RULES_DIR = '/test/rules';
+      mockCustomService = createMockCustomService();
+      service = new RulesService(mockCustomService);
+    });
+
+    describe('listAgents with Mode Agent priority', () => {
+      it('should prioritize Mode Agents first in correct order', async () => {
+        vi.mocked(fs.readdir).mockResolvedValue([
+          'frontend-developer.json',
+          'eval-mode.json',
+          'code-reviewer.json',
+          'plan-mode.json',
+          'act-mode.json',
+          'backend-developer.json',
+        ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+
+        const result = await service.listAgents();
+
+        expect(result).toEqual([
+          'plan-mode',
+          'act-mode',
+          'eval-mode',
+          'backend-developer',
+          'code-reviewer',
+          'frontend-developer',
+        ]);
+      });
+
+      it('should handle missing Mode Agents gracefully', async () => {
+        vi.mocked(fs.readdir).mockResolvedValue([
+          'frontend-developer.json',
+          'plan-mode.json',
+          'backend-developer.json',
+        ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+
+        const result = await service.listAgents();
+
+        expect(result).toEqual([
+          'plan-mode',
+          'backend-developer',
+          'frontend-developer',
+        ]);
+      });
+
+      it('should sort non-mode agents alphabetically', async () => {
+        vi.mocked(fs.readdir).mockResolvedValue([
+          'zebra-agent.json',
+          'alpha-agent.json',
+          'beta-agent.json',
+        ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+
+        const result = await service.listAgents();
+
+        expect(result).toEqual(['alpha-agent', 'beta-agent', 'zebra-agent']);
+      });
+
+      it('should handle only Mode Agents', async () => {
+        vi.mocked(fs.readdir).mockResolvedValue([
+          'eval-mode.json',
+          'plan-mode.json',
+          'act-mode.json',
+        ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+
+        const result = await service.listAgents();
+
+        expect(result).toEqual(['plan-mode', 'act-mode', 'eval-mode']);
+      });
+    });
+
+    describe('isModeAgent', () => {
+      it('should identify plan-mode as Mode Agent', () => {
+        expect(service.isModeAgent('plan-mode')).toBe(true);
+      });
+
+      it('should identify act-mode as Mode Agent', () => {
+        expect(service.isModeAgent('act-mode')).toBe(true);
+      });
+
+      it('should identify eval-mode as Mode Agent', () => {
+        expect(service.isModeAgent('eval-mode')).toBe(true);
+      });
+
+      it('should not identify regular agents as Mode Agents', () => {
+        expect(service.isModeAgent('frontend-developer')).toBe(false);
+        expect(service.isModeAgent('code-reviewer')).toBe(false);
+        expect(service.isModeAgent('backend-developer')).toBe(false);
+      });
+
+      it('should not identify partial matches as Mode Agents', () => {
+        expect(service.isModeAgent('plan')).toBe(false);
+        expect(service.isModeAgent('mode')).toBe(false);
+        expect(service.isModeAgent('plan-mode-extended')).toBe(false);
+      });
+
+      it('should handle empty string and undefined gracefully', () => {
+        expect(service.isModeAgent('')).toBe(false);
+        expect(service.isModeAgent('undefined')).toBe(false);
+      });
+
+      it('should be case sensitive', () => {
+        expect(service.isModeAgent('PLAN-MODE')).toBe(false);
+        expect(service.isModeAgent('Plan-Mode')).toBe(false);
+      });
     });
   });
 });

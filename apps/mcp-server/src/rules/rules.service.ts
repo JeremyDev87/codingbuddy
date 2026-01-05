@@ -6,6 +6,7 @@ import { AgentProfile, SearchResult } from './rules.types';
 import { isPathSafe } from '../shared/security.utils';
 import { parseAgentProfile, AgentSchemaError } from './agent.schema';
 import { CustomService } from '../custom';
+import { MODE_AGENTS } from '../keyword/keyword.types';
 
 @Injectable()
 export class RulesService {
@@ -88,13 +89,32 @@ export class RulesService {
     const agentsDir = path.join(this.rulesDir, 'agents');
     try {
       const files = await fs.readdir(agentsDir);
-      return files
+      const agents = files
         .filter(f => f.endsWith('.json'))
         .map(f => f.replace('.json', ''));
+
+      return this.sortAgentsByPriority(agents);
     } catch (error) {
       this.logger.error('Failed to list agents', error);
       return [];
     }
+  }
+
+  private sortAgentsByPriority(agents: string[]): string[] {
+    const modeAgentSet = new Set<string>(MODE_AGENTS);
+
+    const foundModeAgents = agents.filter(agent => modeAgentSet.has(agent));
+    const otherAgents = agents.filter(agent => !modeAgentSet.has(agent));
+
+    const sortedModeAgents = MODE_AGENTS.filter(agent =>
+      foundModeAgents.includes(agent),
+    );
+
+    return [...sortedModeAgents, ...otherAgents.sort()];
+  }
+
+  isModeAgent(agentName: string): boolean {
+    return (MODE_AGENTS as readonly string[]).includes(agentName);
   }
 
   async getAgent(name: string): Promise<AgentProfile> {

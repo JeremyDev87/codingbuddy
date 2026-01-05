@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "default_agent": "plan-mode",
+
+  "instructions": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md",
+    "packages/rules/.ai-rules/rules/project.md",
+    "packages/rules/.ai-rules/adapters/opencode.md",
+    "CLAUDE.md"
+  ],
+
+  "mcp": {
+    "codingbuddy": {
+      "type": "local",
+      "command": ["npx", "codingbuddy@latest", "mcp"]
+    },
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"]
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "@playwright/mcp@latest"]
+    },
+    "figma": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key=${FIGMA_API_KEY}",
+        "--stdio"
+      ]
+    },
+    "github": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "serena": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server",
+        "--context",
+        "ide-assistant"
+      ]
+    },
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/jeremy/workspace"
+      ]
+    }
+  },
+
+  "agent": {
+    "plan-mode": {
+      "description": "PLAN mode - Analysis and planning without changes",
+      "mode": "primary",
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}\n\n[OpenCode Override]\nMode: PLAN only. Always respond in Korean (한국어). Do NOT make any file changes. Focus on analysis and planning.",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "*": "ask"
+        }
+      }
+    },
+    "act-mode": {
+      "description": "ACT mode - Full development with all tools",
+      "mode": "primary",
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}\n\n[OpenCode Override]\nMode: ACT. Always respond in Korean (한국어). Follow TDD workflow and code quality standards."
+    },
+    "backend": {
+      "description": "Backend development specialist",
+      "mode": "primary",
+      "prompt": "{file:packages/rules/.ai-rules/agents/backend-developer.json}\n\n[OpenCode Override]\nAlways respond in Korean (한국어). Follow backend development best practices."
+    },
+    "eval-mode": {
+      "description": "EVAL mode - Code quality evaluation",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/eval-mode.json}\n\n[OpenCode Override]\nMode: EVAL. Always respond in Korean (한국어). Provide evidence-based evaluation.",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "architect": {
+      "description": "Architecture and design patterns specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/architecture-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "tester": {
+      "description": "Test strategy and TDD specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/test-strategy-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "performance": {
+      "description": "Performance optimization specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/performance-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "security": {
+      "description": "Security audit specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/security-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "a11y": {
+      "description": "Accessibility (WCAG 2.1 AA) specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/accessibility-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "seo": {
+      "description": "SEO and metadata specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/seo-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "ux": {
+      "description": "UI/UX design specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/ui-ux-designer.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "docs": {
+      "description": "Documentation specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/documentation-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "quality": {
+      "description": "Code quality and SOLID principles specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/code-quality-specialist.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "devops": {
+      "description": "DevOps and infrastructure specialist",
+      "mode": "subagent",
+      "prompt": "{file:packages/rules/.ai-rules/agents/devops-engineer.json}",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    }
+  }
+}

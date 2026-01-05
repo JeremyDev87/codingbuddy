@@ -1,10 +1,12 @@
 import {
   KEYWORDS,
   LOCALIZED_KEYWORD_MAP,
+  MODE_AGENTS,
   type Mode,
   type RuleContent,
   type ParseModeResult,
   type KeywordModesConfig,
+  type AgentInfo,
 } from './keyword.types';
 
 const DEFAULT_CONFIG: KeywordModesConfig = {
@@ -14,18 +16,24 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       instructions:
         'Design first approach. Define test cases from TDD perspective. Review architecture before implementation.',
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
+      agent: MODE_AGENTS[0],
+      delegates_to: 'frontend-developer',
     },
     ACT: {
       description: 'Actual task execution phase',
       instructions:
         'Follow Red-Green-Refactor cycle. Implement minimally then improve incrementally. Verify quality standards.',
       rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
+      agent: MODE_AGENTS[1],
+      delegates_to: 'frontend-developer',
     },
     EVAL: {
       description: 'Result review and assessment phase',
       instructions:
         'Review code quality. Verify SOLID principles. Check test coverage. Suggest improvements.',
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
+      agent: MODE_AGENTS[2],
+      delegates_to: 'code-reviewer',
     },
   },
   defaultMode: 'PLAN',
@@ -37,6 +45,7 @@ export class KeywordService {
   constructor(
     private readonly loadConfigFn: () => Promise<KeywordModesConfig>,
     private readonly loadRuleFn: (path: string) => Promise<string>,
+    private readonly loadAgentInfoFn?: (agentName: string) => Promise<any>,
   ) {}
 
   async parseMode(prompt: string): Promise<ParseModeResult> {
@@ -108,13 +117,30 @@ export class KeywordService {
     const modeConfig = config.modes[mode];
     const rules = await this.getRulesForMode(mode);
 
-    return {
+    const result: ParseModeResult = {
       mode,
       originalPrompt,
       instructions: modeConfig.instructions,
       rules,
       ...(warnings.length > 0 ? { warnings } : {}),
     };
+
+    if (modeConfig.agent) {
+      result.agent = modeConfig.agent;
+    }
+
+    if (modeConfig.delegates_to) {
+      result.delegates_to = modeConfig.delegates_to;
+
+      const delegateAgentInfo = await this.getAgentInfo(
+        modeConfig.delegates_to,
+      );
+      if (delegateAgentInfo) {
+        result.delegate_agent_info = delegateAgentInfo;
+      }
+    }
+
+    return result;
   }
 
   async loadModeConfig(): Promise<KeywordModesConfig> {
@@ -146,5 +172,25 @@ export class KeywordService {
     }
 
     return rules;
+  }
+
+  private async getAgentInfo(
+    agentName: string,
+  ): Promise<AgentInfo | undefined> {
+    if (!this.loadAgentInfoFn) {
+      return undefined;
+    }
+
+    try {
+      const agentData = await this.loadAgentInfoFn(agentName);
+
+      return {
+        name: agentData.name || agentName,
+        description: agentData.description || '',
+        expertise: agentData.role?.expertise || [],
+      };
+    } catch {
+      return undefined;
+    }
   }
 }
