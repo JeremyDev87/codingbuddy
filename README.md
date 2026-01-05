@@ -12,6 +12,10 @@
 [![npm version](https://img.shields.io/npm/v/codingbuddy.svg)](https://www.npmjs.com/package/codingbuddy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<p align="center">
+  <img src="docs/ai-rules-architecture.svg" alt="Codingbuddy AI Rules Architecture" width="800"/>
+</p>
+
 **One source of truth for AI coding rules across all AI assistants.**
 
 Codingbuddy provides a unified rules system that works with Cursor, Claude Code, GitHub Copilot, and more—so your entire team follows the same coding standards, regardless of which AI tool they use.
@@ -61,6 +65,7 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 | Antigravity | ✅ Supported |
 | Amazon Q | ✅ Supported |
 | Kiro | ✅ Supported |
+| OpenCode | ✅ Supported |
 
 [Setup Guides →](docs/supported-tools.md)
 
@@ -77,17 +82,12 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 
 ## How It Works
 
-```
-packages/rules/.ai-rules/  ← Shared rules (single source of truth)
-├── rules/                 ← Core rules (workflow, quality)
-├── agents/                ← Specialist expertise (security, performance, etc.)
-└── adapters/              ← Tool-specific integration guides
+See the architecture diagram above for a visual overview of the 3-layer agent system:
 
-.cursor/                   ← Cursor references packages/rules/.ai-rules/
-.claude/                   ← Claude Code references packages/rules/.ai-rules/
-.codex/                    ← GitHub Copilot references packages/rules/.ai-rules/
-...
-```
+- **Layer 1 (Mode Agents)**: PLAN → ACT → EVAL workflow cycle
+- **Layer 2 (Primary Agents)**: Frontend/Backend Developer, Code Reviewer, DevOps
+- **Layer 3 (Specialists)**: 9 domain experts (Security, Performance, Accessibility, etc.)
+- **Skills**: Reusable capabilities (TDD, Debugging, Brainstorming, etc.)
 
 All AI tool configurations reference the same `packages/rules/.ai-rules/` directory. Change the rules once, and every tool follows the updated standards.
 

@@ -20,6 +20,7 @@ Codingbuddy funciona con múltiples asistentes de codificación de IA a través 
 | [Antigravity](#antigravity) | Directorio Config | [Guía](../../packages/rules/.ai-rules/adapters/antigravity.md) |
 | [Amazon Q](#amazon-q) | Directorio Rules | [Guía](../../packages/rules/.ai-rules/adapters/q.md) |
 | [Kiro](#kiro) | Directorio Spec | [Guía](../../packages/rules/.ai-rules/adapters/kiro.md) |
+| [OpenCode](#opencode) | Directorio Rules | [Guía](../../packages/rules/.ai-rules/adapters/opencode.md) |
 
 ## Claude Code
 
@@ -210,6 +211,49 @@ Aplicar reglas de packages/rules/.ai-rules/:
 
 [Guía completa](../../packages/rules/.ai-rules/adapters/kiro.md)
 
+## OpenCode
+
+**Método de integración**: Configuración JSON
+
+OpenCode (y su sucesor Crush de Charm Bracelet) utiliza archivos de configuración JSON con flujos de trabajo basados en agentes.
+
+### Configuración rápida
+
+1. Crear `.opencode.json` (o `crush.json`):
+
+```json
+{
+  "instructions": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md"
+  ],
+  "agent": {
+    "plan-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}",
+      "permission": { "edit": "deny" }
+    },
+    "act-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}",
+      "permission": { "edit": "allow" }
+    }
+  },
+  "mcp": {
+    "codingbuddy": {
+      "command": ["npx", "codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### Características
+
+- Interfaz TUI nativa de terminal
+- Flujo de trabajo PLAN/ACT/EVAL basado en agentes
+- Integración con servidor MCP
+- Control de permisos detallado
+
+[Guía completa](../../packages/rules/.ai-rules/adapters/opencode.md)
+
 ## Añadir nuevas herramientas
 
 Codingbuddy está diseñado para soportar herramientas de IA adicionales:
@@ -222,12 +266,12 @@ Consulta [Guía de contribución](../../CONTRIBUTING.md) para más detalles.
 
 ## Comparación
 
-| Característica | Claude | Cursor | Copilot | Antigravity | Q | Kiro |
-|----------------|--------|--------|---------|-------------|---|------|
-| Soporte MCP | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Referencias de archivos | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Activación de agentes | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
-| Configuración de proyecto | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
+| Característica | Claude | Cursor | Copilot | Antigravity | Q | Kiro | OpenCode |
+|----------------|--------|--------|---------|-------------|---|------|----------|
+| Soporte MCP | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Referencias de archivos | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Activación de agentes | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| Configuración de proyecto | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
 
 ✅ Soporte completo | ⚠️ Soporte parcial (vía referencias de archivos) | ❌ No soportado
 

@@ -20,6 +20,7 @@ Codingbuddy는 통합 규칙 시스템을 통해 여러 AI 코딩 어시스턴�
 | [Antigravity](#antigravity) | Config 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/antigravity.md) |
 | [Amazon Q](#amazon-q) | Rules 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/q.md) |
 | [Kiro](#kiro) | Spec 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/kiro.md) |
+| [OpenCode](#opencode) | Rules 디렉토리 | [가이드](../../packages/rules/.ai-rules/adapters/opencode.md) |
 
 ## Claude Code
 
@@ -210,6 +211,49 @@ packages/rules/.ai-rules/의 규칙 적용:
 
 [전체 가이드](../../packages/rules/.ai-rules/adapters/kiro.md)
 
+## OpenCode
+
+**통합 방식**: JSON 설정
+
+OpenCode (및 후속 프로젝트 Crush by Charm Bracelet)는 에이전트 기반 워크플로우와 함께 JSON 설정 파일을 사용합니다.
+
+### 빠른 설정
+
+1. `.opencode.json` (또는 `crush.json`) 생성:
+
+```json
+{
+  "instructions": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md"
+  ],
+  "agent": {
+    "plan-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}",
+      "permission": { "edit": "deny" }
+    },
+    "act-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}",
+      "permission": { "edit": "allow" }
+    }
+  },
+  "mcp": {
+    "codingbuddy": {
+      "command": ["npx", "codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### 기능
+
+- 터미널 네이티브 TUI 인터페이스
+- 에이전트 기반 PLAN/ACT/EVAL 워크플로우
+- MCP 서버 통합
+- 세밀한 권한 제어
+
+[전체 가이드](../../packages/rules/.ai-rules/adapters/opencode.md)
+
 ## 새 도구 추가하기
 
 Codingbuddy는 추가 AI 도구를 지원하도록 설계되었습니다:
@@ -222,12 +266,12 @@ Codingbuddy는 추가 AI 도구를 지원하도록 설계되었습니다:
 
 ## 비교
 
-| 기능 | Claude | Cursor | Copilot | Antigravity | Q | Kiro |
-|------|--------|--------|---------|-------------|---|------|
-| MCP 지원 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 파일 참조 | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| 에이전트 활성화 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
-| 프로젝트 설정 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
+| 기능 | Claude | Cursor | Copilot | Antigravity | Q | Kiro | OpenCode |
+|------|--------|--------|---------|-------------|---|------|----------|
+| MCP 지원 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| 파일 참조 | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 에이전트 활성화 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| 프로젝트 설정 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
 
 ✅ 전체 지원 | ⚠️ 부분 지원 (파일 참조 통해) | ❌ 미지원
 

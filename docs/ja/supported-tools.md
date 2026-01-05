@@ -20,6 +20,7 @@ Codingbuddyは統一されたルールシステムを通じて複数のAIコー�
 | [Antigravity](#antigravity) | Configディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/antigravity.md) |
 | [Amazon Q](#amazon-q) | Rulesディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/q.md) |
 | [Kiro](#kiro) | Specディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/kiro.md) |
+| [OpenCode](#opencode) | Rulesディレクトリ | [ガイド](../../packages/rules/.ai-rules/adapters/opencode.md) |
 
 ## Claude Code
 
@@ -210,6 +211,49 @@ packages/rules/.ai-rules/のルールを適用：
 
 [完全なガイド](../../packages/rules/.ai-rules/adapters/kiro.md)
 
+## OpenCode
+
+**統合方法**：JSON設定
+
+OpenCode（および後継プロジェクトCrush by Charm Bracelet）は、エージェントベースのワークフローとJSON設定ファイルを使用します。
+
+### クイックセットアップ
+
+1. `.opencode.json`（または`crush.json`）を作成：
+
+```json
+{
+  "instructions": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md"
+  ],
+  "agent": {
+    "plan-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}",
+      "permission": { "edit": "deny" }
+    },
+    "act-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}",
+      "permission": { "edit": "allow" }
+    }
+  },
+  "mcp": {
+    "codingbuddy": {
+      "command": ["npx", "codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### 機能
+
+- ターミナルネイティブTUIインターフェース
+- エージェントベースのPLAN/ACT/EVALワークフロー
+- MCPサーバー統合
+- きめ細かい権限制御
+
+[完全なガイド](../../packages/rules/.ai-rules/adapters/opencode.md)
+
 ## 新しいツールの追加
 
 Codingbuddyは追加のAIツールをサポートするよう設計されています：
@@ -222,12 +266,12 @@ Codingbuddyは追加のAIツールをサポートするよう設計されてい�
 
 ## 比較
 
-| 機能 | Claude | Cursor | Copilot | Antigravity | Q | Kiro |
-|------|--------|--------|---------|-------------|---|------|
-| MCPサポート | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| ファイル参照 | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| エージェント有効化 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
-| プロジェクト設定 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
+| 機能 | Claude | Cursor | Copilot | Antigravity | Q | Kiro | OpenCode |
+|------|--------|--------|---------|-------------|---|------|----------|
+| MCPサポート | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| ファイル参照 | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| エージェント有効化 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| プロジェクト設定 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
 
 ✅ 完全サポート | ⚠️ 部分サポート（ファイル参照経由） | ❌ 非対応
 

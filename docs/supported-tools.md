@@ -20,6 +20,7 @@ Codingbuddy works with multiple AI coding assistants through a unified rules sys
 | [Antigravity](#antigravity) | Config Directory | [Guide](../packages/rules/.ai-rules/adapters/antigravity.md) |
 | [Amazon Q](#amazon-q) | Rules Directory | [Guide](../packages/rules/.ai-rules/adapters/q.md) |
 | [Kiro](#kiro) | Spec Directory | [Guide](../packages/rules/.ai-rules/adapters/kiro.md) |
+| [OpenCode](#opencode) | Rules Directory | [Guide](../packages/rules/.ai-rules/adapters/opencode.md) |
 
 ## Claude Code
 
@@ -210,6 +211,49 @@ Apply rules from packages/rules/.ai-rules/:
 
 [Full Guide](../packages/rules/.ai-rules/adapters/kiro.md)
 
+## OpenCode
+
+**Integration Type**: JSON Configuration
+
+OpenCode (and its successor Crush by Charm Bracelet) uses JSON configuration files with agent-based workflows.
+
+### Quick Setup
+
+1. Create `.opencode.json` (or `crush.json`):
+
+```json
+{
+  "instructions": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md"
+  ],
+  "agent": {
+    "plan-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}",
+      "permission": { "edit": "deny" }
+    },
+    "act-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}",
+      "permission": { "edit": "allow" }
+    }
+  },
+  "mcp": {
+    "codingbuddy": {
+      "command": ["npx", "codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### Features
+
+- Terminal-native TUI interface
+- Agent-based PLAN/ACT/EVAL workflow
+- MCP server integration
+- Fine-grained permission control
+
+[Full Guide](../packages/rules/.ai-rules/adapters/opencode.md)
+
 ## Adding New Tools
 
 Codingbuddy is designed to support additional AI tools:
@@ -222,12 +266,12 @@ See [Contributing](../CONTRIBUTING.md) for details.
 
 ## Comparison
 
-| Feature | Claude | Cursor | Copilot | Antigravity | Q | Kiro |
-|---------|--------|--------|---------|-------------|---|------|
-| MCP Support | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| File References | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Agent Activation | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
-| Project Config | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
+| Feature | Claude | Cursor | Copilot | Antigravity | Q | Kiro | OpenCode |
+|---------|--------|--------|---------|-------------|---|------|----------|
+| MCP Support | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| File References | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Agent Activation | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| Project Config | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
 
 ✅ Full support | ⚠️ Partial (via file reference) | ❌ Not supported
 

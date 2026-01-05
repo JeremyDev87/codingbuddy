@@ -8,9 +8,13 @@
 
 # Codingbuddy
 
-[![CI](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml)
+[![CI](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml)
 [![npm version](https://img.shields.io/npm/v/codingbuddy.svg)](https://www.npmjs.com/package/codingbuddy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+<p align="center">
+  <img src="docs/ai-rules-architecture.svg" alt="Codingbuddy AI Rules Architecture" width="800"/>
+</p>
 
 **Una única fuente de verdad para reglas de codificación AI en todos los asistentes de IA.**
 
@@ -26,11 +30,14 @@ Codingbuddy proporciona un sistema de reglas unificado que funciona con Cursor, 
 ## Inicio rápido
 
 ```bash
-# Inicializa tu proyecto (analiza el código base y crea la configuración)
+# Inicializa tu proyecto (no requiere API key)
 npx codingbuddy init
 
+# Opcional: Inicialización con IA para un análisis más profundo
+# npx codingbuddy init --ai  # Requiere ANTHROPIC_API_KEY
+
 # Añade a tu herramienta de IA (ejemplo: Claude Desktop)
-# Consulta docs/supported-tools.md para otras herramientas de IA
+# Consulta docs/es/supported-tools.md para otras herramientas de IA
 ```
 
 Añade a la configuración de Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
@@ -58,6 +65,7 @@ Añade a la configuración de Claude Desktop (`~/Library/Application Support/Cla
 | Antigravity | ✅ Compatible |
 | Amazon Q | ✅ Compatible |
 | Kiro | ✅ Compatible |
+| OpenCode | ✅ Compatible |
 
 [Guías de configuración →](docs/es/supported-tools.md)
 
@@ -74,17 +82,12 @@ Añade a la configuración de Claude Desktop (`~/Library/Application Support/Cla
 
 ## Cómo funciona
 
-```
-packages/rules/.ai-rules/  ← Reglas compartidas (fuente única de verdad)
-├── rules/                 ← Reglas principales (flujo de trabajo, calidad)
-├── agents/                ← Experiencia especializada (seguridad, rendimiento, etc.)
-└── adapters/              ← Guías de integración específicas por herramienta
+Consulta el diagrama de arquitectura de arriba para una visión general del sistema de agentes de 3 capas:
 
-.cursor/                   ← Cursor referencia packages/rules/.ai-rules/
-.claude/                   ← Claude Code referencia packages/rules/.ai-rules/
-.codex/                    ← GitHub Copilot referencia packages/rules/.ai-rules/
-...
-```
+- **Layer 1 (Agentes de Modo)**: Ciclo de flujo de trabajo PLAN → ACT → EVAL
+- **Layer 2 (Agentes Principales)**: Frontend/Backend Developer, Code Reviewer, DevOps
+- **Layer 3 (Especialistas)**: 9 expertos de dominio (Seguridad, Rendimiento, Accesibilidad, etc.)
+- **Habilidades**: Capacidades reutilizables (TDD, Depuración, Brainstorming, etc.)
 
 Todas las configuraciones de herramientas de IA referencian el mismo directorio `packages/rules/.ai-rules/`. Cambia las reglas una vez, y todas las herramientas siguen los estándares actualizados.
 

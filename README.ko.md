@@ -8,9 +8,13 @@
 
 # Codingbuddy
 
-[![CI](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml)
+[![CI](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml)
 [![npm version](https://img.shields.io/npm/v/codingbuddy.svg)](https://www.npmjs.com/package/codingbuddy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+<p align="center">
+  <img src="docs/ai-rules-architecture.svg" alt="Codingbuddy AI Rules Architecture" width="800"/>
+</p>
 
 **모든 AI 코딩 어시스턴트를 위한 단일 규칙 시스템**
 
@@ -26,8 +30,11 @@ Codingbuddy는 Cursor, Claude Code, GitHub Copilot 등 다양한 AI 도구에서
 ## 빠른 시작
 
 ```bash
-# 프로젝트 초기화 (코드베이스를 분석하고 설정 파일 생성)
+# 프로젝트 초기화 (API 키 불필요)
 npx codingbuddy init
+
+# 선택: AI 기반 초기화로 더 깊은 분석
+# npx codingbuddy init --ai  # ANTHROPIC_API_KEY 필요
 
 # AI 도구에 추가 (예: Claude Desktop)
 # 다른 AI 도구는 docs/ko/supported-tools.md 참조
@@ -58,6 +65,7 @@ Claude Desktop 설정 파일에 추가 (`~/Library/Application Support/Claude/cl
 | Antigravity | ✅ 지원 |
 | Amazon Q | ✅ 지원 |
 | Kiro | ✅ 지원 |
+| OpenCode | ✅ 지원 |
 
 [설정 가이드 →](docs/ko/supported-tools.md)
 
@@ -74,17 +82,12 @@ Claude Desktop 설정 파일에 추가 (`~/Library/Application Support/Claude/cl
 
 ## 작동 방식
 
-```
-packages/rules/.ai-rules/  ← 공유 규칙 (단일 소스)
-├── rules/                 ← 핵심 규칙 (워크플로우, 품질)
-├── agents/                ← 전문가 에이전트 (보안, 성능 등)
-└── adapters/              ← 도구별 통합 가이드
+위 아키텍처 다이어그램에서 3계층 에이전트 시스템의 전체 구조를 확인하세요:
 
-.cursor/                   ← Cursor가 packages/rules/.ai-rules/ 참조
-.claude/                   ← Claude Code가 packages/rules/.ai-rules/ 참조
-.codex/                    ← GitHub Copilot이 packages/rules/.ai-rules/ 참조
-...
-```
+- **Layer 1 (모드 에이전트)**: PLAN → ACT → EVAL 워크플로우 사이클
+- **Layer 2 (주요 에이전트)**: Frontend/Backend Developer, Code Reviewer, DevOps
+- **Layer 3 (전문가)**: 9명의 도메인 전문가 (보안, 성능, 접근성 등)
+- **스킬**: 재사용 가능한 기능 (TDD, 디버깅, 브레인스토밍 등)
 
 모든 AI 도구 설정이 동일한 `packages/rules/.ai-rules/` 디렉토리를 참조합니다. 규칙을 한 번 수정하면 모든 도구가 업데이트된 표준을 따릅니다.
 

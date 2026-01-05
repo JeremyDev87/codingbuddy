@@ -20,6 +20,7 @@ Codingbuddy 通过统一的规则系统与多个 AI 编程助手配合使用。
 | [Antigravity](#antigravity) | Config 目录 | [指南](../../packages/rules/.ai-rules/adapters/antigravity.md) |
 | [Amazon Q](#amazon-q) | Rules 目录 | [指南](../../packages/rules/.ai-rules/adapters/q.md) |
 | [Kiro](#kiro) | Spec 目录 | [指南](../../packages/rules/.ai-rules/adapters/kiro.md) |
+| [OpenCode](#opencode) | Rules 目录 | [指南](../../packages/rules/.ai-rules/adapters/opencode.md) |
 
 ## Claude Code
 
@@ -210,6 +211,49 @@ Kiro 使用 `.kiro/` 进行规范和引导文件配置。
 
 [完整指南](../../packages/rules/.ai-rules/adapters/kiro.md)
 
+## OpenCode
+
+**集成方式**：JSON 配置
+
+OpenCode（及其后续项目 Crush by Charm Bracelet）使用 JSON 配置文件和基于代理的工作流程。
+
+### 快速设置
+
+1. 创建 `.opencode.json`（或 `crush.json`）：
+
+```json
+{
+  "instructions": [
+    "packages/rules/.ai-rules/rules/core.md",
+    "packages/rules/.ai-rules/rules/augmented-coding.md"
+  ],
+  "agent": {
+    "plan-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}",
+      "permission": { "edit": "deny" }
+    },
+    "act-mode": {
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}",
+      "permission": { "edit": "allow" }
+    }
+  },
+  "mcp": {
+    "codingbuddy": {
+      "command": ["npx", "codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### 功能
+
+- 终端原生 TUI 界面
+- 基于代理的 PLAN/ACT/EVAL 工作流程
+- MCP 服务器集成
+- 细粒度权限控制
+
+[完整指南](../../packages/rules/.ai-rules/adapters/opencode.md)
+
 ## 添加新工具
 
 Codingbuddy 设计为支持额外的 AI 工具：
@@ -222,12 +266,12 @@ Codingbuddy 设计为支持额外的 AI 工具：
 
 ## 对比
 
-| 功能 | Claude | Cursor | Copilot | Antigravity | Q | Kiro |
-|------|--------|--------|---------|-------------|---|------|
-| MCP 支持 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 文件引用 | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| 代理激活 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
-| 项目配置 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ |
+| 功能 | Claude | Cursor | Copilot | Antigravity | Q | Kiro | OpenCode |
+|------|--------|--------|---------|-------------|---|------|----------|
+| MCP 支持 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| 文件引用 | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 代理激活 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| 项目配置 | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
 
 ✅ 完整支持 | ⚠️ 部分支持（通过文件引用） | ❌ 不支持
 

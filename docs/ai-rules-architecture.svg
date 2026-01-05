@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" width="1080" height="1350">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f1a"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="planGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="actGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    <linearGradient id="evalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="skillGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899"/>
+      <stop offset="100%" style="stop-color:#f472b6"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1350" fill="url(#bgGradient)"/>
+
+  <!-- Grid Pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.03"/>
+  </pattern>
+  <rect width="1080" height="1350" fill="url(#grid)"/>
+
+  <!-- Header -->
+  <text x="540" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="700" fill="#ffffff" text-anchor="middle">Codingbuddy AI Rules</text>
+  <text x="540" y="90" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">One Standard, Every AI Tool</text>
+  <line x1="200" y1="115" x2="880" y2="115" stroke="#334155" stroke-width="1"/>
+
+  <!-- LAYER 1: Mode Agents (Full Width) -->
+  <text x="540" y="150" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="3">LAYER 1 : MODE AGENTS</text>
+
+  <!-- PLAN -->
+  <rect x="150" y="170" width="200" height="80" rx="12" fill="url(#planGradient)" filter="url(#shadow)"/>
+  <text x="250" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">PLAN</text>
+  <text x="250" y="232" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e0e7ff" text-anchor="middle">Mode Agent</text>
+
+  <!-- Arrow 1 -->
+  <polygon points="365,210 355,205 355,215" fill="#64748b"/>
+  <line x1="350" y1="210" x2="365" y2="210" stroke="#64748b" stroke-width="2"/>
+
+  <!-- ACT -->
+  <rect x="385" y="170" width="200" height="80" rx="12" fill="url(#actGradient)" filter="url(#shadow)"/>
+  <text x="485" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">ACT</text>
+  <text x="485" y="232" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#d1fae5" text-anchor="middle">Mode Agent</text>
+
+  <!-- Arrow 2 -->
+  <polygon points="600,210 590,205 590,215" fill="#64748b"/>
+  <line x1="585" y1="210" x2="600" y2="210" stroke="#64748b" stroke-width="2"/>
+
+  <!-- EVAL -->
+  <rect x="620" y="170" width="200" height="80" rx="12" fill="url(#evalGradient)" filter="url(#shadow)"/>
+  <text x="720" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">EVAL</text>
+  <text x="720" y="232" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#fef3c7" text-anchor="middle">Mode Agent</text>
+
+  <!-- Cycle Arrow -->
+  <path d="M 720 260 Q 720 295 485 295 Q 250 295 250 260" stroke="#475569" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+  <polygon points="250,265 245,255 255,255" fill="#475569"/>
+
+  <!-- Down Arrow to Layer 2 -->
+  <line x1="485" y1="305" x2="485" y2="335" stroke="#475569" stroke-width="2"/>
+  <polygon points="485,345 480,335 490,335" fill="#475569"/>
+  <text x="500" y="328" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">activates</text>
+
+  <!-- Main Content Area: Agents (Left) + Skills (Right) -->
+
+  <!-- LAYER 2: Primary Agents (Left Side) -->
+  <text x="380" y="375" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="3">LAYER 2 : PRIMARY AGENTS</text>
+
+  <!-- Primary Agents 2x2 Grid -->
+  <rect x="70" y="395" width="290" height="60" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="100" y="432" font-family="system-ui, -apple-system, sans-serif" font-size="18">🖥️</text>
+  <text x="135" y="422" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#ffffff">Frontend Developer</text>
+  <text x="135" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">React, Next.js, TDD</text>
+
+  <rect x="380" y="395" width="290" height="60" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="410" y="432" font-family="system-ui, -apple-system, sans-serif" font-size="18">⚙️</text>
+  <text x="445" y="422" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#ffffff">Backend Developer</text>
+  <text x="445" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">NestJS, APIs, Database</text>
+
+  <rect x="70" y="465" width="290" height="60" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+  <text x="100" y="502" font-family="system-ui, -apple-system, sans-serif" font-size="18">🔍</text>
+  <text x="135" y="492" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#ffffff">Code Reviewer</text>
+  <text x="135" y="510" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">Quality, Security, Perf</text>
+
+  <rect x="380" y="465" width="290" height="60" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadow)"/>
+  <text x="410" y="502" font-family="system-ui, -apple-system, sans-serif" font-size="18">🚀</text>
+  <text x="445" y="492" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#ffffff">DevOps Engineer</text>
+  <text x="445" y="510" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">CI/CD, Infrastructure</text>
+
+  <!-- SKILLS Section (Right Side) -->
+  <rect x="700" y="365" width="310" height="395" rx="12" fill="#1e293b" stroke="#ec4899" stroke-width="2" opacity="0.6"/>
+  <text x="855" y="395" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ec4899" text-anchor="middle" letter-spacing="2">SKILLS</text>
+
+  <!-- Skills List -->
+  <rect x="720" y="415" width="135" height="40" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
+  <text x="787" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e9d5ff" text-anchor="middle">🧠 Brainstorming</text>
+
+  <rect x="865" y="415" width="125" height="40" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
+  <text x="927" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#bfdbfe" text-anchor="middle">📝 Writing Plans</text>
+
+  <rect x="720" y="465" width="135" height="40" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
+  <text x="787" y="490" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#d1fae5" text-anchor="middle">🧪 TDD</text>
+
+  <rect x="865" y="465" width="125" height="40" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
+  <text x="927" y="490" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#fef3c7" text-anchor="middle">🐛 Debugging</text>
+
+  <rect x="720" y="515" width="135" height="40" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
+  <text x="787" y="540" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e9d5ff" text-anchor="middle">⚡ Parallel Agents</text>
+
+  <rect x="865" y="515" width="125" height="40" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
+  <text x="927" y="540" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#bfdbfe" text-anchor="middle">🎨 Frontend</text>
+
+  <rect x="720" y="565" width="135" height="40" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
+  <text x="787" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#d1fae5" text-anchor="middle">🚀 Execute Plans</text>
+
+  <rect x="865" y="565" width="125" height="40" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
+  <text x="927" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#fef3c7" text-anchor="middle">🤖 Subagent Dev</text>
+
+  <!-- Connection line from Skills to Agents -->
+  <line x1="700" y1="460" x2="680" y2="460" stroke="#ec4899" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="685" y="450" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#ec4899" text-anchor="end">uses</text>
+
+  <!-- Down Arrow to Layer 3 -->
+  <line x1="380" y1="540" x2="380" y2="570" stroke="#475569" stroke-width="2"/>
+  <polygon points="380,580 375,570 385,570" fill="#475569"/>
+  <text x="395" y="563" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">references</text>
+
+  <!-- LAYER 3: Specialist Agents -->
+  <text x="380" y="615" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="3">LAYER 3 : SPECIALIST AGENTS</text>
+
+  <!-- Specialist Row 1 -->
+  <rect x="70" y="635" width="200" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="95" y="666" font-family="system-ui, -apple-system, sans-serif" font-size="16">🏗️</text>
+  <text x="125" y="658" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Architecture</text>
+  <text x="125" y="672" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">Layer, Dependencies</text>
+
+  <rect x="285" y="635" width="200" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="310" y="666" font-family="system-ui, -apple-system, sans-serif" font-size="16">🧪</text>
+  <text x="340" y="658" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Test Strategy</text>
+  <text x="340" y="672" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">TDD, Coverage 90%+</text>
+
+  <rect x="500" y="635" width="180" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="525" y="666" font-family="system-ui, -apple-system, sans-serif" font-size="16">⚡</text>
+  <text x="555" y="658" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Performance</text>
+  <text x="555" y="672" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">Bundle, Optimize</text>
+
+  <!-- Specialist Row 2 -->
+  <rect x="70" y="695" width="200" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="95" y="726" font-family="system-ui, -apple-system, sans-serif" font-size="16">🔒</text>
+  <text x="125" y="718" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Security</text>
+  <text x="125" y="732" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">OAuth, JWT, OWASP</text>
+
+  <rect x="285" y="695" width="200" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="310" y="726" font-family="system-ui, -apple-system, sans-serif" font-size="16">♿</text>
+  <text x="340" y="718" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Accessibility</text>
+  <text x="340" y="732" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">WCAG 2.1, ARIA</text>
+
+  <rect x="500" y="695" width="180" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="525" y="726" font-family="system-ui, -apple-system, sans-serif" font-size="16">🔍</text>
+  <text x="555" y="718" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">SEO</text>
+  <text x="555" y="732" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">Metadata, Schema</text>
+
+  <!-- Specialist Row 3 -->
+  <rect x="70" y="755" width="200" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="95" y="786" font-family="system-ui, -apple-system, sans-serif" font-size="16">🎨</text>
+  <text x="125" y="778" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">UI/UX Designer</text>
+  <text x="125" y="792" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">Hierarchy, UX Laws</text>
+
+  <rect x="285" y="755" width="200" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="310" y="786" font-family="system-ui, -apple-system, sans-serif" font-size="16">📚</text>
+  <text x="340" y="778" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Documentation</text>
+  <text x="340" y="792" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">JSDoc, README</text>
+
+  <rect x="500" y="755" width="180" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="525" y="786" font-family="system-ui, -apple-system, sans-serif" font-size="16">📐</text>
+  <text x="555" y="778" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Code Quality</text>
+  <text x="555" y="792" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#64748b">SOLID, DRY</text>
+
+  <!-- Connection line from Skills to Specialists -->
+  <line x1="700" y1="700" x2="690" y2="700" stroke="#ec4899" stroke-width="1" stroke-dasharray="4,2"/>
+
+  <!-- Stats Section -->
+  <line x1="70" y1="835" x2="1010" y2="835" stroke="#334155" stroke-width="1"/>
+
+  <!-- Stats boxes - 5 items now including Skills -->
+  <rect x="70" y="860" width="175" height="60" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1"/>
+  <text x="157" y="892" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#6366f1" text-anchor="middle">3</text>
+  <text x="157" y="910" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Mode Agents</text>
+
+  <rect x="260" y="860" width="175" height="60" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="347" y="892" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#3b82f6" text-anchor="middle">4</text>
+  <text x="347" y="910" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Primary Agents</text>
+
+  <rect x="450" y="860" width="175" height="60" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+  <text x="537" y="892" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#10b981" text-anchor="middle">9</text>
+  <text x="537" y="910" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Specialists</text>
+
+  <rect x="640" y="860" width="175" height="60" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="1"/>
+  <text x="727" y="892" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#ec4899" text-anchor="middle">8</text>
+  <text x="727" y="910" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Skills</text>
+
+  <rect x="830" y="860" width="175" height="60" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="917" y="892" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#f59e0b" text-anchor="middle">7</text>
+  <text x="917" y="910" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">AI Tools</text>
+
+  <!-- Divider -->
+  <line x1="70" y1="945" x2="1010" y2="945" stroke="#334155" stroke-width="1"/>
+
+  <!-- Supported AI Tools -->
+  <text x="540" y="975" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">SUPPORTED AI TOOLS</text>
+
+  <!-- Tool badges - Row 1 -->
+  <rect x="110" y="995" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="170" y="1016" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Cursor</text>
+
+  <rect x="245" y="995" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="305" y="1016" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Claude Code</text>
+
+  <rect x="380" y="995" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="440" y="1016" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Codex</text>
+
+  <rect x="515" y="995" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="575" y="1016" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Amazon Q</text>
+
+  <rect x="650" y="995" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="710" y="1016" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Kiro</text>
+
+  <rect x="785" y="995" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="845" y="1016" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Antigravity</text>
+
+  <!-- Row 2 - OpenCode centered -->
+  <rect x="480" y="1040" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="540" y="1061" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">OpenCode</text>
+
+  <!-- How It Works Section -->
+  <line x1="70" y1="1095" x2="1010" y2="1095" stroke="#334155" stroke-width="1"/>
+  <text x="540" y="1125" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">HOW IT WORKS</text>
+
+  <!-- Process Flow -->
+  <rect x="70" y="1145" width="220" height="70" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1"/>
+  <text x="180" y="1172" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#a5b4fc" text-anchor="middle">1. User Types Keyword</text>
+  <text x="180" y="1192" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">PLAN / ACT / EVAL</text>
+
+  <polygon points="300,1180 290,1175 290,1185" fill="#475569"/>
+
+  <rect x="310" y="1145" width="220" height="70" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="420" y="1172" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#93c5fd" text-anchor="middle">2. Mode Agent Activates</text>
+  <text x="420" y="1192" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Primary Agent + Skills</text>
+
+  <polygon points="540,1180 530,1175 530,1185" fill="#475569"/>
+
+  <rect x="550" y="1145" width="220" height="70" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+  <text x="660" y="1172" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#6ee7b7" text-anchor="middle">3. Specialists Referenced</text>
+  <text x="660" y="1192" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">As Needed by Context</text>
+
+  <polygon points="780,1180 770,1175 770,1185" fill="#475569"/>
+
+  <rect x="790" y="1145" width="220" height="70" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="900" y="1172" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#fcd34d" text-anchor="middle">4. Consistent Output</text>
+  <text x="900" y="1192" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Same Rules, Any AI Tool</text>
+
+  <!-- Key Features -->
+  <text x="540" y="1255" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">KEY FEATURES</text>
+
+  <!-- Feature Pills -->
+  <rect x="110" y="1272" width="160" height="28" rx="14" fill="#6366f1" opacity="0.2"/>
+  <text x="190" y="1291" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#a5b4fc" text-anchor="middle">PLAN → ACT → EVAL</text>
+
+  <rect x="290" y="1272" width="130" height="28" rx="14" fill="#10b981" opacity="0.2"/>
+  <text x="355" y="1291" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#6ee7b7" text-anchor="middle">TDD Workflow</text>
+
+  <rect x="440" y="1272" width="150" height="28" rx="14" fill="#ec4899" opacity="0.2"/>
+  <text x="515" y="1291" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#f9a8d4" text-anchor="middle">Reusable Skills</text>
+
+  <rect x="610" y="1272" width="150" height="28" rx="14" fill="#f59e0b" opacity="0.2"/>
+  <text x="685" y="1291" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fcd34d" text-anchor="middle">Auto Activation</text>
+
+  <rect x="780" y="1272" width="150" height="28" rx="14" fill="#3b82f6" opacity="0.2"/>
+  <text x="855" y="1291" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#93c5fd" text-anchor="middle">Multi-AI Support</text>
+
+  <!-- Footer -->
+  <text x="540" y="1335" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#475569" text-anchor="middle">github.com/anthropics/codingbuddy</text>
+
+</svg>

@@ -8,9 +8,13 @@
 
 # Codingbuddy
 
-[![CI](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml)
+[![CI](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml)
 [![npm version](https://img.shields.io/npm/v/codingbuddy.svg)](https://www.npmjs.com/package/codingbuddy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+<p align="center">
+  <img src="docs/ai-rules-architecture.svg" alt="Codingbuddy AI Rules Architecture" width="800"/>
+</p>
 
 **所有 AI 编程助手的统一规则系统**
 
@@ -26,8 +30,11 @@ Codingbuddy 提供了一个统一的规则系统，适用于 Cursor、Claude Cod
 ## 快速开始
 
 ```bash
-# 初始化项目（分析代码库并创建配置文件）
+# 初始化项目（无需 API 密钥）
 npx codingbuddy init
+
+# 可选：AI 驱动的初始化，进行更深入的分析
+# npx codingbuddy init --ai  # 需要 ANTHROPIC_API_KEY
 
 # 添加到您的 AI 工具（示例：Claude Desktop）
 # 其他 AI 工具请参阅 docs/zh-CN/supported-tools.md
@@ -58,6 +65,7 @@ npx codingbuddy init
 | Antigravity | ✅ 支持 |
 | Amazon Q | ✅ 支持 |
 | Kiro | ✅ 支持 |
+| OpenCode | ✅ 支持 |
 
 [设置指南 →](docs/zh-CN/supported-tools.md)
 
@@ -74,17 +82,12 @@ npx codingbuddy init
 
 ## 工作原理
 
-```
-packages/rules/.ai-rules/  ← 共享规则（单一数据源）
-├── rules/                 ← 核心规则（工作流、质量）
-├── agents/                ← 专家代理（安全、性能等）
-└── adapters/              ← 工具特定的集成指南
+请参阅上方架构图，了解三层代理系统的完整概览：
 
-.cursor/                   ← Cursor 引用 packages/rules/.ai-rules/
-.claude/                   ← Claude Code 引用 packages/rules/.ai-rules/
-.codex/                    ← GitHub Copilot 引用 packages/rules/.ai-rules/
-...
-```
+- **Layer 1（模式代理）**：PLAN → ACT → EVAL 工作流程循环
+- **Layer 2（主要代理）**：Frontend/Backend Developer、Code Reviewer、DevOps
+- **Layer 3（专家）**：9位领域专家（安全、性能、可访问性等）
+- **技能**：可复用功能（TDD、调试、头脑风暴等）
 
 所有 AI 工具配置都引用同一个 `packages/rules/.ai-rules/` 目录。只需修改一次规则，所有工具都会遵循更新后的标准。
 

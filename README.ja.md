@@ -8,9 +8,13 @@
 
 # Codingbuddy
 
-[![CI](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/codingbuddy/actions/workflows/dev.yml)
+[![CI](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml/badge.svg)](https://github.com/JeremyDev87/codingbuddy/actions/workflows/dev.yml)
 [![npm version](https://img.shields.io/npm/v/codingbuddy.svg)](https://www.npmjs.com/package/codingbuddy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+<p align="center">
+  <img src="docs/ai-rules-architecture.svg" alt="Codingbuddy AI Rules Architecture" width="800"/>
+</p>
 
 **すべてのAIアシスタントで統一されたAIコーディングルールの単一ソース。**
 
@@ -26,11 +30,14 @@ Codingbuddyは、Cursor、Claude Code、GitHub Copilotなどと連携する統�
 ## クイックスタート
 
 ```bash
-# プロジェクトを初期化（コードベースを分析して設定を作成）
+# プロジェクトを初期化（APIキー不要）
 npx codingbuddy init
 
+# オプション：AI駆動の初期化でより深い分析
+# npx codingbuddy init --ai  # ANTHROPIC_API_KEYが必要
+
 # AIツールに追加（例：Claude Desktop）
-# 他のAIツールについてはdocs/supported-tools.mdを参照
+# 他のAIツールについてはdocs/ja/supported-tools.mdを参照
 ```
 
 Claude Desktop設定に追加（`~/Library/Application Support/Claude/claude_desktop_config.json`）：
@@ -58,6 +65,7 @@ Claude Desktop設定に追加（`~/Library/Application Support/Claude/claude_des
 | Antigravity | ✅ 対応 |
 | Amazon Q | ✅ 対応 |
 | Kiro | ✅ 対応 |
+| OpenCode | ✅ 対応 |
 
 [セットアップガイド →](docs/ja/supported-tools.md)
 
@@ -74,17 +82,12 @@ Claude Desktop設定に追加（`~/Library/Application Support/Claude/claude_des
 
 ## 仕組み
 
-```
-packages/rules/.ai-rules/  ← 共有ルール（単一ソース）
-├── rules/                 ← コアルール（ワークフロー、品質）
-├── agents/                ← スペシャリスト専門知識（セキュリティ、パフォーマンスなど）
-└── adapters/              ← ツール固有の統合ガイド
+上記のアーキテクチャ図で3層エージェントシステムの全体像をご確認ください：
 
-.cursor/                   ← Cursorがpackages/rules/.ai-rules/を参照
-.claude/                   ← Claude Codeがpackages/rules/.ai-rules/を参照
-.codex/                    ← GitHub Copilotがpackages/rules/.ai-rules/を参照
-...
-```
+- **Layer 1（モードエージェント）**：PLAN → ACT → EVAL ワークフローサイクル
+- **Layer 2（主要エージェント）**：Frontend/Backend Developer、Code Reviewer、DevOps
+- **Layer 3（スペシャリスト）**：9名のドメイン専門家（セキュリティ、パフォーマンス、アクセシビリティなど）
+- **スキル**：再利用可能な機能（TDD、デバッグ、ブレインストーミングなど）
 
 すべてのAIツール設定が同じ`packages/rules/.ai-rules/`ディレクトリを参照します。ルールを一度変更すれば、すべてのツールが更新された標準に従います。
 
