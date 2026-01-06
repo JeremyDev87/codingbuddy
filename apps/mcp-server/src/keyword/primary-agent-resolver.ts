@@ -46,6 +46,125 @@ export class PrimaryAgentResolver {
   ];
 
   /**
+   * Intent patterns for data-engineer agent.
+   *
+   * These patterns detect prompts related to database, schema, and data tasks.
+   * Priority: 4th (after explicit, recommended, tooling patterns; before mobile and context).
+   *
+   * Confidence Levels:
+   * - 0.95: Highly specific patterns (schema.prisma)
+   * - 0.90: Database design keywords, migrations, SQL files
+   * - 0.85: Query optimization, indexing, normalization
+   *
+   * @example
+   * "schema.prisma 수정해줘" → data-engineer (0.95)
+   * "데이터베이스 스키마 설계" → data-engineer (0.90)
+   * "쿼리 최적화 필요해" → data-engineer (0.85)
+   */
+  private static readonly DATA_INTENT_PATTERNS: Array<{
+    pattern: RegExp;
+    confidence: number;
+    description: string;
+  }> = [
+    // Schema/migration patterns (0.95)
+    {
+      pattern: /schema\.prisma/i,
+      confidence: 0.95,
+      description: 'Prisma schema',
+    },
+    {
+      pattern: /migration/i,
+      confidence: 0.9,
+      description: 'Database migration',
+    },
+    { pattern: /\.sql$/i, confidence: 0.9, description: 'SQL file' },
+    // Database patterns (0.85-0.90)
+    {
+      pattern: /database|데이터베이스|DB\s*(설계|스키마|마이그레이션)/i,
+      confidence: 0.9,
+      description: 'Database design',
+    },
+    {
+      pattern: /스키마|schema\s*design/i,
+      confidence: 0.9,
+      description: 'Schema design',
+    },
+    {
+      pattern: /ERD|entity.?relationship/i,
+      confidence: 0.9,
+      description: 'ERD design',
+    },
+    {
+      pattern: /쿼리\s*최적화|query\s*optim/i,
+      confidence: 0.85,
+      description: 'Query optimization',
+    },
+    {
+      pattern: /인덱스|index(ing)?/i,
+      confidence: 0.85,
+      description: 'Indexing',
+    },
+    {
+      pattern: /정규화|normaliz/i,
+      confidence: 0.85,
+      description: 'Normalization',
+    },
+  ];
+
+  /**
+   * Intent patterns for mobile-developer agent.
+   *
+   * These patterns detect prompts related to mobile app development.
+   * Priority: 5th (after explicit, recommended, tooling, data patterns; before context).
+   *
+   * Confidence Levels:
+   * - 0.95: Platform-specific frameworks (React Native, Flutter, SwiftUI, Jetpack Compose)
+   * - 0.90: Generic mobile keywords, platform names (iOS, Android), Expo
+   *
+   * @example
+   * "React Native 컴포넌트 만들어줘" → mobile-developer (0.95)
+   * "Flutter 위젯 구현해" → mobile-developer (0.95)
+   * "모바일 앱 화면 개발" → mobile-developer (0.90)
+   */
+  private static readonly MOBILE_INTENT_PATTERNS: Array<{
+    pattern: RegExp;
+    confidence: number;
+    description: string;
+  }> = [
+    // Platform-specific patterns (0.95)
+    {
+      pattern: /react.?native/i,
+      confidence: 0.95,
+      description: 'React Native',
+    },
+    { pattern: /flutter/i, confidence: 0.95, description: 'Flutter' },
+    { pattern: /expo/i, confidence: 0.9, description: 'Expo' },
+    { pattern: /swiftui/i, confidence: 0.95, description: 'SwiftUI' },
+    {
+      pattern: /jetpack\s*compose/i,
+      confidence: 0.95,
+      description: 'Jetpack Compose',
+    },
+    // Generic mobile patterns (0.85-0.90)
+    {
+      pattern: /모바일\s*(앱|개발|화면)/i,
+      confidence: 0.9,
+      description: 'Korean: mobile app',
+    },
+    {
+      pattern: /mobile\s*(app|develop|screen)/i,
+      confidence: 0.9,
+      description: 'Mobile app',
+    },
+    { pattern: /iOS\s*(앱|개발)/i, confidence: 0.9, description: 'iOS app' },
+    {
+      pattern: /android\s*(앱|개발)/i,
+      confidence: 0.9,
+      description: 'Android app',
+    },
+  ];
+
+  /**
    * Intent patterns for tooling-engineer agent.
    *
    * These patterns detect prompts related to configuration, build tools, and package management.
@@ -55,9 +174,11 @@ export class PrimaryAgentResolver {
    * 1. Explicit request in prompt ("backend-developer로 작업해") - highest
    * 2. recommended_agent from PLAN mode (PLAN→ACT context passing)
    * 3. **TOOLING_INTENT_PATTERNS** ← checked here
-   * 4. CONTEXT_PATTERNS (file path/extension inference)
-   * 5. Project config (primaryAgent setting)
-   * 6. Default fallback (frontend-developer) - lowest
+   * 4. DATA_INTENT_PATTERNS
+   * 5. MOBILE_INTENT_PATTERNS
+   * 6. CONTEXT_PATTERNS (file path/extension inference)
+   * 7. Project config (primaryAgent setting)
+   * 8. Default fallback (frontend-developer) - lowest
    *
    * Confidence Levels:
    * - 0.95-0.98: Highly specific config file names (tsconfig, vite.config, etc.)
@@ -150,17 +271,53 @@ export class PrimaryAgentResolver {
     agent: string;
     confidence: number;
   }> = [
+    // Mobile patterns (highest priority for mobile projects)
+    {
+      pattern: /react-native\.config\.js$/i,
+      agent: 'mobile-developer',
+      confidence: 0.95,
+    },
+    {
+      pattern: /metro\.config\.js$/i,
+      agent: 'mobile-developer',
+      confidence: 0.95,
+    },
+    { pattern: /app\.json$/i, agent: 'mobile-developer', confidence: 0.85 },
+    { pattern: /pubspec\.yaml$/i, agent: 'mobile-developer', confidence: 0.95 },
+    { pattern: /\.dart$/i, agent: 'mobile-developer', confidence: 0.9 },
+    { pattern: /Podfile$/i, agent: 'mobile-developer', confidence: 0.9 },
+    { pattern: /\.swift$/i, agent: 'mobile-developer', confidence: 0.9 },
+    {
+      pattern: /build\.gradle(\.kts)?$/i,
+      agent: 'mobile-developer',
+      confidence: 0.85,
+    },
+    {
+      pattern: /AndroidManifest\.xml$/i,
+      agent: 'mobile-developer',
+      confidence: 0.9,
+    },
+    { pattern: /\.kt$/i, agent: 'mobile-developer', confidence: 0.85 },
+    // Data patterns
+    { pattern: /\.sql$/i, agent: 'data-engineer', confidence: 0.9 },
+    { pattern: /schema\.prisma$/i, agent: 'data-engineer', confidence: 0.95 },
+    { pattern: /migrations?\//i, agent: 'data-engineer', confidence: 0.9 },
+    { pattern: /\.entity\.ts$/i, agent: 'data-engineer', confidence: 0.85 },
+    // DevOps patterns
     {
       pattern: /Dockerfile|docker-compose/i,
       agent: 'devops-engineer',
       confidence: 0.9,
     },
+    // Backend patterns
     { pattern: /\.go$/i, agent: 'backend-developer', confidence: 0.85 },
     { pattern: /\.py$/i, agent: 'backend-developer', confidence: 0.85 },
     { pattern: /\.java$/i, agent: 'backend-developer', confidence: 0.85 },
     { pattern: /\.rs$/i, agent: 'backend-developer', confidence: 0.85 },
+    // Frontend patterns (lower priority)
     { pattern: /\.tsx?$/i, agent: 'frontend-developer', confidence: 0.7 },
     { pattern: /\.jsx?$/i, agent: 'frontend-developer', confidence: 0.7 },
+    // Agent patterns
     { pattern: /agents?.*\.json$/i, agent: 'agent-architect', confidence: 0.8 },
   ];
 
@@ -311,7 +468,7 @@ export class PrimaryAgentResolver {
 
   /**
    * Resolve ACT mode agent.
-   * Priority: explicit > recommended > tooling-intent > config > context > default
+   * Priority: explicit > recommended > tooling-intent > data-intent > mobile-intent > config > context > default
    */
   private async resolveActAgent(
     prompt: string,
@@ -345,13 +502,25 @@ export class PrimaryAgentResolver {
       return fromTooling;
     }
 
-    // 4. Check project configuration
+    // 4. Check data intent patterns (database/schema tasks)
+    const fromData = this.inferFromDataPatterns(prompt, availableAgents);
+    if (fromData) {
+      return fromData;
+    }
+
+    // 5. Check mobile intent patterns (mobile app tasks)
+    const fromMobile = this.inferFromMobilePatterns(prompt, availableAgents);
+    if (fromMobile) {
+      return fromMobile;
+    }
+
+    // 6. Check project configuration
     const fromConfig = await this.getFromProjectConfig(availableAgents);
     if (fromConfig) {
       return fromConfig;
     }
 
-    // 5. Check context-based suggestion
+    // 7. Check context-based suggestion
     if (context) {
       const fromContext = this.inferFromContext(context, availableAgents);
       if (fromContext && fromContext.confidence >= 0.8) {
@@ -359,7 +528,7 @@ export class PrimaryAgentResolver {
       }
     }
 
-    // 6. Default fallback for ACT mode
+    // 8. Default fallback for ACT mode
     return this.createResult(
       DEFAULT_ACT_AGENT,
       'default',
@@ -391,6 +560,66 @@ export class PrimaryAgentResolver {
           'intent',
           confidence,
           `Tooling pattern detected: ${description}`,
+        );
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Infer data-engineer from prompt content patterns.
+   * High priority for database, schema, and data tasks.
+   */
+  private inferFromDataPatterns(
+    prompt: string,
+    availableAgents: string[],
+  ): PrimaryAgentResolutionResult | null {
+    if (!availableAgents.includes('data-engineer')) {
+      return null;
+    }
+
+    for (const {
+      pattern,
+      confidence,
+      description,
+    } of PrimaryAgentResolver.DATA_INTENT_PATTERNS) {
+      if (pattern.test(prompt)) {
+        return this.createResult(
+          'data-engineer',
+          'intent',
+          confidence,
+          `Data pattern detected: ${description}`,
+        );
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Infer mobile-developer from prompt content patterns.
+   * High priority for mobile app development tasks.
+   */
+  private inferFromMobilePatterns(
+    prompt: string,
+    availableAgents: string[],
+  ): PrimaryAgentResolutionResult | null {
+    if (!availableAgents.includes('mobile-developer')) {
+      return null;
+    }
+
+    for (const {
+      pattern,
+      confidence,
+      description,
+    } of PrimaryAgentResolver.MOBILE_INTENT_PATTERNS) {
+      if (pattern.test(prompt)) {
+        return this.createResult(
+          'mobile-developer',
+          'intent',
+          confidence,
+          `Mobile pattern detected: ${description}`,
         );
       }
     }

@@ -345,6 +345,176 @@ describe('PrimaryAgentResolver', () => {
       });
     });
 
+    describe('data-engineer pattern matching', () => {
+      beforeEach(() => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'tooling-engineer',
+          'data-engineer',
+          'mobile-developer',
+          'frontend-developer',
+          'backend-developer',
+          'agent-architect',
+          'devops-engineer',
+          'solution-architect',
+          'technical-planner',
+          'code-reviewer',
+        ]);
+      });
+
+      it('returns data-engineer for schema.prisma prompt', async () => {
+        const result = await resolver.resolve('ACT', 'schema.prisma 수정해줘');
+
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBeGreaterThanOrEqual(0.9);
+      });
+
+      it('returns data-engineer for migration prompt', async () => {
+        const result = await resolver.resolve('ACT', 'DB migration 만들어줘');
+
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns data-engineer for Korean "데이터베이스 설계" prompt', async () => {
+        const result = await resolver.resolve(
+          'ACT',
+          '데이터베이스 스키마 설계해줘',
+        );
+
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns data-engineer for ERD prompt', async () => {
+        const result = await resolver.resolve('ACT', 'ERD 설계 도와줘');
+
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns data-engineer for query optimization prompt', async () => {
+        const result = await resolver.resolve('ACT', '쿼리 최적화 필요해');
+
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns data-engineer for indexing prompt', async () => {
+        const result = await resolver.resolve('ACT', 'Add database indexing');
+
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns null when data-engineer not available', async () => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'backend-developer',
+        ]);
+
+        const result = await resolver.resolve('ACT', 'schema.prisma 수정해');
+
+        expect(result.agentName).not.toBe('data-engineer');
+        expect(result.agentName).toBe('frontend-developer');
+      });
+    });
+
+    describe('mobile-developer pattern matching', () => {
+      beforeEach(() => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'tooling-engineer',
+          'data-engineer',
+          'mobile-developer',
+          'frontend-developer',
+          'backend-developer',
+          'agent-architect',
+          'devops-engineer',
+          'solution-architect',
+          'technical-planner',
+          'code-reviewer',
+        ]);
+      });
+
+      it('returns mobile-developer for React Native prompt', async () => {
+        const result = await resolver.resolve(
+          'ACT',
+          'React Native 컴포넌트 만들어줘',
+        );
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBeGreaterThanOrEqual(0.9);
+      });
+
+      it('returns mobile-developer for Flutter prompt', async () => {
+        const result = await resolver.resolve('ACT', 'Flutter 위젯 구현해');
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns mobile-developer for Expo prompt', async () => {
+        const result = await resolver.resolve('ACT', 'Expo 설정 업데이트해');
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns mobile-developer for Korean "모바일 앱" prompt', async () => {
+        const result = await resolver.resolve('ACT', '모바일 앱 화면 개발해줘');
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns mobile-developer for iOS app prompt', async () => {
+        const result = await resolver.resolve('ACT', 'iOS 앱 개발해');
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns mobile-developer for Android app prompt', async () => {
+        const result = await resolver.resolve('ACT', 'android 앱 개발');
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns mobile-developer for SwiftUI prompt', async () => {
+        const result = await resolver.resolve('ACT', 'SwiftUI view 만들어');
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns mobile-developer for Jetpack Compose prompt', async () => {
+        const result = await resolver.resolve(
+          'ACT',
+          'Jetpack Compose UI 구현해',
+        );
+
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns null when mobile-developer not available', async () => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'backend-developer',
+        ]);
+
+        const result = await resolver.resolve(
+          'ACT',
+          'React Native 컴포넌트 만들어',
+        );
+
+        expect(result.agentName).not.toBe('mobile-developer');
+        expect(result.agentName).toBe('frontend-developer');
+      });
+    });
+
     describe('explicit request parsing', () => {
       it('returns explicit agent when prompt contains "backend-developer로 작업해"', async () => {
         const result = await resolver.resolve(
@@ -481,6 +651,21 @@ describe('PrimaryAgentResolver', () => {
     });
 
     describe('context-based resolution', () => {
+      beforeEach(() => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'tooling-engineer',
+          'data-engineer',
+          'mobile-developer',
+          'frontend-developer',
+          'backend-developer',
+          'agent-architect',
+          'devops-engineer',
+          'solution-architect',
+          'technical-planner',
+          'code-reviewer',
+        ]);
+      });
+
       it('suggests devops-engineer when context includes Dockerfile', async () => {
         const context: ResolutionContext = {
           filePath: '/project/Dockerfile',
@@ -513,6 +698,246 @@ describe('PrimaryAgentResolver', () => {
 
         // .tsx has lower confidence (0.7), so falls through to default
         expect(result.agentName).toBe('frontend-developer');
+      });
+
+      describe('mobile context patterns', () => {
+        it('suggests mobile-developer for react-native.config.js', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/react-native.config.js',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+          expect(result.confidence).toBe(0.95);
+        });
+
+        it('suggests mobile-developer for metro.config.js', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/metro.config.js',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests mobile-developer for pubspec.yaml (Flutter)', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/pubspec.yaml',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests mobile-developer for .dart files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/lib/main.dart',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests mobile-developer for .swift files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/App.swift',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests mobile-developer for Podfile', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/ios/Podfile',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests mobile-developer for AndroidManifest.xml', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/android/app/src/main/AndroidManifest.xml',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests mobile-developer for .kt files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/android/MainActivity.kt',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('mobile-developer');
+          expect(result.source).toBe('context');
+        });
+      });
+
+      describe('data context patterns', () => {
+        it('suggests data-engineer for .sql files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/migrations/001_init.sql',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('data-engineer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests data-engineer for schema.prisma files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/prisma/schema.prisma',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('data-engineer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests data-engineer for migrations directory', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/migrations/20240101_add_users.ts',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('data-engineer');
+          expect(result.source).toBe('context');
+        });
+
+        it('suggests data-engineer for .entity.ts files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/src/user/user.entity.ts',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('data-engineer');
+          expect(result.source).toBe('context');
+        });
+      });
+
+      describe('project type context', () => {
+        it('suggests devops-engineer for infrastructure project type', async () => {
+          const context: ResolutionContext = {
+            projectType: 'infrastructure',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 프로젝트 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('devops-engineer');
+          expect(result.source).toBe('context');
+          expect(result.confidence).toBe(0.85);
+        });
+
+        it('does not use project type if devops-engineer unavailable', async () => {
+          mockListPrimaryAgents.mockResolvedValue([
+            'frontend-developer',
+            'backend-developer',
+          ]);
+
+          const context: ResolutionContext = {
+            projectType: 'infrastructure',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 프로젝트 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('frontend-developer');
+          expect(result.source).toBe('default');
+        });
+      });
+
+      describe('agent-architect context', () => {
+        it('suggests agent-architect for agent JSON files', async () => {
+          const context: ResolutionContext = {
+            filePath: '/project/.ai-rules/agents/frontend-developer.json',
+          };
+
+          const result = await resolver.resolve(
+            'ACT',
+            '이 파일 수정해',
+            context,
+          );
+
+          expect(result.agentName).toBe('agent-architect');
+          expect(result.source).toBe('context');
+        });
       });
     });
 

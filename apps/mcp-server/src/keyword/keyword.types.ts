@@ -16,6 +16,8 @@ export const PLAN_PRIMARY_AGENTS = [
 /** Primary Agents for ACT mode - centralized definition */
 export const ACT_PRIMARY_AGENTS = [
   'tooling-engineer', // Config/build tools specialist - highest priority for pattern matching
+  'data-engineer', // Database/schema specialist - high priority for data tasks
+  'mobile-developer', // Mobile app specialist - detected by project files
   'frontend-developer',
   'backend-developer',
   'devops-engineer',
@@ -57,6 +59,57 @@ export const PLAN_PRIMARY_AGENTS_LIST: string[] = [...PLAN_PRIMARY_AGENTS];
 export const ACT_PRIMARY_AGENTS_LIST: string[] = [...ACT_PRIMARY_AGENTS];
 export const ALL_PRIMARY_AGENTS_LIST: string[] = [...ALL_PRIMARY_AGENTS];
 
+/**
+ * Agent display info for CLI prompts and UI.
+ *
+ * This is a lightweight summary derived from agent JSON files.
+ * For full agent profiles, use RulesService.getAgentContent().
+ *
+ * NOTE: Keep in sync with packages/rules/.ai-rules/agents/*.json
+ */
+export interface AgentDisplayInfo {
+  name: string;
+  description: string;
+}
+
+/**
+ * ACT mode agent display info for CLI prompts.
+ *
+ * This provides human-readable names and short descriptions for each ACT Primary Agent.
+ * The data should match the 'name' and 'description' fields in agent JSON files.
+ */
+export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
+  {
+    'tooling-engineer': {
+      name: 'Tooling Engineer',
+      description: 'Config, build tools, bundlers (webpack, vite, eslint)',
+    },
+    'data-engineer': {
+      name: 'Data Engineer',
+      description: 'Database, schema design, migrations, analytics',
+    },
+    'mobile-developer': {
+      name: 'Mobile Developer',
+      description: 'React Native, Flutter, iOS, Android',
+    },
+    'frontend-developer': {
+      name: 'Frontend Developer',
+      description: 'React, Vue, Angular, Web UI development',
+    },
+    'backend-developer': {
+      name: 'Backend Developer',
+      description: 'Node.js, NestJS, Express, API development',
+    },
+    'devops-engineer': {
+      name: 'DevOps Engineer',
+      description: 'CI/CD, Docker, Kubernetes, infrastructure',
+    },
+    'agent-architect': {
+      name: 'Agent Architect',
+      description: 'AI agent systems, MCP servers, LLM integration',
+    },
+  };
+
 /** Localized keywords mapped to their English equivalents */
 export const LOCALIZED_KEYWORD_MAP: Record<string, Mode> = {
   // Korean (한국어)
@@ -76,6 +129,60 @@ export const LOCALIZED_KEYWORD_MAP: Record<string, Mode> = {
   ACTUAR: 'ACT',
   EVALUAR: 'EVAL',
 } as const;
+
+/**
+ * Language display info for CLI prompts and UI.
+ *
+ * This maps ISO 639-1 language codes to display names and descriptions.
+ * Languages listed here are supported for localized keywords in LOCALIZED_KEYWORD_MAP.
+ */
+export interface LanguageDisplayInfo {
+  name: string;
+  nativeName: string;
+  description: string;
+}
+
+/**
+ * Supported languages for CLI prompts.
+ *
+ * Order matters - first entry is the default.
+ * Language codes follow ISO 639-1 standard.
+ */
+export const SUPPORTED_LANGUAGES: Record<string, LanguageDisplayInfo> = {
+  ko: {
+    name: 'Korean',
+    nativeName: '한국어',
+    description: 'AI responses will be in Korean',
+  },
+  en: {
+    name: 'English',
+    nativeName: 'English',
+    description: 'AI responses will be in English',
+  },
+  ja: {
+    name: 'Japanese',
+    nativeName: '日本語',
+    description: 'AI responses will be in Japanese',
+  },
+  zh: {
+    name: 'Chinese',
+    nativeName: '中文',
+    description: 'AI responses will be in Chinese',
+  },
+  es: {
+    name: 'Spanish',
+    nativeName: 'Español',
+    description: 'AI responses will be in Spanish',
+  },
+} as const;
+
+/** Default language code */
+export const DEFAULT_LANGUAGE_CODE = 'ko' as const;
+
+/** List of supported language codes */
+export const SUPPORTED_LANGUAGE_CODES = Object.keys(
+  SUPPORTED_LANGUAGES,
+) as (keyof typeof SUPPORTED_LANGUAGES)[];
 
 /** @deprecated Use LOCALIZED_KEYWORD_MAP instead */
 export const KOREAN_KEYWORD_MAP = LOCALIZED_KEYWORD_MAP;

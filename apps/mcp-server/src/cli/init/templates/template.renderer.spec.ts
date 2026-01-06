@@ -82,15 +82,36 @@ describe('Template Renderer', () => {
         defaultModel: 'claude-opus-4-20250514',
       });
 
-      expect(result).toContain('// AI Model Configuration');
+      expect(result).toContain('// AI Configuration');
       expect(result).toContain('ai: {');
       expect(result).toContain("defaultModel: 'claude-opus-4-20250514'");
     });
 
-    it('does not render ai section when defaultModel is not provided', () => {
+    it('renders ai section when primaryAgent is provided', () => {
+      const result = renderConfigAsJs(mockTemplate, {
+        primaryAgent: 'frontend-developer',
+      });
+
+      expect(result).toContain('// AI Configuration');
+      expect(result).toContain('ai: {');
+      expect(result).toContain("primaryAgent: 'frontend-developer'");
+    });
+
+    it('renders both defaultModel and primaryAgent in ai section', () => {
+      const result = renderConfigAsJs(mockTemplate, {
+        defaultModel: 'claude-opus-4-20250514',
+        primaryAgent: 'backend-developer',
+      });
+
+      expect(result).toContain('// AI Configuration');
+      expect(result).toContain("defaultModel: 'claude-opus-4-20250514'");
+      expect(result).toContain("primaryAgent: 'backend-developer'");
+    });
+
+    it('does not render ai section when neither defaultModel nor primaryAgent is provided', () => {
       const result = renderConfigAsJs(mockTemplate);
 
-      expect(result).not.toContain('// AI Model Configuration');
+      expect(result).not.toContain('// AI Configuration');
       expect(result).not.toContain('ai: {');
     });
 
@@ -163,7 +184,29 @@ describe('Template Renderer', () => {
       expect(parsed.ai.defaultModel).toBe('claude-opus-4-20250514');
     });
 
-    it('does not include ai section when defaultModel is not provided', () => {
+    it('includes ai section when primaryAgent is provided', () => {
+      const result = renderConfigAsJson(mockTemplate, {
+        primaryAgent: 'frontend-developer',
+      });
+      const parsed = JSON.parse(result);
+
+      expect(parsed.ai).toBeDefined();
+      expect(parsed.ai.primaryAgent).toBe('frontend-developer');
+    });
+
+    it('includes both defaultModel and primaryAgent in ai section', () => {
+      const result = renderConfigAsJson(mockTemplate, {
+        defaultModel: 'claude-opus-4-20250514',
+        primaryAgent: 'backend-developer',
+      });
+      const parsed = JSON.parse(result);
+
+      expect(parsed.ai).toBeDefined();
+      expect(parsed.ai.defaultModel).toBe('claude-opus-4-20250514');
+      expect(parsed.ai.primaryAgent).toBe('backend-developer');
+    });
+
+    it('does not include ai section when neither defaultModel nor primaryAgent is provided', () => {
       const result = renderConfigAsJson(mockTemplate);
       const parsed = JSON.parse(result);
 

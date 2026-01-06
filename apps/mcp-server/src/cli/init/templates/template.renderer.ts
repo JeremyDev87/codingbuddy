@@ -90,11 +90,16 @@ export function renderConfigAsJs(
     lines.push('');
   }
 
-  // AI Configuration (from options.defaultModel)
-  if (options.defaultModel) {
-    lines.push('  // AI Model Configuration');
+  // AI Configuration (from options.defaultModel and options.primaryAgent)
+  if (options.defaultModel || options.primaryAgent) {
+    lines.push('  // AI Configuration');
     lines.push('  ai: {');
-    lines.push(`    defaultModel: '${options.defaultModel}',`);
+    if (options.defaultModel) {
+      lines.push(`    defaultModel: '${options.defaultModel}',`);
+    }
+    if (options.primaryAgent) {
+      lines.push(`    primaryAgent: '${options.primaryAgent}',`);
+    }
     lines.push('  },');
   }
 
@@ -118,10 +123,18 @@ export function renderConfigAsJson(
 ): string {
   const config = applyOverrides(template.config, options);
 
-  // Add ai config if defaultModel is provided
-  const configWithAi = options.defaultModel
-    ? { ...config, ai: { defaultModel: options.defaultModel } }
-    : config;
+  // Build ai config from options
+  const aiConfig: Record<string, string> = {};
+  if (options.defaultModel) {
+    aiConfig.defaultModel = options.defaultModel;
+  }
+  if (options.primaryAgent) {
+    aiConfig.primaryAgent = options.primaryAgent;
+  }
+
+  // Add ai config if any options are provided
+  const configWithAi =
+    Object.keys(aiConfig).length > 0 ? { ...config, ai: aiConfig } : config;
 
   return JSON.stringify(configWithAi, null, 2);
 }

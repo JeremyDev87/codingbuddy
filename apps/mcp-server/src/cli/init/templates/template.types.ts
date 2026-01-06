@@ -89,4 +89,6 @@ export interface TemplateRenderOptions {
   includeComments?: boolean;
   /** Default AI model (e.g., 'claude-sonnet-4-20250514') */
   defaultModel?: string;
+  /** Primary development agent (e.g., 'frontend-developer') */
+  primaryAgent?: string;
 }

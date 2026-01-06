@@ -15,7 +15,15 @@ import {
   renderConfigAsJs,
   renderConfigAsJson,
 } from './templates';
-import { promptModelSelection, DEFAULT_MODEL_CHOICE } from './prompts';
+import {
+  promptModelSelection,
+  promptLanguageSelection,
+  promptPrimaryAgentSelection,
+  DEFAULT_MODEL_CHOICE,
+  DEFAULT_LANGUAGE,
+  DEFAULT_PRIMARY_AGENT,
+  type ActPrimaryAgent,
+} from './prompts';
 import type { InitOptions, InitResult } from '../cli.types';
 
 /**
@@ -69,10 +77,24 @@ async function runTemplateInit(
     console.log.info(`  Detected: ${detectedFrameworks.join(', ')}`);
   }
 
-  // Step 3: Select AI model
+  // Step 3: Interactive prompts
+  let selectedLanguage = options.language ?? DEFAULT_LANGUAGE;
   let selectedModel = DEFAULT_MODEL_CHOICE;
+  let selectedAgent: ActPrimaryAgent = DEFAULT_PRIMARY_AGENT;
+
   const shouldPrompt = !(options.skipPrompts ?? false);
   if (shouldPrompt) {
+    // 3a: Language selection
+    console.log.step('🌐', 'Select response language...');
+    selectedLanguage = await promptLanguageSelection();
+    console.log.success(`Language: ${selectedLanguage}`);
+
+    // 3b: Primary agent selection
+    console.log.step('👤', 'Select primary development agent...');
+    selectedAgent = await promptPrimaryAgentSelection();
+    console.log.success(`Agent: ${selectedAgent}`);
+
+    // 3c: AI model selection
     console.log.step('🤖', 'Select AI model...');
     selectedModel = await promptModelSelection();
     console.log.success(`Model: ${selectedModel}`);
@@ -84,8 +106,9 @@ async function runTemplateInit(
   const projectName = analysis.packageInfo?.name;
   const renderOptions = {
     projectName,
-    language: options.language,
+    language: selectedLanguage,
     defaultModel: selectedModel,
+    primaryAgent: selectedAgent,
   };
 
   const configContent =

@@ -28,6 +28,8 @@ AI Agent definitions for specialized development roles.
 | **Implementation Planning** | Technical Planner | `technical-planner.json` |
 | **React/Next.js Development** | Frontend Developer | `frontend-developer.json` |
 | **Backend API Development** | Backend Developer | `backend-developer.json` |
+| **Database/Schema Design** | Data Engineer | `data-engineer.json` |
+| **Mobile App Development** | Mobile Developer | `mobile-developer.json` |
 | **Code Review (EVAL)** | Code Reviewer | `code-reviewer.json` |
 | **Architecture Design** | Architecture Specialist | `architecture-specialist.json` |
 | **Test Strategy** | Test Strategy Specialist | `test-strategy-specialist.json` |
@@ -36,6 +38,7 @@ AI Agent definitions for specialized development roles.
 | **Accessibility Review** | Accessibility Specialist | `accessibility-specialist.json` |
 | **SEO Optimization** | SEO Specialist | `seo-specialist.json` |
 | **UI/UX Design** | UI/UX Designer | `ui-ux-designer.json` |
+| **Internationalization** | i18n Specialist | `i18n-specialist.json` |
 | **Documentation** | Documentation Specialist | `documentation-specialist.json` |
 | **Code Quality** | Code Quality Specialist | `code-quality-specialist.json` |
 | **Infrastructure/Deployment** | DevOps Engineer | `devops-engineer.json` |
@@ -50,6 +53,8 @@ AI Agent definitions for specialized development roles.
 | Technical Planner | Low-level implementation planning with TDD and bite-sized tasks |
 | Frontend Developer | TDD-based frontend development with React/Next.js |
 | Backend Developer | Multi-stack backend API development (Node, Python, Go, Java, Rust) |
+| Data Engineer | Database schema design, migrations, query optimization, analytics |
+| Mobile Developer | Cross-platform (React Native, Flutter) and native (iOS, Android) development |
 | Code Reviewer | Auto-activated in EVAL mode, multi-dimensional code quality assessment |
 | Architecture Specialist | Layer boundaries, dependency direction, Clean Architecture |
 | Test Strategy Specialist | TDD strategy, test coverage, test quality |
@@ -58,6 +63,7 @@ AI Agent definitions for specialized development roles.
 | Accessibility Specialist | WCAG 2.1 AA, semantic HTML, screen reader support |
 | SEO Specialist | Metadata, JSON-LD, Open Graph |
 | UI/UX Designer | Visual hierarchy, UX laws, interaction patterns |
+| i18n Specialist | Internationalization, translation key structure, RTL support |
 | Documentation Specialist | Code comments, JSDoc, documentation quality assessment |
 | Code Quality Specialist | SOLID, DRY, complexity analysis |
 | DevOps Engineer | Docker, monitoring, deployment optimization |

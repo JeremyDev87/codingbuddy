@@ -13,6 +13,8 @@ const {
   mockRenderConfigAsJs,
   mockRenderConfigAsJson,
   mockPromptModelSelection,
+  mockPromptLanguageSelection,
+  mockPromptPrimaryAgentSelection,
 } = vi.hoisted(() => ({
   mockAnalyzeProject: vi.fn(),
   mockGenerate: vi.fn(),
@@ -22,6 +24,8 @@ const {
   mockRenderConfigAsJs: vi.fn(),
   mockRenderConfigAsJson: vi.fn(),
   mockPromptModelSelection: vi.fn(),
+  mockPromptLanguageSelection: vi.fn(),
+  mockPromptPrimaryAgentSelection: vi.fn(),
 }));
 
 // Mock all modules
@@ -50,7 +54,11 @@ vi.mock('./templates', () => ({
 
 vi.mock('./prompts', () => ({
   promptModelSelection: mockPromptModelSelection,
+  promptLanguageSelection: mockPromptLanguageSelection,
+  promptPrimaryAgentSelection: mockPromptPrimaryAgentSelection,
   DEFAULT_MODEL_CHOICE: 'claude-sonnet-4-20250514',
+  DEFAULT_LANGUAGE: 'ko',
+  DEFAULT_PRIMARY_AGENT: 'frontend-developer',
 }));
 
 vi.mock('../utils/console', () => ({
@@ -130,6 +138,8 @@ describe('init.command', () => {
     mockRenderConfigAsJs.mockReturnValue('// rendered config');
     mockRenderConfigAsJson.mockReturnValue('{}');
     mockPromptModelSelection.mockResolvedValue('claude-sonnet-4-20250514');
+    mockPromptLanguageSelection.mockResolvedValue('ko');
+    mockPromptPrimaryAgentSelection.mockResolvedValue('frontend-developer');
   });
 
   describe('getApiKey', () => {
@@ -246,12 +256,13 @@ describe('init.command', () => {
       );
     });
 
-    it('should pass language option to renderer', async () => {
+    it('should pass language option to renderer when skipPrompts', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
         force: false,
         language: 'en',
+        skipPrompts: true,
       };
 
       await runInit(options);
@@ -262,7 +273,7 @@ describe('init.command', () => {
       );
     });
 
-    it('should call promptModelSelection when skipPrompts is false', async () => {
+    it('should call all prompts when skipPrompts is false', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
@@ -272,10 +283,12 @@ describe('init.command', () => {
 
       await runInit(options);
 
+      expect(mockPromptLanguageSelection).toHaveBeenCalled();
+      expect(mockPromptPrimaryAgentSelection).toHaveBeenCalled();
       expect(mockPromptModelSelection).toHaveBeenCalled();
     });
 
-    it('should skip promptModelSelection when skipPrompts is true', async () => {
+    it('should skip all prompts when skipPrompts is true', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
@@ -285,10 +298,14 @@ describe('init.command', () => {
 
       await runInit(options);
 
+      expect(mockPromptLanguageSelection).not.toHaveBeenCalled();
+      expect(mockPromptPrimaryAgentSelection).not.toHaveBeenCalled();
       expect(mockPromptModelSelection).not.toHaveBeenCalled();
     });
 
-    it('should pass selected model to renderer', async () => {
+    it('should pass selected values to renderer', async () => {
+      mockPromptLanguageSelection.mockResolvedValue('ja');
+      mockPromptPrimaryAgentSelection.mockResolvedValue('backend-developer');
       mockPromptModelSelection.mockResolvedValue('claude-opus-4-20250514');
 
       const options: InitOptions = {
@@ -302,11 +319,15 @@ describe('init.command', () => {
 
       expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
         mockTemplateResult.template,
-        expect.objectContaining({ defaultModel: 'claude-opus-4-20250514' }),
+        expect.objectContaining({
+          language: 'ja',
+          primaryAgent: 'backend-developer',
+          defaultModel: 'claude-opus-4-20250514',
+        }),
       );
     });
 
-    it('should use default model when skipPrompts is true', async () => {
+    it('should use default values when skipPrompts is true', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
@@ -318,7 +339,11 @@ describe('init.command', () => {
 
       expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
         mockTemplateResult.template,
-        expect.objectContaining({ defaultModel: 'claude-sonnet-4-20250514' }),
+        expect.objectContaining({
+          language: 'ko',
+          primaryAgent: 'frontend-developer',
+          defaultModel: 'claude-sonnet-4-20250514',
+        }),
       );
     });
   });
