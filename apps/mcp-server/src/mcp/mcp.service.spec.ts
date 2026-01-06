@@ -17,6 +17,18 @@ import type {
 import { LanguageService } from '../shared/language.service';
 import { AgentService } from '../agent/agent.service';
 import type { AgentSystemPrompt, ParallelAgentSet } from '../agent/agent.types';
+import { ChecklistService } from '../checklist/checklist.service';
+import { ContextService } from '../context/context.service';
+import { ModelResolverService } from '../model';
+import type { ToolHandler } from './handlers';
+import {
+  RulesHandler,
+  ConfigHandler,
+  SkillHandler,
+  AgentHandler,
+  ModeHandler,
+  ChecklistContextHandler,
+} from './handlers';
 
 // Handler function type for MCP request handlers
 type McpHandler = (request: unknown) => Promise<unknown>;
@@ -279,8 +291,133 @@ const createMockAgentService = (): Partial<AgentService> => ({
     .mockReturnValue(['security-specialist', 'accessibility-specialist']),
 });
 
+const createMockChecklistService = (): Partial<ChecklistService> => ({
+  generateChecklist: vi.fn().mockResolvedValue({
+    checklists: [
+      {
+        domain: 'security',
+        icon: '🔒',
+        priority: 'high',
+        items: [{ id: 'sec-1', text: 'Validate input', priority: 'high' }],
+      },
+    ],
+    summary: { total: 1, critical: 0, high: 1, medium: 0, low: 0 },
+    matchedTriggers: [],
+  }),
+  getAvailableDomains: vi
+    .fn()
+    .mockReturnValue([
+      'security',
+      'accessibility',
+      'performance',
+      'testing',
+      'code-quality',
+      'seo',
+    ]),
+  clearCache: vi.fn(),
+});
+
+const createMockContextService = (): Partial<ContextService> => ({
+  analyzeTask: vi.fn().mockResolvedValue({
+    analysis: {
+      intent: 'feature_development',
+      category: 'api',
+      complexity: 'medium',
+      keywords: ['auth', 'login'],
+    },
+    riskAssessment: {
+      level: 'high',
+      reason: 'API endpoints need security review',
+      attentionAreas: ['input_validation', 'rate_limiting'],
+    },
+    checklists: [],
+    checklistSummary: { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
+    matchedTriggers: [],
+    recommendedSpecialists: [
+      {
+        name: 'security-specialist',
+        reason: 'Review API security',
+        priority: 1,
+      },
+    ],
+    suggestedWorkflow: {
+      phases: [
+        { phase: 'Design', focus: ['Define requirements'] },
+        { phase: 'Implementation', focus: ['Write code'] },
+      ],
+    },
+    contextHints: {
+      projectType: 'web_application',
+      securityLevel: 'high',
+      mustConsider: ['OWASP Top 10'],
+    },
+  }),
+});
+
+const createMockModelResolverService = (): Partial<ModelResolverService> => ({
+  resolveForMode: vi.fn().mockResolvedValue({
+    model: 'claude-sonnet-4-20250514',
+    source: 'system',
+  }),
+  resolveForAgent: vi.fn().mockResolvedValue({
+    model: 'claude-sonnet-4-20250514',
+    source: 'system',
+  }),
+});
+
 // Import after mocks
 import { McpService } from './mcp.service';
+
+// Helper function to create McpService with handlers
+interface CreateMcpServiceOptions {
+  rulesService?: Partial<RulesService>;
+  keywordService?: Partial<KeywordService>;
+  configService?: Partial<ConfigService>;
+  configDiffService?: Partial<ConfigDiffService>;
+  analyzerService?: Partial<AnalyzerService>;
+  skillRecommendationService?: Partial<SkillRecommendationService>;
+  languageService?: Partial<LanguageService>;
+  agentService?: Partial<AgentService>;
+  checklistService?: Partial<ChecklistService>;
+  contextService?: Partial<ContextService>;
+  modelResolverService?: Partial<ModelResolverService>;
+}
+
+function createMcpServiceWithHandlers(
+  defaults: CreateMcpServiceOptions,
+  overrides: Partial<CreateMcpServiceOptions> = {},
+): McpService {
+  const services = { ...defaults, ...overrides };
+
+  const toolHandlers: ToolHandler[] = [
+    new RulesHandler(services.rulesService as RulesService),
+    new ConfigHandler(
+      services.configService as ConfigService,
+      services.configDiffService as ConfigDiffService,
+      services.analyzerService as AnalyzerService,
+    ),
+    new SkillHandler(
+      services.skillRecommendationService as SkillRecommendationService,
+    ),
+    new AgentHandler(services.agentService as AgentService),
+    new ModeHandler(
+      services.keywordService as KeywordService,
+      services.configService as ConfigService,
+      services.languageService as LanguageService,
+      services.modelResolverService as ModelResolverService,
+    ),
+    new ChecklistContextHandler(
+      services.checklistService as ChecklistService,
+      services.contextService as ContextService,
+    ),
+  ];
+
+  return new McpService(
+    services.rulesService as RulesService,
+    services.configService as ConfigService,
+    toolHandlers,
+  );
+}
 
 describe('McpService', () => {
   let mockRulesService: Partial<RulesService>;
@@ -291,6 +428,9 @@ describe('McpService', () => {
   let mockSkillRecommendationService: Partial<SkillRecommendationService>;
   let mockLanguageService: Partial<LanguageService>;
   let mockAgentService: Partial<AgentService>;
+  let mockChecklistService: Partial<ChecklistService>;
+  let mockContextService: Partial<ContextService>;
+  let mockModelResolverService: Partial<ModelResolverService>;
 
   const testConfig: CodingBuddyConfig = {
     language: 'ko',
@@ -303,6 +443,9 @@ describe('McpService', () => {
     },
   };
 
+  // Default mock services container for helper function
+  let defaultMocks: CreateMcpServiceOptions;
+
   beforeEach(() => {
     handlers.clear();
     mockRulesService = createMockRulesService();
@@ -313,17 +456,26 @@ describe('McpService', () => {
     mockSkillRecommendationService = createMockSkillRecommendationService();
     mockLanguageService = createMockLanguageService();
     mockAgentService = createMockAgentService();
+    mockChecklistService = createMockChecklistService();
+    mockContextService = createMockContextService();
+    mockModelResolverService = createMockModelResolverService();
 
-    const mcpService = new McpService(
-      mockRulesService as RulesService,
-      mockKeywordService as KeywordService,
-      mockConfigService as ConfigService,
-      mockConfigDiffService as ConfigDiffService,
-      mockAnalyzerService as AnalyzerService,
-      mockSkillRecommendationService as SkillRecommendationService,
-      mockLanguageService as LanguageService,
-      mockAgentService as AgentService,
-    );
+    // Store default mocks for use in helper function
+    defaultMocks = {
+      rulesService: mockRulesService,
+      keywordService: mockKeywordService,
+      configService: mockConfigService,
+      configDiffService: mockConfigDiffService,
+      analyzerService: mockAnalyzerService,
+      skillRecommendationService: mockSkillRecommendationService,
+      languageService: mockLanguageService,
+      agentService: mockAgentService,
+      checklistService: mockChecklistService,
+      contextService: mockContextService,
+      modelResolverService: mockModelResolverService,
+    };
+
+    const mcpService = createMcpServiceWithHandlers(defaultMocks);
     mcpService.onModuleInit();
   });
 
@@ -750,20 +902,18 @@ describe('McpService', () => {
 
     describe('resolvedModel field in parse_mode', () => {
       it('should include resolvedModel with source: mode when mode agent has model.preferred', async () => {
-        // Mock mode agent with model config
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Plan Mode Agent',
-          description: 'PLAN mode agent',
-          role: {
-            title: 'Plan Mode Agent',
-            expertise: ['Planning'],
-          },
-          model: {
-            preferred: 'claude-sonnet-4-20250514',
-            reason: 'Good for planning',
-          },
-          source: 'default',
+        // Create service with modelResolverService returning mode source
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'mode',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
         });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -784,16 +934,18 @@ describe('McpService', () => {
       });
 
       it('should include resolvedModel with source: system when mode agent has no model', async () => {
-        // Mock mode agent without model config
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Plan Mode Agent',
-          description: 'PLAN mode agent without model',
-          role: {
-            title: 'Plan Mode Agent',
-            expertise: ['Planning'],
-          },
-          source: 'default',
+        // Create service with modelResolverService returning system source
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'system',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
         });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -814,10 +966,18 @@ describe('McpService', () => {
       });
 
       it('should include resolvedModel with source: system when mode agent loading fails', async () => {
-        // Mock mode agent loading failure
-        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
-          new Error('Agent not found'),
-        );
+        // Create service with modelResolverService returning system source (simulating agent load failure)
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'system',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
+        });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -838,20 +998,18 @@ describe('McpService', () => {
       });
 
       it('should include resolvedModel for ACT mode', async () => {
-        // Mock ACT mode agent with model config
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Act Mode Agent',
-          description: 'ACT mode agent',
-          role: {
-            title: 'Act Mode Agent',
-            expertise: ['Implementation'],
-          },
-          model: {
-            preferred: 'claude-opus-4-20250514',
-            reason: 'Best for complex implementation',
-          },
-          source: 'default',
+        // Create service with modelResolverService returning mode source for ACT
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-opus-4-20250514',
+            source: 'mode',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
         });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -872,20 +1030,18 @@ describe('McpService', () => {
       });
 
       it('should include resolvedModel for EVAL mode', async () => {
-        // Mock EVAL mode agent with model config
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Eval Mode Agent',
-          description: 'EVAL mode agent',
-          role: {
-            title: 'Eval Mode Agent',
-            expertise: ['Code Review'],
-          },
-          model: {
-            preferred: 'claude-sonnet-4-20250514',
-            reason: 'Good for evaluation',
-          },
-          source: 'default',
+        // Create service with modelResolverService returning mode source for EVAL
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'mode',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
         });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -906,20 +1062,18 @@ describe('McpService', () => {
       });
 
       it('should include resolvedModel even when no mode keyword is provided (defaults to PLAN)', async () => {
-        // Mock PLAN mode agent with model config
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Plan Mode Agent',
-          description: 'PLAN mode agent',
-          role: {
-            title: 'Plan Mode Agent',
-            expertise: ['Planning'],
-          },
-          model: {
-            preferred: 'claude-sonnet-4-20250514',
-            reason: 'Good for planning',
-          },
-          source: 'default',
+        // Create service with default modelResolverService (returns system default)
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'mode',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
         });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -938,24 +1092,18 @@ describe('McpService', () => {
       });
 
       it('should use global config when mode agent has no model', async () => {
-        // Mock mode agent without model config
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Plan Mode Agent',
-          description: 'PLAN mode agent without model',
-          role: {
-            title: 'Plan Mode Agent',
-            expertise: ['Planning'],
-          },
-          source: 'default',
+        // Create service with modelResolverService returning global source
+        const customModelResolverService: Partial<ModelResolverService> = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-opus-4-20250514',
+            source: 'global',
+          }),
+        };
+        handlers.clear();
+        const mcpService = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
         });
-
-        // Mock global config with ai.defaultModel
-        vi.mocked(mockConfigService.getSettings!).mockResolvedValue({
-          language: 'ko',
-          ai: {
-            defaultModel: 'claude-opus-4-20250514',
-          },
-        });
+        mcpService.onModuleInit();
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -1105,15 +1253,11 @@ describe('McpService', () => {
       // Clear handlers and recreate with empty config
       handlers.clear();
       const emptyConfigService = createMockConfigService({});
-      const serviceWithEmptyConfig = new McpService(
-        mockRulesService as RulesService,
-        mockKeywordService as KeywordService,
-        emptyConfigService as ConfigService,
-        mockConfigDiffService as ConfigDiffService,
-        mockAnalyzerService as AnalyzerService,
-        mockSkillRecommendationService as SkillRecommendationService,
-        mockLanguageService as LanguageService,
-        mockAgentService as AgentService,
+      const serviceWithEmptyConfig = createMcpServiceWithHandlers(
+        defaultMocks,
+        {
+          configService: emptyConfigService,
+        },
       );
       serviceWithEmptyConfig.onModuleInit();
 
@@ -1156,16 +1300,9 @@ describe('McpService', () => {
         },
       });
 
-      const service = new McpService(
-        mockRulesService as RulesService,
-        mockKeywordService as KeywordService,
-        fullConfigService as ConfigService,
-        mockConfigDiffService as ConfigDiffService,
-        mockAnalyzerService as AnalyzerService,
-        mockSkillRecommendationService as SkillRecommendationService,
-        mockLanguageService as LanguageService,
-        mockAgentService as AgentService,
-      );
+      const service = createMcpServiceWithHandlers(defaultMocks, {
+        configService: fullConfigService,
+      });
       service.onModuleInit();
 
       const handler = handlers.get('prompts/get');
@@ -1222,15 +1359,21 @@ describe('McpService', () => {
           new Error('Config load error'),
         );
 
-        const service = new McpService(
-          mockRulesService as RulesService,
-          mockKeywordService as KeywordService,
-          failingConfigService as ConfigService,
-          mockConfigDiffService as ConfigDiffService,
-          mockAnalyzerService as AnalyzerService,
-          mockSkillRecommendationService as SkillRecommendationService,
-          mockLanguageService as LanguageService,
-          mockAgentService as AgentService,
+        const service = createMcpServiceWithHandlers(
+          {
+            rulesService: mockRulesService,
+            keywordService: mockKeywordService,
+            configService: mockConfigService,
+            configDiffService: mockConfigDiffService,
+            analyzerService: mockAnalyzerService,
+            skillRecommendationService: mockSkillRecommendationService,
+            languageService: mockLanguageService,
+            agentService: mockAgentService,
+            checklistService: mockChecklistService,
+            contextService: mockContextService,
+            modelResolverService: mockModelResolverService,
+          },
+          { configService: failingConfigService },
         );
         service.onModuleInit();
 
@@ -1295,16 +1438,9 @@ describe('McpService', () => {
           new Error('Settings error'),
         );
 
-        const service = new McpService(
-          mockRulesService as RulesService,
-          mockKeywordService as KeywordService,
-          failingConfigService as ConfigService,
-          mockConfigDiffService as ConfigDiffService,
-          mockAnalyzerService as AnalyzerService,
-          mockSkillRecommendationService as SkillRecommendationService,
-          mockLanguageService as LanguageService,
-          mockAgentService as AgentService,
-        );
+        const service = createMcpServiceWithHandlers(defaultMocks, {
+          configService: failingConfigService,
+        });
         service.onModuleInit();
 
         const handler = handlers.get('tools/call');
@@ -1320,23 +1456,23 @@ describe('McpService', () => {
         );
       });
 
-      it('should use system default model when getSettings throws during parse_mode', async () => {
+      it('should use system default model when model resolution fails during parse_mode', async () => {
         handlers.clear();
-        const failingConfigService = createMockConfigService({});
-        vi.mocked(failingConfigService.getSettings!).mockRejectedValue(
-          new Error('Config load error'),
-        );
+        // Mock modelResolverService to return system default (simulating error recovery)
+        const customModelResolverService = {
+          resolveForMode: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'system',
+          }),
+          resolveForAgent: vi.fn().mockResolvedValue({
+            model: 'claude-sonnet-4-20250514',
+            source: 'system',
+          }),
+        };
 
-        const service = new McpService(
-          mockRulesService as RulesService,
-          mockKeywordService as KeywordService,
-          failingConfigService as ConfigService,
-          mockConfigDiffService as ConfigDiffService,
-          mockAnalyzerService as AnalyzerService,
-          mockSkillRecommendationService as SkillRecommendationService,
-          mockLanguageService as LanguageService,
-          mockAgentService as AgentService,
-        );
+        const service = createMcpServiceWithHandlers(defaultMocks, {
+          modelResolverService: customModelResolverService,
+        });
         service.onModuleInit();
 
         const handler = handlers.get('tools/call');
@@ -1363,16 +1499,9 @@ describe('McpService', () => {
           new Error('Analysis failed'),
         );
 
-        const service = new McpService(
-          mockRulesService as RulesService,
-          mockKeywordService as KeywordService,
-          mockConfigService as ConfigService,
-          mockConfigDiffService as ConfigDiffService,
-          failingAnalyzerService as AnalyzerService,
-          mockSkillRecommendationService as SkillRecommendationService,
-          mockLanguageService as LanguageService,
-          mockAgentService as AgentService,
-        );
+        const service = createMcpServiceWithHandlers(defaultMocks, {
+          analyzerService: failingAnalyzerService,
+        });
         service.onModuleInit();
 
         const handler = handlers.get('tools/call');
@@ -1421,16 +1550,7 @@ describe('McpService', () => {
 
   describe('startStdio', () => {
     it('should connect server with StdioServerTransport', async () => {
-      const service = new McpService(
-        mockRulesService as RulesService,
-        mockKeywordService as KeywordService,
-        mockConfigService as ConfigService,
-        mockConfigDiffService as ConfigDiffService,
-        mockAnalyzerService as AnalyzerService,
-        mockSkillRecommendationService as SkillRecommendationService,
-        mockLanguageService as LanguageService,
-        mockAgentService as AgentService,
-      );
+      const service = createMcpServiceWithHandlers(defaultMocks);
 
       // Should not throw
       await expect(service.startStdio()).resolves.not.toThrow();
@@ -1439,16 +1559,7 @@ describe('McpService', () => {
 
   describe('getServer', () => {
     it('should return the MCP server instance', () => {
-      const service = new McpService(
-        mockRulesService as RulesService,
-        mockKeywordService as KeywordService,
-        mockConfigService as ConfigService,
-        mockConfigDiffService as ConfigDiffService,
-        mockAnalyzerService as AnalyzerService,
-        mockSkillRecommendationService as SkillRecommendationService,
-        mockLanguageService as LanguageService,
-        mockAgentService as AgentService,
-      );
+      const service = createMcpServiceWithHandlers(defaultMocks);
 
       const server = service.getServer();
       expect(server).toBeDefined();
@@ -1674,14 +1785,7 @@ describe('McpService', () => {
         expect(result.content[0].text).toContain('prompt');
       });
 
-      it('should return empty recommendations for empty prompt', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.recommendSkills!,
-        ).mockReturnValue({
-          recommendations: [],
-          originalPrompt: '',
-        });
-
+      it('should return error for empty prompt', async () => {
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
 
@@ -1690,11 +1794,10 @@ describe('McpService', () => {
             name: 'recommend_skills',
             arguments: { prompt: '' },
           },
-        })) as { content: { type: string; text: string }[] };
+        })) as { isError: boolean; content: { text: string }[] };
 
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.recommendations).toEqual([]);
-        expect(parsed.originalPrompt).toBe('');
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('prompt');
       });
 
       it('should return error when service throws', async () => {

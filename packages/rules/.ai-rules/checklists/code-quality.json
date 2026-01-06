@@ -1,0 +1,97 @@
+{
+  "domain": "code-quality",
+  "icon": "📏",
+  "description": "Code quality and maintainability review items",
+  "categories": [
+    {
+      "name": "general",
+      "triggers": {
+        "files": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+        "imports": [],
+        "patterns": []
+      },
+      "items": [
+        {
+          "id": "cq-gen-001",
+          "text": "Use explicit TypeScript types (avoid 'any')",
+          "priority": "high",
+          "reason": "Type safety catches errors at compile time"
+        },
+        {
+          "id": "cq-gen-002",
+          "text": "Keep functions small (10-20 lines max)",
+          "priority": "medium",
+          "reason": "Small functions are easier to understand and test"
+        },
+        {
+          "id": "cq-gen-003",
+          "text": "Use meaningful variable and function names",
+          "priority": "high",
+          "reason": "Code should be self-documenting"
+        },
+        {
+          "id": "cq-gen-004",
+          "text": "Remove dead code and unused imports",
+          "priority": "medium",
+          "reason": "Dead code adds confusion and maintenance burden"
+        }
+      ]
+    },
+    {
+      "name": "solid_principles",
+      "triggers": {
+        "files": ["**/service/**", "**/util/**", "**/lib/**", "**/core/**"],
+        "imports": [],
+        "patterns": ["class ", "interface ", "abstract "]
+      },
+      "items": [
+        {
+          "id": "cq-solid-001",
+          "text": "Single Responsibility: Each module has one reason to change",
+          "priority": "high",
+          "reason": "Focused modules are easier to maintain"
+        },
+        {
+          "id": "cq-solid-002",
+          "text": "Dependency Inversion: Depend on abstractions, not concretions",
+          "priority": "medium",
+          "reason": "Makes code more flexible and testable"
+        },
+        {
+          "id": "cq-solid-003",
+          "text": "DRY: Eliminate code duplication",
+          "priority": "high",
+          "reason": "Duplicated code means duplicated bugs"
+        }
+      ]
+    },
+    {
+      "name": "error_handling",
+      "triggers": {
+        "files": ["**/api/**", "**/service/**", "**/handler/**"],
+        "imports": [],
+        "patterns": ["try", "catch", "throw", "Error", "Promise"]
+      },
+      "items": [
+        {
+          "id": "cq-error-001",
+          "text": "Handle all error cases explicitly",
+          "priority": "high",
+          "reason": "Unhandled errors crash applications"
+        },
+        {
+          "id": "cq-error-002",
+          "text": "Provide meaningful error messages",
+          "priority": "medium",
+          "reason": "Good error messages help debugging"
+        },
+        {
+          "id": "cq-error-003",
+          "text": "Use custom error types for domain errors",
+          "priority": "low",
+          "reason": "Enables specific error handling"
+        }
+      ]
+    }
+  ]
+}

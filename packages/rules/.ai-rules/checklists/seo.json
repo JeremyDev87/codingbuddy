@@ -1,0 +1,97 @@
+{
+  "domain": "seo",
+  "icon": "🔍",
+  "description": "SEO optimization review items",
+  "categories": [
+    {
+      "name": "metadata",
+      "triggers": {
+        "files": ["**/page/**", "**/layout/**", "**/app/**", "**/head/**"],
+        "imports": ["next/head", "react-helmet"],
+        "patterns": ["<title", "<meta", "metadata", "generateMetadata"]
+      },
+      "items": [
+        {
+          "id": "seo-meta-001",
+          "text": "Set unique, descriptive title for each page",
+          "priority": "critical",
+          "reason": "Titles appear in search results and browser tabs"
+        },
+        {
+          "id": "seo-meta-002",
+          "text": "Write compelling meta descriptions (150-160 chars)",
+          "priority": "high",
+          "reason": "Descriptions appear in search result snippets"
+        },
+        {
+          "id": "seo-meta-003",
+          "text": "Set canonical URL to prevent duplicate content issues",
+          "priority": "medium",
+          "reason": "Helps search engines understand the primary URL"
+        },
+        {
+          "id": "seo-meta-004",
+          "text": "Add Open Graph and Twitter Card meta tags",
+          "priority": "medium",
+          "reason": "Controls appearance when shared on social media"
+        }
+      ]
+    },
+    {
+      "name": "structure",
+      "triggers": {
+        "files": ["**/page/**", "**/layout/**", "**/*.tsx", "**/*.jsx"],
+        "imports": [],
+        "patterns": ["<h1", "<h2", "<main", "<article", "<nav"]
+      },
+      "items": [
+        {
+          "id": "seo-struct-001",
+          "text": "Use exactly one h1 per page",
+          "priority": "high",
+          "reason": "H1 signals main topic to search engines"
+        },
+        {
+          "id": "seo-struct-002",
+          "text": "Use semantic HTML elements (article, section, nav)",
+          "priority": "medium",
+          "reason": "Semantic markup helps search engines understand content"
+        },
+        {
+          "id": "seo-struct-003",
+          "text": "Implement breadcrumb navigation with structured data",
+          "priority": "low",
+          "reason": "Helps users and search engines navigate site hierarchy"
+        }
+      ]
+    },
+    {
+      "name": "links",
+      "triggers": {
+        "files": ["**/page/**", "**/*.tsx", "**/*.jsx"],
+        "imports": ["next/link"],
+        "patterns": ["<a ", "<Link", "href="]
+      },
+      "items": [
+        {
+          "id": "seo-link-001",
+          "text": "Use descriptive link text (avoid 'click here')",
+          "priority": "medium",
+          "reason": "Link text signals page content to search engines"
+        },
+        {
+          "id": "seo-link-002",
+          "text": "Add rel='noopener noreferrer' to external links",
+          "priority": "medium",
+          "reason": "Security and performance best practice"
+        },
+        {
+          "id": "seo-link-003",
+          "text": "Ensure all internal links use relative paths",
+          "priority": "low",
+          "reason": "Maintains link equity within the site"
+        }
+      ]
+    }
+  ]
+}

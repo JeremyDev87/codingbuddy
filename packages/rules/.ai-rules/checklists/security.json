@@ -1,0 +1,119 @@
+{
+  "domain": "security",
+  "icon": "🔒",
+  "description": "Security-related review items",
+  "categories": [
+    {
+      "name": "authentication",
+      "triggers": {
+        "files": [
+          "**/auth/**",
+          "**/login/**",
+          "**/session/**",
+          "**/password/**",
+          "**/signin/**",
+          "**/signup/**"
+        ],
+        "imports": [
+          "bcrypt",
+          "argon2",
+          "jsonwebtoken",
+          "passport",
+          "next-auth",
+          "@auth/*",
+          "jose"
+        ],
+        "patterns": [
+          "password",
+          "token",
+          "credential",
+          "session",
+          "authenticate"
+        ]
+      },
+      "items": [
+        {
+          "id": "sec-auth-001",
+          "text": "Hash passwords using bcrypt/argon2 (never store plaintext)",
+          "priority": "critical",
+          "reason": "Plaintext passwords can be stolen if database is compromised",
+          "reference": "OWASP Authentication Cheatsheet"
+        },
+        {
+          "id": "sec-auth-002",
+          "text": "Implement rate limiting on login attempts",
+          "priority": "high",
+          "reason": "Prevents brute force attacks"
+        },
+        {
+          "id": "sec-auth-003",
+          "text": "Use secure session management (HttpOnly, Secure, SameSite cookies)",
+          "priority": "critical",
+          "reason": "Prevents session hijacking and XSS attacks"
+        },
+        {
+          "id": "sec-auth-004",
+          "text": "Implement proper logout (invalidate session server-side)",
+          "priority": "high",
+          "reason": "Ensures complete session termination"
+        }
+      ]
+    },
+    {
+      "name": "input_validation",
+      "triggers": {
+        "files": ["**/api/**", "**/form/**", "**/input/**", "**/handler/**"],
+        "imports": ["zod", "yup", "joi", "validator"],
+        "patterns": ["validate", "sanitize", "input", "formData"]
+      },
+      "items": [
+        {
+          "id": "sec-input-001",
+          "text": "Validate all user input server-side",
+          "priority": "critical",
+          "reason": "Client-side validation can be bypassed"
+        },
+        {
+          "id": "sec-input-002",
+          "text": "Sanitize input to prevent XSS attacks",
+          "priority": "critical",
+          "reason": "Unsanitized input can execute malicious scripts"
+        },
+        {
+          "id": "sec-input-003",
+          "text": "Use parameterized queries to prevent SQL injection",
+          "priority": "critical",
+          "reason": "Raw queries with user input enable SQL injection"
+        }
+      ]
+    },
+    {
+      "name": "data_protection",
+      "triggers": {
+        "files": ["**/api/**", "**/data/**", "**/user/**", "**/profile/**"],
+        "imports": ["crypto", "node:crypto"],
+        "patterns": ["encrypt", "decrypt", "secret", "private", "pii"]
+      },
+      "items": [
+        {
+          "id": "sec-data-001",
+          "text": "Encrypt sensitive data at rest",
+          "priority": "high",
+          "reason": "Protects data if storage is compromised"
+        },
+        {
+          "id": "sec-data-002",
+          "text": "Use HTTPS for all data transmission",
+          "priority": "critical",
+          "reason": "Prevents man-in-the-middle attacks"
+        },
+        {
+          "id": "sec-data-003",
+          "text": "Never log sensitive information (passwords, tokens, PII)",
+          "priority": "high",
+          "reason": "Logs can be accessed by unauthorized parties"
+        }
+      ]
+    }
+  ]
+}

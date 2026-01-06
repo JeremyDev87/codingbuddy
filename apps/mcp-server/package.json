@@ -67,6 +67,7 @@
     "@nestjs/core": "^11.1.9",
     "@nestjs/platform-express": "^11.1.9",
     "codingbuddy-rules": "workspace:*",
+    "minimatch": "^10.1.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "yaml": "^2.8.2",

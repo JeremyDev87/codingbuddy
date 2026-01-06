@@ -12,20 +12,10 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import { RulesService } from '../rules/rules.service';
-import { KeywordService } from '../keyword/keyword.service';
-import { KEYWORD_SERVICE } from '../keyword/keyword.module';
 import { ConfigService } from '../config/config.service';
-import { ConfigDiffService } from '../config/config-diff.service';
-import { AnalyzerService } from '../analyzer/analyzer.service';
-import { SkillRecommendationService } from '../skill/skill-recommendation.service';
-import type { ListSkillsOptions } from '../skill/skill-recommendation.types';
 import type { CodingBuddyConfig } from '../config/config.schema';
-import { LanguageService } from '../shared/language.service';
-import { AgentService } from '../agent/agent.service';
-import type { Mode } from '../keyword/keyword.types';
-import { createJsonResponse, createErrorResponse } from './response.utils';
-import { resolveModel, isModelConfig } from '../model';
-import type { ModelConfig } from '../model';
+import type { ToolHandler } from './handlers';
+import { TOOL_HANDLERS } from './handlers';
 
 @Injectable()
 export class McpService implements OnModuleInit {
@@ -34,13 +24,8 @@ export class McpService implements OnModuleInit {
 
   constructor(
     private rulesService: RulesService,
-    @Inject(KEYWORD_SERVICE) private keywordService: KeywordService,
     private configService: ConfigService,
-    private configDiffService: ConfigDiffService,
-    private analyzerService: AnalyzerService,
-    private skillRecommendationService: SkillRecommendationService,
-    private languageService: LanguageService,
-    private agentService: AgentService,
+    @Inject(TOOL_HANDLERS) private toolHandlers: ToolHandler[],
   ) {
     this.server = new Server(
       {
@@ -161,213 +146,26 @@ export class McpService implements OnModuleInit {
   }
 
   private registerTools() {
+    // Collect tool definitions from all handlers
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: [
-          {
-            name: 'search_rules',
-            description: 'Search for rules and guidelines',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                query: { type: 'string', description: 'Search query' },
-              },
-              required: ['query'],
-            },
-          },
-          {
-            name: 'get_agent_details',
-            description: 'Get detailed profile of a specific AI agent',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                agentName: { type: 'string', description: 'Name of the agent' },
-              },
-              required: ['agentName'],
-            },
-          },
-          {
-            name: 'parse_mode',
-            description:
-              'MANDATORY: When user message starts with PLAN, ACT, or EVAL keyword (or localized equivalents: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR), you MUST call this tool FIRST before any other action. This tool parses the workflow mode and returns critical rules that MUST be followed. Failure to call this tool when these keywords are present is a protocol violation.',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                prompt: {
-                  type: 'string',
-                  description:
-                    'User prompt that may start with PLAN/ACT/EVAL keyword',
-                },
-                recommended_agent: {
-                  type: 'string',
-                  description:
-                    'ACT agent recommended from previous PLAN mode. Pass the agentName from recommended_act_agent field of PLAN mode response. Only applies to ACT mode.',
-                },
-              },
-              required: ['prompt'],
-            },
-          },
-          {
-            name: 'get_project_config',
-            description:
-              'Get project configuration including tech stack, architecture, conventions, and language settings',
-            inputSchema: {
-              type: 'object',
-              properties: {},
-              required: [],
-            },
-          },
-          {
-            name: 'suggest_config_updates',
-            description:
-              'Analyze the project and suggest config updates based on detected changes (new frameworks, dependencies, patterns)',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                projectRoot: {
-                  type: 'string',
-                  description:
-                    'Project root directory (defaults to current working directory)',
-                },
-              },
-              required: [],
-            },
-          },
-          {
-            name: 'recommend_skills',
-            description:
-              'Recommend skills based on user prompt with multi-language support',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                prompt: {
-                  type: 'string',
-                  description:
-                    'User prompt to analyze for skill recommendations',
-                },
-              },
-              required: ['prompt'],
-            },
-          },
-          {
-            name: 'list_skills',
-            description: 'List all available skills with optional filtering',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                minPriority: {
-                  type: 'number',
-                  description: 'Minimum priority threshold (inclusive)',
-                },
-                maxPriority: {
-                  type: 'number',
-                  description: 'Maximum priority threshold (inclusive)',
-                },
-              },
-              required: [],
-            },
-          },
-          {
-            name: 'get_agent_system_prompt',
-            description:
-              'Get complete system prompt for a specialist agent to be executed as a Claude Code subagent. Use this to prepare an agent for parallel execution via Task tool.',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                agentName: {
-                  type: 'string',
-                  description:
-                    'Name of the specialist agent (e.g., security-specialist, accessibility-specialist)',
-                },
-                context: {
-                  type: 'object',
-                  description: 'Context for the agent',
-                  properties: {
-                    mode: {
-                      type: 'string',
-                      enum: ['PLAN', 'ACT', 'EVAL'],
-                      description: 'Current workflow mode',
-                    },
-                    targetFiles: {
-                      type: 'array',
-                      items: { type: 'string' },
-                      description: 'Files to analyze or review',
-                    },
-                    taskDescription: {
-                      type: 'string',
-                      description: 'Description of the task',
-                    },
-                  },
-                  required: ['mode'],
-                },
-              },
-              required: ['agentName', 'context'],
-            },
-          },
-          {
-            name: 'prepare_parallel_agents',
-            description:
-              'Prepare multiple specialist agents for parallel execution via Claude Code Task tool. Returns prompts and hints for launching agents concurrently.',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                mode: {
-                  type: 'string',
-                  enum: ['PLAN', 'ACT', 'EVAL'],
-                  description: 'Current workflow mode',
-                },
-                specialists: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description:
-                    'List of specialist agent names (e.g., ["security-specialist", "accessibility-specialist"])',
-                },
-                targetFiles: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: 'Files to analyze or review',
-                },
-                sharedContext: {
-                  type: 'string',
-                  description:
-                    'Shared context or task description for all agents',
-                },
-              },
-              required: ['mode', 'specialists'],
-            },
-          },
-        ],
-      };
+      const tools = this.toolHandlers.flatMap(handler =>
+        handler.getToolDefinitions(),
+      );
+      return { tools };
     });
 
+    // Delegate tool calls to handlers
     this.server.setRequestHandler(CallToolRequestSchema, async request => {
       const { name, arguments: args } = request.params;
 
-      switch (name) {
-        case 'search_rules':
-          return this.handleSearchRules(args);
-        case 'get_agent_details':
-          return this.handleGetAgentDetails(args);
-        case 'parse_mode':
-          return this.handleParseMode(args);
-        case 'get_project_config':
-          return this.handleGetProjectConfig();
-        case 'suggest_config_updates':
-          return this.handleSuggestConfigUpdates(args);
-        case 'recommend_skills':
-          return this.handleRecommendSkills(args);
-        case 'list_skills':
-          return this.handleListSkills(args);
-        case 'get_agent_system_prompt':
-          return this.handleGetAgentSystemPrompt(args);
-        case 'prepare_parallel_agents':
-          return this.handlePrepareParallelAgents(args);
-        default:
-          throw new McpError(
-            ErrorCode.MethodNotFound,
-            `Tool not found: ${name}`,
-          );
+      for (const handler of this.toolHandlers) {
+        const result = await handler.handle(name, args);
+        if (result !== null) {
+          return result;
+        }
       }
+
+      throw new McpError(ErrorCode.MethodNotFound, `Tool not found: ${name}`);
     });
   }
 
@@ -425,262 +223,6 @@ export class McpService implements OnModuleInit {
       }
       throw new McpError(ErrorCode.MethodNotFound, 'Prompt not found');
     });
-  }
-
-  // ============================================================================
-  // Tool Handlers
-  // ============================================================================
-
-  private async handleSearchRules(args: Record<string, unknown> | undefined) {
-    const query = String(args?.query);
-    const results = await this.rulesService.searchRules(query);
-    return createJsonResponse(results);
-  }
-
-  private async handleGetAgentDetails(
-    args: Record<string, unknown> | undefined,
-  ) {
-    const agentName = String(args?.agentName);
-    try {
-      const agent = await this.rulesService.getAgent(agentName);
-
-      // Resolve model using 4-level priority: agent > mode > global > system
-      // For get_agent_details, we only have agent context (no mode or global config)
-      const agentModel = agent.model as ModelConfig | undefined;
-      const resolvedModel = resolveModel({ agentModel });
-
-      return createJsonResponse({
-        ...agent,
-        resolvedModel,
-      });
-    } catch {
-      return createErrorResponse(`Agent '${agentName}' not found.`);
-    }
-  }
-
-  private async handleParseMode(args: Record<string, unknown> | undefined) {
-    const prompt = String(args?.prompt ?? '');
-    // Validate recommended_agent: must be non-empty string after trimming
-    const rawRecommendedAgent = args?.recommended_agent;
-    const recommendedAgent =
-      typeof rawRecommendedAgent === 'string' &&
-      rawRecommendedAgent.trim().length > 0
-        ? rawRecommendedAgent.trim()
-        : undefined;
-
-    try {
-      const options = recommendedAgent
-        ? { recommendedActAgent: recommendedAgent }
-        : undefined;
-      const result = await this.keywordService.parseMode(prompt, options);
-      const language = await this.configService.getLanguage();
-      const languageInstructionResult =
-        this.languageService.getLanguageInstruction(language || 'en');
-      const resolvedModel = await this.resolveModelForMode(result.agent);
-
-      return createJsonResponse({
-        ...result,
-        language,
-        languageInstruction: languageInstructionResult.instruction,
-        resolvedModel,
-      });
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to parse mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
-  /**
-   * Resolve AI model for a given mode agent
-   * Uses 4-level priority: agent > mode > global > system
-   */
-  private async resolveModelForMode(modeAgentName?: string) {
-    const globalDefaultModel = await this.loadGlobalDefaultModel();
-    const modeModel = await this.loadModeModel(modeAgentName);
-    return resolveModel({ modeModel, globalDefaultModel });
-  }
-
-  private async loadGlobalDefaultModel(): Promise<string | undefined> {
-    try {
-      const globalConfig = await this.configService.getSettings();
-      return globalConfig?.ai?.defaultModel;
-    } catch (error) {
-      this.logger.warn(
-        `Failed to load global config for model resolution: ${error instanceof Error ? error.message : 'Unknown error'}. Using system default.`,
-      );
-      return undefined;
-    }
-  }
-
-  private async loadModeModel(
-    agentName?: string,
-  ): Promise<ModelConfig | undefined> {
-    if (!agentName) return undefined;
-
-    try {
-      const modeAgent = await this.rulesService.getAgent(agentName);
-      return isModelConfig(modeAgent.model) ? modeAgent.model : undefined;
-    } catch (error) {
-      this.logger.warn(
-        `Failed to load mode agent '${agentName}' for model resolution: ${error instanceof Error ? error.message : 'Unknown error'}. Using fallback.`,
-      );
-      return undefined;
-    }
-  }
-
-  private async handleGetProjectConfig() {
-    try {
-      const settings = await this.configService.getSettings();
-      return createJsonResponse(settings);
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to get project config: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
-  private async handleSuggestConfigUpdates(
-    args: Record<string, unknown> | undefined,
-  ) {
-    try {
-      const projectRoot = String(args?.projectRoot ?? process.cwd());
-
-      // Analyze project
-      const analysis = await this.analyzerService.analyzeProject(projectRoot);
-
-      // Reload config from disk to get latest changes
-      await this.configService.reload();
-
-      // Get current config
-      const currentConfig = await this.configService.getSettings();
-
-      // Compare and get suggestions
-      const result = this.configDiffService.compareConfig(
-        analysis,
-        currentConfig,
-      );
-
-      return createJsonResponse(result);
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to suggest config updates: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
-  private handleRecommendSkills(args: Record<string, unknown> | undefined) {
-    const prompt = args?.prompt;
-    if (typeof prompt !== 'string') {
-      return createErrorResponse('Missing required parameter: prompt');
-    }
-    try {
-      const result = this.skillRecommendationService.recommendSkills(prompt);
-      return createJsonResponse(result);
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to recommend skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
-  private handleListSkills(args: Record<string, unknown> | undefined) {
-    try {
-      const options: ListSkillsOptions = {};
-
-      if (typeof args?.minPriority === 'number') {
-        options.minPriority = args.minPriority;
-      }
-      if (typeof args?.maxPriority === 'number') {
-        options.maxPriority = args.maxPriority;
-      }
-
-      const result = this.skillRecommendationService.listSkills(options);
-      return createJsonResponse(result);
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to list skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
-  private async handleGetAgentSystemPrompt(
-    args: Record<string, unknown> | undefined,
-  ) {
-    const agentName = args?.agentName;
-    const context = args?.context as
-      | {
-          mode: Mode;
-          targetFiles?: string[];
-          taskDescription?: string;
-        }
-      | undefined;
-
-    if (typeof agentName !== 'string') {
-      return createErrorResponse('Missing required parameter: agentName');
-    }
-    if (!context || typeof context.mode !== 'string') {
-      return createErrorResponse(
-        'Missing required parameter: context.mode (PLAN, ACT, or EVAL)',
-      );
-    }
-    if (!['PLAN', 'ACT', 'EVAL'].includes(context.mode)) {
-      return createErrorResponse(
-        `Invalid mode: ${context.mode}. Must be PLAN, ACT, or EVAL`,
-      );
-    }
-
-    try {
-      const result = await this.agentService.getAgentSystemPrompt(agentName, {
-        mode: context.mode as Mode,
-        targetFiles: context.targetFiles,
-        taskDescription: context.taskDescription,
-      });
-      return createJsonResponse(result);
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to get agent system prompt: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
-  private async handlePrepareParallelAgents(
-    args: Record<string, unknown> | undefined,
-  ) {
-    const mode = args?.mode as string | undefined;
-    const specialists = args?.specialists as string[] | undefined;
-    const targetFiles = args?.targetFiles as string[] | undefined;
-    const sharedContext = args?.sharedContext as string | undefined;
-
-    if (typeof mode !== 'string') {
-      return createErrorResponse(
-        'Missing required parameter: mode (PLAN, ACT, or EVAL)',
-      );
-    }
-    if (!['PLAN', 'ACT', 'EVAL'].includes(mode)) {
-      return createErrorResponse(
-        `Invalid mode: ${mode}. Must be PLAN, ACT, or EVAL`,
-      );
-    }
-    if (!Array.isArray(specialists) || specialists.length === 0) {
-      return createErrorResponse(
-        'Missing required parameter: specialists (array of agent names)',
-      );
-    }
-
-    try {
-      const result = await this.agentService.prepareParallelAgents(
-        mode as Mode,
-        specialists,
-        targetFiles,
-        sharedContext,
-      );
-      return createJsonResponse(result);
-    } catch (error) {
-      return createErrorResponse(
-        `Failed to prepare parallel agents: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
   }
 
   // ============================================================================

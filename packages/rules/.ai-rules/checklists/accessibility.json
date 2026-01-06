@@ -1,0 +1,132 @@
+{
+  "domain": "accessibility",
+  "icon": "♿",
+  "description": "Accessibility (a11y) review items for WCAG 2.1 AA compliance",
+  "categories": [
+    {
+      "name": "forms",
+      "triggers": {
+        "files": [
+          "**/form/**",
+          "**/input/**",
+          "**/login/**",
+          "**/signup/**",
+          "**/contact/**"
+        ],
+        "imports": ["react-hook-form", "formik", "@radix-ui/react-form"],
+        "patterns": ["<form", "<input", "<select", "<textarea", "onSubmit"]
+      },
+      "items": [
+        {
+          "id": "a11y-form-001",
+          "text": "Associate labels with form inputs using htmlFor/id",
+          "priority": "critical",
+          "reason": "Screen readers need label association to announce field purpose",
+          "reference": "WCAG 1.3.1"
+        },
+        {
+          "id": "a11y-form-002",
+          "text": "Provide clear error messages with aria-describedby",
+          "priority": "high",
+          "reason": "Users need to understand what went wrong"
+        },
+        {
+          "id": "a11y-form-003",
+          "text": "Mark required fields with aria-required",
+          "priority": "medium",
+          "reason": "Assistive technologies should announce required fields"
+        },
+        {
+          "id": "a11y-form-004",
+          "text": "Ensure form can be submitted with keyboard (Enter key)",
+          "priority": "high",
+          "reason": "Keyboard-only users must be able to submit forms"
+        }
+      ]
+    },
+    {
+      "name": "interactive_elements",
+      "triggers": {
+        "files": [
+          "**/button/**",
+          "**/modal/**",
+          "**/dialog/**",
+          "**/dropdown/**",
+          "**/menu/**",
+          "**/components/**"
+        ],
+        "imports": [
+          "@radix-ui/*",
+          "@headlessui/*",
+          "react-aria",
+          "react-modal"
+        ],
+        "patterns": ["onClick", "onKeyDown", "role=", "aria-", "<button", "<a "]
+      },
+      "items": [
+        {
+          "id": "a11y-interactive-001",
+          "text": "Ensure all interactive elements are keyboard accessible",
+          "priority": "critical",
+          "reason": "Not all users can use a mouse",
+          "reference": "WCAG 2.1.1"
+        },
+        {
+          "id": "a11y-interactive-002",
+          "text": "Provide visible focus indicators",
+          "priority": "critical",
+          "reason": "Keyboard users need to see where focus is",
+          "reference": "WCAG 2.4.7"
+        },
+        {
+          "id": "a11y-interactive-003",
+          "text": "Use semantic HTML elements (button, a) instead of div with onClick",
+          "priority": "high",
+          "reason": "Semantic elements have built-in accessibility"
+        },
+        {
+          "id": "a11y-interactive-004",
+          "text": "Manage focus when opening/closing modals",
+          "priority": "high",
+          "reason": "Focus should move to modal and return when closed"
+        }
+      ]
+    },
+    {
+      "name": "content",
+      "triggers": {
+        "files": ["**/page/**", "**/layout/**", "**/*.tsx", "**/*.jsx"],
+        "imports": ["next/image", "next/link"],
+        "patterns": ["<img", "<Image", "<h1", "<h2", "<main", "<nav", "<aside"]
+      },
+      "items": [
+        {
+          "id": "a11y-content-001",
+          "text": "Provide alt text for all meaningful images",
+          "priority": "critical",
+          "reason": "Screen reader users cannot see images",
+          "reference": "WCAG 1.1.1"
+        },
+        {
+          "id": "a11y-content-002",
+          "text": "Use proper heading hierarchy (h1 > h2 > h3)",
+          "priority": "high",
+          "reason": "Headings provide document structure for navigation"
+        },
+        {
+          "id": "a11y-content-003",
+          "text": "Ensure sufficient color contrast (4.5:1 for text)",
+          "priority": "high",
+          "reason": "Low contrast text is hard to read",
+          "reference": "WCAG 1.4.3"
+        },
+        {
+          "id": "a11y-content-004",
+          "text": "Use landmark regions (main, nav, aside, footer)",
+          "priority": "medium",
+          "reason": "Landmarks help screen reader users navigate"
+        }
+      ]
+    }
+  ]
+}
