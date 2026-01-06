@@ -5,20 +5,6 @@
  */
 
 /**
- * CLI command handler function
- */
-export type CommandHandler = (args: string[]) => Promise<void>;
-
-/**
- * CLI command definition
- */
-export interface CliCommand {
-  name: string;
-  description: string;
-  handler: CommandHandler;
-}
-
-/**
  * Init command options
  */
 export interface InitOptions {

@@ -3,11 +3,13 @@ import type {
   ResolvedModel,
   ResolveModelParams,
 } from './model.types';
+import { DEFAULT_MODEL } from './model.constants';
 
 /**
  * System default model used when no configuration is provided
+ * @deprecated Use DEFAULT_MODEL from model.constants.ts instead
  */
-export const SYSTEM_DEFAULT_MODEL = 'claude-sonnet-4-20250514';
+export const SYSTEM_DEFAULT_MODEL = DEFAULT_MODEL;
 
 /**
  * Known Claude model ID patterns for validation
