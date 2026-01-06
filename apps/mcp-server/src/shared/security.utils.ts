@@ -98,3 +98,173 @@ export function isPathSafe(basePath: string, relativePath: string): boolean {
   // This prevents matching /app/rules-backup when base is /app/rules
   return resolvedTarget.startsWith(resolvedBase + path.sep);
 }
+
+/**
+ * Result of path validation
+ */
+export interface PathValidationResult {
+  /** Whether the path is valid */
+  valid: boolean;
+  /** Error message if validation failed */
+  error?: string;
+  /** Resolved absolute path if valid */
+  resolvedPath?: string;
+}
+
+/**
+ * Options for comprehensive path validation
+ */
+export interface ValidatePathOptions {
+  /** Base directory that paths must be contained within */
+  basePath: string;
+  /** Whether to allow absolute paths (default: false) */
+  allowAbsolute?: boolean;
+  /** File extensions to allow (if specified, only these extensions are allowed) */
+  allowedExtensions?: string[];
+}
+
+/**
+ * Comprehensive path validation with detailed error reporting
+ *
+ * Validates:
+ * - Null byte injection
+ * - Path traversal attacks (../)
+ * - Base directory containment
+ * - File extension restrictions (optional)
+ * - Absolute path restrictions (optional)
+ *
+ * @param targetPath - The path to validate
+ * @param options - Validation options
+ * @returns Validation result with error details
+ */
+export function validatePath(
+  targetPath: string,
+  options: ValidatePathOptions,
+): PathValidationResult {
+  const { basePath, allowAbsolute = false, allowedExtensions } = options;
+
+  // Check for null bytes
+  if (targetPath.includes('\x00')) {
+    return {
+      valid: false,
+      error: 'Path contains null bytes (possible null byte injection)',
+    };
+  }
+
+  // Check for absolute path if not allowed
+  if (!allowAbsolute && path.isAbsolute(targetPath)) {
+    return {
+      valid: false,
+      error: 'Absolute paths are not allowed',
+    };
+  }
+
+  // Normalize and resolve the path
+  const normalizedPath = targetPath.replace(/\\/g, '/');
+  const resolvedBase = path.resolve(basePath);
+  const resolvedTarget = path.resolve(basePath, normalizedPath);
+
+  // Check path containment (prevent path traversal)
+  const isContained =
+    resolvedTarget === resolvedBase ||
+    resolvedTarget.startsWith(resolvedBase + path.sep);
+
+  if (!isContained) {
+    return {
+      valid: false,
+      error: `Path escapes base directory: ${targetPath} resolves outside ${basePath}`,
+    };
+  }
+
+  // Check allowed extensions if specified
+  if (allowedExtensions && allowedExtensions.length > 0) {
+    const ext = path.extname(resolvedTarget).toLowerCase();
+    const normalizedAllowed = allowedExtensions.map(e =>
+      e.startsWith('.') ? e.toLowerCase() : `.${e.toLowerCase()}`,
+    );
+
+    if (!normalizedAllowed.includes(ext)) {
+      return {
+        valid: false,
+        error: `File extension '${ext}' not allowed. Allowed: ${normalizedAllowed.join(', ')}`,
+      };
+    }
+  }
+
+  return {
+    valid: true,
+    resolvedPath: resolvedTarget,
+  };
+}
+
+/**
+ * Assert that a path is valid, throwing an error if not
+ *
+ * @param targetPath - The path to validate
+ * @param options - Validation options
+ * @throws Error if path validation fails
+ * @returns The resolved absolute path
+ */
+export function assertPathSafe(
+  targetPath: string,
+  options: ValidatePathOptions,
+): string {
+  const result = validatePath(targetPath, options);
+  if (!result.valid) {
+    throw new Error(`Path validation failed: ${result.error}`);
+  }
+  return result.resolvedPath!;
+}
+
+// ============================================================================
+// Handler Argument Sanitization
+// ============================================================================
+
+/**
+ * Result of handler argument validation
+ */
+export interface HandlerArgsSanitizeResult {
+  /** Whether args are safe to process */
+  safe: boolean;
+  /** Error message if validation failed */
+  error?: string;
+}
+
+/**
+ * Validate handler arguments for prototype pollution
+ *
+ * This should be called at the entry point of every handler's handle() method
+ * before any processing occurs. It checks for dangerous keys like __proto__,
+ * constructor, and prototype that could enable prototype pollution attacks.
+ *
+ * @param args - The handler arguments to validate
+ * @returns Validation result indicating if args are safe
+ *
+ * @example
+ * ```typescript
+ * async handle(toolName: string, args: Record<string, unknown> | undefined) {
+ *   const validation = sanitizeHandlerArgs(args);
+ *   if (!validation.safe) {
+ *     return createErrorResponse(validation.error!);
+ *   }
+ *   // ... proceed with processing
+ * }
+ * ```
+ */
+export function sanitizeHandlerArgs(
+  args: Record<string, unknown> | undefined,
+): HandlerArgsSanitizeResult {
+  if (args === undefined) {
+    return { safe: true };
+  }
+
+  const dangerousPath = containsDangerousKeys(args);
+  if (dangerousPath !== null) {
+    return {
+      safe: false,
+      error: `Invalid argument: dangerous key detected at '${dangerousPath}'`,
+    };
+  }
+
+  return { safe: true };
+}

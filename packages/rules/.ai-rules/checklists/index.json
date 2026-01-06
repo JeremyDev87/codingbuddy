@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "domains": [
+    {
+      "id": "security",
+      "name": "Security",
+      "icon": "🔒",
+      "file": "security.json",
+      "description": "Security-related review items (authentication, input validation, data protection)"
+    },
+    {
+      "id": "accessibility",
+      "name": "Accessibility",
+      "icon": "♿",
+      "file": "accessibility.json",
+      "description": "WCAG 2.1 AA compliance items (forms, interactive elements, content)"
+    },
+    {
+      "id": "performance",
+      "name": "Performance",
+      "icon": "⚡",
+      "file": "performance.json",
+      "description": "Performance optimization items (rendering, loading, data fetching)"
+    },
+    {
+      "id": "testing",
+      "name": "Testing",
+      "icon": "🧪",
+      "file": "testing.json",
+      "description": "Testing strategy items (unit, component, API testing)"
+    },
+    {
+      "id": "code-quality",
+      "name": "Code Quality",
+      "icon": "📏",
+      "file": "code-quality.json",
+      "description": "Code quality items (TypeScript, SOLID principles, error handling)"
+    },
+    {
+      "id": "seo",
+      "name": "SEO",
+      "icon": "🔍",
+      "file": "seo.json",
+      "description": "SEO optimization items (metadata, structure, links)"
+    }
+  ]
+}

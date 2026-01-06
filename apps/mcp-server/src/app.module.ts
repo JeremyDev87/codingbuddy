@@ -4,6 +4,8 @@ import { RulesModule } from './rules/rules.module';
 import { McpModule } from './mcp/mcp.module';
 import { KeywordModule } from './keyword/keyword.module';
 import { AgentModule } from './agent/agent.module';
+import { ChecklistModule } from './checklist/checklist.module';
+import { ContextModule } from './context/context.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { AgentModule } from './agent/agent.module';
     McpModule,
     KeywordModule,
     AgentModule,
+    ChecklistModule,
+    ContextModule,
   ],
 })
 export class AppModule {}

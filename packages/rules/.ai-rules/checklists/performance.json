@@ -1,0 +1,97 @@
+{
+  "domain": "performance",
+  "icon": "⚡",
+  "description": "Performance optimization review items",
+  "categories": [
+    {
+      "name": "rendering",
+      "triggers": {
+        "files": ["**/components/**", "**/page/**", "**/*.tsx", "**/*.jsx"],
+        "imports": ["react", "next", "useMemo", "useCallback", "memo"],
+        "patterns": ["useState", "useEffect", "useMemo", "useCallback", "memo("]
+      },
+      "items": [
+        {
+          "id": "perf-render-001",
+          "text": "Memoize expensive calculations with useMemo",
+          "priority": "medium",
+          "reason": "Prevents unnecessary recalculations on re-render"
+        },
+        {
+          "id": "perf-render-002",
+          "text": "Use useCallback for callback props to child components",
+          "priority": "medium",
+          "reason": "Prevents unnecessary child re-renders"
+        },
+        {
+          "id": "perf-render-003",
+          "text": "Avoid inline object/array creation in JSX",
+          "priority": "low",
+          "reason": "New references cause unnecessary re-renders"
+        },
+        {
+          "id": "perf-render-004",
+          "text": "Use React.memo for pure presentational components",
+          "priority": "low",
+          "reason": "Skip re-renders when props haven't changed"
+        }
+      ]
+    },
+    {
+      "name": "loading",
+      "triggers": {
+        "files": ["**/page/**", "**/layout/**", "**/app/**"],
+        "imports": ["next/dynamic", "next/image", "react-lazy-load"],
+        "patterns": ["dynamic(", "lazy(", "Suspense", "loading"]
+      },
+      "items": [
+        {
+          "id": "perf-load-001",
+          "text": "Use code splitting with dynamic imports",
+          "priority": "high",
+          "reason": "Reduces initial bundle size"
+        },
+        {
+          "id": "perf-load-002",
+          "text": "Optimize images (WebP, proper sizing, lazy loading)",
+          "priority": "high",
+          "reason": "Images are often the largest assets"
+        },
+        {
+          "id": "perf-load-003",
+          "text": "Implement loading skeletons for async content",
+          "priority": "medium",
+          "reason": "Improves perceived performance"
+        }
+      ]
+    },
+    {
+      "name": "data_fetching",
+      "triggers": {
+        "files": ["**/api/**", "**/hook/**", "**/query/**"],
+        "imports": ["@tanstack/react-query", "swr", "axios"],
+        "patterns": ["useQuery", "useSWR", "fetch(", "getServerSideProps"]
+      },
+      "items": [
+        {
+          "id": "perf-data-001",
+          "text": "Implement proper caching strategy",
+          "priority": "high",
+          "reason": "Reduces unnecessary network requests"
+        },
+        {
+          "id": "perf-data-002",
+          "text": "Use stale-while-revalidate pattern where appropriate",
+          "priority": "medium",
+          "reason": "Shows cached data while fetching fresh data"
+        },
+        {
+          "id": "perf-data-003",
+          "text": "Paginate or virtualize large lists",
+          "priority": "high",
+          "reason": "Rendering thousands of items kills performance"
+        }
+      ]
+    }
+  ]
+}

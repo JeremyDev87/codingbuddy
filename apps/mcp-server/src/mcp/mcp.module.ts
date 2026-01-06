@@ -6,8 +6,31 @@ import { KeywordModule } from '../keyword/keyword.module';
 import { CodingBuddyConfigModule } from '../config/config.module';
 import { AnalyzerModule } from '../analyzer/analyzer.module';
 import { AgentModule } from '../agent/agent.module';
+import { ChecklistModule } from '../checklist/checklist.module';
+import { ContextModule } from '../context/context.module';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import { LanguageService } from '../shared/language.service';
+import { ModelResolverService } from '../model';
+
+// Tool Handlers
+import {
+  TOOL_HANDLERS,
+  RulesHandler,
+  ConfigHandler,
+  SkillHandler,
+  AgentHandler,
+  ModeHandler,
+  ChecklistContextHandler,
+} from './handlers';
+
+const handlers = [
+  RulesHandler,
+  ConfigHandler,
+  SkillHandler,
+  AgentHandler,
+  ModeHandler,
+  ChecklistContextHandler,
+];
 
 @Module({
   imports: [
@@ -16,9 +39,24 @@ import { LanguageService } from '../shared/language.service';
     CodingBuddyConfigModule,
     AnalyzerModule,
     AgentModule,
+    ChecklistModule,
+    ContextModule,
   ],
   controllers: [McpController],
-  providers: [McpService, SkillRecommendationService, LanguageService],
+  providers: [
+    McpService,
+    SkillRecommendationService,
+    LanguageService,
+    ModelResolverService,
+    ...handlers,
+    {
+      provide: TOOL_HANDLERS,
+      useFactory: (
+        ...handlerInstances: InstanceType<(typeof handlers)[number]>[]
+      ) => handlerInstances,
+      inject: handlers,
+    },
+  ],
   exports: [McpService],
 })
 export class McpModule {}

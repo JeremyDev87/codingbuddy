@@ -101,3 +101,107 @@ export function validateAgentName(name: string): ValidationResult {
   }
   return { valid: true };
 }
+
+// ============================================================================
+// Type Guards for Handler Arguments
+// ============================================================================
+
+/**
+ * Valid workflow modes
+ */
+export const VALID_MODES = ['PLAN', 'ACT', 'EVAL'] as const;
+export type ValidMode = (typeof VALID_MODES)[number];
+
+/**
+ * Check if a value is a non-empty string
+ * @param value - Value to check
+ * @returns True if value is a string with content
+ */
+export function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * Check if a value is a valid string (including empty strings)
+ * @param value - Value to check
+ * @returns True if value is a string
+ */
+export function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+/**
+ * Check if a value is an array of strings
+ * @param value - Value to check
+ * @returns True if value is an array where every element is a string
+ */
+export function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(item => typeof item === 'string');
+}
+
+/**
+ * Check if a value is a valid workflow mode
+ * @param value - Value to check
+ * @returns True if value is PLAN, ACT, or EVAL
+ */
+export function isValidMode(value: unknown): value is ValidMode {
+  return typeof value === 'string' && VALID_MODES.includes(value as ValidMode);
+}
+
+/**
+ * Extract a required string parameter from handler args
+ * @param args - Handler arguments
+ * @param paramName - Parameter name to extract
+ * @returns The string value or null if invalid/missing
+ */
+export function extractRequiredString(
+  args: Record<string, unknown> | undefined,
+  paramName: string,
+): string | null {
+  const value = args?.[paramName];
+  return isNonEmptyString(value) ? value : null;
+}
+
+/**
+ * Extract an optional string parameter from handler args
+ * @param args - Handler arguments
+ * @param paramName - Parameter name to extract
+ * @returns The string value, or undefined if missing, or null if invalid type
+ */
+export function extractOptionalString(
+  args: Record<string, unknown> | undefined,
+  paramName: string,
+): string | undefined {
+  const value = args?.[paramName];
+  if (value === undefined) return undefined;
+  return isString(value) ? value : undefined;
+}
+
+/**
+ * Extract an optional string array parameter from handler args
+ * @param args - Handler arguments
+ * @param paramName - Parameter name to extract
+ * @returns The string array or undefined if missing/invalid
+ */
+export function extractStringArray(
+  args: Record<string, unknown> | undefined,
+  paramName: string,
+): string[] | undefined {
+  const value = args?.[paramName];
+  if (value === undefined) return undefined;
+  return isStringArray(value) ? value : undefined;
+}
+
+/**
+ * Extract and validate a mode parameter from handler args
+ * @param args - Handler arguments
+ * @param paramName - Parameter name (default: 'mode')
+ * @returns The validated mode or null if invalid
+ */
+export function extractMode(
+  args: Record<string, unknown> | undefined,
+  paramName = 'mode',
+): ValidMode | null {
+  const value = args?.[paramName];
+  return isValidMode(value) ? value : null;
+}

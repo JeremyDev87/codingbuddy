@@ -1,0 +1,97 @@
+{
+  "domain": "testing",
+  "icon": "🧪",
+  "description": "Testing strategy and coverage review items",
+  "categories": [
+    {
+      "name": "unit_testing",
+      "triggers": {
+        "files": ["**/util/**", "**/lib/**", "**/helper/**", "**/service/**"],
+        "imports": ["vitest", "jest", "@testing-library/*"],
+        "patterns": ["describe", "it(", "test(", "expect"]
+      },
+      "items": [
+        {
+          "id": "test-unit-001",
+          "text": "Write tests for all pure functions",
+          "priority": "high",
+          "reason": "Pure functions are easiest to test and most valuable to cover"
+        },
+        {
+          "id": "test-unit-002",
+          "text": "Cover edge cases and error conditions",
+          "priority": "high",
+          "reason": "Edge cases often hide bugs"
+        },
+        {
+          "id": "test-unit-003",
+          "text": "Use descriptive test names that explain behavior",
+          "priority": "medium",
+          "reason": "Test names document expected behavior"
+        },
+        {
+          "id": "test-unit-004",
+          "text": "Target 90%+ coverage for core logic",
+          "priority": "high",
+          "reason": "High coverage reduces regression risk"
+        }
+      ]
+    },
+    {
+      "name": "component_testing",
+      "triggers": {
+        "files": ["**/components/**", "**/features/**", "**/widgets/**"],
+        "imports": ["@testing-library/react", "react-test-renderer"],
+        "patterns": ["render(", "screen.", "userEvent"]
+      },
+      "items": [
+        {
+          "id": "test-comp-001",
+          "text": "Test user interactions (click, type, submit)",
+          "priority": "high",
+          "reason": "UI should respond correctly to user actions"
+        },
+        {
+          "id": "test-comp-002",
+          "text": "Test different component states (loading, error, success)",
+          "priority": "high",
+          "reason": "Components should handle all states gracefully"
+        },
+        {
+          "id": "test-comp-003",
+          "text": "Use Testing Library queries by role/label for accessibility",
+          "priority": "medium",
+          "reason": "Tests that query like users improve accessibility"
+        }
+      ]
+    },
+    {
+      "name": "api_testing",
+      "triggers": {
+        "files": ["**/api/**", "**/hook/**", "**/query/**", "**/mutation/**"],
+        "imports": ["msw", "nock", "@tanstack/react-query"],
+        "patterns": ["fetch(", "axios", "useMutation", "useQuery"]
+      },
+      "items": [
+        {
+          "id": "test-api-001",
+          "text": "Mock API responses with MSW for realistic testing",
+          "priority": "high",
+          "reason": "Avoid mocking implementation details"
+        },
+        {
+          "id": "test-api-002",
+          "text": "Test loading, success, and error states",
+          "priority": "high",
+          "reason": "API calls can fail in multiple ways"
+        },
+        {
+          "id": "test-api-003",
+          "text": "Test retry and caching behavior",
+          "priority": "medium",
+          "reason": "Data fetching libraries have complex behavior"
+        }
+      ]
+    }
+  ]
+}
