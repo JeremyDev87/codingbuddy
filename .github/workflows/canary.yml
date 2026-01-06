@@ -38,30 +38,38 @@ jobs:
       - name: Build mcp-server
         run: yarn workspace codingbuddy build
 
-      - name: Publish rules canary
-        working-directory: packages/rules
+      # Generate a single canary version to ensure both packages use the same version
+      # This fixes the timestamp mismatch bug where rules and mcp-server had different versions
+      - name: Generate canary version
         run: |
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           COMMIT_SHA=${GITHUB_SHA::7}
           VERSION="0.0.0-canary.${TIMESTAMP}.${COMMIT_SHA}"
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to generate canary version"
+            exit 1
+          fi
+          echo "CANARY_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Generated canary version: $VERSION"
+
+      - name: Publish rules canary
+        working-directory: packages/rules
+        run: |
+          VERSION="${{ env.CANARY_VERSION }}"
           cat <<< "$( jq --arg v "$VERSION" '.version = $v' package.json )" > package.json
           yarn npm publish --tag canary
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
 
       - name: Publish mcp-server canary
         working-directory: apps/mcp-server
         run: |
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          COMMIT_SHA=${GITHUB_SHA::7}
-          VERSION="0.0.0-canary.${TIMESTAMP}.${COMMIT_SHA}"
+          VERSION="${{ env.CANARY_VERSION }}"
           # Update version and replace workspace dependency with canary version
           cat <<< "$( jq --arg v "$VERSION" '.version = $v | .dependencies["codingbuddy-rules"] = $v' package.json )" > package.json
           yarn npm publish --tag canary
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
 
       - name: Output canary version number
         working-directory: apps/mcp-server
