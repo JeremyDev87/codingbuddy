@@ -1,6 +1,10 @@
 {
   "name": "UI/UX Designer",
   "description": "UI/UX design specialist based on universal design principles and UX best practices - focuses on aesthetics, usability, and user experience rather than specific design system implementations",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for UI/UX design analysis"
+  },
 
   "role": {
     "title": "UI/UX Design Specialist",

@@ -14,10 +14,10 @@ export class RulesService {
   private readonly rulesDir: string;
 
   constructor(private readonly customService: CustomService) {
-    // 경로 탐색 전략:
-    // 1. 환경변수로 직접 지정된 경우 우선 사용
-    // 2. codingbuddy-rules 패키지에서 경로 가져오기
-    // 3. 개발 환경 폴백: require.resolve 실패 시
+    // Path resolution strategy:
+    // 1. Use environment variable if directly specified
+    // 2. Get path from codingbuddy-rules package
+    // 3. Development fallback: when require.resolve fails
 
     if (process.env.CODINGBUDDY_RULES_DIR) {
       this.rulesDir = process.env.CODINGBUDDY_RULES_DIR;
@@ -26,13 +26,13 @@ export class RulesService {
     }
 
     try {
-      // codingbuddy-rules 패키지에서 rulesPath 가져오기
+      // Get rulesPath from codingbuddy-rules package
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { rulesPath } = require('codingbuddy-rules');
       this.rulesDir = rulesPath;
       this.logger.log(`Rules directory set from package: ${this.rulesDir}`);
     } catch {
-      // 개발 환경 폴백: 패키지를 찾을 수 없는 경우
+      // Development fallback: when package is not found
       this.logger.warn(
         'codingbuddy-rules package not found, using development fallback',
       );
@@ -42,14 +42,14 @@ export class RulesService {
   }
 
   private findDevRulesDir(): string {
-    // 개발 환경에서 packages/rules/.ai-rules 또는 루트의 .ai-rules 심볼릭 링크 찾기
-    // 빌드 후: dist/src/rules → 4단계 상위가 apps/mcp-server
-    // 개발 환경: src/rules → 3단계 상위가 apps/mcp-server
+    // Find packages/rules/.ai-rules or root .ai-rules symlink in development
+    // After build: dist/src/rules → 4 levels up is apps/mcp-server
+    // Development: src/rules → 3 levels up is apps/mcp-server
     const candidates = [
-      path.resolve(__dirname, '../../../../packages/rules/.ai-rules'), // 빌드 후
-      path.resolve(__dirname, '../../../packages/rules/.ai-rules'), // 개발 환경
-      path.resolve(__dirname, '../../../../.ai-rules'), // 심볼릭 링크 (빌드 후)
-      path.resolve(__dirname, '../../../.ai-rules'), // 심볼릭 링크 (개발)
+      path.resolve(__dirname, '../../../../packages/rules/.ai-rules'), // after build
+      path.resolve(__dirname, '../../../packages/rules/.ai-rules'), // development
+      path.resolve(__dirname, '../../../../.ai-rules'), // symlink (after build)
+      path.resolve(__dirname, '../../../.ai-rules'), // symlink (development)
     ];
 
     for (const candidate of candidates) {
@@ -58,7 +58,7 @@ export class RulesService {
       }
     }
 
-    // 마지막 폴백
+    // Final fallback
     return candidates[0];
   }
 

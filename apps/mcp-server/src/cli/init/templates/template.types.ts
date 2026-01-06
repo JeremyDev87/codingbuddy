@@ -87,4 +87,6 @@ export interface TemplateRenderOptions {
   projectName?: string;
   /** Include detailed comments */
   includeComments?: boolean;
+  /** Default AI model (e.g., 'claude-sonnet-4-20250514') */
+  defaultModel?: string;
 }

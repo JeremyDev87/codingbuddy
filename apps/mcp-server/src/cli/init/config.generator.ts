@@ -8,6 +8,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { ProjectAnalysis } from '../../analyzer';
 import type { CodingBuddyConfig } from '../../config';
 import { validateConfig } from '../../config/config.schema';
+import { resolveModel } from '../../model';
 import { buildSystemPrompt, buildAnalysisPrompt } from './prompt.builder';
 
 /**
@@ -16,16 +17,13 @@ import { buildSystemPrompt, buildAnalysisPrompt } from './prompt.builder';
 export interface ConfigGeneratorOptions {
   /** Anthropic API key */
   apiKey: string;
-  /** Model to use (default: claude-sonnet-4-20250514) */
+  /** Model to use (explicit override, highest priority) */
   model?: string;
+  /** Loaded config for model resolution */
+  config?: CodingBuddyConfig;
   /** Max tokens for response */
   maxTokens?: number;
 }
-
-/**
- * Default model for config generation
- */
-const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
 
 /**
  * Default max tokens
@@ -94,7 +92,17 @@ export class ConfigGenerator {
     this.client = new Anthropic({
       apiKey: options.apiKey,
     });
-    this.model = options.model ?? DEFAULT_MODEL;
+
+    // Model resolution: explicit option > global config > system default
+    if (options.model) {
+      this.model = options.model;
+    } else {
+      const resolved = resolveModel({
+        globalDefaultModel: options.config?.ai?.defaultModel,
+      });
+      this.model = resolved.model;
+    }
+
     this.maxTokens = options.maxTokens ?? DEFAULT_MAX_TOKENS;
   }
 

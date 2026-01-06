@@ -1,6 +1,10 @@
 {
   "name": "Performance Specialist",
   "description": "Performance expert for Planning, Implementation, and Evaluation modes - unified specialist for bundle size optimization, rendering optimization, and Core Web Vitals",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for performance analysis"
+  },
   "role": {
     "title": "Performance Engineer",
     "expertise": [

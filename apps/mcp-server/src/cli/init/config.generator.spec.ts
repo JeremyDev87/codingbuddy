@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   ConfigGenerator,
+  ConfigGeneratorOptions,
   parseJsonResponse,
   extractJsonFromResponse,
 } from './config.generator';
 import type { ProjectAnalysis } from '../../analyzer';
+import { SYSTEM_DEFAULT_MODEL } from '../../model';
 
 // Mock function for messages.create
 const mockCreate = vi.fn();
@@ -241,6 +243,56 @@ describe('config.generator', () => {
           model: 'claude-3-opus-20240229',
         }),
       );
+    });
+
+    describe('model resolution', () => {
+      it('should use model from options when explicitly provided', () => {
+        const options: ConfigGeneratorOptions = {
+          apiKey: 'test-key',
+          model: 'explicit-model',
+        };
+        const gen = new ConfigGenerator(options);
+        expect((gen as unknown as { model: string }).model).toBe(
+          'explicit-model',
+        );
+      });
+
+      it('should use model from global config when options.model is not provided', () => {
+        const options: ConfigGeneratorOptions = {
+          apiKey: 'test-key',
+          config: {
+            ai: { defaultModel: 'config-model' },
+          },
+        };
+        const gen = new ConfigGenerator(options);
+        expect((gen as unknown as { model: string }).model).toBe(
+          'config-model',
+        );
+      });
+
+      it('should use system default when no model is configured', () => {
+        const options: ConfigGeneratorOptions = {
+          apiKey: 'test-key',
+        };
+        const gen = new ConfigGenerator(options);
+        expect((gen as unknown as { model: string }).model).toBe(
+          SYSTEM_DEFAULT_MODEL,
+        );
+      });
+
+      it('should prioritize explicit model over config model', () => {
+        const options: ConfigGeneratorOptions = {
+          apiKey: 'test-key',
+          model: 'explicit-model',
+          config: {
+            ai: { defaultModel: 'config-model' },
+          },
+        };
+        const gen = new ConfigGenerator(options);
+        expect((gen as unknown as { model: string }).model).toBe(
+          'explicit-model',
+        );
+      });
     });
   });
 });

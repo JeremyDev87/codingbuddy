@@ -225,4 +225,33 @@ describe('CodingBuddyConfigSchema', () => {
       expect(Array.isArray(config.techStack?.frontend)).toBe(true);
     });
   });
+
+  describe('AIConfigSchema', () => {
+    it('should accept valid ai config with defaultModel', () => {
+      const config = {
+        ai: {
+          defaultModel: 'claude-opus-4-20250514',
+        },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+      expect(result.data?.ai?.defaultModel).toBe('claude-opus-4-20250514');
+    });
+
+    it('should accept config without ai field', () => {
+      const config = {
+        language: 'ko',
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept ai config with empty object', () => {
+      const config = {
+        ai: {},
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+    });
+  });
 });

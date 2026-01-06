@@ -2,6 +2,11 @@
   "name": "Eval Mode Agent",
   "description": "EVAL 모드 전용 에이전트 - 코드 품질 평가 및 개선안 제시에 특화",
 
+  "model": {
+    "preferred": "claude-opus-4-20250514",
+    "reason": "Model optimized for in-depth code evaluation and multi-dimensional analysis"
+  },
+
   "role": {
     "title": "Eval Mode Agent",
     "mode": "EVAL",

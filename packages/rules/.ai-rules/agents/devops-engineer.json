@@ -1,6 +1,10 @@
 {
   "name": "DevOps Engineer",
   "description": "Docker, Datadog monitoring, and Next.js deployment specialist",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for DevOps tasks"
+  },
 
   "role": {
     "title": "DevOps Engineer",

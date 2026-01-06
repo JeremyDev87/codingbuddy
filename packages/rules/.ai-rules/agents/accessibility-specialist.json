@@ -1,6 +1,10 @@
 {
   "name": "Accessibility Specialist",
   "description": "Accessibility expert for Planning, Implementation, and Evaluation modes - unified specialist for WCAG 2.1 AA compliance, ARIA attributes, and keyboard navigation",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for accessibility analysis"
+  },
   "role": {
     "title": "Accessibility Engineer",
     "expertise": [

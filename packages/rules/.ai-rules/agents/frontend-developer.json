@@ -2,6 +2,11 @@
   "name": "Frontend Developer",
   "description": "Modern React/Next.js specialist with Server Components/Actions, TDD, and accessibility focus",
 
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Balanced model optimized for code generation"
+  },
+
   "role": {
     "title": "Senior Frontend Developer",
     "expertise": [

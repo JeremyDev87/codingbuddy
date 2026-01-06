@@ -516,6 +516,138 @@ describe('McpService', () => {
       });
     });
 
+    describe('resolvedModel field in get_agent_details', () => {
+      it('should include resolvedModel with source: agent when agent has model.preferred', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Frontend Developer',
+          description: 'Frontend development specialist',
+          role: {
+            title: 'Senior Frontend Developer',
+            expertise: ['React', 'TypeScript'],
+            responsibilities: ['Write clean code', 'Follow best practices'],
+          },
+          model: {
+            preferred: 'claude-sonnet-4-20250514',
+            reason: 'Balanced model optimized for code generation',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_details',
+            arguments: { agentName: 'frontend-developer' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'agent',
+        });
+      });
+
+      it('should include resolvedModel with source: system when agent has no model', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Legacy Agent',
+          description: 'Agent without model config',
+          role: {
+            title: 'Legacy Role',
+            expertise: ['Legacy Tech'],
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_details',
+            arguments: { agentName: 'legacy-agent' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'system',
+        });
+      });
+
+      it('should include resolvedModel with source: system when agent model has no preferred', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Partial Model Agent',
+          description: 'Agent with partial model config',
+          role: {
+            title: 'Partial Role',
+            expertise: ['Partial Tech'],
+          },
+          model: {
+            reason: 'Some reason but no preferred model',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_details',
+            arguments: { agentName: 'partial-model-agent' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'system',
+        });
+      });
+
+      it('should preserve original model field in response alongside resolvedModel', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Frontend Developer',
+          description: 'Frontend development specialist',
+          role: {
+            title: 'Senior Frontend Developer',
+            expertise: ['React', 'TypeScript'],
+          },
+          model: {
+            preferred: 'claude-opus-4-20250514',
+            reason: 'Best for complex reasoning',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_details',
+            arguments: { agentName: 'frontend-developer' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        const parsed = JSON.parse(result.content[0].text);
+        // Original model field should be preserved
+        expect(parsed.model).toEqual({
+          preferred: 'claude-opus-4-20250514',
+          reason: 'Best for complex reasoning',
+        });
+        // And resolvedModel should also be present
+        expect(parsed.resolvedModel).toEqual({
+          model: 'claude-opus-4-20250514',
+          source: 'agent',
+        });
+      });
+    });
+
     it('should list suggest_config_updates tool', async () => {
       const handler = handlers.get('tools/list');
       expect(handler).toBeDefined();
@@ -613,6 +745,234 @@ describe('McpService', () => {
         name: 'Code Reviewer',
         description: 'Code quality evaluation specialist',
         expertise: ['Code Quality', 'SOLID Principles'],
+      });
+    });
+
+    describe('resolvedModel field in parse_mode', () => {
+      it('should include resolvedModel with source: mode when mode agent has model.preferred', async () => {
+        // Mock mode agent with model config
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Plan Mode Agent',
+          description: 'PLAN mode agent',
+          role: {
+            title: 'Plan Mode Agent',
+            expertise: ['Planning'],
+          },
+          model: {
+            preferred: 'claude-sonnet-4-20250514',
+            reason: 'Good for planning',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'PLAN Create a login form' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        expect(parsedContent.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'mode',
+        });
+      });
+
+      it('should include resolvedModel with source: system when mode agent has no model', async () => {
+        // Mock mode agent without model config
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Plan Mode Agent',
+          description: 'PLAN mode agent without model',
+          role: {
+            title: 'Plan Mode Agent',
+            expertise: ['Planning'],
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'PLAN Create a login form' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        expect(parsedContent.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'system',
+        });
+      });
+
+      it('should include resolvedModel with source: system when mode agent loading fails', async () => {
+        // Mock mode agent loading failure
+        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
+          new Error('Agent not found'),
+        );
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'PLAN Create a login form' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        expect(parsedContent.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'system',
+        });
+      });
+
+      it('should include resolvedModel for ACT mode', async () => {
+        // Mock ACT mode agent with model config
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Act Mode Agent',
+          description: 'ACT mode agent',
+          role: {
+            title: 'Act Mode Agent',
+            expertise: ['Implementation'],
+          },
+          model: {
+            preferred: 'claude-opus-4-20250514',
+            reason: 'Best for complex implementation',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'ACT implement feature' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        expect(parsedContent.resolvedModel).toEqual({
+          model: 'claude-opus-4-20250514',
+          source: 'mode',
+        });
+      });
+
+      it('should include resolvedModel for EVAL mode', async () => {
+        // Mock EVAL mode agent with model config
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Eval Mode Agent',
+          description: 'EVAL mode agent',
+          role: {
+            title: 'Eval Mode Agent',
+            expertise: ['Code Review'],
+          },
+          model: {
+            preferred: 'claude-sonnet-4-20250514',
+            reason: 'Good for evaluation',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'EVAL review code quality' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        expect(parsedContent.resolvedModel).toEqual({
+          model: 'claude-sonnet-4-20250514',
+          source: 'mode',
+        });
+      });
+
+      it('should include resolvedModel even when no mode keyword is provided (defaults to PLAN)', async () => {
+        // Mock PLAN mode agent with model config
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Plan Mode Agent',
+          description: 'PLAN mode agent',
+          role: {
+            title: 'Plan Mode Agent',
+            expertise: ['Planning'],
+          },
+          model: {
+            preferred: 'claude-sonnet-4-20250514',
+            reason: 'Good for planning',
+          },
+          source: 'default',
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'Create a login form' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        // Should still have resolvedModel even without explicit mode keyword
+        expect(parsedContent.resolvedModel).toBeDefined();
+      });
+
+      it('should use global config when mode agent has no model', async () => {
+        // Mock mode agent without model config
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
+          name: 'Plan Mode Agent',
+          description: 'PLAN mode agent without model',
+          role: {
+            title: 'Plan Mode Agent',
+            expertise: ['Planning'],
+          },
+          source: 'default',
+        });
+
+        // Mock global config with ai.defaultModel
+        vi.mocked(mockConfigService.getSettings!).mockResolvedValue({
+          language: 'ko',
+          ai: {
+            defaultModel: 'claude-opus-4-20250514',
+          },
+        });
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'PLAN Create a login form' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        expect(parsedContent.resolvedModel).toEqual({
+          model: 'claude-opus-4-20250514',
+          source: 'global',
+        });
       });
     });
 
@@ -957,6 +1317,74 @@ describe('McpService', () => {
         expect(result.isError).toBe(true);
         expect(result.content[0].text).toContain(
           'Failed to get project config',
+        );
+      });
+
+      it('should use system default model when getSettings throws during parse_mode', async () => {
+        handlers.clear();
+        const failingConfigService = createMockConfigService({});
+        vi.mocked(failingConfigService.getSettings!).mockRejectedValue(
+          new Error('Config load error'),
+        );
+
+        const service = new McpService(
+          mockRulesService as RulesService,
+          mockKeywordService as KeywordService,
+          failingConfigService as ConfigService,
+          mockConfigDiffService as ConfigDiffService,
+          mockAnalyzerService as AnalyzerService,
+          mockSkillRecommendationService as SkillRecommendationService,
+          mockLanguageService as LanguageService,
+          mockAgentService as AgentService,
+        );
+        service.onModuleInit();
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'parse_mode',
+            arguments: { prompt: 'PLAN Create a login form' },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        const parsedContent = JSON.parse(result.content[0].text);
+        // Should still work, falling back to system default
+        expect(parsedContent.resolvedModel).toBeDefined();
+        expect(parsedContent.resolvedModel.source).toBe('system');
+      });
+
+      it('should return error response when suggest_config_updates fails', async () => {
+        handlers.clear();
+        const failingAnalyzerService = createMockAnalyzerService();
+        vi.mocked(failingAnalyzerService.analyzeProject!).mockRejectedValue(
+          new Error('Analysis failed'),
+        );
+
+        const service = new McpService(
+          mockRulesService as RulesService,
+          mockKeywordService as KeywordService,
+          mockConfigService as ConfigService,
+          mockConfigDiffService as ConfigDiffService,
+          failingAnalyzerService as AnalyzerService,
+          mockSkillRecommendationService as SkillRecommendationService,
+          mockLanguageService as LanguageService,
+          mockAgentService as AgentService,
+        );
+        service.onModuleInit();
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: { name: 'suggest_config_updates', arguments: {} },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain(
+          'Failed to suggest config updates',
         );
       });
     });

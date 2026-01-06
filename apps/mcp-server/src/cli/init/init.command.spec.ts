@@ -12,6 +12,7 @@ const {
   mockSelectTemplate,
   mockRenderConfigAsJs,
   mockRenderConfigAsJson,
+  mockPromptModelSelection,
 } = vi.hoisted(() => ({
   mockAnalyzeProject: vi.fn(),
   mockGenerate: vi.fn(),
@@ -20,6 +21,7 @@ const {
   mockSelectTemplate: vi.fn(),
   mockRenderConfigAsJs: vi.fn(),
   mockRenderConfigAsJson: vi.fn(),
+  mockPromptModelSelection: vi.fn(),
 }));
 
 // Mock all modules
@@ -44,6 +46,11 @@ vi.mock('./templates', () => ({
   selectTemplate: mockSelectTemplate,
   renderConfigAsJs: mockRenderConfigAsJs,
   renderConfigAsJson: mockRenderConfigAsJson,
+}));
+
+vi.mock('./prompts', () => ({
+  promptModelSelection: mockPromptModelSelection,
+  DEFAULT_MODEL_CHOICE: 'claude-sonnet-4-20250514',
 }));
 
 vi.mock('../utils/console', () => ({
@@ -122,6 +129,7 @@ describe('init.command', () => {
     mockSelectTemplate.mockReturnValue(mockTemplateResult);
     mockRenderConfigAsJs.mockReturnValue('// rendered config');
     mockRenderConfigAsJson.mockReturnValue('{}');
+    mockPromptModelSelection.mockResolvedValue('claude-sonnet-4-20250514');
   });
 
   describe('getApiKey', () => {
@@ -251,6 +259,66 @@ describe('init.command', () => {
       expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
         mockTemplateResult.template,
         expect.objectContaining({ language: 'en' }),
+      );
+    });
+
+    it('should call promptModelSelection when skipPrompts is false', async () => {
+      const options: InitOptions = {
+        projectRoot: '/project',
+        format: 'js',
+        force: false,
+        skipPrompts: false,
+      };
+
+      await runInit(options);
+
+      expect(mockPromptModelSelection).toHaveBeenCalled();
+    });
+
+    it('should skip promptModelSelection when skipPrompts is true', async () => {
+      const options: InitOptions = {
+        projectRoot: '/project',
+        format: 'js',
+        force: false,
+        skipPrompts: true,
+      };
+
+      await runInit(options);
+
+      expect(mockPromptModelSelection).not.toHaveBeenCalled();
+    });
+
+    it('should pass selected model to renderer', async () => {
+      mockPromptModelSelection.mockResolvedValue('claude-opus-4-20250514');
+
+      const options: InitOptions = {
+        projectRoot: '/project',
+        format: 'js',
+        force: false,
+        skipPrompts: false,
+      };
+
+      await runInit(options);
+
+      expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
+        mockTemplateResult.template,
+        expect.objectContaining({ defaultModel: 'claude-opus-4-20250514' }),
+      );
+    });
+
+    it('should use default model when skipPrompts is true', async () => {
+      const options: InitOptions = {
+        projectRoot: '/project',
+        format: 'js',
+        force: false,
+        skipPrompts: true,
+      };
+
+      await runInit(options);
+
+      expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
+        mockTemplateResult.template,
+        expect.objectContaining({ defaultModel: 'claude-sonnet-4-20250514' }),
       );
     });
   });

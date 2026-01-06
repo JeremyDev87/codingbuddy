@@ -34,6 +34,11 @@ export interface InitOptions {
   apiKey?: string;
   /** Response language for AI and comments */
   language?: string;
+  /**
+   * Skip interactive prompts (for CI environments)
+   * @default false - When false or undefined, interactive prompts are shown
+   */
+  skipPrompts?: boolean;
 }
 
 /**

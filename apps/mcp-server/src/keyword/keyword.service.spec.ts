@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { KeywordService } from './keyword.service';
 import type { KeywordModesConfig } from './keyword.types';
 
+/**
+ * NOTE: Korean/Japanese/Chinese/Spanish test inputs (e.g., '계획 인증 기능 설계')
+ * are intentional for testing multi-language keyword parsing functionality.
+ * These are NOT translation targets - they are test data for i18n support.
+ */
+
 const mockConfig: KeywordModesConfig = {
   modes: {
     PLAN: {
@@ -51,14 +57,16 @@ const mockRulesContent: Record<string, string> = {
 const mockAgentData: Record<string, unknown> = {
   'frontend-developer': {
     name: 'Frontend Developer',
-    description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+    description:
+      'React/Next.js specialist with TDD and design system experience',
     role: {
       expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
     },
   },
   'code-reviewer': {
     name: 'Code Reviewer',
-    description: '코드 품질 평가 및 개선 제안 전문가',
+    description:
+      'Code quality evaluation and improvement suggestion specialist',
     role: {
       expertise: [
         'Code Quality',
@@ -110,7 +118,8 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('frontend-developer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Frontend Developer',
-          description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+          description:
+            'React/Next.js specialist with TDD and design system experience',
           expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
         });
       });
@@ -126,7 +135,8 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('frontend-developer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Frontend Developer',
-          description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+          description:
+            'React/Next.js specialist with TDD and design system experience',
           expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
         });
       });
@@ -141,7 +151,8 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('code-reviewer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Code Reviewer',
-          description: '코드 품질 평가 및 개선 제안 전문가',
+          description:
+            'Code quality evaluation and improvement suggestion specialist',
           expertise: [
             'Code Quality',
             'SOLID Principles',
@@ -630,7 +641,8 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('frontend-developer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Frontend Developer',
-          description: 'React/Next.js 전문가, TDD 및 디자인 시스템 경험',
+          description:
+            'React/Next.js specialist with TDD and design system experience',
           expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
         });
         expect(mockLoadAgentInfo).toHaveBeenCalledWith('frontend-developer');
@@ -642,7 +654,8 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('code-reviewer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Code Reviewer',
-          description: '코드 품질 평가 및 개선 제안 전문가',
+          description:
+            'Code quality evaluation and improvement suggestion specialist',
           expertise: [
             'Code Quality',
             'SOLID Principles',

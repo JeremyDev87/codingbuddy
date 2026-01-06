@@ -1,6 +1,10 @@
 {
   "name": "Code Quality Specialist",
   "description": "Code quality expert for Planning, Implementation, and Evaluation modes - unified specialist for SOLID principles, DRY, complexity analysis, and design patterns",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for code quality analysis"
+  },
   "role": {
     "title": "Code Quality Engineer",
     "expertise": [

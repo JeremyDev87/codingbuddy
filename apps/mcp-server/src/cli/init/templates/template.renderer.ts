@@ -87,6 +87,15 @@ export function renderConfigAsJs(
     lines.push('  testStrategy: {');
     lines.push(...renderTestStrategy(config.testStrategy));
     lines.push('  },');
+    lines.push('');
+  }
+
+  // AI Configuration (from options.defaultModel)
+  if (options.defaultModel) {
+    lines.push('  // AI Model Configuration');
+    lines.push('  ai: {');
+    lines.push(`    defaultModel: '${options.defaultModel}',`);
+    lines.push('  },');
   }
 
   lines.push('};');
@@ -108,7 +117,13 @@ export function renderConfigAsJson(
   options: TemplateRenderOptions = {},
 ): string {
   const config = applyOverrides(template.config, options);
-  return JSON.stringify(config, null, 2);
+
+  // Add ai config if defaultModel is provided
+  const configWithAi = options.defaultModel
+    ? { ...config, ai: { defaultModel: options.defaultModel } }
+    : config;
+
+  return JSON.stringify(configWithAi, null, 2);
 }
 
 /**

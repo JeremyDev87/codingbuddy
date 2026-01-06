@@ -157,6 +157,28 @@ testStrategy: {
 | `e2eDirectory` | `string` | E2E test directory |
 | `mockingStrategy` | `string` | Mocking approach (`'minimal'`, `'extensive'`, `'no-mocks'`) |
 
+### AI Configuration (`ai`)
+
+Configure AI model settings:
+
+```javascript
+ai: {
+  defaultModel: 'claude-sonnet-4-20250514',
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `defaultModel` | `string` | Default Claude model for AI operations. Available options: `claude-sonnet-4-20250514` (recommended, balanced), `claude-opus-4-20250514` (most capable), `claude-haiku-3-5-20241022` (fastest) |
+
+**Model Selection During Init:**
+
+When running `npx codingbuddy init`, you'll be prompted to select a default model:
+
+- **Claude Sonnet 4** (Recommended) - Balanced performance and cost
+- **Claude Opus 4** - Most capable, best for complex tasks
+- **Claude Haiku 3.5** - Fastest, most cost-effective
+
 ### Additional Context
 
 ```javascript
@@ -226,6 +248,11 @@ module.exports = {
     coverage: 80,
     unitTestPattern: 'colocated',
     mockingStrategy: 'minimal',
+  },
+
+  // AI Configuration
+  ai: {
+    defaultModel: 'claude-sonnet-4-20250514',
   },
 
   // Additional

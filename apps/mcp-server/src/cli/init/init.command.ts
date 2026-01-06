@@ -15,6 +15,7 @@ import {
   renderConfigAsJs,
   renderConfigAsJson,
 } from './templates';
+import { promptModelSelection, DEFAULT_MODEL_CHOICE } from './prompts';
 import type { InitOptions, InitResult } from '../cli.types';
 
 /**
@@ -68,13 +69,23 @@ async function runTemplateInit(
     console.log.info(`  Detected: ${detectedFrameworks.join(', ')}`);
   }
 
-  // Step 3: Render config with comments
+  // Step 3: Select AI model
+  let selectedModel = DEFAULT_MODEL_CHOICE;
+  const shouldPrompt = !(options.skipPrompts ?? false);
+  if (shouldPrompt) {
+    console.log.step('🤖', 'Select AI model...');
+    selectedModel = await promptModelSelection();
+    console.log.success(`Model: ${selectedModel}`);
+  }
+
+  // Step 4: Render config with comments
   console.log.step('✨', 'Generating configuration...');
 
   const projectName = analysis.packageInfo?.name;
   const renderOptions = {
     projectName,
     language: options.language,
+    defaultModel: selectedModel,
   };
 
   const configContent =
@@ -82,7 +93,7 @@ async function runTemplateInit(
       ? renderConfigAsJson(template, renderOptions)
       : renderConfigAsJs(template, renderOptions);
 
-  // Step 4: Write config file
+  // Step 5: Write config file
   console.log.step('💾', 'Writing configuration file...');
 
   const configPath = await writeConfig(options.projectRoot, configContent, {

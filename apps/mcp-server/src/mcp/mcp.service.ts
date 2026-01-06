@@ -23,6 +23,8 @@ import type { CodingBuddyConfig } from '../config/config.schema';
 import { LanguageService } from '../shared/language.service';
 import { AgentService } from '../agent/agent.service';
 import type { Mode } from '../keyword/keyword.types';
+import { resolveModel, isModelConfig } from '../model';
+import type { ModelConfig } from '../model';
 
 @Injectable()
 export class McpService implements OnModuleInit {
@@ -435,7 +437,16 @@ export class McpService implements OnModuleInit {
     const agentName = String(args?.agentName);
     try {
       const agent = await this.rulesService.getAgent(agentName);
-      return this.jsonResponse(agent);
+
+      // Resolve model using 4-level priority: agent > mode > global > system
+      // For get_agent_details, we only have agent context (no mode or global config)
+      const agentModel = agent.model as ModelConfig | undefined;
+      const resolvedModel = resolveModel({ agentModel });
+
+      return this.jsonResponse({
+        ...agent,
+        resolvedModel,
+      });
     } catch {
       return this.errorResponse(`Agent '${agentName}' not found.`);
     }
@@ -448,16 +459,56 @@ export class McpService implements OnModuleInit {
       const language = await this.configService.getLanguage();
       const languageInstructionResult =
         this.languageService.getLanguageInstruction(language || 'en');
+      const resolvedModel = await this.resolveModelForMode(result.agent);
 
       return this.jsonResponse({
         ...result,
         language,
         languageInstruction: languageInstructionResult.instruction,
+        resolvedModel,
       });
     } catch (error) {
       return this.errorResponse(
         `Failed to parse mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+    }
+  }
+
+  /**
+   * Resolve AI model for a given mode agent
+   * Uses 4-level priority: agent > mode > global > system
+   */
+  private async resolveModelForMode(modeAgentName?: string) {
+    const globalDefaultModel = await this.loadGlobalDefaultModel();
+    const modeModel = await this.loadModeModel(modeAgentName);
+    return resolveModel({ modeModel, globalDefaultModel });
+  }
+
+  private async loadGlobalDefaultModel(): Promise<string | undefined> {
+    try {
+      const globalConfig = await this.configService.getSettings();
+      return globalConfig?.ai?.defaultModel;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to load global config for model resolution: ${error instanceof Error ? error.message : 'Unknown error'}. Using system default.`,
+      );
+      return undefined;
+    }
+  }
+
+  private async loadModeModel(
+    agentName?: string,
+  ): Promise<ModelConfig | undefined> {
+    if (!agentName) return undefined;
+
+    try {
+      const modeAgent = await this.rulesService.getAgent(agentName);
+      return isModelConfig(modeAgent.model) ? modeAgent.model : undefined;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to load mode agent '${agentName}' for model resolution: ${error instanceof Error ? error.message : 'Unknown error'}. Using fallback.`,
+      );
+      return undefined;
     }
   }
 

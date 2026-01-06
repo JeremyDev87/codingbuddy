@@ -1,6 +1,10 @@
 {
   "name": "SEO Specialist",
   "description": "SEO expert for Planning, Implementation, and Evaluation modes - unified specialist for metadata, structured data, and search engine optimization",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for SEO analysis"
+  },
   "role": {
     "title": "SEO Engineer",
     "expertise": [

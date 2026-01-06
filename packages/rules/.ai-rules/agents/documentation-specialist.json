@@ -1,6 +1,10 @@
 {
   "name": "Documentation Specialist",
   "description": "Documentation expert for Planning, Implementation, and Evaluation modes - unified specialist for documentation planning, code comments, type definitions, and documentation quality assessment",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for documentation"
+  },
   "role": {
     "title": "Documentation Engineer",
     "expertise": [

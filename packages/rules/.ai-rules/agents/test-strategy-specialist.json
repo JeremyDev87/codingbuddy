@@ -1,6 +1,10 @@
 {
   "name": "Test Strategy Specialist",
   "description": "Test strategy expert for Planning, Implementation, and Evaluation modes - unified specialist for TDD vs Test-After decisions, test coverage planning, and test quality assessment",
+  "model": {
+    "preferred": "claude-sonnet-4-20250514",
+    "reason": "Suitable model for test strategy planning"
+  },
   "role": {
     "title": "Test Strategy Engineer",
     "expertise": [

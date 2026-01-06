@@ -41,12 +41,23 @@ const RoleSchema = z
   .passthrough();
 
 /**
+ * Model configuration schema - optional model preferences
+ */
+const ModelConfigSchema = z
+  .object({
+    preferred: z.string(),
+    reason: z.string().optional(),
+  })
+  .optional();
+
+/**
  * Agent Profile schema - validates required fields, allows additional
  */
 const AgentProfileSchema = z
   .object({
     name: z.string(),
     description: z.string(),
+    model: ModelConfigSchema,
     role: RoleSchema,
   })
   .passthrough();

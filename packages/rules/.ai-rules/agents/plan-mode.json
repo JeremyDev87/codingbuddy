@@ -2,6 +2,11 @@
   "name": "Plan Mode Agent",
   "description": "PLAN 모드 전용 에이전트 - 작업 계획 수립 및 설계에 특화",
 
+  "model": {
+    "preferred": "claude-opus-4-20250514",
+    "reason": "Model optimized for complex planning and architecture design"
+  },
+
   "role": {
     "title": "Plan Mode Agent",
     "mode": "PLAN",

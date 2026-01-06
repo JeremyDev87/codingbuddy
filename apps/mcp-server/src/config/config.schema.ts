@@ -69,6 +69,10 @@ export const TestStrategyConfigSchema = z.object({
   mockingStrategy: z.enum(['minimal', 'extensive', 'no-mocks']).optional(),
 });
 
+export const AIConfigSchema = z.object({
+  defaultModel: z.string().optional(),
+});
+
 // ============================================================================
 // Main Configuration Schema
 // ============================================================================
@@ -85,6 +89,9 @@ export const CodingBuddyConfigSchema = z.object({
   architecture: ArchitectureConfigSchema.optional(),
   conventions: ConventionsConfigSchema.optional(),
   testStrategy: TestStrategyConfigSchema.optional(),
+
+  // AI Configuration
+  ai: AIConfigSchema.optional(),
 
   // Additional Context
   keyFiles: z.array(z.string()).optional(),
@@ -103,6 +110,7 @@ export type TechStackConfig = z.infer<typeof TechStackConfigSchema>;
 export type ArchitectureConfig = z.infer<typeof ArchitectureConfigSchema>;
 export type ConventionsConfig = z.infer<typeof ConventionsConfigSchema>;
 export type TestStrategyConfig = z.infer<typeof TestStrategyConfigSchema>;
+export type AIConfig = z.infer<typeof AIConfigSchema>;
 export type CodingBuddyConfig = z.infer<typeof CodingBuddyConfigSchema>;
 
 // ============================================================================

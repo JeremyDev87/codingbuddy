@@ -11,15 +11,15 @@ describe('SkillRecommendationService', () => {
     service = new SkillRecommendationService();
   });
 
-  describe('recommendSkills 기본 기능', () => {
-    it('관련 없는 프롬프트에 대해 빈 추천을 반환해야 함', () => {
+  describe('recommendSkills basic functionality', () => {
+    it('should return empty recommendations for unrelated prompt', () => {
       const result = service.recommendSkills('hello world');
 
       expect(result.recommendations).toHaveLength(0);
       expect(result.originalPrompt).toBe('hello world');
     });
 
-    it('매칭된 패턴과 함께 추천을 반환해야 함', () => {
+    it('should return recommendations with matched patterns', () => {
       const result = service.recommendSkills('I need to fix this error');
 
       expect(result.recommendations.length).toBeGreaterThan(0);
@@ -29,7 +29,7 @@ describe('SkillRecommendationService', () => {
       );
     });
 
-    it('원본 프롬프트를 결과에 포함해야 함', () => {
+    it('should include original prompt in result', () => {
       const prompt = 'create a new button component';
       const result = service.recommendSkills(prompt);
 
@@ -37,8 +37,8 @@ describe('SkillRecommendationService', () => {
     });
   });
 
-  describe('다국어 지원 (5개 언어)', () => {
-    describe('영어 (English)', () => {
+  describe('multi-language support (5 languages)', () => {
+    describe('English', () => {
       it('"There is a bug in the login" -> systematic-debugging', () => {
         const result = service.recommendSkills('There is a bug in the login');
 
@@ -47,7 +47,7 @@ describe('SkillRecommendationService', () => {
         );
       });
 
-      it('"build" 키워드로 brainstorming 추천', () => {
+      it('should recommend brainstorming for "build" keyword', () => {
         const result = service.recommendSkills('I want to build a new feature');
 
         const hasExpectedSkill = result.recommendations.some(
@@ -57,7 +57,7 @@ describe('SkillRecommendationService', () => {
       });
     });
 
-    describe('한국어 (Korean)', () => {
+    describe('Korean', () => {
       it('"로그인에 버그가 있어" -> systematic-debugging', () => {
         const result = service.recommendSkills('로그인에 버그가 있어');
 
@@ -76,7 +76,7 @@ describe('SkillRecommendationService', () => {
       });
     });
 
-    describe('일본어 (Japanese)', () => {
+    describe('Japanese', () => {
       it('"ログインにバグがある" -> systematic-debugging', () => {
         const result = service.recommendSkills('ログインにバグがある');
 
@@ -95,7 +95,7 @@ describe('SkillRecommendationService', () => {
       });
     });
 
-    describe('중국어 (Chinese)', () => {
+    describe('Chinese', () => {
       it('"登录有错误" -> systematic-debugging', () => {
         const result = service.recommendSkills('登录有错误');
 
@@ -114,7 +114,7 @@ describe('SkillRecommendationService', () => {
       });
     });
 
-    describe('스페인어 (Spanish)', () => {
+    describe('Spanish', () => {
       it('"Hay un error en el login" -> systematic-debugging', () => {
         const result = service.recommendSkills('Hay un error en el login');
 
@@ -134,9 +134,9 @@ describe('SkillRecommendationService', () => {
     });
   });
 
-  describe('신뢰도(confidence) 레벨', () => {
-    it('여러 패턴 매칭 시 high confidence 반환', () => {
-      // "fix", "bug", "error" 모두 매칭 - 3개 이상
+  describe('confidence levels', () => {
+    it('should return high confidence when multiple patterns match', () => {
+      // "fix", "bug", "error" all match - 3 or more
       const result = service.recommendSkills(
         'I need to fix this bug error issue',
       );
@@ -147,8 +147,8 @@ describe('SkillRecommendationService', () => {
       expect(debugging?.confidence).toBe('high');
     });
 
-    it('단일 패턴 매칭 시 medium confidence 반환', () => {
-      // 단일 키워드만 매칭
+    it('should return medium confidence for single pattern match', () => {
+      // single keyword match only
       const result = service.recommendSkills('There is an error here');
 
       const debugging = result.recommendations.find(
@@ -157,15 +157,15 @@ describe('SkillRecommendationService', () => {
       expect(debugging?.confidence).toBe('medium');
     });
 
-    it('매칭 없으면 low가 아닌 추천 없음', () => {
+    it('should return no recommendations (not low) when nothing matches', () => {
       const result = service.recommendSkills('random unrelated text xyz123');
 
       expect(result.recommendations).toHaveLength(0);
     });
   });
 
-  describe('우선순위(priority) 정렬', () => {
-    it('높은 우선순위 스킬이 먼저 나와야 함', () => {
+  describe('priority sorting', () => {
+    it('should return higher priority skills first', () => {
       // "error" -> debugging (25), "create" -> brainstorming (10)
       const result = service.recommendSkills(
         'I need to create something but there is an error',
@@ -173,7 +173,7 @@ describe('SkillRecommendationService', () => {
 
       expect(result.recommendations.length).toBeGreaterThanOrEqual(2);
 
-      // debugging (priority 25)이 brainstorming (priority 10)보다 먼저
+      // debugging (priority 25) should come before brainstorming (priority 10)
       const debuggingIdx = result.recommendations.findIndex(
         r => r.skillName === 'systematic-debugging',
       );
@@ -184,25 +184,25 @@ describe('SkillRecommendationService', () => {
       expect(debuggingIdx).toBeLessThan(brainstormingIdx);
     });
 
-    it('여러 스킬 추천 시 priority 순으로 정렬', () => {
+    it('should sort multiple skill recommendations by priority', () => {
       const result = service.recommendSkills(
         'I need to fix the bug and create a new button component',
       );
 
-      // 여러 스킬이 매칭될 수 있음
+      // Multiple skills may match
       for (let i = 0; i < result.recommendations.length - 1; i++) {
         const current = result.recommendations[i];
         const next = result.recommendations[i + 1];
 
-        // description에 priority 정보가 없으므로 순서만 확인
-        // 실제 구현에서는 priority 기준 정렬됨을 신뢰
+        // Since description doesn't have priority info, just verify order exists
+        // Trust that actual implementation sorts by priority
         expect(current).toBeDefined();
         expect(next).toBeDefined();
       }
     });
   });
 
-  describe('각 스킬별 예시 프롬프트', () => {
+  describe('example prompts for each skill', () => {
     it('"I need to fix this bug" -> systematic-debugging', () => {
       const result = service.recommendSkills('I need to fix this bug');
 
@@ -223,7 +223,7 @@ describe('SkillRecommendationService', () => {
         'Design a new user profile feature',
       );
 
-      // "new"와 "design" 키워드가 brainstorming과 매칭
+      // "new" and "design" keywords match brainstorming
       const hasBrainstorming = result.recommendations.some(
         r => r.skillName === 'brainstorming',
       );
@@ -260,8 +260,8 @@ describe('SkillRecommendationService', () => {
     });
   });
 
-  describe('RecommendSkillsResult 구조', () => {
-    it('결과 객체가 올바른 구조를 가져야 함', () => {
+  describe('RecommendSkillsResult structure', () => {
+    it('should have correct result object structure', () => {
       const result: RecommendSkillsResult =
         service.recommendSkills('fix the bug');
 
@@ -270,7 +270,7 @@ describe('SkillRecommendationService', () => {
       expect(Array.isArray(result.recommendations)).toBe(true);
     });
 
-    it('SkillRecommendation이 필수 필드를 포함해야 함', () => {
+    it('SkillRecommendation should include required fields', () => {
       const result = service.recommendSkills('there is an error');
 
       expect(result.recommendations.length).toBeGreaterThan(0);
@@ -282,7 +282,7 @@ describe('SkillRecommendationService', () => {
       expect(recommendation).toHaveProperty('description');
     });
 
-    it('confidence는 high, medium, low 중 하나여야 함', () => {
+    it('confidence should be one of high, medium, low', () => {
       const result = service.recommendSkills('fix the error bug issue');
 
       for (const rec of result.recommendations) {
@@ -290,7 +290,7 @@ describe('SkillRecommendationService', () => {
       }
     });
 
-    it('matchedPatterns는 문자열 배열이어야 함', () => {
+    it('matchedPatterns should be an array of strings', () => {
       const result = service.recommendSkills('fix the error');
 
       for (const rec of result.recommendations) {
@@ -302,35 +302,35 @@ describe('SkillRecommendationService', () => {
     });
   });
 
-  describe('엣지 케이스', () => {
-    it('빈 문자열 입력 처리', () => {
+  describe('edge cases', () => {
+    it('should handle empty string input', () => {
       const result = service.recommendSkills('');
 
       expect(result.recommendations).toHaveLength(0);
       expect(result.originalPrompt).toBe('');
     });
 
-    it('공백만 있는 입력 처리', () => {
+    it('should handle whitespace-only input', () => {
       const result = service.recommendSkills('   ');
 
       expect(result.recommendations).toHaveLength(0);
     });
 
-    it('특수 문자가 포함된 입력 처리', () => {
+    it('should handle input with special characters', () => {
       const result = service.recommendSkills('fix the bug!! @#$%');
 
       expect(result.recommendations[0].skillName).toBe('systematic-debugging');
     });
 
-    it('매우 긴 프롬프트 처리', () => {
+    it('should handle very long prompts', () => {
       const longPrompt = 'I need to fix this bug '.repeat(100);
       const result = service.recommendSkills(longPrompt);
 
       expect(result.recommendations.length).toBeGreaterThan(0);
     });
 
-    it('혼합 언어 프롬프트 처리', () => {
-      // 한국어와 영어 혼합
+    it('should handle mixed language prompts', () => {
+      // Korean and English mixed
       const result = service.recommendSkills('버그 fix please');
 
       expect(result.recommendations.length).toBeGreaterThan(0);

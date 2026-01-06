@@ -77,6 +77,23 @@ describe('Template Renderer', () => {
       expect(result).toContain("language: 'en'");
     });
 
+    it('renders ai section when defaultModel is provided', () => {
+      const result = renderConfigAsJs(mockTemplate, {
+        defaultModel: 'claude-opus-4-20250514',
+      });
+
+      expect(result).toContain('// AI Model Configuration');
+      expect(result).toContain('ai: {');
+      expect(result).toContain("defaultModel: 'claude-opus-4-20250514'");
+    });
+
+    it('does not render ai section when defaultModel is not provided', () => {
+      const result = renderConfigAsJs(mockTemplate);
+
+      expect(result).not.toContain('// AI Model Configuration');
+      expect(result).not.toContain('ai: {');
+    });
+
     it('renders Next.js template correctly', () => {
       const result = renderConfigAsJs(nextjsTemplate, {
         projectName: 'nextjs-app',
@@ -134,6 +151,23 @@ describe('Template Renderer', () => {
 
       expect(result).toContain('\n');
       expect(result).toContain('  '); // Has indentation
+    });
+
+    it('includes ai section when defaultModel is provided', () => {
+      const result = renderConfigAsJson(mockTemplate, {
+        defaultModel: 'claude-opus-4-20250514',
+      });
+      const parsed = JSON.parse(result);
+
+      expect(parsed.ai).toBeDefined();
+      expect(parsed.ai.defaultModel).toBe('claude-opus-4-20250514');
+    });
+
+    it('does not include ai section when defaultModel is not provided', () => {
+      const result = renderConfigAsJson(mockTemplate);
+      const parsed = JSON.parse(result);
+
+      expect(parsed.ai).toBeUndefined();
     });
   });
 });

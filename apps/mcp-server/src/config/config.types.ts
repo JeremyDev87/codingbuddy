@@ -34,6 +34,7 @@ export type {
   ArchitectureConfig,
   ConventionsConfig,
   TestStrategyConfig,
+  AIConfig,
   TechDetail,
   ArchitectureLayer,
   NamingConvention,
