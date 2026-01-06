@@ -1,0 +1,47 @@
+---
+description: codingbuddy Agent auto-activation based on file patterns
+globs:
+  - "**/*.tsx"
+  - "**/*.ts"
+  - "**/*.go"
+  - "**/*.py"
+  - "**/*.java"
+  - "**/*.rs"
+  - "**/Dockerfile"
+  - "**/*.yml"
+  - "**/*.yaml"
+alwaysApply: false
+---
+
+# codingbuddy Agent System
+
+## Required: Mode Keyword Detection
+
+When user message starts with `PLAN`, `ACT`, `EVAL` (or localized variants):
+
+→ **Immediately** call `parse_mode` MCP tool
+
+## File Context → Agent Mapping
+
+| File Pattern | Recommended Agent | MCP Call |
+|--------------|-------------------|----------|
+| `*.tsx`, `*.ts` | frontend-developer | `get_agent_details("frontend-developer")` |
+| `*.go`, `*.py`, `*.java`, `*.rs` | backend-developer | `get_agent_details("backend-developer")` |
+| `Dockerfile`, `*.yml` | devops-engineer | `get_agent_details("devops-engineer")` |
+| `*.json` (agents/) | agent-architect | `get_agent_details("agent-architect")` |
+
+## Specialist Auto-Recommendation
+
+| Detected Topic | Recommended Specialist |
+|----------------|------------------------|
+| Security, auth, XSS, CSRF | security-specialist |
+| Accessibility, ARIA, a11y, WCAG | accessibility-specialist |
+| Performance, bundle, optimization | performance-specialist |
+| Testing, TDD, coverage | test-strategy-specialist |
+| Architecture, layers, dependencies | architecture-specialist |
+
+→ Use `prepare_parallel_agents` for parallel reviews
+
+## Reference
+
+Agent definitions: `packages/rules/.ai-rules/agents/README.md`
