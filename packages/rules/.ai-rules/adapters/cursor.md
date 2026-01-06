@@ -1,151 +1,173 @@
 # Cursor Integration Guide
 
-This guide explains how to use the common AI rules (`.ai-rules/`) in Cursor.
+Guide for using codingbuddy with Cursor.
 
 ## Overview
 
-Cursor continues to use its native `.cursor/` directory structure while referencing the common rules from `.ai-rules/`.
+codingbuddy integrates with Cursor in two ways:
 
-## Integration Method
+1. **AGENTS.md** - Industry standard format compatible with all AI tools
+2. **.cursor/rules/*.mdc** - Cursor-specific optimization (glob-based auto-activation)
 
-### 1. Reference Common Rules
+## Two Usage Contexts
 
-Create `.cursor/rules/imports.mdc` to reference common rules:
+### End Users (Your Project)
 
-```markdown
+End users access rules **only through MCP tools**. No local rule files needed.
+
+```json
+// .cursor/mcp.json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["-y", "codingbuddy"]
+    }
+  }
+}
+```
+
+Optional: Create `.cursor/rules/codingbuddy.mdc` for basic integration:
+
+```yaml
 ---
-description: Common AI Rules Import
+description: codingbuddy integration
 globs:
 alwaysApply: true
 ---
 
-# Common Rules
-
-This project uses shared rules from `.ai-rules/` directory for all AI assistants.
-
-## 📚 Core Rules
-See [../../.ai-rules/rules/core.md](../../.ai-rules/rules/core.md) for:
-- PLAN/ACT/EVAL workflow modes
-- Agent activation rules
-- Communication guidelines
-
-## 🏗️ Project Setup
-See [../../.ai-rules/rules/project.md](../../.ai-rules/rules/project.md) for:
-- Tech stack and dependencies
-- Project structure and architecture
-- Development rules and conventions
-- Domain knowledge and business context
-
-## 🎯 Augmented Coding Principles
-See [../../.ai-rules/rules/augmented-coding.md](../../.ai-rules/rules/augmented-coding.md) for:
-- TDD cycle (Red → Green → Refactor)
-- Code quality standards (SOLID, DRY)
-- Testing best practices
-- Commit discipline
-
-## 🤖 Specialist Agents
-See [../../.ai-rules/agents/README.md](../../.ai-rules/agents/README.md) for available specialist agents:
-- Frontend Developer, Code Reviewer
-- Architecture, Test Strategy, Performance, Security
-- Accessibility, SEO, Design System, Documentation
-- Code Quality, DevOps Engineer
+When PLAN, ACT, EVAL keywords detected → call `parse_mode` MCP tool
 ```
 
-### 2. Keep Cursor-Specific Features
+### Monorepo Contributors
 
-Maintain `.cursor/rules/cursor-specific.mdc` for Cursor-only features:
+Contributors to the codingbuddy repository can use direct file references:
 
-```markdown
+```
+Project Root/
+├── AGENTS.md                    # Cross-platform entry point
+├── .cursor/rules/
+│   ├── imports.mdc              # Common rules (alwaysApply: true)
+│   ├── auto-agent.mdc           # File pattern-based Agent auto-activation
+│   └── custom.mdc               # Personal settings (Git ignored)
+└── packages/rules/.ai-rules/    # Single Source of Truth
+```
+
+## DRY Principle
+
+**Single Source of Truth**: `packages/rules/.ai-rules/`
+
+- All Agent definitions, rules, skills managed only in `.ai-rules/`
+- AGENTS.md and .mdc files act as **pointers only**
+- No duplication, only references
+
+## Configuration Files
+
+### imports.mdc (alwaysApply)
+
+Core rules automatically applied to all conversations:
+
+```yaml
 ---
-description: Cursor-specific configurations
+description: codingbuddy common rules
 globs:
 alwaysApply: true
 ---
 
-# Cursor-Specific Features
-
-## File Globbing
-
-[Add Cursor-specific glob patterns here]
-
-## Agent Tool Integration
-
-[Add Cursor-specific todo_write tool usage]
+# Core principles only (details in .ai-rules/)
 ```
 
-## Current Structure
+### auto-agent.mdc (glob-based)
 
-```
-.cursor/
-├── agents/              # Keep for Cursor compatibility
-├── rules/
-│   ├── core.mdc        # Keep existing (can add reference to .ai-rules)
-│   ├── project.mdc     # Keep existing (can add reference to .ai-rules)
-│   ├── augmented-coding.mdc  # Keep existing
-│   ├── imports.mdc     # NEW: References to .ai-rules
-│   └── cursor-specific.mdc   # NEW: Cursor-only features
-└── config.json         # Cursor configuration
+Automatically provides appropriate Agent context based on file patterns:
 
-.ai-rules/              # Common rules for all AI tools
-├── rules/
-│   ├── core.md
-│   ├── project.md
-│   └── augmented-coding.md
-├── agents/
-│   └── *.json
-└── adapters/
-    └── cursor.md (this file)
+```yaml
+---
+description: Agent auto-activation
+globs:
+  - "**/*.tsx"
+  - "**/*.ts"
+  - "**/*.go"
+alwaysApply: false
+---
+
+# File pattern → Agent mapping table
 ```
 
 ## Usage
 
-### In Cursor Chat
+### Mode Keywords
 
-Reference rules directly:
 ```
-@.ai-rules/rules/core.md
-@.ai-rules/agents/frontend-developer.json
-
-Create a new feature following our common workflow
+PLAN Design user authentication feature
 ```
 
-### In Cursor Composer
+→ `parse_mode` MCP tool is called, loading appropriate Agent and rules
 
-The `.cursor/rules/imports.mdc` with `alwaysApply: true` will automatically apply common rules to all Composer sessions.
+### Auto-Activation on File Edit
 
-## Benefits
+Open `.tsx` file → `auto-agent.mdc` auto-applies → frontend-developer Agent recommended
 
-- ✅ Seamless integration with existing Cursor setup
-- ✅ Access to common rules shared across all AI tools
-- ✅ Cursor-specific features (globs, alwaysApply) still work
-- ✅ Easy to update: change `.ai-rules/` once, all tools benefit
+### Specialist Usage
 
-## Maintenance
+```
+EVAL Review from security perspective
+```
 
-When updating rules:
-1. Update `.ai-rules/rules/*.md` for changes affecting all AI tools
-2. Update `.cursor/rules/*.mdc` only for Cursor-specific changes
-3. Keep both in sync for best experience
+→ security-specialist activated
+
+## MCP Tools
+
+Available codingbuddy MCP tools in Cursor:
+
+| Tool | Purpose |
+|------|---------|
+| `parse_mode` | Parse mode keywords + load Agent/rules |
+| `get_agent_details` | Get specific Agent details |
+| `get_project_config` | Get project configuration |
+| `recommend_skills` | Recommend skills based on prompt |
+| `prepare_parallel_agents` | Prepare parallel Agent execution |
 
 ## Skills
 
 ### Using Skills in Cursor
 
-Reference skills in your prompts using file inclusion:
+Load skills via file reference (monorepo only):
 
 ```
-@.ai-rules/skills/test-driven-development/SKILL.md
+@packages/rules/.ai-rules/skills/test-driven-development/SKILL.md
 ```
 
-Or manually include skill content in `.cursorrules`.
+For end users, use `recommend_skills` MCP tool instead.
 
 ### Available Skills
 
-- `.ai-rules/skills/brainstorming/SKILL.md`
-- `.ai-rules/skills/test-driven-development/SKILL.md`
-- `.ai-rules/skills/systematic-debugging/SKILL.md`
-- `.ai-rules/skills/writing-plans/SKILL.md`
-- `.ai-rules/skills/executing-plans/SKILL.md`
-- `.ai-rules/skills/subagent-driven-development/SKILL.md`
-- `.ai-rules/skills/dispatching-parallel-agents/SKILL.md`
-- `.ai-rules/skills/frontend-design/SKILL.md`
+- `brainstorming/SKILL.md` - Idea → Design
+- `test-driven-development/SKILL.md` - TDD workflow
+- `systematic-debugging/SKILL.md` - Systematic debugging
+- `writing-plans/SKILL.md` - Implementation plan writing
+- `executing-plans/SKILL.md` - Plan execution
+- `subagent-driven-development/SKILL.md` - Subagent development
+- `dispatching-parallel-agents/SKILL.md` - Parallel Agent dispatch
+- `frontend-design/SKILL.md` - Frontend design
+
+## AGENTS.md
+
+Industry standard format compatible with all AI tools (Cursor, Claude Code, Codex, etc.):
+
+```markdown
+# AGENTS.md
+
+This project uses codingbuddy MCP server to manage AI Agents.
+
+## Quick Start
+...
+```
+
+See `AGENTS.md` in project root for details.
+
+## Reference
+
+- [AGENTS.md Official Spec](https://agents.md)
+- [Cursor Rules Documentation](https://cursor.com/docs/context/rules)
+- [codingbuddy MCP API](../../docs/api.md)
