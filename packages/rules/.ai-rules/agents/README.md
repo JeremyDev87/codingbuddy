@@ -24,6 +24,8 @@ AI Agent definitions for specialized development roles.
 
 | Task Type | Recommended Agent | File |
 |-----------|-------------------|------|
+| **High-level Architecture Design** | Solution Architect | `solution-architect.json` |
+| **Implementation Planning** | Technical Planner | `technical-planner.json` |
 | **React/Next.js Development** | Frontend Developer | `frontend-developer.json` |
 | **Backend API Development** | Backend Developer | `backend-developer.json` |
 | **Code Review (EVAL)** | Code Reviewer | `code-reviewer.json` |
@@ -43,6 +45,8 @@ AI Agent definitions for specialized development roles.
 
 | Agent | Description |
 |-------|-------------|
+| Solution Architect | High-level system design and architecture planning |
+| Technical Planner | Low-level implementation planning with TDD and bite-sized tasks |
 | Frontend Developer | TDD-based frontend development with React/Next.js |
 | Backend Developer | Multi-stack backend API development (Node, Python, Go, Java, Rust) |
 | Code Reviewer | Auto-activated in EVAL mode, multi-dimensional code quality assessment |
@@ -93,9 +97,18 @@ as agent-architect, design new agent
 
 ### Available Primary Agents
 
+**PLAN Mode Primary Agents:**
+
 | Agent | role.type | Activation Condition |
 |-------|-----------|---------------------|
-| Frontend Developer | `primary` | Default for PLAN/ACT modes, React/Next.js projects |
+| Solution Architect | `primary` | Architecture design, system design, technology selection |
+| Technical Planner | `primary` | Implementation planning, task breakdown, TDD planning |
+
+**ACT Mode Primary Agents:**
+
+| Agent | role.type | Activation Condition |
+|-------|-----------|---------------------|
+| Frontend Developer | `primary` | Default for ACT mode, React/Next.js projects |
 | Backend Developer | `primary` | Backend file context (.go, .py, .java, .rs) |
 | Agent Architect | `primary` | Agent-related work requests |
 | DevOps Engineer | `primary` | Dockerfile, docker-compose context |
@@ -103,6 +116,15 @@ as agent-architect, design new agent
 ### EVAL Mode
 
 EVAL mode always uses `code-reviewer` (regardless of Primary Agent settings).
+
+### Intent-Based Resolution (PLAN Mode)
+
+PLAN mode uses intent-based resolution to automatically select between Solution Architect and Technical Planner:
+
+| Intent Pattern | Selected Agent |
+|----------------|----------------|
+| Architecture, system design, technology selection | Solution Architect |
+| Implementation plan, task breakdown, TDD | Technical Planner |
 
 ---
 
@@ -252,6 +274,89 @@ Unified specialist agents organized by domain:
 ---
 
 ## Agent Details
+
+### Solution Architect (`solution-architect.json`)
+
+> **Note**: This is a **Primary Agent** for PLAN mode, specializing in high-level system design.
+
+**Expertise:**
+
+- System Architecture Design
+- Technology Selection
+- Integration Patterns
+- Scalability Planning
+- Trade-off Analysis
+
+**Development Philosophy:**
+
+- **Brainstorm-First**: Always start with `superpowers:brainstorming` skill
+- **Multiple Options**: Present 2-3 design approaches with trade-offs
+- **Incremental Validation**: Present design in sections (200-300 words) and validate with user
+- **Document-Driven**: Save validated designs to `docs/plans/YYYY-MM-DD-<topic>-design.md`
+
+**Responsibilities:**
+
+- Analyze requirements and constraints
+- Design high-level system architecture
+- Evaluate technology options
+- Define component boundaries
+- Delegate to domain specialists (Frontend/Backend/DevOps)
+
+**Workflow:**
+
+1. Invoke `superpowers:brainstorming` skill
+2. Understand project context (files, docs, commits)
+3. Ask clarifying questions one at a time
+4. Propose 2-3 approaches with trade-offs
+5. Present design in sections with user validation
+6. Document to `docs/plans/`
+7. Offer handoff to Technical Planner
+
+---
+
+### Technical Planner (`technical-planner.json`)
+
+> **Note**: This is a **Primary Agent** for PLAN mode, specializing in detailed implementation planning.
+
+**Expertise:**
+
+- Implementation Planning
+- TDD Strategy
+- Task Decomposition
+- Code Structure Design
+- Test Design
+
+**Development Philosophy:**
+
+- **Bite-Sized Tasks**: Each task is 2-5 minutes of work
+- **TDD-First**: Red-Green-Refactor-Commit structure per task
+- **Complete Code**: Plans include full code, no placeholders
+- **Exact Paths**: Specify exact file paths for all changes
+
+**Responsibilities:**
+
+- Break down designs into bite-sized tasks (2-5 minutes each)
+- Define exact file paths and code changes
+- Design test cases with TDD approach
+- Create executable implementation plans
+- Ensure plans are context-complete for engineers
+
+**Workflow:**
+
+1. Invoke `superpowers:writing-plans` skill
+2. Read design document or requirements
+3. Identify all components and dependencies
+4. Break into bite-sized tasks (2-5 minutes each)
+5. For each task: exact files, complete code, test commands
+6. Save to `docs/plans/YYYY-MM-DD-<feature>.md`
+7. Offer execution choice (subagent vs parallel session)
+
+**Execution Options:**
+
+- **Subagent-Driven**: Execute in current session with `superpowers:subagent-driven-development`
+- **Parallel Session**: Execute in separate session with `superpowers:executing-plans`
+
+---
 
 ### Primary Developer Agent Example: Frontend Developer (`frontend-developer.json`)
 
@@ -746,8 +851,10 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 
 ```
 .ai-rules/agents/
-├── frontend-developer.json          # Primary Agent (auto-activated, default)
-├── backend-developer.json           # Primary Agent for backend
+├── solution-architect.json          # Primary Agent for PLAN mode (architecture)
+├── technical-planner.json           # Primary Agent for PLAN mode (implementation)
+├── frontend-developer.json          # Primary Agent for ACT mode (default)
+├── backend-developer.json           # Primary Agent for ACT mode (backend)
 ├── agent-architect.json             # Primary Agent for agent management
 ├── devops-engineer.json             # Primary Agent for infrastructure
 ├── code-reviewer.json               # Core agent (EVAL mode, fixed)

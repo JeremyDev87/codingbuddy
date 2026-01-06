@@ -130,9 +130,11 @@ Specialist agent definitions.
 
 | URI | Agent |
 |-----|-------|
-| `rules://agents/frontend-developer.json` | Frontend Developer |
-| `rules://agents/backend-developer.json` | Backend Developer |
-| `rules://agents/code-reviewer.json` | Code Reviewer |
+| `rules://agents/solution-architect.json` | Solution Architect (PLAN mode) |
+| `rules://agents/technical-planner.json` | Technical Planner (PLAN mode) |
+| `rules://agents/frontend-developer.json` | Frontend Developer (ACT mode) |
+| `rules://agents/backend-developer.json` | Backend Developer (ACT mode) |
+| `rules://agents/code-reviewer.json` | Code Reviewer (EVAL mode) |
 | `rules://agents/architecture-specialist.json` | Architecture Specialist |
 | `rules://agents/test-strategy-specialist.json` | Test Strategy Specialist |
 | `rules://agents/performance-specialist.json` | Performance Specialist |
@@ -309,11 +311,30 @@ Parse workflow mode keyword from prompt and return mode-specific rules with proj
   "content": [
     {
       "type": "text",
-      "text": "{\"mode\": \"PLAN\", \"prompt\": \"Design a user authentication feature\", \"instructions\": \"...\", \"rules\": \"...\", \"language\": \"ko\"}"
+      "text": "{\"mode\": \"PLAN\", \"originalPrompt\": \"Design a user authentication feature\", \"instructions\": \"...\", \"rules\": [...], \"agent\": \"plan-mode\", \"delegates_to\": \"technical-planner\", \"primary_agent_source\": \"intent\", \"delegate_agent_info\": {...}, \"parallelAgentsRecommendation\": {...}, \"languageInstruction\": \"Always respond in Korean.\", \"resolvedModel\": {\"model\": \"claude-sonnet-4-20250514\", \"source\": \"mode\"}}"
     }
   ]
 }
 ```
+
+**Response Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mode` | string | Detected mode: `PLAN`, `ACT`, or `EVAL` |
+| `originalPrompt` | string | User prompt with keyword removed |
+| `instructions` | string | Mode-specific instructions |
+| `rules` | array | Applicable rule files with content |
+| `warnings` | array | Parsing warnings (optional) |
+| `agent` | string | Mode Agent name (e.g., `plan-mode`) |
+| `delegates_to` | string | Primary Agent name |
+| `primary_agent_source` | string | How Primary Agent was selected: `explicit`, `config`, `intent`, `context`, `default` |
+| `delegate_agent_info` | object | Primary Agent details (name, description, expertise) |
+| `parallelAgentsRecommendation` | object | Recommended specialist agents for parallel execution |
+| `recommended_act_agent` | object | Recommended ACT mode agent (for PLAN mode) |
+| `activation_message` | object | Agent activation transparency info |
+| `languageInstruction` | string | Dynamic language instruction based on config |
+| `resolvedModel` | object | Resolved AI model info (`model`, `source`) |
 
 **Mode Values**:
 
@@ -508,6 +529,220 @@ recommend_skills({ prompt: "Build a dashboard component" })
 
 ---
 
+### list_skills
+
+List all available skills with optional priority filtering.
+
+**Input Schema**:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "minPriority": {
+      "type": "number",
+      "description": "Minimum priority threshold (inclusive)"
+    },
+    "maxPriority": {
+      "type": "number",
+      "description": "Maximum priority threshold (inclusive)"
+    }
+  },
+  "required": []
+}
+```
+
+**Request Example**:
+
+```json
+{
+  "name": "list_skills",
+  "arguments": {}
+}
+```
+
+**Response Example**:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"skills\": [{\"name\": \"systematic-debugging\", \"priority\": 1, \"description\": \"Systematic approach to debugging\"}, {\"name\": \"test-driven-development\", \"priority\": 2, \"description\": \"TDD workflow\"}], \"total\": 10}"
+    }
+  ]
+}
+```
+
+**Response Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `skills` | array | List of available skills |
+| `skills[].name` | string | Skill identifier |
+| `skills[].priority` | number | Skill priority (lower = higher priority) |
+| `skills[].description` | string | Brief description of the skill |
+| `total` | number | Total number of skills returned |
+
+**Filter Example**:
+
+```json
+{
+  "name": "list_skills",
+  "arguments": {
+    "minPriority": 1,
+    "maxPriority": 3
+  }
+}
+```
+
+---
+
+### get_agent_system_prompt
+
+Get complete system prompt for a specialist agent to be executed as a Claude Code subagent.
+
+**Input Schema**:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "agentName": {
+      "type": "string",
+      "description": "Name of the specialist agent (e.g., 'security-specialist', 'accessibility-specialist')"
+    },
+    "context": {
+      "type": "object",
+      "description": "Context for the agent",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["PLAN", "ACT", "EVAL"],
+          "description": "Current workflow mode"
+        },
+        "targetFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files to analyze or review"
+        },
+        "taskDescription": {
+          "type": "string",
+          "description": "Description of the task"
+        }
+      },
+      "required": ["mode"]
+    }
+  },
+  "required": ["agentName", "context"]
+}
+```
+
+**Request Example**:
+
+```json
+{
+  "name": "get_agent_system_prompt",
+  "arguments": {
+    "agentName": "security-specialist",
+    "context": {
+      "mode": "EVAL",
+      "targetFiles": ["src/auth/login.ts"],
+      "taskDescription": "Review authentication security"
+    }
+  }
+}
+```
+
+**Response Example**:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"agentName\": \"security-specialist\", \"systemPrompt\": \"You are a Security Specialist agent...\", \"taskPrompt\": \"Analyze security of src/auth/login.ts...\"}"
+    }
+  ]
+}
+```
+
+---
+
+### prepare_parallel_agents
+
+Prepare multiple specialist agents for parallel execution via Claude Code Task tool.
+
+**Input Schema**:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["PLAN", "ACT", "EVAL"],
+      "description": "Current workflow mode"
+    },
+    "specialists": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of specialist agent names"
+    },
+    "targetFiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Files to analyze or review"
+    },
+    "sharedContext": {
+      "type": "string",
+      "description": "Shared context or task description for all agents"
+    }
+  },
+  "required": ["mode", "specialists"]
+}
+```
+
+**Request Example**:
+
+```json
+{
+  "name": "prepare_parallel_agents",
+  "arguments": {
+    "mode": "EVAL",
+    "specialists": ["security-specialist", "accessibility-specialist", "performance-specialist"],
+    "targetFiles": ["src/components/UserForm.tsx"],
+    "sharedContext": "Review the user registration form"
+  }
+}
+```
+
+**Response Example**:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"prepared\": [{\"agentName\": \"security-specialist\", \"systemPrompt\": \"...\", \"taskPrompt\": \"...\"}, ...], \"executionHint\": \"Use Task tool with subagent_type='general-purpose' and run_in_background=true\"}"
+    }
+  ]
+}
+```
+
+**Usage with Claude Code Task Tool**:
+
+```typescript
+// Launch multiple agents in parallel
+await Promise.all([
+  Task({ subagent_type: 'general-purpose', prompt: securityPrompt, run_in_background: true }),
+  Task({ subagent_type: 'general-purpose', prompt: accessibilityPrompt, run_in_background: true }),
+  Task({ subagent_type: 'general-purpose', prompt: performancePrompt, run_in_background: true })
+]);
+```
+
+---
+
 ## Prompts
 
 Prompts provide pre-defined message templates for common workflows.
@@ -584,7 +819,7 @@ Activate a specific specialist agent with project context.
 | `Invalid URI scheme` | URI doesn't start with `rules://` or `config://` | Use correct URI scheme |
 | `Resource not found: {uri}` | Requested rule file doesn't exist | Check file path in `packages/rules/.ai-rules/` |
 | `Agent '{name}' not found` | Invalid agent name | Use valid agent name from list |
-| `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates`, `recommend_skills` |
+| `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates`, `recommend_skills`, `list_skills`, `get_agent_system_prompt`, `prepare_parallel_agents` |
 | `Failed to load project configuration` | Missing or invalid `codingbuddy.config.js` | Run `npx codingbuddy init` |
 
 ---

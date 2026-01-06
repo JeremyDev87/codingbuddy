@@ -85,7 +85,7 @@ Claude Desktop設定に追加（`~/Library/Application Support/Claude/claude_des
 上記のアーキテクチャ図で3層エージェントシステムの全体像をご確認ください：
 
 - **Layer 1（モードエージェント）**：PLAN → ACT → EVAL ワークフローサイクル
-- **Layer 2（主要エージェント）**：Frontend/Backend Developer、Code Reviewer、DevOps
+- **Layer 2（主要エージェント）**：Solution Architect、Technical Planner、Frontend/Backend Developer、Code Reviewer、DevOps
 - **Layer 3（スペシャリスト）**：9名のドメイン専門家（セキュリティ、パフォーマンス、アクセシビリティなど）
 - **スキル**：再利用可能な機能（TDD、デバッグ、ブレインストーミングなど）
 

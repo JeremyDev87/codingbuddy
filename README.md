@@ -85,7 +85,7 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 See the architecture diagram above for a visual overview of the 3-layer agent system:
 
 - **Layer 1 (Mode Agents)**: PLAN → ACT → EVAL workflow cycle
-- **Layer 2 (Primary Agents)**: Frontend/Backend Developer, Code Reviewer, DevOps
+- **Layer 2 (Primary Agents)**: Solution Architect, Technical Planner, Frontend/Backend Developer, Code Reviewer, DevOps
 - **Layer 3 (Specialists)**: 9 domain experts (Security, Performance, Accessibility, etc.)
 - **Skills**: Reusable capabilities (TDD, Debugging, Brainstorming, etc.)
 

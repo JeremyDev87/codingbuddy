@@ -85,7 +85,7 @@ Claude Desktop 설정 파일에 추가 (`~/Library/Application Support/Claude/cl
 위 아키텍처 다이어그램에서 3계층 에이전트 시스템의 전체 구조를 확인하세요:
 
 - **Layer 1 (모드 에이전트)**: PLAN → ACT → EVAL 워크플로우 사이클
-- **Layer 2 (주요 에이전트)**: Frontend/Backend Developer, Code Reviewer, DevOps
+- **Layer 2 (주요 에이전트)**: Solution Architect, Technical Planner, Frontend/Backend Developer, Code Reviewer, DevOps
 - **Layer 3 (전문가)**: 9명의 도메인 전문가 (보안, 성능, 접근성 등)
 - **스킬**: 재사용 가능한 기능 (TDD, 디버깅, 브레인스토밍 등)
 

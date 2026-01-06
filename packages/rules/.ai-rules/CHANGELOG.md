@@ -5,6 +5,55 @@ All notable changes to the Multi-AI Coding Assistant Common Rules System will be
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-06
+
+### Added
+
+- **PLAN Mode Primary Agents** with intent-based resolution
+  - `solution-architect.json`: High-level system design and architecture planning
+  - `technical-planner.json`: Low-level implementation planning with TDD and bite-sized tasks
+  - Intent-based automatic selection between architects based on prompt analysis
+  - Support for Korean and English intent patterns
+
+- **AI Model Selection and Resolution**
+  - CLI init prompt for model selection (Sonnet/Opus/Haiku)
+  - `ai.defaultModel` configuration field in `codingbuddy.config.js`
+  - Agent-level model preferences with priority resolution (agent > mode > system)
+  - `resolvedModel` field in MCP tool responses
+
+- **Parallel Agent Execution Support**
+  - `get_agent_system_prompt` MCP tool for generating subagent prompts
+  - `prepare_parallel_agents` MCP tool for batch agent preparation
+  - `parallelAgentsRecommendation` in `parse_mode` response
+  - Default specialist lists per mode (PLAN/ACT/EVAL)
+
+- **Dynamic Language Configuration**
+  - `LanguageService` supporting 10 languages (ko, en, ja, zh, es, de, fr, pt, ru, hi)
+  - `languageInstruction` field in `parse_mode` response
+  - Automatic language detection from project config
+
+- **Agent Activation Transparency**
+  - `ActivationMessageBuilder` for clear agent activation reporting
+  - `activation_message` field showing active agents with tiers
+
+### Changed
+
+- **Primary Agent Resolution**
+  - Extended `PrimaryAgentSource` type to include `intent`
+  - Priority order: explicit > config > intent > context > default
+  - Centralized Primary Agent constants with `_LIST` variants
+
+- **Token Usage Optimization**
+  - Mode-based `core.md` filtering to reduce token consumption
+  - Shared `ResponseUtils` for consolidated response generation
+
+### Fixed
+
+- Canary deployment timestamp mismatch bug
+- Type assertions replaced with proper typing in keyword service
+
+---
+
 ## [1.0.0] - 2025-11-20
 
 ### Added
@@ -48,18 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Clarification Phase** for PLAN mode (`rules/clarification-guide.md`)
-  - Optional phase triggered when AI detects ambiguous requirements
-  - Sequential Q&A with progress indicator (Question N/M format)
-  - Multiple-choice questions preferred for easy response
-  - Ambiguity assessment checklist (6 categories, triggers on 2+ unclear)
-  - Question count guidelines (2-7 questions based on complexity)
-  - Korean/English output format support
-  - Updated `rules/core.md` with Clarification Phase section
-
 ### Planned
-- Real-world usage testing across all 6 AI tools
+- Real-world usage testing across all 7 AI tools (including OpenCode)
 - Performance metrics collection
 - User feedback integration
 - Advanced examples and use cases
