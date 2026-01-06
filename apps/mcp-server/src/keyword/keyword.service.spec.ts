@@ -606,7 +606,7 @@ describe('KeywordService', () => {
         expect(result.agent).toBe('plan-mode');
       });
 
-      it('does not include agent field when agent is undefined in config', async () => {
+      it('does not include agent field when agent is undefined in config, but delegates_to defaults to frontend-developer', async () => {
         const configWithoutAgent: KeywordModesConfig = {
           modes: {
             PLAN: {
@@ -628,9 +628,11 @@ describe('KeywordService', () => {
 
         const result = await service.parseMode('PLAN design feature');
 
+        // agent field is undefined since not in config
         expect(result.agent).toBeUndefined();
-        expect(result.delegates_to).toBeUndefined();
-        expect(result.delegate_agent_info).toBeUndefined();
+        // delegates_to defaults to 'frontend-developer' for PLAN/ACT modes (dynamic resolution)
+        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.primary_agent_source).toBe('default');
       });
     });
 

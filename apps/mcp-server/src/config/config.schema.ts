@@ -71,6 +71,7 @@ export const TestStrategyConfigSchema = z.object({
 
 export const AIConfigSchema = z.object({
   defaultModel: z.string().optional(),
+  primaryAgent: z.string().optional(),
 });
 
 // ============================================================================

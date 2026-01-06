@@ -22,39 +22,87 @@ AI Agent definitions for specialized development roles.
 
 ## Quick Reference: Which Agent?
 
-| 작업 유형 | 추천 에이전트 | 파일 |
-|----------|-------------|------|
-| **React/Next.js 개발** | Frontend Developer | `frontend-developer.json` |
-| **백엔드 API 개발** | Backend Developer | `backend-developer.json` |
-| **코드 리뷰 (EVAL)** | Code Reviewer | `code-reviewer.json` |
-| **아키텍처 설계** | Architecture Specialist | `architecture-specialist.json` |
-| **테스트 전략** | Test Strategy Specialist | `test-strategy-specialist.json` |
-| **성능 최적화** | Performance Specialist | `performance-specialist.json` |
-| **보안 검토** | Security Specialist | `security-specialist.json` |
-| **접근성 검토** | Accessibility Specialist | `accessibility-specialist.json` |
-| **SEO 최적화** | SEO Specialist | `seo-specialist.json` |
-| **UI/UX 디자인** | UI/UX Designer | `ui-ux-designer.json` |
-| **문서화** | Documentation Specialist | `documentation-specialist.json` |
-| **코드 품질** | Code Quality Specialist | `code-quality-specialist.json` |
-| **인프라/배포** | DevOps Engineer | `devops-engineer.json` |
+| Task Type | Recommended Agent | File |
+|-----------|-------------------|------|
+| **React/Next.js Development** | Frontend Developer | `frontend-developer.json` |
+| **Backend API Development** | Backend Developer | `backend-developer.json` |
+| **Code Review (EVAL)** | Code Reviewer | `code-reviewer.json` |
+| **Architecture Design** | Architecture Specialist | `architecture-specialist.json` |
+| **Test Strategy** | Test Strategy Specialist | `test-strategy-specialist.json` |
+| **Performance Optimization** | Performance Specialist | `performance-specialist.json` |
+| **Security Review** | Security Specialist | `security-specialist.json` |
+| **Accessibility Review** | Accessibility Specialist | `accessibility-specialist.json` |
+| **SEO Optimization** | SEO Specialist | `seo-specialist.json` |
+| **UI/UX Design** | UI/UX Designer | `ui-ux-designer.json` |
+| **Documentation** | Documentation Specialist | `documentation-specialist.json` |
+| **Code Quality** | Code Quality Specialist | `code-quality-specialist.json` |
+| **Infrastructure/Deployment** | DevOps Engineer | `devops-engineer.json` |
+| **Agent Management** | Agent Architect | `agent-architect.json` |
 
 ### Agent Summary
 
-| Agent | 한 줄 설명 |
-|-------|-----------|
-| Frontend Developer | React/Next.js TDD 기반 프론트엔드 개발 |
-| Backend Developer | 멀티스택 지원 백엔드 API 개발 (Node, Python, Go, Java, Rust) |
-| Code Reviewer | EVAL 모드 자동 활성화, 다차원 코드 품질 평가 |
-| Architecture Specialist | 레이어 경계, 의존성 방향, Clean Architecture |
-| Test Strategy Specialist | TDD 전략, 테스트 커버리지, 테스트 품질 |
-| Performance Specialist | Core Web Vitals, 번들 최적화, 렌더링 성능 |
-| Security Specialist | OWASP, 인증/인가, XSS/CSRF 방어 |
-| Accessibility Specialist | WCAG 2.1 AA, 시맨틱 HTML, 스크린 리더 |
-| SEO Specialist | 메타데이터, JSON-LD, Open Graph |
-| UI/UX Designer | 비주얼 계층, UX 법칙, 인터랙션 패턴 |
-| Documentation Specialist | 코드 주석, JSDoc, 문서 품질 평가 |
-| Code Quality Specialist | SOLID, DRY, 복잡도 분석 |
-| DevOps Engineer | Docker, 모니터링, 배포 최적화 |
+| Agent | Description |
+|-------|-------------|
+| Frontend Developer | TDD-based frontend development with React/Next.js |
+| Backend Developer | Multi-stack backend API development (Node, Python, Go, Java, Rust) |
+| Code Reviewer | Auto-activated in EVAL mode, multi-dimensional code quality assessment |
+| Architecture Specialist | Layer boundaries, dependency direction, Clean Architecture |
+| Test Strategy Specialist | TDD strategy, test coverage, test quality |
+| Performance Specialist | Core Web Vitals, bundle optimization, rendering performance |
+| Security Specialist | OWASP, authentication/authorization, XSS/CSRF defense |
+| Accessibility Specialist | WCAG 2.1 AA, semantic HTML, screen reader support |
+| SEO Specialist | Metadata, JSON-LD, Open Graph |
+| UI/UX Designer | Visual hierarchy, UX laws, interaction patterns |
+| Documentation Specialist | Code comments, JSDoc, documentation quality assessment |
+| Code Quality Specialist | SOLID, DRY, complexity analysis |
+| DevOps Engineer | Docker, monitoring, deployment optimization |
+| Agent Architect | AI agent design, validation, checklist auditing |
+
+---
+
+## Primary Agent System
+
+**Primary Agents** are core agents that receive delegation from Mode Agents (PLAN/ACT/EVAL) to perform actual work.
+
+### Dynamic Primary Agent Resolution
+
+Primary Agent is dynamically determined based on the following priority:
+
+| Priority | Source | Description |
+|----------|--------|-------------|
+| 1 | **explicit** | Explicit request in prompt (e.g., "use backend-developer agent") |
+| 2 | **config** | Project configuration's `primaryAgent` setting |
+| 3 | **context** | Inference based on file path (e.g., `.go` → backend-developer) |
+| 4 | **default** | Default value (frontend-developer) |
+
+### Primary Agent Request Patterns
+
+**Korean:**
+```
+backend-developer로 작업해      # "Work with backend-developer" (~로 작업해 = "work with ~")
+agent-architect으로 해줘        # "Do it with agent-architect" (~으로 해줘 = "do with ~")
+devops-engineer로 개발해        # "Develop with devops-engineer" (~로 개발해 = "develop with ~")
+```
+
+**English:**
+```
+use backend-developer agent
+using frontend-developer create this
+as agent-architect, design new agent
+```
+
+### Available Primary Agents
+
+| Agent | role.type | Activation Condition |
+|-------|-----------|---------------------|
+| Frontend Developer | `primary` | Default for PLAN/ACT modes, React/Next.js projects |
+| Backend Developer | `primary` | Backend file context (.go, .py, .java, .rs) |
+| Agent Architect | `primary` | Agent-related work requests |
+| DevOps Engineer | `primary` | Dockerfile, docker-compose context |
+
+### EVAL Mode
+
+EVAL mode always uses `code-reviewer` (regardless of Primary Agent settings).
 
 ---
 
@@ -68,14 +116,15 @@ Mode Agents are workflow orchestrators that provide seamless integration with Op
 
 ```
 Mode Agents (Workflow Orchestrators)
-├── plan-mode      → delegates to → frontend-developer (or project-specific)
-├── act-mode       → delegates to → frontend-developer (or project-specific)
-└── eval-mode      → delegates to → code-reviewer
+├── plan-mode      → delegates to → [Dynamic Primary Agent]
+├── act-mode       → delegates to → [Dynamic Primary Agent]
+└── eval-mode      → delegates to → code-reviewer (always)
 
-Delegate Agents (Implementation Experts)
-├── frontend-developer     # React/Next.js expertise
+Primary Agents (Implementation Experts) - role.type: "primary"
+├── frontend-developer     # React/Next.js expertise (default)
 ├── backend-developer      # Multi-language backend expertise
-└── code-reviewer         # Quality evaluation expertise
+├── agent-architect        # AI agent framework expertise
+└── devops-engineer        # Infrastructure expertise
 
 Specialist Agents (Domain Experts)
 ├── architecture-specialist
@@ -84,13 +133,15 @@ Specialist Agents (Domain Experts)
 └── ... (other specialists)
 ```
 
+**Dynamic Resolution**: Primary Agent is dynamically determined based on prompt content, project configuration, and file context.
+
 ### Mode Agent Details
 
 | Mode Agent | Workflow | Delegates To | Purpose |
 |------------|----------|--------------|---------|
-| **plan-mode** | PLAN | frontend-developer (configurable) | Analysis and planning without changes |
-| **act-mode** | ACT | frontend-developer (configurable) | Full development with all tools |
-| **eval-mode** | EVAL | code-reviewer | Code quality evaluation |
+| **plan-mode** | PLAN | Dynamic Primary Agent | Analysis and planning without changes |
+| **act-mode** | ACT | Dynamic Primary Agent | Full development with all tools |
+| **eval-mode** | EVAL | code-reviewer (fixed) | Code quality evaluation |
 
 **Key Features:**
 - **Seamless Integration**: Works with OpenCode agent system
@@ -105,9 +156,9 @@ Specialist Agents (Domain Experts)
 ```bash
 # OpenCode CLI example
 /agent plan-mode
-새로운 기능을 만들어줘
+Create a new feature
 
-/agent act-mode  
+/agent act-mode
 ACT
 
 /agent eval-mode
@@ -121,15 +172,16 @@ When using the `parse_mode` MCP tool, you receive enhanced response with Mode Ag
 ```json
 {
   "mode": "PLAN",
-  "originalPrompt": "새로운 기능을 만들어줘",
-  "instructions": "설계 우선 접근...",
+  "originalPrompt": "Create a new feature",
+  "instructions": "Design-first approach...",
   "rules": [{"name": "rules/core.md", "content": "..."}],
   "warnings": ["No keyword found, defaulting to PLAN"],
   "agent": "plan-mode",
   "delegates_to": "frontend-developer",
+  "primary_agent_source": "default",
   "delegate_agent_info": {
     "name": "Frontend Developer",
-    "description": "React/Next.js 전문가, TDD 및 디자인 시스템 경험",
+    "description": "React/Next.js expert with TDD and design system experience",
     "expertise": ["React", "Next.js", "TDD", "TypeScript"]
   }
 }
@@ -146,6 +198,7 @@ When using the `parse_mode` MCP tool, you receive enhanced response with Mode Ag
 | `warnings` | array | No | Parsing warnings (e.g., missing keyword) |
 | `agent` | string | No | Mode Agent name (e.g., "plan-mode") |
 | `delegates_to` | string | No | Delegate agent name (e.g., "frontend-developer") |
+| `primary_agent_source` | string | No | How Primary Agent was selected: "explicit", "config", "context", "default" |
 | `delegate_agent_info` | object | No | Delegate agent details (name, description, expertise) |
 
 ### Agent Priority System
@@ -314,6 +367,40 @@ Unified specialist agents organized by domain:
 - Optimize build performance and memory usage
 - Debug production issues with source maps
 - Monitor and improve application performance
+
+---
+
+### Agent Architect (`agent-architect.json`)
+
+> **Note**: This is a **Primary Agent** for managing AI agent configurations, schemas, and validation.
+
+**Expertise:**
+
+- Agent Schema Design (JSON/YAML)
+- Workflow Orchestration
+- Quality Assurance Automation
+- TDD for Configuration
+- Meta-Agent Patterns
+
+**Responsibilities:**
+
+- Generate new agent definitions from requirements
+- Validate agent configurations against AgentProfile schema
+- Audit code against agent mandatory_checklist
+- Optimize agent workflows and delegation chains
+- Maintain agent registry consistency
+- Design specialized agents for specific domains
+
+**Workflow:**
+
+- **Agent Creation**: TDD approach - Define schema → Create minimal JSON → Validate → Enhance → Test → Document
+- **Agent Validation**: Multi-layer validation (Schema, Checklist, Reference integrity, Documentation)
+- **Checklist Audit**: Systematic verification against mandatory_checklist items
+
+**Activation Patterns:**
+
+- Korean: "create agent", "validate agent", "audit checklist"
+- English: "create agent", "validate agent", "audit checklist"
 
 ---
 
@@ -659,11 +746,12 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 
 ```
 .ai-rules/agents/
-├── frontend-developer.json          # Primary Developer Agent example (auto-activated)
-├── backend-developer.json           # Primary Developer Agent for backend (auto-activated)
-├── code-reviewer.json               # Core agent (auto-activated)
+├── frontend-developer.json          # Primary Agent (auto-activated, default)
+├── backend-developer.json           # Primary Agent for backend
+├── agent-architect.json             # Primary Agent for agent management
+├── devops-engineer.json             # Primary Agent for infrastructure
+├── code-reviewer.json               # Core agent (EVAL mode, fixed)
 ├── code-quality-specialist.json     # Utility agent
-├── devops-engineer.json             # Utility agent
 ├── accessibility-specialist.json    # Domain specialist
 ├── architecture-specialist.json     # Domain specialist
 ├── ui-ux-designer.json              # Domain specialist

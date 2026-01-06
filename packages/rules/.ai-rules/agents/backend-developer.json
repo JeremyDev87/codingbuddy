@@ -9,6 +9,7 @@
 
   "role": {
     "title": "Senior Backend Developer",
+    "type": "primary",
     "expertise": [
       "Backend API Development (REST, GraphQL, gRPC)",
       "Clean Architecture & Domain-Driven Design",

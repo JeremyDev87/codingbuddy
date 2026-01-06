@@ -29,11 +29,20 @@ export class AgentSchemaError extends Error {
 // ============================================================================
 
 /**
+ * Agent role type - defines the agent's position in the hierarchy
+ * - primary: Activated via Mode Agent delegation (frontend-developer, backend-developer, agent-architect)
+ * - specialist: Referenced by Primary Agents for domain expertise
+ * - utility: Helper agents for specific tasks
+ */
+const AgentRoleType = z.enum(['primary', 'specialist', 'utility']);
+
+/**
  * Role schema - required fields for agent role
  */
 const RoleSchema = z
   .object({
     title: z.string(),
+    type: AgentRoleType.optional(),
     expertise: z.array(z.string()),
     tech_stack_reference: z.string().optional(),
     responsibilities: z.array(z.string()).optional(),
@@ -69,6 +78,8 @@ const AgentProfileSchema = z
 export type ValidatedAgentProfile = z.infer<typeof AgentProfileSchema> & {
   [key: string]: unknown;
 };
+
+export type AgentRoleTypeValue = z.infer<typeof AgentRoleType>;
 
 // ============================================================================
 // Public API

@@ -46,6 +46,23 @@ export interface ParallelAgentRecommendation {
   hint: string;
 }
 
+/** Source of Primary Agent selection */
+export type PrimaryAgentSource = 'explicit' | 'config' | 'context' | 'default';
+
+/** Result of Primary Agent resolution */
+export interface PrimaryAgentResolutionResult {
+  agentName: string;
+  source: PrimaryAgentSource;
+  confidence: number; // 0-1
+  reason: string;
+}
+
+/** Context for Primary Agent resolution (optional) */
+export interface ResolutionContext {
+  filePath?: string;
+  projectType?: string;
+}
+
 export interface ParseModeResult {
   mode: Mode;
   originalPrompt: string;
@@ -55,6 +72,8 @@ export interface ParseModeResult {
   agent?: string;
   delegates_to?: string;
   delegate_agent_info?: AgentInfo;
+  /** Source of Primary Agent selection */
+  primary_agent_source?: PrimaryAgentSource;
   parallelAgentsRecommendation?: ParallelAgentRecommendation;
 }
 

@@ -8,6 +8,7 @@
 
   "role": {
     "title": "DevOps Engineer",
+    "type": "primary",
     "expertise": [
       "Docker containerization & optimization",
       "Datadog monitoring & observability",

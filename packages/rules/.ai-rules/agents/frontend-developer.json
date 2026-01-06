@@ -9,6 +9,7 @@
 
   "role": {
     "title": "Senior Frontend Developer",
+    "type": "primary",
     "expertise": [
       "React",
       "Next.js App Router",

@@ -58,6 +58,65 @@ describe('parseAgentProfile', () => {
         'Review code',
       ]);
     });
+
+    it('should accept valid role.type "primary"', () => {
+      const primaryAgent = {
+        name: 'Primary Agent',
+        description: 'A primary agent',
+        role: {
+          title: 'Frontend Developer',
+          type: 'primary',
+          expertise: ['React'],
+        },
+      };
+
+      const result = parseAgentProfile(primaryAgent);
+      expect(result.role.type).toBe('primary');
+    });
+
+    it('should accept valid role.type "specialist"', () => {
+      const specialistAgent = {
+        name: 'Specialist Agent',
+        description: 'A specialist agent',
+        role: {
+          title: 'Security Specialist',
+          type: 'specialist',
+          expertise: ['Security'],
+        },
+      };
+
+      const result = parseAgentProfile(specialistAgent);
+      expect(result.role.type).toBe('specialist');
+    });
+
+    it('should accept valid role.type "utility"', () => {
+      const utilityAgent = {
+        name: 'Utility Agent',
+        description: 'A utility agent',
+        role: {
+          title: 'Code Quality',
+          type: 'utility',
+          expertise: ['Linting'],
+        },
+      };
+
+      const result = parseAgentProfile(utilityAgent);
+      expect(result.role.type).toBe('utility');
+    });
+
+    it('should accept agent without role.type (optional)', () => {
+      const agentWithoutType = {
+        name: 'No Type Agent',
+        description: 'Agent without type',
+        role: {
+          title: 'Generic Role',
+          expertise: ['General'],
+        },
+      };
+
+      const result = parseAgentProfile(agentWithoutType);
+      expect(result.role.type).toBeUndefined();
+    });
   });
 
   describe('invalid agent profiles', () => {
