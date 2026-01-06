@@ -284,3 +284,169 @@ AI assistants should display the `activation_message.formatted` field at the sta
 
 ...
 ```
+
+## Parallel Specialist Agents Execution
+
+CodingBuddy supports parallel execution of multiple specialist agents for comprehensive analysis.
+
+### When to Use Parallel Execution
+
+Parallel execution is recommended when `parse_mode` returns a `parallelAgentsRecommendation` field:
+
+| Mode | Default Specialists | Use Case |
+|------|---------------------|----------|
+| **PLAN** | architecture-specialist, test-strategy-specialist | Validate architecture and test approach |
+| **ACT** | code-quality-specialist, test-strategy-specialist | Verify implementation quality |
+| **EVAL** | security-specialist, accessibility-specialist, performance-specialist, code-quality-specialist | Comprehensive multi-dimensional review |
+
+### parallelAgentsRecommendation Response Field
+
+The `parse_mode` MCP tool returns this field to recommend parallel specialist execution:
+
+```json
+{
+  "mode": "EVAL",
+  "parallelAgentsRecommendation": {
+    "specialists": [
+      "security-specialist",
+      "accessibility-specialist",
+      "performance-specialist",
+      "code-quality-specialist"
+    ],
+    "hint": "Use Task tool with subagent_type=\"general-purpose\" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts."
+  }
+}
+```
+
+### Parallel Execution Workflow
+
+```
+parse_mode 호출
+     ↓
+parallelAgentsRecommendation 확인
+     ↓ (있으면)
+사용자에게 시작 메시지 표시
+     ↓
+prepare_parallel_agents MCP 호출
+     ↓
+반환된 각 agent.taskPrompt를 Task tool로 병렬 호출:
+  - subagent_type: "general-purpose"
+  - run_in_background: true
+  - prompt: agent.taskPrompt
+     ↓
+TaskOutput으로 결과 수집
+     ↓
+사용자에게 결과 종합하여 표시
+```
+
+### Code Example
+
+```typescript
+// Step 1: Parse mode returns parallelAgentsRecommendation
+const parseModeResult = await parse_mode({ prompt: "EVAL review auth implementation" });
+
+if (parseModeResult.parallelAgentsRecommendation) {
+  // Step 2: Display start message to user
+  console.log("🚀 Dispatching 4 specialist agents in parallel...");
+  console.log("   → 🔒 security-specialist");
+  console.log("   → ♿ accessibility-specialist");
+  console.log("   → ⚡ performance-specialist");
+  console.log("   → 📏 code-quality-specialist");
+
+  // Step 3: Prepare parallel agents
+  const preparedAgents = await prepare_parallel_agents({
+    mode: "EVAL",
+    specialists: parseModeResult.parallelAgentsRecommendation.specialists,
+    sharedContext: "Review authentication implementation",
+    targetFiles: ["src/auth/login.tsx"]
+  });
+
+  // Step 4: Execute in parallel using Task tool
+  const agentTasks = preparedAgents.agents.map(agent =>
+    Task({
+      subagent_type: "general-purpose",
+      prompt: agent.taskPrompt,
+      description: agent.description,
+      run_in_background: true,
+      model: "haiku" // Use haiku for efficiency
+    })
+  );
+
+  // Step 5: Collect results
+  const results = await Promise.all(agentTasks.map(task => TaskOutput(task.id)));
+
+  // Step 6: Display summary
+  console.log("📊 Specialist Analysis Complete:");
+  results.forEach(result => console.log(result.summary));
+}
+```
+
+### Visibility Pattern
+
+When executing parallel specialists, display clear status messages:
+
+**Start Message:**
+```
+🚀 Dispatching N specialist agents in parallel...
+   → 🔒 security-specialist
+   → ♿ accessibility-specialist
+   → ⚡ performance-specialist
+   → 📏 code-quality-specialist
+```
+
+**Completion Message:**
+```
+📊 Specialist Analysis Complete:
+
+🔒 Security Specialist:
+   [findings summary]
+
+♿ Accessibility Specialist:
+   [findings summary]
+
+⚡ Performance Specialist:
+   [findings summary]
+
+📏 Code Quality Specialist:
+   [findings summary]
+```
+
+### Specialist Icons
+
+| Icon | Specialist |
+|------|------------|
+| 🔒 | security-specialist |
+| ♿ | accessibility-specialist |
+| ⚡ | performance-specialist |
+| 📏 | code-quality-specialist |
+| 🧪 | test-strategy-specialist |
+| 🏛️ | architecture-specialist |
+| 📚 | documentation-specialist |
+| 🔍 | seo-specialist |
+| 🎨 | design-system-specialist |
+
+### Handling Failures
+
+When `prepare_parallel_agents` returns `failedAgents`:
+
+```
+⚠️ Some agents failed to load:
+   ✗ performance-specialist: Profile not found
+
+Continuing with 3/4 agents...
+```
+
+**Strategy:**
+- Continue with successfully loaded agents
+- Report failures clearly to user
+- Document which agents couldn't be loaded in final report
+
+### Specialist Activation Scope
+
+Each workflow mode activates different specialist agents:
+
+- **PLAN mode**: Architecture and test strategy specialists validate design
+- **ACT mode**: Code quality and test strategy specialists verify implementation
+- **EVAL mode**: Security, accessibility, performance, and code quality specialists provide comprehensive review
+
+**Important:** Specialists from one mode do NOT carry over to the next mode. Each mode has its own recommended specialist set.

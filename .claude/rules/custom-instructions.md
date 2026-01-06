@@ -83,6 +83,31 @@ Failure to call `parse_mode` when these keywords are present will result in:
 
 예시: `PLAN 인증 기능 설계` → **즉시** parse_mode 호출 → PLAN 모드로 작업
 
+## 🔴 MANDATORY: Parallel Specialist Agent Execution
+
+<PARALLEL_EXECUTION_MANDATORY_RULE>
+
+**When `parse_mode` returns `parallelAgentsRecommendation`, you MUST execute parallel specialists.**
+
+**Quick Checklist:**
+- [ ] Call `prepare_parallel_agents` with recommended specialists
+- [ ] Execute each agent via Task tool (`subagent_type: "general-purpose"`, `run_in_background: true`)
+- [ ] Display activation status (🚀 Dispatching...)
+- [ ] Collect results with `TaskOutput`
+- [ ] Summarize all findings (📊 Specialist Analysis Complete)
+
+**Mode-specific Specialists:**
+
+| Mode | Specialists |
+|------|-------------|
+| **PLAN** | 🏛️ architecture, 🧪 test-strategy |
+| **ACT** | 📏 code-quality, 🧪 test-strategy |
+| **EVAL** | 🔒 security, ♿ accessibility, ⚡ performance, 📏 code-quality |
+
+**📖 Full Guide:** [Parallel Specialist Agents Execution](../../packages/rules/.ai-rules/adapters/claude-code.md#parallel-specialist-agents-execution)
+
+</PARALLEL_EXECUTION_MANDATORY_RULE>
+
 ## Claude Code Specific
 
 - Always respond in **Korean (한국어)**
