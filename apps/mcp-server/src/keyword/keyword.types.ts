@@ -41,6 +41,11 @@ export interface AgentInfo {
   expertise: string[];
 }
 
+export interface ParallelAgentRecommendation {
+  specialists: string[];
+  hint: string;
+}
+
 export interface ParseModeResult {
   mode: Mode;
   originalPrompt: string;
@@ -50,6 +55,7 @@ export interface ParseModeResult {
   agent?: string;
   delegates_to?: string;
   delegate_agent_info?: AgentInfo;
+  parallelAgentsRecommendation?: ParallelAgentRecommendation;
 }
 
 export interface ModeConfig {
@@ -58,6 +64,7 @@ export interface ModeConfig {
   rules: string[];
   agent?: string;
   delegates_to?: string;
+  defaultSpecialists?: string[];
 }
 
 export interface KeywordModesConfig {

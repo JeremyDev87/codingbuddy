@@ -5,7 +5,11 @@
       "instructions": "설계 우선 접근. TDD 관점에서 테스트 케이스 먼저 정의. 구현 전 아키텍처 검토.",
       "rules": ["rules/core.md", "rules/augmented-coding.md"],
       "agent": "plan-mode",
-      "delegates_to": "frontend-developer"
+      "delegates_to": "frontend-developer",
+      "defaultSpecialists": [
+        "architecture-specialist",
+        "test-strategy-specialist"
+      ]
     },
     "ACT": {
       "description": "Actual task execution phase",
@@ -16,14 +20,24 @@
         "rules/augmented-coding.md"
       ],
       "agent": "act-mode",
-      "delegates_to": "frontend-developer"
+      "delegates_to": "frontend-developer",
+      "defaultSpecialists": [
+        "code-quality-specialist",
+        "test-strategy-specialist"
+      ]
     },
     "EVAL": {
       "description": "Result review and assessment phase",
       "instructions": "코드 품질 검토. SOLID 원칙 준수 확인. 테스트 커버리지 점검. 개선점 제안.",
       "rules": ["rules/core.md", "rules/augmented-coding.md"],
       "agent": "eval-mode",
-      "delegates_to": "code-reviewer"
+      "delegates_to": "code-reviewer",
+      "defaultSpecialists": [
+        "security-specialist",
+        "accessibility-specialist",
+        "performance-specialist",
+        "code-quality-specialist"
+      ]
     }
   },
   "defaultMode": "PLAN"

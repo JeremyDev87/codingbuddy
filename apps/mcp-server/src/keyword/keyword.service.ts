@@ -7,6 +7,7 @@ import {
   type ParseModeResult,
   type KeywordModesConfig,
   type AgentInfo,
+  type ParallelAgentRecommendation,
 } from './keyword.types';
 
 const DEFAULT_CONFIG: KeywordModesConfig = {
@@ -18,6 +19,10 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[0],
       delegates_to: 'frontend-developer',
+      defaultSpecialists: [
+        'architecture-specialist',
+        'test-strategy-specialist',
+      ],
     },
     ACT: {
       description: 'Actual task execution phase',
@@ -26,6 +31,10 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[1],
       delegates_to: 'frontend-developer',
+      defaultSpecialists: [
+        'code-quality-specialist',
+        'test-strategy-specialist',
+      ],
     },
     EVAL: {
       description: 'Result review and assessment phase',
@@ -34,6 +43,12 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[2],
       delegates_to: 'code-reviewer',
+      defaultSpecialists: [
+        'security-specialist',
+        'accessibility-specialist',
+        'performance-specialist',
+        'code-quality-specialist',
+      ],
     },
   },
   defaultMode: 'PLAN',
@@ -140,7 +155,36 @@ export class KeywordService {
       }
     }
 
+    // Add parallel agents recommendation for Claude Code subagent execution
+    const parallelAgentsRecommendation = this.getParallelAgentsRecommendation(
+      mode,
+      config,
+    );
+    if (parallelAgentsRecommendation) {
+      result.parallelAgentsRecommendation = parallelAgentsRecommendation;
+    }
+
     return result;
+  }
+
+  /**
+   * Get recommended parallel agents for a given mode.
+   * These specialists can be executed as Claude Code subagents via Task tool.
+   */
+  private getParallelAgentsRecommendation(
+    mode: Mode,
+    config: KeywordModesConfig,
+  ): ParallelAgentRecommendation | undefined {
+    const modeConfig = config.modes[mode];
+    const specialists = modeConfig?.defaultSpecialists;
+    if (!specialists || specialists.length === 0) {
+      return undefined;
+    }
+
+    return {
+      specialists: [...specialists],
+      hint: `Use Task tool with subagent_type="general-purpose" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts.`,
+    };
   }
 
   async loadModeConfig(): Promise<KeywordModesConfig> {

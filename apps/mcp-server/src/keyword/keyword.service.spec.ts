@@ -10,6 +10,10 @@ const mockConfig: KeywordModesConfig = {
       rules: ['rules/core.md'],
       agent: 'plan-mode',
       delegates_to: 'frontend-developer',
+      defaultSpecialists: [
+        'architecture-specialist',
+        'test-strategy-specialist',
+      ],
     },
     ACT: {
       description: 'Actual task execution phase',
@@ -17,6 +21,10 @@ const mockConfig: KeywordModesConfig = {
       rules: ['rules/core.md', 'rules/project.md'],
       agent: 'act-mode',
       delegates_to: 'frontend-developer',
+      defaultSpecialists: [
+        'code-quality-specialist',
+        'test-strategy-specialist',
+      ],
     },
     EVAL: {
       description: 'Result review and assessment phase',
@@ -24,6 +32,12 @@ const mockConfig: KeywordModesConfig = {
       rules: ['rules/core.md'],
       agent: 'eval-mode',
       delegates_to: 'code-reviewer',
+      defaultSpecialists: [
+        'security-specialist',
+        'accessibility-specialist',
+        'performance-specialist',
+        'code-quality-specialist',
+      ],
     },
   },
   defaultMode: 'PLAN',
@@ -736,6 +750,76 @@ describe('KeywordService', () => {
         expect(result.agent).toBe('plan-mode');
         expect(result.delegates_to).toBe('frontend-developer');
       });
+    });
+  });
+
+  describe('parallelAgentsRecommendation', () => {
+    it('returns parallel agents recommendation for PLAN mode', async () => {
+      const result = await service.parseMode('PLAN design auth feature');
+
+      expect(result.parallelAgentsRecommendation).toBeDefined();
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'architecture-specialist',
+      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'test-strategy-specialist',
+      );
+      expect(result.parallelAgentsRecommendation?.hint).toContain('Task tool');
+      expect(result.parallelAgentsRecommendation?.hint).toContain(
+        'prepare_parallel_agents',
+      );
+    });
+
+    it('returns parallel agents recommendation for ACT mode', async () => {
+      const result = await service.parseMode('ACT implement auth feature');
+
+      expect(result.parallelAgentsRecommendation).toBeDefined();
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'code-quality-specialist',
+      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'test-strategy-specialist',
+      );
+    });
+
+    it('returns parallel agents recommendation for EVAL mode', async () => {
+      const result = await service.parseMode('EVAL review auth feature');
+
+      expect(result.parallelAgentsRecommendation).toBeDefined();
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'security-specialist',
+      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'accessibility-specialist',
+      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'performance-specialist',
+      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain(
+        'code-quality-specialist',
+      );
+    });
+
+    it('returns specialists as a copy (not reference)', async () => {
+      const result1 = await service.parseMode('PLAN task1');
+      const result2 = await service.parseMode('PLAN task2');
+
+      // Modifying one should not affect the other
+      result1.parallelAgentsRecommendation?.specialists.push('test-specialist');
+      expect(result2.parallelAgentsRecommendation?.specialists).not.toContain(
+        'test-specialist',
+      );
+    });
+
+    it('includes hint with Task tool usage instructions', async () => {
+      const result = await service.parseMode('EVAL code review');
+
+      expect(result.parallelAgentsRecommendation?.hint).toContain(
+        'subagent_type="general-purpose"',
+      );
+      expect(result.parallelAgentsRecommendation?.hint).toContain(
+        'run_in_background=true',
+      );
     });
   });
 });

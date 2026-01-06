@@ -15,6 +15,8 @@ import type {
   ListSkillsResult,
 } from '../skill/skill-recommendation.types';
 import { LanguageService } from '../shared/language.service';
+import { AgentService } from '../agent/agent.service';
+import type { AgentSystemPrompt, ParallelAgentSet } from '../agent/agent.types';
 
 // Handler function type for MCP request handlers
 type McpHandler = (request: unknown) => Promise<unknown>;
@@ -246,6 +248,37 @@ const createMockLanguageService = (): Partial<LanguageService> => ({
   isLanguageSupported: vi.fn().mockReturnValue(true),
 });
 
+const createMockAgentService = (): Partial<AgentService> => ({
+  getAgentSystemPrompt: vi.fn().mockResolvedValue({
+    agentName: 'security-specialist',
+    displayName: 'Security Specialist',
+    systemPrompt:
+      'You are a Security Specialist. Focus on vulnerability detection.',
+    description: 'Security analysis for PLAN mode',
+  } as AgentSystemPrompt),
+  prepareParallelAgents: vi.fn().mockResolvedValue({
+    agents: [
+      {
+        id: 'security-specialist',
+        displayName: 'Security Specialist',
+        taskPrompt: 'Security analysis prompt',
+        description: 'Security analysis for PLAN mode',
+      },
+      {
+        id: 'accessibility-specialist',
+        displayName: 'Accessibility Specialist',
+        taskPrompt: 'Accessibility analysis prompt',
+        description: 'Accessibility analysis for PLAN mode',
+      },
+    ],
+    parallelExecutionHint:
+      'Use Task tool with subagent_type="general-purpose" and run_in_background=true',
+  } as ParallelAgentSet),
+  getRecommendedAgents: vi
+    .fn()
+    .mockReturnValue(['security-specialist', 'accessibility-specialist']),
+});
+
 // Import after mocks
 import { McpService } from './mcp.service';
 
@@ -257,6 +290,7 @@ describe('McpService', () => {
   let mockAnalyzerService: Partial<AnalyzerService>;
   let mockSkillRecommendationService: Partial<SkillRecommendationService>;
   let mockLanguageService: Partial<LanguageService>;
+  let mockAgentService: Partial<AgentService>;
 
   const testConfig: CodingBuddyConfig = {
     language: 'ko',
@@ -278,6 +312,7 @@ describe('McpService', () => {
     mockAnalyzerService = createMockAnalyzerService();
     mockSkillRecommendationService = createMockSkillRecommendationService();
     mockLanguageService = createMockLanguageService();
+    mockAgentService = createMockAgentService();
 
     const mcpService = new McpService(
       mockRulesService as RulesService,
@@ -287,6 +322,7 @@ describe('McpService', () => {
       mockAnalyzerService as AnalyzerService,
       mockSkillRecommendationService as SkillRecommendationService,
       mockLanguageService as LanguageService,
+      mockAgentService as AgentService,
     );
     mcpService.onModuleInit();
   });
@@ -717,6 +753,7 @@ describe('McpService', () => {
         mockAnalyzerService as AnalyzerService,
         mockSkillRecommendationService as SkillRecommendationService,
         mockLanguageService as LanguageService,
+        mockAgentService as AgentService,
       );
       serviceWithEmptyConfig.onModuleInit();
 
@@ -767,6 +804,7 @@ describe('McpService', () => {
         mockAnalyzerService as AnalyzerService,
         mockSkillRecommendationService as SkillRecommendationService,
         mockLanguageService as LanguageService,
+        mockAgentService as AgentService,
       );
       service.onModuleInit();
 
@@ -832,6 +870,7 @@ describe('McpService', () => {
           mockAnalyzerService as AnalyzerService,
           mockSkillRecommendationService as SkillRecommendationService,
           mockLanguageService as LanguageService,
+          mockAgentService as AgentService,
         );
         service.onModuleInit();
 
@@ -904,6 +943,7 @@ describe('McpService', () => {
           mockAnalyzerService as AnalyzerService,
           mockSkillRecommendationService as SkillRecommendationService,
           mockLanguageService as LanguageService,
+          mockAgentService as AgentService,
         );
         service.onModuleInit();
 
@@ -961,6 +1001,7 @@ describe('McpService', () => {
         mockAnalyzerService as AnalyzerService,
         mockSkillRecommendationService as SkillRecommendationService,
         mockLanguageService as LanguageService,
+        mockAgentService as AgentService,
       );
 
       // Should not throw
@@ -978,6 +1019,7 @@ describe('McpService', () => {
         mockAnalyzerService as AnalyzerService,
         mockSkillRecommendationService as SkillRecommendationService,
         mockLanguageService as LanguageService,
+        mockAgentService as AgentService,
       );
 
       const server = service.getServer();
@@ -1448,6 +1490,407 @@ describe('McpService', () => {
         // Should be called with empty options since non-number values are ignored
         expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
           {},
+        );
+      });
+    });
+  });
+
+  // ============================================================================
+  // get_agent_system_prompt Tool Tests
+  // ============================================================================
+
+  describe('get_agent_system_prompt tool', () => {
+    describe('Tool Registration', () => {
+      it('should list get_agent_system_prompt tool', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string; inputSchema: object }[];
+        };
+        const agentPromptTool = result.tools.find(
+          t => t.name === 'get_agent_system_prompt',
+        );
+
+        expect(agentPromptTool).toBeDefined();
+        expect(agentPromptTool!.description).toContain('specialist agent');
+        expect(agentPromptTool!.description).toContain('subagent');
+      });
+
+      it('should have correct inputSchema for get_agent_system_prompt', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: {
+            name: string;
+            inputSchema: {
+              properties: Record<string, unknown>;
+              required: string[];
+            };
+          }[];
+        };
+        const agentPromptTool = result.tools.find(
+          t => t.name === 'get_agent_system_prompt',
+        );
+
+        expect(agentPromptTool).toBeDefined();
+        expect(agentPromptTool!.inputSchema.properties).toHaveProperty(
+          'agentName',
+        );
+        expect(agentPromptTool!.inputSchema.properties).toHaveProperty(
+          'context',
+        );
+        expect(agentPromptTool!.inputSchema.required).toContain('agentName');
+        expect(agentPromptTool!.inputSchema.required).toContain('context');
+      });
+    });
+
+    describe('Basic Functionality', () => {
+      it('should return agent system prompt with valid parameters', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_system_prompt',
+            arguments: {
+              agentName: 'security-specialist',
+              context: { mode: 'PLAN' },
+            },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        expect(result.content[0].type).toBe('text');
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.agentName).toBe('security-specialist');
+        expect(parsed.displayName).toBe('Security Specialist');
+        expect(parsed.systemPrompt).toContain('Security Specialist');
+        expect(parsed.description).toBeDefined();
+        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
+          'security-specialist',
+          { mode: 'PLAN' },
+        );
+      });
+
+      it('should pass targetFiles and taskDescription to service', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        await handler!({
+          params: {
+            name: 'get_agent_system_prompt',
+            arguments: {
+              agentName: 'accessibility-specialist',
+              context: {
+                mode: 'ACT',
+                targetFiles: ['src/components/Button.tsx'],
+                taskDescription: 'Review component accessibility',
+              },
+            },
+          },
+        });
+
+        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
+          'accessibility-specialist',
+          {
+            mode: 'ACT',
+            targetFiles: ['src/components/Button.tsx'],
+            taskDescription: 'Review component accessibility',
+          },
+        );
+      });
+    });
+
+    describe('Error Handling', () => {
+      it('should return error when agentName is missing', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_system_prompt',
+            arguments: {
+              context: { mode: 'PLAN' },
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('agentName');
+      });
+
+      it('should return error when context.mode is missing', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_system_prompt',
+            arguments: {
+              agentName: 'security-specialist',
+              context: {},
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('context.mode');
+      });
+
+      it('should return error when mode is invalid', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_system_prompt',
+            arguments: {
+              agentName: 'security-specialist',
+              context: { mode: 'INVALID' },
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('Invalid mode');
+      });
+
+      it('should return error when service throws', async () => {
+        vi.mocked(mockAgentService.getAgentSystemPrompt!).mockRejectedValue(
+          new Error('Agent not found'),
+        );
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'get_agent_system_prompt',
+            arguments: {
+              agentName: 'invalid-agent',
+              context: { mode: 'PLAN' },
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain(
+          'Failed to get agent system prompt',
+        );
+      });
+    });
+  });
+
+  // ============================================================================
+  // prepare_parallel_agents Tool Tests
+  // ============================================================================
+
+  describe('prepare_parallel_agents tool', () => {
+    describe('Tool Registration', () => {
+      it('should list prepare_parallel_agents tool', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: { name: string; description: string; inputSchema: object }[];
+        };
+        const parallelAgentsTool = result.tools.find(
+          t => t.name === 'prepare_parallel_agents',
+        );
+
+        expect(parallelAgentsTool).toBeDefined();
+        expect(parallelAgentsTool!.description).toContain('parallel');
+        expect(parallelAgentsTool!.description).toContain('Task tool');
+      });
+
+      it('should have correct inputSchema for prepare_parallel_agents', async () => {
+        const handler = handlers.get('tools/list');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({})) as {
+          tools: {
+            name: string;
+            inputSchema: {
+              properties: Record<string, unknown>;
+              required: string[];
+            };
+          }[];
+        };
+        const parallelAgentsTool = result.tools.find(
+          t => t.name === 'prepare_parallel_agents',
+        );
+
+        expect(parallelAgentsTool).toBeDefined();
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
+          'mode',
+        );
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
+          'specialists',
+        );
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
+          'targetFiles',
+        );
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
+          'sharedContext',
+        );
+        expect(parallelAgentsTool!.inputSchema.required).toContain('mode');
+        expect(parallelAgentsTool!.inputSchema.required).toContain(
+          'specialists',
+        );
+      });
+    });
+
+    describe('Basic Functionality', () => {
+      it('should return parallel agents with valid parameters', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              mode: 'PLAN',
+              specialists: ['security-specialist', 'accessibility-specialist'],
+            },
+          },
+        })) as { content: { type: string; text: string }[] };
+
+        expect(result.content).toHaveLength(1);
+        expect(result.content[0].type).toBe('text');
+
+        const parsed = JSON.parse(result.content[0].text);
+        expect(parsed.agents).toHaveLength(2);
+        expect(parsed.agents[0].id).toBe('security-specialist');
+        expect(parsed.agents[1].id).toBe('accessibility-specialist');
+        expect(parsed.parallelExecutionHint).toContain('Task tool');
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'PLAN',
+          ['security-specialist', 'accessibility-specialist'],
+          undefined,
+          undefined,
+        );
+      });
+
+      it('should pass targetFiles and sharedContext to service', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              mode: 'EVAL',
+              specialists: ['security-specialist'],
+              targetFiles: ['src/api/auth.ts', 'src/api/login.ts'],
+              sharedContext: 'Review authentication implementation',
+            },
+          },
+        });
+
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['security-specialist'],
+          ['src/api/auth.ts', 'src/api/login.ts'],
+          'Review authentication implementation',
+        );
+      });
+    });
+
+    describe('Error Handling', () => {
+      it('should return error when mode is missing', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              specialists: ['security-specialist'],
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('mode');
+      });
+
+      it('should return error when mode is invalid', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              mode: 'INVALID',
+              specialists: ['security-specialist'],
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('Invalid mode');
+      });
+
+      it('should return error when specialists is missing', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              mode: 'PLAN',
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('specialists');
+      });
+
+      it('should return error when specialists is empty array', async () => {
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              mode: 'PLAN',
+              specialists: [],
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('specialists');
+      });
+
+      it('should return error when service throws', async () => {
+        vi.mocked(mockAgentService.prepareParallelAgents!).mockRejectedValue(
+          new Error('Service error'),
+        );
+
+        const handler = handlers.get('tools/call');
+        expect(handler).toBeDefined();
+
+        const result = (await handler!({
+          params: {
+            name: 'prepare_parallel_agents',
+            arguments: {
+              mode: 'PLAN',
+              specialists: ['invalid-agent'],
+            },
+          },
+        })) as { isError: boolean; content: { text: string }[] };
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain(
+          'Failed to prepare parallel agents',
         );
       });
     });

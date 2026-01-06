@@ -21,6 +21,8 @@ import { SkillRecommendationService } from '../skill/skill-recommendation.servic
 import type { ListSkillsOptions } from '../skill/skill-recommendation.types';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import { LanguageService } from '../shared/language.service';
+import { AgentService } from '../agent/agent.service';
+import type { Mode } from '../keyword/keyword.types';
 
 @Injectable()
 export class McpService implements OnModuleInit {
@@ -35,6 +37,7 @@ export class McpService implements OnModuleInit {
     private analyzerService: AnalyzerService,
     private skillRecommendationService: SkillRecommendationService,
     private languageService: LanguageService,
+    private agentService: AgentService,
   ) {
     this.server = new Server(
       {
@@ -256,6 +259,75 @@ export class McpService implements OnModuleInit {
               required: [],
             },
           },
+          {
+            name: 'get_agent_system_prompt',
+            description:
+              'Get complete system prompt for a specialist agent to be executed as a Claude Code subagent. Use this to prepare an agent for parallel execution via Task tool.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                agentName: {
+                  type: 'string',
+                  description:
+                    'Name of the specialist agent (e.g., security-specialist, accessibility-specialist)',
+                },
+                context: {
+                  type: 'object',
+                  description: 'Context for the agent',
+                  properties: {
+                    mode: {
+                      type: 'string',
+                      enum: ['PLAN', 'ACT', 'EVAL'],
+                      description: 'Current workflow mode',
+                    },
+                    targetFiles: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Files to analyze or review',
+                    },
+                    taskDescription: {
+                      type: 'string',
+                      description: 'Description of the task',
+                    },
+                  },
+                  required: ['mode'],
+                },
+              },
+              required: ['agentName', 'context'],
+            },
+          },
+          {
+            name: 'prepare_parallel_agents',
+            description:
+              'Prepare multiple specialist agents for parallel execution via Claude Code Task tool. Returns prompts and hints for launching agents concurrently.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                mode: {
+                  type: 'string',
+                  enum: ['PLAN', 'ACT', 'EVAL'],
+                  description: 'Current workflow mode',
+                },
+                specialists: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description:
+                    'List of specialist agent names (e.g., ["security-specialist", "accessibility-specialist"])',
+                },
+                targetFiles: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Files to analyze or review',
+                },
+                sharedContext: {
+                  type: 'string',
+                  description:
+                    'Shared context or task description for all agents',
+                },
+              },
+              required: ['mode', 'specialists'],
+            },
+          },
         ],
       };
     });
@@ -278,6 +350,10 @@ export class McpService implements OnModuleInit {
           return this.handleRecommendSkills(args);
         case 'list_skills':
           return this.handleListSkills(args);
+        case 'get_agent_system_prompt':
+          return this.handleGetAgentSystemPrompt(args);
+        case 'prepare_parallel_agents':
+          return this.handlePrepareParallelAgents(args);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
@@ -456,6 +532,85 @@ export class McpService implements OnModuleInit {
     } catch (error) {
       return this.errorResponse(
         `Failed to list skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  private async handleGetAgentSystemPrompt(
+    args: Record<string, unknown> | undefined,
+  ) {
+    const agentName = args?.agentName;
+    const context = args?.context as
+      | {
+          mode: Mode;
+          targetFiles?: string[];
+          taskDescription?: string;
+        }
+      | undefined;
+
+    if (typeof agentName !== 'string') {
+      return this.errorResponse('Missing required parameter: agentName');
+    }
+    if (!context || typeof context.mode !== 'string') {
+      return this.errorResponse(
+        'Missing required parameter: context.mode (PLAN, ACT, or EVAL)',
+      );
+    }
+    if (!['PLAN', 'ACT', 'EVAL'].includes(context.mode)) {
+      return this.errorResponse(
+        `Invalid mode: ${context.mode}. Must be PLAN, ACT, or EVAL`,
+      );
+    }
+
+    try {
+      const result = await this.agentService.getAgentSystemPrompt(agentName, {
+        mode: context.mode as Mode,
+        targetFiles: context.targetFiles,
+        taskDescription: context.taskDescription,
+      });
+      return this.jsonResponse(result);
+    } catch (error) {
+      return this.errorResponse(
+        `Failed to get agent system prompt: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  private async handlePrepareParallelAgents(
+    args: Record<string, unknown> | undefined,
+  ) {
+    const mode = args?.mode as string | undefined;
+    const specialists = args?.specialists as string[] | undefined;
+    const targetFiles = args?.targetFiles as string[] | undefined;
+    const sharedContext = args?.sharedContext as string | undefined;
+
+    if (typeof mode !== 'string') {
+      return this.errorResponse(
+        'Missing required parameter: mode (PLAN, ACT, or EVAL)',
+      );
+    }
+    if (!['PLAN', 'ACT', 'EVAL'].includes(mode)) {
+      return this.errorResponse(
+        `Invalid mode: ${mode}. Must be PLAN, ACT, or EVAL`,
+      );
+    }
+    if (!Array.isArray(specialists) || specialists.length === 0) {
+      return this.errorResponse(
+        'Missing required parameter: specialists (array of agent names)',
+      );
+    }
+
+    try {
+      const result = await this.agentService.prepareParallelAgents(
+        mode as Mode,
+        specialists,
+        targetFiles,
+        sharedContext,
+      );
+      return this.jsonResponse(result);
+    } catch (error) {
+      return this.errorResponse(
+        `Failed to prepare parallel agents: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
