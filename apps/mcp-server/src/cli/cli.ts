@@ -28,6 +28,7 @@ export function parseArgs(args: string[]): ParsedArgs {
     projectRoot: process.cwd(),
     format: 'js',
     force: false,
+    useDefaults: false,
   };
 
   // Check for help/version flags first
@@ -56,6 +57,8 @@ export function parseArgs(args: string[]): ParsedArgs {
 
     if (arg === '--force' || arg === '-f') {
       options.force = true;
+    } else if (arg === '--yes' || arg === '-y') {
+      options.useDefaults = true;
     } else if (arg === '--format') {
       const format = args[++i];
       if (format === 'js' || format === 'json') {
@@ -88,6 +91,7 @@ Usage:
 Options:
   --format <js|json>    Output format (default: js)
   --force, -f           Overwrite existing config
+  --yes, -y             Accept detected defaults (quick setup)
   --api-key <key>       Anthropic API key (or set ANTHROPIC_API_KEY env)
 
 Examples:

@@ -45,6 +45,25 @@ npx codingbuddy init --ai
 
 AI 기반 모드는 더 깊은 프로젝트 분석과 맞춤형 설정을 제공합니다.
 
+#### 환경 변수
+
+CLI는 색상 출력 제어를 위한 표준 환경 변수를 지원합니다:
+
+| 변수 | 설명 |
+|------|------|
+| `NO_COLOR` | 어떤 값이든 설정하면 색상 출력 비활성화 ([no-color.org](https://no-color.org/) 표준 준수) |
+| `FORCE_COLOR` | `1`로 설정하면 색상 강제 활성화 (CI 환경에서 유용). `0`으로 설정하면 비활성화. `NO_COLOR`보다 우선 |
+
+사용 예시:
+
+```bash
+# 접근성 또는 파이프 사용 시 색상 비활성화
+NO_COLOR=1 npx codingbuddy init
+
+# CI 환경에서 색상 강제 활성화
+FORCE_COLOR=1 npx codingbuddy init
+```
+
 ### 2단계: AI 도구 설정
 
 AI 어시스턴트에 Codingbuddy를 추가합니다. Claude Desktop 예시:

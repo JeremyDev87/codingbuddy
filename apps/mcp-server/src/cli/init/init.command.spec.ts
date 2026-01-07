@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { InitOptions } from '../cli.types';
 import type { ProjectAnalysis } from '../../analyzer';
 import type { CodingBuddyConfig } from '../../config';
+import type { WizardData } from './init.wizard';
 
 // Use vi.hoisted to ensure mock functions are available before vi.mock hoisting
 const {
@@ -9,23 +10,19 @@ const {
   mockGenerate,
   mockFindExistingConfig,
   mockWriteConfig,
-  mockSelectTemplate,
-  mockRenderConfigAsJs,
-  mockRenderConfigAsJson,
-  mockPromptModelSelection,
-  mockPromptLanguageSelection,
-  mockPromptPrimaryAgentSelection,
+  mockRunInitWizard,
+  mockWizardDataToConfig,
+  mockRenderConfigObjectAsJs,
+  mockRenderConfigObjectAsJson,
 } = vi.hoisted(() => ({
   mockAnalyzeProject: vi.fn(),
   mockGenerate: vi.fn(),
   mockFindExistingConfig: vi.fn(),
   mockWriteConfig: vi.fn(),
-  mockSelectTemplate: vi.fn(),
-  mockRenderConfigAsJs: vi.fn(),
-  mockRenderConfigAsJson: vi.fn(),
-  mockPromptModelSelection: vi.fn(),
-  mockPromptLanguageSelection: vi.fn(),
-  mockPromptPrimaryAgentSelection: vi.fn(),
+  mockRunInitWizard: vi.fn(),
+  mockWizardDataToConfig: vi.fn(),
+  mockRenderConfigObjectAsJs: vi.fn(),
+  mockRenderConfigObjectAsJson: vi.fn(),
 }));
 
 // Mock all modules
@@ -47,18 +44,13 @@ vi.mock('./config.writer', () => ({
 }));
 
 vi.mock('./templates', () => ({
-  selectTemplate: mockSelectTemplate,
-  renderConfigAsJs: mockRenderConfigAsJs,
-  renderConfigAsJson: mockRenderConfigAsJson,
+  renderConfigObjectAsJs: mockRenderConfigObjectAsJs,
+  renderConfigObjectAsJson: mockRenderConfigObjectAsJson,
 }));
 
-vi.mock('./prompts', () => ({
-  promptModelSelection: mockPromptModelSelection,
-  promptLanguageSelection: mockPromptLanguageSelection,
-  promptPrimaryAgentSelection: mockPromptPrimaryAgentSelection,
-  DEFAULT_MODEL_CHOICE: 'claude-sonnet-4-20250514',
-  DEFAULT_LANGUAGE: 'ko',
-  DEFAULT_PRIMARY_AGENT: 'frontend-developer',
+vi.mock('./init.wizard', () => ({
+  runInitWizard: mockRunInitWizard,
+  wizardDataToConfig: mockWizardDataToConfig,
 }));
 
 vi.mock('../utils/console', () => ({
@@ -108,22 +100,39 @@ describe('init.command', () => {
 
   const mockConfig: CodingBuddyConfig = {
     projectName: 'test-app',
-    language: 'en',
+    language: 'ko',
   };
 
-  const mockTemplateResult = {
-    template: {
-      metadata: {
-        id: 'default',
-        name: 'Default',
-        description: 'Default template',
-        matchPatterns: [],
-      },
-      config: mockConfig,
-      comments: { header: '// header' },
+  const mockWizardData: WizardData = {
+    basic: {
+      language: 'ko',
+      projectName: 'test-app',
+      description: 'Test application',
     },
-    reason: 'Default template selected',
-    detectedFrameworks: [],
+    techStack: {
+      languages: ['TypeScript'],
+      frontend: ['React'],
+      backend: [],
+      tools: ['Vitest'],
+    },
+    architecture: {
+      pattern: 'modular',
+      componentStyle: 'feature-based',
+    },
+    conventions: {
+      fileNaming: 'kebab-case',
+      quotes: 'single',
+      semicolons: true,
+    },
+    testStrategy: {
+      approach: 'tdd',
+      coverage: 90,
+      mockingStrategy: 'minimal',
+    },
+    ai: {
+      defaultModel: 'sonnet',
+      primaryAgent: 'frontend-developer',
+    },
   };
 
   beforeEach(() => {
@@ -134,12 +143,10 @@ describe('init.command', () => {
     mockGenerate.mockResolvedValue(mockConfig);
     mockFindExistingConfig.mockResolvedValue(null);
     mockWriteConfig.mockResolvedValue('/project/codingbuddy.config.js');
-    mockSelectTemplate.mockReturnValue(mockTemplateResult);
-    mockRenderConfigAsJs.mockReturnValue('// rendered config');
-    mockRenderConfigAsJson.mockReturnValue('{}');
-    mockPromptModelSelection.mockResolvedValue('claude-sonnet-4-20250514');
-    mockPromptLanguageSelection.mockResolvedValue('ko');
-    mockPromptPrimaryAgentSelection.mockResolvedValue('frontend-developer');
+    mockRunInitWizard.mockResolvedValue(mockWizardData);
+    mockWizardDataToConfig.mockReturnValue(mockConfig);
+    mockRenderConfigObjectAsJs.mockReturnValue('// rendered config');
+    mockRenderConfigObjectAsJson.mockReturnValue('{}');
   });
 
   describe('getApiKey', () => {
@@ -202,7 +209,7 @@ describe('init.command', () => {
       expect(mockAnalyzeProject).toHaveBeenCalledWith('/project');
     });
 
-    it('should select template based on analysis', async () => {
+    it('should run init wizard with analysis', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
@@ -211,7 +218,23 @@ describe('init.command', () => {
 
       await runInit(options);
 
-      expect(mockSelectTemplate).toHaveBeenCalledWith(mockAnalysis);
+      expect(mockRunInitWizard).toHaveBeenCalledWith({
+        analysis: mockAnalysis,
+        useDefaults: undefined,
+        skipPrompts: undefined,
+      });
+    });
+
+    it('should convert wizard data to config', async () => {
+      const options: InitOptions = {
+        projectRoot: '/project',
+        format: 'js',
+        force: false,
+      };
+
+      await runInit(options);
+
+      expect(mockWizardDataToConfig).toHaveBeenCalledWith(mockWizardData);
     });
 
     it('should render config as JS by default', async () => {
@@ -223,8 +246,8 @@ describe('init.command', () => {
 
       await runInit(options);
 
-      expect(mockRenderConfigAsJs).toHaveBeenCalled();
-      expect(mockRenderConfigAsJson).not.toHaveBeenCalled();
+      expect(mockRenderConfigObjectAsJs).toHaveBeenCalledWith(mockConfig);
+      expect(mockRenderConfigObjectAsJson).not.toHaveBeenCalled();
     });
 
     it('should render config as JSON when format is json', async () => {
@@ -236,8 +259,8 @@ describe('init.command', () => {
 
       await runInit(options);
 
-      expect(mockRenderConfigAsJson).toHaveBeenCalled();
-      expect(mockRenderConfigAsJs).not.toHaveBeenCalled();
+      expect(mockRenderConfigObjectAsJson).toHaveBeenCalledWith(mockConfig);
+      expect(mockRenderConfigObjectAsJs).not.toHaveBeenCalled();
     });
 
     it('should write rendered config with raw option', async () => {
@@ -256,39 +279,24 @@ describe('init.command', () => {
       );
     });
 
-    it('should pass language option to renderer when skipPrompts', async () => {
+    it('should pass useDefaults option to wizard', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
         force: false,
-        language: 'en',
-        skipPrompts: true,
+        useDefaults: true,
       };
 
       await runInit(options);
 
-      expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
-        mockTemplateResult.template,
-        expect.objectContaining({ language: 'en' }),
-      );
+      expect(mockRunInitWizard).toHaveBeenCalledWith({
+        analysis: mockAnalysis,
+        useDefaults: true,
+        skipPrompts: undefined,
+      });
     });
 
-    it('should call all prompts when skipPrompts is false', async () => {
-      const options: InitOptions = {
-        projectRoot: '/project',
-        format: 'js',
-        force: false,
-        skipPrompts: false,
-      };
-
-      await runInit(options);
-
-      expect(mockPromptLanguageSelection).toHaveBeenCalled();
-      expect(mockPromptPrimaryAgentSelection).toHaveBeenCalled();
-      expect(mockPromptModelSelection).toHaveBeenCalled();
-    });
-
-    it('should skip all prompts when skipPrompts is true', async () => {
+    it('should pass skipPrompts option to wizard', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
         format: 'js',
@@ -298,53 +306,26 @@ describe('init.command', () => {
 
       await runInit(options);
 
-      expect(mockPromptLanguageSelection).not.toHaveBeenCalled();
-      expect(mockPromptPrimaryAgentSelection).not.toHaveBeenCalled();
-      expect(mockPromptModelSelection).not.toHaveBeenCalled();
-    });
-
-    it('should pass selected values to renderer', async () => {
-      mockPromptLanguageSelection.mockResolvedValue('ja');
-      mockPromptPrimaryAgentSelection.mockResolvedValue('backend-developer');
-      mockPromptModelSelection.mockResolvedValue('claude-opus-4-20250514');
-
-      const options: InitOptions = {
-        projectRoot: '/project',
-        format: 'js',
-        force: false,
-        skipPrompts: false,
-      };
-
-      await runInit(options);
-
-      expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
-        mockTemplateResult.template,
-        expect.objectContaining({
-          language: 'ja',
-          primaryAgent: 'backend-developer',
-          defaultModel: 'claude-opus-4-20250514',
-        }),
-      );
-    });
-
-    it('should use default values when skipPrompts is true', async () => {
-      const options: InitOptions = {
-        projectRoot: '/project',
-        format: 'js',
-        force: false,
+      expect(mockRunInitWizard).toHaveBeenCalledWith({
+        analysis: mockAnalysis,
+        useDefaults: undefined,
         skipPrompts: true,
+      });
+    });
+
+    it('should handle wizard cancellation', async () => {
+      mockRunInitWizard.mockResolvedValue(null);
+
+      const options: InitOptions = {
+        projectRoot: '/project',
+        format: 'js',
+        force: false,
       };
 
-      await runInit(options);
+      const result = await runInit(options);
 
-      expect(mockRenderConfigAsJs).toHaveBeenCalledWith(
-        mockTemplateResult.template,
-        expect.objectContaining({
-          language: 'ko',
-          primaryAgent: 'frontend-developer',
-          defaultModel: 'claude-sonnet-4-20250514',
-        }),
-      );
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('cancelled');
     });
   });
 
@@ -376,7 +357,7 @@ describe('init.command', () => {
 
       expect(result.success).toBe(true);
       expect(mockGenerate).toHaveBeenCalledWith(mockAnalysis);
-      expect(mockSelectTemplate).not.toHaveBeenCalled();
+      expect(mockRunInitWizard).not.toHaveBeenCalled();
     });
 
     it('should write config without raw option in AI mode', async () => {

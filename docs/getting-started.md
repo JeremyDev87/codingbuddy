@@ -52,6 +52,25 @@ npx codingbuddy init --ai
 
 The AI-powered mode provides deeper project analysis and more tailored configurations.
 
+#### Environment Variables
+
+The CLI respects standard environment variables for color output control:
+
+| Variable | Description |
+|----------|-------------|
+| `NO_COLOR` | Set to any value to disable colored output (follows [no-color.org](https://no-color.org/) standard) |
+| `FORCE_COLOR` | Set to `1` to force colors (useful in CI). Set to `0` to disable. Takes precedence over `NO_COLOR` |
+
+Example usage:
+
+```bash
+# Disable colors for accessibility or piping
+NO_COLOR=1 npx codingbuddy init
+
+# Force colors in CI environments
+FORCE_COLOR=1 npx codingbuddy init
+```
+
 ### Step 2: Configure Your AI Tool
 
 Add Codingbuddy to your AI assistant. Here's an example for Claude Desktop:

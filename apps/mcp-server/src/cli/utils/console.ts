@@ -18,20 +18,57 @@ export interface ConsoleUtils {
 }
 
 /**
- * ANSI color codes
+ * Determine if colors should be enabled based on environment variables
+ * @see https://no-color.org/
+ * @see https://force-color.org/
+ *
+ * Priority: FORCE_COLOR > NO_COLOR > default (enabled)
+ * - FORCE_COLOR=1 (or any truthy value): force colors on
+ * - FORCE_COLOR=0: force colors off
+ * - NO_COLOR (any value): disable colors
  */
-const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  cyan: '\x1b[36m',
-};
+function shouldDisableColors(): boolean {
+  const forceColor = process.env.FORCE_COLOR;
+
+  // FORCE_COLOR takes precedence
+  if (forceColor !== undefined) {
+    // FORCE_COLOR=0 disables colors
+    return forceColor === '0';
+  }
+
+  // NO_COLOR disables colors
+  return process.env.NO_COLOR !== undefined;
+}
+
+/**
+ * Get ANSI color codes, respecting NO_COLOR environment variable
+ */
+function getColors(): Record<string, string> {
+  if (shouldDisableColors()) {
+    return {
+      reset: '',
+      green: '',
+      yellow: '',
+      red: '',
+      cyan: '',
+    };
+  }
+
+  return {
+    reset: '\x1b[0m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    red: '\x1b[31m',
+    cyan: '\x1b[36m',
+  };
+}
 
 /**
  * Create console utilities instance
  */
 export function createConsoleUtils(): ConsoleUtils {
+  const colors = getColors();
+
   const log = {
     info(message: string): void {
       process.stdout.write(`${colors.cyan}ℹ${colors.reset} ${message}\n`);

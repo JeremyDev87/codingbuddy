@@ -71,6 +71,26 @@ describe('cli', () => {
 
       expect(result.options.projectRoot).toBe('/custom/path');
     });
+
+    it('should parse init with --yes flag', () => {
+      const result = parseArgs(['init', '--yes']);
+
+      expect(result.command).toBe('init');
+      expect(result.options.useDefaults).toBe(true);
+    });
+
+    it('should parse init with -y short flag', () => {
+      const result = parseArgs(['init', '-y']);
+
+      expect(result.command).toBe('init');
+      expect(result.options.useDefaults).toBe(true);
+    });
+
+    it('should default useDefaults to false', () => {
+      const result = parseArgs(['init']);
+
+      expect(result.options.useDefaults).toBe(false);
+    });
   });
 
   describe('printUsage', () => {

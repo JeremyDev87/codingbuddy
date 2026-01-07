@@ -25,6 +25,11 @@ export interface InitOptions {
    * @default false - When false or undefined, interactive prompts are shown
    */
   skipPrompts?: boolean;
+  /**
+   * Use detected defaults without prompting (--yes, -y flag)
+   * @default false
+   */
+  useDefaults?: boolean;
 }
 
 /**

@@ -24,5 +24,12 @@ export {
 // Template rendering
 export { renderConfigAsJs, renderConfigAsJson } from './template.renderer';
 
+// Config object rendering (for wizard)
+export {
+  renderConfigObjectAsJs,
+  renderConfigObjectAsJson,
+  escapeJsString,
+} from './config-renderer';
+
 // Individual templates
 export { TEMPLATES } from './frameworks';

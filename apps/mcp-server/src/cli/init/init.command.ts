@@ -6,25 +6,41 @@
  * Optionally uses AI generation with --ai flag
  */
 
-import { AnalyzerService } from '../../analyzer';
+import { AnalyzerService, type ProjectAnalysis } from '../../analyzer';
 import { ConfigGenerator } from './config.generator';
 import { findExistingConfig, writeConfig } from './config.writer';
 import { createConsoleUtils } from '../utils/console';
-import {
-  selectTemplate,
-  renderConfigAsJs,
-  renderConfigAsJson,
-} from './templates';
-import {
-  promptModelSelection,
-  promptLanguageSelection,
-  promptPrimaryAgentSelection,
-  DEFAULT_MODEL_CHOICE,
-  DEFAULT_LANGUAGE,
-  DEFAULT_PRIMARY_AGENT,
-  type ActPrimaryAgent,
-} from './prompts';
+import { renderConfigObjectAsJs, renderConfigObjectAsJson } from './templates';
+import { runInitWizard, wizardDataToConfig } from './init.wizard';
 import type { InitOptions, InitResult } from '../cli.types';
+
+/**
+ * Analyze project and log summary
+ *
+ * Common helper used by both template and AI init modes
+ */
+async function analyzeProjectWithLogging(
+  projectRoot: string,
+  console: ReturnType<typeof createConsoleUtils>,
+): Promise<ProjectAnalysis> {
+  console.log.step('🔍', 'Analyzing project...');
+
+  const analyzer = new AnalyzerService();
+  const analysis = await analyzer.analyzeProject(projectRoot);
+
+  console.log.success('Project analysis complete');
+
+  // Log analysis summary
+  if (analysis.packageInfo) {
+    console.log.step('📦', `Package: ${analysis.packageInfo.name}`);
+  }
+  if (analysis.detectedPatterns.length > 0) {
+    console.log.step('🏗️', `Patterns: ${analysis.detectedPatterns.join(', ')}`);
+  }
+  console.log.step('📁', `Files: ${analysis.directoryStructure.totalFiles}`);
+
+  return analysis;
+}
 
 /**
  * Get API key from options or environment
@@ -50,73 +66,37 @@ async function runTemplateInit(
   console: ReturnType<typeof createConsoleUtils>,
 ): Promise<InitResult> {
   // Step 1: Analyze project
-  console.log.step('🔍', 'Analyzing project...');
+  const analysis = await analyzeProjectWithLogging(
+    options.projectRoot,
+    console,
+  );
 
-  const analyzer = new AnalyzerService();
-  const analysis = await analyzer.analyzeProject(options.projectRoot);
+  // Step 2: Run interactive wizard
+  const wizardData = await runInitWizard({
+    analysis,
+    useDefaults: options.useDefaults,
+    skipPrompts: options.skipPrompts,
+  });
 
-  console.log.success('Project analysis complete');
-
-  // Log analysis summary
-  if (analysis.packageInfo) {
-    console.log.step('📦', `Package: ${analysis.packageInfo.name}`);
-  }
-  if (analysis.detectedPatterns.length > 0) {
-    console.log.step('🏗️', `Patterns: ${analysis.detectedPatterns.join(', ')}`);
-  }
-  console.log.step('📁', `Files: ${analysis.directoryStructure.totalFiles}`);
-
-  // Step 2: Select template based on analysis
-  console.log.step('📋', 'Selecting template...');
-
-  const { template, reason, detectedFrameworks } = selectTemplate(analysis);
-
-  console.log.success(`Template: ${template.metadata.name}`);
-  console.log.info(`  ${reason}`);
-  if (detectedFrameworks.length > 0) {
-    console.log.info(`  Detected: ${detectedFrameworks.join(', ')}`);
+  // Handle cancellation
+  if (wizardData === null) {
+    return {
+      success: false,
+      error: 'Configuration cancelled by user.',
+    };
   }
 
-  // Step 3: Interactive prompts
-  let selectedLanguage = options.language ?? DEFAULT_LANGUAGE;
-  let selectedModel = DEFAULT_MODEL_CHOICE;
-  let selectedAgent: ActPrimaryAgent = DEFAULT_PRIMARY_AGENT;
-
-  const shouldPrompt = !(options.skipPrompts ?? false);
-  if (shouldPrompt) {
-    // 3a: Language selection
-    console.log.step('🌐', 'Select response language...');
-    selectedLanguage = await promptLanguageSelection();
-    console.log.success(`Language: ${selectedLanguage}`);
-
-    // 3b: Primary agent selection
-    console.log.step('👤', 'Select primary development agent...');
-    selectedAgent = await promptPrimaryAgentSelection();
-    console.log.success(`Agent: ${selectedAgent}`);
-
-    // 3c: AI model selection
-    console.log.step('🤖', 'Select AI model...');
-    selectedModel = await promptModelSelection();
-    console.log.success(`Model: ${selectedModel}`);
-  }
-
-  // Step 4: Render config with comments
+  // Step 3: Convert wizard data to config and render
   console.log.step('✨', 'Generating configuration...');
 
-  const projectName = analysis.packageInfo?.name;
-  const renderOptions = {
-    projectName,
-    language: selectedLanguage,
-    defaultModel: selectedModel,
-    primaryAgent: selectedAgent,
-  };
+  const config = wizardDataToConfig(wizardData);
 
   const configContent =
     options.format === 'json'
-      ? renderConfigAsJson(template, renderOptions)
-      : renderConfigAsJs(template, renderOptions);
+      ? renderConfigObjectAsJson(config)
+      : renderConfigObjectAsJs(config);
 
-  // Step 5: Write config file
+  // Step 4: Write config file
   console.log.step('💾', 'Writing configuration file...');
 
   const configPath = await writeConfig(options.projectRoot, configContent, {
@@ -168,21 +148,10 @@ async function runAiInit(
   }
 
   // Step 1: Analyze project
-  console.log.step('🔍', 'Analyzing project...');
-
-  const analyzer = new AnalyzerService();
-  const analysis = await analyzer.analyzeProject(options.projectRoot);
-
-  console.log.success('Project analysis complete');
-
-  // Log analysis summary
-  if (analysis.packageInfo) {
-    console.log.step('📦', `Package: ${analysis.packageInfo.name}`);
-  }
-  if (analysis.detectedPatterns.length > 0) {
-    console.log.step('🏗️', `Patterns: ${analysis.detectedPatterns.join(', ')}`);
-  }
-  console.log.step('📁', `Files: ${analysis.directoryStructure.totalFiles}`);
+  const analysis = await analyzeProjectWithLogging(
+    options.projectRoot,
+    console,
+  );
 
   // Step 2: Generate config with AI
   console.log.step('🤖', 'AI is generating configuration...');

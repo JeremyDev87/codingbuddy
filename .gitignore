@@ -50,3 +50,4 @@ coverage/
 .mcp.json
 codingbuddy.config.js
 custom.mdc
+.serena/

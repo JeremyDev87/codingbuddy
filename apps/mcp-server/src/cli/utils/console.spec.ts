@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createConsoleUtils, type ConsoleUtils } from './console';
 
@@ -63,6 +64,101 @@ describe('console utils', () => {
       const output = stdoutWrite.mock.calls[0][0] as string;
       expect(output).toContain('🔍');
       expect(output).toContain('Analyzing project...');
+    });
+  });
+
+  describe('NO_COLOR support', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('should not include ANSI color codes when NO_COLOR is set', () => {
+      process.env.NO_COLOR = '1';
+      const noColorConsole = createConsoleUtils();
+
+      noColorConsole.log.success('Test message');
+
+      const output = stdoutWrite.mock.calls[0][0] as string;
+      // Should not contain ANSI escape codes (e.g., \x1b[32m)
+      expect(output).not.toMatch(/\x1b\[\d+m/);
+      expect(output).toContain('✓');
+      expect(output).toContain('Test message');
+    });
+
+    it('should not include ANSI color codes for error when NO_COLOR is set', () => {
+      process.env.NO_COLOR = '1';
+      const noColorConsole = createConsoleUtils();
+
+      noColorConsole.log.error('Error message');
+
+      const output = stderrWrite.mock.calls[0][0] as string;
+      expect(output).not.toMatch(/\x1b\[\d+m/);
+      expect(output).toContain('✗');
+    });
+
+    it('should include colors when NO_COLOR is not set', () => {
+      delete process.env.NO_COLOR;
+      const colorConsole = createConsoleUtils();
+
+      colorConsole.log.success('Test message');
+
+      const output = stdoutWrite.mock.calls[0][0] as string;
+      // Should contain ANSI escape codes
+      expect(output).toMatch(/\x1b\[\d+m/);
+    });
+  });
+
+  describe('FORCE_COLOR support', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('should include colors when FORCE_COLOR is set', () => {
+      process.env.FORCE_COLOR = '1';
+      delete process.env.NO_COLOR;
+      const forceColorConsole = createConsoleUtils();
+
+      forceColorConsole.log.success('Test message');
+
+      const output = stdoutWrite.mock.calls[0][0] as string;
+      expect(output).toMatch(/\x1b\[\d+m/);
+    });
+
+    it('should include colors when FORCE_COLOR overrides NO_COLOR', () => {
+      // FORCE_COLOR should take precedence over NO_COLOR
+      process.env.FORCE_COLOR = '1';
+      process.env.NO_COLOR = '1';
+      const forceColorConsole = createConsoleUtils();
+
+      forceColorConsole.log.success('Test message');
+
+      const output = stdoutWrite.mock.calls[0][0] as string;
+      // FORCE_COLOR wins - should have colors
+      expect(output).toMatch(/\x1b\[\d+m/);
+    });
+
+    it('should not include colors when FORCE_COLOR is "0"', () => {
+      process.env.FORCE_COLOR = '0';
+      delete process.env.NO_COLOR;
+      const noForceConsole = createConsoleUtils();
+
+      noForceConsole.log.success('Test message');
+
+      const output = stdoutWrite.mock.calls[0][0] as string;
+      // FORCE_COLOR=0 disables colors
+      expect(output).not.toMatch(/\x1b\[\d+m/);
     });
   });
 });
