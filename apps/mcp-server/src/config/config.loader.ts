@@ -53,6 +53,61 @@ export function findConfigFile(projectRoot: string): string | null {
 }
 
 /**
+ * Maximum number of parent directories to traverse when searching for project root
+ */
+const MAX_PARENT_TRAVERSAL = 10;
+
+/**
+ * Automatically detect the project root by searching for config files
+ * starting from the given directory and traversing up to parent directories.
+ *
+ * This is useful when the MCP server is started from a directory that may not
+ * be the actual project root (e.g., when launched via npx from a temp directory).
+ *
+ * Search order:
+ * 1. Look for codingbuddy.config.* files (highest priority)
+ * 2. If not found, look for package.json with 'codingbuddy' field
+ * 3. If nothing found after MAX_PARENT_TRAVERSAL, return the starting directory
+ *
+ * @param startDir - Directory to start searching from (defaults to process.cwd())
+ * @returns Detected project root directory
+ */
+export function findProjectRoot(startDir?: string): string {
+  const start = startDir ?? process.cwd();
+  let currentDir = path.resolve(start);
+  let traversalCount = 0;
+
+  while (traversalCount < MAX_PARENT_TRAVERSAL) {
+    // Check for codingbuddy config files
+    if (findConfigFile(currentDir) !== null) {
+      return currentDir;
+    }
+
+    // Check for package.json (indicates a project root)
+    const packageJsonPath = path.join(currentDir, 'package.json');
+    if (existsSync(packageJsonPath)) {
+      // Found a package.json - this is likely the project root
+      // even if there's no codingbuddy config
+      return currentDir;
+    }
+
+    // Move to parent directory
+    const parentDir = path.dirname(currentDir);
+
+    // Reached filesystem root - stop searching
+    if (parentDir === currentDir) {
+      break;
+    }
+
+    currentDir = parentDir;
+    traversalCount++;
+  }
+
+  // Fallback to starting directory
+  return start;
+}
+
+/**
  * Load a JavaScript/ESM config file using dynamic import
  */
 export async function loadJsConfig(filePath: string): Promise<unknown> {

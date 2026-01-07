@@ -1,4 +1,20 @@
-# Keyword Invocation 설계 문서
+# Keyword Invocation Design Document
+
+> **English Summary (TLDR)**
+>
+> This document describes the keyword invocation feature that automatically calls MCP tools when prompts start with specific keywords (PLAN, ACT, EVAL).
+>
+> **Key Points:**
+> - When user types `PLAN/ACT/EVAL` at the start of a prompt, the AI tool detects the keyword
+> - The AI tool calls the `parse_mode` MCP tool with the prompt
+> - The MCP server parses the keyword and returns mode-specific rules and instructions
+> - This enables consistent workflow enforcement across all AI tools (Claude Code, Cursor, etc.)
+>
+> **Architecture:** AI Tool → MCP Server → parse_mode tool → keyword-modes.json config → Return {mode, prompt, rules[]}
+
+---
+
+# Keyword Invocation 설계 문서 (Korean)
 
 ## 개요
 

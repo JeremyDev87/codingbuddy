@@ -1,10 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import {
   CONFIG_FILE_NAMES,
   ConfigLoadError,
   validateAndTransform,
   isJsConfig,
   getJsConfigWarning,
+  findProjectRoot,
+  findConfigFile,
 } from './config.loader';
 
 describe('config.loader', () => {
@@ -148,6 +153,185 @@ describe('config.loader', () => {
       const warning = getJsConfigWarning('/path/to/config.js');
 
       expect(warning).toContain('codingbuddy.config.json');
+    });
+  });
+
+  describe('findConfigFile', () => {
+    let testTempDir: string;
+
+    function createTestDir(): string {
+      const tempDir = path.join(
+        os.tmpdir(),
+        `findConfigFile-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      );
+      mkdirSync(tempDir, { recursive: true });
+      return tempDir;
+    }
+
+    afterEach(() => {
+      if (testTempDir && existsSync(testTempDir)) {
+        rmSync(testTempDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should find codingbuddy.config.js when it exists', () => {
+      testTempDir = createTestDir();
+      writeFileSync(
+        path.join(testTempDir, 'codingbuddy.config.js'),
+        'module.exports = {};',
+      );
+
+      const result = findConfigFile(testTempDir);
+
+      expect(result).not.toBeNull();
+      expect(result).toContain('codingbuddy.config.js');
+    });
+
+    it('should find codingbuddy.config.json when it exists', () => {
+      testTempDir = createTestDir();
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.json'), '{}');
+
+      const result = findConfigFile(testTempDir);
+
+      expect(result).not.toBeNull();
+      expect(result).toContain('codingbuddy.config.json');
+    });
+
+    it('should return null when no config file exists', () => {
+      testTempDir = createTestDir();
+
+      const result = findConfigFile(testTempDir);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('findProjectRoot', () => {
+    let testTempDir: string;
+
+    // Helper to create test directory structure
+    function createTestDir(): string {
+      const tempDir = path.join(
+        os.tmpdir(),
+        `findProjectRoot-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      );
+      mkdirSync(tempDir, { recursive: true });
+      return tempDir;
+    }
+
+    // Helper to cleanup test directory
+    function cleanupTestDir(dir: string): void {
+      try {
+        if (existsSync(dir)) {
+          rmSync(dir, { recursive: true, force: true });
+        }
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
+
+    afterEach(() => {
+      if (testTempDir) {
+        cleanupTestDir(testTempDir);
+      }
+    });
+
+    it('should return directory with codingbuddy config file', () => {
+      // Setup: /tempdir/project/src/components with config at /tempdir/project
+      testTempDir = createTestDir();
+      const projectDir = path.join(testTempDir, 'project');
+      const srcDir = path.join(projectDir, 'src', 'components');
+
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(
+        path.join(projectDir, 'codingbuddy.config.js'),
+        'module.exports = {};',
+      );
+
+      const result = findProjectRoot(srcDir);
+
+      expect(result).toBe(projectDir);
+    });
+
+    it('should return directory with package.json when no config file exists', () => {
+      // Setup: /tempdir/project/src/deep/nested with package.json at /tempdir/project
+      testTempDir = createTestDir();
+      const projectDir = path.join(testTempDir, 'project');
+      const nestedDir = path.join(projectDir, 'src', 'deep', 'nested');
+
+      mkdirSync(nestedDir, { recursive: true });
+      writeFileSync(
+        path.join(projectDir, 'package.json'),
+        JSON.stringify({ name: 'test-project' }),
+      );
+
+      const result = findProjectRoot(nestedDir);
+
+      expect(result).toBe(projectDir);
+    });
+
+    it('should return start directory when no project root found', () => {
+      // Setup: Empty directory structure
+      testTempDir = createTestDir();
+      const emptyDir = path.join(testTempDir, 'empty', 'nested');
+      mkdirSync(emptyDir, { recursive: true });
+
+      const result = findProjectRoot(emptyDir);
+
+      // Should fall back to the original directory since nothing was found
+      // up to the temp dir (which also has no package.json)
+      expect(result).toBe(emptyDir);
+    });
+
+    it('should find codingbuddy config before package.json in same directory', () => {
+      // Setup: Both config and package.json in same directory
+      testTempDir = createTestDir();
+      const projectDir = path.join(testTempDir, 'project');
+      const srcDir = path.join(projectDir, 'src');
+
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(path.join(projectDir, 'codingbuddy.config.json'), '{}');
+      writeFileSync(path.join(projectDir, 'package.json'), '{}');
+
+      const result = findProjectRoot(srcDir);
+
+      expect(result).toBe(projectDir);
+    });
+
+    it('should stop at first package.json when no config exists', () => {
+      // Setup: package.json at middle level, nothing at deeper levels
+      testTempDir = createTestDir();
+      const rootDir = path.join(testTempDir, 'workspace');
+      const projectDir = path.join(rootDir, 'apps', 'my-app');
+      const srcDir = path.join(projectDir, 'src', 'features');
+
+      mkdirSync(srcDir, { recursive: true });
+      // Only package.json at project level
+      writeFileSync(path.join(projectDir, 'package.json'), '{}');
+
+      const result = findProjectRoot(srcDir);
+
+      expect(result).toBe(projectDir);
+    });
+
+    it('should use process.cwd() when no startDir provided', () => {
+      // This test verifies the function works with actual cwd
+      const result = findProjectRoot();
+
+      // Should return a valid directory path
+      expect(result).toBeDefined();
+      expect(existsSync(result)).toBe(true);
+      // Should find a project root (has package.json or config file)
+      const hasPackageJson = existsSync(path.join(result, 'package.json'));
+      const hasConfig = findConfigFile(result) !== null;
+      expect(hasPackageJson || hasConfig).toBe(true);
+    });
+
+    it('should handle filesystem root gracefully', () => {
+      // Starting from root should return root
+      const result = findProjectRoot('/');
+
+      expect(result).toBe('/');
     });
   });
 });

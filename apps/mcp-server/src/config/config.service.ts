@@ -1,6 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { existsSync, statSync } from 'fs';
+import * as path from 'path';
 import {
   loadConfig,
+  findProjectRoot,
   type ConfigLoadResult,
   ConfigLoadError,
 } from './config.loader';
@@ -44,8 +47,48 @@ export class ConfigService implements OnModuleInit {
   private isLoaded = false;
 
   constructor() {
-    // Default to cwd, can be overridden via setProjectRoot
-    this.projectRoot = process.env.CODINGBUDDY_PROJECT_ROOT ?? process.cwd();
+    // Priority: env var (validated) > auto-detect from cwd
+    // Auto-detection searches for codingbuddy.config.* or package.json
+    // starting from cwd and traversing up to parent directories
+    this.projectRoot = this.resolveProjectRoot();
+  }
+
+  /**
+   * Resolve project root with validation
+   * Priority: validated env var > auto-detect
+   */
+  private resolveProjectRoot(): string {
+    const envRoot = process.env.CODINGBUDDY_PROJECT_ROOT;
+
+    if (envRoot) {
+      const normalizedPath = path.resolve(envRoot);
+
+      // Validate: path must exist and be a directory
+      if (existsSync(normalizedPath)) {
+        try {
+          const stat = statSync(normalizedPath);
+          if (stat.isDirectory()) {
+            this.logger.log(
+              `Using project root from CODINGBUDDY_PROJECT_ROOT: ${normalizedPath}`,
+            );
+            return normalizedPath;
+          }
+          this.logger.warn(
+            `CODINGBUDDY_PROJECT_ROOT is not a directory: ${normalizedPath}, falling back to auto-detect`,
+          );
+        } catch {
+          this.logger.warn(
+            `Failed to stat CODINGBUDDY_PROJECT_ROOT: ${normalizedPath}, falling back to auto-detect`,
+          );
+        }
+      } else {
+        this.logger.warn(
+          `CODINGBUDDY_PROJECT_ROOT path does not exist: ${normalizedPath}, falling back to auto-detect`,
+        );
+      }
+    }
+
+    return findProjectRoot();
   }
 
   async onModuleInit(): Promise<void> {
