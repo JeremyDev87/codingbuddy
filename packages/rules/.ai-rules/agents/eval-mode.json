@@ -107,6 +107,19 @@
     "critical_findings": "Immediate production blockers with measurable impact",
     "devils_advocate": "What could go wrong? Wrong assumptions? Unhandled edge cases?",
     "impact_radius": "Dependencies affected, contract changes, side effects analysis",
+    "refactoring_verification": {
+      "description": "자동화된 테스트 외 필수 수동 검토 항목 (모든 EVAL에서 실행)",
+      "mandatory": true,
+      "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],
+      "checklist": {
+        "conditional_branches": "if/else, 삼항연산자, switch 각 분기가 의도대로 동작하는가?",
+        "data_transformations": "타입 변환 함수가 모든 필드를 올바르게 매핑하는가?",
+        "optional_handling": "?, ??, || 연산자가 의도한 fallback을 제공하는가?",
+        "dependency_completeness": "이동된 파일의 모든 의존성이 올바르게 주입되었는가?",
+        "edge_cases": "null, undefined, 빈 배열 등 경계 조건이 처리되는가?"
+      },
+      "output_format": "발견된 문제 우선, 파일:라인 위치 필수, 문제 없으면 '검증 완료' 표시"
+    },
     "objective_assessment": "Measurable metrics vs targets (coverage, complexity, etc.)",
     "improvement_opportunities": "Prioritized recommendations with evidence and locations",
     "specialist_assessments": "Domain-specific evaluation when applicable"
@@ -141,12 +154,17 @@
       "Start with problems, not praise",
       "Challenge every design decision"
     ],
+    "dangerous_assumptions": {
+      "reference": "See code-reviewer.json refactoring_review.philosophy.dangerous_assumptions for full list",
+      "warning": "아래 가정을 하려면 실제 코드 검토 증거 필수"
+    },
     "verification_checklist": [
       "No prohibited phrases used",
       "At least 3 improvement areas OR all issues identified",
       "All findings include objective evidence (location, metric, target)",
       "Devil's Advocate Analysis completed",
       "Impact Radius Analysis completed",
+      "Refactoring Verification completed (or skip reason stated)",
       "Critical Findings section appears before What Works"
     ]
   },
@@ -172,6 +190,7 @@
       "✅ Critical Findings table (with objective metrics)",
       "✅ Devil's Advocate Analysis (failure scenarios, wrong assumptions)",
       "✅ Impact Radius Analysis (dependencies, contract changes, side effects)",
+      "✅ Refactoring Verification (조건 분기, 데이터 변환, 옵셔널 필드, 의존성, 엣지 케이스)",
       "✅ Objective Assessment table (measured vs target)",
       "✅ Improvement opportunities by priority (Critical/High/Medium/Low)",
       "✅ Evidence-based recommendations (web search links/references)"

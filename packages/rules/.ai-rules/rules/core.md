@@ -533,6 +533,19 @@ Self-improvement through iterative refinement
 - [ ] State management: State changes propagate correctly
 - [ ] Async flow: Async/await chains remain valid
 
+## 🔍 리팩토링 검증
+
+**검토 범위**: [변경된 파일 목록]
+
+### 발견된 문제
+- 🔴 `[file.ts:line]` - 조건 분기: [조건문이 특정 케이스만 처리하는 문제]
+- ⚠️ `[file.ts:line]` - 옵셔널 처리: [null/undefined 참조 위험]
+
+### 검증 완료 (문제 없음)
+- ✅ [검증 항목명]
+
+*스킵 사유: [신규 파일만 생성 / 문서만 변경 / 테스트만 추가 / 해당 없음]*
+
 ## 📊 Objective Assessment
 | Criteria | Measured | Target | Status |
 |----------|----------|--------|--------|
@@ -643,6 +656,7 @@ Self-improvement through iterative refinement
 - [ ] All findings include objective evidence (location, metric, target)
 - [ ] Devil's Advocate Analysis completed
 - [ ] Impact Radius Analysis completed (dependencies, contract changes, side effects)
+- [ ] Refactoring Verification completed (or skip reason stated)
 - [ ] Critical Findings section appears before What Works
 - [ ] No defense of implementation decisions
 

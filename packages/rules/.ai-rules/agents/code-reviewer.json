@@ -308,6 +308,7 @@
       "🔴 UI/UX Design: Visual hierarchy, UX laws, interaction patterns - Reference: .ai-rules/agents/ui-ux-designer.json modes.evaluation framework for comprehensive UI/UX design assessment",
       "🔴 Documentation Quality: Documentation, cursor rules, and AI prompt quality - Reference: .ai-rules/agents/documentation-specialist.json modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment",
       "🔴 Impact Radius: Side effects, dependencies, breaking changes - Reference: impact_radius_analysis section for dependency analysis, contract changes, and side effect checklist",
+      "🔴 Refactoring Verification: 조건 분기, 데이터 변환, 옵셔널 필드, 의존성, 엣지 케이스 수동 검토 - Reference: refactoring_review section for manual logic verification beyond automated tests",
       "Design Patterns: Latest React/Next.js patterns - See project.md 'Tech Stack' section for versions and .ai-rules/agents/code-quality-specialist.json for design pattern assessment"
     ],
     "specialist_agent_integration": {
@@ -433,6 +434,67 @@
           "action": "Verify behavior compatibility through tests"
         }
       }
+    },
+
+    "refactoring_review": {
+      "description": "자동화된 테스트 외 필수 수동 로직 검토 - 테스트 통과 ≠ 버그 없음",
+      "trigger": "모든 EVAL에서 실행 (스킵 가능)",
+      "philosophy": {
+        "core_principle": "테스트 통과 ≠ 버그 없음, 리팩토링 ≠ 안전",
+        "dangerous_assumptions": [
+          "파일 이동만 했으니 로직 변경 없음",
+          "테스트 통과했으니 기능 동일함",
+          "리팩토링은 정의상 안전함",
+          "기존 코드니까 검증된 것임"
+        ],
+        "required_evidence": "위 가정을 하려면 실제 코드 검토 증거 필수"
+      },
+      "checklist": {
+        "conditional_branches": {
+          "description": "if/else, 삼항연산자, switch 각 분기 추적",
+          "question": "각 분기가 의도대로 동작하는가?",
+          "common_bugs": [
+            "조건 누락으로 특정 케이스만 처리",
+            "else 분기 미구현"
+          ]
+        },
+        "data_transformations": {
+          "description": "타입 변환 함수의 입출력 필드 매핑 확인",
+          "question": "모든 필드가 올바르게 매핑되는가?",
+          "common_bugs": ["필드 누락", "잘못된 기본값", "타입 불일치"]
+        },
+        "optional_handling": {
+          "description": "?, ??, || 연산자 의도된 fallback 검증",
+          "question": "옵셔널 체이닝이 의도한 fallback을 제공하는가?",
+          "common_bugs": ["null vs undefined 혼동", "빈 문자열/0 처리 오류"]
+        },
+        "dependency_completeness": {
+          "description": "DI 주입, import 경로 정확성",
+          "question": "이동된 파일의 모든 의존성이 올바르게 주입되었는가?",
+          "common_bugs": ["누락된 의존성", "잘못된 import 경로", "순환 참조"]
+        },
+        "edge_cases": {
+          "description": "null, undefined, 빈 배열, 경계값 처리",
+          "question": "경계 조건이 올바르게 처리되는가?",
+          "common_bugs": [
+            "빈 배열 처리 누락",
+            "null 참조 에러",
+            "경계값 off-by-one"
+          ]
+        }
+      },
+      "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],
+      "pass_criteria": {
+        "minimum_checks": "변경된 코드에 해당하는 항목은 모두 검토해야 함",
+        "evidence_required": "각 항목별로 검토 결과(문제 발견 또는 검증 완료) 명시 필수",
+        "skip_justification": "스킵하는 경우 반드시 사유 명시"
+      },
+      "output_format": {
+        "structure": "발견된 문제 우선, 파일:라인 위치 필수",
+        "problem_format": "🔴 `file.ts:line` - [항목]: [문제 설명]",
+        "verified_format": "✅ [항목]: 검증 완료",
+        "skip_format": "*스킵 사유: [사유]*"
+      }
     }
   },
 
@@ -482,6 +544,14 @@
           "### Side Effect Checklist - verification of compatibility"
         ],
         "description": "Analyze side effects and ripple effects of changes in project-wide context",
+        "required": true
+      },
+
+      "6.5_refactoring_verification": {
+        "title": "## 🔍 리팩토링 검증",
+        "format": "**검토 범위**: [변경된 파일 목록]\n\n### 발견된 문제\n- 🔴 `file.ts:line` - [항목]: [문제]\n\n### 검증 완료 (문제 없음)\n- ✅ [항목]\n\n*스킵 사유: [해당시]*",
+        "description": "자동화된 테스트 외 필수 수동 검토 - 조건 분기, 데이터 변환, 옵셔널 필드, 의존성, 엣지 케이스",
+        "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],
         "required": true
       },
 
