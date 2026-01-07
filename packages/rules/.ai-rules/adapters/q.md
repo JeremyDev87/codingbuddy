@@ -29,7 +29,7 @@ Refer to `.ai-rules/rules/core.md` for:
 ### Project Setup
 
 Refer to `.ai-rules/rules/project.md` for:
-- **Tech Stack**: 프로젝트의 package.json 참조
+- **Tech Stack**: See project package.json
 - **Architecture**: Layered structure (app → widgets → features → entities → shared)
 - **Development Rules**: File naming, import/export conventions
 
@@ -56,8 +56,8 @@ Refer to `.ai-rules/agents/*.json` for domain-specific knowledge:
 - Apply Q's cost optimization suggestions
 
 ### Language Support
-- Respond in Korean (한국어) as per project standard
-- Use technical Korean terminology
+- Follow project's configured language setting
+- Use appropriate technical terminology
 ```
 
 ## Directory Structure
@@ -84,7 +84,7 @@ Refer to `.ai-rules/agents/*.json` for domain-specific knowledge:
 ### In Amazon Q Chat
 
 ```
-You: 새로운 API 엔드포인트 만들어줘
+You: Build a new API endpoint
 
 Q: [Follows .ai-rules/rules/core.md workflow]
    [Applies .ai-rules/rules/augmented-coding.md TDD]

@@ -297,7 +297,7 @@
   },
 
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding target platforms",
       "Read existing project structure and patterns",

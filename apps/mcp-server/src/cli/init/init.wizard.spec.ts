@@ -44,7 +44,7 @@ vi.mock('./prompts', () => ({
   promptArchitectureSettings: mockPromptArchitectureSettings,
   promptConventionsSettings: mockPromptConventionsSettings,
   promptTestStrategySettings: mockPromptTestStrategySettings,
-  DEFAULT_LANGUAGE: 'ko',
+  DEFAULT_LANGUAGE: 'en',
   DEFAULT_MODEL_CHOICE: 'sonnet',
   DEFAULT_PRIMARY_AGENT: 'frontend-developer',
   DEFAULT_PROJECT_NAME: 'my-project',
@@ -142,8 +142,8 @@ describe('init.wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Setup default mock behaviors
-    mockPromptLanguageSelection.mockResolvedValue('ko');
+    // Setup default mock behaviors - use 'en' to match DEFAULT_LANGUAGE_CODE
+    mockPromptLanguageSelection.mockResolvedValue('en');
     mockPromptModelSelection.mockResolvedValue('sonnet');
     mockPromptPrimaryAgentSelection.mockResolvedValue('frontend-developer');
     mockPromptBasicSettings.mockResolvedValue(mockBasicSettings);
@@ -160,7 +160,7 @@ describe('init.wizard', () => {
       const result = await runInitWizard({ analysis: mockAnalysis });
 
       expect(result).not.toBeNull();
-      expect(result?.basic.language).toBe('ko');
+      expect(result?.basic.language).toBe('en');
       expect(result?.basic.projectName).toBe('test-project');
     });
 

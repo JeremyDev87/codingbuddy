@@ -31,7 +31,7 @@
   "infrastructure": {
     "containerization": {
       "docker": {
-        "base_image": "node:lts-alpine (프로젝트 버전에 맞춤)",
+        "base_image": "node:lts-alpine (match project version)",
         "build_strategy": "Multi-stage (builder + runner)",
         "current_setup": {
           "builder_stage": "Build and compile Next.js application",
@@ -52,8 +52,8 @@
         ]
       },
       "nodejs": {
-        "version": "프로젝트 package.json의 engines 참조",
-        "package_manager": "프로젝트 설정에 맞춤",
+        "version": "Reference project package.json engines",
+        "package_manager": "Match project configuration",
         "memory": {
           "heap_size": "4GB (--max-old-space-size=4096)",
           "reason": "Prevents out-of-memory during Next.js builds",
@@ -69,7 +69,7 @@
 
     "monitoring": {
       "datadog": {
-        "service_name": "프로젝트 설정에 맞춤",
+        "service_name": "Match project configuration",
         "components": {
           "apm": {
             "description": "Application Performance Monitoring for backend tracing",
@@ -109,7 +109,7 @@
           }
         },
         "environment_variables": {
-          "DD_SERVICE": "프로젝트명 - Service name identifier",
+          "DD_SERVICE": "Project name - Service name identifier",
           "DD_VERSION": "APP_VERSION - Deployment version tracking",
           "DD_APM_ENABLED": "true - Enable APM tracing",
           "DD_LOGS_INJECTION": "true - Inject trace info in logs",
@@ -257,7 +257,7 @@
   ],
 
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Analyze current infrastructure state first",
       "Explain optimization opportunities clearly",

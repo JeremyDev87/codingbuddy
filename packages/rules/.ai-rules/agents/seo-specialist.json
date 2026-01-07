@@ -407,7 +407,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding SEO context (planning/implementation/evaluation)",
       "Plan/review metadata implementation",

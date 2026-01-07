@@ -50,7 +50,7 @@ See full workflow details in `.ai-rules/rules/core.md`
 
 #### Tech Stack
 
-프로젝트의 `package.json`을 참조하세요.
+See project `package.json`.
 
 #### Project Structure
 ```
@@ -126,7 +126,7 @@ Antigravity uses artifact files for:
 
 ### Communication
 
-- **Always respond in Korean (한국어)** as specified in common rules
+- **Follow project's configured language setting**
 - Use structured markdown formatting
 - Provide clear, actionable feedback
 
@@ -161,7 +161,7 @@ When working with Antigravity, it automatically has access to:
 ### Workflow Example
 
 ```
-User: 새로운 뉴스레터 기능 만들어줘
+User: Build a new newsletter feature
 
 AI: # Mode: PLAN
     ## 📋 Plan Overview
@@ -206,7 +206,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 ### Example Usage
 
 ```
-User: AUTO 새로운 결제 시스템 기능 만들어줘
+User: AUTO Build a new payment system feature
 
 AI: # Mode: AUTO (Iteration 1/3)
     ## Phase: PLAN

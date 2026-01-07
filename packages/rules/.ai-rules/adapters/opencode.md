@@ -220,16 +220,16 @@ The `parse_mode` tool now returns additional Mode Agent information and dynamic 
 ```json
 {
   "mode": "PLAN",
-  "originalPrompt": "새로운 사용자 등록 기능을 만들어줘",
-  "instructions": "설계 우선 접근. TDD 관점에서...",
+  "originalPrompt": "Build a new user registration feature",
+  "instructions": "Design-first approach. From TDD perspective...",
   "rules": [...],
-  "language": "ko",
-  "languageInstruction": "Always respond in Korean (한국어).",
+  "language": "en",
+  "languageInstruction": "Always respond in English.",
   "agent": "plan-mode",
-  "delegates_to": "frontend-developer", 
+  "delegates_to": "frontend-developer",
   "delegate_agent_info": {
     "name": "Frontend Developer",
-    "description": "React/Next.js 전문가, TDD 및 디자인 시스템 경험",
+    "description": "React/Next.js expert, TDD and design system experience",
     "expertise": ["React", "Next.js", "TDD", "TypeScript"]
   }
 }
@@ -255,11 +255,11 @@ The `parse_mode` tool now returns additional Mode Agent information and dynamic 
 /agent plan-mode
 
 # Then in chat
-새로운 사용자 등록 기능을 만들어줘
+Build a new user registration feature
 ```
 
 **Plan-mode agent will:**
-- Analyze requirements (Korean response)
+- Analyze requirements
 - Create structured implementation plan
 - Generate todo list using todo_write tool
 - Reference .ai-rules for consistent standards
@@ -477,7 +477,7 @@ npx codingbuddy@latest mcp
 ```bash
 # Terminal 1: Planning
 opencode --agent plan-mode
-계획을 세워줘
+Create a plan for me
 
 # Terminal 2: Implementation  
 opencode --agent act-mode
@@ -514,10 +514,10 @@ EVAL
 ```bash
 # 1. Start planning
 /agent plan-mode
-React 컴포넌트 라이브러리를 만들어줘
+Build a React component library
 
 # 2. Implement
-/agent act-mode  
+/agent act-mode
 ACT
 
 # 3. Review
@@ -526,7 +526,7 @@ EVAL
 
 # 4. Optimize
 /agent performance
-성능 최적화 제안해줘
+Suggest performance optimizations
 ```
 
 ### Full-Stack Development
@@ -534,15 +534,15 @@ EVAL
 ```bash
 # Frontend work
 /agent plan-mode
-사용자 대시보드 UI 계획
+Plan user dashboard UI
 
-# Backend work  
+# Backend work
 /agent backend
-API 엔드포인트 구현
+Implement API endpoint
 
 # Security review
 /agent security
-보안 취약점 검사
+Check security vulnerabilities
 ```
 
 ## AUTO Mode
@@ -566,7 +566,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 ```bash
 # Start AUTO mode
 /agent plan-mode
-AUTO 새로운 사용자 인증 기능을 만들어줘
+AUTO Build a new user authentication feature
 ```
 
 ### Workflow

@@ -169,7 +169,7 @@ describe('AutoFormatter', () => {
 
       const output = AutoFormatter.formatEvalSummary(summary);
 
-      expect(output).toContain('반복 필요');
+      expect(output).toContain('iteration needed');
     });
   });
 });

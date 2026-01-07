@@ -3,8 +3,8 @@ import { getLanguageChoices, DEFAULT_LANGUAGE } from './language-prompt';
 
 describe('language-prompt', () => {
   describe('DEFAULT_LANGUAGE', () => {
-    it('should be Korean (ko)', () => {
-      expect(DEFAULT_LANGUAGE).toBe('ko');
+    it('should be English (en)', () => {
+      expect(DEFAULT_LANGUAGE).toBe('en');
     });
   });
 
@@ -15,10 +15,10 @@ describe('language-prompt', () => {
       expect(choices.length).toBeGreaterThan(0);
     });
 
-    it('should include Korean as first option', () => {
+    it('should include English as first option', () => {
       const choices = getLanguageChoices();
-      expect(choices[0].value).toBe('ko');
-      expect(choices[0].name).toContain('Korean');
+      expect(choices[0].value).toBe('en');
+      expect(choices[0].name).toBe('English');
     });
 
     it('should include English option', () => {

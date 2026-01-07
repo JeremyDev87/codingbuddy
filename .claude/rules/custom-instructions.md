@@ -21,7 +21,7 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 
 **Source**: `packages/rules/.ai-rules/rules/project.md`
 
-**Tech Stack**: 프로젝트의 `package.json` 참조
+**Tech Stack**: See project's `package.json`
 
 **Architecture**:
 - Layered structure: app → widgets → features → entities → shared
@@ -81,7 +81,7 @@ Failure to call `parse_mode` when these keywords are present will result in:
 
 </CODINGBUDDY_CRITICAL_RULE>
 
-예시: `PLAN 인증 기능 설계` → **즉시** parse_mode 호출 → PLAN 모드로 작업
+Example: `PLAN design auth feature` → **immediately** call parse_mode → work in PLAN mode
 
 ## 🔴 MANDATORY: Parallel Specialist Agent Execution
 
@@ -110,7 +110,7 @@ Failure to call `parse_mode` when these keywords are present will result in:
 
 ## Claude Code Specific
 
-- Always respond in **Korean (한국어)**
+- Follow project's configured language setting
 - Use structured markdown formatting
 - Provide clear, actionable feedback
 - Reference project context from `packages/rules/.ai-rules/rules/project.md`

@@ -98,7 +98,7 @@ export const CodingBuddyConfigSchema = z.object({
   // AI Configuration
   ai: AIConfigSchema.optional(),
 
-  // AUTO 모드 설정
+  // AUTO mode settings
   auto: AutoConfigSchema.optional(),
 
   // Additional Context

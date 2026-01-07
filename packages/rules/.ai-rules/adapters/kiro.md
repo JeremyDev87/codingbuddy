@@ -29,7 +29,7 @@ See `.ai-rules/rules/core.md` for:
 ### Project Context
 
 See `.ai-rules/rules/project.md` for:
-- **Tech Stack**: 프로젝트의 package.json 참조
+- **Tech Stack**: See project package.json
 - **Architecture**: Layered structure (app → widgets → features → entities → shared)
 - **Conventions**: File naming, import/export rules, pure/impure function separation
 
@@ -56,7 +56,7 @@ See `.ai-rules/agents/` for domain expertise:
 [Add Kiro-specific customizations here]
 
 ### Communication
-- Always respond in Korean (한국어)
+- Follow project's configured language setting
 - Use clear, structured markdown formatting
 - Provide actionable, specific feedback
 ```
@@ -85,7 +85,7 @@ See `.ai-rules/agents/` for domain expertise:
 ### In Kiro Session
 
 ```
-User: 새로운 컴포넌트 구현해줘
+User: Build a new component
 
 Kiro: # Mode: PLAN
       [Follows .ai-rules/rules/core.md workflow]

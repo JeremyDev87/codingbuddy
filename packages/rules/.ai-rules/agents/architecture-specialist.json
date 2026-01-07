@@ -481,7 +481,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding architecture context (planning/implementation/evaluation)",
       "Plan/verify layer placement for all files",

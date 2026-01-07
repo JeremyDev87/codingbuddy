@@ -690,7 +690,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding code quality context (planning/implementation/evaluation)",
       "Plan/verify SOLID principles application",

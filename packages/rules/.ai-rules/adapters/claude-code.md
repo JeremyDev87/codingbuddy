@@ -27,7 +27,7 @@ See `.ai-rules/rules/core.md` for:
 
 ### Project Context
 See `.ai-rules/rules/project.md` for:
-- Tech stack (프로젝트의 package.json 참조)
+- Tech stack (see project package.json)
 - Project structure (app → widgets → features → entities → shared)
 - Development rules and file naming conventions
 - Domain knowledge
@@ -44,7 +44,7 @@ See `.ai-rules/agents/README.md` for available specialist agents and their exper
 
 ## Claude Code Specific
 
-- Always respond in Korean (한국어)
+- Follow project's configured language setting
 - Use structured markdown formatting
 - Provide clear, actionable feedback
 - Reference project context from `.ai-rules/rules/project.md`
@@ -85,7 +85,7 @@ See `.ai-rules/agents/README.md` for available specialist agents and their exper
 ### In Claude Chat
 
 ```
-User: 새로운 기능 만들어줘
+User: Build a new feature
 
 Claude: # Mode: PLAN
         [Following .ai-rules/rules/core.md workflow]
@@ -198,7 +198,7 @@ Specialist agents can be invoked by any Primary Agent as needed:
 
 1. **PLAN mode**: Always uses `solution-architect` or `technical-planner` based on prompt analysis
 2. **ACT mode**: Resolution priority:
-   1. Explicit agent request in prompt (e.g., "backend-developer로 작업해")
+   1. Explicit agent request in prompt (e.g., "work with backend-developer")
    2. `recommended_agent` parameter (from PLAN mode recommendation)
    3. Tooling pattern matching (config files, build tools → `tooling-engineer`)
    4. Project configuration (`primaryAgent` setting)
@@ -321,22 +321,22 @@ The `parse_mode` MCP tool returns this field to recommend parallel specialist ex
 ### Parallel Execution Workflow
 
 ```
-parse_mode 호출
+Call parse_mode
      ↓
-parallelAgentsRecommendation 확인
-     ↓ (있으면)
-사용자에게 시작 메시지 표시
+Check parallelAgentsRecommendation
+     ↓ (if exists)
+Display start message to user
      ↓
-prepare_parallel_agents MCP 호출
+Call prepare_parallel_agents MCP
      ↓
-반환된 각 agent.taskPrompt를 Task tool로 병렬 호출:
+Call each agent.taskPrompt via Task tool in parallel:
   - subagent_type: "general-purpose"
   - run_in_background: true
   - prompt: agent.taskPrompt
      ↓
-TaskOutput으로 결과 수집
+Collect results with TaskOutput
      ↓
-사용자에게 결과 종합하여 표시
+Display consolidated results to user
 ```
 
 ### Code Example

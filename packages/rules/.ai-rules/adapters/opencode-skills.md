@@ -50,24 +50,24 @@ OpenCode/Crush supports Agent Skills standard for structured AI capabilities. Th
 ### 1. Direct Skill Invocation
 ```bash
 # In OpenCode CLI
-/skill brainstorming "새로운 기능 아이디어"
-/skill tdd "사용자 인증 구현"
-/skill debug "로그인 버그 해결"
+/skill brainstorming "new feature ideas"
+/skill tdd "user authentication implementation"
+/skill debug "fix login bug"
 ```
 
 ### 2. Agent + Skill Combination
 ```bash
 # Planning with brainstorming skill
 /agent plan
-/skill brainstorming "대시보드 UI 개선"
+/skill brainstorming "improve dashboard UI"
 
-# Implementation with TDD skill  
+# Implementation with TDD skill
 /agent build
-/skill tdd "API 연동 구현"
+/skill tdd "implement API integration"
 
 # Review with debugging skill
 /agent reviewer
-/skill debug "성능 이슈 분석"
+/skill debug "analyze performance issues"
 ```
 
 ### 3. Automatic Skill Recommendation
@@ -76,9 +76,9 @@ OpenCode can automatically recommend skills based on prompts using the `recommen
 
 ```typescript
 // Auto-triggered when user enters certain keywords
-"버그가 있어" → recommends: systematic-debugging
-"계획을 세워줘" → recommends: writing-plans  
-"UI를 만들어줘" → recommends: frontend-design
+"there's a bug" → recommends: systematic-debugging
+"create a plan" → recommends: writing-plans
+"build the UI" → recommends: frontend-design
 ```
 
 ## Skill Conversion Process
@@ -201,20 +201,20 @@ The MCP server handles Korean→English skill name mapping automatically.
 /agent plan
 
 # Use brainstorming skill
-/skill brainstorming "사용자 대시보드 개선"
+/skill brainstorming "improve user dashboard"
 
 # Generate implementation plan
-계획을 세워줘
+Create a plan for me
 ```
 
 ### Implementing with TDD
 
-```bash  
+```bash
 # Switch to build agent
 /agent build
 
 # Load TDD skill
-/skill test-driven-development "로그인 API 구현"
+/skill test-driven-development "implement login API"
 
 # Start TDD cycle
 ACT
@@ -224,10 +224,10 @@ ACT
 
 ```bash
 # Use systematic debugging
-/skill systematic-debugging "로그인 후 화면이 안 나와"
+/skill systematic-debugging "screen not showing after login"
 
 # Apply debugging methodology
-디버깅해줘
+Debug this for me
 ```
 
 ## Benefits

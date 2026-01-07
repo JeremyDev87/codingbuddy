@@ -182,8 +182,8 @@
   ],
 
   "communication": {
-    "language": "ko",
-    "style": "체계적이고 명확한 접근, 스키마 중심 설계",
+    "language": "en",
+    "style": "Systematic and clear approach, schema-driven design",
     "approach": [
       "Start by understanding agent requirements",
       "Reference existing agents for patterns",

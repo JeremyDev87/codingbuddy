@@ -446,7 +446,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding security context (planning/implementation/evaluation)",
       "Plan/verify authentication implementation",

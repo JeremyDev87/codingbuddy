@@ -34,7 +34,7 @@ Max Iterations: ${maxIterations}
     return `
 Issues Found:
 - Critical: ${summary.criticalCount}
-- High: ${summary.highCount}${needsIteration ? ' <- 반복 필요' : ''}
+- High: ${summary.highCount}${needsIteration ? ' <- iteration needed' : ''}
 - Medium: ${summary.mediumCount}
 - Low: ${summary.lowCount}`;
   }
@@ -77,12 +77,12 @@ ${files}`;
 ---
 # Mode: AUTO - MAX ITERATIONS REACHED
 
-${result.maxIterations}회 시도했지만 일부 이슈가 남아있습니다.
+Tried ${result.maxIterations} iterations but some issues remain.
 
 Remaining Issues:
 ${remainingIssues}
 
-시도한 접근:
+Attempted approaches:
 ${attempts}
 
 ---

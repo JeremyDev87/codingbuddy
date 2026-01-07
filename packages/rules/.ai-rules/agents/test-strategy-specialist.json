@@ -523,7 +523,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding test context (planning/implementation/evaluation)",
       "Plan/verify TDD vs Test-After approach",

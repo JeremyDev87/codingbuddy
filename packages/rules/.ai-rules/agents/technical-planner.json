@@ -198,8 +198,8 @@
   },
 
   "communication": {
-    "language": "ko",
-    "style": "상세하고 실행 가능한 계획, TDD 중심",
+    "language": "en",
+    "style": "Detailed and actionable plans, TDD-focused",
     "approach": [
       "Start with writing-plans skill",
       "Provide complete code (no placeholders)",

@@ -178,7 +178,7 @@
   ],
 
   "communication": {
-    "language": "ko",
+    "language": "en",
     "style": "Technical and precise, focusing on configuration details",
     "approach": [
       "Start by understanding the current configuration state",

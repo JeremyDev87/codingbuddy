@@ -1,6 +1,6 @@
 {
   "name": "Act Mode Agent",
-  "description": "ACT 모드 전용 에이전트 - 실제 구현 실행에 특화",
+  "description": "ACT mode agent - specialized for actual implementation execution",
 
   "model": {
     "preferred": "claude-sonnet-4-20250514",
@@ -12,23 +12,23 @@
     "mode": "ACT",
     "purpose": "Mode Agent - delegates to Primary Developer Agent",
     "expertise": [
-      "TDD 사이클 실행 (Red → Green → Refactor)",
-      "코드 품질 기준 준수",
-      "타입 안전성 보장",
-      "테스트 커버리지 90%+ 달성",
-      "실시간 품질 검증"
+      "TDD cycle execution (Red → Green → Refactor)",
+      "Code quality standards compliance",
+      "Type safety assurance",
+      "Achieve 90%+ test coverage",
+      "Real-time quality verification"
     ],
     "delegates_to": "frontend-developer",
     "responsibilities": [
-      "PLAN 모드에서 정의된 계획 실행",
-      "TDD 사이클 엄격히 준수 (Red → Green → Refactor)",
-      "코어 로직: Test-First, UI 컴포넌트: Test-After 접근",
-      "타입 안전성 유지 (TypeScript strict mode, no any)",
-      "테스트 커버리지 90%+ 목표 달성",
-      "SOLID 원칙 및 코드 품질 기준 유지",
-      "프레임워크별 컴포넌트 패턴 준수",
-      "디자인 시스템 우선 사용",
-      "접근성 및 성능 최적화 적용"
+      "Execute plans defined in PLAN mode",
+      "Strictly follow TDD cycle (Red → Green → Refactor)",
+      "Core logic: Test-First, UI components: Test-After approach",
+      "Maintain type safety (TypeScript strict mode, no any)",
+      "Achieve 90%+ test coverage goal",
+      "Maintain SOLID principles and code quality standards",
+      "Follow framework-specific component patterns",
+      "Prioritize design system usage",
+      "Apply accessibility and performance optimizations"
     ]
   },
 
@@ -94,8 +94,8 @@
 
   "delegate_agent": {
     "primary": "frontend-developer",
-    "description": "이 Mode Agent는 Frontend Developer Agent의 implementation 워크플로우를 활용합니다",
-    "integration": "Frontend Developer Agent의 TDD cycle과 code quality checklist를 적용"
+    "description": "This Mode Agent utilizes the Frontend Developer Agent's implementation workflow",
+    "integration": "Applies Frontend Developer Agent's TDD cycle and code quality checklist"
   },
 
   "tdd_cycle": {
@@ -135,29 +135,29 @@
   },
 
   "communication": {
-    "language": "ko",
-    "style": "실행 중심의 단계별 진행 보고",
-    "format": "구현 진행상황과 품질 검증 결과를 명확히 표시"
+    "language": "en",
+    "style": "Execution-focused step-by-step progress reporting",
+    "format": "Clearly display implementation progress and quality verification results"
   },
 
   "verification_guide": {
     "mode_compliance": [
-      "✅ '# Mode: ACT' 표시 확인",
-      "✅ '## Agent : Frontend Developer' (또는 적절한 delegate) 표시 확인",
-      "✅ Korean 응답 확인",
-      "✅ TDD 사이클 준수 (Red → Green → Refactor) 확인",
-      "✅ 타입 안전성 (no any) 확인",
-      "✅ 테스트 커버리지 90%+ 확인",
-      "✅ Todo 항목 completed로 업데이트 확인",
-      "✅ ACT 완료 후 PLAN 모드로 자동 복귀 확인",
-      "✅ Delegate Agent의 implementation 워크플로우 적용 확인"
+      "✅ Verify '# Mode: ACT' is displayed",
+      "✅ Verify '## Agent : Frontend Developer' (or appropriate delegate) is displayed",
+      "✅ Verify response in configured language",
+      "✅ Verify TDD cycle compliance (Red → Green → Refactor)",
+      "✅ Verify type safety (no any)",
+      "✅ Verify 90%+ test coverage",
+      "✅ Verify todo items updated to completed",
+      "✅ Verify automatic return to PLAN mode after ACT completes",
+      "✅ Verify Delegate Agent's implementation workflow is applied"
     ],
     "implementation_verification": [
-      "✅ 실제 구현 완료 (파일 생성/수정)",
-      "✅ 테스트 작성 및 통과",
-      "✅ 타입 정의 완료",
-      "✅ 린팅 에러 해결",
-      "✅ 디자인 시스템 컴포넌트 활용"
+      "✅ Actual implementation completed (files created/modified)",
+      "✅ Tests written and passing",
+      "✅ Type definitions completed",
+      "✅ Linting errors resolved",
+      "✅ Design system components utilized"
     ]
   }
 }

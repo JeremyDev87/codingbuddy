@@ -3,24 +3,24 @@ import type { ParseModeResult, AutoConfig } from './keyword.types';
 // Re-export AutoConfig for convenience
 export type { AutoConfig };
 
-/** AUTO 모드 실행 옵션 */
+/** AUTO mode execution options */
 export interface AutoExecutorOptions {
-  /** 최대 반복 횟수 */
+  /** Maximum iteration count */
   maxIterations: number;
-  /** 사용자 프롬프트 */
+  /** User prompt */
   prompt: string;
 }
 
-/** 이슈 심각도 */
+/** Issue severity */
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low';
 
-/** EVAL 결과에서 추출한 이슈 정보 */
+/** Issue info extracted from EVAL result */
 export interface EvalIssue {
   severity: IssueSeverity;
   description: string;
 }
 
-/** EVAL 결과 요약 */
+/** EVAL result summary */
 export interface EvalSummary {
   criticalCount: number;
   highCount: number;
@@ -29,7 +29,7 @@ export interface EvalSummary {
   issues: EvalIssue[];
 }
 
-/** 단일 이터레이션 결과 */
+/** Single iteration result */
 export interface IterationResult {
   iteration: number;
   planResult: ParseModeResult;
@@ -39,7 +39,7 @@ export interface IterationResult {
   approach: string;
 }
 
-/** AUTO 모드 최종 결과 */
+/** AUTO mode final result */
 export interface AutoResult {
   success: boolean;
   iterations: number;
@@ -51,7 +51,7 @@ export interface AutoResult {
   fallbackPlanResult?: ParseModeResult;
 }
 
-/** AUTO 모드 상태 */
+/** AUTO mode phase */
 export type AutoPhase =
   | 'starting'
   | 'plan'
@@ -60,7 +60,7 @@ export type AutoPhase =
   | 'completed'
   | 'failed';
 
-/** AUTO 모드 진행 상황 콜백 */
+/** AUTO mode progress callback */
 export interface AutoProgressCallback {
   onPhaseStart: (
     phase: AutoPhase,
@@ -72,7 +72,7 @@ export interface AutoProgressCallback {
   onComplete: (result: AutoResult) => void;
 }
 
-/** 기본 AUTO 설정 */
+/** Default AUTO configuration */
 export const DEFAULT_AUTO_CONFIG: AutoConfig = {
   maxIterations: 3,
 };

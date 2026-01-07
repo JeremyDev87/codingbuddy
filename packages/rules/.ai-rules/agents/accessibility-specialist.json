@@ -494,7 +494,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding accessibility context (planning/implementation/evaluation)",
       "Plan/verify WCAG 2.1 AA compliance",

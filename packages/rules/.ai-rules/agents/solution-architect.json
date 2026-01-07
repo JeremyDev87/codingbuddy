@@ -162,8 +162,8 @@
   },
 
   "communication": {
-    "language": "ko",
-    "style": "체계적이고 명확한 접근, 옵션 중심 설계",
+    "language": "en",
+    "style": "Systematic and clear approach, option-oriented design",
     "approach": [
       "Start with brainstorming skill",
       "Ask one question at a time",

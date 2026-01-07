@@ -158,15 +158,15 @@ export interface LanguageDisplayInfo {
  * Language codes follow ISO 639-1 standard.
  */
 export const SUPPORTED_LANGUAGES: Record<string, LanguageDisplayInfo> = {
-  ko: {
-    name: 'Korean',
-    nativeName: '한국어',
-    description: 'AI responses will be in Korean',
-  },
   en: {
     name: 'English',
     nativeName: 'English',
     description: 'AI responses will be in English',
+  },
+  ko: {
+    name: 'Korean',
+    nativeName: '한국어',
+    description: 'AI responses will be in Korean',
   },
   ja: {
     name: 'Japanese',
@@ -186,12 +186,49 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageDisplayInfo> = {
 } as const;
 
 /** Default language code */
-export const DEFAULT_LANGUAGE_CODE = 'ko' as const;
+export const DEFAULT_LANGUAGE_CODE = 'en' as const;
 
-/** List of supported language codes */
-export const SUPPORTED_LANGUAGE_CODES = Object.keys(
+/**
+ * Type-safe language code type derived from SUPPORTED_LANGUAGES keys.
+ * Use this type for function parameters and return types.
+ */
+export type SupportedLanguageCode = keyof typeof SUPPORTED_LANGUAGES;
+
+/**
+ * List of supported language codes.
+ *
+ * Note: Object.keys() returns string[] at runtime, but we use a type assertion
+ * here because SUPPORTED_LANGUAGES is defined with `as const` and its shape
+ * is guaranteed at compile time. The order matches SUPPORTED_LANGUAGES definition.
+ */
+export const SUPPORTED_LANGUAGE_CODES: SupportedLanguageCode[] = Object.keys(
   SUPPORTED_LANGUAGES,
-) as (keyof typeof SUPPORTED_LANGUAGES)[];
+) as SupportedLanguageCode[];
+
+/**
+ * Type guard to check if a string is a valid supported language code.
+ *
+ * @param code - The string to check
+ * @returns True if the code is a valid SupportedLanguageCode
+ *
+ * @example
+ * ```typescript
+ * const userInput = getUserLanguagePreference(); // string
+ *
+ * if (isValidLanguageCode(userInput)) {
+ *   // TypeScript narrows userInput to SupportedLanguageCode
+ *   const langInfo = SUPPORTED_LANGUAGES[userInput];
+ *   console.log(`Selected: ${langInfo.nativeName}`);
+ * } else {
+ *   console.log(`Invalid language code: ${userInput}`);
+ * }
+ * ```
+ */
+export const isValidLanguageCode = (
+  code: string,
+): code is SupportedLanguageCode => {
+  return code in SUPPORTED_LANGUAGES;
+};
 
 /** @deprecated Use LOCALIZED_KEYWORD_MAP instead */
 export const KOREAN_KEYWORD_MAP = LOCALIZED_KEYWORD_MAP;
@@ -262,6 +299,18 @@ export interface AutoConfig {
   maxIterations: number;
 }
 
+/**
+ * Result of parsing a workflow mode from user prompt.
+ *
+ * **Naming Convention Note:**
+ * This interface uses mixed naming conventions intentionally:
+ * - snake_case properties (delegates_to, primary_agent_source, etc.) are used for
+ *   MCP protocol compatibility and external API responses consumed by AI tools.
+ * - camelCase properties (originalPrompt, parallelAgentsRecommendation, etc.) are
+ *   used for internal TypeScript usage and newer additions.
+ *
+ * Do not rename snake_case properties as they are part of the external API contract.
+ */
 export interface ParseModeResult {
   mode: Mode;
   originalPrompt: string;
@@ -269,16 +318,18 @@ export interface ParseModeResult {
   rules: RuleContent[];
   warnings?: string[];
   agent?: string;
+  /** @apiProperty External API - do not rename */
   delegates_to?: string;
+  /** @apiProperty External API - do not rename */
   delegate_agent_info?: AgentInfo;
-  /** Source of Primary Agent selection */
+  /** @apiProperty External API - do not rename. Source of Primary Agent selection */
   primary_agent_source?: PrimaryAgentSource;
   parallelAgentsRecommendation?: ParallelAgentRecommendation;
-  /** ACT mode agent recommendation (only in PLAN mode response) */
+  /** @apiProperty External API - do not rename. ACT mode agent recommendation (only in PLAN mode response) */
   recommended_act_agent?: ActAgentRecommendation;
-  /** Available ACT agents for selection (only in PLAN mode response) */
+  /** @apiProperty External API - do not rename. Available ACT agents for selection (only in PLAN mode response) */
   available_act_agents?: string[];
-  /** Activation message for user visibility */
+  /** @apiProperty External API - do not rename. Activation message for user visibility */
   activation_message?: ActivationMessage;
   /** AUTO mode configuration (only in AUTO mode response) */
   autoConfig?: AutoConfig;

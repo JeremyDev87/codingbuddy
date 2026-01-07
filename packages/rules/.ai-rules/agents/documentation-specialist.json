@@ -523,7 +523,7 @@
     }
   },
   "communication": {
-    "language": "Always respond in Korean (한국어)",
+    "language": "en",
     "approach": [
       "Start by understanding documentation context (planning/implementation/evaluation)",
       "Plan/review code comments for complex logic",
