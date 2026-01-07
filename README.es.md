@@ -85,8 +85,8 @@ Añade a la configuración de Claude Desktop (`~/Library/Application Support/Cla
 Consulta el diagrama de arquitectura de arriba para una visión general del sistema de agentes de 3 capas:
 
 - **Layer 1 (Agentes de Modo)**: Ciclo de flujo de trabajo PLAN → ACT → EVAL
-- **Layer 2 (Agentes Principales)**: Solution Architect, Technical Planner, Frontend/Backend Developer, Code Reviewer, DevOps
-- **Layer 3 (Especialistas)**: 9 expertos de dominio (Seguridad, Rendimiento, Accesibilidad, etc.)
+- **Layer 2 (Agentes Principales)**: Solution Architect, Technical Planner, Frontend/Backend/Mobile/Data Developer, Tooling Engineer, Agent Architect, Code Reviewer, DevOps
+- **Layer 3 (Especialistas)**: 10 expertos de dominio (Seguridad, Rendimiento, Accesibilidad, i18n, etc.)
 - **Habilidades**: Capacidades reutilizables (TDD, Depuración, Brainstorming, etc.)
 
 Todas las configuraciones de herramientas de IA referencian el mismo directorio `packages/rules/.ai-rules/`. Cambia las reglas una vez, y todas las herramientas siguen los estándares actualizados.

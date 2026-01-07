@@ -85,8 +85,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 See the architecture diagram above for a visual overview of the 3-layer agent system:
 
 - **Layer 1 (Mode Agents)**: PLAN → ACT → EVAL workflow cycle
-- **Layer 2 (Primary Agents)**: Solution Architect, Technical Planner, Frontend/Backend Developer, Code Reviewer, DevOps
-- **Layer 3 (Specialists)**: 9 domain experts (Security, Performance, Accessibility, etc.)
+- **Layer 2 (Primary Agents)**: Solution Architect, Technical Planner, Frontend/Backend/Mobile/Data Developer, Tooling Engineer, Agent Architect, Code Reviewer, DevOps
+- **Layer 3 (Specialists)**: 10 domain experts (Security, Performance, Accessibility, i18n, etc.)
 - **Skills**: Reusable capabilities (TDD, Debugging, Brainstorming, etc.)
 
 All AI tool configurations reference the same `packages/rules/.ai-rules/` directory. Change the rules once, and every tool follows the updated standards.

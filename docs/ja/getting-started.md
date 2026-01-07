@@ -220,7 +220,14 @@ AI：[security-specialistを有効化]
 - `performance-specialist` - パフォーマンス最適化
 - `accessibility-specialist` - WCAGコンプライアンス
 - `code-reviewer` - コード品質
-- その他[専門家](../../packages/rules/.ai-rules/agents/README.md)
+- `architecture-specialist` - システムアーキテクチャ
+- `test-strategy-specialist` - テスト戦略
+- `i18n-specialist` - 国際化
+- `seo-specialist` - SEO最適化
+- `ui-ux-designer` - UI/UXデザイン
+- `documentation-specialist` - ドキュメンテーション
+- `code-quality-specialist` - コード品質標準
+- 全リストは[エージェントガイド](../../packages/rules/.ai-rules/agents/README.md)を参照
 
 ## 次のステップ
 

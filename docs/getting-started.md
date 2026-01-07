@@ -227,7 +227,14 @@ Available specialists:
 - `performance-specialist` - Optimization
 - `accessibility-specialist` - WCAG compliance
 - `code-reviewer` - Code quality
-- And [other specialists](../packages/rules/.ai-rules/agents/README.md)
+- `architecture-specialist` - System architecture
+- `test-strategy-specialist` - Testing approaches
+- `i18n-specialist` - Internationalization
+- `seo-specialist` - SEO optimization
+- `ui-ux-designer` - UI/UX design
+- `documentation-specialist` - Documentation
+- `code-quality-specialist` - Code standards
+- See [full agent list](../packages/rules/.ai-rules/agents/README.md)
 
 ## Next Steps
 

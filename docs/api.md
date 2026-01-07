@@ -130,21 +130,32 @@ Specialist agent definitions.
 
 | URI | Agent |
 |-----|-------|
+| **Mode Agents** | |
+| `rules://agents/plan-mode.json` | Plan Mode (workflow orchestrator) |
+| `rules://agents/act-mode.json` | Act Mode (workflow orchestrator) |
+| `rules://agents/eval-mode.json` | Eval Mode (workflow orchestrator) |
+| **Primary Agents** | |
 | `rules://agents/solution-architect.json` | Solution Architect (PLAN mode) |
 | `rules://agents/technical-planner.json` | Technical Planner (PLAN mode) |
 | `rules://agents/frontend-developer.json` | Frontend Developer (ACT mode) |
 | `rules://agents/backend-developer.json` | Backend Developer (ACT mode) |
+| `rules://agents/data-engineer.json` | Data Engineer (ACT mode) |
+| `rules://agents/mobile-developer.json` | Mobile Developer (ACT mode) |
+| `rules://agents/tooling-engineer.json` | Tooling Engineer (ACT mode) |
+| `rules://agents/agent-architect.json` | Agent Architect (ACT mode) |
+| `rules://agents/devops-engineer.json` | DevOps Engineer (ACT mode) |
 | `rules://agents/code-reviewer.json` | Code Reviewer (EVAL mode) |
+| **Domain Specialists** | |
 | `rules://agents/architecture-specialist.json` | Architecture Specialist |
 | `rules://agents/test-strategy-specialist.json` | Test Strategy Specialist |
 | `rules://agents/performance-specialist.json` | Performance Specialist |
 | `rules://agents/security-specialist.json` | Security Specialist |
 | `rules://agents/accessibility-specialist.json` | Accessibility Specialist |
 | `rules://agents/seo-specialist.json` | SEO Specialist |
+| `rules://agents/i18n-specialist.json` | i18n Specialist |
 | `rules://agents/ui-ux-designer.json` | UI/UX Designer |
 | `rules://agents/documentation-specialist.json` | Documentation Specialist |
 | `rules://agents/code-quality-specialist.json` | Code Quality Specialist |
-| `rules://agents/devops-engineer.json` | DevOps Engineer |
 
 **MIME Type**: `application/json`
 
@@ -743,6 +754,138 @@ await Promise.all([
 
 ---
 
+### generate_checklist
+
+Generate contextual checklists based on file patterns and domains.
+
+**Input Schema**:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "files": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "File paths to analyze for checklist generation"
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["security", "accessibility", "performance", "testing", "code-quality", "seo"]
+      },
+      "description": "Specific domains to generate checklists for. If not provided, domains are auto-detected."
+    }
+  },
+  "required": []
+}
+```
+
+**Request Example**:
+
+```json
+{
+  "name": "generate_checklist",
+  "arguments": {
+    "files": ["src/auth/login.ts", "src/api/users.ts"],
+    "domains": ["security", "testing"]
+  }
+}
+```
+
+**Response Example**:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"checklists\": [{\"domain\": \"security\", \"items\": [{\"id\": \"sec-1\", \"description\": \"Validate input data\", \"priority\": \"high\"}]}], \"detectedPatterns\": [\"auth\", \"api\"]}"
+    }
+  ]
+}
+```
+
+**Response Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `checklists` | array | Generated checklists grouped by domain |
+| `checklists[].domain` | string | Domain name (security, accessibility, etc.) |
+| `checklists[].items` | array | Checklist items for this domain |
+| `detectedPatterns` | array | File patterns detected from input files |
+
+---
+
+### analyze_task
+
+Analyze a task to provide contextual recommendations including risk assessment, relevant checklists, specialist recommendations, and workflow suggestions.
+
+**Input Schema**:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "User's task description"
+    },
+    "files": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional file paths related to the task"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["PLAN", "ACT", "EVAL"],
+      "description": "Current workflow mode"
+    }
+  },
+  "required": ["prompt"]
+}
+```
+
+**Request Example**:
+
+```json
+{
+  "name": "analyze_task",
+  "arguments": {
+    "prompt": "Add user authentication with OAuth",
+    "files": ["src/auth/"],
+    "mode": "PLAN"
+  }
+}
+```
+
+**Response Example**:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"riskAssessment\": {\"level\": \"high\", \"factors\": [\"security-sensitive\", \"authentication\"]}, \"recommendedChecklists\": [\"security\", \"testing\"], \"recommendedSpecialists\": [\"security-specialist\"], \"workflowSuggestions\": [\"Use TDD approach\", \"Review OWASP guidelines\"]}"
+    }
+  ]
+}
+```
+
+**Response Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `riskAssessment` | object | Risk level and contributing factors |
+| `riskAssessment.level` | string | Risk level: `low`, `medium`, `high`, `critical` |
+| `riskAssessment.factors` | array | Factors contributing to the risk level |
+| `recommendedChecklists` | array | Suggested checklist domains for this task |
+| `recommendedSpecialists` | array | Specialist agents recommended for this task |
+| `workflowSuggestions` | array | Workflow recommendations |
+
+---
+
 ## Prompts
 
 Prompts provide pre-defined message templates for common workflows.
@@ -819,7 +962,7 @@ Activate a specific specialist agent with project context.
 | `Invalid URI scheme` | URI doesn't start with `rules://` or `config://` | Use correct URI scheme |
 | `Resource not found: {uri}` | Requested rule file doesn't exist | Check file path in `packages/rules/.ai-rules/` |
 | `Agent '{name}' not found` | Invalid agent name | Use valid agent name from list |
-| `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates`, `recommend_skills`, `list_skills`, `get_agent_system_prompt`, `prepare_parallel_agents` |
+| `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates`, `recommend_skills`, `list_skills`, `get_agent_system_prompt`, `prepare_parallel_agents`, `generate_checklist`, `analyze_task` |
 | `Failed to load project configuration` | Missing or invalid `codingbuddy.config.js` | Run `npx codingbuddy init` |
 
 ---

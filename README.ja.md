@@ -85,8 +85,8 @@ Claude Desktop設定に追加（`~/Library/Application Support/Claude/claude_des
 上記のアーキテクチャ図で3層エージェントシステムの全体像をご確認ください：
 
 - **Layer 1（モードエージェント）**：PLAN → ACT → EVAL ワークフローサイクル
-- **Layer 2（主要エージェント）**：Solution Architect、Technical Planner、Frontend/Backend Developer、Code Reviewer、DevOps
-- **Layer 3（スペシャリスト）**：9名のドメイン専門家（セキュリティ、パフォーマンス、アクセシビリティなど）
+- **Layer 2（主要エージェント）**：Solution Architect、Technical Planner、Frontend/Backend/Mobile/Data Developer、Tooling Engineer、Agent Architect、Code Reviewer、DevOps
+- **Layer 3（スペシャリスト）**：10名のドメイン専門家（セキュリティ、パフォーマンス、アクセシビリティ、i18nなど）
 - **スキル**：再利用可能な機能（TDD、デバッグ、ブレインストーミングなど）
 
 すべてのAIツール設定が同じ`packages/rules/.ai-rules/`ディレクトリを参照します。ルールを一度変更すれば、すべてのツールが更新された標準に従います。

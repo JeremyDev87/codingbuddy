@@ -220,7 +220,14 @@ AI：[激活 security-specialist]
 - `performance-specialist` - 性能优化
 - `accessibility-specialist` - WCAG 合规
 - `code-reviewer` - 代码质量
-- 以及[更多专家](../../packages/rules/.ai-rules/agents/README.md)
+- `architecture-specialist` - 系统架构
+- `test-strategy-specialist` - 测试策略
+- `i18n-specialist` - 国际化
+- `seo-specialist` - SEO 优化
+- `ui-ux-designer` - UI/UX 设计
+- `documentation-specialist` - 文档编写
+- `code-quality-specialist` - 代码质量标准
+- 完整列表请参阅[代理指南](../../packages/rules/.ai-rules/agents/README.md)
 
 ## 后续步骤
 

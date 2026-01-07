@@ -220,7 +220,14 @@ AI: [security-specialist 활성화]
 - `performance-specialist` - 최적화
 - `accessibility-specialist` - WCAG 준수
 - `code-reviewer` - 코드 품질
-- 그 외 [전문가들](../../packages/rules/.ai-rules/agents/README.md)
+- `architecture-specialist` - 시스템 아키텍처
+- `test-strategy-specialist` - 테스트 전략
+- `i18n-specialist` - 국제화
+- `seo-specialist` - SEO 최적화
+- `ui-ux-designer` - UI/UX 디자인
+- `documentation-specialist` - 문서화
+- `code-quality-specialist` - 코드 품질 표준
+- 전체 목록은 [에이전트 가이드](../../packages/rules/.ai-rules/agents/README.md) 참조
 
 ## 다음 단계
 
