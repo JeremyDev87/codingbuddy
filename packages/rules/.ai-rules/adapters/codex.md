@@ -147,3 +147,60 @@ Skills are located in `.ai-rules/skills/`. To use a skill:
 - `subagent-driven-development` - In-session plan execution
 - `dispatching-parallel-agents` - Handle parallel tasks
 - `frontend-design` - Build production-grade UI
+
+## AUTO Mode
+
+AUTO mode enables autonomous PLAN -> ACT -> EVAL cycling until quality criteria are met.
+
+### Triggering AUTO Mode
+
+Use the `AUTO` keyword (or localized versions) at the start of your message:
+
+| Language | Keyword |
+|----------|---------|
+| English | `AUTO` |
+| Korean | `자동` |
+| Japanese | `自動` |
+| Chinese | `自动` |
+| Spanish | `AUTOMATICO` |
+
+### Example Usage
+
+```
+AUTO implement user authentication with JWT
+```
+
+### Workflow
+
+1. **PLAN Phase**: Creates implementation plan with quality criteria
+2. **ACT Phase**: Executes implementation following TDD workflow
+3. **EVAL Phase**: Evaluates quality against exit criteria
+4. **Loop/Exit**: Continues cycling until:
+   - Success: `Critical = 0 AND High = 0`
+   - Failure: Max iterations reached (default: 3)
+
+### Copilot Integration
+
+When using GitHub Copilot Chat with AUTO mode:
+- Copilot references `.ai-rules/rules/core.md` for workflow
+- Applies `.ai-rules/rules/augmented-coding.md` TDD principles
+- Uses project structure from `.ai-rules/rules/project.md`
+
+### Configuration
+
+Configure in `codingbuddy.config.js`:
+
+```javascript
+module.exports = {
+  auto: {
+    maxIterations: 3
+  }
+};
+```
+
+### When to Use
+
+- Large feature implementations requiring multiple refinement cycles
+- Complex refactoring with quality verification
+- Bug fixes needing comprehensive testing
+- Code quality improvements with measurable criteria

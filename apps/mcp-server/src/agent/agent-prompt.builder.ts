@@ -23,6 +23,12 @@ const MODE_INSTRUCTIONS: Record<Mode, string> = {
 - Review code for potential issues and improvements
 - Provide objective, evidence-based feedback
 - Identify areas for improvement with specific recommendations`,
+
+  AUTO: `You are in AUTO mode. Your task is to:
+- Execute an autonomous PLAN → ACT → EVAL cycle
+- Iterate until quality standards are met or max iterations reached
+- Self-correct based on EVAL feedback in subsequent iterations
+- Provide a final summary with all changes and remaining issues`,
 };
 
 /**
@@ -32,6 +38,7 @@ const MODE_TASK_PREFIXES: Record<Mode, string> = {
   PLAN: 'planning',
   ACT: 'verification',
   EVAL: 'review',
+  AUTO: 'autonomous execution',
 };
 
 /**

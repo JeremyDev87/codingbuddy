@@ -8,8 +8,12 @@ const CORE_RULES_PATH = 'rules/core.md';
 /**
  * Section markers for filtering core.md content by mode.
  * Each mode only needs its own section plus common sections.
+ * AUTO mode returns full content since it cycles through all modes.
  */
-const MODE_SECTION_MARKERS: Record<Mode, { start: RegExp; end: RegExp }> = {
+const MODE_SECTION_MARKERS: Record<
+  Mode,
+  { start: RegExp; end: RegExp } | null
+> = {
   PLAN: {
     start: /^### Plan Mode$/m,
     end: /^### Act Mode$/m,
@@ -22,6 +26,8 @@ const MODE_SECTION_MARKERS: Record<Mode, { start: RegExp; end: RegExp }> = {
     start: /^### Eval Mode$/m,
     end: /^### Communication Rules$/m,
   },
+  // AUTO mode cycles through PLAN → ACT → EVAL, so no filtering needed
+  AUTO: null,
 };
 
 /**

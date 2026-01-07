@@ -70,6 +70,20 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
         'code-quality-specialist',
       ],
     },
+    AUTO: {
+      description:
+        'Autonomous execution mode - PLAN → ACT → EVAL cycle until quality achieved',
+      instructions:
+        'Execute PLAN → ACT → EVAL cycle automatically. Repeat until Critical/High issues = 0 or max iterations reached.',
+      rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
+      agent: MODE_AGENTS[3], // 'auto-mode'
+      defaultSpecialists: [
+        'architecture-specialist',
+        'test-strategy-specialist',
+        'security-specialist',
+        'code-quality-specialist',
+      ],
+    },
   },
   defaultMode: 'PLAN',
 };
@@ -269,6 +283,13 @@ export class KeywordService {
       } else {
         result.activation_message = activationMessage;
       }
+    }
+
+    // Add autoConfig for AUTO mode
+    if (mode === 'AUTO') {
+      result.autoConfig = {
+        maxIterations: 3, // TODO: Make configurable via config file
+      };
     }
 
     return result;

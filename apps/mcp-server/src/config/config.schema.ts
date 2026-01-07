@@ -74,6 +74,10 @@ export const AIConfigSchema = z.object({
   primaryAgent: z.string().optional(),
 });
 
+export const AutoConfigSchema = z.object({
+  maxIterations: z.number().int().min(1).max(10).default(3),
+});
+
 // ============================================================================
 // Main Configuration Schema
 // ============================================================================
@@ -94,6 +98,9 @@ export const CodingBuddyConfigSchema = z.object({
   // AI Configuration
   ai: AIConfigSchema.optional(),
 
+  // AUTO 모드 설정
+  auto: AutoConfigSchema.optional(),
+
   // Additional Context
   keyFiles: z.array(z.string()).optional(),
   avoid: z.array(z.string()).optional(),
@@ -112,6 +119,7 @@ export type ArchitectureConfig = z.infer<typeof ArchitectureConfigSchema>;
 export type ConventionsConfig = z.infer<typeof ConventionsConfigSchema>;
 export type TestStrategyConfig = z.infer<typeof TestStrategyConfigSchema>;
 export type AIConfig = z.infer<typeof AIConfigSchema>;
+export type AutoConfig = z.infer<typeof AutoConfigSchema>;
 export type CodingBuddyConfig = z.infer<typeof CodingBuddyConfigSchema>;
 
 // ============================================================================

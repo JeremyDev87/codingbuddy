@@ -66,6 +66,12 @@ const DEFAULT_MODE_CONFIG: KeywordModesConfig = {
         'Review code quality. Verify SOLID principles. Check test coverage. Suggest improvements.',
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
     },
+    AUTO: {
+      description: 'Autonomous PLAN → ACT → EVAL cycle',
+      instructions:
+        'Execute autonomous iteration cycle. Run PLAN → ACT → EVAL until quality achieved or max iterations reached. Self-correct based on EVAL feedback.',
+      rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
+    },
   },
   defaultMode: 'PLAN',
 };

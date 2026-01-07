@@ -450,3 +450,93 @@ Each workflow mode activates different specialist agents:
 - **EVAL mode**: Security, accessibility, performance, and code quality specialists provide comprehensive review
 
 **Important:** Specialists from one mode do NOT carry over to the next mode. Each mode has its own recommended specialist set.
+
+## AUTO Mode
+
+AUTO mode enables autonomous iteration through PLAN -> ACT -> EVAL cycles until quality criteria are met.
+
+### Triggering AUTO Mode
+
+Use the `AUTO` keyword (or localized versions) at the start of your message:
+
+| Language | Keyword |
+|----------|---------|
+| English | `AUTO` |
+| Korean | `자동` |
+| Japanese | `自動` |
+| Chinese | `自动` |
+| Spanish | `AUTOMATICO` |
+
+### Example Usage
+
+```
+AUTO implement user authentication with JWT tokens
+```
+
+```
+자동 사용자 인증 기능을 JWT로 구현해줘
+```
+
+### Expected Behavior
+
+1. **Initial PLAN**: Creates implementation plan with quality criteria
+2. **ACT Iteration**: Executes implementation following TDD workflow
+3. **EVAL Check**: Evaluates quality against exit criteria
+4. **Loop or Exit**:
+   - If quality met (Critical=0, High=0): Exits with success summary
+   - If max iterations reached: Exits with failure summary and remaining issues
+   - Otherwise: Returns to PLAN with improvement focus
+
+### Exit Criteria
+
+- **Success**: `Critical = 0 AND High = 0` severity issues
+- **Failure**: Max iterations reached (default: 3, configurable via `auto.maxIterations`)
+
+### Configuration
+
+Configure AUTO mode in `codingbuddy.config.js`:
+
+```javascript
+module.exports = {
+  auto: {
+    maxIterations: 3  // Default: 3
+  }
+};
+```
+
+### AUTO Mode Output Format
+
+```
+# Mode: AUTO (Iteration 1/3)
+
+## Phase: PLAN
+[Planning content...]
+
+## Phase: ACT
+[Implementation content...]
+
+## Phase: EVAL
+[Evaluation content...]
+
+### Quality Status
+- Critical: 0
+- High: 0
+
+✅ AUTO mode completed successfully!
+```
+
+### When to Use AUTO Mode
+
+- **Large feature implementations** that require multiple refinement cycles
+- **Complex refactoring** where quality verification is critical
+- **Bug fixes** that need comprehensive testing and validation
+- **Code quality improvements** with measurable success criteria
+
+### Differences from Manual Mode Flow
+
+| Aspect | Manual Mode | AUTO Mode |
+|--------|-------------|-----------|
+| Transition | User triggers each mode | Automatic cycling |
+| Iterations | Single pass per mode | Multiple cycles until quality met |
+| Exit | User decides completion | Quality criteria or max iterations |
+| Intervention | Required for each step | Only when requested or on failure |

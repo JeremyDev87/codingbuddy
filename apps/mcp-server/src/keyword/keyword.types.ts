@@ -1,9 +1,14 @@
-export const KEYWORDS = ['PLAN', 'ACT', 'EVAL'] as const;
+export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
 export type Mode = (typeof KEYWORDS)[number];
 
 /** Mode Agent names in priority order */
-export const MODE_AGENTS = ['plan-mode', 'act-mode', 'eval-mode'] as const;
+export const MODE_AGENTS = [
+  'plan-mode',
+  'act-mode',
+  'eval-mode',
+  'auto-mode',
+] as const;
 
 export type ModeAgent = (typeof MODE_AGENTS)[number];
 
@@ -116,18 +121,22 @@ export const LOCALIZED_KEYWORD_MAP: Record<string, Mode> = {
   계획: 'PLAN',
   실행: 'ACT',
   평가: 'EVAL',
+  자동: 'AUTO',
   // Japanese (日本語)
   計画: 'PLAN',
   実行: 'ACT',
   評価: 'EVAL',
+  自動: 'AUTO',
   // Chinese Simplified (简体中文)
   计划: 'PLAN',
   执行: 'ACT',
   评估: 'EVAL',
+  自动: 'AUTO',
   // Spanish (Español) - stored uppercase, matched case-insensitively
   PLANIFICAR: 'PLAN',
   ACTUAR: 'ACT',
   EVALUAR: 'EVAL',
+  AUTOMÁTICO: 'AUTO',
 } as const;
 
 /**
@@ -247,6 +256,12 @@ export interface ActivationMessage {
   formatted: string; // Pre-formatted message for display
 }
 
+/** AUTO mode configuration */
+export interface AutoConfig {
+  /** Maximum PLAN → ACT → EVAL iterations */
+  maxIterations: number;
+}
+
 export interface ParseModeResult {
   mode: Mode;
   originalPrompt: string;
@@ -265,6 +280,8 @@ export interface ParseModeResult {
   available_act_agents?: string[];
   /** Activation message for user visibility */
   activation_message?: ActivationMessage;
+  /** AUTO mode configuration (only in AUTO mode response) */
+  autoConfig?: AutoConfig;
 }
 
 export interface ModeConfig {

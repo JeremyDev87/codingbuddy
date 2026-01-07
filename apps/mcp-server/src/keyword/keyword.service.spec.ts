@@ -46,6 +46,16 @@ const mockConfig: KeywordModesConfig = {
         'code-quality-specialist',
       ],
     },
+    AUTO: {
+      description: 'Autonomous execution mode',
+      instructions: 'Execute PLAN → ACT → EVAL cycle automatically.',
+      rules: ['rules/core.md'],
+      agent: 'auto-mode',
+      defaultSpecialists: [
+        'architecture-specialist',
+        'test-strategy-specialist',
+      ],
+    },
   },
   defaultMode: 'PLAN',
 };
@@ -161,6 +171,14 @@ describe('KeywordService', () => {
             'Security',
           ],
         });
+      });
+
+      it('parses AUTO keyword', async () => {
+        const result = await service.parseMode('AUTO Add login feature');
+
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('Add login feature');
+        expect(result.agent).toBe('auto-mode');
       });
     });
 
@@ -465,6 +483,71 @@ describe('KeywordService', () => {
         expect(result.originalPrompt).toBe('');
         expect(result.warnings).toContain('No prompt content after keyword');
       });
+
+      it('parses AUTOMÁTICO as AUTO (Spanish)', async () => {
+        const result = await service.parseMode(
+          'AUTOMÁTICO implementar feature',
+        );
+
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('implementar feature');
+      });
+    });
+
+    describe('AUTO mode', () => {
+      it('should parse AUTO keyword', async () => {
+        const result = await service.parseMode('AUTO Add login feature');
+
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('Add login feature');
+        expect(result.agent).toBe('auto-mode');
+      });
+
+      it('should parse Korean AUTO keyword (자동)', async () => {
+        const result = await service.parseMode('자동 로그인 기능 추가');
+
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('로그인 기능 추가');
+      });
+
+      it('should parse Japanese AUTO keyword (自動)', async () => {
+        const result = await service.parseMode('自動 ログイン機能追加');
+
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('ログイン機能追加');
+      });
+
+      it('should parse Chinese AUTO keyword (自动)', async () => {
+        const result = await service.parseMode('自动 登录功能添加');
+
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('登录功能添加');
+      });
+
+      it('should include auto config in result for AUTO mode', async () => {
+        const result = await service.parseMode('AUTO Add login feature');
+
+        expect(result.autoConfig).toBeDefined();
+        expect(result.autoConfig?.maxIterations).toBe(3);
+      });
+
+      it('should not include autoConfig for PLAN mode', async () => {
+        const result = await service.parseMode('PLAN design feature');
+
+        expect(result.autoConfig).toBeUndefined();
+      });
+
+      it('should not include autoConfig for ACT mode', async () => {
+        const result = await service.parseMode('ACT implement feature');
+
+        expect(result.autoConfig).toBeUndefined();
+      });
+
+      it('should not include autoConfig for EVAL mode', async () => {
+        const result = await service.parseMode('EVAL review code');
+
+        expect(result.autoConfig).toBeUndefined();
+      });
     });
 
     describe('edge cases', () => {
@@ -617,6 +700,7 @@ describe('KeywordService', () => {
             },
             ACT: mockConfig.modes.ACT,
             EVAL: mockConfig.modes.EVAL,
+            AUTO: mockConfig.modes.AUTO,
           },
           defaultMode: 'PLAN',
         };

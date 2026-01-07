@@ -545,6 +545,97 @@ API 엔드포인트 구현
 보안 취약점 검사
 ```
 
+## AUTO Mode
+
+AUTO mode enables autonomous PLAN -> ACT -> EVAL cycling until quality criteria are met.
+
+### Triggering AUTO Mode
+
+Use the `AUTO` keyword (or localized versions) at the start of your message:
+
+| Language | Keyword |
+|----------|---------|
+| English | `AUTO` |
+| Korean | `자동` |
+| Japanese | `自動` |
+| Chinese | `自动` |
+| Spanish | `AUTOMATICO` |
+
+### Example Usage
+
+```bash
+# Start AUTO mode
+/agent plan-mode
+AUTO 새로운 사용자 인증 기능을 만들어줘
+```
+
+### Workflow
+
+1. **PLAN Phase**: Creates implementation plan with quality criteria (read-only)
+2. **ACT Phase**: Executes implementation following TDD workflow (full permissions)
+3. **EVAL Phase**: Evaluates quality against exit criteria (read-only)
+4. **Loop/Exit**: Continues cycling until:
+   - Success: `Critical = 0 AND High = 0`
+   - Failure: Max iterations reached (default: 3)
+
+### OpenCode Agent Integration
+
+AUTO mode automatically switches between agents:
+
+```
+AUTO detected
+    ↓
+plan-mode agent (PLAN phase)
+    ↓
+act-mode agent (ACT phase)
+    ↓
+eval-mode agent (EVAL phase)
+    ↓
+[Check quality criteria]
+    ↓
+Loop or Exit
+```
+
+### Configuration
+
+Configure in `codingbuddy.config.js`:
+
+```javascript
+module.exports = {
+  auto: {
+    maxIterations: 3
+  }
+};
+```
+
+### AUTO Mode Output Format
+
+```
+# Mode: AUTO (Iteration 1/3)
+
+## Phase: PLAN
+[Planning with plan-mode agent...]
+
+## Phase: ACT
+[Implementation with act-mode agent...]
+
+## Phase: EVAL
+[Evaluation with eval-mode agent...]
+
+### Quality Status
+- Critical: 0
+- High: 0
+
+✅ AUTO mode completed successfully!
+```
+
+### When to Use
+
+- Large feature implementations requiring multiple refinement cycles
+- Complex refactoring with quality verification
+- Bug fixes needing comprehensive testing
+- Code quality improvements with measurable criteria
+
 ---
 
 This guide ensures consistent, high-quality AI-assisted development using OpenCode/Crush with the `.ai-rules` system. All agents follow the same standards while leveraging OpenCode's powerful terminal-based interface.

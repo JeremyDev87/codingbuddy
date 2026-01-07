@@ -254,4 +254,48 @@ describe('CodingBuddyConfigSchema', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  describe('AutoConfigSchema', () => {
+    it('should accept valid auto configuration', () => {
+      const config = {
+        auto: {
+          maxIterations: 5,
+        },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+      expect(result.data?.auto?.maxIterations).toBe(5);
+    });
+
+    it('should use default maxIterations of 3', () => {
+      const config = {
+        auto: {},
+      };
+      const result = CodingBuddyConfigSchema.safeParse(config);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.auto?.maxIterations).toBe(3);
+      }
+    });
+
+    it('should reject maxIterations below 1', () => {
+      const config = {
+        auto: {
+          maxIterations: 0,
+        },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject maxIterations above 10', () => {
+      const config = {
+        auto: {
+          maxIterations: 11,
+        },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(false);
+    });
+  });
 });
