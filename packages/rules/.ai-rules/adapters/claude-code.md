@@ -368,7 +368,7 @@ if (parseModeResult.parallelAgentsRecommendation) {
       prompt: agent.taskPrompt,
       description: agent.description,
       run_in_background: true,
-      model: "haiku" // Use haiku for efficiency
+      model: "opus" // Use opus for thorough analysis
     })
   );
 

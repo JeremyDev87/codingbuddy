@@ -49,6 +49,17 @@ describe('model-prompt', () => {
       expect(choices[0].value).toContain('sonnet');
       expect(choices[0].name).toContain('Recommended');
     });
+
+    it('should mark Haiku as not recommended', () => {
+      const choices = getModelChoices();
+      const haikuChoice = choices.find((c: ModelChoice) =>
+        c.value.includes('haiku'),
+      );
+
+      expect(haikuChoice).toBeDefined();
+      expect(haikuChoice!.name).toContain('Not recommended');
+      expect(haikuChoice!.description).toContain('not recommended');
+    });
   });
 
   describe('DEFAULT_MODEL_CHOICE', () => {

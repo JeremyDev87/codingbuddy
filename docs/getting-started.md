@@ -34,7 +34,7 @@ This command analyzes your project and creates a `codingbuddy.config.js` file wi
 
 #### AI Model Selection
 
-During initialization, you'll be prompted to select a default AI model (Claude Sonnet 4, Opus 4, or Haiku 3.5). Your selection is saved to `ai.defaultModel` in the config file.
+During initialization, you'll be prompted to select a default AI model (Claude Sonnet 4, Opus 4, or Haiku 3.5 - not recommended). Your selection is saved to `ai.defaultModel` in the config file.
 
 See [AI Configuration](./config-schema.md#ai-configuration-ai) for detailed model options and characteristics.
 

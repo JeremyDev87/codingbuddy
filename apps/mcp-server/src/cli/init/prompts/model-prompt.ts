@@ -42,9 +42,10 @@ export function getModelChoices(): ModelChoice[] {
       description: 'Most capable, best for complex tasks',
     },
     {
-      name: 'Claude Haiku 3.5',
+      name: 'Claude Haiku 3.5 (Not recommended)',
       value: CLAUDE_HAIKU_35,
-      description: 'Fastest, most cost-effective',
+      description:
+        'Fastest but least capable - not recommended for coding tasks',
     },
   ];
 }

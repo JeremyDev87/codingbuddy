@@ -17,6 +17,7 @@ export const CLAUDE_SONNET_4 = 'claude-sonnet-4-20250514';
 
 /**
  * Claude Haiku 3.5 - Fastest, most cost-effective
+ * @deprecated Not recommended for coding tasks due to limited capability
  */
 export const CLAUDE_HAIKU_35 = 'claude-haiku-3-5-20241022';
 

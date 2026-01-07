@@ -241,6 +241,43 @@ describe('resolveModel', () => {
       expect(result.warning).toContain('gemini');
     });
   });
+
+  describe('haiku deprecation warning', () => {
+    it('should include deprecation warning for haiku models', () => {
+      const result = resolveModel({
+        agentModel: { preferred: 'claude-haiku-3-5-20241022' },
+      });
+
+      expect(result.model).toBe('claude-haiku-3-5-20241022');
+      expect(result.warning).toBeDefined();
+      expect(result.warning).toContain('not recommended');
+    });
+
+    it('should include deprecation warning for any haiku variant', () => {
+      const result = resolveModel({
+        globalDefaultModel: 'claude-haiku-3-20250101',
+      });
+
+      expect(result.warning).toBeDefined();
+      expect(result.warning).toContain('not recommended');
+    });
+
+    it('should not include deprecation warning for opus models', () => {
+      const result = resolveModel({
+        agentModel: { preferred: 'claude-opus-4-20250514' },
+      });
+
+      expect(result.warning).toBeUndefined();
+    });
+
+    it('should not include deprecation warning for sonnet models', () => {
+      const result = resolveModel({
+        agentModel: { preferred: 'claude-sonnet-4-20250514' },
+      });
+
+      expect(result.warning).toBeUndefined();
+    });
+  });
 });
 
 describe('isModelConfig', () => {

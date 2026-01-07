@@ -169,7 +169,7 @@ ai: {
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `defaultModel` | `string` | Default Claude model for AI operations. Available options: `claude-sonnet-4-20250514` (recommended, balanced), `claude-opus-4-20250514` (most capable), `claude-haiku-3-5-20241022` (fastest) |
+| `defaultModel` | `string` | Default Claude model for AI operations. Available options: `claude-sonnet-4-20250514` (recommended, balanced), `claude-opus-4-20250514` (most capable), `claude-haiku-3-5-20241022` (fastest, not recommended) |
 
 **Model Selection During Init:**
 
@@ -177,7 +177,7 @@ When running `npx codingbuddy init`, you'll be prompted to select a default mode
 
 - **Claude Sonnet 4** (Recommended) - Balanced performance and cost
 - **Claude Opus 4** - Most capable, best for complex tasks
-- **Claude Haiku 3.5** - Fastest, most cost-effective
+- **Claude Haiku 3.5** - Fastest, most cost-effective (not recommended for coding tasks)
 
 ### Additional Context
 

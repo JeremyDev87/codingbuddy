@@ -23,6 +23,24 @@ export const KNOWN_MODEL_PREFIXES = [
 ] as const;
 
 /**
+ * Haiku model prefix - used for deprecation warning
+ */
+const HAIKU_PREFIX = 'claude-haiku';
+
+/**
+ * Check if a model ID is a Haiku model (deprecated)
+ */
+function isHaikuModel(modelId: string): boolean {
+  return modelId.startsWith(HAIKU_PREFIX);
+}
+
+/**
+ * Deprecation warning message for Haiku models
+ */
+const HAIKU_DEPRECATION_WARNING =
+  'Claude Haiku is not recommended for coding tasks. Consider using Claude Sonnet 4 (balanced) or Claude Opus 4 (most capable) instead.';
+
+/**
  * Get all prefixes including additional ones
  * @param additionalPrefixes - Optional additional prefixes to include
  */
@@ -111,6 +129,10 @@ export function resolveModel(params: ResolveModelParams): ResolvedModel {
   const result: ResolvedModel = { model, source };
   if (!isKnownModel(model, additionalPrefixes)) {
     result.warning = formatUnknownModelWarning(model, additionalPrefixes);
+  }
+  // Add deprecation warning for Haiku models (even though they're recognized)
+  else if (isHaikuModel(model)) {
+    result.warning = HAIKU_DEPRECATION_WARNING;
   }
 
   return result;
