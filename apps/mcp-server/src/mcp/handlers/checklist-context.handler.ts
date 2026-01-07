@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import type { ToolHandler, ToolDefinition, ToolResult } from './base.handler';
+import type { ToolDefinition } from './base.handler';
+import type { ToolResponse } from '../response.utils';
+import { AbstractHandler } from './abstract-handler';
 import { ChecklistService } from '../../checklist/checklist.service';
 import { ContextService } from '../../context/context.service';
 import type { ChecklistDomain } from '../../checklist/checklist.types';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
-import { sanitizeHandlerArgs } from '../../shared/security.utils';
 import {
   extractRequiredString,
   extractStringArray,
@@ -18,35 +19,29 @@ import {
  * - analyze_task: Analyze tasks for recommendations
  */
 @Injectable()
-export class ChecklistContextHandler implements ToolHandler {
-  private readonly handledTools = ['generate_checklist', 'analyze_task'];
-
+export class ChecklistContextHandler extends AbstractHandler {
   constructor(
     private readonly checklistService: ChecklistService,
     private readonly contextService: ContextService,
-  ) {}
+  ) {
+    super();
+  }
 
-  async handle(
+  protected getHandledTools(): string[] {
+    return ['generate_checklist', 'analyze_task'];
+  }
+
+  protected async handleTool(
     toolName: string,
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult | null> {
-    if (!this.handledTools.includes(toolName)) {
-      return null;
-    }
-
-    // Validate args for prototype pollution
-    const validation = sanitizeHandlerArgs(args);
-    if (!validation.safe) {
-      return createErrorResponse(validation.error!);
-    }
-
+  ): Promise<ToolResponse> {
     switch (toolName) {
       case 'generate_checklist':
         return this.handleGenerateChecklist(args);
       case 'analyze_task':
         return this.handleAnalyzeTask(args);
       default:
-        return null;
+        return createErrorResponse(`Unknown tool: ${toolName}`);
     }
   }
 
@@ -115,7 +110,7 @@ export class ChecklistContextHandler implements ToolHandler {
 
   private async handleGenerateChecklist(
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult> {
+  ): Promise<ToolResponse> {
     // Extract optional arrays using shared utilities
     const files = extractStringArray(args, 'files');
     const domains = extractStringArray(args, 'domains') as
@@ -137,7 +132,7 @@ export class ChecklistContextHandler implements ToolHandler {
 
   private async handleAnalyzeTask(
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult> {
+  ): Promise<ToolResponse> {
     const prompt = extractRequiredString(args, 'prompt');
     if (prompt === null) {
       return createErrorResponse('Missing required parameter: prompt');

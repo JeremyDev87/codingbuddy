@@ -6,6 +6,7 @@ import type {
   AutoProgressCallback,
 } from './auto-executor.types';
 import type { ParseModeResult } from './keyword.types';
+import { AutoPromptBuilder } from './auto-prompt-builder';
 
 export interface AutoExecutorDependencies {
   parsePlan: (prompt: string) => Promise<ParseModeResult>;
@@ -15,10 +16,14 @@ export interface AutoExecutorDependencies {
 }
 
 export class AutoExecutor {
+  private readonly promptBuilder: AutoPromptBuilder;
+
   constructor(
     private readonly deps: AutoExecutorDependencies,
     private readonly progressCallback?: AutoProgressCallback,
-  ) {}
+  ) {
+    this.promptBuilder = new AutoPromptBuilder();
+  }
 
   async execute(options: AutoExecutorOptions): Promise<AutoResult> {
     const iterationHistory: IterationResult[] = [];
@@ -27,7 +32,11 @@ export class AutoExecutor {
     for (let i = 1; i <= options.maxIterations; i++) {
       this.progressCallback?.onPhaseStart('plan', i, options.maxIterations);
       const planResult = await this.deps.parsePlan(
-        this.buildPrompt(options.prompt, i, iterationHistory),
+        this.promptBuilder.buildIterationPrompt(
+          options.prompt,
+          i,
+          iterationHistory,
+        ),
       );
       this.progressCallback?.onPhaseComplete('plan', planResult);
 
@@ -47,7 +56,7 @@ export class AutoExecutor {
         actResult,
         evalResult,
         evalSummary,
-        approach: `Iteration ${i} approach`,
+        approach: this.extractApproach(planResult, i),
       };
 
       iterationHistory.push(iterationResult);
@@ -70,7 +79,7 @@ export class AutoExecutor {
 
     // Max iterations reached - fallback to PLAN
     const fallbackPlanResult = await this.deps.parsePlan(
-      this.buildFallbackPrompt(options.prompt, iterationHistory),
+      this.promptBuilder.buildFallbackPrompt(options.prompt, iterationHistory),
     );
 
     const result: AutoResult = {
@@ -93,45 +102,35 @@ export class AutoExecutor {
     return summary.criticalCount === 0 && summary.highCount === 0;
   }
 
-  private buildPrompt(
-    originalPrompt: string,
+  /**
+   * Extract approach description from plan result
+   * Uses delegate agent name and instructions to describe the iteration approach
+   *
+   * @param planResult - Plan phase result containing agent and instructions
+   * @param iteration - Iteration number for fallback description
+   * @returns Human-readable approach description
+   * @private
+   */
+  private extractApproach(
+    planResult: ParseModeResult,
     iteration: number,
-    history: IterationResult[],
   ): string {
-    if (iteration === 1) {
-      return originalPrompt;
+    const agent =
+      planResult.delegates_to || planResult.agent || 'default agent';
+    const instructions = planResult.instructions;
+
+    // Create concise approach description
+    if (instructions && instructions.length > 0) {
+      // Take first sentence or first 60 characters of instructions
+      const firstSentence = instructions.split('.')[0];
+      const shortInstructions =
+        firstSentence.length > 60
+          ? firstSentence.substring(0, 60) + '...'
+          : firstSentence;
+      return `${agent}: ${shortInstructions}`;
     }
 
-    const lastIteration = history[history.length - 1];
-    const issues = lastIteration?.evalSummary.issues
-      .filter(i => i.severity === 'critical' || i.severity === 'high')
-      .map(i => `- ${i.description}`)
-      .join('\n');
-
-    return `${originalPrompt}\n\nPrevious issues to address:\n${issues}`;
-  }
-
-  private buildFallbackPrompt(
-    originalPrompt: string,
-    history: IterationResult[],
-  ): string {
-    const attempts = history
-      .map(h => `- Iteration ${h.iteration}: ${h.approach}`)
-      .join('\n');
-
-    const remainingIssues = history[history.length - 1]?.evalSummary.issues
-      .filter(i => i.severity === 'critical' || i.severity === 'high')
-      .map(i => `- [${i.severity.toUpperCase()}] ${i.description}`)
-      .join('\n');
-
-    return `${originalPrompt}
-
-Previous attempts:
-${attempts}
-
-Remaining issues:
-${remainingIssues}
-
-Please propose a new approach.`;
+    // Fallback if no instructions available
+    return `${agent} iteration ${iteration}`;
   }
 }

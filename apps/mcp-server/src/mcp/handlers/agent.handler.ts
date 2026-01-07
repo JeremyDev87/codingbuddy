@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type { ToolHandler, ToolDefinition, ToolResult } from './base.handler';
+import type { ToolDefinition } from './base.handler';
+import type { ToolResponse } from '../response.utils';
+import { AbstractHandler } from './abstract-handler';
 import { AgentService } from '../../agent/agent.service';
 import type { Mode } from '../../keyword/keyword.types';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
-import { sanitizeHandlerArgs } from '../../shared/security.utils';
 import {
   extractRequiredString,
   extractStringArray,
@@ -17,35 +18,26 @@ import {
  * - prepare_parallel_agents: Prepare multiple agents for parallel execution
  */
 @Injectable()
-export class AgentHandler implements ToolHandler {
-  private readonly handledTools = [
-    'get_agent_system_prompt',
-    'prepare_parallel_agents',
-  ];
+export class AgentHandler extends AbstractHandler {
+  constructor(private readonly agentService: AgentService) {
+    super();
+  }
 
-  constructor(private readonly agentService: AgentService) {}
+  protected getHandledTools(): string[] {
+    return ['get_agent_system_prompt', 'prepare_parallel_agents'];
+  }
 
-  async handle(
+  protected async handleTool(
     toolName: string,
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult | null> {
-    if (!this.handledTools.includes(toolName)) {
-      return null;
-    }
-
-    // Validate args for prototype pollution
-    const validation = sanitizeHandlerArgs(args);
-    if (!validation.safe) {
-      return createErrorResponse(validation.error!);
-    }
-
+  ): Promise<ToolResponse> {
     switch (toolName) {
       case 'get_agent_system_prompt':
         return this.handleGetAgentSystemPrompt(args);
       case 'prepare_parallel_agents':
         return this.handlePrepareParallelAgents(args);
       default:
-        return null;
+        return createErrorResponse(`Unknown tool: ${toolName}`);
     }
   }
 
@@ -124,7 +116,7 @@ export class AgentHandler implements ToolHandler {
 
   private async handleGetAgentSystemPrompt(
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult> {
+  ): Promise<ToolResponse> {
     const agentName = extractRequiredString(args, 'agentName');
     if (agentName === null) {
       return createErrorResponse('Missing required parameter: agentName');
@@ -165,7 +157,7 @@ export class AgentHandler implements ToolHandler {
 
   private async handlePrepareParallelAgents(
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult> {
+  ): Promise<ToolResponse> {
     const mode = args?.mode;
     if (!isValidMode(mode)) {
       return createErrorResponse(

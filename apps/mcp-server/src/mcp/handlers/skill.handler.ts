@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type { ToolHandler, ToolDefinition, ToolResult } from './base.handler';
+import type { ToolDefinition } from './base.handler';
+import type { ToolResponse } from '../response.utils';
+import { AbstractHandler } from './abstract-handler';
 import { SkillRecommendationService } from '../../skill/skill-recommendation.service';
 import type { ListSkillsOptions } from '../../skill/skill-recommendation.types';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
-import { sanitizeHandlerArgs } from '../../shared/security.utils';
 import { extractRequiredString } from '../../shared/validation.constants';
 
 /**
@@ -12,34 +13,28 @@ import { extractRequiredString } from '../../shared/validation.constants';
  * - list_skills: List all available skills
  */
 @Injectable()
-export class SkillHandler implements ToolHandler {
-  private readonly handledTools = ['recommend_skills', 'list_skills'];
-
+export class SkillHandler extends AbstractHandler {
   constructor(
     private readonly skillRecommendationService: SkillRecommendationService,
-  ) {}
+  ) {
+    super();
+  }
 
-  async handle(
+  protected getHandledTools(): string[] {
+    return ['recommend_skills', 'list_skills'];
+  }
+
+  protected async handleTool(
     toolName: string,
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult | null> {
-    if (!this.handledTools.includes(toolName)) {
-      return null;
-    }
-
-    // Validate args for prototype pollution
-    const validation = sanitizeHandlerArgs(args);
-    if (!validation.safe) {
-      return createErrorResponse(validation.error!);
-    }
-
+  ): Promise<ToolResponse> {
     switch (toolName) {
       case 'recommend_skills':
         return this.handleRecommendSkills(args);
       case 'list_skills':
         return this.handleListSkills(args);
       default:
-        return null;
+        return createErrorResponse(`Unknown tool: ${toolName}`);
     }
   }
 
@@ -83,7 +78,7 @@ export class SkillHandler implements ToolHandler {
 
   private handleRecommendSkills(
     args: Record<string, unknown> | undefined,
-  ): ToolResult {
+  ): ToolResponse {
     const prompt = extractRequiredString(args, 'prompt');
     if (prompt === null) {
       return createErrorResponse('Missing required parameter: prompt');
@@ -100,7 +95,7 @@ export class SkillHandler implements ToolHandler {
 
   private handleListSkills(
     args: Record<string, unknown> | undefined,
-  ): ToolResult {
+  ): ToolResponse {
     try {
       const options: ListSkillsOptions = {};
 

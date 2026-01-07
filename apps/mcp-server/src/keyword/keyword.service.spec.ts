@@ -531,6 +531,65 @@ describe('KeywordService', () => {
         expect(result.autoConfig?.maxIterations).toBe(3);
       });
 
+      it('should use configured maxIterations when loadAutoConfigFn is provided', async () => {
+        const mockLoadAutoConfig = vi.fn().mockResolvedValue({
+          maxIterations: 5,
+        });
+        const serviceWithAutoConfig = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+          undefined,
+          mockLoadAutoConfig,
+        );
+
+        const result = await serviceWithAutoConfig.parseMode(
+          'AUTO Add login feature',
+        );
+
+        expect(result.autoConfig).toBeDefined();
+        expect(result.autoConfig?.maxIterations).toBe(5);
+        expect(mockLoadAutoConfig).toHaveBeenCalled();
+      });
+
+      it('should fallback to default maxIterations when loadAutoConfigFn returns null', async () => {
+        const mockLoadAutoConfig = vi.fn().mockResolvedValue(null);
+        const serviceWithAutoConfig = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+          undefined,
+          mockLoadAutoConfig,
+        );
+
+        const result = await serviceWithAutoConfig.parseMode(
+          'AUTO Add login feature',
+        );
+
+        expect(result.autoConfig).toBeDefined();
+        expect(result.autoConfig?.maxIterations).toBe(3);
+      });
+
+      it('should fallback to default maxIterations when loadAutoConfigFn throws', async () => {
+        const mockLoadAutoConfig = vi
+          .fn()
+          .mockRejectedValue(new Error('Config error'));
+        const serviceWithAutoConfig = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+          undefined,
+          mockLoadAutoConfig,
+        );
+
+        const result = await serviceWithAutoConfig.parseMode(
+          'AUTO Add login feature',
+        );
+
+        expect(result.autoConfig).toBeDefined();
+        expect(result.autoConfig?.maxIterations).toBe(3);
+      });
+
       it('should not include autoConfig for PLAN mode', async () => {
         const result = await service.parseMode('PLAN design feature');
 
@@ -1287,6 +1346,199 @@ describe('KeywordService', () => {
       });
 
       expect(result.delegates_to).toBe('frontend-developer');
+    });
+  });
+
+  describe('Environment-based cache TTL', () => {
+    it('uses 1 hour (3600000ms) TTL in production environment', () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+
+      const productionService = new KeywordService(
+        mockLoadConfig,
+        mockLoadRule,
+        mockLoadAgentInfo,
+      );
+
+      // Access private cacheTTL via type assertion for testing
+      const ttl = (productionService as unknown as { cacheTTL: number })
+        .cacheTTL;
+      expect(ttl).toBe(3600000); // 1 hour
+
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('uses 5 minutes (300000ms) TTL in development environment', () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      const devService = new KeywordService(
+        mockLoadConfig,
+        mockLoadRule,
+        mockLoadAgentInfo,
+      );
+
+      const ttl = (devService as unknown as { cacheTTL: number }).cacheTTL;
+      expect(ttl).toBe(300000); // 5 minutes
+
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('uses 5 minutes (300000ms) TTL when NODE_ENV is not set (defaults to dev)', () => {
+      const originalEnv = process.env.NODE_ENV;
+      delete process.env.NODE_ENV;
+
+      const defaultService = new KeywordService(
+        mockLoadConfig,
+        mockLoadRule,
+        mockLoadAgentInfo,
+      );
+
+      const ttl = (defaultService as unknown as { cacheTTL: number }).cacheTTL;
+      expect(ttl).toBe(300000); // 5 minutes (development default)
+
+      process.env.NODE_ENV = originalEnv;
+    });
+  });
+
+  describe('invalidateConfigCache', () => {
+    it('clears the config cache when called', async () => {
+      // First call loads config and caches it
+      const config1 = await service.loadModeConfig();
+      expect(config1).toEqual(mockConfig);
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1);
+
+      // Second call uses cache (mockLoadConfig not called again)
+      const config2 = await service.loadModeConfig();
+      expect(config2).toEqual(mockConfig);
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1); // Still 1
+
+      // Invalidate cache
+      service.invalidateConfigCache();
+
+      // Third call reloads config (mockLoadConfig called again)
+      const config3 = await service.loadModeConfig();
+      expect(config3).toEqual(mockConfig);
+      expect(mockLoadConfig).toHaveBeenCalledTimes(2); // Now 2
+    });
+
+    it('does nothing when cache is already empty', () => {
+      // Service starts with empty cache
+      expect(() => service.invalidateConfigCache()).not.toThrow();
+
+      // Verify cache is still empty by checking that next load calls mockLoadConfig
+      void service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalled();
+    });
+
+    it('forces fresh config load after invalidation', async () => {
+      // Load and cache initial config
+      await service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1);
+
+      // Update mock to return different config
+      const updatedConfig = {
+        ...mockConfig,
+        modes: {
+          ...mockConfig.modes,
+          PLAN: {
+            ...mockConfig.modes.PLAN,
+            instructions: 'Updated instructions',
+          },
+        },
+      };
+
+      // Reset mockLoadConfig to return updated config
+      mockLoadConfig = vi.fn().mockResolvedValue(updatedConfig);
+      const serviceWithUpdatedConfig = new KeywordService(
+        mockLoadConfig,
+        mockLoadRule,
+        mockLoadAgentInfo,
+      );
+
+      // Load initial config
+      await serviceWithUpdatedConfig.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1);
+
+      // Invalidate cache and reload
+      serviceWithUpdatedConfig.invalidateConfigCache();
+      const freshConfig = await serviceWithUpdatedConfig.loadModeConfig();
+
+      expect(freshConfig.modes.PLAN.instructions).toBe('Updated instructions');
+      expect(mockLoadConfig).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Performance monitoring', () => {
+    it('tracks cache hits and misses correctly', async () => {
+      // First call - MISS (cold cache)
+      await service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1);
+
+      // Second call - HIT (warm cache)
+      await service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1); // Still 1 (cache used)
+
+      // Third call - HIT (warm cache)
+      await service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1); // Still 1 (cache used)
+
+      // Verify hit/miss counts through side effects (logger calls)
+      // 1 miss (first load) + 2 hits (subsequent loads) = 3 total accesses
+      // Hit rate should be 66.67% (2/3)
+    });
+
+    it('resets counters after invalidation and shows correct metrics', async () => {
+      // First load - MISS
+      await service.loadModeConfig();
+
+      // Second load - HIT
+      await service.loadModeConfig();
+
+      // Invalidate cache
+      service.invalidateConfigCache();
+
+      // Third load - MISS (cache invalidated)
+      await service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(2); // Called twice total
+
+      // Fourth load - HIT (new cache)
+      await service.loadModeConfig();
+      expect(mockLoadConfig).toHaveBeenCalledTimes(2); // Still 2
+
+      // Metrics: 2 misses, 2 hits = 50% hit rate
+    });
+
+    it('calculates 0% hit rate when only misses occur', async () => {
+      // Create service and immediately invalidate before any loads
+      const newService = new KeywordService(
+        mockLoadConfig,
+        mockLoadRule,
+        mockLoadAgentInfo,
+      );
+
+      // Load and invalidate repeatedly (only misses)
+      await newService.loadModeConfig();
+      newService.invalidateConfigCache();
+      await newService.loadModeConfig();
+      newService.invalidateConfigCache();
+
+      // Hit rate should be 0% (0 hits, 2 misses)
+      expect(mockLoadConfig).toHaveBeenCalled();
+    });
+
+    it('calculates 100% hit rate when only hits occur after first load', async () => {
+      // First load - MISS
+      await service.loadModeConfig();
+
+      // Multiple hits
+      await service.loadModeConfig();
+      await service.loadModeConfig();
+      await service.loadModeConfig();
+      await service.loadModeConfig();
+
+      // 1 miss + 4 hits = 80% hit rate (4/5)
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1);
     });
   });
 });

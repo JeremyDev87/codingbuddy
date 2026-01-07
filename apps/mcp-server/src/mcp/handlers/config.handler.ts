@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import type { ToolHandler, ToolDefinition, ToolResult } from './base.handler';
+import type { ToolDefinition } from './base.handler';
+import type { ToolResponse } from '../response.utils';
+import { AbstractHandler } from './abstract-handler';
 import { ConfigService } from '../../config/config.service';
 import { ConfigDiffService } from '../../config/config-diff.service';
 import { AnalyzerService } from '../../analyzer/analyzer.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
-import { sanitizeHandlerArgs } from '../../shared/security.utils';
 import { extractOptionalString } from '../../shared/validation.constants';
 
 /**
@@ -13,40 +14,33 @@ import { extractOptionalString } from '../../shared/validation.constants';
  * - suggest_config_updates: Analyze and suggest config updates
  */
 @Injectable()
-export class ConfigHandler implements ToolHandler {
-  private readonly handledTools = [
-    'get_project_config',
-    'suggest_config_updates',
-  ];
-
+export class ConfigHandler extends AbstractHandler {
   constructor(
     private readonly configService: ConfigService,
     private readonly configDiffService: ConfigDiffService,
     private readonly analyzerService: AnalyzerService,
-  ) {}
+  ) {
+    super();
+  }
 
-  async handle(
+  protected getHandledTools(): string[] {
+    return ['get_project_config', 'suggest_config_updates'];
+  }
+
+  protected async handleTool(
     toolName: string,
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult | null> {
-    if (!this.handledTools.includes(toolName)) {
-      return null;
+  ): Promise<ToolResponse> {
+    if (toolName === 'get_project_config') {
+      return this.handleGetProjectConfig();
     }
 
-    // Validate args for prototype pollution
-    const validation = sanitizeHandlerArgs(args);
-    if (!validation.safe) {
-      return createErrorResponse(validation.error!);
+    if (toolName === 'suggest_config_updates') {
+      return this.handleSuggestConfigUpdates(args);
     }
 
-    switch (toolName) {
-      case 'get_project_config':
-        return this.handleGetProjectConfig();
-      case 'suggest_config_updates':
-        return this.handleSuggestConfigUpdates(args);
-      default:
-        return null;
-    }
+    // This should never be reached because AbstractHandler validates tool names
+    return createErrorResponse(`Unknown tool: ${toolName}`);
   }
 
   getToolDefinitions(): ToolDefinition[] {
@@ -80,7 +74,7 @@ export class ConfigHandler implements ToolHandler {
     ];
   }
 
-  private async handleGetProjectConfig(): Promise<ToolResult> {
+  private async handleGetProjectConfig(): Promise<ToolResponse> {
     try {
       const settings = await this.configService.getSettings();
       return createJsonResponse(settings);
@@ -93,7 +87,7 @@ export class ConfigHandler implements ToolHandler {
 
   private async handleSuggestConfigUpdates(
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult> {
+  ): Promise<ToolResponse> {
     try {
       const projectRoot =
         extractOptionalString(args, 'projectRoot') ?? process.cwd();

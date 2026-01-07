@@ -75,11 +75,24 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           listPrimaryAgents,
         );
 
+        const loadAutoConfig = async () => {
+          try {
+            const settings = await configService.getSettings();
+            return settings.auto ?? null;
+          } catch (error) {
+            logger.debug(
+              `Failed to load AUTO config: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            );
+            return null;
+          }
+        };
+
         return new KeywordService(
           loadConfig,
           loadRule,
           loadAgent,
           primaryAgentResolver,
+          loadAutoConfig,
         );
       },
       inject: [RulesService, ConfigService],

@@ -56,15 +56,6 @@ export type ActPrimaryAgent = (typeof ACT_PRIMARY_AGENTS)[number];
 export type PrimaryAgent = (typeof ALL_PRIMARY_AGENTS)[number];
 
 /**
- * Mutable string[] versions of Primary Agent constants.
- * Use these for runtime operations that require string[] type.
- * The readonly versions above provide compile-time type safety.
- */
-export const PLAN_PRIMARY_AGENTS_LIST: string[] = [...PLAN_PRIMARY_AGENTS];
-export const ACT_PRIMARY_AGENTS_LIST: string[] = [...ACT_PRIMARY_AGENTS];
-export const ALL_PRIMARY_AGENTS_LIST: string[] = [...ALL_PRIMARY_AGENTS];
-
-/**
  * Agent display info for CLI prompts and UI.
  *
  * This is a lightweight summary derived from agent JSON files.

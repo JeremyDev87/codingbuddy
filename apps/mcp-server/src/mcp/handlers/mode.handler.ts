@@ -1,12 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
-import type { ToolHandler, ToolDefinition, ToolResult } from './base.handler';
+import type { ToolDefinition } from './base.handler';
+import type { ToolResponse } from '../response.utils';
+import { AbstractHandler } from './abstract-handler';
 import { KeywordService } from '../../keyword/keyword.service';
 import { KEYWORD_SERVICE } from '../../keyword/keyword.module';
 import { ConfigService } from '../../config/config.service';
 import { LanguageService } from '../../shared/language.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
 import { ModelResolverService } from '../../model';
-import { sanitizeHandlerArgs } from '../../shared/security.utils';
 import { extractRequiredString } from '../../shared/validation.constants';
 
 /**
@@ -14,31 +15,18 @@ import { extractRequiredString } from '../../shared/validation.constants';
  * - parse_mode: Parse PLAN/ACT/EVAL workflow mode from user prompt
  */
 @Injectable()
-export class ModeHandler implements ToolHandler {
-  private readonly handledTools = ['parse_mode'];
-
+export class ModeHandler extends AbstractHandler {
   constructor(
     @Inject(KEYWORD_SERVICE) private readonly keywordService: KeywordService,
     private readonly configService: ConfigService,
     private readonly languageService: LanguageService,
     private readonly modelResolverService: ModelResolverService,
-  ) {}
+  ) {
+    super();
+  }
 
-  async handle(
-    toolName: string,
-    args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult | null> {
-    if (!this.handledTools.includes(toolName)) {
-      return null;
-    }
-
-    // Validate args for prototype pollution
-    const validation = sanitizeHandlerArgs(args);
-    if (!validation.safe) {
-      return createErrorResponse(validation.error!);
-    }
-
-    return this.handleParseMode(args);
+  protected getHandledTools(): string[] {
+    return ['parse_mode'];
   }
 
   getToolDefinitions(): ToolDefinition[] {
@@ -67,9 +55,10 @@ export class ModeHandler implements ToolHandler {
     ];
   }
 
-  private async handleParseMode(
+  protected async handleTool(
+    toolName: string,
     args: Record<string, unknown> | undefined,
-  ): Promise<ToolResult> {
+  ): Promise<ToolResponse> {
     const prompt = extractRequiredString(args, 'prompt');
     if (prompt === null) {
       return createErrorResponse('Missing required parameter: prompt');

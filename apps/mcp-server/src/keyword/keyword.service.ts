@@ -3,7 +3,7 @@ import {
   KEYWORDS,
   LOCALIZED_KEYWORD_MAP,
   MODE_AGENTS,
-  ALL_PRIMARY_AGENTS_LIST,
+  ALL_PRIMARY_AGENTS,
   ACT_PRIMARY_AGENTS,
   DEFAULT_ACT_AGENT,
   type Mode,
@@ -15,7 +15,9 @@ import {
   type ResolutionContext,
   type PrimaryAgentSource,
   type ActAgentRecommendation,
+  type AutoConfig,
 } from './keyword.types';
+import { DEFAULT_AUTO_CONFIG } from './auto-executor.types';
 
 /**
  * Options for parseMode method
@@ -28,6 +30,7 @@ export interface ParseModeOptions {
 }
 import { PrimaryAgentResolver } from './primary-agent-resolver';
 import { ActivationMessageBuilder } from './activation-message.builder';
+import { asyncWithFallback } from '../shared/async.utils';
 import { filterRulesByMode } from './rule-filter';
 
 const DEFAULT_CONFIG: KeywordModesConfig = {
@@ -88,18 +91,30 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
   defaultMode: 'PLAN',
 };
 
+/** Cache entry with TTL */
+interface ConfigCacheEntry {
+  config: KeywordModesConfig;
+  timestamp: number;
+}
+
 export class KeywordService {
   private readonly logger = new Logger(KeywordService.name);
-  private configCache: KeywordModesConfig | null = null;
+  private configCache: ConfigCacheEntry | null = null;
   private readonly primaryAgentResolver?: PrimaryAgentResolver;
+  private readonly cacheTTL: number; // Environment-based: 5min dev, 1hr prod
+  private cacheHits = 0;
+  private cacheMisses = 0;
 
   constructor(
     private readonly loadConfigFn: () => Promise<KeywordModesConfig>,
     private readonly loadRuleFn: (path: string) => Promise<string>,
     private readonly loadAgentInfoFn?: (agentName: string) => Promise<unknown>,
     primaryAgentResolver?: PrimaryAgentResolver,
+    private readonly loadAutoConfigFn?: () => Promise<AutoConfig | null>,
   ) {
     this.primaryAgentResolver = primaryAgentResolver;
+    // Environment-based TTL: 5 minutes for development, 1 hour for production
+    this.cacheTTL = process.env.NODE_ENV === 'production' ? 3600000 : 300000;
   }
 
   async parseMode(
@@ -287,9 +302,8 @@ export class KeywordService {
 
     // Add autoConfig for AUTO mode
     if (mode === 'AUTO') {
-      result.autoConfig = {
-        maxIterations: 3, // TODO: Make configurable via config file
-      };
+      const autoConfig = await this.getAutoConfig();
+      result.autoConfig = autoConfig;
     }
 
     return result;
@@ -299,7 +313,8 @@ export class KeywordService {
    * Determine if an agent is a primary or specialist tier.
    */
   private getPrimaryAgentTier(agentName: string): 'primary' | 'specialist' {
-    return ALL_PRIMARY_AGENTS_LIST.includes(agentName)
+    // Type assertion needed because ALL_PRIMARY_AGENTS is readonly tuple
+    return (ALL_PRIMARY_AGENTS as readonly string[]).includes(agentName)
       ? 'primary'
       : 'specialist';
   }
@@ -335,38 +350,86 @@ export class KeywordService {
       return undefined;
     }
 
-    try {
-      // Use resolver to analyze prompt as if it were ACT mode
-      const result = await this.primaryAgentResolver.resolve('ACT', prompt);
+    return asyncWithFallback({
+      fn: async () => {
+        // Use resolver to analyze prompt as if it were ACT mode
+        const result = await this.primaryAgentResolver!.resolve('ACT', prompt);
 
-      return {
-        agentName: result.agentName,
-        reason: result.reason,
-        confidence: result.confidence,
-      };
-    } catch (error) {
-      this.logger.debug(
-        `Failed to get ACT agent recommendation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-      return undefined;
+        return {
+          agentName: result.agentName,
+          reason: result.reason,
+          confidence: result.confidence,
+        };
+      },
+      fallback: undefined,
+      errorMessage: 'Failed to get ACT agent recommendation: ${error}',
+      logger: this.logger,
+    });
+  }
+
+  /**
+   * Manually invalidate the configuration cache.
+   * Use this when config files are modified externally to force reload on next access.
+   */
+  public invalidateConfigCache(): void {
+    if (this.configCache) {
+      this.logger.debug('Configuration cache manually invalidated');
+      this.configCache = null;
     }
   }
 
   async loadModeConfig(): Promise<KeywordModesConfig> {
+    // Check cache validity
     if (this.configCache) {
-      return this.configCache;
+      const now = Date.now();
+      const age = now - this.configCache.timestamp;
+
+      if (age < this.cacheTTL) {
+        // Cache is still valid
+        this.cacheHits++;
+        this.logger.debug(
+          `Config cache HIT (total hits: ${this.cacheHits}, misses: ${this.cacheMisses}, hit rate: ${this.getCacheHitRate()}%)`,
+        );
+        return this.configCache.config;
+      }
+
+      // Cache expired, invalidate
+      this.logger.debug(
+        `Config cache expired (age: ${Math.round(age / 1000)}s, TTL: ${this.cacheTTL / 1000}s), reloading`,
+      );
+      this.configCache = null;
     }
 
-    try {
-      this.configCache = await this.loadConfigFn();
-      return this.configCache;
-    } catch (error) {
-      this.logger.debug(
-        `Failed to load mode config, using defaults: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-      this.configCache = DEFAULT_CONFIG;
-      return DEFAULT_CONFIG;
-    }
+    // Load fresh config
+    this.cacheMisses++;
+    this.logger.debug(
+      `Config cache MISS (total hits: ${this.cacheHits}, misses: ${this.cacheMisses}, hit rate: ${this.getCacheHitRate()}%)`,
+    );
+
+    const config = await asyncWithFallback({
+      fn: () => this.loadConfigFn(),
+      fallback: DEFAULT_CONFIG,
+      errorMessage: 'Failed to load mode config, using defaults: ${error}',
+      logger: this.logger,
+    });
+
+    // Cache with timestamp
+    this.configCache = {
+      config,
+      timestamp: Date.now(),
+    };
+
+    return config;
+  }
+
+  /**
+   * Calculate cache hit rate as a percentage.
+   * @returns Hit rate (0-100), or 0 if no cache accesses yet
+   */
+  private getCacheHitRate(): string {
+    const total = this.cacheHits + this.cacheMisses;
+    if (total === 0) return '0.00';
+    return ((this.cacheHits / total) * 100).toFixed(2);
   }
 
   async getRulesForMode(mode: Mode): Promise<RuleContent[]> {
@@ -375,13 +438,15 @@ export class KeywordService {
     const rules: RuleContent[] = [];
 
     for (const rulePath of modeConfig.rules) {
-      try {
-        const content = await this.loadRuleFn(rulePath);
+      const content = await asyncWithFallback({
+        fn: () => this.loadRuleFn(rulePath),
+        fallback: null as string | null,
+        errorMessage: `Skipping rule file '${rulePath}': \${error}`,
+        logger: this.logger,
+      });
+
+      if (content !== null) {
         rules.push({ name: rulePath, content });
-      } catch (error) {
-        this.logger.debug(
-          `Skipping rule file '${rulePath}': ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
       }
     }
 
@@ -395,29 +460,49 @@ export class KeywordService {
       return undefined;
     }
 
-    try {
-      const agentData = await this.loadAgentInfoFn(agentName);
+    return asyncWithFallback({
+      fn: async () => {
+        const agentData = await this.loadAgentInfoFn!(agentName);
 
-      // Type guard for agent data
-      if (!agentData || typeof agentData !== 'object') {
-        return undefined;
-      }
+        // Type guard for agent data
+        if (!agentData || typeof agentData !== 'object') {
+          return undefined;
+        }
 
-      const agent = agentData as Record<string, unknown>;
-      const role = agent.role as Record<string, unknown> | undefined;
+        const agent = agentData as Record<string, unknown>;
+        const role = agent.role as Record<string, unknown> | undefined;
 
-      return {
-        name: typeof agent.name === 'string' ? agent.name : agentName,
-        description:
-          typeof agent.description === 'string' ? agent.description : '',
-        expertise: Array.isArray(role?.expertise) ? role.expertise : [],
-      };
-    } catch (error) {
-      this.logger.debug(
-        `Failed to load agent info for '${agentName}': ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-      return undefined;
+        return {
+          name: typeof agent.name === 'string' ? agent.name : agentName,
+          description:
+            typeof agent.description === 'string' ? agent.description : '',
+          expertise: Array.isArray(role?.expertise) ? role.expertise : [],
+        };
+      },
+      fallback: undefined,
+      errorMessage: `Failed to load agent info for '${agentName}': \${error}`,
+      logger: this.logger,
+    });
+  }
+
+  /**
+   * Get AUTO mode configuration from project config.
+   * Falls back to default maxIterations of 3 if not configured.
+   */
+  private async getAutoConfig(): Promise<AutoConfig> {
+    if (!this.loadAutoConfigFn) {
+      return DEFAULT_AUTO_CONFIG;
     }
+
+    return asyncWithFallback({
+      fn: async () => {
+        const config = await this.loadAutoConfigFn!();
+        return config ?? DEFAULT_AUTO_CONFIG;
+      },
+      fallback: DEFAULT_AUTO_CONFIG,
+      errorMessage: 'Failed to load AUTO config, using default: ${error}',
+      logger: this.logger,
+    });
   }
 
   /**

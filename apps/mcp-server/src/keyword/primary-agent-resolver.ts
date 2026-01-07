@@ -2,9 +2,9 @@ import { Logger } from '@nestjs/common';
 import {
   EVAL_PRIMARY_AGENT,
   DEFAULT_ACT_AGENT,
-  ALL_PRIMARY_AGENTS_LIST,
-  PLAN_PRIMARY_AGENTS_LIST,
-  ACT_PRIMARY_AGENTS_LIST,
+  ALL_PRIMARY_AGENTS,
+  PLAN_PRIMARY_AGENTS,
+  ACT_PRIMARY_AGENTS,
   type Mode,
   type PrimaryAgentResolutionResult,
   type PrimaryAgentSource,
@@ -380,7 +380,7 @@ export class PrimaryAgentResolver {
     const explicit = this.parseExplicitRequest(
       prompt,
       availableAgents,
-      PLAN_PRIMARY_AGENTS_LIST,
+      Array.from(PLAN_PRIMARY_AGENTS),
     );
     if (explicit) {
       return explicit;
@@ -480,7 +480,7 @@ export class PrimaryAgentResolver {
     const explicit = this.parseExplicitRequest(
       prompt,
       availableAgents,
-      ACT_PRIMARY_AGENTS_LIST,
+      Array.from(ACT_PRIMARY_AGENTS),
     );
     if (explicit) {
       return explicit;
@@ -745,7 +745,7 @@ export class PrimaryAgentResolver {
         this.logger.debug(
           'No primary agents found in registry, using default fallback list',
         );
-        return [...ALL_PRIMARY_AGENTS_LIST];
+        return [...ALL_PRIMARY_AGENTS];
       }
       return agents;
     } catch (error) {
@@ -753,7 +753,7 @@ export class PrimaryAgentResolver {
         `Failed to list primary agents: ${error instanceof Error ? error.message : 'Unknown error'}. ` +
           `Using fallback list.`,
       );
-      return [...ALL_PRIMARY_AGENTS_LIST];
+      return [...ALL_PRIMARY_AGENTS];
     }
   }
 
