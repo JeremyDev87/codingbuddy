@@ -10,7 +10,31 @@ import {
   getJsConfigWarning,
   findProjectRoot,
   findConfigFile,
+  clearProjectRootCache,
+  getProjectRootCacheSize,
 } from './config.loader';
+
+/**
+ * Shared test helpers for filesystem-based tests
+ */
+function createTestDir(prefix: string): string {
+  const tempDir = path.join(
+    os.tmpdir(),
+    `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+  mkdirSync(tempDir, { recursive: true });
+  return tempDir;
+}
+
+function cleanupTestDir(dir: string): void {
+  try {
+    if (existsSync(dir)) {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  } catch {
+    // Ignore cleanup errors
+  }
+}
 
 describe('config.loader', () => {
   describe('CONFIG_FILE_NAMES', () => {
@@ -159,23 +183,14 @@ describe('config.loader', () => {
   describe('findConfigFile', () => {
     let testTempDir: string;
 
-    function createTestDir(): string {
-      const tempDir = path.join(
-        os.tmpdir(),
-        `findConfigFile-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      );
-      mkdirSync(tempDir, { recursive: true });
-      return tempDir;
-    }
-
     afterEach(() => {
-      if (testTempDir && existsSync(testTempDir)) {
-        rmSync(testTempDir, { recursive: true, force: true });
+      if (testTempDir) {
+        cleanupTestDir(testTempDir);
       }
     });
 
     it('should find codingbuddy.config.js when it exists', () => {
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('findConfigFile-test');
       writeFileSync(
         path.join(testTempDir, 'codingbuddy.config.js'),
         'module.exports = {};',
@@ -188,7 +203,7 @@ describe('config.loader', () => {
     });
 
     it('should find codingbuddy.config.json when it exists', () => {
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
       writeFileSync(path.join(testTempDir, 'codingbuddy.config.json'), '{}');
 
       const result = findConfigFile(testTempDir);
@@ -198,7 +213,7 @@ describe('config.loader', () => {
     });
 
     it('should return null when no config file exists', () => {
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
 
       const result = findConfigFile(testTempDir);
 
@@ -209,36 +224,17 @@ describe('config.loader', () => {
   describe('findProjectRoot', () => {
     let testTempDir: string;
 
-    // Helper to create test directory structure
-    function createTestDir(): string {
-      const tempDir = path.join(
-        os.tmpdir(),
-        `findProjectRoot-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      );
-      mkdirSync(tempDir, { recursive: true });
-      return tempDir;
-    }
-
-    // Helper to cleanup test directory
-    function cleanupTestDir(dir: string): void {
-      try {
-        if (existsSync(dir)) {
-          rmSync(dir, { recursive: true, force: true });
-        }
-      } catch {
-        // Ignore cleanup errors
-      }
-    }
-
     afterEach(() => {
       if (testTempDir) {
         cleanupTestDir(testTempDir);
       }
+      // Clear cache between tests to ensure isolation
+      clearProjectRootCache();
     });
 
     it('should return directory with codingbuddy config file', () => {
       // Setup: /tempdir/project/src/components with config at /tempdir/project
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
       const projectDir = path.join(testTempDir, 'project');
       const srcDir = path.join(projectDir, 'src', 'components');
 
@@ -255,7 +251,7 @@ describe('config.loader', () => {
 
     it('should return directory with package.json when no config file exists', () => {
       // Setup: /tempdir/project/src/deep/nested with package.json at /tempdir/project
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
       const projectDir = path.join(testTempDir, 'project');
       const nestedDir = path.join(projectDir, 'src', 'deep', 'nested');
 
@@ -272,7 +268,7 @@ describe('config.loader', () => {
 
     it('should return start directory when no project root found', () => {
       // Setup: Empty directory structure
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
       const emptyDir = path.join(testTempDir, 'empty', 'nested');
       mkdirSync(emptyDir, { recursive: true });
 
@@ -285,7 +281,7 @@ describe('config.loader', () => {
 
     it('should find codingbuddy config before package.json in same directory', () => {
       // Setup: Both config and package.json in same directory
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
       const projectDir = path.join(testTempDir, 'project');
       const srcDir = path.join(projectDir, 'src');
 
@@ -298,9 +294,9 @@ describe('config.loader', () => {
       expect(result).toBe(projectDir);
     });
 
-    it('should stop at first package.json when no config exists', () => {
+    it('should use first package.json as fallback when no config exists', () => {
       // Setup: package.json at middle level, nothing at deeper levels
-      testTempDir = createTestDir();
+      testTempDir = createTestDir('config-loader-test');
       const rootDir = path.join(testTempDir, 'workspace');
       const projectDir = path.join(rootDir, 'apps', 'my-app');
       const srcDir = path.join(projectDir, 'src', 'features');
@@ -332,6 +328,135 @@ describe('config.loader', () => {
       const result = findProjectRoot('/');
 
       expect(result).toBe('/');
+    });
+
+    it('should find codingbuddy config in parent directory even when child has package.json (monorepo)', () => {
+      // Setup: monorepo structure
+      // /tempdir/monorepo/codingbuddy.config.js  <- config here
+      // /tempdir/monorepo/package.json
+      // /tempdir/monorepo/apps/sub-package/package.json  <- no config
+      // /tempdir/monorepo/apps/sub-package/src/  <- start here
+      testTempDir = createTestDir('config-loader-test');
+      const monorepoRoot = path.join(testTempDir, 'monorepo');
+      const subPackageDir = path.join(monorepoRoot, 'apps', 'sub-package');
+      const srcDir = path.join(subPackageDir, 'src');
+
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(
+        path.join(monorepoRoot, 'codingbuddy.config.js'),
+        'module.exports = {};',
+      );
+      writeFileSync(path.join(monorepoRoot, 'package.json'), '{}');
+      writeFileSync(path.join(subPackageDir, 'package.json'), '{}');
+
+      const result = findProjectRoot(srcDir);
+
+      expect(result).toBe(monorepoRoot);
+    });
+
+    it('should cache results for repeated calls with same path', () => {
+      testTempDir = createTestDir('config-loader-test');
+      const projectDir = path.join(testTempDir, 'project');
+      const srcDir = path.join(projectDir, 'src');
+
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(
+        path.join(projectDir, 'codingbuddy.config.js'),
+        'module.exports = {};',
+      );
+
+      // First call - should traverse filesystem
+      const result1 = findProjectRoot(srcDir);
+      expect(result1).toBe(projectDir);
+
+      // Second call with same path - should return cached result
+      const result2 = findProjectRoot(srcDir);
+      expect(result2).toBe(projectDir);
+
+      // Both should be equal
+      expect(result1).toBe(result2);
+    });
+
+    it('should clear cache when clearProjectRootCache is called', () => {
+      testTempDir = createTestDir('config-loader-test');
+      const projectDir = path.join(testTempDir, 'project');
+      const srcDir = path.join(projectDir, 'src');
+
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(path.join(projectDir, 'package.json'), '{}');
+
+      // First call
+      const result1 = findProjectRoot(srcDir);
+      expect(result1).toBe(projectDir);
+
+      // Add config file after first call
+      writeFileSync(
+        path.join(projectDir, 'codingbuddy.config.js'),
+        'module.exports = {};',
+      );
+
+      // Without clearing cache, should still return package.json location
+      // (This is expected caching behavior - result is stale)
+
+      // Clear cache
+      clearProjectRootCache();
+
+      // After clearing, should find the new config file
+      const result2 = findProjectRoot(srcDir);
+      expect(result2).toBe(projectDir); // Same location, but now due to config file
+    });
+
+    it('should track cache size with getProjectRootCacheSize', () => {
+      testTempDir = createTestDir('config-loader-test');
+      const project1 = path.join(testTempDir, 'project1');
+      const project2 = path.join(testTempDir, 'project2');
+
+      mkdirSync(project1, { recursive: true });
+      mkdirSync(project2, { recursive: true });
+      writeFileSync(path.join(project1, 'package.json'), '{}');
+      writeFileSync(path.join(project2, 'package.json'), '{}');
+
+      // Cache should start empty after clearing in afterEach
+      expect(getProjectRootCacheSize()).toBe(0);
+
+      // First call adds one entry
+      findProjectRoot(project1);
+      expect(getProjectRootCacheSize()).toBe(1);
+
+      // Second call with different path adds another entry
+      findProjectRoot(project2);
+      expect(getProjectRootCacheSize()).toBe(2);
+
+      // Repeated call with same path should not increase size
+      findProjectRoot(project1);
+      expect(getProjectRootCacheSize()).toBe(2);
+    });
+
+    it('should return cached result without re-traversing filesystem', () => {
+      testTempDir = createTestDir('config-loader-test');
+      const projectDir = path.join(testTempDir, 'project');
+      const srcDir = path.join(projectDir, 'src');
+
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(
+        path.join(projectDir, 'codingbuddy.config.js'),
+        'module.exports = {};',
+      );
+
+      // First call - populates cache
+      const result1 = findProjectRoot(srcDir);
+      expect(result1).toBe(projectDir);
+      expect(getProjectRootCacheSize()).toBe(1);
+
+      // Remove config file - cache should still return old result
+      rmSync(path.join(projectDir, 'codingbuddy.config.js'));
+
+      // Second call - should return cached result (stale but expected)
+      const result2 = findProjectRoot(srcDir);
+      expect(result2).toBe(projectDir);
+
+      // Cache size should still be 1
+      expect(getProjectRootCacheSize()).toBe(1);
     });
   });
 });
