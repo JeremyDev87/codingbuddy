@@ -13,6 +13,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { RulesService } from '../rules/rules.service';
 import { ConfigService } from '../config/config.service';
+import { getPackageVersion } from '../shared/version.utils';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import type { ToolHandler } from './handlers';
 import { TOOL_HANDLERS } from './handlers';
@@ -29,7 +30,7 @@ export class McpService implements OnModuleInit {
     this.server = new Server(
       {
         name: 'codingbuddy-rules-server',
-        version: '1.0.0',
+        version: getPackageVersion(),
       },
       {
         capabilities: {

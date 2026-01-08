@@ -14,6 +14,7 @@ import { KEYWORDS } from '../keyword/keyword.types';
 import { loadConfig } from '../config/config.loader';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import { isPathSafe } from '../shared/security.utils';
+import { getPackageVersion } from '../shared/version.utils';
 import { parseAgentProfile, AgentSchemaError } from '../rules/agent.schema';
 import { parseSkill, SkillSchemaError } from '../rules/skill.schema';
 import type { Skill } from '../rules/skill.schema';
@@ -91,7 +92,7 @@ export class McpServerlessService {
 
     this.server = new McpServer({
       name: 'codingbuddy',
-      version: '1.0.0',
+      version: getPackageVersion(),
     });
 
     this.registerTools();

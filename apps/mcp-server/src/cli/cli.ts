@@ -7,10 +7,8 @@
 
 import { runInit } from './init';
 import { bootstrap } from '../main';
+import { getPackageVersion } from '../shared/version.utils';
 import type { InitOptions } from './cli.types';
-
-// Package version (injected at build time or read from package.json)
-const VERSION = '1.0.0';
 
 /**
  * Parsed command line arguments
@@ -114,7 +112,7 @@ Environment:
  * Print version
  */
 export function printVersion(): void {
-  process.stdout.write(`codingbuddy v${VERSION}\n`);
+  process.stdout.write(`codingbuddy v${getPackageVersion()}\n`);
 }
 
 /**
