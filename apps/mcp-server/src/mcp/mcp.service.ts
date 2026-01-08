@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, Logger, Inject } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -20,7 +20,6 @@ import { TOOL_HANDLERS } from './handlers';
 @Injectable()
 export class McpService implements OnModuleInit {
   private server: Server;
-  private readonly logger = new Logger(McpService.name);
 
   constructor(
     private rulesService: RulesService,
@@ -51,7 +50,7 @@ export class McpService implements OnModuleInit {
   async startStdio() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    this.logger.log('MCP Server connected via Stdio');
+    // Note: Do not log here - stdout is reserved for MCP JSON-RPC messages
   }
 
   getServer() {

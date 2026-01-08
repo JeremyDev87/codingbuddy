@@ -2,7 +2,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { McpService } from './mcp/mcp.service';
-import { Logger } from '@nestjs/common';
 
 /**
  * Parse CORS origin configuration from environment variable
@@ -30,11 +29,23 @@ function parseCorsOrigin(
   return corsOrigin;
 }
 
+/**
+ * Log to stderr for debugging in stdio mode
+ * Use MCP_DEBUG=1 to enable debug output
+ */
+function debugLog(message: string): void {
+  if (process.env.MCP_DEBUG === '1') {
+    process.stderr.write(`[codingbuddy] ${message}\n`);
+  }
+}
+
 export async function bootstrap(): Promise<void> {
-  const logger = new Logger('Bootstrap');
   const transportMode = process.env.MCP_TRANSPORT || 'stdio';
 
   if (transportMode === 'sse') {
+    // Import Logger only when needed (SSE mode)
+    const { Logger } = await import('@nestjs/common');
+    const logger = new Logger('Bootstrap');
     // SSE Mode: Run as HTTP Server with CORS configuration
     const corsOrigin = parseCorsOrigin(process.env.CORS_ORIGIN);
     const app = await NestFactory.create(AppModule, {
@@ -55,10 +66,15 @@ export async function bootstrap(): Promise<void> {
     logger.log(`MCP Server running in SSE mode on port ${port}`);
   } else {
     // Stdio Mode: Run as Standalone App
-    const app = await NestFactory.createApplicationContext(AppModule);
+    // Disable NestJS logger to prevent ANSI color codes from breaking MCP protocol
+    // MCP uses stdio for JSON-RPC communication, so stdout must only contain JSON messages
+    debugLog('Starting in stdio mode...');
+    const app = await NestFactory.createApplicationContext(AppModule, {
+      logger: false,
+    });
     const mcpService = app.get(McpService);
     await mcpService.startStdio();
-    logger.log('MCP Server running in Stdio mode');
+    debugLog('MCP Server connected via stdio');
   }
 }
 
