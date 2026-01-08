@@ -238,6 +238,14 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 - [Framework best practices]
 - [Accessibility considerations]
 
+## 📝 Session Documentation (Optional)
+To preserve this planning session for future reference:
+\`\`\`bash
+./docs/codingbuddy/scripts/new-doc.sh plan <slug>
+\`\`\`
+- Creates timestamped PLAN document in `docs/codingbuddy/plan/`
+- Useful for: Complex features, team handoffs, audit trails
+
 **Next:** Type `ACT` to execute, or modify plan
 ```
 
@@ -390,6 +398,14 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 
 ## 📝 Next Steps
 [Return to PLAN mode automatically]
+
+## 📝 Session Documentation (Optional)
+To preserve this implementation session for future reference:
+\`\`\`bash
+./docs/codingbuddy/scripts/new-doc.sh act <slug>
+\`\`\`
+- Creates timestamped ACT document in `docs/codingbuddy/act/`
+- Useful for: Implementation decisions, debugging context, knowledge transfer
 
 **Next:** Type `ACT` to continue, `PLAN` to review, or `EVAL` for quality assessment
 ```
@@ -659,6 +675,14 @@ Self-improvement through iterative refinement
 - [ ] Refactoring Verification completed (or skip reason stated)
 - [ ] Critical Findings section appears before What Works
 - [ ] No defense of implementation decisions
+
+## 📝 Session Documentation (Optional)
+To preserve this evaluation session for future reference:
+\`\`\`bash
+./docs/codingbuddy/scripts/new-doc.sh eval <slug>
+\`\`\`
+- Creates timestamped EVAL document in `docs/codingbuddy/eval/`
+- Useful for: Quality reviews, improvement tracking, retrospectives
 
 **🔴 Required:**
 - All recommendations must include web search validation or reference documentation

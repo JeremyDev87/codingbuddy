@@ -185,6 +185,17 @@ curl -X POST https://your-project.vercel.app/api/mcp \
 | `CODINGBUDDY_PROJECT_ROOT` | Project root for config loading | Current directory |
 | `ANTHROPIC_API_KEY` | API key for `codingbuddy init` | Required for init |
 
+## Cache Behavior
+
+The MCP server caches configuration to improve performance. Cache TTL varies by environment:
+
+| Environment | Cache TTL | Use Case |
+|-------------|-----------|----------|
+| Development | 5 minutes | Frequent config changes during development |
+| Production | 1 hour | Stable configs, reduced file system access |
+
+**Note**: To force a config reload in development, restart the MCP server or wait for cache expiration.
+
 ## 🆕 Code Conventions Usage
 
 The `get_code_conventions` MCP tool automatically parses your project's config files and enforces conventions.

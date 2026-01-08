@@ -2,7 +2,7 @@
   "modes": {
     "PLAN": {
       "description": "Task planning and design phase",
-      "instructions": "설계 우선 접근. TDD 관점에서 테스트 케이스 먼저 정의. 구현 전 아키텍처 검토.",
+      "instructions": "설계 우선 접근. TDD 관점에서 테스트 케이스 먼저 정의. 구현 전 아키텍처 검토. 📝 완료 후 docs/codingbuddy/plan/ 에 PLAN 문서 작성 권장 (./docs/codingbuddy/scripts/new-doc.sh plan <slug>).",
       "rules": ["rules/core.md", "rules/augmented-coding.md"],
       "agent": "plan-mode",
       "delegates_to": "frontend-developer",
@@ -13,7 +13,7 @@
     },
     "ACT": {
       "description": "Actual task execution phase",
-      "instructions": "Red-Green-Refactor 사이클 준수. 최소 구현 후 점진적 개선. 품질 기준 충족 확인.",
+      "instructions": "Red-Green-Refactor 사이클 준수. 최소 구현 후 점진적 개선. 품질 기준 충족 확인. 📝 완료 후 docs/codingbuddy/act/ 에 ACT 문서 작성 권장 (./docs/codingbuddy/scripts/new-doc.sh act <slug>).",
       "rules": [
         "rules/core.md",
         "rules/project.md",
@@ -28,7 +28,7 @@
     },
     "EVAL": {
       "description": "Result review and assessment phase",
-      "instructions": "코드 품질 검토. SOLID 원칙 준수 확인. 테스트 커버리지 점검. 개선점 제안.",
+      "instructions": "코드 품질 검토. SOLID 원칙 준수 확인. 테스트 커버리지 점검. 개선점 제안. 📝 완료 후 docs/codingbuddy/eval/ 에 EVAL 문서 작성 권장 (./docs/codingbuddy/scripts/new-doc.sh eval <slug>).",
       "rules": ["rules/core.md", "rules/augmented-coding.md"],
       "agent": "eval-mode",
       "delegates_to": "code-reviewer",
@@ -37,6 +37,19 @@
         "accessibility-specialist",
         "performance-specialist",
         "code-quality-specialist"
+      ]
+    },
+    "AUTO": {
+      "description": "Autonomous execution mode",
+      "instructions": "PLAN → ACT → EVAL 사이클 자동 실행. Critical/High 이슈가 0이 될 때까지 반복. (세션 문서는 각 PLAN/ACT/EVAL 단계에서 작성됨)",
+      "rules": ["rules/core.md", "rules/project.md", "rules/augmented-coding.md"],
+      "agent": "auto-mode",
+      "delegates_to": "frontend-developer",
+      "defaultSpecialists": [
+        "architecture-specialist",
+        "test-strategy-specialist",
+        "code-quality-specialist",
+        "security-specialist"
       ]
     }
   },

@@ -1,0 +1,135 @@
+{
+  "created": "Created",
+  "author": "Author",
+  "status": "Status",
+  "status_draft": "Draft",
+  "status_in_progress": "In Progress",
+  "status_completed": "Completed",
+  "status_reviewed": "Reviewed",
+
+  "related_docs": "Related Documents",
+  "type": "Type",
+  "link": "Link",
+  "ticket": "Ticket",
+
+  "summary": "Summary",
+  "summary_hint": "One sentence describing what is being planned",
+  "act_summary_hint": "One-line summary of work performed",
+
+  "background": "Background",
+  "background_hint": "Why this work is needed",
+
+  "design_decisions": "Design Decisions",
+  "decision": "Decision",
+  "choice": "Choice",
+  "alternative": "Alternative",
+  "rationale": "Rationale",
+
+  "implementation_plan": "Implementation Plan",
+  "task": "Task",
+
+  "planned_changes": "Planned File Changes",
+  "changes": "Changes",
+  "new_files": "New Files",
+  "modified_files": "Modified Files",
+  "deleted_files": "Deleted Files",
+  "file": "File",
+  "purpose": "Purpose",
+  "lines": "Lines",
+  "reason": "Reason",
+
+  "test_strategy": "Test Strategy",
+  "unit_tests": "Unit Tests",
+  "integration_tests": "Integration Tests",
+  "coverage_goal": "Coverage Goal",
+  "coverage": "Coverage",
+
+  "risks": "Risks",
+  "severity": "Severity",
+  "item": "Item",
+  "content": "Content",
+  "mitigation": "Mitigation",
+
+  "next_steps": "Next Steps",
+  "proceed_after_approval": "Proceed to ACT after user approval",
+
+  "implementation_details": "Implementation Details",
+  "implementation_desc": "Implementation description",
+
+  "test_results": "Test Results",
+  "result": "Result",
+  "passed": "passed",
+  "failed": "failed",
+  "test_command": "Test Command",
+
+  "issues_encountered": "Issues Encountered",
+  "issue": "Issue",
+  "cause": "Cause",
+  "resolution": "Resolution",
+
+  "deviations_from_plan": "Deviations from PLAN",
+  "deviations_hint": "Document any differences from the original plan",
+  "actual": "Actual",
+
+  "remaining_tasks": "Remaining Tasks",
+  "decide_eval": "Decide whether to proceed with EVAL",
+  "create_commit_pr": "Create commit and PR",
+
+  "evaluation_target": "Evaluation Target",
+  "evaluation_target_hint": "What implementation was evaluated",
+
+  "quality_summary": "Quality Assessment Summary",
+  "count": "Count",
+  "quality_target": "Quality Target Met",
+
+  "findings": "Findings",
+  "location": "Location",
+  "recommended_action": "Recommended Action",
+
+  "specialist_analysis": "Specialist Analysis",
+  "code_quality": "Code Quality",
+  "code_quality_hint": "Code quality assessment summary",
+  "security": "Security",
+  "security_hint": "Security assessment summary",
+  "performance": "Performance",
+  "performance_hint": "Performance assessment summary",
+  "test_strategy_hint": "Test strategy assessment summary",
+
+  "metrics": "Metrics",
+  "metric": "Metric",
+  "value": "Value",
+  "target": "Target",
+  "test_coverage": "Test Coverage",
+  "cyclomatic_complexity": "Cyclomatic Complexity",
+  "function_size": "Function Size",
+
+  "devils_advocate": "Devil's Advocate Analysis",
+  "challenge": "Challenge",
+  "assessment": "Assessment",
+  "da_overkill": "Is this approach overkill?",
+  "da_simpler": "Is there a simpler way?",
+  "da_maintainable": "Is this maintainable long-term?",
+
+  "improvement_suggestions": "Improvement Suggestions",
+  "immediate_actions": "Immediate Actions Required",
+  "future_considerations": "Future Considerations",
+  "suggestion": "Suggestion",
+
+  "conclusion": "Conclusion",
+  "conclusion_hint": "Final assessment and next steps",
+  "conclusion_action": "Recommended Action",
+  "ready_to_commit": "Ready to commit",
+  "commit_after_fixes": "Commit after fixes",
+  "additional_act_required": "Additional ACT required",
+
+  "ticket_status": "Status",
+  "ticket_type": "Type",
+  "ticket_severity": "Severity",
+  "ticket_scope": "Scope",
+  "ticket_problem": "Problem Description / Feature Requirements",
+  "ticket_problem_hint": "Add details here",
+  "ticket_solution": "Proposed Solution / Implementation Plan",
+  "ticket_solution_hint": "Add details here",
+  "ticket_benefits": "Expected Benefits",
+  "ticket_benefits_hint": "Add details here"
+}

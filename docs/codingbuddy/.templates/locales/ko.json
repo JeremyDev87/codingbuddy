@@ -1,0 +1,135 @@
+{
+  "created": "생성일시",
+  "author": "작성자",
+  "status": "상태",
+  "status_draft": "Draft",
+  "status_in_progress": "In Progress",
+  "status_completed": "Completed",
+  "status_reviewed": "Reviewed",
+
+  "related_docs": "관련 문서",
+  "type": "유형",
+  "link": "링크",
+  "ticket": "티켓",
+
+  "summary": "요약",
+  "summary_hint": "한 문장으로 무엇을 계획하는지",
+  "act_summary_hint": "수행한 작업 한 줄 요약",
+
+  "background": "배경",
+  "background_hint": "왜 이 작업이 필요한지",
+
+  "design_decisions": "설계 결정사항",
+  "decision": "결정 사항",
+  "choice": "선택",
+  "alternative": "대안",
+  "rationale": "선택 근거",
+
+  "implementation_plan": "구현 계획",
+  "task": "작업",
+
+  "planned_changes": "파일 변경 예정",
+  "changes": "변경 내용",
+  "new_files": "신규 생성",
+  "modified_files": "수정",
+  "deleted_files": "삭제",
+  "file": "파일",
+  "purpose": "목적",
+  "lines": "라인 수",
+  "reason": "사유",
+
+  "test_strategy": "테스트 전략",
+  "unit_tests": "단위 테스트",
+  "integration_tests": "통합 테스트",
+  "coverage_goal": "커버리지 목표",
+  "coverage": "커버리지",
+
+  "risks": "리스크",
+  "severity": "심각도",
+  "item": "항목",
+  "content": "내용",
+  "mitigation": "대응 방안",
+
+  "next_steps": "다음 단계",
+  "proceed_after_approval": "사용자 승인 후 ACT 진행",
+
+  "implementation_details": "구현 상세",
+  "implementation_desc": "구현 내용 설명",
+
+  "test_results": "테스트 결과",
+  "result": "결과",
+  "passed": "통과",
+  "failed": "실패",
+  "test_command": "테스트 명령어",
+
+  "issues_encountered": "발생한 이슈",
+  "issue": "이슈",
+  "cause": "원인",
+  "resolution": "해결 방법",
+
+  "deviations_from_plan": "PLAN 대비 변경점",
+  "deviations_hint": "PLAN과 다르게 구현된 부분이 있다면 기록",
+  "actual": "실제 구현",
+
+  "remaining_tasks": "남은 작업",
+  "decide_eval": "EVAL 진행 여부 결정",
+  "create_commit_pr": "커밋 및 PR 생성",
+
+  "evaluation_target": "평가 대상",
+  "evaluation_target_hint": "어떤 구현을 평가했는지",
+
+  "quality_summary": "품질 평가 요약",
+  "count": "개수",
+  "quality_target": "품질 목표 충족",
+
+  "findings": "발견 사항",
+  "location": "위치",
+  "recommended_action": "권장 조치",
+
+  "specialist_analysis": "스페셜리스트 분석",
+  "code_quality": "Code Quality",
+  "code_quality_hint": "코드 품질 평가 요약",
+  "security": "Security",
+  "security_hint": "보안 평가 요약",
+  "performance": "Performance",
+  "performance_hint": "성능 평가 요약",
+  "test_strategy_hint": "테스트 전략 평가 요약",
+
+  "metrics": "메트릭스",
+  "metric": "지표",
+  "value": "값",
+  "target": "목표",
+  "test_coverage": "테스트 커버리지",
+  "cyclomatic_complexity": "순환 복잡도",
+  "function_size": "함수 크기",
+
+  "devils_advocate": "Devil's Advocate Analysis",
+  "challenge": "도전",
+  "assessment": "평가",
+  "da_overkill": "이 접근법이 과도한 것은 아닌가?",
+  "da_simpler": "더 간단한 방법은 없는가?",
+  "da_maintainable": "장기적으로 유지보수 가능한가?",
+
+  "improvement_suggestions": "개선 제안",
+  "immediate_actions": "즉시 반영 필요",
+  "future_considerations": "향후 고려",
+  "suggestion": "제안",
+
+  "conclusion": "결론",
+  "conclusion_hint": "최종 평가 및 다음 단계",
+  "conclusion_action": "권장 조치",
+  "ready_to_commit": "즉시 커밋 가능",
+  "commit_after_fixes": "수정 후 커밋",
+  "additional_act_required": "추가 ACT 필요",
+
+  "ticket_status": "상태",
+  "ticket_type": "유형",
+  "ticket_severity": "심각도",
+  "ticket_scope": "영향 범위",
+  "ticket_problem": "문제 설명 / 기능 요구사항",
+  "ticket_problem_hint": "상세 내용 작성",
+  "ticket_solution": "해결 방안 / 구현 계획",
+  "ticket_solution_hint": "상세 내용 작성",
+  "ticket_benefits": "기대 효과",
+  "ticket_benefits_hint": "상세 내용 작성"
+}
