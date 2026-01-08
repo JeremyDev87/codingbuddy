@@ -58,37 +58,114 @@ export function findConfigFile(projectRoot: string): string | null {
 const MAX_PARENT_TRAVERSAL = 10;
 
 /**
+ * Maximum number of entries to keep in the project root cache.
+ * When exceeded, oldest entries are evicted (FIFO).
+ */
+const MAX_CACHE_SIZE = 100;
+
+/**
+ * Cache for findProjectRoot results to avoid redundant filesystem traversals.
+ * Uses Map to maintain insertion order for FIFO eviction.
+ */
+const projectRootCache = new Map<string, string>();
+
+/**
+ * Add an entry to the cache with size limit enforcement.
+ * Evicts oldest entries (FIFO) when cache exceeds MAX_CACHE_SIZE.
+ */
+function setCacheEntry(key: string, value: string): void {
+  // If key already exists, delete it first to update insertion order
+  if (projectRootCache.has(key)) {
+    projectRootCache.delete(key);
+  }
+
+  // Evict oldest entries if at capacity
+  while (projectRootCache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = projectRootCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      projectRootCache.delete(oldestKey);
+    }
+  }
+
+  projectRootCache.set(key, value);
+}
+
+/**
+ * Clear the project root cache.
+ * Useful when config files may have been added/removed during runtime.
+ */
+export function clearProjectRootCache(): void {
+  projectRootCache.clear();
+}
+
+/**
+ * Get the current cache size (for testing purposes).
+ * @internal
+ */
+export function getProjectRootCacheSize(): number {
+  return projectRootCache.size;
+}
+
+/**
  * Automatically detect the project root by searching for config files
  * starting from the given directory and traversing up to parent directories.
  *
  * This is useful when the MCP server is started from a directory that may not
  * be the actual project root (e.g., when launched via npx from a temp directory).
  *
- * Search order:
- * 1. Look for codingbuddy.config.* files (highest priority)
- * 2. If not found, look for package.json with 'codingbuddy' field
- * 3. If nothing found after MAX_PARENT_TRAVERSAL, return the starting directory
+ * Search priority:
+ * 1. codingbuddy.config.* files (highest priority - continues searching parent
+ *    directories even after finding package.json to support monorepo setups)
+ * 2. First package.json found (fallback when no config file exists in any
+ *    parent directory up to MAX_PARENT_TRAVERSAL)
+ * 3. Starting directory (fallback when nothing found)
+ *
+ * @caching
+ * **Caching Behavior:**
+ * - Results are cached by resolved start directory path
+ * - Cache uses FIFO eviction with max 100 entries to prevent memory leaks
+ * - Use {@link clearProjectRootCache} to invalidate cache when config files change
+ * - Use {@link getProjectRootCacheSize} to inspect cache size (for testing)
+ *
+ * @security
+ * **Monorepo Security Considerations:**
+ * - In monorepo setups, sub-packages will load config from parent directories
+ * - JavaScript config files (.js, .mjs) execute arbitrary code when loaded
+ * - Ensure parent directory configs are trusted before running in sub-packages
+ * - Consider using JSON configs in shared/untrusted environments
+ *
+ * **Symlink Behavior:**
+ * - This function follows symbolic links without verification
+ * - In untrusted environments, symlinks could redirect to malicious configs
  *
  * @param startDir - Directory to start searching from (defaults to process.cwd())
  * @returns Detected project root directory
  */
 export function findProjectRoot(startDir?: string): string {
   const start = startDir ?? process.cwd();
-  let currentDir = path.resolve(start);
+  const resolvedStart = path.resolve(start);
+
+  // Check cache first
+  const cached = projectRootCache.get(resolvedStart);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  let currentDir = resolvedStart;
   let traversalCount = 0;
+  let firstPackageJsonDir: string | null = null;
 
   while (traversalCount < MAX_PARENT_TRAVERSAL) {
-    // Check for codingbuddy config files
+    // Check for codingbuddy config files (highest priority)
     if (findConfigFile(currentDir) !== null) {
+      setCacheEntry(resolvedStart, currentDir);
       return currentDir;
     }
 
-    // Check for package.json (indicates a project root)
+    // Store first package.json location as fallback, but continue searching
     const packageJsonPath = path.join(currentDir, 'package.json');
-    if (existsSync(packageJsonPath)) {
-      // Found a package.json - this is likely the project root
-      // even if there's no codingbuddy config
-      return currentDir;
+    if (existsSync(packageJsonPath) && firstPackageJsonDir === null) {
+      firstPackageJsonDir = currentDir;
     }
 
     // Move to parent directory
@@ -103,8 +180,10 @@ export function findProjectRoot(startDir?: string): string {
     traversalCount++;
   }
 
-  // Fallback to starting directory
-  return start;
+  // Return first package.json dir if no config found, otherwise start dir
+  const result = firstPackageJsonDir ?? start;
+  setCacheEntry(resolvedStart, result);
+  return result;
 }
 
 /**
