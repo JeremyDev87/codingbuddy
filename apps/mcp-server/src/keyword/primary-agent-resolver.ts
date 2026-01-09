@@ -174,11 +174,12 @@ export class PrimaryAgentResolver {
    * 1. Explicit request in prompt ("backend-developer로 작업해") - highest
    * 2. recommended_agent from PLAN mode (PLAN→ACT context passing)
    * 3. **TOOLING_INTENT_PATTERNS** ← checked here
-   * 4. DATA_INTENT_PATTERNS
-   * 5. MOBILE_INTENT_PATTERNS
-   * 6. CONTEXT_PATTERNS (file path/extension inference)
-   * 7. Project config (primaryAgent setting)
-   * 8. Default fallback (frontend-developer) - lowest
+   * 4. PLATFORM_INTENT_PATTERNS
+   * 5. DATA_INTENT_PATTERNS
+   * 6. MOBILE_INTENT_PATTERNS
+   * 7. CONTEXT_PATTERNS (file path/extension inference)
+   * 8. Project config (primaryAgent setting)
+   * 9. Default fallback (frontend-developer) - lowest
    *
    * Confidence Levels:
    * - 0.95-0.98: Highly specific config file names (tsconfig, vite.config, etc.)
@@ -265,6 +266,118 @@ export class PrimaryAgentResolver {
     },
   ];
 
+  /**
+   * Intent patterns for platform-engineer agent.
+   *
+   * These patterns detect prompts related to Infrastructure as Code, Kubernetes,
+   * multi-cloud, GitOps, and platform engineering tasks.
+   * Priority: 4th (after explicit, recommended, tooling patterns; before data, mobile, context).
+   *
+   * Confidence Levels:
+   * - 0.95: Highly specific IaC tools (Terraform, Pulumi, Helm, Argo CD)
+   * - 0.90: Kubernetes, cloud provider infrastructure, GitOps keywords
+   * - 0.85: Generic infrastructure patterns, Korean keywords
+   *
+   * ## Pattern Overlap with Tooling Engineer
+   *
+   * Both agents deal with configuration files, but they serve different purposes:
+   *
+   * | Pattern Type | tooling-engineer | platform-engineer |
+   * |--------------|------------------|-------------------|
+   * | Config files | tsconfig, vite.config, eslint | terraform.tf, Chart.yaml |
+   * | Focus area   | Build tools, bundlers, linters | IaC, K8s, cloud infra |
+   * | Resolution   | Checked 3rd (higher priority) | Checked 4th (after tooling) |
+   *
+   * Conflict Resolution:
+   * - tooling-engineer patterns are checked BEFORE platform-engineer
+   * - If both could match, tooling-engineer wins by priority order
+   * - Platform-specific keywords (terraform, helm, k8s) are unambiguous
+   *
+   * @example
+   * "terraform 모듈 작성해줘" → platform-engineer (0.95)
+   * "k8s 매니페스트 수정" → platform-engineer (0.90)
+   * "인프라 코드 설정" → platform-engineer (0.85)
+   */
+  private static readonly PLATFORM_INTENT_PATTERNS: Array<{
+    pattern: RegExp;
+    confidence: number;
+    description: string;
+  }> = [
+    // IaC tools (0.95)
+    { pattern: /terraform/i, confidence: 0.95, description: 'Terraform' },
+    { pattern: /pulumi/i, confidence: 0.95, description: 'Pulumi' },
+    { pattern: /aws.?cdk/i, confidence: 0.95, description: 'AWS CDK' },
+    { pattern: /helm/i, confidence: 0.95, description: 'Helm chart' },
+    {
+      pattern: /argocd|argo.?cd/i,
+      confidence: 0.95,
+      description: 'Argo CD',
+    },
+    { pattern: /flux.?cd|fluxcd/i, confidence: 0.95, description: 'Flux CD' },
+    // Kubernetes patterns (0.90-0.95)
+    {
+      pattern: /kubernetes|k8s/i,
+      confidence: 0.9,
+      description: 'Kubernetes',
+    },
+    {
+      pattern: /kustomize|kustomization/i,
+      confidence: 0.95,
+      description: 'Kustomize',
+    },
+    {
+      pattern: /kubectl|kubeconfig/i,
+      confidence: 0.9,
+      description: 'Kubectl',
+    },
+    {
+      pattern: /k8s.*manifest|manifest.*k8s|kubernetes.*manifest/i,
+      confidence: 0.9,
+      description: 'K8s manifest',
+    },
+    // Cloud provider infrastructure (0.85-0.90)
+    {
+      pattern: /EKS|GKE|AKS/i,
+      confidence: 0.9,
+      description: 'Managed Kubernetes',
+    },
+    {
+      pattern: /IRSA|workload.?identity/i,
+      confidence: 0.9,
+      description: 'Workload identity',
+    },
+    {
+      pattern: /인프라\s*(코드|설정|관리|자동화)/i,
+      confidence: 0.85,
+      description: 'Korean: infrastructure',
+    },
+    {
+      pattern: /infrastructure.?as.?code|IaC/i,
+      confidence: 0.9,
+      description: 'Infrastructure as Code',
+    },
+    // GitOps patterns (0.90)
+    { pattern: /gitops/i, confidence: 0.9, description: 'GitOps' },
+    // Multi-cloud patterns (0.85)
+    {
+      pattern: /multi.?cloud|hybrid.?cloud/i,
+      confidence: 0.85,
+      description: 'Multi-cloud',
+    },
+    // Cost optimization patterns (0.85)
+    {
+      pattern: /finops|cloud.?cost|비용\s*최적화/i,
+      confidence: 0.85,
+      description: 'Cloud cost optimization',
+    },
+    // Disaster recovery (0.85)
+    {
+      pattern: /disaster.?recovery|RTO|RPO/i,
+      confidence: 0.85,
+      description: 'Disaster recovery',
+    },
+  ];
+
   /** Context patterns for suggesting agents based on file paths */
   private static readonly CONTEXT_PATTERNS: Array<{
     pattern: RegExp;
@@ -303,7 +416,42 @@ export class PrimaryAgentResolver {
     { pattern: /schema\.prisma$/i, agent: 'data-engineer', confidence: 0.95 },
     { pattern: /migrations?\//i, agent: 'data-engineer', confidence: 0.9 },
     { pattern: /\.entity\.ts$/i, agent: 'data-engineer', confidence: 0.85 },
-    // DevOps patterns
+    // Platform Engineering / IaC patterns (highest priority for infra files)
+    { pattern: /\.tf$/i, agent: 'platform-engineer', confidence: 0.95 },
+    { pattern: /\.tfvars$/i, agent: 'platform-engineer', confidence: 0.95 },
+    {
+      pattern: /terragrunt\.hcl$/i,
+      agent: 'platform-engineer',
+      confidence: 0.95,
+    },
+    { pattern: /Chart\.yaml$/i, agent: 'platform-engineer', confidence: 0.95 },
+    { pattern: /values\.yaml$/i, agent: 'platform-engineer', confidence: 0.75 },
+    {
+      pattern: /helm.*templates\/|charts\/.*templates\//i,
+      agent: 'platform-engineer',
+      confidence: 0.9,
+    },
+    {
+      pattern: /kustomization\.ya?ml$/i,
+      agent: 'platform-engineer',
+      confidence: 0.95,
+    },
+    {
+      pattern: /Pulumi\.ya?ml$/i,
+      agent: 'platform-engineer',
+      confidence: 0.95,
+    },
+    {
+      pattern: /argocd\/|argo-cd\//i,
+      agent: 'platform-engineer',
+      confidence: 0.9,
+    },
+    {
+      pattern: /flux-system\//i,
+      agent: 'platform-engineer',
+      confidence: 0.9,
+    },
+    // DevOps patterns (CI/CD, containers)
     {
       pattern: /Dockerfile|docker-compose/i,
       agent: 'devops-engineer',
@@ -468,7 +616,7 @@ export class PrimaryAgentResolver {
 
   /**
    * Resolve ACT mode agent.
-   * Priority: explicit > recommended > tooling-intent > data-intent > mobile-intent > config > context > default
+   * Priority: explicit > recommended > tooling-intent > platform-intent > data-intent > mobile-intent > config > context > default
    */
   private async resolveActAgent(
     prompt: string,
@@ -502,25 +650,34 @@ export class PrimaryAgentResolver {
       return fromTooling;
     }
 
-    // 4. Check data intent patterns (database/schema tasks)
+    // 4. Check platform intent patterns (IaC, Kubernetes, multi-cloud tasks)
+    const fromPlatform = this.inferFromPlatformPatterns(
+      prompt,
+      availableAgents,
+    );
+    if (fromPlatform) {
+      return fromPlatform;
+    }
+
+    // 5. Check data intent patterns (database/schema tasks)
     const fromData = this.inferFromDataPatterns(prompt, availableAgents);
     if (fromData) {
       return fromData;
     }
 
-    // 5. Check mobile intent patterns (mobile app tasks)
+    // 6. Check mobile intent patterns (mobile app tasks)
     const fromMobile = this.inferFromMobilePatterns(prompt, availableAgents);
     if (fromMobile) {
       return fromMobile;
     }
 
-    // 6. Check project configuration
+    // 7. Check project configuration
     const fromConfig = await this.getFromProjectConfig(availableAgents);
     if (fromConfig) {
       return fromConfig;
     }
 
-    // 7. Check context-based suggestion
+    // 8. Check context-based suggestion
     if (context) {
       const fromContext = this.inferFromContext(context, availableAgents);
       if (fromContext && fromContext.confidence >= 0.8) {
@@ -528,7 +685,7 @@ export class PrimaryAgentResolver {
       }
     }
 
-    // 8. Default fallback for ACT mode
+    // 9. Default fallback for ACT mode
     return this.createResult(
       DEFAULT_ACT_AGENT,
       'default',
@@ -560,6 +717,36 @@ export class PrimaryAgentResolver {
           'intent',
           confidence,
           `Tooling pattern detected: ${description}`,
+        );
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Infer platform-engineer from prompt content patterns.
+   * High priority for IaC, Kubernetes, multi-cloud, and GitOps tasks.
+   */
+  private inferFromPlatformPatterns(
+    prompt: string,
+    availableAgents: string[],
+  ): PrimaryAgentResolutionResult | null {
+    if (!availableAgents.includes('platform-engineer')) {
+      return null;
+    }
+
+    for (const {
+      pattern,
+      confidence,
+      description,
+    } of PrimaryAgentResolver.PLATFORM_INTENT_PATTERNS) {
+      if (pattern.test(prompt)) {
+        return this.createResult(
+          'platform-engineer',
+          'intent',
+          confidence,
+          `Platform pattern detected: ${description}`,
         );
       }
     }

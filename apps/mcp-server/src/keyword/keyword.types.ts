@@ -21,6 +21,7 @@ export const PLAN_PRIMARY_AGENTS = [
 /** Primary Agents for ACT mode - centralized definition */
 export const ACT_PRIMARY_AGENTS = [
   'tooling-engineer', // Config/build tools specialist - highest priority for pattern matching
+  'platform-engineer', // IaC, Kubernetes, multi-cloud specialist - high priority for infra tasks
   'data-engineer', // Database/schema specialist - high priority for data tasks
   'mobile-developer', // Mobile app specialist - detected by project files
   'frontend-developer',
@@ -79,6 +80,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
     'tooling-engineer': {
       name: 'Tooling Engineer',
       description: 'Config, build tools, bundlers (webpack, vite, eslint)',
+    },
+    'platform-engineer': {
+      name: 'Platform Engineer',
+      description: 'Terraform, Kubernetes, Helm, multi-cloud, GitOps',
     },
     'data-engineer': {
       name: 'Data Engineer',

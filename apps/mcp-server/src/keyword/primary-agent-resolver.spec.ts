@@ -515,6 +515,285 @@ describe('PrimaryAgentResolver', () => {
       });
     });
 
+    describe('platform-engineer pattern matching', () => {
+      beforeEach(() => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'tooling-engineer',
+          'platform-engineer',
+          'data-engineer',
+          'mobile-developer',
+          'frontend-developer',
+          'backend-developer',
+          'agent-architect',
+          'devops-engineer',
+          'solution-architect',
+          'technical-planner',
+          'code-reviewer',
+        ]);
+      });
+
+      it('returns platform-engineer for Terraform prompt', async () => {
+        const result = await resolver.resolve('ACT', 'terraform 모듈 작성해줘');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBeGreaterThanOrEqual(0.9);
+      });
+
+      it('returns platform-engineer for Pulumi prompt', async () => {
+        const result = await resolver.resolve('ACT', 'Pulumi 스택 설정해');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for Helm prompt', async () => {
+        const result = await resolver.resolve('ACT', 'helm chart 만들어줘');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for Kubernetes prompt', async () => {
+        const result = await resolver.resolve(
+          'ACT',
+          'kubernetes 매니페스트 수정',
+        );
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for k8s shorthand prompt', async () => {
+        const result = await resolver.resolve('ACT', 'k8s deployment 설정해');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for Argo CD prompt', async () => {
+        const result = await resolver.resolve('ACT', 'ArgoCD application 설정');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for GitOps prompt', async () => {
+        const result = await resolver.resolve('ACT', 'GitOps workflow 구성해');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for Korean "인프라 코드" prompt', async () => {
+        const result = await resolver.resolve('ACT', '인프라 코드 작성해줘');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for AWS CDK prompt', async () => {
+        const result = await resolver.resolve('ACT', 'AWS CDK 스택 만들어');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for EKS prompt', async () => {
+        const result = await resolver.resolve('ACT', 'EKS 클러스터 설정');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for GKE prompt', async () => {
+        const result = await resolver.resolve('ACT', 'GKE 노드풀 추가해');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for kustomize prompt', async () => {
+        const result = await resolver.resolve('ACT', 'kustomization 설정해');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for FinOps prompt', async () => {
+        const result = await resolver.resolve('ACT', 'FinOps 비용 분석해줘');
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns platform-engineer for disaster recovery prompt', async () => {
+        const result = await resolver.resolve(
+          'ACT',
+          'disaster recovery 계획 세워줘',
+        );
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('returns null when platform-engineer not available', async () => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'backend-developer',
+        ]);
+
+        const result = await resolver.resolve('ACT', 'terraform 모듈 작성');
+
+        expect(result.agentName).not.toBe('platform-engineer');
+        expect(result.agentName).toBe('frontend-developer');
+      });
+
+      it('prioritizes tooling-engineer over platform-engineer for config files', async () => {
+        // eslint.config.ts는 tooling이 처리해야 함
+        const result = await resolver.resolve(
+          'ACT',
+          'eslint.config.ts 수정해줘',
+        );
+
+        expect(result.agentName).toBe('tooling-engineer');
+        expect(result.agentName).not.toBe('platform-engineer');
+      });
+    });
+
+    describe('platform-engineer context patterns', () => {
+      beforeEach(() => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'tooling-engineer',
+          'platform-engineer',
+          'data-engineer',
+          'mobile-developer',
+          'frontend-developer',
+          'backend-developer',
+          'agent-architect',
+          'devops-engineer',
+          'solution-architect',
+          'technical-planner',
+          'code-reviewer',
+        ]);
+      });
+
+      it('suggests platform-engineer for .tf files', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/infra/main.tf',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('context');
+        expect(result.confidence).toBe(0.95);
+      });
+
+      it('suggests platform-engineer for Chart.yaml files', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/charts/my-app/Chart.yaml',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('context');
+      });
+
+      it('suggests platform-engineer for kustomization.yaml files', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/k8s/kustomization.yaml',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('context');
+      });
+
+      it('suggests platform-engineer for Pulumi.yaml files', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/infra/Pulumi.yaml',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('context');
+      });
+
+      it('suggests platform-engineer for .tfvars files', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/infra/prod.tfvars',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('context');
+      });
+
+      it('suggests platform-engineer for argocd directory files', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/argocd/application.yaml',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('context');
+      });
+
+      it('suggests devops-engineer for Dockerfile (not platform-engineer)', async () => {
+        const context: ResolutionContext = {
+          filePath: '/project/Dockerfile',
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        expect(result.agentName).toBe('devops-engineer');
+        expect(result.agentName).not.toBe('platform-engineer');
+      });
+
+      it('falls back to default when context pattern matches but agent unavailable', async () => {
+        // Simulate platform-engineer not being in available agents
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'backend-developer',
+        ]);
+
+        const context: ResolutionContext = {
+          filePath: '/project/infra/main.tf', // Matches platform-engineer pattern
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        // Should fall back to default since platform-engineer is unavailable
+        expect(result.agentName).toBe('frontend-developer');
+        expect(result.source).toBe('default');
+      });
+
+      it('continues to next pattern when matched agent is unavailable', async () => {
+        // Simulate only devops-engineer available (not platform-engineer)
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'devops-engineer',
+        ]);
+
+        const context: ResolutionContext = {
+          filePath: '/project/infra/main.tf', // Matches platform-engineer pattern
+          projectType: 'infrastructure', // Also triggers devops-engineer fallback
+        };
+
+        const result = await resolver.resolve('ACT', '이 파일 수정해', context);
+
+        // Should fall back to devops-engineer via projectType since platform-engineer unavailable
+        expect(result.agentName).toBe('devops-engineer');
+        expect(result.source).toBe('context');
+      });
+    });
+
     describe('explicit request parsing', () => {
       it('returns explicit agent when prompt contains "backend-developer로 작업해"', async () => {
         const result = await resolver.resolve(

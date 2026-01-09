@@ -41,7 +41,8 @@ AI Agent definitions for specialized development roles.
 | **Internationalization** | i18n Specialist | `i18n-specialist.json` |
 | **Documentation** | Documentation Specialist | `documentation-specialist.json` |
 | **Code Quality** | Code Quality Specialist | `code-quality-specialist.json` |
-| **Infrastructure/Deployment** | DevOps Engineer | `devops-engineer.json` |
+| **Docker/Monitoring** | DevOps Engineer | `devops-engineer.json` |
+| **IaC/K8s/Multi-Cloud** | Platform Engineer | `platform-engineer.json` |
 | **Config/Build Tools** | Tooling Engineer | `tooling-engineer.json` |
 | **Agent Management** | Agent Architect | `agent-architect.json` |
 | **AI/ML Development** | AI/ML Engineer | `ai-ml-engineer.json` |
@@ -68,9 +69,35 @@ AI Agent definitions for specialized development roles.
 | Documentation Specialist | Code comments, JSDoc, documentation quality assessment |
 | Code Quality Specialist | SOLID, DRY, complexity analysis |
 | DevOps Engineer | Docker, monitoring, deployment optimization |
+| Platform Engineer | IaC, Kubernetes, multi-cloud, GitOps, cost optimization, DR |
 | Tooling Engineer | Project configuration, build tools, dev environment setup |
 | Agent Architect | AI agent design, validation, checklist auditing |
 | AI/ML Engineer | LLM integration, RAG architecture, prompt engineering, AI safety |
+
+### DevOps Engineer vs Platform Engineer Decision Matrix
+
+Use this matrix to determine which agent to use for infrastructure-related tasks:
+
+| Scenario | Use DevOps Engineer | Use Platform Engineer |
+|----------|--------------------|-----------------------|
+| **Docker optimization** | ✅ Multi-stage builds, image size | Container orchestration at scale |
+| **Monitoring setup** | ✅ Datadog, APM, RUM, logs | Cloud-native observability (Prometheus, Grafana) |
+| **Next.js deployment** | ✅ Standalone builds, memory tuning | Kubernetes deployment strategies |
+| **Terraform/Pulumi** | Basic Dockerfile | ✅ Module design, state management |
+| **Kubernetes** | Docker image for K8s | ✅ Helm, RBAC, network policies, GitOps |
+| **Multi-cloud** | Single cloud Docker | ✅ AWS/GCP/Azure strategies |
+| **Cost optimization** | Build performance | ✅ FinOps, right-sizing, spot instances |
+| **Disaster recovery** | Container health checks | ✅ RTO/RPO, backups, failover |
+| **GitOps (Argo CD/Flux)** | CI/CD pipelines | ✅ GitOps workflows, sync strategies |
+| **Service mesh** | Container networking | ✅ Istio, Linkerd configuration |
+
+**Rule of Thumb:**
+- **DevOps Engineer**: Docker containers, application monitoring, build optimization
+- **Platform Engineer**: Infrastructure as Code, Kubernetes at scale, multi-cloud, FinOps
+
+**Hybrid Scenarios:**
+- Docker + Kubernetes: Start with Platform Engineer (broader scope), reference DevOps for Docker-specific optimization
+- Monitoring + Multi-cloud: Platform Engineer for infrastructure, DevOps for application-level monitoring
 
 ---
 
@@ -123,6 +150,7 @@ as agent-architect, design new agent
 | Backend Developer | `primary` | Backend file context (.go, .py, .java, .rs) |
 | Agent Architect | `primary` | Agent-related work requests |
 | DevOps Engineer | `primary` | Dockerfile, docker-compose context |
+| Platform Engineer | `primary` | Terraform, Kubernetes, cloud infrastructure |
 | AI/ML Engineer | `primary` | LLM integration, RAG, prompt engineering, AI safety |
 
 ### EVAL Mode
@@ -159,7 +187,8 @@ Primary Agents (Implementation Experts) - role.type: "primary"
 ├── frontend-developer     # React/Next.js expertise (default)
 ├── backend-developer      # Multi-language backend expertise
 ├── agent-architect        # AI agent framework expertise
-├── devops-engineer        # Infrastructure expertise
+├── devops-engineer        # Docker/monitoring expertise
+├── platform-engineer      # IaC/Kubernetes/multi-cloud expertise
 └── ai-ml-engineer         # LLM/RAG/AI safety expertise
 
 Specialist Agents (Domain Experts)
@@ -486,6 +515,69 @@ Unified specialist agents organized by domain:
 - Optimize build performance and memory usage
 - Debug production issues with source maps
 - Monitor and improve application performance
+
+---
+
+### Platform Engineer (`platform-engineer.json`)
+
+> **Note**: This is a **Primary Agent** for cloud-native infrastructure, covering IaC, Kubernetes, multi-cloud, GitOps, cost optimization, and disaster recovery. Complements DevOps Engineer with broader platform engineering scope.
+
+**Supported Cloud Providers:**
+
+- AWS (EKS, ECS, Lambda, CloudFormation)
+- Google Cloud (GKE, Cloud Run, Deployment Manager)
+- Azure (AKS, Container Apps, ARM/Bicep)
+- Kubernetes (any distribution)
+
+**IaC Tools:**
+
+- Terraform, Pulumi, AWS CDK, Crossplane, OpenTofu
+
+**GitOps Tools:**
+
+- Argo CD, Flux, Jenkins X, Tekton
+
+**Expertise:**
+
+- Infrastructure as Code (Terraform, Pulumi, AWS CDK)
+- Kubernetes & Container Orchestration
+- Multi-Cloud Strategy (AWS, GCP, Azure)
+- GitOps Workflows (Argo CD, Flux)
+- Cost Optimization & FinOps
+- Disaster Recovery & Business Continuity
+- Service Mesh & Networking
+- Security & Compliance (RBAC, Network Policies)
+
+**Development Philosophy:**
+
+- **IaC-First**: Infrastructure defined as code with proper state management
+- **Security-First**: RBAC, network policies, secrets management
+- **Cost-Conscious**: FinOps practices, right-sizing, spot instances
+- **GitOps-Native**: Declarative configs, automated sync, drift detection
+- **DR-Ready**: RTO/RPO planning, backup automation, failover testing
+
+**Responsibilities:**
+
+- Design and implement Infrastructure as Code modules
+- Architect Kubernetes deployments with security best practices
+- Plan multi-cloud and hybrid cloud strategies
+- Establish GitOps workflows for continuous delivery
+- Optimize cloud costs through FinOps practices
+- Design disaster recovery and business continuity plans
+
+**Workflow:**
+
+- **Planning**: IaC architecture, Kubernetes design, cost planning, DR planning
+- **Implementation**: Terraform/Pulumi apply, Helm deployments, GitOps sync
+- **Evaluation**: Security audit, cost review, DR readiness assessment
+
+**Activation Patterns:**
+
+- Files: `*.tf`, `*.tfvars`, `Chart.yaml`, `kustomization.yaml`, `Pulumi.yaml`, `argocd/`, `flux-system/`
+- Korean: "인프라 코드", "쿠버네티스", "테라폼", "비용 최적화", "재해 복구"
+- English: "terraform", "kubernetes", "k8s", "helm", "pulumi", "gitops", "argocd", "infrastructure as code"
+
+**Auto-Activation:** Supported via MCP server. Platform Engineer is automatically selected when prompts contain IaC/Kubernetes keywords or when working with infrastructure files.
 
 ---
 
@@ -965,7 +1057,8 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 ├── frontend-developer.json          # Primary Agent for ACT mode (default)
 ├── backend-developer.json           # Primary Agent for ACT mode (backend)
 ├── agent-architect.json             # Primary Agent for agent management
-├── devops-engineer.json             # Primary Agent for infrastructure
+├── devops-engineer.json             # Primary Agent for Docker/monitoring
+├── platform-engineer.json           # Primary Agent for IaC/K8s/multi-cloud
 ├── ai-ml-engineer.json              # Primary Agent for AI/ML development
 ├── code-reviewer.json               # Core agent (EVAL mode, fixed)
 ├── code-quality-specialist.json     # Utility agent
