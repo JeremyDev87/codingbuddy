@@ -149,6 +149,12 @@ export class KeywordService {
   /**
    * Extract mode and original prompt from user input.
    * Handles English and localized keywords with validation.
+   *
+   * Supported formats:
+   * - "KEYWORD task" (space separated)
+   * - "KEYWORD: task" (colon attached)
+   * - "KEYWORD : task" (colon separated)
+   * - Full-width colon (：) is also supported for CJK keyboards
    */
   private extractModeFromPrompt(
     prompt: string,
@@ -156,27 +162,37 @@ export class KeywordService {
   ): { mode: Mode; originalPrompt: string; warnings: string[] } {
     const warnings: string[] = [];
     const trimmed = prompt.trim();
-    const parts = trimmed.split(/\s+/);
-    const firstWord = parts[0] ?? '';
-    const firstWordUpper = firstWord.toUpperCase();
+
+    // Regex: keyword (non-space, non-colon) + optional (space + colon + space) + rest
+    // Supports: "KEYWORD: task", "KEYWORD : task", "KEYWORD task", "KEYWORD：task"
+    const keywordRegex = /^([^\s:：]+)\s*[:：]?\s*(.*)$/s;
+    const match = trimmed.match(keywordRegex);
+
+    if (!match || !match[1]) {
+      warnings.push('No keyword found, defaulting to PLAN');
+      return { mode: defaultMode, originalPrompt: trimmed, warnings };
+    }
+
+    const keywordCandidate = match[1];
+    const keywordUpper = keywordCandidate.toUpperCase();
+    const originalPrompt = (match[2] ?? '').trim();
 
     // Check English keywords (case-insensitive)
-    const isEnglishKeyword = KEYWORDS.includes(firstWordUpper as Mode);
+    const isEnglishKeyword = KEYWORDS.includes(keywordUpper as Mode);
     // Check localized keywords (exact match for CJK, case-insensitive for Spanish)
     const localizedMode =
-      LOCALIZED_KEYWORD_MAP[firstWord] ?? LOCALIZED_KEYWORD_MAP[firstWordUpper];
+      LOCALIZED_KEYWORD_MAP[keywordCandidate] ??
+      LOCALIZED_KEYWORD_MAP[keywordUpper];
 
     if (isEnglishKeyword) {
-      const mode = firstWordUpper as Mode;
-      const originalPrompt = trimmed.slice(firstWord.length).trim();
-      this.checkForMultipleKeywords(parts, warnings);
+      const mode = keywordUpper as Mode;
+      this.checkForMultipleKeywordsInPrompt(originalPrompt, warnings);
       this.checkForEmptyContent(originalPrompt, warnings);
       return { mode, originalPrompt, warnings };
     }
 
     if (localizedMode) {
-      const originalPrompt = trimmed.slice(firstWord.length).trim();
-      this.checkForMultipleKeywords(parts, warnings);
+      this.checkForMultipleKeywordsInPrompt(originalPrompt, warnings);
       this.checkForEmptyContent(originalPrompt, warnings);
       return { mode: localizedMode, originalPrompt, warnings };
     }
@@ -187,17 +203,25 @@ export class KeywordService {
   }
 
   /**
-   * Check if second word is also a keyword and add warning.
+   * Check if first word of originalPrompt is also a keyword and add warning.
    */
-  private checkForMultipleKeywords(parts: string[], warnings: string[]): void {
-    if (parts.length <= 1) return;
+  private checkForMultipleKeywordsInPrompt(
+    originalPrompt: string,
+    warnings: string[],
+  ): void {
+    if (!originalPrompt) return;
 
-    const secondWord = parts[1];
-    const secondWordUpper = secondWord.toUpperCase();
+    // Extract first word from originalPrompt (excluding colons)
+    const firstWordMatch = originalPrompt.match(/^([^\s:：]+)/);
+    if (!firstWordMatch) return;
+
+    const firstWord = firstWordMatch[1];
+    const firstWordUpper = firstWord.toUpperCase();
+
     const isSecondKeyword =
-      KEYWORDS.includes(secondWordUpper as Mode) ||
-      LOCALIZED_KEYWORD_MAP[secondWord] !== undefined ||
-      LOCALIZED_KEYWORD_MAP[secondWordUpper] !== undefined;
+      KEYWORDS.includes(firstWordUpper as Mode) ||
+      LOCALIZED_KEYWORD_MAP[firstWord] !== undefined ||
+      LOCALIZED_KEYWORD_MAP[firstWordUpper] !== undefined;
 
     if (isSecondKeyword) {
       warnings.push('Multiple keywords found, using first');
