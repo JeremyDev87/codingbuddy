@@ -30,6 +30,7 @@ describe('ModeHandler', () => {
 
     mockConfigService = {
       getLanguage: vi.fn().mockResolvedValue('ko'),
+      reload: vi.fn().mockResolvedValue({}),
     } as unknown as ConfigService;
 
     mockLanguageService = {
@@ -126,6 +127,24 @@ describe('ModeHandler', () => {
           'ACT implement feature',
           undefined,
         );
+      });
+
+      it('should reload config before getting language to ensure fresh settings', async () => {
+        await handler.handle('parse_mode', {
+          prompt: 'PLAN test',
+        });
+
+        // Verify reload is called
+        expect(mockConfigService.reload).toHaveBeenCalled();
+
+        // Verify reload is called before getLanguage
+        const reloadCallOrder =
+          (mockConfigService.reload as ReturnType<typeof vi.fn>).mock
+            .invocationCallOrder[0] ?? 0;
+        const getLanguageCallOrder =
+          (mockConfigService.getLanguage as ReturnType<typeof vi.fn>).mock
+            .invocationCallOrder[0] ?? 0;
+        expect(reloadCallOrder).toBeLessThan(getLanguageCallOrder);
       });
 
       it('should include language and languageInstruction in response', async () => {

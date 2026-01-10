@@ -69,6 +69,10 @@ export class ModeHandler extends AbstractHandler {
       extractRequiredString(args, 'recommended_agent') ?? undefined;
 
     try {
+      // Always reload config to ensure fresh language settings
+      // This prevents stale config from MCP server startup location issues
+      await this.configService.reload();
+
       const options = recommendedAgent
         ? { recommendedActAgent: recommendedAgent }
         : undefined;
