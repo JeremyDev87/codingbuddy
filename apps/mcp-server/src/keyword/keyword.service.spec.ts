@@ -1541,4 +1541,165 @@ describe('KeywordService', () => {
       expect(mockLoadConfig).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('keyword with colon variations (all modes)', () => {
+    describe('PLAN mode colon variations', () => {
+      it('parses PLAN: (colon attached)', async () => {
+        const result = await service.parseMode('PLAN: design auth');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design auth');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses PLAN : (colon separated)', async () => {
+        const result = await service.parseMode('PLAN : design auth');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design auth');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses plan: (lowercase with colon)', async () => {
+        const result = await service.parseMode('plan: design auth');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design auth');
+      });
+    });
+
+    describe('ACT mode colon variations', () => {
+      it('parses ACT: (colon attached)', async () => {
+        const result = await service.parseMode('ACT: implement feature');
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('implement feature');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses ACT : (colon separated)', async () => {
+        const result = await service.parseMode('ACT : implement feature');
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('implement feature');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses act: (lowercase with colon)', async () => {
+        const result = await service.parseMode('act: implement feature');
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('implement feature');
+      });
+    });
+
+    describe('EVAL mode colon variations', () => {
+      it('parses EVAL: (colon attached)', async () => {
+        const result = await service.parseMode('EVAL: review code');
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('review code');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses EVAL : (colon separated)', async () => {
+        const result = await service.parseMode('EVAL : review code');
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('review code');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses eval: (lowercase with colon)', async () => {
+        const result = await service.parseMode('eval: review code');
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('review code');
+      });
+    });
+
+    describe('AUTO mode colon variations', () => {
+      it('parses AUTO: (colon attached)', async () => {
+        const result = await service.parseMode('AUTO: add login');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('add login');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses AUTO : (colon separated)', async () => {
+        const result = await service.parseMode('AUTO : add login');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('add login');
+        expect(result.warnings).toBeUndefined();
+      });
+
+      it('parses auto: (lowercase with colon)', async () => {
+        const result = await service.parseMode('auto: add login');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('add login');
+      });
+    });
+
+    describe('Localized keywords with colon', () => {
+      it('parses 계획: (Korean PLAN with colon)', async () => {
+        const result = await service.parseMode('계획: 인증 설계');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('인증 설계');
+      });
+
+      it('parses 실행: (Korean ACT with colon)', async () => {
+        const result = await service.parseMode('실행: 구현하기');
+        expect(result.mode).toBe('ACT');
+        expect(result.originalPrompt).toBe('구현하기');
+      });
+
+      it('parses 평가: (Korean EVAL with colon)', async () => {
+        const result = await service.parseMode('평가: 코드 검토');
+        expect(result.mode).toBe('EVAL');
+        expect(result.originalPrompt).toBe('코드 검토');
+      });
+
+      it('parses 자동: (Korean AUTO with colon)', async () => {
+        const result = await service.parseMode('자동: 기능 추가');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('기능 추가');
+      });
+
+      it('parses 計画: (Japanese PLAN with colon)', async () => {
+        const result = await service.parseMode('計画: 設計する');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('設計する');
+      });
+
+      it('parses 自動: (Japanese AUTO with colon)', async () => {
+        const result = await service.parseMode('自動: 機能追加');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('機能追加');
+      });
+
+      it('parses PLANIFICAR: (Spanish PLAN with colon)', async () => {
+        const result = await service.parseMode('PLANIFICAR: diseño');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('diseño');
+      });
+
+      it('parses AUTOMÁTICO: (Spanish AUTO with colon)', async () => {
+        const result = await service.parseMode('AUTOMÁTICO: implementar');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('implementar');
+      });
+    });
+
+    describe('edge cases with colon', () => {
+      it('handles multiple colons - uses first keyword', async () => {
+        const result = await service.parseMode('PLAN: design: with: colons');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design: with: colons');
+      });
+
+      it('handles keyword with only colon (no prompt)', async () => {
+        const result = await service.parseMode('AUTO:');
+        expect(result.mode).toBe('AUTO');
+        expect(result.originalPrompt).toBe('');
+        expect(result.warnings).toContain('No prompt content after keyword');
+      });
+
+      it('handles full-width colon (：)', async () => {
+        const result = await service.parseMode('PLAN： design auth');
+        expect(result.mode).toBe('PLAN');
+        expect(result.originalPrompt).toBe('design auth');
+      });
+    });
+  });
 });
