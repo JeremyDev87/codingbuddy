@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { RulesService } from './rules.service';
 import { CustomModule } from '../custom';
+import { CodingBuddyConfigModule } from '../config/config.module';
 
 @Module({
-  imports: [CustomModule],
+  imports: [CustomModule, CodingBuddyConfigModule],
   providers: [RulesService],
   exports: [RulesService],
 })
