@@ -17,7 +17,7 @@ alwaysApply: false
 
 ## Required: Mode Keyword Detection
 
-When user message starts with `PLAN`, `ACT`, `EVAL` (or localized variants):
+When user message starts with `PLAN`, `ACT`, `EVAL`, `AUTO` (or localized variants: 자동, 自動, 自动, AUTOMÁTICO):
 
 → **Immediately** call `parse_mode` MCP tool
 

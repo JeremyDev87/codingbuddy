@@ -7,10 +7,11 @@ const SAMPLE_CORE_MD = `## Core Rules
 
 ### Work Modes
 
-You have three modes of operation:
+You have four modes of operation:
 1. Plan mode
 2. Act mode
 3. Eval mode
+4. Auto mode
 
 ### Plan Mode
 
@@ -38,6 +39,15 @@ More act content.
 
 Eval-specific content here.
 More eval content.
+
+### Auto Mode
+
+**Important:**
+- AUTO mode cycles through PLAN → ACT → EVAL automatically
+- Autonomous execution until quality targets met
+
+Auto-specific content here.
+More auto content.
 
 ### Communication Rules
 
@@ -81,13 +91,37 @@ describe('rule-filter', () => {
       expect(result).not.toContain('Act-specific content');
     });
 
+    it('should return full content for AUTO mode (no filtering)', () => {
+      const result = filterCoreRulesByMode(SAMPLE_CORE_MD, 'AUTO');
+
+      // AUTO mode should return full content since it cycles through all modes
+      expect(result).toContain('## Core Rules');
+      expect(result).toContain('### Work Modes');
+      expect(result).toContain('### Plan Mode');
+      expect(result).toContain('Plan-specific content');
+      expect(result).toContain('### Act Mode');
+      expect(result).toContain('Act-specific content');
+      expect(result).toContain('### Eval Mode');
+      expect(result).toContain('Eval-specific content');
+      expect(result).toContain('### Auto Mode');
+      expect(result).toContain('Auto-specific content');
+      expect(result).toContain('### Communication Rules');
+    });
+
+    it('should not add filtered view note for AUTO mode', () => {
+      const result = filterCoreRulesByMode(SAMPLE_CORE_MD, 'AUTO');
+
+      // AUTO mode returns original content, no filter note
+      expect(result).not.toContain('filtered view');
+    });
+
     it('should add a note about filtered content', () => {
       const result = filterCoreRulesByMode(SAMPLE_CORE_MD, 'PLAN');
 
       expect(result).toContain('filtered view for PLAN mode');
     });
 
-    it('should significantly reduce content length', () => {
+    it('should significantly reduce content length for PLAN/ACT/EVAL modes', () => {
       const planResult = filterCoreRulesByMode(SAMPLE_CORE_MD, 'PLAN');
       const actResult = filterCoreRulesByMode(SAMPLE_CORE_MD, 'ACT');
       const evalResult = filterCoreRulesByMode(SAMPLE_CORE_MD, 'EVAL');
@@ -96,6 +130,13 @@ describe('rule-filter', () => {
       expect(planResult.length).toBeLessThan(SAMPLE_CORE_MD.length);
       expect(actResult.length).toBeLessThan(SAMPLE_CORE_MD.length);
       expect(evalResult.length).toBeLessThan(SAMPLE_CORE_MD.length);
+    });
+
+    it('should preserve full content length for AUTO mode', () => {
+      const autoResult = filterCoreRulesByMode(SAMPLE_CORE_MD, 'AUTO');
+
+      // AUTO mode returns original content, so length should be equal
+      expect(autoResult.length).toBe(SAMPLE_CORE_MD.length);
     });
 
     it('should include content until end of file when end marker is missing', () => {

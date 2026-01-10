@@ -10,10 +10,11 @@ alwaysApply: true
 
 - **PLAN** → **ACT** → **PLAN** (default flow)
 - **EVAL** only on explicit request
+- **AUTO** for autonomous PLAN → ACT → EVAL cycle until quality achieved
 
 ## Required Actions
 
-When `PLAN`, `ACT`, `EVAL` keywords detected → **Immediately** call `parse_mode` MCP tool
+When `PLAN`, `ACT`, `EVAL`, `AUTO` keywords detected → **Immediately** call `parse_mode` MCP tool
 
 ## Core Principles
 

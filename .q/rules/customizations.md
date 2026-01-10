@@ -4,12 +4,13 @@
 
 This project follows shared coding rules from `packages/rules/.ai-rules/` for consistency across all AI assistants.
 
-### Workflow Modes (PLAN/ACT/EVAL)
+### Workflow Modes (PLAN/ACT/EVAL/AUTO)
 
 Refer to `packages/rules/.ai-rules/rules/core.md`:
 - **PLAN**: Create implementation plans
 - **ACT**: Execute code changes
 - **EVAL**: Quality assessment and improvements
+- **AUTO**: Autonomous PLAN → ACT → EVAL cycle until quality achieved
 
 ### Project Setup
 
@@ -37,7 +38,7 @@ Refer to `packages/rules/.ai-rules/agents/*.json`:
 
 <CODINGBUDDY_CRITICAL_RULE>
 
-**When user message starts with PLAN, ACT, or EVAL keyword (or localized: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR):**
+**When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized: Korean 계획/실행/평가/자동, Japanese 計画/実行/評価/自動, Chinese 计划/执行/评估/自动, Spanish PLANIFICAR/ACTUAR/EVALUAR/AUTOMÁTICO):**
 
 1. **IMMEDIATELY** follow the mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
 2. Apply the mode's workflow **EXACTLY**

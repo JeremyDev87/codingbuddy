@@ -8,7 +8,13 @@ const CORE_RULES_PATH = 'rules/core.md';
 /**
  * Section markers for filtering core.md content by mode.
  * Each mode only needs its own section plus common sections.
- * AUTO mode returns full content since it cycles through all modes.
+ *
+ * Design Decision:
+ * - PLAN/ACT/EVAL modes filter content to reduce token usage
+ * - AUTO mode returns full content (null markers) because it autonomously
+ *   cycles through PLAN → ACT → EVAL phases and needs all mode documentation
+ *
+ * @see filterCoreRulesByMode - Returns original content when markers is null
  */
 const MODE_SECTION_MARKERS: Record<
   Mode,
@@ -26,7 +32,13 @@ const MODE_SECTION_MARKERS: Record<
     start: /^### Eval Mode$/m,
     end: /^### Communication Rules$/m,
   },
-  // AUTO mode cycles through PLAN → ACT → EVAL, so no filtering needed
+  /**
+   * AUTO mode: null markers = no filtering (returns full content)
+   *
+   * Rationale: AUTO mode autonomously cycles through all three phases
+   * (PLAN → ACT → EVAL → repeat until quality targets met), so it needs
+   * access to all mode documentation within a single execution context.
+   */
   AUTO: null,
 };
 
