@@ -33,17 +33,19 @@ This project uses shared AI coding rules from `packages/rules/.ai-rules/` direct
 
 ### Work Modes
 
-You have three modes of operation:
+You have four modes of operation:
 
 1. **PLAN mode** - Define a plan without making changes
 2. **ACT mode** - Execute the plan and make changes
 3. **EVAL mode** - Analyze results and propose improvements
+4. **AUTO mode** - Autonomous PLAN → ACT → EVAL cycle until quality achieved
 
 **Mode Flow**:
 - Start in PLAN mode by default
 - Move to ACT when user types `ACT`
 - Return to PLAN after ACT completes (automatic)
 - Move to EVAL only when user explicitly types `EVAL`
+- Move to AUTO when user types `AUTO` (autonomous cycle)
 
 **Mode Indicators**:
 - Print `# Mode: PLAN` in plan mode

@@ -12,10 +12,11 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 - **PLAN mode**: Create implementation plans with TDD approach
 - **ACT mode**: Execute changes following quality standards
 - **EVAL mode**: Evaluate code quality and suggest improvements
+- **AUTO mode**: Autonomous PLAN → ACT → EVAL cycle until quality achieved
 
-**Mode Flow**: PLAN (default) → ACT (user types "ACT") → PLAN (automatic) → EVAL (user types "EVAL")
+**Mode Flow**: PLAN (default) → ACT (user types "ACT") → PLAN (automatic) → EVAL (user types "EVAL") | AUTO (autonomous cycle)
 
-**Mode Indicators**: Always print `# Mode: PLAN|ACT|EVAL` at the start of responses
+**Mode Indicators**: Always print `# Mode: PLAN|ACT|EVAL|AUTO` at the start of responses
 
 ### 🏗️ Project Context
 
@@ -57,7 +58,7 @@ See [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/a
 
 <CODINGBUDDY_CRITICAL_RULE>
 
-**When user message starts with PLAN, ACT, or EVAL keyword (or localized: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR):**
+**When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized: Korean 계획/실행/평가/자동, Japanese 計画/実行/評価/自動, Chinese 计划/执行/评估/自动, Spanish PLANIFICAR/ACTUAR/EVALUAR/AUTOMÁTICO):**
 
 1. **IMMEDIATELY** call `mcp__codingbuddy__parse_mode` with the user's prompt
 2. Follow the returned `instructions` **EXACTLY**
@@ -81,7 +82,9 @@ Failure to call `parse_mode` when these keywords are present will result in:
 
 </CODINGBUDDY_CRITICAL_RULE>
 
-Example: `PLAN design auth feature` → **immediately** call parse_mode → work in PLAN mode
+Examples:
+- `PLAN design auth feature` → **immediately** call parse_mode → work in PLAN mode
+- `AUTO implement user dashboard` → **immediately** call parse_mode → autonomous PLAN→ACT→EVAL cycle
 
 ## 🔴 MANDATORY: Parallel Specialist Agent Execution
 
@@ -103,6 +106,7 @@ Example: `PLAN design auth feature` → **immediately** call parse_mode → work
 | **PLAN** | 🏛️ architecture, 🧪 test-strategy |
 | **ACT** | 📏 code-quality, 🧪 test-strategy |
 | **EVAL** | 🔒 security, ♿ accessibility, ⚡ performance, 📏 code-quality |
+| **AUTO** | 🏛️ architecture, 🧪 test-strategy, 🔒 security, 📏 code-quality |
 
 **📖 Full Guide:** [Parallel Specialist Agents Execution](../../packages/rules/.ai-rules/adapters/claude-code.md#parallel-specialist-agents-execution)
 
@@ -115,6 +119,7 @@ Example: `PLAN design auth feature` → **immediately** call parse_mode → work
 - Provide clear, actionable feedback
 - Reference project context from `packages/rules/.ai-rules/rules/project.md`
 - Follow PLAN → ACT → EVAL workflow when appropriate
+- Use AUTO mode for autonomous quality-driven development cycles
 
 ## Full Documentation
 

@@ -10,6 +10,7 @@ See `packages/rules/.ai-rules/rules/core.md`:
 - **PLAN mode**: Create implementation plans with TDD approach
 - **ACT mode**: Execute changes following quality standards
 - **EVAL mode**: Evaluate code quality and suggest improvements
+- **AUTO mode**: Autonomous PLAN → ACT → EVAL cycle until quality achieved
 
 ### Project Context
 
@@ -40,7 +41,7 @@ See `packages/rules/.ai-rules/agents/`:
 
 <CODINGBUDDY_CRITICAL_RULE>
 
-**When user message starts with PLAN, ACT, or EVAL keyword (or localized: Korean 계획/실행/평가, Japanese 計画/実行/評価, Chinese 计划/执行/评估, Spanish PLANIFICAR/ACTUAR/EVALUAR):**
+**When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized: Korean 계획/실행/평가/자동, Japanese 計画/実行/評価/自動, Chinese 计划/执行/评估/自动, Spanish PLANIFICAR/ACTUAR/EVALUAR/AUTOMÁTICO):**
 
 1. **IMMEDIATELY** follow the mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
 2. Apply the mode's workflow **EXACTLY**
@@ -74,7 +75,7 @@ Example: `EVAL` → **즉시** EVAL 모드 규칙 적용 → Devil's Advocate An
 - Provide actionable, specific feedback
 
 ### Workflow
-Apply PLAN → ACT → EVAL workflow as defined in `packages/rules/.ai-rules/rules/core.md`
+Apply PLAN → ACT → EVAL (or AUTO for autonomous cycle) workflow as defined in `packages/rules/.ai-rules/rules/core.md`
 
 ## Full Documentation
 
