@@ -485,5 +485,185 @@ describe('ModeHandler', () => {
         expect(response.sessionWarning).toBeUndefined();
       });
     });
+
+    describe('auto-add mode section', () => {
+      it('should auto-add PLAN section when parse_mode is called in PLAN mode', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'PLAN',
+          originalPrompt: 'implement auth feature',
+          agent: 'technical-planner',
+          recommended_act_agent: {
+            agentName: 'frontend-developer',
+            confidence: 0.95,
+          },
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'PLAN implement auth feature',
+        });
+
+        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
+          sessionId: '2026-01-11-test-task',
+          section: expect.objectContaining({
+            mode: 'PLAN',
+            primaryAgent: 'technical-planner',
+            task: 'implement auth feature',
+            recommendedActAgent: 'frontend-developer',
+            recommendedActAgentConfidence: 0.95,
+            status: 'in_progress',
+          }),
+        });
+      });
+
+      it('should auto-add ACT section when parse_mode is called in ACT mode', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'ACT',
+          originalPrompt: 'implement feature',
+          agent: 'frontend-developer',
+        });
+        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
+          metadata: { id: 'existing-session', status: 'active' },
+          sections: [],
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'ACT implement feature',
+        });
+
+        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
+          sessionId: 'existing-session',
+          section: expect.objectContaining({
+            mode: 'ACT',
+            primaryAgent: 'frontend-developer',
+            task: 'implement feature',
+            status: 'in_progress',
+          }),
+        });
+      });
+
+      it('should auto-add EVAL section when parse_mode is called in EVAL mode', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'EVAL',
+          originalPrompt: 'evaluate implementation',
+          agent: 'code-reviewer',
+        });
+        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
+          metadata: { id: 'existing-session', status: 'active' },
+          sections: [],
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'EVAL evaluate implementation',
+        });
+
+        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
+          sessionId: 'existing-session',
+          section: expect.objectContaining({
+            mode: 'EVAL',
+            primaryAgent: 'code-reviewer',
+            task: 'evaluate implementation',
+            status: 'in_progress',
+          }),
+        });
+      });
+
+      it('should auto-add AUTO section when parse_mode is called in AUTO mode', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'AUTO',
+          originalPrompt: 'implement dashboard',
+          agent: 'auto-mode-agent',
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'AUTO implement dashboard',
+        });
+
+        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
+          sessionId: '2026-01-11-test-task',
+          section: expect.objectContaining({
+            mode: 'AUTO',
+            primaryAgent: 'auto-mode-agent',
+            task: 'implement dashboard',
+            status: 'in_progress',
+          }),
+        });
+      });
+
+      it('should not call updateSession when no session exists for ACT/EVAL', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'ACT',
+          agent: 'frontend-developer',
+        });
+        // No active session
+        mockSessionService.getActiveSession = vi.fn().mockResolvedValue(null);
+
+        await handler.handle('parse_mode', {
+          prompt: 'ACT implement feature',
+        });
+
+        expect(mockSessionService.updateSession).not.toHaveBeenCalled();
+      });
+
+      it('should handle updateSession failure gracefully', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'PLAN',
+          agent: 'technical-planner',
+        });
+        mockSessionService.updateSession = vi.fn().mockResolvedValue({
+          success: false,
+          error: 'Failed to update session',
+        });
+
+        const result = await handler.handle('parse_mode', {
+          prompt: 'PLAN test task',
+        });
+
+        // Should not fail the whole operation
+        expect(result?.isError).toBeFalsy();
+      });
+
+      it('should log debug message when agent is undefined but session exists', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'PLAN',
+          agent: undefined, // No agent
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'PLAN test task',
+        });
+
+        // Session update should not be called when agent is undefined
+        expect(mockSessionService.updateSession).not.toHaveBeenCalled();
+      });
+
+      it('should include task field in auto-added section', async () => {
+        const taskDescription = 'implement user authentication with OAuth2';
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'PLAN',
+          originalPrompt: taskDescription,
+          agent: 'technical-planner',
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: `PLAN ${taskDescription}`,
+        });
+
+        expect(mockSessionService.updateSession).toHaveBeenCalledWith(
+          expect.objectContaining({
+            section: expect.objectContaining({
+              task: taskDescription,
+            }),
+          }),
+        );
+      });
+    });
   });
 });

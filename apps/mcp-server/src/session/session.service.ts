@@ -12,6 +12,8 @@ import type {
 } from './session.types';
 import type { Mode } from '../keyword/keyword.types';
 import { ConfigService } from '../config/config.service';
+import { generateSlug } from '../shared/slug.utils';
+import { withTimeout } from '../shared/async.utils';
 
 /**
  * Session document file format:
@@ -21,6 +23,9 @@ import { ConfigService } from '../config/config.service';
  */
 
 const SESSIONS_DIR_NAME = 'docs/codingbuddy/sessions';
+
+/** Timeout for session file operations in milliseconds (5 seconds) */
+const SESSION_FILE_TIMEOUT_MS = 5000;
 
 /**
  * Markdown format constants for session documents.
@@ -97,6 +102,19 @@ const LOCALIZED_LABELS: Record<string, LocalizedLabels> = {
     TASK_HEADER: '### 任务',
     DECISIONS_HEADER: '### 决策',
     NOTES_HEADER: '### 备注',
+  },
+  es: {
+    SESSION_HEADER: '# Sesión:',
+    CREATED_PREFIX: '**Creado**:',
+    UPDATED_PREFIX: '**Actualizado**:',
+    STATUS_PREFIX: '**Estado**:',
+    PRIMARY_AGENT_PREFIX: '**Agente Principal**:',
+    RECOMMENDED_ACT_AGENT_PREFIX: '**Agente ACT Recomendado**:',
+    SPECIALISTS_PREFIX: '**Especialistas**:',
+    SECTION_SEPARATOR: '---',
+    TASK_HEADER: '### Tarea',
+    DECISIONS_HEADER: '### Decisiones',
+    NOTES_HEADER: '### Notas',
   },
 };
 
@@ -211,6 +229,17 @@ const VALID_SECTION_STATUSES = ['in_progress', 'completed', 'blocked'] as const;
  * Pattern to match section headers: ## MODE (timestamp)
  */
 const SECTION_HEADER_PATTERN = /^## (PLAN|ACT|EVAL|AUTO) \((.+)\)$/;
+
+/**
+ * Mapping from language codes to locale strings for timestamp formatting.
+ */
+const LANGUAGE_TO_LOCALE: Record<string, string> = {
+  en: 'en-US',
+  ko: 'ko-KR',
+  ja: 'ja-JP',
+  zh: 'zh-CN',
+  es: 'es-ES',
+};
 
 /**
  * Type guard for session metadata status.
@@ -592,15 +621,11 @@ export class SessionService {
   }
 
   /**
-   * Generate session filename from title and date.
+   * Generate session filename from title and date using shared slug utility.
    */
   private generateFilename(title: string): string {
     const date = new Date().toISOString().split('T')[0];
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9가-힣]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, MAX_SLUG_LENGTH);
+    const slug = generateSlug(title, MAX_SLUG_LENGTH);
     return `${date}-${slug}.md`;
   }
 
@@ -649,7 +674,10 @@ export class SessionService {
       // Get language for localized labels
       const language = (await this.configService.getLanguage()) || 'en';
       const content = this.serializeDocument(document, language);
-      await fs.writeFile(filePath, content, 'utf-8');
+      await withTimeout(fs.writeFile(filePath, content, 'utf-8'), {
+        timeoutMs: SESSION_FILE_TIMEOUT_MS,
+        operationName: 'write session file',
+      });
 
       // Invalidate active session cache (new session may become active)
       // No need to clear session cache since no existing sessions are modified
@@ -697,7 +725,10 @@ export class SessionService {
         return null;
       }
 
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await withTimeout(fs.readFile(filePath, 'utf-8'), {
+        timeoutMs: SESSION_FILE_TIMEOUT_MS,
+        operationName: 'read session file',
+      });
       const session = this.parseDocument(content, sessionId);
 
       // Add to cache
@@ -782,7 +813,9 @@ export class SessionService {
       }
 
       const now = new Date().toISOString();
-      const timestamp = new Date().toLocaleString('ko-KR', {
+      const language = (await this.configService.getLanguage()) || 'en';
+      const locale = LANGUAGE_TO_LOCALE[language] || 'en-US';
+      const timestamp = new Date().toLocaleString(locale, {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
@@ -823,10 +856,12 @@ export class SessionService {
         };
       }
 
-      // Get language for localized labels
-      const language = (await this.configService.getLanguage()) || 'en';
+      // Use language obtained earlier for localized labels
       const content = this.serializeDocument(session, language);
-      await fs.writeFile(filePath, content, 'utf-8');
+      await withTimeout(fs.writeFile(filePath, content, 'utf-8'), {
+        timeoutMs: SESSION_FILE_TIMEOUT_MS,
+        operationName: 'update session file',
+      });
 
       // Invalidate only the updated session from cache
       this.invalidateSession(options.sessionId);
