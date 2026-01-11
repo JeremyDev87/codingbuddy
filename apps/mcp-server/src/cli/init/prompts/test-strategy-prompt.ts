@@ -30,6 +30,19 @@ export interface TestStrategySettings {
 export const DEFAULT_COVERAGE = 90;
 
 /**
+ * Validate coverage input value
+ * @param value - Input value to validate
+ * @returns true if valid, error message string if invalid
+ */
+export function validateCoverage(value: string): true | string {
+  const num = parseInt(value, 10);
+  if (isNaN(num) || num < 0 || num > 100) {
+    return 'Please enter a number between 0 and 100';
+  }
+  return true;
+}
+
+/**
  * Test approach choices
  */
 export const APPROACH_CHOICES: TestChoice<TestStrategySettings['approach']>[] =
@@ -106,13 +119,7 @@ export async function promptTestStrategySettings(
   const coverageInput = await input({
     message: 'Target test coverage (%):',
     default: String(options.detectedCoverage ?? DEFAULT_COVERAGE),
-    validate: value => {
-      const num = parseInt(value, 10);
-      if (isNaN(num) || num < 0 || num > 100) {
-        return 'Please enter a number between 0 and 100';
-      }
-      return true;
-    },
+    validate: validateCoverage,
   });
   const coverage = parseInt(coverageInput, 10);
 

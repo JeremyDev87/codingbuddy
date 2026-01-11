@@ -91,7 +91,7 @@ export interface TechStackPromptOptions {
 /**
  * Get choices with detected items pre-checked
  */
-function getChoicesWithDefaults(
+export function getChoicesWithDefaults(
   choices: StackChoice[],
   detected: string[] = [],
 ): StackChoice[] {
