@@ -9,12 +9,14 @@ import { LanguageService } from '../../shared/language.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
 import { ModelResolverService } from '../../model';
 import { extractRequiredString } from '../../shared/validation.constants';
+import { generateSlug } from '../../shared/slug.utils';
 import { SessionService } from '../../session/session.service';
 import { StateService } from '../../state/state.service';
 import type {
   SessionContext,
   SessionDocument,
 } from '../../session/session.types';
+import type { Mode } from '../../keyword/keyword.types';
 
 /** Maximum length for session title slug generation */
 const SESSION_TITLE_MAX_LENGTH = 50;
@@ -137,6 +139,21 @@ export class ModeHandler extends AbstractHandler {
         result.mode,
         result.originalPrompt,
       );
+
+      // C: Auto-add mode section to session document
+      if (sessionInfo.autoSession?.sessionId && result.agent) {
+        await this.autoAddModeSection(
+          sessionInfo.autoSession.sessionId,
+          result.mode as Mode,
+          result.agent,
+          result.originalPrompt,
+          result.recommended_act_agent,
+        );
+      } else if (sessionInfo.autoSession?.sessionId && !result.agent) {
+        this.logger.debug(
+          `Skipping auto-add section: agent is undefined for mode ${result.mode}`,
+        );
+      }
 
       // Persist state for context recovery after compaction
       await this.persistModeState(
@@ -322,18 +339,12 @@ export class ModeHandler extends AbstractHandler {
   }
 
   /**
-   * Generate session title from prompt
+   * Generate session title from prompt using shared slug utility.
    */
   private generateSessionTitle(prompt: string): string {
-    // Take first N chars, remove special chars, convert to slug
-    const truncated = prompt.slice(0, SESSION_TITLE_MAX_LENGTH).trim();
-    const slug = truncated
-      .toLowerCase()
-      .replace(/[^a-z0-9가-힣\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/^-|-$/g, '');
-
-    return slug || 'untitled-session';
+    const slug = generateSlug(prompt, SESSION_TITLE_MAX_LENGTH);
+    // Maintain backward compatibility: 'untitled' from shared utility becomes 'untitled-session'
+    return slug === 'untitled' ? 'untitled-session' : slug;
   }
 
   /**
@@ -362,6 +373,40 @@ export class ModeHandler extends AbstractHandler {
       // Log but don't fail - state persistence is best-effort
       this.logger.warn(
         `Failed to persist mode state: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * C: Auto-add mode section to session document
+   * Automatically adds a section for the current mode with basic metadata.
+   * This ensures session documents always track mode transitions.
+   */
+  private async autoAddModeSection(
+    sessionId: string,
+    mode: Mode,
+    primaryAgent: string,
+    task: string,
+    recommendedActAgent?: { agentName: string; confidence: number },
+  ): Promise<void> {
+    try {
+      await this.sessionService.updateSession({
+        sessionId,
+        section: {
+          mode,
+          primaryAgent,
+          task,
+          recommendedActAgent: recommendedActAgent?.agentName,
+          recommendedActAgentConfidence: recommendedActAgent?.confidence,
+          status: 'in_progress',
+        },
+      });
+
+      this.logger.debug(`Auto-added ${mode} section to session ${sessionId}`);
+    } catch (error) {
+      // Log but don't fail - section auto-add is best-effort
+      this.logger.warn(
+        `Failed to auto-add mode section: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
