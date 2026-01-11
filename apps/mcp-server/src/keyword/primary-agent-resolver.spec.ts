@@ -19,6 +19,11 @@ describe('PrimaryAgentResolver', () => {
         'solution-architect',
         'technical-planner',
         'code-reviewer',
+        'mobile-developer',
+        'data-engineer',
+        'platform-engineer',
+        'tooling-engineer',
+        'ai-ml-engineer',
       ]);
 
     resolver = new PrimaryAgentResolver(
@@ -1668,11 +1673,9 @@ describe('PrimaryAgentResolver', () => {
         filePath: '/project/Dockerfile',
       };
 
-      const result = await resolver.resolve(
-        'ACT',
-        'Docker 설정 수정해',
-        context,
-      );
+      // Use a generic prompt that doesn't match intent patterns
+      // so context-based resolution can take priority
+      const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
       expect(result.agentName).toBe('devops-engineer');
       expect(result.source).toBe('context');
@@ -2127,6 +2130,192 @@ describe('PrimaryAgentResolver', () => {
         expect(elapsed).toBeLessThan(500);
         expect(result).toBeDefined();
       });
+    });
+  });
+
+  // ==========================================================================
+  // Bug Fix Tests - Priority Inversion, Meta-Discussion Detection, excludeAgents
+  // ==========================================================================
+
+  describe('Bug Fix: Project config priority over intent patterns', () => {
+    it('uses project config primaryAgent over intent patterns', async () => {
+      mockGetProjectConfig.mockResolvedValue({
+        primaryAgent: 'agent-architect',
+      });
+
+      // This prompt contains "mobile develop" which would trigger mobile-developer
+      // But project config should take priority
+      const result = await resolver.resolve(
+        'ACT',
+        'mobile developer 관련 버그 수정해줘',
+      );
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('config');
+    });
+
+    it('uses project config over backend patterns', async () => {
+      mockGetProjectConfig.mockResolvedValue({
+        primaryAgent: 'frontend-developer',
+      });
+
+      // This prompt would normally match backend-developer patterns
+      const result = await resolver.resolve(
+        'ACT',
+        'NestJS API 엔드포인트 추가해줘',
+      );
+
+      expect(result.agentName).toBe('frontend-developer');
+      expect(result.source).toBe('config');
+    });
+  });
+
+  describe('Bug Fix: Meta-discussion detection', () => {
+    it('skips intent patterns when discussing agent matching issues', async () => {
+      // This prompt discusses "Mobile Developer가 매칭되었어" - meta-discussion
+      // Should NOT trigger mobile-developer pattern
+      const result = await resolver.resolve(
+        'ACT',
+        'Mobile Developer가 잘못 매칭되는 버그가 있어',
+      );
+
+      // Should fall through to default since it's meta-discussion
+      expect(result.agentName).toBe('frontend-developer');
+      expect(result.source).toBe('default');
+    });
+
+    it('skips intent patterns when discussing Primary Agent system', async () => {
+      const result = await resolver.resolve(
+        'ACT',
+        'Primary Agent 선택 로직을 점검해야해',
+      );
+
+      expect(result.agentName).toBe('frontend-developer');
+      expect(result.source).toBe('default');
+    });
+
+    it('skips intent patterns when discussing agent activation issues', async () => {
+      const result = await resolver.resolve(
+        'ACT',
+        '에이전트 활성화 파이프라인에 문제가 있어',
+      );
+
+      expect(result.agentName).toBe('frontend-developer');
+      expect(result.source).toBe('default');
+    });
+
+    it('skips intent patterns when debugging agent behavior', async () => {
+      const result = await resolver.resolve(
+        'ACT',
+        'Frontend Developer 에이전트 버그 분석해줘',
+      );
+
+      expect(result.agentName).toBe('frontend-developer');
+      expect(result.source).toBe('default');
+    });
+
+    it('still matches actual work requests (not meta-discussion)', async () => {
+      // This is actual mobile work, not discussion about mobile-developer agent
+      const result = await resolver.resolve('ACT', 'React Native 앱 개발해줘');
+
+      expect(result.agentName).toBe('mobile-developer');
+      expect(result.source).toBe('intent');
+    });
+  });
+
+  describe('Bug Fix: Agent-architect patterns now checked first', () => {
+    it('matches agent creation patterns before mobile patterns', async () => {
+      // "Agent를 만드는" should match agent-architect, not mobile
+      const result = await resolver.resolve(
+        'ACT',
+        'Agent를 만드는 작업을 해야해',
+      );
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('intent');
+    });
+
+    it('matches Korean agent creation pattern', async () => {
+      const result = await resolver.resolve('ACT', '새로운 에이전트 만들어줘');
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('intent');
+    });
+
+    it('matches MCP server development', async () => {
+      const result = await resolver.resolve('ACT', 'MCP 서버 코드 수정해줘');
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('intent');
+    });
+
+    it('matches specialist agent patterns', async () => {
+      const result = await resolver.resolve(
+        'ACT',
+        'specialist agent JSON 파일 수정해줘',
+      );
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('intent');
+    });
+
+    it('matches primary agent resolution patterns', async () => {
+      // "primary agent resolver 코드" is implementation work, not meta-discussion
+      const result = await resolver.resolve(
+        'ACT',
+        'PrimaryAgentResolver 코드 개선해줘',
+      );
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('intent');
+    });
+  });
+
+  describe('Bug Fix: excludeAgents config support', () => {
+    it('excludes specified agents from resolution', async () => {
+      mockGetProjectConfig.mockResolvedValue({
+        excludeAgents: ['mobile-developer', 'frontend-developer'],
+      });
+
+      // This would normally match mobile-developer, but it's excluded
+      const result = await resolver.resolve('ACT', 'React Native 앱 개발해줘');
+
+      // Should match next available agent or fall back to default
+      // Since frontend-developer (default) is also excluded, should try others
+      expect(result.agentName).not.toBe('mobile-developer');
+      expect(result.agentName).not.toBe('frontend-developer');
+    });
+
+    it('uses primaryAgent even with excludeAgents set', async () => {
+      mockGetProjectConfig.mockResolvedValue({
+        primaryAgent: 'agent-architect',
+        excludeAgents: ['mobile-developer', 'frontend-developer'],
+      });
+
+      const result = await resolver.resolve('ACT', '작업 시작해줘');
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('config');
+    });
+
+    it('ignores excludeAgents when empty array', async () => {
+      mockGetProjectConfig.mockResolvedValue({
+        excludeAgents: [],
+      });
+
+      const result = await resolver.resolve('ACT', 'React Native 앱 개발해줘');
+
+      expect(result.agentName).toBe('mobile-developer');
+    });
+
+    it('handles excludeAgents case-insensitively', async () => {
+      mockGetProjectConfig.mockResolvedValue({
+        excludeAgents: ['Mobile-Developer', 'FRONTEND-DEVELOPER'],
+      });
+
+      const result = await resolver.resolve('ACT', 'React Native 앱 개발해줘');
+
+      expect(result.agentName).not.toBe('mobile-developer');
     });
   });
 });

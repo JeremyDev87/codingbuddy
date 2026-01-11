@@ -35,12 +35,15 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           return rulesService.getAgent(agentName);
         };
 
-        // Get primaryAgent from project config
+        // Get primaryAgent and excludeAgents from project config
         const getProjectConfig = async () => {
           try {
             const settings = await configService.getSettings();
-            if (settings.ai?.primaryAgent) {
-              return { primaryAgent: settings.ai.primaryAgent };
+            if (settings.ai?.primaryAgent || settings.ai?.excludeAgents) {
+              return {
+                primaryAgent: settings.ai.primaryAgent,
+                excludeAgents: settings.ai.excludeAgents,
+              };
             }
             return null;
           } catch (error) {

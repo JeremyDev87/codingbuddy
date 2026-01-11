@@ -72,6 +72,19 @@ export const TestStrategyConfigSchema = z.object({
 export const AIConfigSchema = z.object({
   defaultModel: z.string().optional(),
   primaryAgent: z.string().optional(),
+  /**
+   * List of agent names to exclude from automatic resolution.
+   * Useful for project-specific exclusions (e.g., exclude mobile-developer for backend-only projects).
+   *
+   * @example
+   * ```javascript
+   * ai: {
+   *   primaryAgent: 'agent-architect',
+   *   excludeAgents: ['mobile-developer', 'frontend-developer'],
+   * }
+   * ```
+   */
+  excludeAgents: z.array(z.string()).optional(),
 });
 
 export const AutoConfigSchema = z.object({

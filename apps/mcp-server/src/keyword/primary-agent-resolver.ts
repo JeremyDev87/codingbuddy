@@ -14,6 +14,8 @@ import {
 /** Project config interface for Primary Agent configuration */
 interface ProjectConfig {
   primaryAgent?: string;
+  /** List of agent names to exclude from automatic resolution */
+  excludeAgents?: string[];
 }
 
 /** Function type for loading project config */
@@ -620,17 +622,18 @@ export class PrimaryAgentResolver {
    *
    * These patterns detect prompts related to AI agent development,
    * workflow automation, and MCP server development.
-   * Priority: 7th (after backend patterns).
+   * Priority: 1st (moved up to prevent false positives from agent name mentions).
    *
    * Confidence Levels:
    * - 0.95: MCP-specific patterns, agent framework patterns
-   * - 0.90: Workflow automation, LLM orchestration
+   * - 0.90: Workflow automation, LLM orchestration, agent creation (만들다)
    * - 0.85: Generic agent/automation keywords
    *
    * @example
    * "MCP 서버 만들어줘" → agent-architect (0.95)
    * "AI 에이전트 설계해줘" → agent-architect (0.90)
    * "워크플로우 자동화 구현" → agent-architect (0.90)
+   * "Agent를 만드는 작업" → agent-architect (0.90)
    */
   private static readonly AGENT_INTENT_PATTERNS: ReadonlyArray<IntentPattern> =
     [
@@ -660,6 +663,33 @@ export class PrimaryAgentResolver {
         pattern: /claude\s*(code|에이전트|agent|sdk)/i,
         confidence: 0.95,
         description: 'Claude Agent',
+      },
+      // Agent creation patterns using 만들다 verb (0.90)
+      {
+        pattern: /agent.?를?\s*만[들드]/i,
+        confidence: 0.9,
+        description: 'Korean: Creating Agent (with English)',
+      },
+      {
+        pattern: /에이전트\s*만[들드]/i,
+        confidence: 0.9,
+        description: 'Korean: Creating Agent (native)',
+      },
+      // Agent JSON/schema patterns (0.90)
+      {
+        pattern: /\.json\s*(에이전트|agent)|agent.*\.json/i,
+        confidence: 0.9,
+        description: 'Agent JSON Definition',
+      },
+      {
+        pattern: /specialist.*agent|agent.*specialist/i,
+        confidence: 0.9,
+        description: 'Specialist Agent',
+      },
+      {
+        pattern: /primary.*agent|agent.*resolver|agent.*select/i,
+        confidence: 0.9,
+        description: 'Agent Resolution',
       },
       // Workflow automation (0.90)
       {
@@ -706,17 +736,23 @@ export class PrimaryAgentResolver {
    * Cached as static property to avoid per-call allocation.
    * Priority is determined by array order (first match wins).
    *
-   * Pattern check order:
-   * 1. tooling-engineer - Build tools, linters, bundlers
-   * 2. platform-engineer - IaC, Kubernetes, cloud infrastructure
-   * 3. data-engineer - Database, schema, migrations
-   * 4. mobile-developer - React Native, Flutter, iOS/Android
+   * Pattern check order (reordered to prevent false positives):
+   * 1. agent-architect - MCP, AI agents, workflows (MOVED UP - prevents false positives from agent name mentions)
+   * 2. tooling-engineer - Build tools, linters, bundlers
+   * 3. platform-engineer - IaC, Kubernetes, cloud infrastructure
+   * 4. data-engineer - Database, schema, migrations
    * 5. ai-ml-engineer - ML frameworks, LLM, embeddings
    * 6. backend-developer - APIs, servers, authentication
-   * 7. agent-architect - MCP, AI agents, workflows
+   * 7. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
    */
   private static readonly INTENT_PATTERN_CHECKS: ReadonlyArray<IntentPatternCheck> =
     [
+      // Agent-related patterns first (prevents "Mobile Developer" text triggering mobile patterns)
+      {
+        agent: 'agent-architect',
+        patterns: PrimaryAgentResolver.AGENT_INTENT_PATTERNS,
+        category: 'Agent',
+      },
       {
         agent: 'tooling-engineer',
         patterns: PrimaryAgentResolver.TOOLING_INTENT_PATTERNS,
@@ -733,11 +769,6 @@ export class PrimaryAgentResolver {
         category: 'Data',
       },
       {
-        agent: 'mobile-developer',
-        patterns: PrimaryAgentResolver.MOBILE_INTENT_PATTERNS,
-        category: 'Mobile',
-      },
-      {
         agent: 'ai-ml-engineer',
         patterns: PrimaryAgentResolver.AI_ML_INTENT_PATTERNS,
         category: 'AI/ML',
@@ -747,11 +778,40 @@ export class PrimaryAgentResolver {
         patterns: PrimaryAgentResolver.BACKEND_INTENT_PATTERNS,
         category: 'Backend',
       },
+      // Mobile patterns last (they are greedy and can match agent name mentions)
       {
-        agent: 'agent-architect',
-        patterns: PrimaryAgentResolver.AGENT_INTENT_PATTERNS,
-        category: 'Agent',
+        agent: 'mobile-developer',
+        patterns: PrimaryAgentResolver.MOBILE_INTENT_PATTERNS,
+        category: 'Mobile',
       },
+    ];
+
+  /**
+   * Meta-discussion patterns to detect when user is DISCUSSING agents rather than
+   * REQUESTING work for a specific agent type.
+   *
+   * These patterns prevent false positives like:
+   * - "Mobile Developer가 매칭되었어" → should NOT trigger mobile-developer
+   * - "Frontend Developer Agent가 사용되고 있어" → should NOT trigger frontend-developer
+   * - "Primary Agent 선택 로직 점검" → discussing agent system itself
+   *
+   * When meta-discussion is detected, intent patterns are skipped to avoid
+   * incorrect agent matching based on agent names mentioned in discussion.
+   */
+  private static readonly META_AGENT_DISCUSSION_PATTERNS: ReadonlyArray<RegExp> =
+    [
+      // Discussing specific agent names (Korean particles indicate object/subject)
+      /(?:mobile|frontend|backend|data|platform|devops|ai-?ml).?(?:developer|engineer)\s*(?:가|이|를|은|는|로|에|의|와|과)/i,
+      // Discussing agent matching/selection/resolution
+      /(?:agent|에이전트)\s*(?:매칭|호출|선택|resolution|matching|selection|추천|recommendation)/i,
+      // Discussing Primary Agent system (NOT implementation - requires discussion keywords)
+      // "primary agent 선택 로직" → meta-discussion
+      // "primary agent resolver 코드 수정" → implementation work (NOT matched)
+      /primary\s*agent\s*(?:선택|매칭|시스템|system)/i,
+      // Discussing agent activation/invocation issues
+      /(?:agent|에이전트)\s*(?:활성화|activation|호출|invocation|파이프라인|pipeline)/i,
+      // Debugging agent behavior
+      /(?:agent|에이전트).{0,20}(?:버그|bug|문제|issue|오류|error|잘못|wrong)/i,
     ];
 
   /** Context patterns for suggesting agents based on file paths */
@@ -876,7 +936,9 @@ export class PrimaryAgentResolver {
       );
     }
 
-    const availableAgents = await this.safeListPrimaryAgents();
+    // Get available agents and filter out excluded ones
+    const allAgents = await this.safeListPrimaryAgents();
+    const availableAgents = await this.filterExcludedAgents(allAgents);
 
     // PLAN mode - always use solution-architect or technical-planner
     if (mode === 'PLAN') {
@@ -890,6 +952,41 @@ export class PrimaryAgentResolver {
       context,
       recommendedActAgent,
     );
+  }
+
+  /**
+   * Filter out agents that are excluded in project configuration.
+   * This allows projects to prevent certain agents from being recommended.
+   *
+   * @example
+   * // codingbuddy.config.js
+   * ai: {
+   *   excludeAgents: ['mobile-developer', 'frontend-developer'],
+   * }
+   */
+  private async filterExcludedAgents(agents: string[]): Promise<string[]> {
+    try {
+      const config = await this.getProjectConfig();
+      if (config?.excludeAgents && config.excludeAgents.length > 0) {
+        const excluded = new Set(
+          config.excludeAgents.map(a => a.toLowerCase()),
+        );
+        const filtered = agents.filter(agent => !excluded.has(agent));
+
+        if (filtered.length < agents.length) {
+          this.logger.debug(
+            `Excluded agents from resolution: ${config.excludeAgents.join(', ')}`,
+          );
+        }
+
+        return filtered;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to get excludeAgents from config: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+    return agents;
   }
 
   /**
@@ -992,7 +1089,16 @@ export class PrimaryAgentResolver {
 
   /**
    * Resolve ACT mode agent.
-   * Priority: explicit > recommended > tooling > platform > data > mobile > ai-ml > backend > agent > config > context > default
+   * Priority: explicit > recommended > config > (skip intent if meta-discussion) > intent patterns > context > default
+   *
+   * Resolution order (fixed priority inversion bug):
+   * 1. Explicit request in prompt ("backend-developer로 작업해")
+   * 2. Recommended agent from PLAN mode
+   * 3. Project configuration (primaryAgent setting) ← MOVED UP from step 10
+   * 4. Meta-discussion detection (skip intent patterns if discussing agent names)
+   * 5-11. Intent patterns (agent, tooling, platform, data, ai-ml, backend, mobile)
+   * 12. Context-based suggestion (file path inference)
+   * 13. Default fallback
    */
   private async resolveActAgent(
     prompt: string,
@@ -1020,32 +1126,42 @@ export class PrimaryAgentResolver {
       );
     }
 
-    // 3-9. Check intent patterns in priority order using static INTENT_PATTERN_CHECKS
-    // Pattern priority is determined by array order (first match wins within each category)
-    for (const {
-      agent,
-      patterns,
-      category,
-    } of PrimaryAgentResolver.INTENT_PATTERN_CHECKS) {
-      const result = this.inferFromIntentPatterns(
-        prompt,
-        availableAgents,
-        agent,
-        patterns,
-        category,
-      );
-      if (result) {
-        return result;
-      }
-    }
-
-    // 10. Check project configuration
+    // 3. Check project configuration (MOVED UP - fixes priority inversion bug)
+    // Project config should take precedence over intent pattern matching
     const fromConfig = await this.getFromProjectConfig(availableAgents);
     if (fromConfig) {
       return fromConfig;
     }
 
-    // 11. Check context-based suggestion
+    // 4. Meta-discussion detection: Skip intent patterns if discussing agent names
+    // Prevents false positives like "Mobile Developer가 매칭되었어" triggering mobile patterns
+    if (this.isMetaAgentDiscussion(prompt)) {
+      this.logger.debug(
+        'Meta-agent discussion detected, skipping intent patterns',
+      );
+      // Fall through to context and default
+    } else {
+      // 5-11. Check intent patterns in priority order using static INTENT_PATTERN_CHECKS
+      // Pattern priority is determined by array order (first match wins within each category)
+      for (const {
+        agent,
+        patterns,
+        category,
+      } of PrimaryAgentResolver.INTENT_PATTERN_CHECKS) {
+        const result = this.inferFromIntentPatterns(
+          prompt,
+          availableAgents,
+          agent,
+          patterns,
+          category,
+        );
+        if (result) {
+          return result;
+        }
+      }
+    }
+
+    // 12. Check context-based suggestion
     if (context) {
       const fromContext = this.inferFromContext(context, availableAgents);
       if (fromContext && fromContext.confidence >= 0.8) {
@@ -1053,12 +1169,33 @@ export class PrimaryAgentResolver {
       }
     }
 
-    // 12. Default fallback for ACT mode
+    // 13. Default fallback for ACT mode
+    // Check if default agent is available (might be excluded)
+    if (availableAgents.includes(DEFAULT_ACT_AGENT)) {
+      return this.createResult(
+        DEFAULT_ACT_AGENT,
+        'default',
+        1.0,
+        'ACT mode default: frontend-developer (no specific intent detected)',
+      );
+    }
+
+    // If default is excluded, use the first available agent
+    if (availableAgents.length > 0) {
+      return this.createResult(
+        availableAgents[0],
+        'default',
+        0.8,
+        `ACT mode fallback: ${availableAgents[0]} (default agent excluded)`,
+      );
+    }
+
+    // Ultimate fallback - should rarely happen
     return this.createResult(
       DEFAULT_ACT_AGENT,
       'default',
-      1.0,
-      'ACT mode default: frontend-developer (no specific intent detected)',
+      0.5,
+      'ACT mode fallback: frontend-developer (no agents available)',
     );
   }
 
@@ -1207,6 +1344,28 @@ export class PrimaryAgentResolver {
     }
 
     return null;
+  }
+
+  /**
+   * Detect if the prompt is a meta-discussion ABOUT agents rather than
+   * a request FOR a specific type of work.
+   *
+   * This prevents false positives where mentioning agent names (e.g., "Mobile Developer")
+   * in discussion triggers incorrect agent matching.
+   *
+   * @example
+   * // Returns true (meta-discussion)
+   * "Mobile Developer가 매칭되었어" → discussing agent behavior
+   * "Primary Agent 선택 로직 점검해줘" → discussing agent system
+   *
+   * // Returns false (actual work request)
+   * "모바일 앱 개발해줘" → requesting mobile development work
+   * "React Native 컴포넌트 만들어" → requesting mobile development work
+   */
+  private isMetaAgentDiscussion(prompt: string): boolean {
+    return PrimaryAgentResolver.META_AGENT_DISCUSSION_PATTERNS.some(pattern =>
+      pattern.test(prompt),
+    );
   }
 
   /**
