@@ -10,6 +10,7 @@ import { createJsonResponse, createErrorResponse } from '../response.utils';
 import { ModelResolverService } from '../../model';
 import { extractRequiredString } from '../../shared/validation.constants';
 import { SessionService } from '../../session/session.service';
+import { StateService } from '../../state/state.service';
 
 /** Maximum length for session title slug generation */
 const SESSION_TITLE_MAX_LENGTH = 50;
@@ -61,6 +62,7 @@ export class ModeHandler extends AbstractHandler {
     private readonly languageService: LanguageService,
     private readonly modelResolverService: ModelResolverService,
     private readonly sessionService: SessionService,
+    private readonly stateService: StateService,
   ) {
     super();
   }
@@ -128,6 +130,12 @@ export class ModeHandler extends AbstractHandler {
       const sessionInfo = await this.handleAutoSession(
         result.mode,
         result.originalPrompt,
+      );
+
+      // Persist state for context recovery after compaction
+      await this.persistModeState(
+        result.mode,
+        sessionInfo.autoSession?.sessionId,
       );
 
       return createJsonResponse({
@@ -267,5 +275,35 @@ export class ModeHandler extends AbstractHandler {
       .replace(/^-|-$/g, '');
 
     return slug || 'untitled-session';
+  }
+
+  /**
+   * Persist mode state for context recovery after compaction
+   * Option C (Hybrid approach): Document files for important state
+   */
+  private async persistModeState(
+    mode: string,
+    sessionId?: string,
+  ): Promise<void> {
+    try {
+      // Update last mode
+      await this.stateService.updateLastMode(
+        mode as 'PLAN' | 'ACT' | 'EVAL' | 'AUTO',
+      );
+
+      // Update last session if available
+      if (sessionId) {
+        await this.stateService.updateLastSession(sessionId);
+      }
+
+      this.logger.debug(
+        `Persisted mode state: mode=${mode}, sessionId=${sessionId || 'none'}`,
+      );
+    } catch (error) {
+      // Log but don't fail - state persistence is best-effort
+      this.logger.warn(
+        `Failed to persist mode state: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 }

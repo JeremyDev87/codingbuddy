@@ -9,6 +9,7 @@ import { AgentModule } from '../agent/agent.module';
 import { ChecklistModule } from '../checklist/checklist.module';
 import { ContextModule } from '../context/context.module';
 import { SessionModule } from '../session/session.module';
+import { StateModule } from '../state/state.module';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import { LanguageService } from '../shared/language.service';
 import { ModelResolverService } from '../model';
@@ -47,6 +48,7 @@ const handlers = [
     ChecklistModule,
     ContextModule,
     SessionModule,
+    StateModule,
   ],
   controllers: [McpController],
   providers: [
