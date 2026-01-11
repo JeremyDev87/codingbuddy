@@ -1,6 +1,17 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { PrimaryAgentResolver } from './primary-agent-resolver';
 import { type ResolutionContext } from './keyword.types';
+import {
+  EXPLICIT_PATTERNS,
+  CONTEXT_PATTERNS,
+  DATA_INTENT_PATTERNS,
+  MOBILE_INTENT_PATTERNS,
+  TOOLING_INTENT_PATTERNS,
+  PLATFORM_INTENT_PATTERNS,
+  AI_ML_INTENT_PATTERNS,
+  BACKEND_INTENT_PATTERNS,
+  AGENT_INTENT_PATTERNS,
+} from './patterns';
 
 describe('PrimaryAgentResolver', () => {
   let resolver: PrimaryAgentResolver;
@@ -1974,10 +1985,7 @@ describe('PrimaryAgentResolver', () => {
       it('DATA_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // Access private static via any cast for testing
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any).DATA_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of DATA_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -1988,9 +1996,7 @@ describe('PrimaryAgentResolver', () => {
       it('MOBILE_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any).MOBILE_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of MOBILE_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2001,10 +2007,7 @@ describe('PrimaryAgentResolver', () => {
       it('TOOLING_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any)
-            .TOOLING_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of TOOLING_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2015,10 +2018,7 @@ describe('PrimaryAgentResolver', () => {
       it('PLATFORM_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any)
-            .PLATFORM_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of PLATFORM_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2029,9 +2029,7 @@ describe('PrimaryAgentResolver', () => {
       it('AI_ML_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any).AI_ML_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of AI_ML_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2042,10 +2040,7 @@ describe('PrimaryAgentResolver', () => {
       it('BACKEND_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any)
-            .BACKEND_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of BACKEND_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2056,9 +2051,7 @@ describe('PrimaryAgentResolver', () => {
       it('AGENT_INTENT_PATTERNS are safe from ReDoS attacks', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any).AGENT_INTENT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of AGENT_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2078,9 +2071,7 @@ describe('PrimaryAgentResolver', () => {
 
         for (const vector of vectors) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any).EXPLICIT_PATTERNS;
-          for (const pattern of patterns) {
+          for (const pattern of EXPLICIT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
@@ -2100,9 +2091,7 @@ describe('PrimaryAgentResolver', () => {
 
         for (const vector of vectors) {
           const start = performance.now();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const patterns = (PrimaryAgentResolver as any).CONTEXT_PATTERNS;
-          for (const { pattern } of patterns) {
+          for (const { pattern } of CONTEXT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
