@@ -62,6 +62,18 @@ const MAX_SLUG_LENGTH = 100;
 const MAX_SESSION_ID_LENGTH = 150;
 
 /**
+ * Cache TTL in milliseconds (30 seconds).
+ * Short TTL balances performance with freshness.
+ */
+const CACHE_TTL_MS = 30_000;
+
+/**
+ * Maximum number of sessions to cache.
+ * Prevents unbounded memory growth in long-running servers.
+ */
+const MAX_CACHE_SIZE = 100;
+
+/**
  * Valid session status values for type-safe parsing.
  */
 const VALID_SESSION_STATUSES = ['active', 'completed', 'archived'] as const;
@@ -207,6 +219,14 @@ type ListHeaderResult =
   | { matched: false };
 
 /**
+ * Cache entry for session documents.
+ */
+interface SessionCacheEntry {
+  session: SessionDocument;
+  timestamp: number;
+}
+
+/**
  * Parse section list header (### Task, ### Decisions, ### Notes).
  * @returns parsed result with matched flag and list type
  */
@@ -245,7 +265,83 @@ function isContentLine(line: string): boolean {
 export class SessionService {
   private readonly logger = new Logger(SessionService.name);
 
+  /** Session cache by ID */
+  private readonly sessionCache = new Map<string, SessionCacheEntry>();
+
+  /** Cached active session ID (invalidated on write operations) */
+  private activeSessionId: string | null = null;
+  private activeSessionTimestamp = 0;
+
   constructor(private readonly configService: ConfigService) {}
+
+  /**
+   * Check if a cache entry is still valid (within TTL).
+   */
+  private isCacheValid(timestamp: number): boolean {
+    return Date.now() - timestamp < CACHE_TTL_MS;
+  }
+
+  /**
+   * Get session from cache if valid.
+   */
+  private getFromCache(sessionId: string): SessionDocument | null {
+    const entry = this.sessionCache.get(sessionId);
+    if (entry && this.isCacheValid(entry.timestamp)) {
+      return entry.session;
+    }
+    // Clean up stale entry
+    if (entry) {
+      this.sessionCache.delete(sessionId);
+    }
+    return null;
+  }
+
+  /**
+   * Add session to cache with LRU eviction when size limit reached.
+   */
+  private addToCache(sessionId: string, session: SessionDocument): void {
+    // If updating existing entry, delete first to refresh order (Map maintains insertion order)
+    if (this.sessionCache.has(sessionId)) {
+      this.sessionCache.delete(sessionId);
+    }
+
+    // Evict oldest entries if cache is at max size
+    while (this.sessionCache.size >= MAX_CACHE_SIZE) {
+      const oldestKey = this.sessionCache.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.sessionCache.delete(oldestKey);
+      } else {
+        break;
+      }
+    }
+
+    this.sessionCache.set(sessionId, {
+      session,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Invalidate all caches (called on write operations).
+   */
+  private invalidateCache(): void {
+    this.sessionCache.clear();
+    this.activeSessionId = null;
+    this.activeSessionTimestamp = 0;
+  }
+
+  /**
+   * Invalidate a specific session from cache.
+   * More efficient than full cache invalidation for single-session updates.
+   */
+  private invalidateSession(sessionId: string): void {
+    this.sessionCache.delete(sessionId);
+    // Also invalidate active session cache if it matches
+    if (this.activeSessionId === sessionId) {
+      this.activeSessionId = null;
+      this.activeSessionTimestamp = 0;
+    }
+  }
 
   /**
    * Get the sessions directory path.
@@ -407,6 +503,11 @@ export class SessionService {
       const content = this.serializeDocument(document);
       await fs.writeFile(filePath, content, 'utf-8');
 
+      // Invalidate active session cache (new session may become active)
+      // No need to clear session cache since no existing sessions are modified
+      this.activeSessionId = null;
+      this.activeSessionTimestamp = 0;
+
       this.logger.log(`Created session: ${filename}`);
 
       return {
@@ -430,6 +531,12 @@ export class SessionService {
    */
   async getSession(sessionId: string): Promise<SessionDocument | null> {
     try {
+      // Check cache first
+      const cached = this.getFromCache(sessionId);
+      if (cached) {
+        return cached;
+      }
+
       // Security: validate session ID and get safe file path
       const filePath = this.getSessionFilePath(sessionId);
       if (!filePath) {
@@ -443,7 +550,12 @@ export class SessionService {
       }
 
       const content = await fs.readFile(filePath, 'utf-8');
-      return this.parseDocument(content, sessionId);
+      const session = this.parseDocument(content, sessionId);
+
+      // Add to cache
+      this.addToCache(sessionId, session);
+
+      return session;
     } catch (error) {
       this.logger.error(
         `Failed to read session ${sessionId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -454,9 +566,24 @@ export class SessionService {
 
   /**
    * Get the most recent active session.
+   * Uses cached active session ID to avoid directory scan when possible.
    */
   async getActiveSession(): Promise<SessionDocument | null> {
     try {
+      // Check if we have a cached active session ID that's still valid
+      if (
+        this.activeSessionId &&
+        this.isCacheValid(this.activeSessionTimestamp)
+      ) {
+        const session = await this.getSession(this.activeSessionId);
+        if (session && session.metadata.status === 'active') {
+          return session;
+        }
+        // Cached ID is stale (session no longer active), clear it
+        this.activeSessionId = null;
+        this.activeSessionTimestamp = 0;
+      }
+
       const sessionsDir = this.getSessionsDir();
 
       if (!existsSync(sessionsDir)) {
@@ -474,6 +601,9 @@ export class SessionService {
         const session = await this.getSession(sessionId);
 
         if (session && session.metadata.status === 'active') {
+          // Cache the active session ID
+          this.activeSessionId = sessionId;
+          this.activeSessionTimestamp = Date.now();
           return session;
         }
       }
@@ -546,6 +676,9 @@ export class SessionService {
 
       const content = this.serializeDocument(session);
       await fs.writeFile(filePath, content, 'utf-8');
+
+      // Invalidate only the updated session from cache
+      this.invalidateSession(options.sessionId);
 
       this.logger.log(
         `Updated session ${options.sessionId}: ${options.section.mode} section`,

@@ -112,6 +112,50 @@ Examples:
 
 </PARALLEL_EXECUTION_MANDATORY_RULE>
 
+## 🔴 MANDATORY: Session Document Management
+
+<SESSION_DOCUMENT_RULE>
+
+**Session documents persist PLAN → ACT context across context compaction.**
+
+### When to Create Sessions
+
+**PLAN mode entry** requires session creation for:
+- Complex multi-step tasks
+- Features requiring ACT agent recommendations
+- Tasks spanning multiple conversation turns
+
+### Required Workflow
+
+**In PLAN mode:**
+1. `create_session` - Create session document with task title
+2. `update_session` - Record PLAN details, recommendedActAgent, decisions
+
+**In ACT mode:**
+1. `get_active_session` - Retrieve PLAN context and recommended agent
+2. `update_session` - Record ACT progress and notes
+
+**In EVAL mode:**
+1. `get_active_session` - Retrieve full context
+2. `update_session` - Record evaluation findings
+
+### Why This Matters
+
+Without session documents:
+- Agent recommendations from PLAN are **lost** after context compaction
+- ACT mode cannot retrieve which agent was recommended
+- Cross-mode context sharing **fails**
+
+### Red Flags (STOP if you think these):
+
+| Thought | Reality |
+|---------|---------|
+| "I'll remember the agent" | NO. Context compaction erases memory. |
+| "This task is simple" | Simple tasks grow. Create session anyway. |
+| "I'll create it later" | NO. Create at PLAN start, not after. |
+
+</SESSION_DOCUMENT_RULE>
+
 ## Claude Code Specific
 
 - Follow project's configured language setting
