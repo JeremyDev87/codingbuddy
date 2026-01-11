@@ -17,6 +17,7 @@ import { RulesService } from '../../rules/rules.service';
 import { LanguageService } from '../../shared/language.service';
 import { ModelResolverService } from '../../model/model-resolver.service';
 import { SessionService } from '../../session/session.service';
+import { StateService } from '../../state/state.service';
 
 /**
  * Integration tests verifying all concrete handlers inherit
@@ -46,6 +47,7 @@ describe('Handler Security Integration', () => {
   let mockLanguageService: LanguageService;
   let mockModelResolverService: ModelResolverService;
   let mockSessionService: SessionService;
+  let mockStateService: StateService;
 
   beforeEach(() => {
     // Create mock services with minimal implementation
@@ -104,6 +106,11 @@ describe('Handler Security Integration', () => {
       getActiveSession: vi.fn().mockResolvedValue(null),
     } as unknown as SessionService;
 
+    mockStateService = {
+      updateLastMode: vi.fn().mockResolvedValue({ success: true }),
+      updateLastSession: vi.fn().mockResolvedValue({ success: true }),
+    } as unknown as StateService;
+
     // Initialize handlers
     agentHandler = new AgentHandler(mockAgentService);
     checklistHandler = new ChecklistContextHandler(
@@ -121,6 +128,7 @@ describe('Handler Security Integration', () => {
       mockLanguageService,
       mockModelResolverService,
       mockSessionService,
+      mockStateService,
     );
     rulesHandler = new RulesHandler(mockRulesService);
     skillHandler = new SkillHandler(mockSkillRecommendationService);

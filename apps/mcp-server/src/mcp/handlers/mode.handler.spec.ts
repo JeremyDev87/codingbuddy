@@ -5,6 +5,7 @@ import { ConfigService } from '../../config/config.service';
 import { LanguageService } from '../../shared/language.service';
 import { ModelResolverService } from '../../model';
 import { SessionService } from '../../session/session.service';
+import { StateService } from '../../state/state.service';
 
 describe('ModeHandler', () => {
   let handler: ModeHandler;
@@ -13,6 +14,7 @@ describe('ModeHandler', () => {
   let mockLanguageService: LanguageService;
   let mockModelResolverService: ModelResolverService;
   let mockSessionService: SessionService;
+  let mockStateService: StateService;
 
   const mockParseModeResult = {
     mode: 'PLAN',
@@ -61,12 +63,22 @@ describe('ModeHandler', () => {
       updateSession: vi.fn().mockResolvedValue({ success: true }),
     } as unknown as SessionService;
 
+    mockStateService = {
+      updateLastMode: vi.fn().mockResolvedValue({ success: true }),
+      updateLastSession: vi.fn().mockResolvedValue({ success: true }),
+      saveProjectMetadata: vi.fn().mockResolvedValue({ success: true }),
+      loadProjectMetadata: vi.fn().mockResolvedValue(null),
+      getLastMode: vi.fn().mockResolvedValue(null),
+      getLastSessionId: vi.fn().mockResolvedValue(null),
+    } as unknown as StateService;
+
     handler = new ModeHandler(
       mockKeywordService,
       mockConfigService,
       mockLanguageService,
       mockModelResolverService,
       mockSessionService,
+      mockStateService,
     );
   });
 
