@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -17,9 +17,11 @@ import { getPackageVersion } from '../shared/version.utils';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import type { ToolHandler } from './handlers';
 import { TOOL_HANDLERS } from './handlers';
+import { fileURLToPath } from 'url';
 
 @Injectable()
 export class McpService implements OnModuleInit {
+  private readonly logger = new Logger(McpService.name);
   private server: Server;
 
   constructor(
@@ -52,6 +54,76 @@ export class McpService implements OnModuleInit {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     // Note: Do not log here - stdout is reserved for MCP JSON-RPC messages
+
+    // Try to get project root from client's roots capability
+    // This runs after connection is established
+    await this.updateProjectRootFromClient();
+  }
+
+  /** Timeout for listRoots() request in milliseconds */
+  private static readonly LIST_ROOTS_TIMEOUT_MS = 5000;
+
+  /**
+   * Update project root from client's roots capability.
+   * This allows the MCP server to automatically detect the project directory
+   * when CODINGBUDDY_PROJECT_ROOT env var is not set.
+   *
+   * Priority: env var > roots/list > findProjectRoot()
+   */
+  private async updateProjectRootFromClient(): Promise<void> {
+    // Skip if CODINGBUDDY_PROJECT_ROOT is already set
+    if (process.env.CODINGBUDDY_PROJECT_ROOT) {
+      this.logger.debug(
+        'CODINGBUDDY_PROJECT_ROOT already set, skipping roots/list request',
+      );
+      return;
+    }
+
+    try {
+      // Request roots from client with timeout to prevent startup delays
+      const result = await this.listRootsWithTimeout();
+
+      if (result.roots && result.roots.length > 0) {
+        // Use the first root as the project root
+        // MCP clients typically list roots in priority order
+        const rootUri = result.roots[0].uri;
+
+        // Validate URI scheme before conversion
+        if (!rootUri.startsWith('file://')) {
+          this.logger.debug(`Ignoring non-file URI from client: ${rootUri}`);
+          return;
+        }
+
+        // Convert file:// URI to filesystem path
+        // e.g., file:///Users/jeremy/workspace/myproject -> /Users/jeremy/workspace/myproject
+        const projectRoot = fileURLToPath(rootUri);
+
+        this.logger.log(`Detected project root from client: ${projectRoot}`);
+
+        // Update config service with the new project root
+        await this.configService.setProjectRootAndReload(projectRoot);
+      }
+    } catch (error) {
+      // Client may not support roots capability - this is fine, fall back to default behavior
+      this.logger.debug(
+        `Could not get roots from client: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Request roots from client with timeout.
+   * Prevents startup delays if client is slow or unresponsive.
+   */
+  private async listRootsWithTimeout(): Promise<{ roots?: { uri: string }[] }> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(
+        () => reject(new Error('listRoots timeout')),
+        McpService.LIST_ROOTS_TIMEOUT_MS,
+      );
+    });
+
+    return Promise.race([this.server.listRoots(), timeoutPromise]);
   }
 
   getServer() {

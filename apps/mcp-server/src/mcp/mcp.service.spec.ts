@@ -41,6 +41,11 @@ const { handlers } = vi.hoisted(() => ({
   handlers: new Map<string, McpHandler>(),
 }));
 
+// Hoist listRoots mock so it can be controlled per test
+const { listRootsMock } = vi.hoisted(() => ({
+  listRootsMock: vi.fn(),
+}));
+
 // Mock the MCP SDK Server
 vi.mock('@modelcontextprotocol/sdk/server/index.js', () => ({
   Server: class MockServer {
@@ -60,6 +65,7 @@ vi.mock('@modelcontextprotocol/sdk/server/index.js', () => ({
     async connect() {
       /* noop */
     }
+    listRoots = listRootsMock;
   },
 }));
 
@@ -186,6 +192,16 @@ const createMockConfigService = (
   getFormattedContext: vi.fn().mockResolvedValue(''),
   getProjectRoot: vi.fn().mockReturnValue('/test/project'),
   reload: vi.fn().mockResolvedValue({
+    settings: config,
+    ignorePatterns: ['node_modules', '.git'],
+    contextFiles: [],
+    sources: {
+      config: '/test/codingbuddy.config.js',
+      ignore: null,
+      context: null,
+    },
+  } as ProjectConfig),
+  setProjectRootAndReload: vi.fn().mockResolvedValue({
     settings: config,
     ignorePatterns: ['node_modules', '.git'],
     contextFiles: [],
@@ -524,6 +540,9 @@ describe('McpService', () => {
 
   beforeEach(() => {
     handlers.clear();
+    listRootsMock.mockReset();
+    // Default: client doesn't support roots
+    listRootsMock.mockRejectedValue(new Error('Client does not support roots'));
     mockRulesService = createMockRulesService();
     mockKeywordService = createMockKeywordService();
     mockConfigService = createMockConfigService(testConfig);
@@ -1645,6 +1664,219 @@ describe('McpService', () => {
 
       const server = service.getServer();
       expect(server).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // updateProjectRootFromClient Tests
+  // ============================================================================
+
+  describe('updateProjectRootFromClient', () => {
+    const originalEnv = process.env.CODINGBUDDY_PROJECT_ROOT;
+
+    beforeEach(() => {
+      // Reset env var before each test
+      delete process.env.CODINGBUDDY_PROJECT_ROOT;
+    });
+
+    afterEach(() => {
+      // Restore original env var
+      if (originalEnv !== undefined) {
+        process.env.CODINGBUDDY_PROJECT_ROOT = originalEnv;
+      } else {
+        delete process.env.CODINGBUDDY_PROJECT_ROOT;
+      }
+    });
+
+    describe('successful project root detection', () => {
+      it('should detect project root from file:// URI', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [{ uri: 'file:///Users/test/workspace/myproject' }],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(mockConfigService.setProjectRootAndReload).toHaveBeenCalledWith(
+          '/Users/test/workspace/myproject',
+        );
+      });
+
+      it('should use the first root when multiple roots are provided', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [
+            { uri: 'file:///Users/test/workspace/primary' },
+            { uri: 'file:///Users/test/workspace/secondary' },
+          ],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(mockConfigService.setProjectRootAndReload).toHaveBeenCalledWith(
+          '/Users/test/workspace/primary',
+        );
+      });
+
+      it('should handle Windows file:// URIs', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [{ uri: 'file:///C:/Users/test/workspace/myproject' }],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        // On Windows, fileURLToPath would convert to C:\Users\test\workspace\myproject
+        // On Unix, it would convert to /C:/Users/test/workspace/myproject
+        expect(mockConfigService.setProjectRootAndReload).toHaveBeenCalled();
+      });
+    });
+
+    describe('URI scheme validation', () => {
+      it('should ignore non-file:// URIs (http://)', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [{ uri: 'http://example.com/project' }],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should ignore non-file:// URIs (https://)', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [{ uri: 'https://example.com/project' }],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should ignore custom URI schemes', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [{ uri: 'vscode://workspace/project' }],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('empty or missing roots', () => {
+      it('should handle empty roots array gracefully', async () => {
+        listRootsMock.mockResolvedValue({
+          roots: [],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should handle undefined roots gracefully', async () => {
+        listRootsMock.mockResolvedValue({});
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('environment variable precedence', () => {
+      it('should skip roots/list when CODINGBUDDY_PROJECT_ROOT is set', async () => {
+        process.env.CODINGBUDDY_PROJECT_ROOT = '/custom/project/root';
+
+        listRootsMock.mockResolvedValue({
+          roots: [{ uri: 'file:///Users/test/workspace/myproject' }],
+        });
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+        await service.startStdio();
+
+        // listRoots should not be called when env var is set
+        expect(listRootsMock).not.toHaveBeenCalled();
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('error handling', () => {
+      it('should handle client not supporting roots capability gracefully', async () => {
+        listRootsMock.mockRejectedValue(
+          new Error('Client does not support roots'),
+        );
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+
+        // Should not throw
+        await expect(service.startStdio()).resolves.not.toThrow();
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should handle network errors gracefully', async () => {
+        listRootsMock.mockRejectedValue(new Error('Network error'));
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+
+        // Should not throw
+        await expect(service.startStdio()).resolves.not.toThrow();
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('timeout handling', () => {
+      it('should timeout if listRoots takes too long', async () => {
+        // Simulate a slow response that exceeds the timeout
+        listRootsMock.mockImplementation(
+          () =>
+            new Promise(resolve => {
+              // Never resolves within the timeout period
+              setTimeout(
+                () =>
+                  resolve({
+                    roots: [{ uri: 'file:///Users/test/workspace/myproject' }],
+                  }),
+                10000,
+              );
+            }),
+        );
+
+        const service = createMcpServiceWithHandlers(defaultMocks);
+
+        // Use a shorter timeout to make the test faster
+        // The actual implementation has 5s timeout
+        const startTime = Date.now();
+        await service.startStdio();
+        const elapsed = Date.now() - startTime;
+
+        // Should timeout within reasonable time (5s + small buffer)
+        expect(elapsed).toBeLessThan(6000);
+        expect(
+          mockConfigService.setProjectRootAndReload,
+        ).not.toHaveBeenCalled();
+      }, 10000); // Increase test timeout
     });
   });
 
