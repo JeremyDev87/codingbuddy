@@ -59,7 +59,7 @@
     "validate:rules:markdown": "cd ../.. && ./scripts/validate-rules.sh --markdown-only"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.2",
+    "@anthropic-ai/sdk": "^0.72.1",
     "@inquirer/prompts": "^8.1.0",
     "@modelcontextprotocol/sdk": "^1.25.2",
     "@nestjs/common": "^11.1.9",
