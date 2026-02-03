@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import { getPrimaryAgentChoices, DEFAULT_PRIMARY_AGENT } from './agent-prompt';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  getPrimaryAgentChoices,
+  DEFAULT_PRIMARY_AGENT,
+  promptPrimaryAgentSelection,
+} from './agent-prompt';
 import { ACT_PRIMARY_AGENTS } from '../../../keyword/keyword.types';
+
+// Mock @inquirer/prompts
+vi.mock('@inquirer/prompts', () => ({
+  select: vi.fn(),
+}));
 
 describe('agent-prompt', () => {
   describe('DEFAULT_PRIMARY_AGENT', () => {
@@ -54,6 +63,54 @@ describe('agent-prompt', () => {
 
       expect(values).toContain('data-engineer');
       expect(values).toContain('mobile-developer');
+    });
+  });
+
+  describe('promptPrimaryAgentSelection', () => {
+    it('should call select with default message and choices', async () => {
+      const { select } = await import('@inquirer/prompts');
+      const selectMock = select as ReturnType<typeof vi.fn>;
+      selectMock.mockResolvedValue('frontend-developer');
+
+      const result = await promptPrimaryAgentSelection();
+
+      expect(selectMock).toHaveBeenCalledWith({
+        message: 'Select your primary development agent:',
+        choices: expect.arrayContaining([
+          expect.objectContaining({
+            value: 'frontend-developer',
+            name: expect.stringContaining('Recommended'),
+          }),
+        ]),
+        default: DEFAULT_PRIMARY_AGENT,
+      });
+      expect(result).toBe('frontend-developer');
+    });
+
+    it('should call select with custom message', async () => {
+      const { select } = await import('@inquirer/prompts');
+      const selectMock = select as ReturnType<typeof vi.fn>;
+      selectMock.mockResolvedValue('backend-developer');
+
+      const customMessage = 'Choose an agent:';
+      const result = await promptPrimaryAgentSelection(customMessage);
+
+      expect(selectMock).toHaveBeenCalledWith({
+        message: customMessage,
+        choices: expect.any(Array),
+        default: DEFAULT_PRIMARY_AGENT,
+      });
+      expect(result).toBe('backend-developer');
+    });
+
+    it('should return the selected agent', async () => {
+      const { select } = await import('@inquirer/prompts');
+      const selectMock = select as ReturnType<typeof vi.fn>;
+      selectMock.mockResolvedValue('data-engineer');
+
+      const result = await promptPrimaryAgentSelection();
+
+      expect(result).toBe('data-engineer');
     });
   });
 });

@@ -4,7 +4,6 @@ import { KeywordService } from '../../keyword/keyword.service';
 import { ConfigService } from '../../config/config.service';
 import { LanguageService } from '../../shared/language.service';
 import { ModelResolverService } from '../../model';
-import { SessionService } from '../../session/session.service';
 import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
@@ -15,7 +14,6 @@ describe('ModeHandler', () => {
   let mockConfigService: ConfigService;
   let mockLanguageService: LanguageService;
   let mockModelResolverService: ModelResolverService;
-  let mockSessionService: SessionService;
   let mockStateService: StateService;
   let mockContextDocService: ContextDocumentService;
   let mockDiagnosticLogService: DiagnosticLogService;
@@ -57,24 +55,11 @@ describe('ModeHandler', () => {
       }),
     } as unknown as ModelResolverService;
 
-    mockSessionService = {
-      createSession: vi.fn().mockResolvedValue({
-        success: true,
-        sessionId: '2026-01-11-test-task',
-        filePath: 'docs/codingbuddy/sessions/2026-01-11-test-task.md',
-      }),
-      getActiveSession: vi.fn().mockResolvedValue(null),
-      getSession: vi.fn().mockResolvedValue(null),
-      updateSession: vi.fn().mockResolvedValue({ success: true }),
-    } as unknown as SessionService;
-
     mockStateService = {
       updateLastMode: vi.fn().mockResolvedValue({ success: true }),
-      updateLastSession: vi.fn().mockResolvedValue({ success: true }),
       saveProjectMetadata: vi.fn().mockResolvedValue({ success: true }),
       loadProjectMetadata: vi.fn().mockResolvedValue(null),
       getLastMode: vi.fn().mockResolvedValue(null),
-      getLastSessionId: vi.fn().mockResolvedValue(null),
     } as unknown as StateService;
 
     mockContextDocService = {
@@ -134,7 +119,6 @@ describe('ModeHandler', () => {
       mockConfigService,
       mockLanguageService,
       mockModelResolverService,
-      mockSessionService,
       mockStateService,
       mockContextDocService,
       mockDiagnosticLogService,
@@ -297,132 +281,27 @@ describe('ModeHandler', () => {
     });
   });
 
-  describe('auto-session (B+D)', () => {
+  describe('context document handling', () => {
     describe('PLAN mode', () => {
-      it('should auto-create session', async () => {
+      it('should reset context document in PLAN mode', async () => {
         const result = await handler.handle('parse_mode', {
           prompt: 'PLAN implement auth feature',
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockSessionService.createSession).toHaveBeenCalled();
+        expect(mockContextDocService.resetContext).toHaveBeenCalled();
 
         const responseText = result?.content[0]?.text;
         const response = JSON.parse(responseText as string);
-        expect(response.autoSession).toBeDefined();
-        expect(response.autoSession.created).toBe(true);
-        expect(response.autoSession.sessionId).toBe('2026-01-11-test-task');
+        expect(response.contextFilePath).toBeDefined();
+        expect(response.contextExists).toBe(true);
+        expect(response.contextDocument).toBeDefined();
       });
 
-      it('should use existing session if active session exists', async () => {
-        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
-          metadata: {
-            id: 'existing-session',
-            title: 'Existing Session',
-            status: 'active',
-          },
-          sections: [],
-        });
-
-        const result = await handler.handle('parse_mode', {
-          prompt: 'PLAN another task',
-        });
-
-        expect(result?.isError).toBeFalsy();
-        expect(mockSessionService.createSession).not.toHaveBeenCalled();
-
-        const responseText = result?.content[0]?.text;
-        const response = JSON.parse(responseText as string);
-        expect(response.autoSession.sessionId).toBe('existing-session');
-        expect(response.autoSession.created).toBe(false);
-        expect(response.sessionWarning).toContain('existing active session');
-      });
-
-      it('should generate slug from prompt for session title', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: 'Implement User Authentication!',
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'PLAN Implement User Authentication!',
-        });
-
-        expect(mockSessionService.createSession).toHaveBeenCalledWith({
-          title: expect.stringMatching(/implement-user-authentication/i),
-        });
-      });
-
-      it('should preserve Korean characters in session title', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: '사용자 인증 기능 구현',
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'PLAN 사용자 인증 기능 구현',
-        });
-
-        expect(mockSessionService.createSession).toHaveBeenCalledWith({
-          title: expect.stringMatching(/사용자-인증-기능-구현/),
-        });
-      });
-
-      it('should return untitled-session for empty prompt', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: '',
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'PLAN',
-        });
-
-        expect(mockSessionService.createSession).toHaveBeenCalledWith({
-          title: 'untitled-session',
-        });
-      });
-
-      it('should return untitled-session for prompt with only special characters', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: '!@#$%^&*()',
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'PLAN !@#$%^&*()',
-        });
-
-        expect(mockSessionService.createSession).toHaveBeenCalledWith({
-          title: 'untitled-session',
-        });
-      });
-
-      it('should truncate long prompts in session title', async () => {
-        const longPrompt = 'a'.repeat(100);
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: longPrompt,
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: `PLAN ${longPrompt}`,
-        });
-
-        expect(mockSessionService.createSession).toHaveBeenCalledWith({
-          title: expect.stringMatching(/^a{50}$/),
-        });
-      });
-
-      it('should handle session creation failure gracefully', async () => {
-        mockSessionService.createSession = vi.fn().mockResolvedValue({
+      it('should handle context reset failure gracefully', async () => {
+        mockContextDocService.resetContext = vi.fn().mockResolvedValue({
           success: false,
-          error: 'Failed to create session',
+          error: 'Failed to reset context',
         });
 
         const result = await handler.handle('parse_mode', {
@@ -433,14 +312,14 @@ describe('ModeHandler', () => {
 
         const responseText = result?.content[0]?.text;
         const response = JSON.parse(responseText as string);
-        expect(response.sessionWarning).toContain(
-          'Failed to auto-create session',
+        expect(response.contextWarning).toContain(
+          'Failed to create context document',
         );
       });
     });
 
     describe('AUTO mode', () => {
-      it('should auto-create session', async () => {
+      it('should reset context document in AUTO mode', async () => {
         mockKeywordService.parseMode = vi.fn().mockResolvedValue({
           ...mockParseModeResult,
           mode: 'AUTO',
@@ -452,21 +331,20 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockSessionService.createSession).toHaveBeenCalled();
-
-        const responseText = result?.content[0]?.text;
-        const response = JSON.parse(responseText as string);
-        expect(response.autoSession).toBeDefined();
-        expect(response.autoSession.created).toBe(true);
+        expect(mockContextDocService.resetContext).toHaveBeenCalled();
       });
     });
 
     describe('ACT mode', () => {
-      it('should warn when no active session exists', async () => {
+      it('should warn when no context document exists', async () => {
         mockKeywordService.parseMode = vi.fn().mockResolvedValue({
           ...mockParseModeResult,
           mode: 'ACT',
           originalPrompt: 'implement feature',
+        });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({
+          exists: false,
+          document: null,
         });
 
         const result = await handler.handle('parse_mode', {
@@ -477,18 +355,14 @@ describe('ModeHandler', () => {
 
         const responseText = result?.content[0]?.text;
         const response = JSON.parse(responseText as string);
-        expect(response.sessionWarning).toContain('No active session found');
+        expect(response.contextWarning).toContain('No context document found');
       });
 
-      it('should not warn when active session exists', async () => {
+      it('should append context when document exists', async () => {
         mockKeywordService.parseMode = vi.fn().mockResolvedValue({
           ...mockParseModeResult,
           mode: 'ACT',
           originalPrompt: 'implement feature',
-        });
-        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
-          metadata: { id: 'active-session', status: 'active' },
-          sections: [],
         });
 
         const result = await handler.handle('parse_mode', {
@@ -496,19 +370,20 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-
-        const responseText = result?.content[0]?.text;
-        const response = JSON.parse(responseText as string);
-        expect(response.sessionWarning).toBeUndefined();
+        expect(mockContextDocService.appendContext).toHaveBeenCalled();
       });
     });
 
     describe('EVAL mode', () => {
-      it('should warn when no active session exists', async () => {
+      it('should warn when no context document exists', async () => {
         mockKeywordService.parseMode = vi.fn().mockResolvedValue({
           ...mockParseModeResult,
           mode: 'EVAL',
           originalPrompt: 'evaluate implementation',
+        });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({
+          exists: false,
+          document: null,
         });
 
         const result = await handler.handle('parse_mode', {
@@ -519,18 +394,14 @@ describe('ModeHandler', () => {
 
         const responseText = result?.content[0]?.text;
         const response = JSON.parse(responseText as string);
-        expect(response.sessionWarning).toContain('No active session found');
+        expect(response.contextWarning).toContain('No context document found');
       });
 
-      it('should not warn when active session exists', async () => {
+      it('should append context when document exists', async () => {
         mockKeywordService.parseMode = vi.fn().mockResolvedValue({
           ...mockParseModeResult,
           mode: 'EVAL',
           originalPrompt: 'evaluate implementation',
-        });
-        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
-          metadata: { id: 'active-session', status: 'active' },
-          sections: [],
         });
 
         const result = await handler.handle('parse_mode', {
@@ -538,191 +409,31 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-
-        const responseText = result?.content[0]?.text;
-        const response = JSON.parse(responseText as string);
-        expect(response.sessionWarning).toBeUndefined();
+        expect(mockContextDocService.appendContext).toHaveBeenCalled();
       });
     });
+  });
 
-    describe('auto-add mode section', () => {
-      it('should auto-add PLAN section when parse_mode is called in PLAN mode', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: 'implement auth feature',
-          agent: 'technical-planner',
-          recommended_act_agent: {
-            agentName: 'frontend-developer',
-            confidence: 0.95,
-          },
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'PLAN implement auth feature',
-        });
-
-        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
-          sessionId: '2026-01-11-test-task',
-          section: expect.objectContaining({
-            mode: 'PLAN',
-            primaryAgent: 'technical-planner',
-            task: 'implement auth feature',
-            recommendedActAgent: 'frontend-developer',
-            recommendedActAgentConfidence: 0.95,
-            status: 'in_progress',
-          }),
-        });
+  describe('state persistence', () => {
+    it('should persist mode state', async () => {
+      await handler.handle('parse_mode', {
+        prompt: 'PLAN implement auth feature',
       });
 
-      it('should auto-add ACT section when parse_mode is called in ACT mode', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'ACT',
-          originalPrompt: 'implement feature',
-          agent: 'frontend-developer',
-        });
-        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
-          metadata: { id: 'existing-session', status: 'active' },
-          sections: [],
-        });
+      expect(mockStateService.updateLastMode).toHaveBeenCalledWith('PLAN');
+    });
 
-        await handler.handle('parse_mode', {
-          prompt: 'ACT implement feature',
-        });
+    it('should handle state persistence failure gracefully', async () => {
+      mockStateService.updateLastMode = vi
+        .fn()
+        .mockRejectedValue(new Error('State persistence failed'));
 
-        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
-          sessionId: 'existing-session',
-          section: expect.objectContaining({
-            mode: 'ACT',
-            primaryAgent: 'frontend-developer',
-            task: 'implement feature',
-            status: 'in_progress',
-          }),
-        });
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
       });
 
-      it('should auto-add EVAL section when parse_mode is called in EVAL mode', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'EVAL',
-          originalPrompt: 'evaluate implementation',
-          agent: 'code-reviewer',
-        });
-        mockSessionService.getActiveSession = vi.fn().mockResolvedValue({
-          metadata: { id: 'existing-session', status: 'active' },
-          sections: [],
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'EVAL evaluate implementation',
-        });
-
-        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
-          sessionId: 'existing-session',
-          section: expect.objectContaining({
-            mode: 'EVAL',
-            primaryAgent: 'code-reviewer',
-            task: 'evaluate implementation',
-            status: 'in_progress',
-          }),
-        });
-      });
-
-      it('should auto-add AUTO section when parse_mode is called in AUTO mode', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'AUTO',
-          originalPrompt: 'implement dashboard',
-          agent: 'auto-mode-agent',
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'AUTO implement dashboard',
-        });
-
-        expect(mockSessionService.updateSession).toHaveBeenCalledWith({
-          sessionId: '2026-01-11-test-task',
-          section: expect.objectContaining({
-            mode: 'AUTO',
-            primaryAgent: 'auto-mode-agent',
-            task: 'implement dashboard',
-            status: 'in_progress',
-          }),
-        });
-      });
-
-      it('should not call updateSession when no session exists for ACT/EVAL', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'ACT',
-          agent: 'frontend-developer',
-        });
-        // No active session
-        mockSessionService.getActiveSession = vi.fn().mockResolvedValue(null);
-
-        await handler.handle('parse_mode', {
-          prompt: 'ACT implement feature',
-        });
-
-        expect(mockSessionService.updateSession).not.toHaveBeenCalled();
-      });
-
-      it('should handle updateSession failure gracefully', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          agent: 'technical-planner',
-        });
-        mockSessionService.updateSession = vi.fn().mockResolvedValue({
-          success: false,
-          error: 'Failed to update session',
-        });
-
-        const result = await handler.handle('parse_mode', {
-          prompt: 'PLAN test task',
-        });
-
-        // Should not fail the whole operation
-        expect(result?.isError).toBeFalsy();
-      });
-
-      it('should log debug message when agent is undefined but session exists', async () => {
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          agent: undefined, // No agent
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: 'PLAN test task',
-        });
-
-        // Session update should not be called when agent is undefined
-        expect(mockSessionService.updateSession).not.toHaveBeenCalled();
-      });
-
-      it('should include task field in auto-added section', async () => {
-        const taskDescription = 'implement user authentication with OAuth2';
-        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
-          ...mockParseModeResult,
-          mode: 'PLAN',
-          originalPrompt: taskDescription,
-          agent: 'technical-planner',
-        });
-
-        await handler.handle('parse_mode', {
-          prompt: `PLAN ${taskDescription}`,
-        });
-
-        expect(mockSessionService.updateSession).toHaveBeenCalledWith(
-          expect.objectContaining({
-            section: expect.objectContaining({
-              task: taskDescription,
-            }),
-          }),
-        );
-      });
+      // Should not fail the whole operation
+      expect(result?.isError).toBeFalsy();
     });
   });
 });

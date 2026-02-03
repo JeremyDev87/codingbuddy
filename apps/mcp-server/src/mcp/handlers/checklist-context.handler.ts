@@ -14,6 +14,18 @@ import {
 } from '../../shared/validation.constants';
 
 /**
+ * Valid checklist domains for runtime validation
+ */
+const VALID_CHECKLIST_DOMAINS = [
+  'security',
+  'accessibility',
+  'performance',
+  'testing',
+  'code-quality',
+  'seo',
+] as const;
+
+/**
  * Handler for checklist and context analysis tools
  * - generate_checklist: Generate contextual checklists
  * - analyze_task: Analyze tasks for recommendations
@@ -98,7 +110,7 @@ export class ChecklistContextHandler extends AbstractHandler {
             },
             mode: {
               type: 'string',
-              enum: ['PLAN', 'ACT', 'EVAL'],
+              enum: ['PLAN', 'ACT', 'EVAL', 'AUTO'],
               description: 'Current workflow mode',
             },
           },
@@ -113,9 +125,10 @@ export class ChecklistContextHandler extends AbstractHandler {
   ): Promise<ToolResponse> {
     // Extract optional arrays using shared utilities
     const files = extractStringArray(args, 'files');
-    const domains = extractStringArray(args, 'domains') as
-      | ChecklistDomain[]
-      | undefined;
+    const rawDomains = extractStringArray(args, 'domains');
+    const domains = rawDomains?.filter((d): d is ChecklistDomain =>
+      (VALID_CHECKLIST_DOMAINS as readonly string[]).includes(d),
+    );
 
     try {
       const result = await this.checklistService.generateChecklist({

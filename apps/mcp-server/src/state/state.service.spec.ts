@@ -194,31 +194,6 @@ describe('StateService', () => {
     });
   });
 
-  describe('updateLastSession', () => {
-    it('should update lastSessionId in existing metadata', async () => {
-      const existingDoc: StateDocument = {
-        version: STATE_SCHEMA_VERSION,
-        project: {
-          projectRoot: mockProjectRoot,
-          detectedAt: '2026-01-11T00:00:00.000Z',
-        },
-        updatedAt: '2026-01-11T00:00:00.000Z',
-      };
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(existingDoc));
-      vi.mocked(fs.writeFile).mockResolvedValue();
-
-      const result = await service.updateLastSession('2026-01-11-test-session');
-
-      expect(result.success).toBe(true);
-
-      const writeCall = vi.mocked(fs.writeFile).mock.calls[0];
-      const savedContent = JSON.parse(writeCall[1] as string) as StateDocument;
-      expect(savedContent.project.lastSessionId).toBe(
-        '2026-01-11-test-session',
-      );
-    });
-  });
-
   describe('clearState', () => {
     it('should delete state files', async () => {
       vi.mocked(fs.unlink).mockResolvedValue();
@@ -382,49 +357,6 @@ describe('StateService', () => {
       vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(savedDoc));
 
       const result = await service.getLastMode();
-
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('getLastSessionId', () => {
-    it('should return lastSessionId from loaded metadata', async () => {
-      const savedDoc: StateDocument = {
-        version: STATE_SCHEMA_VERSION,
-        project: {
-          projectRoot: mockProjectRoot,
-          detectedAt: '2026-01-11T00:00:00.000Z',
-          lastSessionId: '2026-01-11-auth-feature',
-        },
-        updatedAt: '2026-01-11T00:00:00.000Z',
-      };
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(savedDoc));
-
-      const result = await service.getLastSessionId();
-
-      expect(result).toBe('2026-01-11-auth-feature');
-    });
-
-    it('should return null if no metadata exists', async () => {
-      vi.mocked(existsSync).mockReturnValue(false);
-
-      const result = await service.getLastSessionId();
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null if lastSessionId is not set', async () => {
-      const savedDoc: StateDocument = {
-        version: STATE_SCHEMA_VERSION,
-        project: {
-          projectRoot: mockProjectRoot,
-          detectedAt: '2026-01-11T00:00:00.000Z',
-        },
-        updatedAt: '2026-01-11T00:00:00.000Z',
-      };
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(savedDoc));
-
-      const result = await service.getLastSessionId();
 
       expect(result).toBeNull();
     });

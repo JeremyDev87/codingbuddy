@@ -30,8 +30,6 @@ export interface ProjectMetadata {
   configFile?: string;
   /** Last active mode */
   lastMode?: Mode;
-  /** Last active session ID */
-  lastSessionId?: string;
 }
 
 /**

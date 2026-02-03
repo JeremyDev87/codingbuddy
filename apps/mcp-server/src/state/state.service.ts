@@ -18,7 +18,7 @@ import {
  * StateService - File-based state persistence for context reliability
  *
  * This service implements Option C (Hybrid approach):
- * - Document files for important state (project metadata, last mode, last session)
+ * - Document files for important state (project metadata, last mode)
  * - Memory cache remains for performance-sensitive data
  *
  * State is persisted to .codingbuddy/state/ directory
@@ -176,45 +176,6 @@ export class StateService {
   }
 
   /**
-   * Update last session ID in project metadata
-   */
-  async updateLastSession(sessionId: string): Promise<StateOperationResult> {
-    try {
-      const existing = await this.loadStateDocument();
-
-      if (existing) {
-        existing.project.lastSessionId = sessionId;
-        existing.updatedAt = new Date().toISOString();
-
-        const filePath = this.getStateFilePath(STATE_FILES.PROJECT_METADATA);
-        await fs.writeFile(
-          filePath,
-          JSON.stringify(existing, null, 2),
-          'utf-8',
-        );
-
-        this.logger.debug(`Updated lastSessionId to ${sessionId}`);
-        return {
-          success: true,
-          message: `Last session updated to ${sessionId}`,
-        };
-      }
-
-      // Create new metadata if not exists
-      const projectRoot = this.configService.getProjectRoot();
-      return this.saveProjectMetadata({
-        projectRoot,
-        detectedAt: new Date().toISOString(),
-        lastSessionId: sessionId,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to update last session: ${message}`);
-      return { success: false, error: message };
-    }
-  }
-
-  /**
    * Save mode configuration snapshot
    */
   async saveModeConfigSnapshot(
@@ -292,14 +253,5 @@ export class StateService {
   async getLastMode(): Promise<Mode | null> {
     const metadata = await this.loadProjectMetadata();
     return metadata?.lastMode ?? null;
-  }
-
-  /**
-   * Get last session ID from persisted state
-   * Useful for recovering context after context compaction
-   */
-  async getLastSessionId(): Promise<string | null> {
-    const metadata = await this.loadProjectMetadata();
-    return metadata?.lastSessionId ?? null;
   }
 }

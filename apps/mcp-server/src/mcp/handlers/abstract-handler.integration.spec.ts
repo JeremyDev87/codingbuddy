@@ -16,7 +16,6 @@ import { SkillRecommendationService } from '../../skill/skill-recommendation.ser
 import { RulesService } from '../../rules/rules.service';
 import { LanguageService } from '../../shared/language.service';
 import { ModelResolverService } from '../../model/model-resolver.service';
-import { SessionService } from '../../session/session.service';
 import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
@@ -48,7 +47,6 @@ describe('Handler Security Integration', () => {
   let mockRulesService: RulesService;
   let mockLanguageService: LanguageService;
   let mockModelResolverService: ModelResolverService;
-  let mockSessionService: SessionService;
   let mockStateService: StateService;
   let mockContextDocService: ContextDocumentService;
   let mockDiagnosticLogService: DiagnosticLogService;
@@ -108,16 +106,8 @@ describe('Handler Security Integration', () => {
       resolveModel: vi.fn().mockReturnValue({ model: 'default' }),
     } as unknown as ModelResolverService;
 
-    mockSessionService = {
-      createSession: vi
-        .fn()
-        .mockResolvedValue({ success: true, sessionId: 'test-session' }),
-      getActiveSession: vi.fn().mockResolvedValue(null),
-    } as unknown as SessionService;
-
     mockStateService = {
       updateLastMode: vi.fn().mockResolvedValue({ success: true }),
-      updateLastSession: vi.fn().mockResolvedValue({ success: true }),
     } as unknown as StateService;
 
     mockContextDocService = {
@@ -161,7 +151,6 @@ describe('Handler Security Integration', () => {
       mockConfigService,
       mockLanguageService,
       mockModelResolverService,
-      mockSessionService,
       mockStateService,
       mockContextDocService,
       mockDiagnosticLogService,

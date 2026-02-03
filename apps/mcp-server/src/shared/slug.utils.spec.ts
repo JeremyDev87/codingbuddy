@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { generateSlug, generateSessionTitle } from './slug.utils';
+import { generateSlug, generateContextTitle } from './slug.utils';
 
 describe('slug.utils', () => {
   describe('generateSlug', () => {
@@ -84,7 +84,7 @@ describe('slug.utils', () => {
     });
   });
 
-  describe('generateSessionTitle', () => {
+  describe('generateContextTitle', () => {
     beforeEach(() => {
       // Mock Date to have consistent test output
       vi.useFakeTimers();
@@ -96,23 +96,23 @@ describe('slug.utils', () => {
     });
 
     it('should prefix slug with date', () => {
-      const result = generateSessionTitle('Test Session');
+      const result = generateContextTitle('Test Session');
       expect(result).toBe('2026-01-11-test-session');
     });
 
     it('should handle empty text', () => {
-      const result = generateSessionTitle('');
+      const result = generateContextTitle('');
       expect(result).toBe('2026-01-11-untitled');
     });
 
     it('should handle Korean text', () => {
-      const result = generateSessionTitle('인증 기능 구현');
+      const result = generateContextTitle('인증 기능 구현');
       expect(result).toBe('2026-01-11-인증-기능-구현');
     });
 
     it('should respect maxLength parameter', () => {
-      const longText = 'This is a very long session title that exceeds limit';
-      const result = generateSessionTitle(longText, 20);
+      const longText = 'This is a very long context title that exceeds limit';
+      const result = generateContextTitle(longText, 20);
       // Date prefix is 10 chars + hyphen = 11 chars
       // Slug portion should be max 20 chars
       expect(result.startsWith('2026-01-11-')).toBe(true);

@@ -17,5 +17,4 @@ export const CODINGBUDDY_GITIGNORE_ENTRIES: GitignoreEntry[] = [
     pattern: 'docs/codingbuddy/context.md',
     comment: '# Codingbuddy (local workspace)',
   },
-  { pattern: 'docs/codingbuddy/sessions/' },
 ];

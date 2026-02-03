@@ -330,7 +330,7 @@ export function validateAgentName(name: string): ValidationResult {
 /**
  * Valid workflow modes
  */
-export const VALID_MODES = ['PLAN', 'ACT', 'EVAL'] as const;
+export const VALID_MODES = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 export type ValidMode = (typeof VALID_MODES)[number];
 
 /**
@@ -363,7 +363,7 @@ export function isStringArray(value: unknown): value is string[] {
 /**
  * Check if a value is a valid workflow mode
  * @param value - Value to check
- * @returns True if value is PLAN, ACT, or EVAL
+ * @returns True if value is PLAN, ACT, EVAL, or AUTO
  */
 export function isValidMode(value: unknown): value is ValidMode {
   return typeof value === 'string' && VALID_MODES.includes(value as ValidMode);

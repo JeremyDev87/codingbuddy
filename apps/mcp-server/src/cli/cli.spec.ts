@@ -1,5 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { parseArgs, printUsage, printVersion, printApiKeyWarning } from './cli';
+import {
+  parseArgs,
+  printUsage,
+  printVersion,
+  printApiKeyWarning,
+  main,
+} from './cli';
+
+// Mock dependencies
+vi.mock('./init', () => ({
+  runInit: vi.fn(),
+}));
+
+vi.mock('../main', () => ({
+  bootstrap: vi.fn(),
+}));
 
 describe('cli', () => {
   describe('parseArgs', () => {
@@ -175,6 +190,164 @@ describe('cli', () => {
         .map((c: unknown[]) => c[0])
         .join('');
       expect(output).toContain('export ANTHROPIC_API_KEY');
+    });
+  });
+
+  describe('main', () => {
+    let runInitMock: ReturnType<typeof vi.fn>;
+    let bootstrapMock: ReturnType<typeof vi.fn>;
+    let stdoutWrite: ReturnType<typeof vi.spyOn>;
+    let stderrWrite: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(async () => {
+      // Import mocks
+      const initModule = await import('./init');
+      const mainModule = await import('../main');
+      runInitMock = initModule.runInit as ReturnType<typeof vi.fn>;
+      bootstrapMock = mainModule.bootstrap as ReturnType<typeof vi.fn>;
+
+      // Setup spies
+      stdoutWrite = vi
+        .spyOn(process.stdout, 'write')
+        .mockImplementation(() => true);
+      stderrWrite = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation(() => true);
+
+      // Reset mocks
+      vi.clearAllMocks();
+      process.exitCode = 0;
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      process.exitCode = 0;
+    });
+
+    it('should handle help command', async () => {
+      await main(['--help']);
+
+      expect(stdoutWrite).toHaveBeenCalled();
+      const output = stdoutWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toContain('codingbuddy');
+      expect(output).toContain('Usage:');
+    });
+
+    it('should handle version command', async () => {
+      await main(['--version']);
+
+      expect(stdoutWrite).toHaveBeenCalled();
+      const output = stdoutWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toMatch(/\d+\.\d+\.\d+/);
+    });
+
+    it('should handle mcp command', async () => {
+      bootstrapMock.mockResolvedValue(undefined);
+
+      await main(['mcp']);
+
+      expect(bootstrapMock).toHaveBeenCalled();
+    });
+
+    it('should handle init command with success', async () => {
+      runInitMock.mockResolvedValue({ success: true });
+
+      await main(['init']);
+
+      expect(runInitMock).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRoot: process.cwd() }),
+      );
+      expect(process.exitCode).toBe(0);
+    });
+
+    it('should handle init command with failure', async () => {
+      runInitMock.mockResolvedValue({ success: false });
+
+      await main(['init']);
+
+      expect(runInitMock).toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should print API key warning when apiKey is provided', async () => {
+      runInitMock.mockResolvedValue({ success: true });
+
+      await main(['init', '--api-key', 'test-key']);
+
+      expect(stderrWrite).toHaveBeenCalled();
+      const output = stderrWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toContain('Security Warning');
+    });
+
+    it('should handle init command with all options', async () => {
+      runInitMock.mockResolvedValue({ success: true });
+
+      await main([
+        'init',
+        '/custom/path',
+        '--format',
+        'json',
+        '--force',
+        '--yes',
+      ]);
+
+      expect(runInitMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          projectRoot: '/custom/path',
+          format: 'json',
+          force: true,
+          useDefaults: true,
+        }),
+      );
+    });
+
+    it('should parse short flags correctly', async () => {
+      runInitMock.mockResolvedValue({ success: true });
+
+      await main(['init', '-f', '-y']);
+
+      expect(runInitMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          force: true,
+          useDefaults: true,
+        }),
+      );
+    });
+
+    it('should handle short version flag', async () => {
+      await main(['-v']);
+
+      expect(stdoutWrite).toHaveBeenCalled();
+      const output = stdoutWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toMatch(/\d+\.\d+\.\d+/);
+    });
+
+    it('should handle short help flag', async () => {
+      await main(['-h']);
+
+      expect(stdoutWrite).toHaveBeenCalled();
+      const output = stdoutWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toContain('Usage:');
+    });
+
+    it('should default to help for unknown commands', async () => {
+      await main(['unknown-command']);
+
+      expect(stdoutWrite).toHaveBeenCalled();
+      const output = stdoutWrite.mock.calls
+        .map((c: unknown[]) => c[0])
+        .join('');
+      expect(output).toContain('Usage:');
     });
   });
 });

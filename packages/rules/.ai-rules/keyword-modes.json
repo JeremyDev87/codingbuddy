@@ -8,7 +8,11 @@
       "delegates_to": "frontend-developer",
       "defaultSpecialists": [
         "architecture-specialist",
-        "test-strategy-specialist"
+        "test-strategy-specialist",
+        "event-architecture-specialist",
+        "integration-specialist",
+        "observability-specialist",
+        "migration-specialist"
       ]
     },
     "ACT": {
@@ -23,7 +27,9 @@
       "delegates_to": "frontend-developer",
       "defaultSpecialists": [
         "code-quality-specialist",
-        "test-strategy-specialist"
+        "test-strategy-specialist",
+        "event-architecture-specialist",
+        "integration-specialist"
       ]
     },
     "EVAL": {
@@ -36,7 +42,11 @@
         "security-specialist",
         "accessibility-specialist",
         "performance-specialist",
-        "code-quality-specialist"
+        "code-quality-specialist",
+        "event-architecture-specialist",
+        "integration-specialist",
+        "observability-specialist",
+        "migration-specialist"
       ]
     },
     "AUTO": {
@@ -52,8 +62,12 @@
       "defaultSpecialists": [
         "architecture-specialist",
         "test-strategy-specialist",
+        "security-specialist",
         "code-quality-specialist",
-        "security-specialist"
+        "event-architecture-specialist",
+        "integration-specialist",
+        "observability-specialist",
+        "migration-specialist"
       ]
     }
   },

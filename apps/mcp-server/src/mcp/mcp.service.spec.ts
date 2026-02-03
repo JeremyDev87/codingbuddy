@@ -21,7 +21,6 @@ import { ChecklistService } from '../checklist/checklist.service';
 import { ContextService } from '../context/context.service';
 import { ContextDocumentService } from '../context/context-document.service';
 import { ModelResolverService } from '../model';
-import { SessionService } from '../session/session.service';
 import { StateService } from '../state/state.service';
 import { DiagnosticLogService } from '../diagnostic/diagnostic-log.service';
 import type { ToolHandler } from './handlers';
@@ -386,24 +385,11 @@ const createMockModelResolverService = (): Partial<ModelResolverService> => ({
   }),
 });
 
-const createMockSessionService = (): Partial<SessionService> => ({
-  createSession: vi.fn().mockResolvedValue({
-    success: true,
-    sessionId: 'test-session-id',
-    filePath: 'docs/codingbuddy/sessions/test-session-id.md',
-  }),
-  getActiveSession: vi.fn().mockResolvedValue(null),
-  getSession: vi.fn().mockResolvedValue(null),
-  updateSession: vi.fn().mockResolvedValue({ success: true }),
-});
-
 const createMockStateService = (): Partial<StateService> => ({
   updateLastMode: vi.fn().mockResolvedValue({ success: true }),
-  updateLastSession: vi.fn().mockResolvedValue({ success: true }),
   saveProjectMetadata: vi.fn().mockResolvedValue({ success: true }),
   loadProjectMetadata: vi.fn().mockResolvedValue(null),
   getLastMode: vi.fn().mockResolvedValue(null),
-  getLastSessionId: vi.fn().mockResolvedValue(null),
 });
 
 const createMockContextDocService = (): Partial<ContextDocumentService> => ({
@@ -466,7 +452,6 @@ interface CreateMcpServiceOptions {
   contextService?: Partial<ContextService>;
   contextDocService?: Partial<ContextDocumentService>;
   modelResolverService?: Partial<ModelResolverService>;
-  sessionService?: Partial<SessionService>;
   stateService?: Partial<StateService>;
   diagnosticLogService?: Partial<DiagnosticLogService>;
 }
@@ -494,7 +479,6 @@ function createMcpServiceWithHandlers(
       services.configService as ConfigService,
       services.languageService as LanguageService,
       services.modelResolverService as ModelResolverService,
-      services.sessionService as SessionService,
       services.stateService as StateService,
       services.contextDocService as ContextDocumentService,
       services.diagnosticLogService as DiagnosticLogService,
@@ -525,7 +509,6 @@ describe('McpService', () => {
   let mockContextService: Partial<ContextService>;
   let mockContextDocService: Partial<ContextDocumentService>;
   let mockModelResolverService: Partial<ModelResolverService>;
-  let mockSessionService: Partial<SessionService>;
   let mockStateService: Partial<StateService>;
   let mockDiagnosticLogService: Partial<DiagnosticLogService>;
 
@@ -560,7 +543,6 @@ describe('McpService', () => {
     mockContextService = createMockContextService();
     mockContextDocService = createMockContextDocService();
     mockModelResolverService = createMockModelResolverService();
-    mockSessionService = createMockSessionService();
     mockStateService = createMockStateService();
     mockDiagnosticLogService = {
       logConfigLoading: vi.fn().mockResolvedValue({ success: true }),
@@ -585,7 +567,6 @@ describe('McpService', () => {
       contextService: mockContextService,
       contextDocService: mockContextDocService,
       modelResolverService: mockModelResolverService,
-      sessionService: mockSessionService,
       stateService: mockStateService,
       diagnosticLogService: mockDiagnosticLogService,
     };

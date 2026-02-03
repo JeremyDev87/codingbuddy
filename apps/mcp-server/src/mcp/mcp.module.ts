@@ -8,7 +8,6 @@ import { AnalyzerModule } from '../analyzer/analyzer.module';
 import { AgentModule } from '../agent/agent.module';
 import { ChecklistModule } from '../checklist/checklist.module';
 import { ContextModule } from '../context/context.module';
-import { SessionModule } from '../session/session.module';
 import { StateModule } from '../state/state.module';
 import { DiagnosticModule } from '../diagnostic/diagnostic.module';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
@@ -25,7 +24,6 @@ import {
   ModeHandler,
   ChecklistContextHandler,
   ConventionsHandler,
-  SessionHandler,
   ContextDocumentHandler,
 } from './handlers';
 
@@ -37,7 +35,6 @@ const handlers = [
   ModeHandler,
   ChecklistContextHandler,
   ConventionsHandler,
-  SessionHandler,
   ContextDocumentHandler,
 ];
 
@@ -50,7 +47,6 @@ const handlers = [
     AgentModule,
     ChecklistModule,
     ContextModule,
-    SessionModule,
     StateModule,
     DiagnosticModule,
   ],

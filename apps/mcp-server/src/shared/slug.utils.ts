@@ -58,19 +58,19 @@ export function generateSlug(
 }
 
 /**
- * Generates a session title slug with date prefix.
+ * Generates a context title slug with date prefix.
  *
- * @param text - The input text to convert to a session title
+ * @param text - The input text to convert to a context title
  * @param maxLength - Maximum length for the text portion (default: 50)
- * @returns A date-prefixed session title slug
+ * @returns A date-prefixed context title slug
  *
  * @example
  * ```typescript
- * generateSessionTitle('Implement Auth Feature')
+ * generateContextTitle('Implement Auth Feature')
  * // '2026-01-11-implement-auth-feature'
  * ```
  */
-export function generateSessionTitle(
+export function generateContextTitle(
   text: string,
   maxLength: number = DEFAULT_MAX_LENGTH,
 ): string {

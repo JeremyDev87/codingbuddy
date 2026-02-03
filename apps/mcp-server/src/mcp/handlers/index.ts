@@ -78,13 +78,6 @@ export { ChecklistContextHandler } from './checklist-context.handler';
 export { ConventionsHandler } from './conventions.handler';
 
 /**
- * Handler for session document tools (create_session, get_session, update_session)
- * @see {@link SessionHandler}
- * @deprecated Use ContextDocumentHandler instead
- */
-export { SessionHandler } from './session.handler';
-
-/**
  * Handler for context document tools (read_context, update_context)
  * Uses fixed path docs/codingbuddy/context.md
  * @see {@link ContextDocumentHandler}

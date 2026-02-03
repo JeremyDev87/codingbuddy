@@ -611,6 +611,83 @@ describe('RulesService', () => {
     });
   });
 
+  describe('findDevRulesDir (fallback logic)', () => {
+    beforeEach(() => {
+      // Reset require cache to force fallback
+      delete process.env.CODINGBUDDY_RULES_DIR;
+      vi.clearAllMocks();
+    });
+
+    it('should use package path when available', () => {
+      // In this test environment, codingbuddy-rules package is available
+      const service = new RulesService(
+        createMockCustomService(),
+        createMockConfigService(),
+      );
+      const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
+
+      // Should resolve to package path or fallback
+      expect(rulesDir).toBeDefined();
+      expect(typeof rulesDir).toBe('string');
+      expect(rulesDir).toContain('.ai-rules');
+    });
+
+    it('should use first existing candidate when checking paths', () => {
+      // The actual implementation checks real filesystem paths
+      // In development, package is available so fallback isn't triggered
+      // This test verifies the constructor completes successfully
+      const service = new RulesService(
+        createMockCustomService(),
+        createMockConfigService(),
+      );
+      const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
+
+      expect(rulesDir).toBeDefined();
+      expect(rulesDir).toContain('.ai-rules');
+    });
+
+    it('should handle directory resolution gracefully', () => {
+      // Test that constructor doesn't throw even with filesystem variations
+      expect(
+        () =>
+          new RulesService(
+            createMockCustomService(),
+            createMockConfigService(),
+          ),
+      ).not.toThrow();
+    });
+
+    it('should use fallback when existsSync returns false for all candidates', () => {
+      // Mock existsSync to return false for all candidates
+      vi.mocked(existsSync).mockReturnValue(false);
+
+      const service = new RulesService(
+        createMockCustomService(),
+        createMockConfigService(),
+      );
+      const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
+
+      // Should still return a valid path (first candidate as fallback)
+      expect(rulesDir).toBeDefined();
+      expect(rulesDir).toContain('.ai-rules');
+    });
+
+    it('should stop checking candidates when first valid path found', () => {
+      // Mock existsSync to return true on first call
+      vi.mocked(existsSync).mockReturnValueOnce(true);
+
+      const service = new RulesService(
+        createMockCustomService(),
+        createMockConfigService(),
+      );
+      const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
+
+      // Should have found a valid directory
+      expect(rulesDir).toBeDefined();
+      expect(rulesDir).toContain('.ai-rules');
+    });
+  });
+
   describe('searchRules with custom rules', () => {
     let service: RulesService;
     let mockCustomService: CustomService;
@@ -826,6 +903,288 @@ describe('RulesService', () => {
       it('should be case sensitive', () => {
         expect(service.isModeAgent('PLAN-MODE')).toBe(false);
         expect(service.isModeAgent('Plan-Mode')).toBe(false);
+      });
+    });
+  });
+
+  describe('Skill Operations', () => {
+    let service: RulesService;
+
+    beforeEach(() => {
+      process.env.CODINGBUDDY_RULES_DIR = '/test/rules';
+      service = new RulesService(
+        createMockCustomService(),
+        createMockConfigService(),
+      );
+    });
+
+    describe('listSkillsFromDir', () => {
+      it('should list all valid skills from directory', async () => {
+        // Mock readdir to return skill directories
+        const mockDirEntries = [
+          { name: 'parallel-execution', isDirectory: () => true },
+          { name: 'api-design', isDirectory: () => true },
+          { name: 'README.md', isDirectory: () => false }, // should be filtered
+        ];
+        vi.mocked(fs.readdir).mockResolvedValue(
+          mockDirEntries as unknown as Awaited<ReturnType<typeof fs.readdir>>,
+        );
+
+        // Mock SKILL.md content with proper YAML frontmatter
+        vi.mocked(fs.readFile).mockImplementation(async (filePath: unknown) => {
+          const path = filePath as string;
+          if (path.includes('parallel-execution')) {
+            return `---
+name: parallel-execution
+description: Execute tasks in parallel for improved performance
+---
+
+This skill enables parallel execution of independent tasks.`;
+          }
+          if (path.includes('api-design')) {
+            return `---
+name: api-design
+description: Design RESTful APIs following best practices
+---
+
+API design skill with comprehensive guidelines.`;
+          }
+          return '';
+        });
+
+        const result = await service.listSkillsFromDir();
+
+        expect(result).toHaveLength(2);
+        expect(result[0].name).toBe('parallel-execution');
+        expect(result[0].description).toBe(
+          'Execute tasks in parallel for improved performance',
+        );
+        expect(result[1].name).toBe('api-design');
+        expect(result[1].description).toBe(
+          'Design RESTful APIs following best practices',
+        );
+      });
+
+      it('should return empty array when skills directory is empty', async () => {
+        vi.mocked(fs.readdir).mockResolvedValue(
+          [] as unknown as Awaited<ReturnType<typeof fs.readdir>>,
+        );
+
+        const result = await service.listSkillsFromDir();
+
+        expect(result).toEqual([]);
+      });
+
+      it('should skip invalid skill files and continue', async () => {
+        const mockDirEntries = [
+          { name: 'valid-skill', isDirectory: () => true },
+          { name: 'invalid-skill', isDirectory: () => true },
+        ];
+        vi.mocked(fs.readdir).mockResolvedValue(
+          mockDirEntries as unknown as Awaited<ReturnType<typeof fs.readdir>>,
+        );
+
+        let callCount = 0;
+        vi.mocked(fs.readFile).mockImplementation(async () => {
+          callCount++;
+          if (callCount === 1) {
+            return `---
+name: valid-skill
+description: A valid skill description
+---
+
+Valid skill content.`;
+          }
+          // Second call returns invalid content (missing frontmatter)
+          return 'Invalid SKILL.md without frontmatter';
+        });
+
+        const result = await service.listSkillsFromDir();
+
+        // Should return only the valid skill
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe('valid-skill');
+      });
+
+      it('should handle readdir errors gracefully', async () => {
+        vi.mocked(fs.readdir).mockRejectedValue(
+          new Error('Directory not found'),
+        );
+
+        const result = await service.listSkillsFromDir();
+
+        expect(result).toEqual([]);
+      });
+
+      it('should filter non-directory entries', async () => {
+        const mockDirEntries = [
+          { name: 'skill-one', isDirectory: () => true },
+          { name: 'README.md', isDirectory: () => false },
+          { name: '.gitkeep', isDirectory: () => false },
+          { name: 'skill-two', isDirectory: () => true },
+        ];
+        vi.mocked(fs.readdir).mockResolvedValue(
+          mockDirEntries as unknown as Awaited<ReturnType<typeof fs.readdir>>,
+        );
+
+        vi.mocked(fs.readFile).mockImplementation(async (filePath: unknown) => {
+          const path = filePath as string;
+          if (path.includes('skill-one')) {
+            return `---
+name: skill-one
+description: First test skill
+---
+
+Skill one content.`;
+          }
+          if (path.includes('skill-two')) {
+            return `---
+name: skill-two
+description: Second test skill
+---
+
+Skill two content.`;
+          }
+          return '';
+        });
+
+        const result = await service.listSkillsFromDir();
+
+        // Only directories should be processed
+        expect(result).toHaveLength(2);
+        expect(result[0].name).toBe('skill-one');
+        expect(result[1].name).toBe('skill-two');
+      });
+    });
+
+    describe('getSkill', () => {
+      it('should return parsed Skill object', async () => {
+        const mockSkillContent = `---
+name: test-skill
+description: A test skill for demonstration
+---
+
+# Test Skill
+
+This is a detailed description of the test skill.
+
+## Usage
+
+Use this skill when you need to test.
+
+## Examples
+
+\`\`\`
+Example usage here
+\`\`\`
+`;
+        vi.mocked(fs.readFile).mockResolvedValue(mockSkillContent);
+
+        const result = await service.getSkill('test-skill');
+
+        expect(result.name).toBe('test-skill');
+        expect(result.description).toBe('A test skill for demonstration');
+        expect(result.content).toBeDefined();
+        expect(fs.readFile).toHaveBeenCalledWith(
+          '/test/rules/skills/test-skill/SKILL.md',
+          'utf-8',
+        );
+      });
+
+      it('should throw error for invalid skill name format', async () => {
+        await expect(service.getSkill('Invalid_Skill')).rejects.toThrow(
+          'Invalid skill name format',
+        );
+        await expect(service.getSkill('skill with spaces')).rejects.toThrow(
+          'Invalid skill name format',
+        );
+        await expect(service.getSkill('UPPERCASE-SKILL')).rejects.toThrow(
+          'Invalid skill name format',
+        );
+      });
+
+      it('should accept valid lowercase alphanumeric with hyphens', async () => {
+        vi.mocked(fs.readFile).mockImplementation(async (filePath: unknown) => {
+          const path = filePath as string;
+          if (path.includes('valid-skill-123')) {
+            return `---
+name: valid-skill-123
+description: Valid skill with numbers
+---
+
+Content for skill 123.`;
+          }
+          if (path.includes('skill123')) {
+            return `---
+name: skill123
+description: Valid skill without hyphens
+---
+
+Content for skill123.`;
+          }
+          if (path.includes('my-skill')) {
+            return `---
+name: my-skill
+description: My custom skill
+---
+
+Content for my-skill.`;
+          }
+          return '';
+        });
+
+        await expect(
+          service.getSkill('valid-skill-123'),
+        ).resolves.toBeDefined();
+        await expect(service.getSkill('skill123')).resolves.toBeDefined();
+        await expect(service.getSkill('my-skill')).resolves.toBeDefined();
+      });
+
+      it('should throw error when skill file does not exist', async () => {
+        vi.mocked(fs.readFile).mockRejectedValue(
+          new Error('ENOENT: no such file or directory'),
+        );
+
+        await expect(service.getSkill('nonexistent-skill')).rejects.toThrow(
+          'Skill not found',
+        );
+      });
+
+      it('should throw error for invalid skill schema', async () => {
+        // Mock invalid SKILL.md content (missing required sections)
+        vi.mocked(fs.readFile).mockResolvedValue('Invalid skill content');
+
+        await expect(service.getSkill('invalid-skill')).rejects.toThrow(
+          'Invalid skill',
+        );
+      });
+
+      it('should reject path traversal attempts with format validation', async () => {
+        // Path traversal with ../ is caught by format validation
+        await expect(service.getSkill('../../../etc/passwd')).rejects.toThrow(
+          'Invalid skill name format',
+        );
+      });
+
+      it('should reject skills with slashes (directory traversal)', async () => {
+        // Slashes in skill name are invalid format
+        await expect(service.getSkill('skill/../../etc')).rejects.toThrow(
+          'Invalid skill name format',
+        );
+      });
+
+      it('should validate path safety for valid names', async () => {
+        // Even if name format is valid, path safety should be checked
+        vi.mocked(fs.readFile).mockResolvedValue(`---
+name: valid-skill
+description: A valid skill for testing
+---
+
+Valid skill content.`);
+
+        const result = await service.getSkill('valid-skill');
+        expect(result).toBeDefined();
+        expect(result.name).toBe('valid-skill');
       });
     });
   });

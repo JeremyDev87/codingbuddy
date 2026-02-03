@@ -61,7 +61,7 @@ export class AgentHandler extends AbstractHandler {
               properties: {
                 mode: {
                   type: 'string',
-                  enum: ['PLAN', 'ACT', 'EVAL'],
+                  enum: ['PLAN', 'ACT', 'EVAL', 'AUTO'],
                   description: 'Current workflow mode',
                 },
                 targetFiles: {
@@ -89,7 +89,7 @@ export class AgentHandler extends AbstractHandler {
           properties: {
             mode: {
               type: 'string',
-              enum: ['PLAN', 'ACT', 'EVAL'],
+              enum: ['PLAN', 'ACT', 'EVAL', 'AUTO'],
               description: 'Current workflow mode',
             },
             specialists: {
@@ -125,7 +125,7 @@ export class AgentHandler extends AbstractHandler {
     const context = args?.context as Record<string, unknown> | undefined;
     if (!context) {
       return createErrorResponse(
-        'Missing required parameter: context.mode (PLAN, ACT, or EVAL)',
+        'Missing required parameter: context.mode (PLAN, ACT, EVAL, or AUTO)',
       );
     }
 
@@ -133,8 +133,8 @@ export class AgentHandler extends AbstractHandler {
     if (!isValidMode(mode)) {
       return createErrorResponse(
         mode === undefined || mode === null
-          ? 'Missing required parameter: context.mode (PLAN, ACT, or EVAL)'
-          : `Invalid mode: ${mode}. Must be PLAN, ACT, or EVAL`,
+          ? 'Missing required parameter: context.mode (PLAN, ACT, EVAL, or AUTO)'
+          : `Invalid mode: ${mode}. Must be PLAN, ACT, EVAL, or AUTO`,
       );
     }
 
@@ -162,8 +162,8 @@ export class AgentHandler extends AbstractHandler {
     if (!isValidMode(mode)) {
       return createErrorResponse(
         mode === undefined || mode === null
-          ? 'Missing required parameter: mode (PLAN, ACT, or EVAL)'
-          : `Invalid mode: ${mode}. Must be PLAN, ACT, or EVAL`,
+          ? 'Missing required parameter: mode (PLAN, ACT, EVAL, or AUTO)'
+          : `Invalid mode: ${mode}. Must be PLAN, ACT, EVAL, or AUTO`,
       );
     }
 

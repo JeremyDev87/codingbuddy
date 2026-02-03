@@ -89,7 +89,7 @@ export interface AnalyzeTaskInput {
   /** Optional file paths related to the task */
   files?: string[];
   /** Current workflow mode */
-  mode?: 'PLAN' | 'ACT' | 'EVAL';
+  mode?: 'PLAN' | 'ACT' | 'EVAL' | 'AUTO';
 }
 
 /**

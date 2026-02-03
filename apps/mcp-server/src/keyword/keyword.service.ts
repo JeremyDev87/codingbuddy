@@ -98,14 +98,24 @@ import { filterRulesByMode } from './rule-filter';
  */
 const MAX_PROMPT_LENGTH = 50_000;
 
+/**
+ * Default configuration for keyword modes.
+ *
+ * NOTE: `defaultSpecialists` arrays are synchronized with:
+ * - packages/rules/.ai-rules/keyword-modes.json
+ * - .claude/rules/custom-instructions.md
+ *
+ * When modifying specialists, ensure all three locations are updated.
+ * The JSON file can override these defaults at runtime via loadConfigFn.
+ */
 const DEFAULT_CONFIG: KeywordModesConfig = {
   modes: {
     PLAN: {
       description: 'Task planning and design phase',
       instructions:
-        '🔴 SESSION: Check sessionContext field for previous mode context (decisions, notes, recommendedActAgent). ' +
+        '🔴 CONTEXT: Check contextDocument field for previous mode context (decisions, notes, recommendedActAgent). ' +
         'Design first approach. Define test cases from TDD perspective. Review architecture before implementation. ' +
-        '📝 MANDATORY BEFORE COMPLETION: Call update_session with mode=PLAN, recommendedActAgent, task, decisions, and notes. ' +
+        '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=PLAN, recommendedActAgent, task, decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content, not overwritten.',
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[0],
@@ -113,15 +123,18 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       defaultSpecialists: [
         'architecture-specialist',
         'test-strategy-specialist',
+        'event-architecture-specialist',
+        'integration-specialist',
+        'observability-specialist',
         'migration-specialist',
       ],
     },
     ACT: {
       description: 'Actual task execution phase',
       instructions:
-        '🔴 CONTEXT: sessionContext contains PLAN decisions and recommendedActAgent. Use this context! ' +
+        '🔴 CONTEXT: contextDocument contains PLAN decisions and recommendedActAgent. Use this context! ' +
         'Follow Red-Green-Refactor cycle. Use recommended agent from PLAN. ' +
-        '📝 MANDATORY BEFORE COMPLETION: Call update_session with mode=ACT, task (what was done), decisions, and notes. ' +
+        '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=ACT, task (what was done), decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content.',
       rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[1],
@@ -129,14 +142,16 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       defaultSpecialists: [
         'code-quality-specialist',
         'test-strategy-specialist',
+        'event-architecture-specialist',
+        'integration-specialist',
       ],
     },
     EVAL: {
       description: 'Result review and assessment phase',
       instructions:
-        '🔴 CONTEXT: sessionContext contains all PLAN and ACT decisions/notes. Review this accumulated context! ' +
+        '🔴 CONTEXT: contextDocument contains all PLAN and ACT decisions/notes. Review this accumulated context! ' +
         'Evaluate code quality. Verify SOLID principles. Check test coverage. ' +
-        '📝 MANDATORY BEFORE COMPLETION: Call update_session with mode=EVAL, task (evaluation summary), decisions, and notes. ' +
+        '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=EVAL, task (evaluation summary), decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content.',
       rules: ['rules/core.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[2],
@@ -146,8 +161,9 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
         'accessibility-specialist',
         'performance-specialist',
         'code-quality-specialist',
-        'observability-specialist',
         'event-architecture-specialist',
+        'integration-specialist',
+        'observability-specialist',
         'migration-specialist',
       ],
     },
@@ -155,9 +171,9 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       description:
         'Autonomous execution mode - PLAN → ACT → EVAL cycle until quality achieved',
       instructions:
-        '🔴 SESSION: Check sessionContext for accumulated context across iterations. ' +
+        '🔴 CONTEXT: Check contextDocument for accumulated context across iterations. ' +
         'Execute PLAN → ACT → EVAL cycle automatically. Repeat until Critical/High issues = 0 or max iterations reached. ' +
-        '📝 MANDATORY AT EACH PHASE: Call update_session to record progress. Decisions and notes are APPENDED. ' +
+        '📝 MANDATORY AT EACH PHASE: Call update_context to record progress. Decisions and notes are APPENDED. ' +
         'This maintains full context history across iterations.',
       rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[3], // 'auto-mode'
@@ -166,8 +182,9 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
         'test-strategy-specialist',
         'security-specialist',
         'code-quality-specialist',
-        'observability-specialist',
         'event-architecture-specialist',
+        'integration-specialist',
+        'observability-specialist',
         'migration-specialist',
       ],
     },
