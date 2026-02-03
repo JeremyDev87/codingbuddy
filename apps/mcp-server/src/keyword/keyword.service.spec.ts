@@ -2682,4 +2682,126 @@ describe('KeywordService', () => {
       });
     });
   });
+
+  describe('verbosity-based rule content truncation', () => {
+    // Create long content that exceeds standard limit (2000 chars)
+    // Each repeat is ~14 chars, so 150 repeats = ~2100 chars per section
+    const longRuleContent = `# Long Rule File
+
+## Section 1
+
+${'Content line.\n'.repeat(150)}
+
+## Section 2
+
+${'More content.\n'.repeat(150)}
+
+## Section 3
+
+${'Even more content.\n'.repeat(150)}`;
+
+    const mockConfigWithLongRules: KeywordModesConfig = {
+      ...mockConfig,
+      modes: {
+        ...mockConfig.modes,
+        PLAN: {
+          ...mockConfig.modes.PLAN,
+          rules: ['rules/long-core.md'],
+        },
+      },
+    };
+
+    const mockLoadLongRule = vi
+      .fn()
+      .mockImplementation(async (path: string) => {
+        if (path === 'rules/long-core.md') {
+          return longRuleContent;
+        }
+        return mockRulesContent[path] ?? '';
+      });
+
+    it('should include full content with "full" verbosity', async () => {
+      const service = new KeywordService(
+        vi.fn().mockResolvedValue(mockConfigWithLongRules),
+        mockLoadLongRule,
+        mockLoadAgentInfo,
+      );
+
+      const result = await service.parseMode('PLAN design feature', {
+        verbosity: 'full',
+      });
+
+      expect(result.rules).toHaveLength(1);
+      expect(result.rules[0].content).toBe(longRuleContent);
+      expect(result.rules[0].content).not.toContain('[Content truncated');
+    });
+
+    it('should truncate content with "standard" verbosity', async () => {
+      const service = new KeywordService(
+        vi.fn().mockResolvedValue(mockConfigWithLongRules),
+        mockLoadLongRule,
+        mockLoadAgentInfo,
+      );
+
+      const result = await service.parseMode('PLAN design feature', {
+        verbosity: 'standard',
+      });
+
+      expect(result.rules).toHaveLength(1);
+      expect(result.rules[0].content.length).toBeLessThan(
+        longRuleContent.length,
+      );
+      expect(result.rules[0].content).toContain('[Content truncated');
+    });
+
+    it('should return paths only (empty content) with "minimal" verbosity', async () => {
+      const service = new KeywordService(
+        vi.fn().mockResolvedValue(mockConfigWithLongRules),
+        mockLoadLongRule,
+        mockLoadAgentInfo,
+      );
+
+      const result = await service.parseMode('PLAN design feature', {
+        verbosity: 'minimal',
+      });
+
+      expect(result.rules).toHaveLength(1);
+      expect(result.rules[0].name).toBe('rules/long-core.md');
+      expect(result.rules[0].content).toBe('');
+    });
+
+    it('should default to "standard" verbosity when not specified', async () => {
+      const service = new KeywordService(
+        vi.fn().mockResolvedValue(mockConfigWithLongRules),
+        mockLoadLongRule,
+        mockLoadAgentInfo,
+      );
+
+      const result = await service.parseMode('PLAN design feature');
+
+      expect(result.rules).toHaveLength(1);
+      // Long content should be truncated with default standard verbosity
+      expect(result.rules[0].content.length).toBeLessThan(
+        longRuleContent.length,
+      );
+      expect(result.rules[0].content).toContain('[Content truncated');
+    });
+
+    it('should preserve markdown structure when truncating', async () => {
+      const service = new KeywordService(
+        vi.fn().mockResolvedValue(mockConfigWithLongRules),
+        mockLoadLongRule,
+        mockLoadAgentInfo,
+      );
+
+      const result = await service.parseMode('PLAN design feature', {
+        verbosity: 'standard',
+      });
+
+      expect(result.rules).toHaveLength(1);
+      // Should have headings preserved
+      expect(result.rules[0].content).toContain('# Long Rule File');
+      expect(result.rules[0].content).toContain('## Section');
+    });
+  });
 });

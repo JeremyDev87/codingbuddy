@@ -10,12 +10,14 @@ import type {
   ContextOperationResult,
   ContextReadResult,
   ContextLimits,
+  ContextReadOptions,
 } from './context-document.types';
 import {
   CONTEXT_FILE_PATH,
   CONTEXT_FILE_TIMEOUT_MS,
   truncateArray,
   DEFAULT_CONTEXT_LIMITS,
+  CONTEXT_SIZE_THRESHOLDS,
 } from './context-document.types';
 import { parseContextDocument } from './context-parser.utils';
 import {
@@ -24,6 +26,8 @@ import {
   createPlanSection,
   mergeSection,
   generateTimestamp,
+  estimateDocumentSize,
+  cleanupContextDocument,
 } from './context-serializer.utils';
 import { ConfigService } from '../config/config.service';
 import { withTimeout } from '../shared/async.utils';
@@ -77,8 +81,11 @@ export class ContextDocumentService {
   private async getContextLimits(): Promise<ContextLimits> {
     try {
       return await this.configService.getContextLimits();
-    } catch {
+    } catch (error) {
       // Fall back to defaults if config unavailable
+      this.logger.debug(
+        `Failed to load context limits: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       return DEFAULT_CONTEXT_LIMITS;
     }
   }
@@ -107,8 +114,10 @@ export class ContextDocumentService {
   /**
    * Read the current context document.
    * Returns null if document doesn't exist.
+   *
+   * @param options - Read options for controlling returned data size
    */
-  async readContext(): Promise<ContextReadResult> {
+  async readContext(options?: ContextReadOptions): Promise<ContextReadResult> {
     try {
       const contextPath = this.getContextPath();
 
@@ -122,11 +131,30 @@ export class ContextDocumentService {
         operationName: 'read context file',
       });
 
-      const document = parseContextDocument(content);
+      let document = parseContextDocument(content);
+
+      // Apply section truncation if requested
+      let truncatedSections = 0;
+      if (options?.maxSections && options.maxSections > 0) {
+        const totalSections = document.sections.length;
+        if (totalSections > options.maxSections) {
+          // Keep the most recent N sections
+          document = {
+            ...document,
+            sections: document.sections.slice(-options.maxSections),
+          };
+          truncatedSections = totalSections - options.maxSections;
+          this.logger.debug(
+            `Truncated ${truncatedSections} sections (keeping ${options.maxSections} most recent)`,
+          );
+        }
+      }
 
       return {
         exists: true,
         document,
+        truncatedSections:
+          truncatedSections > 0 ? truncatedSections : undefined,
       };
     } catch (error) {
       const result = this.handleContextError(error, 'read context');
@@ -256,6 +284,9 @@ export class ContextDocumentService {
 
       this.logger.log(`Appended ${data.mode} section to context document`);
 
+      // Check for automatic cleanup after append
+      await this.autoCleanupIfNeeded();
+
       return {
         success: true,
         filePath: contextPath,
@@ -330,5 +361,132 @@ export class ContextDocumentService {
    */
   getContextFilePath(): string {
     return CONTEXT_FILE_PATH;
+  }
+
+  /**
+   * Check if automatic cleanup is needed based on document size.
+   * Returns cleanup recommendation with size info.
+   */
+  async shouldCleanup(): Promise<{
+    needed: boolean;
+    currentSize: number;
+    threshold: number;
+    level: 'none' | 'warn' | 'cleanup';
+  }> {
+    const readResult = await this.readContext();
+
+    if (!readResult.exists || !readResult.document) {
+      return {
+        needed: false,
+        currentSize: 0,
+        threshold: CONTEXT_SIZE_THRESHOLDS.CLEANUP,
+        level: 'none',
+      };
+    }
+
+    const currentSize = estimateDocumentSize(readResult.document);
+
+    if (currentSize >= CONTEXT_SIZE_THRESHOLDS.CLEANUP) {
+      return {
+        needed: true,
+        currentSize,
+        threshold: CONTEXT_SIZE_THRESHOLDS.CLEANUP,
+        level: 'cleanup',
+      };
+    }
+
+    if (currentSize >= CONTEXT_SIZE_THRESHOLDS.WARN) {
+      return {
+        needed: false,
+        currentSize,
+        threshold: CONTEXT_SIZE_THRESHOLDS.WARN,
+        level: 'warn',
+      };
+    }
+
+    return {
+      needed: false,
+      currentSize,
+      threshold: CONTEXT_SIZE_THRESHOLDS.CLEANUP,
+      level: 'none',
+    };
+  }
+
+  /**
+   * Perform automatic cleanup on the context document.
+   * Summarizes older sections to reduce size while preserving recent history.
+   *
+   * @param keepRecentSectionsFull - Number of recent sections to keep full (default: 2)
+   * @param keepRecentItems - Number of items to keep in summarized sections (default: 5)
+   */
+  async performCleanup(
+    keepRecentSectionsFull: number = 2,
+    keepRecentItems: number = 5,
+  ): Promise<ContextOperationResult> {
+    try {
+      const readResult = await this.readContext();
+
+      if (!readResult.exists || !readResult.document) {
+        return {
+          success: false,
+          error: 'No context document found to cleanup',
+        };
+      }
+
+      const {
+        document: cleanedDocument,
+        originalSize,
+        newSize,
+      } = cleanupContextDocument(
+        readResult.document,
+        keepRecentSectionsFull,
+        keepRecentItems,
+      );
+
+      // Write cleaned document
+      const contextPath = this.getContextPath();
+      const content = serializeContextDocument(cleanedDocument);
+      await withTimeout(fs.writeFile(contextPath, content, 'utf-8'), {
+        timeoutMs: CONTEXT_FILE_TIMEOUT_MS,
+        operationName: 'write context file',
+      });
+
+      const reduction = originalSize - newSize;
+      const reductionPercent = ((reduction / originalSize) * 100).toFixed(1);
+
+      this.logger.log(
+        `Cleaned up context document: ${originalSize} → ${newSize} chars (${reductionPercent}% reduction)`,
+      );
+
+      return {
+        success: true,
+        filePath: contextPath,
+        message: `Context cleaned up successfully. Size reduced by ${reductionPercent}% (${reduction} chars)`,
+        document: cleanedDocument,
+      };
+    } catch (error) {
+      return this.handleContextError(error, 'cleanup context');
+    }
+  }
+
+  /**
+   * Check and perform automatic cleanup if needed.
+   * Called after append operations to maintain document size.
+   */
+  private async autoCleanupIfNeeded(): Promise<void> {
+    const check = await this.shouldCleanup();
+
+    if (check.level === 'warn') {
+      this.logger.warn(
+        `Context document size approaching limit: ${check.currentSize} chars (threshold: ${check.threshold})`,
+      );
+    }
+
+    if (check.needed) {
+      this.logger.log(
+        'Context document size exceeded threshold, performing automatic cleanup...',
+      );
+      await this.performCleanup();
+    }
   }
 }

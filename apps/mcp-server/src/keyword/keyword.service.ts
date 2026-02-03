@@ -25,6 +25,15 @@ import {
   generateSrpInstructions,
 } from './complexity-classifier';
 import { DEFAULT_AUTO_CONFIG } from './auto-executor.types';
+import { type VerbosityLevel } from '../shared/verbosity.types';
+import { MAX_PROMPT_LENGTH_REDOS_DEFENSE } from '../shared/validation.constants';
+import { PrimaryAgentResolver } from './primary-agent-resolver';
+import { ActivationMessageBuilder } from './activation-message.builder';
+import { asyncWithFallback } from '../shared/async.utils';
+import { filterRulesByMode } from './rule-filter';
+import { truncateSkillContent } from '../skill/skill-content.utils';
+import { createAgentSummary } from '../agent/agent-summary.utils';
+import { truncateRuleContent } from '../rules/rules-content.utils';
 
 /**
  * Options for parseMode method
@@ -34,6 +43,16 @@ export interface ParseModeOptions {
   recommendedActAgent?: string;
   /** Resolution context for file-based inference */
   context?: ResolutionContext;
+
+  // ======== Token Optimization Options ========
+  /** Include skills in response (default: true) */
+  includeSkills?: boolean;
+  /** Include agent system prompt in response (default: true) */
+  includeAgent?: boolean;
+  /** Maximum number of skills to include (default: 3, config value) */
+  maxIncludedSkills?: number;
+  /** Verbosity level for response (default: 'standard') */
+  verbosity?: VerbosityLevel;
 }
 
 /**
@@ -86,17 +105,6 @@ export interface AgentSystemPromptInfo {
   systemPrompt: string;
   description: string;
 }
-import { PrimaryAgentResolver } from './primary-agent-resolver';
-import { ActivationMessageBuilder } from './activation-message.builder';
-import { asyncWithFallback } from '../shared/async.utils';
-import { filterRulesByMode } from './rule-filter';
-
-/**
- * Maximum allowed prompt length for defense-in-depth input validation.
- * Prevents potential ReDoS attacks from extremely long input strings.
- * 50KB should be sufficient for any reasonable prompt while protecting against abuse.
- */
-const MAX_PROMPT_LENGTH = 50_000;
 
 /**
  * Default configuration for keyword modes.
@@ -315,11 +323,11 @@ export class KeywordService {
     options?: ParseModeOptions,
   ): Promise<ParseModeResult> {
     // Defense-in-depth: validate input length to prevent ReDoS attacks
-    if (prompt.length > MAX_PROMPT_LENGTH) {
+    if (prompt.length > MAX_PROMPT_LENGTH_REDOS_DEFENSE) {
       this.logger.warn(
-        `Prompt exceeds maximum length (${prompt.length} > ${MAX_PROMPT_LENGTH}), truncating`,
+        `Prompt exceeds maximum length (${prompt.length} > ${MAX_PROMPT_LENGTH_REDOS_DEFENSE}), truncating`,
       );
-      prompt = prompt.slice(0, MAX_PROMPT_LENGTH);
+      prompt = prompt.slice(0, MAX_PROMPT_LENGTH_REDOS_DEFENSE);
     }
 
     const config = await this.loadModeConfig();
@@ -329,7 +337,8 @@ export class KeywordService {
     );
 
     const modeConfig = config.modes[mode];
-    const rules = await this.getRulesForMode(mode);
+    const verbosity = options?.verbosity ?? 'standard';
+    const rules = await this.getRulesForMode(mode, verbosity);
 
     // Only pass recommendedActAgent for ACT mode
     const effectiveRecommendedAgent =
@@ -342,7 +351,7 @@ export class KeywordService {
       modeConfig,
       rules,
       config,
-      options?.context,
+      options,
       effectiveRecommendedAgent,
     );
   }
@@ -452,7 +461,7 @@ export class KeywordService {
     modeConfig: KeywordModesConfig['modes'][Mode],
     rules: RuleContent[],
     config: KeywordModesConfig,
-    context?: ResolutionContext,
+    options?: ParseModeOptions,
     recommendedActAgent?: string,
   ): Promise<ParseModeResult> {
     // 1. Build base result object
@@ -469,7 +478,7 @@ export class KeywordService {
       mode,
       originalPrompt,
       modeConfig.delegates_to,
-      context,
+      options?.context,
       recommendedActAgent,
     );
     await this.addAgentInfoToResult(result, resolvedAgent);
@@ -490,10 +499,10 @@ export class KeywordService {
     this.addComplexityToResult(result, mode, originalPrompt);
 
     // 8. Auto-include relevant skills (for MCP mode to force AI execution)
-    await this.addIncludedSkillsToResult(result, originalPrompt);
+    await this.addIncludedSkillsToResult(result, originalPrompt, options);
 
     // 9. Auto-include primary agent system prompt (for MCP mode to force AI execution)
-    await this.addIncludedAgentToResult(result, mode);
+    await this.addIncludedAgentToResult(result, mode, options);
 
     return result;
   }
@@ -663,26 +672,41 @@ export class KeywordService {
   /**
    * Auto-include relevant skills in the response for MCP mode.
    * This forces AI clients to have skill content without additional tool calls.
+   * Applies verbosity-based content control:
+   * - minimal: metadata only (no content)
+   * - standard: truncated content (3,000 chars max)
+   * - full: complete content
    */
   private async addIncludedSkillsToResult(
     result: ParseModeResult,
     originalPrompt: string,
+    options?: ParseModeOptions,
   ): Promise<void> {
+    // Skip if explicitly disabled
+    if (options?.includeSkills === false) {
+      this.logger.log('Skipping skill inclusion (disabled by options)');
+      return;
+    }
+
     if (!this.getSkillRecommendationsFn || !this.loadSkillContentFn) return;
 
     try {
       const recommendations = this.getSkillRecommendationsFn(originalPrompt);
       if (recommendations.length === 0) return;
 
-      const maxSkills = await this.getMaxIncludedSkills();
+      // Use maxIncludedSkills from options if provided, otherwise use config value
+      const maxSkills =
+        options?.maxIncludedSkills ?? (await this.getMaxIncludedSkills());
+      const verbosity = options?.verbosity ?? 'standard';
       const skills = await this.loadSkillsInParallel(
         recommendations.slice(0, maxSkills),
+        verbosity,
       );
 
       if (skills.length > 0) {
         result.included_skills = skills;
         this.logger.log(
-          `Auto-included ${skills.length} skills: ${skills.map(s => s.name).join(', ')}`,
+          `Auto-included ${skills.length} skills (verbosity: ${verbosity}): ${skills.map(s => s.name).join(', ')}`,
         );
       }
     } catch (error) {
@@ -708,18 +732,33 @@ export class KeywordService {
 
   /**
    * Load multiple skills in parallel and filter out failed loads.
+   * Applies verbosity-based content truncation:
+   * - minimal: omit content entirely (metadata only)
+   * - standard: truncate content to 3,000 chars
+   * - full: include full content
    */
   private async loadSkillsInParallel(
     recommendations: SkillRecommendationInfo[],
+    verbosity: VerbosityLevel,
   ): Promise<IncludedSkill[]> {
     const loadPromises = recommendations.map(async rec => {
       const content = await this.loadSkillContentFn!(rec.skillName);
       if (!content) return null;
 
+      // Apply verbosity-based content control
+      let finalContent: string;
+      if (verbosity === 'minimal') {
+        finalContent = ''; // Metadata only, no content
+      } else if (verbosity === 'standard') {
+        finalContent = truncateSkillContent(content.content);
+      } else {
+        finalContent = content.content; // Full content
+      }
+
       return {
         name: content.name,
         description: content.description,
-        content: content.content,
+        content: finalContent,
         reason: `Matched patterns: ${rec.matchedPatterns.join(', ')} (confidence: ${rec.confidence})`,
       };
     });
@@ -728,11 +767,24 @@ export class KeywordService {
     return results.filter((skill): skill is IncludedSkill => skill !== null);
   }
 
-  /** Auto-include primary agent system prompt for MCP mode. */
+  /**
+   * Auto-include primary agent system prompt for MCP mode.
+   * Applies verbosity-based content control:
+   * - minimal: summary only (no full system prompt)
+   * - standard: summary only (no full system prompt)
+   * - full: full system prompt included
+   */
   private async addIncludedAgentToResult(
     result: ParseModeResult,
     mode: Mode,
+    options?: ParseModeOptions,
   ): Promise<void> {
+    // Skip if explicitly disabled
+    if (options?.includeAgent === false) {
+      this.logger.log('Skipping agent inclusion (disabled by options)');
+      return;
+    }
+
     if (!this.loadAgentSystemPromptFn || !result.delegates_to) return;
 
     const agentPrompt = await asyncWithFallback({
@@ -743,12 +795,36 @@ export class KeywordService {
     });
 
     if (agentPrompt) {
-      result.included_agent = {
-        name: agentPrompt.displayName,
-        systemPrompt: agentPrompt.systemPrompt,
-        expertise: result.delegate_agent_info?.expertise ?? [],
-      };
-      this.logger.log(`Auto-included agent: ${agentPrompt.displayName}`);
+      const verbosity = options?.verbosity ?? 'standard';
+      const expertise = result.delegate_agent_info?.expertise ?? [];
+
+      // Apply verbosity-based system prompt control
+      if (verbosity === 'full') {
+        // Full verbosity: include complete system prompt
+        result.included_agent = {
+          name: agentPrompt.displayName,
+          systemPrompt: agentPrompt.systemPrompt,
+          expertise,
+        };
+      } else {
+        // Minimal/Standard: use summary instead of full system prompt
+        const summary = createAgentSummary({
+          name: result.delegates_to!,
+          displayName: agentPrompt.displayName,
+          expertise,
+          systemPrompt: agentPrompt.systemPrompt,
+        });
+
+        result.included_agent = {
+          name: summary.displayName,
+          systemPrompt: summary.primaryFocus, // Truncated primary focus instead of full prompt
+          expertise: summary.expertise, // Top 5 expertise items
+        };
+      }
+
+      this.logger.log(
+        `Auto-included agent: ${agentPrompt.displayName} (verbosity: ${verbosity})`,
+      );
     }
   }
 
@@ -911,12 +987,15 @@ export class KeywordService {
     return ((this.cacheHits / total) * 100).toFixed(2);
   }
 
-  async getRulesForMode(mode: Mode): Promise<RuleContent[]> {
+  async getRulesForMode(
+    mode: Mode,
+    verbosity: VerbosityLevel = 'standard',
+  ): Promise<RuleContent[]> {
     const config = await this.loadModeConfig();
     const modeConfig = config.modes[mode];
-    const rules: RuleContent[] = [];
 
-    for (const rulePath of modeConfig.rules) {
+    // Load all rules in parallel for better performance
+    const rulePromises = modeConfig.rules.map(async rulePath => {
       const content = await asyncWithFallback({
         fn: () => this.loadRuleFn(rulePath),
         fallback: null as string | null,
@@ -924,12 +1003,15 @@ export class KeywordService {
         logger: this.logger,
       });
 
-      if (content !== null) {
-        rules.push({ name: rulePath, content });
-      }
-    }
+      if (content === null) return null;
 
-    return rules;
+      // Apply verbosity-based truncation
+      const processedContent = truncateRuleContent(content, verbosity);
+      return { name: rulePath, content: processedContent };
+    });
+
+    const results = await Promise.all(rulePromises);
+    return results.filter((rule): rule is RuleContent => rule !== null);
   }
 
   private async getAgentInfo(

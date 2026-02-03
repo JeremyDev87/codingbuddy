@@ -14,6 +14,9 @@ import {
   buildTaskDescription,
   buildParallelExecutionHint,
 } from './agent-prompt.builder';
+import { createAgentSummary } from './agent-summary.utils';
+import type { VerbosityLevel } from '../shared/verbosity.types';
+import { getVerbosityConfig } from '../shared/verbosity.types';
 
 @Injectable()
 export class AgentService {
@@ -43,23 +46,33 @@ export class AgentService {
 
   /**
    * Prepare multiple agents for parallel execution via Claude Code Task tool
+   *
+   * @param mode - Current workflow mode
+   * @param specialists - List of specialist agent names
+   * @param targetFiles - Files to analyze or review
+   * @param sharedContext - Shared context or task description for all agents
+   * @param verbosity - Response detail level: minimal (name only), standard (summary, default), full (complete prompt)
    */
   async prepareParallelAgents(
     mode: Mode,
     specialists: string[],
     targetFiles?: string[],
     sharedContext?: string,
+    verbosity?: VerbosityLevel,
   ): Promise<ParallelAgentSet> {
-    const uniqueSpecialists = [...new Set(specialists)];
+    const uniqueSpecialists = Array.from(new Set(specialists));
     const context: AgentContext = {
       mode,
       targetFiles,
       taskDescription: sharedContext,
     };
 
+    const verbosityConfig = getVerbosityConfig(verbosity || 'standard');
+
     const { agents, failedAgents } = await this.loadAgents(
       uniqueSpecialists,
       context,
+      verbosityConfig.includeAgentPrompt,
     );
 
     return this.buildParallelAgentSet(agents, failedAgents);
@@ -68,9 +81,12 @@ export class AgentService {
   private async loadAgents(
     specialists: string[],
     context: AgentContext,
+    includeFullPrompt: boolean,
   ): Promise<{ agents: PreparedAgent[]; failedAgents: FailedAgent[] }> {
     const results = await Promise.all(
-      specialists.map(name => this.tryLoadAgent(name, context)),
+      specialists.map(name =>
+        this.tryLoadAgent(name, context, includeFullPrompt),
+      ),
     );
 
     const agents: PreparedAgent[] = [];
@@ -80,16 +96,26 @@ export class AgentService {
       if (result.success) {
         agents.push(result.agent);
       } else {
-        failedAgents.push(result.error);
+        // TypeScript narrowing: result is now { success: false; error: FailedAgent }
+        const errorResult = result as { success: false; error: FailedAgent };
+        failedAgents.push(errorResult.error);
       }
     }
 
     return { agents, failedAgents };
   }
 
+  /**
+   * Try to load a single agent with verbosity control
+   *
+   * @param specialistName - Agent identifier
+   * @param context - Agent context for prompt generation
+   * @param includeFullPrompt - Whether to include full taskPrompt (true) or summary only (false)
+   */
   private async tryLoadAgent(
     specialistName: string,
     context: AgentContext,
+    includeFullPrompt: boolean,
   ): Promise<
     | { success: true; agent: PreparedAgent }
     | { success: false; error: FailedAgent }
@@ -99,9 +125,27 @@ export class AgentService {
       const agent: PreparedAgent = {
         id: specialistName,
         displayName: profile.name,
-        taskPrompt: buildAgentSystemPrompt(profile, context),
         description: buildTaskDescription(profile, context),
       };
+
+      if (includeFullPrompt) {
+        // Full verbosity: include complete taskPrompt
+        agent.taskPrompt = buildAgentSystemPrompt(profile, context);
+      } else {
+        // Minimal/Standard verbosity: include summary only
+        const summary = createAgentSummary({
+          name: specialistName,
+          displayName: profile.name,
+          expertise: profile.role?.expertise,
+          systemPrompt: profile.description,
+        });
+        agent.summary = {
+          expertise: summary.expertise,
+          primaryFocus: summary.primaryFocus,
+          fullPromptAvailable: summary.fullPromptAvailable,
+        };
+      }
+
       return { success: true, agent };
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown error';

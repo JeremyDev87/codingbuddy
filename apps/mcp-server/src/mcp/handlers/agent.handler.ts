@@ -107,6 +107,12 @@ export class AgentHandler extends AbstractHandler {
               type: 'string',
               description: 'Shared context or task description for all agents',
             },
+            verbosity: {
+              type: 'string',
+              enum: ['minimal', 'standard', 'full'],
+              description:
+                'Response detail level: minimal (name only), standard (summary, default), full (complete prompt)',
+            },
           },
           required: ['mode', 'specialists'],
         },
@@ -176,6 +182,11 @@ export class AgentHandler extends AbstractHandler {
 
     const targetFiles = extractStringArray(args, 'targetFiles');
     const sharedContext = extractOptionalString(args, 'sharedContext');
+    const verbosity = extractOptionalString(args, 'verbosity') as
+      | 'minimal'
+      | 'standard'
+      | 'full'
+      | undefined;
 
     try {
       const result = await this.agentService.prepareParallelAgents(
@@ -183,6 +194,7 @@ export class AgentHandler extends AbstractHandler {
         specialists,
         targetFiles,
         sharedContext,
+        verbosity,
       );
       return createJsonResponse(result);
     } catch (error) {

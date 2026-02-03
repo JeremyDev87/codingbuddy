@@ -140,7 +140,7 @@ describe('ModeHandler', () => {
         expect(result?.isError).toBeFalsy();
         expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
           'PLAN test task',
-          undefined,
+          { verbosity: 'standard' },
         );
       });
 
@@ -169,7 +169,7 @@ describe('ModeHandler', () => {
         expect(result?.isError).toBeFalsy();
         expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
           'ACT implement feature',
-          { recommendedActAgent: 'frontend-developer' },
+          { recommendedActAgent: 'frontend-developer', verbosity: 'standard' },
         );
       });
 
@@ -182,7 +182,7 @@ describe('ModeHandler', () => {
         expect(result?.isError).toBeFalsy();
         expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
           'ACT implement feature',
-          undefined,
+          { verbosity: 'standard' },
         );
       });
 
@@ -195,7 +195,32 @@ describe('ModeHandler', () => {
         expect(result?.isError).toBeFalsy();
         expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
           'ACT implement feature',
-          undefined,
+          { verbosity: 'standard' },
+        );
+      });
+
+      it('should pass verbosity when provided', async () => {
+        const result = await handler.handle('parse_mode', {
+          prompt: 'PLAN design feature',
+          verbosity: 'minimal',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
+          'PLAN design feature',
+          { verbosity: 'minimal' },
+        );
+      });
+
+      it('should use standard verbosity as default', async () => {
+        const result = await handler.handle('parse_mode', {
+          prompt: 'PLAN design feature',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
+          'PLAN design feature',
+          { verbosity: 'standard' },
         );
       });
 

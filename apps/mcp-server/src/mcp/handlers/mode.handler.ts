@@ -18,6 +18,7 @@ import {
   type ContextDocument,
 } from '../../context/context-document.types';
 import type { Mode } from '../../keyword/keyword.types';
+import { isValidVerbosity } from '../../shared/verbosity.types';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -79,6 +80,12 @@ export class ModeHandler extends AbstractHandler {
               description:
                 'ACT agent recommended from previous PLAN mode. Pass the agentName from recommended_act_agent field of PLAN mode response. Only applies to ACT mode.',
             },
+            verbosity: {
+              type: 'string',
+              enum: ['minimal', 'standard', 'full'],
+              description:
+                'Control response detail level. minimal: metadata only; standard: truncated content (default); full: complete content',
+            },
           },
           required: ['prompt'],
         },
@@ -99,14 +106,21 @@ export class ModeHandler extends AbstractHandler {
     const recommendedAgent =
       extractRequiredString(args, 'recommended_agent') ?? undefined;
 
+    // Extract and validate optional verbosity (defaults to 'standard')
+    const rawVerbosity = extractRequiredString(args, 'verbosity') ?? 'standard';
+    const verbosity = isValidVerbosity(rawVerbosity)
+      ? rawVerbosity
+      : 'standard';
+
     try {
       // Always reload config to ensure fresh language settings
       // This prevents stale config from MCP server startup location issues
       await this.configService.reload();
 
-      const options = recommendedAgent
-        ? { recommendedActAgent: recommendedAgent }
-        : undefined;
+      const options = {
+        ...(recommendedAgent && { recommendedActAgent: recommendedAgent }),
+        verbosity,
+      };
       const result = await this.keywordService.parseMode(prompt, options);
 
       // Get language with diagnostic logging

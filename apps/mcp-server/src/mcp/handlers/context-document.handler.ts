@@ -10,6 +10,8 @@ import {
 } from '../../shared/validation.constants';
 import { CONTEXT_FILE_PATH } from '../../context/context-document.types';
 import type { Mode } from '../../keyword/keyword.types';
+import type { VerbosityLevel } from '../../shared/verbosity.types';
+import { getVerbosityConfig } from '../../shared/verbosity.types';
 
 /**
  * Handler for context document tools.
@@ -28,7 +30,7 @@ export class ContextDocumentHandler extends AbstractHandler {
   }
 
   protected getHandledTools(): string[] {
-    return ['read_context', 'update_context'];
+    return ['read_context', 'update_context', 'cleanup_context'];
   }
 
   protected async handleTool(
@@ -37,9 +39,11 @@ export class ContextDocumentHandler extends AbstractHandler {
   ): Promise<ToolResponse> {
     switch (toolName) {
       case 'read_context':
-        return this.handleReadContext();
+        return this.handleReadContext(args);
       case 'update_context':
         return this.handleUpdateContext(args);
+      case 'cleanup_context':
+        return this.handleCleanupContext(args);
       default:
         return createErrorResponse(`Unknown tool: ${toolName}`);
     }
@@ -49,10 +53,17 @@ export class ContextDocumentHandler extends AbstractHandler {
     return [
       {
         name: 'read_context',
-        description: `Read the current context document from ${CONTEXT_FILE_PATH}. Returns all accumulated context from PLAN/ACT/EVAL modes including decisions, notes, and recommended agents.`,
+        description: `Read the current context document from ${CONTEXT_FILE_PATH}. Returns all accumulated context from PLAN/ACT/EVAL modes including decisions, notes, and recommended agents. Supports verbosity levels for controlling returned data size.`,
         inputSchema: {
           type: 'object',
-          properties: {},
+          properties: {
+            verbosity: {
+              type: 'string',
+              enum: ['minimal', 'standard', 'full'],
+              description:
+                'Control response size: minimal (most recent section only), standard (2 most recent), full (all sections). Default: standard',
+            },
+          },
           required: [],
         },
       },
@@ -61,6 +72,7 @@ export class ContextDocumentHandler extends AbstractHandler {
         description: `MANDATORY: Update the context document at ${CONTEXT_FILE_PATH}.
 - PLAN mode: Resets (clears) existing content and starts fresh.
 - ACT/EVAL modes: Appends new section to existing content (requires PLAN first).
+- Automatic cleanup: If document exceeds size threshold, older sections are automatically summarized.
 Call this at the end of each mode to persist decisions and notes.`,
         inputSchema: {
           type: 'object',
@@ -126,11 +138,44 @@ Call this at the end of each mode to persist decisions and notes.`,
           required: ['mode'],
         },
       },
+      {
+        name: 'cleanup_context',
+        description: `Manually trigger context document cleanup at ${CONTEXT_FILE_PATH}. Summarizes older sections to reduce document size while preserving recent history. Normally happens automatically when size thresholds are exceeded, but can be called manually if needed.`,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            keepRecentSectionsFull: {
+              type: 'number',
+              description:
+                'Number of recent sections to keep full (default: 2)',
+            },
+            keepRecentItems: {
+              type: 'number',
+              description:
+                'Number of recent items to keep in summarized section arrays (default: 5)',
+            },
+          },
+          required: [],
+        },
+      },
     ];
   }
 
-  private async handleReadContext(): Promise<ToolResponse> {
-    const result = await this.contextDocService.readContext();
+  private async handleReadContext(
+    args: Record<string, unknown> | undefined,
+  ): Promise<ToolResponse> {
+    // Extract verbosity level (defaults to 'standard')
+    const verbosityStr = extractOptionalString(args, 'verbosity') || 'standard';
+    const verbosity = verbosityStr as VerbosityLevel;
+    const verbosityConfig = getVerbosityConfig(verbosity);
+
+    // Apply verbosity settings to read options
+    const readOptions =
+      verbosityConfig.maxContextSections === -1
+        ? undefined
+        : { maxSections: verbosityConfig.maxContextSections };
+
+    const result = await this.contextDocService.readContext(readOptions);
 
     if (!result.exists) {
       return createJsonResponse({
@@ -165,6 +210,8 @@ Call this at the end of each mode to persist decisions and notes.`,
         currentMode: document.metadata.currentMode,
         status: document.metadata.status,
         sectionCount: document.sections.length,
+        truncatedSections: result.truncatedSections,
+        verbosityApplied: verbosity,
         recommendedActAgent: planSection?.recommendedActAgent
           ? {
               agent: planSection.recommendedActAgent,
@@ -259,6 +306,42 @@ Call this at the end of each mode to persist decisions and notes.`,
       success: true,
       filePath: CONTEXT_FILE_PATH,
       message: `Context document updated (${typedMode} mode)`,
+      document: result.document,
+    });
+  }
+
+  private async handleCleanupContext(
+    args: Record<string, unknown> | undefined,
+  ): Promise<ToolResponse> {
+    // Extract optional parameters
+    const keepRecentSectionsFull =
+      typeof args?.keepRecentSectionsFull === 'number'
+        ? args.keepRecentSectionsFull
+        : 2;
+    const keepRecentItems =
+      typeof args?.keepRecentItems === 'number' ? args.keepRecentItems : 5;
+
+    // Validate parameters
+    if (keepRecentSectionsFull < 0) {
+      return createErrorResponse('keepRecentSectionsFull must be >= 0');
+    }
+    if (keepRecentItems < 1) {
+      return createErrorResponse('keepRecentItems must be >= 1');
+    }
+
+    const result = await this.contextDocService.performCleanup(
+      keepRecentSectionsFull,
+      keepRecentItems,
+    );
+
+    if (!result.success) {
+      return createErrorResponse(result.error || 'Failed to cleanup context');
+    }
+
+    return createJsonResponse({
+      success: true,
+      filePath: CONTEXT_FILE_PATH,
+      message: result.message,
       document: result.document,
     });
   }

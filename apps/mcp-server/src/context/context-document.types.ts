@@ -68,6 +68,16 @@ export interface ContextSection {
   recommendations?: string[];
   /** Section status */
   status?: 'in_progress' | 'completed' | 'blocked';
+  /** Flag indicating this section was summarized (arrays truncated) */
+  summarized?: boolean;
+  /** Original array lengths before summarization */
+  originalCounts?: {
+    decisions?: number;
+    notes?: number;
+    progress?: number;
+    findings?: number;
+    recommendations?: number;
+  };
 }
 
 /**
@@ -142,6 +152,14 @@ export interface ContextOperationResult {
 }
 
 /**
+ * Context read options for controlling returned data size.
+ */
+export interface ContextReadOptions {
+  /** Maximum number of sections to return (-1 = all) */
+  maxSections?: number;
+}
+
+/**
  * Context read result.
  */
 export interface ContextReadResult {
@@ -151,6 +169,8 @@ export interface ContextReadResult {
   document?: ContextDocument;
   /** Error message if read failed */
   error?: string;
+  /** Number of sections truncated (if limited by maxSections) */
+  truncatedSections?: number;
 }
 
 /**
@@ -248,4 +268,25 @@ export function truncateArray(
         ? item.substring(0, limits.maxItemLength)
         : item,
     );
+}
+
+/**
+ * Estimated size thresholds for automatic cleanup (in characters).
+ * When document exceeds these thresholds, automatic summarization is triggered.
+ */
+export const CONTEXT_SIZE_THRESHOLDS = {
+  /** Soft limit - trigger warning */
+  WARN: 50_000,
+  /** Hard limit - force cleanup */
+  CLEANUP: 100_000,
+} as const;
+
+/**
+ * Configuration for automatic context cleanup.
+ */
+export interface ContextCleanupConfig {
+  /** Maximum number of items to keep in arrays for old sections */
+  keepRecentItems: number;
+  /** Number of most recent sections to keep full (no summarization) */
+  keepRecentSectionsFull: number;
 }

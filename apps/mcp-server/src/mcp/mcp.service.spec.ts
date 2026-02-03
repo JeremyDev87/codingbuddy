@@ -2611,6 +2611,7 @@ describe('McpService', () => {
           ['security-specialist', 'accessibility-specialist'],
           undefined,
           undefined,
+          undefined,
         );
       });
 
@@ -2635,6 +2636,7 @@ describe('McpService', () => {
           ['security-specialist'],
           ['src/api/auth.ts', 'src/api/login.ts'],
           'Review authentication implementation',
+          undefined,
         );
       });
     });

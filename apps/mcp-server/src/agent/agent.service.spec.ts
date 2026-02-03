@@ -230,7 +230,7 @@ describe('AgentService', () => {
       expect(result.parallelExecutionHint).toContain('parallel');
     });
 
-    it('should include task prompt for each agent', async () => {
+    it('should include task prompt for each agent with full verbosity', async () => {
       vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
         mockSecurityAgent,
       );
@@ -240,8 +240,10 @@ describe('AgentService', () => {
         ['security-specialist'],
         ['src/auth/login.ts'],
         'Security review task',
+        'full',
       );
 
+      expect(result.agents[0].taskPrompt).toBeDefined();
       expect(result.agents[0].taskPrompt).toContain('Security Specialist');
       expect(result.agents[0].taskPrompt).toContain('EVAL');
       expect(result.agents[0].taskPrompt).toContain('src/auth/login.ts');
@@ -260,6 +262,125 @@ describe('AgentService', () => {
 
       expect(result.agents[0].description).toBeDefined();
       expect(result.agents[0].description.length).toBeLessThanOrEqual(50);
+    });
+
+    describe('verbosity control', () => {
+      it('should include summary only with standard verbosity (default)', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+          mockSecurityAgent,
+        );
+
+        const result = await service.prepareParallelAgents(
+          'EVAL',
+          ['security-specialist'],
+          ['src/file.ts'],
+        );
+
+        expect(result.agents[0].summary).toBeDefined();
+        expect(result.agents[0].summary?.expertise).toBeDefined();
+        expect(result.agents[0].summary?.primaryFocus).toBeDefined();
+        expect(result.agents[0].taskPrompt).toBeUndefined();
+      });
+
+      it('should include summary only with minimal verbosity', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+          mockSecurityAgent,
+        );
+
+        const result = await service.prepareParallelAgents(
+          'EVAL',
+          ['security-specialist'],
+          ['src/file.ts'],
+          undefined,
+          'minimal',
+        );
+
+        expect(result.agents[0].summary).toBeDefined();
+        expect(result.agents[0].taskPrompt).toBeUndefined();
+      });
+
+      it('should include full taskPrompt with full verbosity', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+          mockSecurityAgent,
+        );
+
+        const result = await service.prepareParallelAgents(
+          'EVAL',
+          ['security-specialist'],
+          ['src/file.ts'],
+          undefined,
+          'full',
+        );
+
+        expect(result.agents[0].taskPrompt).toBeDefined();
+        expect(result.agents[0].taskPrompt).toContain('Security Specialist');
+        expect(result.agents[0].summary).toBeUndefined();
+      });
+
+      it('should truncate expertise in summary to 5 items', async () => {
+        const agentWithManyExpertise: typeof mockSecurityAgent = {
+          ...mockSecurityAgent,
+          role: {
+            ...mockSecurityAgent.role,
+            expertise: [
+              'Item 1',
+              'Item 2',
+              'Item 3',
+              'Item 4',
+              'Item 5',
+              'Item 6',
+              'Item 7',
+            ],
+          },
+        };
+
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+          agentWithManyExpertise,
+        );
+
+        const result = await service.prepareParallelAgents(
+          'EVAL',
+          ['security-specialist'],
+          ['src/file.ts'],
+          undefined,
+          'standard',
+        );
+
+        expect(result.agents[0].summary?.expertise).toHaveLength(5);
+      });
+
+      it('should include primaryFocus in summary', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+          mockSecurityAgent,
+        );
+
+        const result = await service.prepareParallelAgents(
+          'EVAL',
+          ['security-specialist'],
+          ['src/file.ts'],
+          undefined,
+          'standard',
+        );
+
+        expect(result.agents[0].summary?.primaryFocus).toBeDefined();
+        expect(typeof result.agents[0].summary?.primaryFocus).toBe('string');
+      });
+
+      it('should indicate fullPromptAvailable in summary', async () => {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+          mockSecurityAgent,
+        );
+
+        const result = await service.prepareParallelAgents(
+          'EVAL',
+          ['security-specialist'],
+          ['src/file.ts'],
+          undefined,
+          'standard',
+        );
+
+        expect(result.agents[0].summary?.fullPromptAvailable).toBe(true);
+      });
     });
   });
 

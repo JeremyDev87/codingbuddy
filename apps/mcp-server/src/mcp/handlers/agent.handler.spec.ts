@@ -150,6 +150,7 @@ describe('AgentHandler', () => {
           ['security-specialist', 'performance-specialist'],
           undefined,
           undefined,
+          undefined,
         );
       });
 
@@ -215,6 +216,7 @@ describe('AgentHandler', () => {
           ['security-specialist'],
           ['src/app.ts'],
           'Review code',
+          undefined,
         );
       });
 
@@ -233,6 +235,42 @@ describe('AgentHandler', () => {
           type: 'text',
           text: expect.stringContaining('Service error'),
         });
+      });
+
+      it('should pass verbosity parameter', async () => {
+        const result = await handler.handle('prepare_parallel_agents', {
+          mode: 'EVAL',
+          specialists: ['security-specialist'],
+          verbosity: 'minimal',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['security-specialist'],
+          undefined,
+          undefined,
+          'minimal',
+        );
+      });
+
+      it('should pass full verbosity parameter', async () => {
+        const result = await handler.handle('prepare_parallel_agents', {
+          mode: 'EVAL',
+          specialists: ['security-specialist'],
+          targetFiles: ['src/app.ts'],
+          sharedContext: 'Review code',
+          verbosity: 'full',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['security-specialist'],
+          ['src/app.ts'],
+          'Review code',
+          'full',
+        );
       });
     });
   });

@@ -26,8 +26,13 @@ export interface AgentSystemPrompt {
 export interface PreparedAgent {
   id: string;
   displayName: string;
-  taskPrompt: string;
+  taskPrompt?: string;
   description: string;
+  summary?: {
+    expertise: string[];
+    primaryFocus: string;
+    fullPromptAvailable: boolean;
+  };
 }
 
 /**

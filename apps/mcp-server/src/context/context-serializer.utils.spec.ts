@@ -8,6 +8,9 @@ import {
   mergeArraysUnique,
   mergeSection,
   generateTimestamp,
+  summarizeSection,
+  estimateDocumentSize,
+  cleanupContextDocument,
 } from './context-serializer.utils';
 import type { ContextDocument, ContextSection } from './context-document.types';
 
@@ -287,6 +290,290 @@ describe('context-serializer.utils', () => {
       const result = generateTimestamp();
 
       expect(result).toMatch(/\d{2}:\d{2}/);
+    });
+  });
+
+  describe('summarizeSection', () => {
+    it('keeps only the most recent N items in arrays', () => {
+      const section: ContextSection = {
+        mode: 'PLAN',
+        timestamp: '10:00',
+        decisions: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'],
+        notes: ['N1', 'N2', 'N3', 'N4', 'N5'],
+      };
+
+      const summarized = summarizeSection(section, 3);
+
+      expect(summarized.decisions).toEqual(['D6', 'D7', 'D8']);
+      expect(summarized.notes).toEqual(['N3', 'N4', 'N5']);
+      expect(summarized.summarized).toBe(true);
+      expect(summarized.originalCounts).toEqual({
+        decisions: 8,
+        notes: 5,
+        progress: undefined,
+        findings: undefined,
+        recommendations: undefined,
+      });
+    });
+
+    it('handles all array types', () => {
+      const section: ContextSection = {
+        mode: 'EVAL',
+        timestamp: '10:00',
+        progress: ['P1', 'P2', 'P3', 'P4'],
+        findings: ['F1', 'F2', 'F3'],
+        recommendations: ['R1', 'R2', 'R3', 'R4', 'R5'],
+      };
+
+      const summarized = summarizeSection(section, 2);
+
+      expect(summarized.progress).toEqual(['P3', 'P4']);
+      expect(summarized.findings).toEqual(['F2', 'F3']);
+      expect(summarized.recommendations).toEqual(['R4', 'R5']);
+    });
+
+    it('keeps arrays shorter than limit unchanged', () => {
+      const section: ContextSection = {
+        mode: 'PLAN',
+        timestamp: '10:00',
+        decisions: ['D1', 'D2'],
+      };
+
+      const summarized = summarizeSection(section, 5);
+
+      expect(summarized.decisions).toEqual(['D1', 'D2']);
+      expect(summarized.summarized).toBe(true);
+      expect(summarized.originalCounts?.decisions).toBe(2);
+    });
+
+    it('handles undefined arrays', () => {
+      const section: ContextSection = {
+        mode: 'PLAN',
+        timestamp: '10:00',
+      };
+
+      const summarized = summarizeSection(section, 3);
+
+      expect(summarized.decisions).toBeUndefined();
+      expect(summarized.notes).toBeUndefined();
+      expect(summarized.summarized).toBe(true);
+    });
+
+    it('uses default keepRecentItems when not specified', () => {
+      const section: ContextSection = {
+        mode: 'PLAN',
+        timestamp: '10:00',
+        decisions: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'],
+      };
+
+      const summarized = summarizeSection(section);
+
+      expect(summarized.decisions).toHaveLength(5); // default is 5
+      expect(summarized.decisions).toEqual(['D4', 'D5', 'D6', 'D7', 'D8']);
+    });
+  });
+
+  describe('estimateDocumentSize', () => {
+    it('returns character count of serialized document', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          lastUpdatedAt: '2024-01-01T01:00:00.000Z',
+          currentMode: 'PLAN',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            task: 'Test task',
+          },
+        ],
+      };
+
+      const size = estimateDocumentSize(doc);
+
+      expect(size).toBeGreaterThan(0);
+      expect(typeof size).toBe('number');
+    });
+
+    it('returns larger size for documents with more content', () => {
+      const smallDoc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          lastUpdatedAt: '2024-01-01T01:00:00.000Z',
+          currentMode: 'PLAN',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+          },
+        ],
+      };
+
+      const largeDoc: ContextDocument = {
+        ...smallDoc,
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            decisions: Array.from({ length: 100 }, (_, i) => `Decision ${i}`),
+          },
+        ],
+      };
+
+      const smallSize = estimateDocumentSize(smallDoc);
+      const largeSize = estimateDocumentSize(largeDoc);
+
+      expect(largeSize).toBeGreaterThan(smallSize);
+    });
+  });
+
+  describe('cleanupContextDocument', () => {
+    it('summarizes older sections and keeps recent ones full', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          lastUpdatedAt: '2024-01-01T03:00:00.000Z',
+          currentMode: 'EVAL',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            decisions: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'],
+          },
+          {
+            mode: 'ACT',
+            timestamp: '11:00',
+            progress: ['P1', 'P2', 'P3', 'P4'],
+          },
+          {
+            mode: 'EVAL',
+            timestamp: '12:00',
+            findings: ['F1', 'F2'],
+          },
+        ],
+      };
+
+      const result = cleanupContextDocument(doc, 2, 3);
+
+      // PLAN section (oldest) should be summarized
+      const planSection = result.document.sections.find(s => s.mode === 'PLAN');
+      expect(planSection?.summarized).toBe(true);
+      expect(planSection?.decisions).toEqual(['D4', 'D5', 'D6']);
+      expect(planSection?.originalCounts?.decisions).toBe(6);
+
+      // ACT and EVAL sections (recent 2) should remain full
+      const actSection = result.document.sections.find(s => s.mode === 'ACT');
+      expect(actSection?.summarized).toBeUndefined();
+      expect(actSection?.progress).toHaveLength(4);
+
+      const evalSection = result.document.sections.find(s => s.mode === 'EVAL');
+      expect(evalSection?.summarized).toBeUndefined();
+      expect(evalSection?.findings).toHaveLength(2);
+    });
+
+    it('reports size reduction', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          lastUpdatedAt: '2024-01-01T02:00:00.000Z',
+          currentMode: 'ACT',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            decisions: Array.from(
+              { length: 50 },
+              (_, i) => `Decision ${i}: ${'x'.repeat(100)}`,
+            ),
+          },
+          {
+            mode: 'ACT',
+            timestamp: '11:00',
+            progress: ['Progress 1', 'Progress 2'],
+          },
+        ],
+      };
+
+      // Keep 1 recent section full, so PLAN (older) will be summarized
+      const result = cleanupContextDocument(doc, 1, 5);
+
+      expect(result.originalSize).toBeGreaterThan(0);
+      expect(result.newSize).toBeGreaterThan(0);
+      expect(result.newSize).toBeLessThan(result.originalSize);
+    });
+
+    it('does not summarize already summarized sections', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          lastUpdatedAt: '2024-01-01T02:00:00.000Z',
+          currentMode: 'ACT',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            decisions: ['D1', 'D2'],
+            summarized: true,
+            originalCounts: { decisions: 10 },
+          },
+          {
+            mode: 'ACT',
+            timestamp: '11:00',
+            progress: ['P1', 'P2', 'P3'],
+          },
+        ],
+      };
+
+      const result = cleanupContextDocument(doc, 1, 1);
+
+      // PLAN section should remain unchanged (already summarized)
+      const planSection = result.document.sections.find(s => s.mode === 'PLAN');
+      expect(planSection?.decisions).toEqual(['D1', 'D2']);
+      expect(planSection?.summarized).toBe(true);
+      expect(planSection?.originalCounts?.decisions).toBe(10);
+
+      // ACT section (recent) should remain full
+      const actSection = result.document.sections.find(s => s.mode === 'ACT');
+      expect(actSection?.progress).toEqual(['P1', 'P2', 'P3']);
+      expect(actSection?.summarized).toBeUndefined();
+    });
+
+    it('handles empty sections', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          lastUpdatedAt: '2024-01-01T01:00:00.000Z',
+          currentMode: 'PLAN',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+          },
+        ],
+      };
+
+      const result = cleanupContextDocument(doc, 1, 3);
+
+      expect(result.document.sections).toHaveLength(1);
+      expect(result.newSize).toBeLessThanOrEqual(result.originalSize);
     });
   });
 });

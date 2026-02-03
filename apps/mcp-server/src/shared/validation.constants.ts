@@ -22,10 +22,30 @@ export const MAX_CONFIG_FILE_SIZE = 1024 * 1024; // 1MB
 export const MAX_QUERY_LENGTH = 1000;
 
 /**
- * Maximum length for prompts (PLAN/ACT/EVAL mode)
- * Allows for detailed prompts while preventing abuse
+ * Maximum length for prompts (PLAN/ACT/EVAL mode) - Business Logic Validation
+ *
+ * Used by validatePrompt() to return an error for overly long prompts.
+ * This is a hard limit that rejects input with a user-friendly error message.
+ *
+ * @see MAX_PROMPT_LENGTH_REDOS_DEFENSE for the internal truncation limit
  */
 export const MAX_PROMPT_LENGTH = 10000;
+
+/**
+ * Maximum prompt length for ReDoS defense - Internal Truncation Limit
+ *
+ * Used by KeywordService as defense-in-depth against regex denial-of-service attacks.
+ * This is a soft limit that silently truncates (not rejects) extremely long input
+ * before applying regex patterns.
+ *
+ * This value is intentionally higher than MAX_PROMPT_LENGTH (50KB vs 10KB) because:
+ * 1. MAX_PROMPT_LENGTH is for business validation (returns error to user)
+ * 2. This limit is for internal safety (truncates without user notification)
+ * 3. Some internal operations may bypass validatePrompt() but still need protection
+ *
+ * @see MAX_PROMPT_LENGTH for the business logic validation limit
+ */
+export const MAX_PROMPT_LENGTH_REDOS_DEFENSE = 50_000;
 
 /**
  * Maximum length for agent names

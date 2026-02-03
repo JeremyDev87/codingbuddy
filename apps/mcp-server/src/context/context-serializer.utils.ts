@@ -270,3 +270,94 @@ export function generateTimestamp(date: Date = new Date()): string {
     hour12: false,
   });
 }
+
+/**
+ * Summarize a context section by keeping only the most recent N items in arrays.
+ * Used for automatic cleanup to reduce document size.
+ *
+ * Note: Currently uses uniform retention count for all array types.
+ * Future enhancement could apply different retention policies per array type
+ * (e.g., keep more decisions than progress items) if needed.
+ *
+ * @param section - Section to summarize
+ * @param keepRecentItems - Number of recent items to keep (default: 5)
+ * @returns Summarized section with truncated arrays
+ */
+export function summarizeSection(
+  section: ContextSection,
+  keepRecentItems: number = 5,
+): ContextSection {
+  // Store original counts before summarization
+  const originalCounts = {
+    decisions: section.decisions?.length,
+    notes: section.notes?.length,
+    progress: section.progress?.length,
+    findings: section.findings?.length,
+    recommendations: section.recommendations?.length,
+  };
+
+  return {
+    ...section,
+    decisions: section.decisions?.slice(-keepRecentItems),
+    notes: section.notes?.slice(-keepRecentItems),
+    progress: section.progress?.slice(-keepRecentItems),
+    findings: section.findings?.slice(-keepRecentItems),
+    recommendations: section.recommendations?.slice(-keepRecentItems),
+    summarized: true,
+    originalCounts,
+  };
+}
+
+/**
+ * Calculate estimated size of a context document in characters.
+ * Used for determining when automatic cleanup is needed.
+ *
+ * @param document - Context document
+ * @returns Estimated size in characters
+ */
+export function estimateDocumentSize(document: ContextDocument): number {
+  const serialized = serializeContextDocument(document);
+  return serialized.length;
+}
+
+/**
+ * Apply automatic cleanup to a context document.
+ * Summarizes older sections while keeping recent ones full.
+ *
+ * @param document - Context document to cleanup
+ * @param keepRecentSectionsFull - Number of recent sections to keep full
+ * @param keepRecentItems - Number of items to keep in summarized sections
+ * @returns Cleaned up document with size reduction info
+ */
+export function cleanupContextDocument(
+  document: ContextDocument,
+  keepRecentSectionsFull: number = 2,
+  keepRecentItems: number = 5,
+): { document: ContextDocument; originalSize: number; newSize: number } {
+  const originalSize = estimateDocumentSize(document);
+
+  // Keep the most recent sections full, summarize older ones
+  const sectionsCount = document.sections.length;
+  const cleanedSections = document.sections.map((section, index) => {
+    const isRecent = index >= sectionsCount - keepRecentSectionsFull;
+    if (isRecent || section.summarized) {
+      // Keep recent sections or already summarized sections unchanged
+      return section;
+    }
+    // Summarize older sections
+    return summarizeSection(section, keepRecentItems);
+  });
+
+  const cleanedDocument: ContextDocument = {
+    ...document,
+    sections: cleanedSections,
+  };
+
+  const newSize = estimateDocumentSize(cleanedDocument);
+
+  return {
+    document: cleanedDocument,
+    originalSize,
+    newSize,
+  };
+}

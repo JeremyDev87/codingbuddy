@@ -770,4 +770,327 @@ describe('ContextDocumentService', () => {
       );
     });
   });
+
+  describe('readContext with options', () => {
+    const MULTI_SECTION_CONTEXT = `# Context: Multi Section
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T03:00:00.000Z
+**Current Mode**: EVAL
+**Status**: active
+
+---
+
+## PLAN (10:00)
+**Status**: completed
+### Task
+Planning task
+---
+
+## ACT (11:00)
+**Status**: completed
+### Task
+Implementation task
+---
+
+## EVAL (12:00)
+**Status**: in_progress
+### Task
+Evaluation task
+---`;
+
+    it('should return all sections when no maxSections specified', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(MULTI_SECTION_CONTEXT);
+
+      const result = await service.readContext();
+
+      expect(result.exists).toBe(true);
+      expect(result.document?.sections).toHaveLength(3);
+      expect(result.truncatedSections).toBeUndefined();
+    });
+
+    it('should return only maxSections most recent sections', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(MULTI_SECTION_CONTEXT);
+
+      const result = await service.readContext({ maxSections: 2 });
+
+      expect(result.exists).toBe(true);
+      expect(result.document?.sections).toHaveLength(2);
+      expect(result.document?.sections[0].mode).toBe('ACT');
+      expect(result.document?.sections[1].mode).toBe('EVAL');
+      expect(result.truncatedSections).toBe(1);
+    });
+
+    it('should return 1 section for minimal verbosity', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(MULTI_SECTION_CONTEXT);
+
+      const result = await service.readContext({ maxSections: 1 });
+
+      expect(result.exists).toBe(true);
+      expect(result.document?.sections).toHaveLength(1);
+      expect(result.document?.sections[0].mode).toBe('EVAL');
+      expect(result.truncatedSections).toBe(2);
+    });
+
+    it('should handle maxSections larger than actual sections', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(MULTI_SECTION_CONTEXT);
+
+      const result = await service.readContext({ maxSections: 10 });
+
+      expect(result.exists).toBe(true);
+      expect(result.document?.sections).toHaveLength(3);
+      expect(result.truncatedSections).toBeUndefined();
+    });
+  });
+
+  describe('shouldCleanup', () => {
+    it('should return none when no context exists', async () => {
+      vi.mocked(existsSync).mockReturnValue(false);
+
+      const result = await service.shouldCleanup();
+
+      expect(result.needed).toBe(false);
+      expect(result.level).toBe('none');
+      expect(result.currentSize).toBe(0);
+    });
+
+    it('should return none for small documents', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(
+        TEST_FIXTURES.BASIC_PLAN_CONTEXT,
+      );
+
+      const result = await service.shouldCleanup();
+
+      expect(result.needed).toBe(false);
+      expect(result.level).toBe('none');
+      expect(result.currentSize).toBeLessThan(50_000);
+    });
+
+    it('should return warn for documents approaching limit', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      // Create large content (>50k but <100k chars)
+      const largeContent = `# Context: Large
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T01:00:00.000Z
+**Current Mode**: PLAN
+**Status**: active
+
+---
+
+## PLAN (10:00)
+**Status**: completed
+### Decisions
+${Array.from({ length: 1000 }, (_, i) => `- Decision ${i}: ${'x'.repeat(50)}`).join('\n')}
+---`;
+
+      vi.mocked(fs.readFile).mockResolvedValue(largeContent);
+
+      const result = await service.shouldCleanup();
+
+      expect(result.level).toBe('warn');
+      expect(result.currentSize).toBeGreaterThanOrEqual(50_000);
+      expect(result.currentSize).toBeLessThan(100_000);
+    });
+
+    it('should return cleanup for documents exceeding limit', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      // Create very large content (>100k chars)
+      const veryLargeContent = `# Context: Very Large
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T01:00:00.000Z
+**Current Mode**: PLAN
+**Status**: active
+
+---
+
+## PLAN (10:00)
+**Status**: completed
+### Decisions
+${Array.from({ length: 2000 }, (_, i) => `- Decision ${i}: ${'x'.repeat(50)}`).join('\n')}
+---`;
+
+      vi.mocked(fs.readFile).mockResolvedValue(veryLargeContent);
+
+      const result = await service.shouldCleanup();
+
+      expect(result.needed).toBe(true);
+      expect(result.level).toBe('cleanup');
+      expect(result.currentSize).toBeGreaterThanOrEqual(100_000);
+    });
+  });
+
+  describe('performCleanup', () => {
+    it('should return error when no context exists', async () => {
+      vi.mocked(existsSync).mockReturnValue(false);
+
+      const result = await service.performCleanup();
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('No context document found');
+    });
+
+    it('should summarize older sections and keep recent ones full', async () => {
+      const contextWithMultipleSections = `# Context: Test
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T03:00:00.000Z
+**Current Mode**: EVAL
+**Status**: active
+
+---
+
+## PLAN (10:00)
+**Status**: completed
+### Decisions
+- Decision 1
+- Decision 2
+- Decision 3
+- Decision 4
+- Decision 5
+- Decision 6
+- Decision 7
+- Decision 8
+---
+
+## ACT (11:00)
+**Status**: completed
+### Progress
+- Progress 1
+- Progress 2
+- Progress 3
+- Progress 4
+- Progress 5
+- Progress 6
+---
+
+## EVAL (12:00)
+**Status**: in_progress
+### Findings
+- Finding 1
+- Finding 2
+---`;
+
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(contextWithMultipleSections);
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const result = await service.performCleanup(2, 3);
+
+      expect(result.success).toBe(true);
+      expect(result.document).toBeDefined();
+
+      // PLAN section should be summarized (kept last 3 items)
+      const planSection = result.document?.sections.find(
+        s => s.mode === 'PLAN',
+      );
+      expect(planSection?.summarized).toBe(true);
+      expect(planSection?.decisions).toHaveLength(3);
+      expect(planSection?.decisions).toEqual([
+        'Decision 6',
+        'Decision 7',
+        'Decision 8',
+      ]);
+      expect(planSection?.originalCounts?.decisions).toBe(8);
+
+      // ACT and EVAL sections should remain full (recent)
+      const actSection = result.document?.sections.find(s => s.mode === 'ACT');
+      expect(actSection?.summarized).toBeUndefined();
+      expect(actSection?.progress).toHaveLength(6);
+
+      const evalSection = result.document?.sections.find(
+        s => s.mode === 'EVAL',
+      );
+      expect(evalSection?.summarized).toBeUndefined();
+      expect(evalSection?.findings).toHaveLength(2);
+    });
+
+    it('should log size reduction', async () => {
+      // Create a document with significant content to reduce
+      const largeDocumentForCleanup = `# Context: Test
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T02:00:00.000Z
+**Current Mode**: ACT
+**Status**: active
+
+---
+
+## PLAN (10:00)
+**Status**: completed
+### Decisions
+${Array.from({ length: 50 }, (_, i) => `- Decision ${i}`).join('\n')}
+---
+
+## ACT (11:00)
+**Status**: in_progress
+### Progress
+- Progress 1
+---`;
+
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(largeDocumentForCleanup);
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const result = await service.performCleanup(1, 5);
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('reduced');
+      // Verify actual size reduction occurred
+      expect(result.message).toMatch(/Size reduced by \d+\.\d+% \(\d+ chars\)/);
+    });
+  });
+
+  describe('auto cleanup integration', () => {
+    it('should trigger auto cleanup when appending to large document', async () => {
+      // Create a document that exceeds cleanup threshold
+      const largeDocument = `# Context: Large
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T01:00:00.000Z
+**Current Mode**: PLAN
+**Status**: active
+
+---
+
+## PLAN (10:00)
+**Status**: completed
+### Decisions
+${Array.from({ length: 2000 }, (_, i) => `- Decision ${i}: ${'x'.repeat(50)}`).join('\n')}
+---`;
+
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(largeDocument);
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      // Mock to track if cleanup was called
+      const performCleanupSpy = vi.spyOn(service, 'performCleanup');
+
+      await service.appendContext({
+        mode: 'ACT',
+        task: 'New task',
+      });
+
+      // Auto cleanup should have been triggered
+      expect(performCleanupSpy).toHaveBeenCalled();
+    });
+
+    it('should not trigger auto cleanup for small documents', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(
+        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
+      );
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const performCleanupSpy = vi.spyOn(service, 'performCleanup');
+
+      await service.appendContext({
+        mode: 'ACT',
+        task: 'New task',
+      });
+
+      // Auto cleanup should NOT have been triggered
+      expect(performCleanupSpy).not.toHaveBeenCalled();
+    });
+  });
 });

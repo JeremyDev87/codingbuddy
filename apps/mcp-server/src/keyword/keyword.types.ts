@@ -1,4 +1,9 @@
+import { type VerbosityLevel } from '../shared/verbosity.types';
+
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
+
+// Re-export VerbosityLevel for convenience
+export type { VerbosityLevel };
 
 export type Mode = (typeof KEYWORDS)[number];
 
