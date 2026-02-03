@@ -14,6 +14,7 @@ Reusable workflows for consistent development practices.
 | executing-plans | Execute implementation plans with review checkpoints | Following written plans |
 | frontend-design | Create distinctive, production-grade frontend interfaces | Building web components/pages |
 | incident-response | Systematic organizational response to production incidents | Production incidents, alerts, service degradation |
+| pr-all-in-one | Unified commit and PR workflow with smart issue linking | `/pr-all-in-one [target] [issue]` |
 | pr-review | Systematic, evidence-based PR review with anti-sycophancy principles | Conducting manual PR reviews |
 | refactoring | Structured, test-driven refactoring workflow with Tidy First principles | Improving code structure without changing behavior |
 | subagent-driven-development | Execute plans with independent tasks in current session | In-session plan execution |
@@ -131,6 +132,11 @@ EOF
 ├── performance-optimization/
 │   ├── SKILL.md
 │   └── documentation-template.md
+├── pr-all-in-one/
+│   ├── SKILL.md
+│   ├── configuration-guide.md
+│   ├── issue-patterns.md
+│   └── pr-templates.md
 ├── pr-review/
 │   └── SKILL.md
 ├── refactoring/

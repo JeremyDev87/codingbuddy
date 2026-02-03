@@ -1,0 +1,15 @@
+{
+  "$comment": "Example configuration with {issue} placeholder in branch naming. Default pattern is {type}/{description}",
+  "defaultTargetBranch": "main",
+  "issueTracker": "jira",
+  "issuePattern": "[A-Z]+-[0-9]+",
+  "issueUrlTemplate": "https://your-domain.atlassian.net/browse/{id}",
+  "prLanguage": "bilingual",
+  "commitLanguage": "en",
+  "conventionalCommits": true,
+  "branchNaming": {
+    "pattern": "{type}/{issue}-{description}",
+    "types": ["feat", "fix", "chore", "docs", "refactor", "test"]
+  },
+  "draftByDefault": true
+}
