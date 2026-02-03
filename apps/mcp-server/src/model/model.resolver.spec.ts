@@ -7,7 +7,6 @@ import {
   getAllPrefixes,
   formatUnknownModelWarning,
 } from './model.resolver';
-import { isModelConfig } from './model.types';
 
 describe('formatUnknownModelWarning', () => {
   it('should format warning message with model and default prefixes', () => {
@@ -95,33 +94,12 @@ describe('isKnownModel', () => {
 
 describe('resolveModel', () => {
   describe('priority order', () => {
-    it('should return agent model when all levels are provided', () => {
+    it('should return global model when provided', () => {
       const result = resolveModel({
-        agentModel: { preferred: 'agent-model' },
-        modeModel: { preferred: 'mode-model' },
-        globalDefaultModel: 'global-model',
+        globalDefaultModel: 'claude-opus-4-20250514',
       });
 
-      expect(result.model).toBe('agent-model');
-      expect(result.source).toBe('agent');
-    });
-
-    it('should return mode model when agent is not provided', () => {
-      const result = resolveModel({
-        modeModel: { preferred: 'mode-model' },
-        globalDefaultModel: 'global-model',
-      });
-
-      expect(result.model).toBe('mode-model');
-      expect(result.source).toBe('mode');
-    });
-
-    it('should return global model when agent and mode are not provided', () => {
-      const result = resolveModel({
-        globalDefaultModel: 'global-model',
-      });
-
-      expect(result.model).toBe('global-model');
+      expect(result.model).toBe('claude-opus-4-20250514');
       expect(result.source).toBe('global');
     });
 
@@ -131,40 +109,8 @@ describe('resolveModel', () => {
       expect(result.model).toBe(SYSTEM_DEFAULT_MODEL);
       expect(result.source).toBe('system');
     });
-  });
 
-  describe('edge cases', () => {
-    it('should skip agent with undefined preferred', () => {
-      const result = resolveModel({
-        agentModel: { preferred: undefined as unknown as string },
-        modeModel: { preferred: 'mode-model' },
-      });
-
-      expect(result.model).toBe('mode-model');
-      expect(result.source).toBe('mode');
-    });
-
-    it('should skip agent with empty string preferred', () => {
-      const result = resolveModel({
-        agentModel: { preferred: '' },
-        modeModel: { preferred: 'mode-model' },
-      });
-
-      expect(result.model).toBe('mode-model');
-      expect(result.source).toBe('mode');
-    });
-
-    it('should skip mode with empty string preferred', () => {
-      const result = resolveModel({
-        modeModel: { preferred: '' },
-        globalDefaultModel: 'global-model',
-      });
-
-      expect(result.model).toBe('global-model');
-      expect(result.source).toBe('global');
-    });
-
-    it('should skip empty global default', () => {
+    it('should return system default when global is empty string', () => {
       const result = resolveModel({
         globalDefaultModel: '',
       });
@@ -183,7 +129,7 @@ describe('resolveModel', () => {
   describe('model validation warning', () => {
     it('should not include warning for known models', () => {
       const result = resolveModel({
-        agentModel: { preferred: 'claude-sonnet-4-20250514' },
+        globalDefaultModel: 'claude-sonnet-4-20250514',
       });
 
       expect(result.model).toBe('claude-sonnet-4-20250514');
@@ -192,7 +138,7 @@ describe('resolveModel', () => {
 
     it('should include warning for unknown models', () => {
       const result = resolveModel({
-        agentModel: { preferred: 'unknown-model' },
+        globalDefaultModel: 'unknown-model',
       });
 
       expect(result.model).toBe('unknown-model');
@@ -206,17 +152,6 @@ describe('resolveModel', () => {
 
       expect(result.model).toBe(SYSTEM_DEFAULT_MODEL);
       expect(result.warning).toBeUndefined();
-    });
-
-    it('should include warning for unknown global config model', () => {
-      const result = resolveModel({
-        globalDefaultModel: 'gpt-4-turbo',
-      });
-
-      expect(result.model).toBe('gpt-4-turbo');
-      expect(result.source).toBe('global');
-      expect(result.warning).toBeDefined();
-      expect(result.warning).toContain('gpt-4-turbo');
     });
 
     it('should not include warning when model matches additionalPrefixes', () => {
@@ -245,7 +180,7 @@ describe('resolveModel', () => {
   describe('haiku deprecation warning', () => {
     it('should include deprecation warning for haiku models', () => {
       const result = resolveModel({
-        agentModel: { preferred: 'claude-haiku-3-5-20241022' },
+        globalDefaultModel: 'claude-haiku-3-5-20241022',
       });
 
       expect(result.model).toBe('claude-haiku-3-5-20241022');
@@ -264,7 +199,7 @@ describe('resolveModel', () => {
 
     it('should not include deprecation warning for opus models', () => {
       const result = resolveModel({
-        agentModel: { preferred: 'claude-opus-4-20250514' },
+        globalDefaultModel: 'claude-opus-4-20250514',
       });
 
       expect(result.warning).toBeUndefined();
@@ -272,43 +207,10 @@ describe('resolveModel', () => {
 
     it('should not include deprecation warning for sonnet models', () => {
       const result = resolveModel({
-        agentModel: { preferred: 'claude-sonnet-4-20250514' },
+        globalDefaultModel: 'claude-sonnet-4-20250514',
       });
 
       expect(result.warning).toBeUndefined();
     });
-  });
-});
-
-describe('isModelConfig', () => {
-  it('should return true for valid ModelConfig with preferred string', () => {
-    expect(isModelConfig({ preferred: 'claude-sonnet-4-20250514' })).toBe(true);
-    expect(isModelConfig({ preferred: 'gpt-4', reason: 'test' })).toBe(true);
-  });
-
-  it('should return false for null or undefined', () => {
-    expect(isModelConfig(null)).toBe(false);
-    expect(isModelConfig(undefined)).toBe(false);
-  });
-
-  it('should return false for non-object values', () => {
-    expect(isModelConfig('string')).toBe(false);
-    expect(isModelConfig(123)).toBe(false);
-    expect(isModelConfig(true)).toBe(false);
-  });
-
-  it('should return false for object without preferred property', () => {
-    expect(isModelConfig({})).toBe(false);
-    expect(isModelConfig({ model: 'claude-sonnet-4' })).toBe(false);
-  });
-
-  it('should return false for object with non-string preferred', () => {
-    expect(isModelConfig({ preferred: 123 })).toBe(false);
-    expect(isModelConfig({ preferred: null })).toBe(false);
-    expect(isModelConfig({ preferred: undefined })).toBe(false);
-  });
-
-  it('should return false for object with empty string preferred', () => {
-    expect(isModelConfig({ preferred: '' })).toBe(false);
   });
 });

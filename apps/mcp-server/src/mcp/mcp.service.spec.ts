@@ -375,13 +375,9 @@ const createMockContextService = (): Partial<ContextService> => ({
 });
 
 const createMockModelResolverService = (): Partial<ModelResolverService> => ({
-  resolveForMode: vi.fn().mockResolvedValue({
+  resolve: vi.fn().mockResolvedValue({
     model: 'claude-sonnet-4-20250514',
-    source: 'system',
-  }),
-  resolveForAgent: vi.fn().mockResolvedValue({
-    model: 'claude-sonnet-4-20250514',
-    source: 'system',
+    source: 'global',
   }),
 });
 
@@ -463,7 +459,10 @@ function createMcpServiceWithHandlers(
   const services = { ...defaults, ...overrides };
 
   const toolHandlers: ToolHandler[] = [
-    new RulesHandler(services.rulesService as RulesService),
+    new RulesHandler(
+      services.rulesService as RulesService,
+      services.modelResolverService as ModelResolverService,
+    ),
     new ConfigHandler(
       services.configService as ConfigService,
       services.configDiffService as ConfigDiffService,
@@ -765,7 +764,7 @@ describe('McpService', () => {
     });
 
     describe('resolvedModel field in get_agent_details', () => {
-      it('should include resolvedModel with source: agent when agent has model.preferred', async () => {
+      it('should include resolvedModel from global config (v4.0.0 - agent model removed)', async () => {
         vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
           name: 'Frontend Developer',
           description: 'Frontend development specialist',
@@ -773,10 +772,6 @@ describe('McpService', () => {
             title: 'Senior Frontend Developer',
             expertise: ['React', 'TypeScript'],
             responsibilities: ['Write clean code', 'Follow best practices'],
-          },
-          model: {
-            preferred: 'claude-sonnet-4-20250514',
-            reason: 'Balanced model optimized for code generation',
           },
           source: 'default',
         });
@@ -792,13 +787,14 @@ describe('McpService', () => {
         })) as { content: { type: string; text: string }[] };
 
         const parsed = JSON.parse(result.content[0].text);
+        // v4.0.0: Model is now resolved from global config, not agent
         expect(parsed.resolvedModel).toEqual({
           model: 'claude-sonnet-4-20250514',
-          source: 'agent',
+          source: 'global',
         });
       });
 
-      it('should include resolvedModel with source: system when agent has no model', async () => {
+      it('should include resolvedModel for any agent (no longer depends on agent model)', async () => {
         vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
           name: 'Legacy Agent',
           description: 'Agent without model config',
@@ -820,78 +816,10 @@ describe('McpService', () => {
         })) as { content: { type: string; text: string }[] };
 
         const parsed = JSON.parse(result.content[0].text);
+        // v4.0.0: All agents use global config for model resolution
         expect(parsed.resolvedModel).toEqual({
           model: 'claude-sonnet-4-20250514',
-          source: 'system',
-        });
-      });
-
-      it('should include resolvedModel with source: system when agent model has no preferred', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Partial Model Agent',
-          description: 'Agent with partial model config',
-          role: {
-            title: 'Partial Role',
-            expertise: ['Partial Tech'],
-          },
-          model: {
-            reason: 'Some reason but no preferred model',
-          },
-          source: 'default',
-        });
-
-        const handler = handlers.get('tools/call');
-        expect(handler).toBeDefined();
-
-        const result = (await handler!({
-          params: {
-            name: 'get_agent_details',
-            arguments: { agentName: 'partial-model-agent' },
-          },
-        })) as { content: { type: string; text: string }[] };
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.resolvedModel).toEqual({
-          model: 'claude-sonnet-4-20250514',
-          source: 'system',
-        });
-      });
-
-      it('should preserve original model field in response alongside resolvedModel', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue({
-          name: 'Frontend Developer',
-          description: 'Frontend development specialist',
-          role: {
-            title: 'Senior Frontend Developer',
-            expertise: ['React', 'TypeScript'],
-          },
-          model: {
-            preferred: 'claude-opus-4-20250514',
-            reason: 'Best for complex reasoning',
-          },
-          source: 'default',
-        });
-
-        const handler = handlers.get('tools/call');
-        expect(handler).toBeDefined();
-
-        const result = (await handler!({
-          params: {
-            name: 'get_agent_details',
-            arguments: { agentName: 'frontend-developer' },
-          },
-        })) as { content: { type: string; text: string }[] };
-
-        const parsed = JSON.parse(result.content[0].text);
-        // Original model field should be preserved
-        expect(parsed.model).toEqual({
-          preferred: 'claude-opus-4-20250514',
-          reason: 'Best for complex reasoning',
-        });
-        // And resolvedModel should also be present
-        expect(parsed.resolvedModel).toEqual({
-          model: 'claude-opus-4-20250514',
-          source: 'agent',
+          source: 'global',
         });
       });
     });
@@ -997,12 +925,12 @@ describe('McpService', () => {
     });
 
     describe('resolvedModel field in parse_mode', () => {
-      it('should include resolvedModel with source: mode when mode agent has model.preferred', async () => {
-        // Create service with modelResolverService returning mode source
+      it('should include resolvedModel with source: global when global config is set', async () => {
+        // Create service with modelResolverService returning global source
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-sonnet-4-20250514',
-            source: 'mode',
+            source: 'global',
           }),
         };
         handlers.clear();
@@ -1025,14 +953,14 @@ describe('McpService', () => {
         const parsedContent = JSON.parse(result.content[0].text);
         expect(parsedContent.resolvedModel).toEqual({
           model: 'claude-sonnet-4-20250514',
-          source: 'mode',
+          source: 'global',
         });
       });
 
-      it('should include resolvedModel with source: system when mode agent has no model', async () => {
+      it('should include resolvedModel with source: system when no global config', async () => {
         // Create service with modelResolverService returning system source
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-sonnet-4-20250514',
             source: 'system',
           }),
@@ -1061,10 +989,10 @@ describe('McpService', () => {
         });
       });
 
-      it('should include resolvedModel with source: system when mode agent loading fails', async () => {
-        // Create service with modelResolverService returning system source (simulating agent load failure)
+      it('should include resolvedModel with source: system when config loading fails', async () => {
+        // Create service with modelResolverService returning system source (simulating config load failure)
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-sonnet-4-20250514',
             source: 'system',
           }),
@@ -1094,11 +1022,11 @@ describe('McpService', () => {
       });
 
       it('should include resolvedModel for ACT mode', async () => {
-        // Create service with modelResolverService returning mode source for ACT
+        // Create service with modelResolverService returning global source for ACT
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-opus-4-20250514',
-            source: 'mode',
+            source: 'global',
           }),
         };
         handlers.clear();
@@ -1121,16 +1049,16 @@ describe('McpService', () => {
         const parsedContent = JSON.parse(result.content[0].text);
         expect(parsedContent.resolvedModel).toEqual({
           model: 'claude-opus-4-20250514',
-          source: 'mode',
+          source: 'global',
         });
       });
 
       it('should include resolvedModel for EVAL mode', async () => {
-        // Create service with modelResolverService returning mode source for EVAL
+        // Create service with modelResolverService returning global source for EVAL
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-sonnet-4-20250514',
-            source: 'mode',
+            source: 'global',
           }),
         };
         handlers.clear();
@@ -1153,16 +1081,16 @@ describe('McpService', () => {
         const parsedContent = JSON.parse(result.content[0].text);
         expect(parsedContent.resolvedModel).toEqual({
           model: 'claude-sonnet-4-20250514',
-          source: 'mode',
+          source: 'global',
         });
       });
 
       it('should include resolvedModel even when no mode keyword is provided (defaults to PLAN)', async () => {
-        // Create service with default modelResolverService (returns system default)
+        // Create service with modelResolverService returning global source
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-sonnet-4-20250514',
-            source: 'mode',
+            source: 'global',
           }),
         };
         handlers.clear();
@@ -1187,10 +1115,10 @@ describe('McpService', () => {
         expect(parsedContent.resolvedModel).toBeDefined();
       });
 
-      it('should use global config when mode agent has no model', async () => {
+      it('should use global config when available', async () => {
         // Create service with modelResolverService returning global source
         const customModelResolverService: Partial<ModelResolverService> = {
-          resolveForMode: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-opus-4-20250514',
             source: 'global',
           }),
@@ -1556,11 +1484,7 @@ describe('McpService', () => {
         handlers.clear();
         // Mock modelResolverService to return system default (simulating error recovery)
         const customModelResolverService = {
-          resolveForMode: vi.fn().mockResolvedValue({
-            model: 'claude-sonnet-4-20250514',
-            source: 'system',
-          }),
-          resolveForAgent: vi.fn().mockResolvedValue({
+          resolve: vi.fn().mockResolvedValue({
             model: 'claude-sonnet-4-20250514',
             source: 'system',
           }),

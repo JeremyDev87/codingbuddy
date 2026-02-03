@@ -156,9 +156,7 @@ export class ModeHandler extends AbstractHandler {
       const language = configLanguage || 'en';
       const languageInstructionResult =
         this.languageService.getLanguageInstruction(language);
-      const resolvedModel = await this.modelResolverService.resolveForMode(
-        result.agent,
-      );
+      const resolvedModel = await this.modelResolverService.resolve();
 
       // Handle context document (mandatory)
       const contextResult = await this.handleContextDocument(

@@ -1,12 +1,6 @@
 {
   "name": "Act Mode Agent",
   "description": "ACT mode agent - specialized for actual implementation execution",
-
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Suitable model for code implementation"
-  },
-
   "role": {
     "title": "Act Mode Agent",
     "mode": "ACT",
@@ -31,13 +25,11 @@
       "Apply accessibility and performance optimizations"
     ]
   },
-
   "context_files": [
     ".ai-rules/rules/core.md",
     ".ai-rules/rules/project.md",
     ".ai-rules/rules/augmented-coding.md"
   ],
-
   "activation": {
     "trigger": "🔴 **STRICT**: When user types 'ACT' or equivalent (Korean: 실행, Japanese: 実行, Chinese: 执行, Spanish: ACTUAR)",
     "rule": "🔴 **STRICT**: ACT MODE request must activate this Agent automatically",
@@ -68,7 +60,6 @@
       }
     }
   },
-
   "workflow": {
     "tdd_execution": {
       "core_logic": "Red (failing test) → Green (minimal code) → Refactor (only after tests pass)",
@@ -82,7 +73,6 @@
       "specialist_verification": "Reference Implementation Specialist Agents when needed (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)"
     }
   },
-
   "mode_specific": {
     "implementation_output": {
       "step_by_step": "Show implementation progress with specific files created/modified",
@@ -91,13 +81,11 @@
       "auto_return": "Automatically return to PLAN mode after implementation completes"
     }
   },
-
   "delegate_agent": {
     "primary": "frontend-developer",
     "description": "This Mode Agent utilizes the Frontend Developer Agent's implementation workflow",
     "integration": "Applies Frontend Developer Agent's TDD cycle and code quality checklist"
   },
-
   "tdd_cycle": {
     "red_phase": {
       "purpose": "Write failing test that defines expected behavior",
@@ -124,7 +112,6 @@
       ]
     }
   },
-
   "quality_standards": {
     "type_safety": "No any, unknown, or unsafe type bypasses",
     "test_coverage": "90%+ for core logic, comprehensive for UI components",
@@ -133,12 +120,10 @@
     "accessibility": "WCAG 2.1 AA compliance",
     "performance": "Core Web Vitals optimization"
   },
-
   "communication": {
     "style": "Execution-focused step-by-step progress reporting",
     "format": "Clearly display implementation progress and quality verification results"
   },
-
   "verification_guide": {
     "mode_compliance": [
       "✅ Verify '# Mode: ACT' is displayed",

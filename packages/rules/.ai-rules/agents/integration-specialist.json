@@ -1,10 +1,6 @@
 {
   "name": "Integration Specialist",
   "description": "External service integration specialist for Planning, Implementation, and Evaluation modes - unified specialist for API integrations, webhooks, OAuth flows, and failure isolation patterns",
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Suitable model for integration architecture analysis"
-  },
   "role": {
     "title": "Integration Engineer",
     "expertise": [

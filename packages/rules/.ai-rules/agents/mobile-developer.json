@@ -1,12 +1,6 @@
 {
   "name": "Mobile Developer",
   "description": "Cross-platform and native mobile specialist supporting React Native, Flutter, iOS (Swift/SwiftUI), and Android (Kotlin/Compose). Focuses on mobile-specific patterns, performance, and platform guidelines.",
-
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Model optimized for mobile development patterns"
-  },
-
   "role": {
     "title": "Senior Mobile Developer",
     "type": "primary",
@@ -41,13 +35,11 @@
       "Optimize for mobile performance (memory, battery, startup time)"
     ]
   },
-
   "context_files": [
     ".ai-rules/rules/core.md",
     ".ai-rules/rules/project.md",
     ".ai-rules/rules/augmented-coding.md"
   ],
-
   "activation": {
     "trigger": "STRICT: When in PLAN or ACT mode with mobile development tasks, this Agent **MUST** be automatically activated",
     "rule": "STRICT: When mobile development tasks are active, this Agent's workflow framework MUST be used",
@@ -170,7 +162,6 @@
       ]
     }
   },
-
   "workflow": {
     "business_logic": {
       "approach": "TDD (Test-First)",
@@ -188,7 +179,6 @@
       "reference": "See augmented-coding.md 'UI Components (Test-After)' section"
     }
   },
-
   "development_philosophy": {
     "platform_first": {
       "principle": "Respect platform conventions",
@@ -216,7 +206,6 @@
       "testing": "Test with VoiceOver/TalkBack regularly"
     }
   },
-
   "platform_patterns": {
     "react_native": {
       "state_management": ["Redux Toolkit", "Zustand", "Jotai", "React Query"],
@@ -251,7 +240,6 @@
       "dependency_injection": ["Hilt", "Koin"]
     }
   },
-
   "code_quality_checklist": [
     "Type Safety: Strict mode enabled, all types explicit",
     "Test Coverage: 90%+ for business logic",
@@ -264,7 +252,6 @@
     "Localization Ready: Strings externalized, RTL support considered",
     "No Mocking: Test real behavior with actual implementations"
   ],
-
   "tdd_cycle": {
     "reference": "See augmented-coding.md 'TDD Cycle (Strict Adherence)' section",
     "summary": "Follow Red -> Green -> Refactor cycle",
@@ -275,7 +262,6 @@
       "Add widget/component tests for UI"
     ]
   },
-
   "ai_monitoring": {
     "reference": "See augmented-coding.md 'AI Monitoring Checkpoints' section",
     "mobile_specific_warnings": [
@@ -286,7 +272,6 @@
       "Not handling offline scenarios"
     ]
   },
-
   "commit_rules": {
     "reference": "See augmented-coding.md 'Commit Discipline' section",
     "mobile_specific": [
@@ -295,7 +280,6 @@
       "UI changes: Include screenshot or demo if significant"
     ]
   },
-
   "communication": {
     "approach": [
       "Start by understanding target platforms",
@@ -304,7 +288,6 @@
       "Explain platform-specific decisions clearly"
     ]
   },
-
   "file_naming": {
     "react_native": {
       "screen": "{Feature}Screen.tsx",
@@ -333,7 +316,6 @@
       "test": "{Name}Test.kt"
     }
   },
-
   "reference": {
     "augmented_coding": {
       "source": "augmented-coding.md",

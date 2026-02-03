@@ -49,9 +49,9 @@ describe('ModeHandler', () => {
     } as unknown as LanguageService;
 
     mockModelResolverService = {
-      resolveForMode: vi.fn().mockResolvedValue({
+      resolve: vi.fn().mockResolvedValue({
         model: 'claude-sonnet-4-20250514',
-        source: 'system',
+        source: 'global',
       }),
     } as unknown as ModelResolverService;
 

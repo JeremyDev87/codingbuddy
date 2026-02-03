@@ -103,7 +103,10 @@ describe('Handler Security Integration', () => {
     } as unknown as LanguageService;
 
     mockModelResolverService = {
-      resolveModel: vi.fn().mockReturnValue({ model: 'default' }),
+      resolve: vi.fn().mockResolvedValue({
+        model: 'claude-sonnet-4-20250514',
+        source: 'global',
+      }),
     } as unknown as ModelResolverService;
 
     mockStateService = {
@@ -155,7 +158,7 @@ describe('Handler Security Integration', () => {
       mockContextDocService,
       mockDiagnosticLogService,
     );
-    rulesHandler = new RulesHandler(mockRulesService);
+    rulesHandler = new RulesHandler(mockRulesService, mockModelResolverService);
     skillHandler = new SkillHandler(
       mockSkillRecommendationService,
       mockRulesService,

@@ -1,10 +1,6 @@
 {
   "name": "Event Architecture Specialist",
   "description": "Event-driven architecture specialist for Planning, Implementation, and Evaluation modes - unified specialist for message queues, event sourcing, CQRS, real-time communication, distributed transactions, and event schema management",
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Suitable model for event architecture analysis"
-  },
   "role": {
     "title": "Event Architecture Engineer",
     "expertise": [

@@ -1,12 +1,6 @@
 {
   "name": "Solution Architect",
   "description": "High-level system design and architecture planning specialist",
-
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Balanced for architectural analysis and design decisions"
-  },
-
   "role": {
     "title": "Solution Architect",
     "type": "primary",
@@ -25,9 +19,7 @@
       "Delegate to domain specialists (FE/BE/DevOps)"
     ]
   },
-
   "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
-
   "skills": {
     "required": [
       {
@@ -44,7 +36,6 @@
       }
     ]
   },
-
   "activation": {
     "trigger": "When high-level architecture design or system design is needed",
     "explicit_patterns": [
@@ -95,7 +86,6 @@
       "language": "All responses in Korean"
     }
   },
-
   "workflow": {
     "design_task": {
       "approach": "Brainstorm-First",
@@ -112,7 +102,6 @@
       ]
     }
   },
-
   "delegation": {
     "to_technical_planner": {
       "when": "After high-level design is validated",
@@ -131,7 +120,6 @@
       "handoff": "Provide deployment requirements and constraints"
     }
   },
-
   "modes": {
     "planning": {
       "description": "Designing high-level system architecture",
@@ -160,7 +148,6 @@
       ]
     }
   },
-
   "communication": {
     "style": "Systematic and clear approach, option-oriented design",
     "approach": [
@@ -171,7 +158,6 @@
       "Validate before proceeding"
     ]
   },
-
   "reference": {
     "project_rules": ".ai-rules/rules/",
     "existing_agents": ".ai-rules/agents/*.json",

@@ -1,13 +1,13 @@
-import type {
-  ModelConfig,
-  ResolvedModel,
-  ResolveModelParams,
-} from './model.types';
+import type { ResolvedModel, ResolveModelParams } from './model.types';
 import { DEFAULT_MODEL } from './model.constants';
 
 /**
- * System default model used when no configuration is provided
- * @deprecated Use DEFAULT_MODEL from model.constants.ts instead
+ * System default model used when no configuration is provided.
+ *
+ * @deprecated v4.0.0 - External consumers should use DEFAULT_MODEL from model.constants.ts.
+ * Internal usage within model.resolver.ts is acceptable and intentional.
+ * This export is kept for backward compatibility with existing consumers.
+ * **Will be removed in v5.0.0** - Migrate to DEFAULT_MODEL from model.constants.ts.
  */
 export const SYSTEM_DEFAULT_MODEL = DEFAULT_MODEL;
 
@@ -80,60 +80,39 @@ export function isKnownModel(
 }
 
 /**
- * Check if a model config has a valid preferred value
- */
-function hasValidPreferred(
-  model?: ModelConfig,
-): model is ModelConfig & { preferred: string } {
-  return Boolean(model?.preferred);
-}
-
-/**
  * Resolve AI model based on priority order:
- * 1. Agent (highest)
- * 2. Mode
- * 3. Global Config
- * 4. System Default (lowest)
+ * 1. Global Config (highest)
+ * 2. System Default (lowest)
  *
+ * @since v4.0.0 - Simplified to 2-level priority (removed agent/mode)
  * @param params - Resolution parameters
  * @returns Resolved model with source information
  */
 export function resolveModel(params: ResolveModelParams): ResolvedModel {
-  const { agentModel, modeModel, globalDefaultModel, additionalPrefixes } =
-    params;
+  const { globalDefaultModel, additionalPrefixes } = params;
 
-  let model: string;
-  let source: ResolvedModel['source'];
+  // 1. Global config (highest priority)
+  if (globalDefaultModel) {
+    const result: ResolvedModel = {
+      model: globalDefaultModel,
+      source: 'global',
+    };
 
-  // 1. Agent model (highest priority)
-  if (hasValidPreferred(agentModel)) {
-    model = agentModel.preferred;
-    source = 'agent';
-  }
-  // 2. Mode model
-  else if (hasValidPreferred(modeModel)) {
-    model = modeModel.preferred;
-    source = 'mode';
-  }
-  // 3. Global config
-  else if (globalDefaultModel) {
-    model = globalDefaultModel;
-    source = 'global';
-  }
-  // 4. System default
-  else {
-    return { model: SYSTEM_DEFAULT_MODEL, source: 'system' };
+    // Add warning if model is not recognized (but still use it)
+    if (!isKnownModel(globalDefaultModel, additionalPrefixes)) {
+      result.warning = formatUnknownModelWarning(
+        globalDefaultModel,
+        additionalPrefixes,
+      );
+    }
+    // Add deprecation warning for Haiku models (even though they're recognized)
+    else if (isHaikuModel(globalDefaultModel)) {
+      result.warning = HAIKU_DEPRECATION_WARNING;
+    }
+
+    return result;
   }
 
-  // Add warning if model is not recognized (but still use it)
-  const result: ResolvedModel = { model, source };
-  if (!isKnownModel(model, additionalPrefixes)) {
-    result.warning = formatUnknownModelWarning(model, additionalPrefixes);
-  }
-  // Add deprecation warning for Haiku models (even though they're recognized)
-  else if (isHaikuModel(model)) {
-    result.warning = HAIKU_DEPRECATION_WARNING;
-  }
-
-  return result;
+  // 2. System default
+  return { model: SYSTEM_DEFAULT_MODEL, source: 'system' };
 }

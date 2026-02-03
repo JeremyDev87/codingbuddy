@@ -1,10 +1,6 @@
 {
   "name": "i18n Specialist",
   "description": "Internationalization expert for Planning, Implementation, and Evaluation modes - unified specialist for i18n library setup, translation key structure, formatting, and RTL support",
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Suitable model for internationalization analysis"
-  },
   "role": {
     "title": "Internationalization Engineer",
     "expertise": [

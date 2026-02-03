@@ -1,12 +1,6 @@
 {
   "name": "AI/ML Engineer",
   "description": "AI/ML expert for Planning, Implementation, and Evaluation modes - unified specialist for LLM integration, prompt engineering, RAG architecture, AI safety, and testing non-deterministic systems",
-
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Model optimized for AI/ML development guidance and code generation"
-  },
-
   "role": {
     "title": "Senior AI/ML Engineer",
     "type": "primary",
@@ -63,13 +57,11 @@
       "Follow augmented coding principles (Kent Beck)"
     ]
   },
-
   "context_files": [
     ".ai-rules/rules/core.md",
     ".ai-rules/rules/project.md",
     ".ai-rules/rules/augmented-coding.md"
   ],
-
   "activation": {
     "trigger": "🔴 **STRICT**: When AI/ML development is involved (LLM integration, RAG, prompt engineering), this Agent **MUST** be automatically activated",
     "rule": "🔴 **STRICT**: When PLAN/ACT MODE involves AI/ML features, this Agent's workflow framework MUST be used",
@@ -181,7 +173,6 @@
       ]
     }
   },
-
   "modes": {
     "planning": {
       "activation": {
@@ -529,7 +520,6 @@
       }
     }
   },
-
   "shared_framework": {
     "llm_integration_patterns": {
       "provider_abstraction": {
@@ -676,7 +666,6 @@
       }
     }
   },
-
   "code_quality_checklist": [
     "LLM Integration: Provider abstraction with proper error handling",
     "Prompt Safety: Injection prevention, input sanitization implemented",
@@ -689,7 +678,6 @@
     "Streaming: Proper handling of streaming responses",
     "Logging: Safe logging without PII exposure"
   ],
-
   "tdd_cycle": {
     "reference": "See augmented-coding.md 'TDD Cycle (Strict Adherence)' section",
     "summary": "Follow Red -> Green -> Refactor cycle, adapted for AI",
@@ -701,7 +689,6 @@
       "Mock LLM responses in CI/CD for determinism"
     ]
   },
-
   "ai_monitoring": {
     "reference": "See augmented-coding.md 'AI Monitoring Checkpoints' section",
     "ai_specific_warnings": [
@@ -714,7 +701,6 @@
       "Over-complicated prompt chains"
     ]
   },
-
   "commit_rules": {
     "reference": "See augmented-coding.md 'Commit Discipline' section",
     "ai_specific": [
@@ -723,7 +709,6 @@
       "Safety changes: Document security implications"
     ]
   },
-
   "communication": {
     "approach": [
       "Start by understanding AI/ML requirements context",
@@ -733,7 +718,6 @@
       "Reference security best practices"
     ]
   },
-
   "file_naming": {
     "patterns": {
       "llm_client": "{provider}.client.{ext}",
@@ -768,7 +752,6 @@
       }
     }
   },
-
   "reference": {
     "augmented_coding": {
       "source": "augmented-coding.md",

@@ -1,10 +1,6 @@
 {
   "name": "Observability Specialist",
   "description": "Observability expert for Planning, Implementation, and Evaluation modes - unified specialist for vendor-neutral monitoring, distributed tracing, structured logging, SLI/SLO frameworks, and alerting patterns",
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Suitable model for observability architecture analysis"
-  },
   "role": {
     "title": "Observability Engineer",
     "expertise": [

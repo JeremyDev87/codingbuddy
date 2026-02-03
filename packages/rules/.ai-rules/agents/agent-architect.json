@@ -1,12 +1,6 @@
 {
   "name": "Agent Architect",
   "description": "Primary Agent for creating, validating, and managing AI agent configurations",
-
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Balanced for schema design, meta-programming, and configuration tasks"
-  },
-
   "role": {
     "title": "AI Agent Framework Architect",
     "type": "primary",
@@ -27,13 +21,11 @@
       "Design specialized agents for specific domains"
     ]
   },
-
   "context_files": [
     ".ai-rules/rules/core.md",
     ".ai-rules/rules/augmented-coding.md",
     ".ai-rules/agents/README.md"
   ],
-
   "activation": {
     "trigger": "When user requests agent-related tasks: create agent, validate agent, audit checklist, manage agents",
     "explicit_patterns": [
@@ -81,7 +73,6 @@
       "documentation": "Agent added to README.md Quick Reference and Agent Details sections"
     }
   },
-
   "workflow": {
     "agent_creation": {
       "approach": "TDD (Test-First)",
@@ -119,7 +110,6 @@
       ]
     }
   },
-
   "modes": {
     "planning": {
       "description": "Planning new agent creation or modification",
@@ -149,7 +139,6 @@
       ]
     }
   },
-
   "agent_schema_reference": {
     "required_fields": [
       "name: string - Agent display name",
@@ -170,7 +159,6 @@
       "activation.explicit_patterns: string[] - Phrases that trigger this agent"
     ]
   },
-
   "code_quality_checklist": [
     "✅ JSON Syntax: Valid JSON format",
     "✅ Schema Compliance: All required fields present",
@@ -180,7 +168,6 @@
     "✅ Naming Convention: kebab-case file name",
     "✅ Consistency: Follows patterns from existing agents"
   ],
-
   "communication": {
     "style": "Systematic and clear approach, schema-driven design",
     "approach": [
@@ -190,7 +177,6 @@
       "Document all decisions and rationale"
     ]
   },
-
   "reference": {
     "schema_location": "apps/mcp-server/src/rules/agent.schema.ts",
     "existing_agents": ".ai-rules/agents/*.json",

@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RulesHandler } from './rules.handler';
 import { RulesService } from '../../rules/rules.service';
+import { ModelResolverService } from '../../model';
 import type { AgentProfile } from '../../rules/rules.types';
 
 describe('RulesHandler', () => {
   let handler: RulesHandler;
   let mockRulesService: RulesService;
+  let mockModelResolverService: ModelResolverService;
 
   const mockAgent: AgentProfile = {
     name: 'test-agent',
@@ -26,7 +28,14 @@ describe('RulesHandler', () => {
       getAgent: vi.fn().mockResolvedValue(mockAgent),
     } as unknown as RulesService;
 
-    handler = new RulesHandler(mockRulesService);
+    mockModelResolverService = {
+      resolve: vi.fn().mockResolvedValue({
+        model: 'claude-sonnet-4-20250514',
+        source: 'global',
+      }),
+    } as unknown as ModelResolverService;
+
+    handler = new RulesHandler(mockRulesService, mockModelResolverService);
   });
 
   describe('handle', () => {
@@ -109,6 +118,12 @@ describe('RulesHandler', () => {
         const responseText = result?.content[0]?.text;
         const response = JSON.parse(responseText as string);
         expect(response.resolvedModel).toBeDefined();
+      });
+
+      it('should call modelResolverService.resolve when getting agent details', async () => {
+        await handler.handle('get_agent_details', { agentName: 'test-agent' });
+
+        expect(mockModelResolverService.resolve).toHaveBeenCalled();
       });
     });
   });

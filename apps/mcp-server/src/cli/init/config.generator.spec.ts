@@ -6,7 +6,7 @@ import {
   extractJsonFromResponse,
 } from './config.generator';
 import type { ProjectAnalysis } from '../../analyzer';
-import { SYSTEM_DEFAULT_MODEL } from '../../model';
+import { DEFAULT_MODEL } from '../../model';
 
 // Mock function for messages.create
 const mockCreate = vi.fn();
@@ -275,9 +275,7 @@ describe('config.generator', () => {
           apiKey: 'test-key',
         };
         const gen = new ConfigGenerator(options);
-        expect((gen as unknown as { model: string }).model).toBe(
-          SYSTEM_DEFAULT_MODEL,
-        );
+        expect((gen as unknown as { model: string }).model).toBe(DEFAULT_MODEL);
       });
 
       it('should prioritize explicit model over config model', () => {

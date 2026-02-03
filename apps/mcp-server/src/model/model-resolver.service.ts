@@ -1,47 +1,30 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '../config/config.service';
-import { RulesService } from '../rules/rules.service';
 import { resolveModel } from './model.resolver';
-import { isModelConfig } from './model.types';
-import type { ModelConfig, ResolvedModel } from './model.types';
+import type { ResolvedModel } from './model.types';
 
 /**
- * Service for resolving AI models based on context.
- * Encapsulates the loading of model configurations from various sources
- * and delegates to the resolveModel pure function for priority resolution.
+ * Service for resolving AI models based on global configuration.
+ * Uses 2-level priority: global config > system default.
+ *
+ * @since v4.0.0 - Agent/Mode model configs are no longer supported.
+ *                 Use codingbuddy.config.js ai.defaultModel instead.
  */
 @Injectable()
 export class ModelResolverService {
   private readonly logger = new Logger(ModelResolverService.name);
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly rulesService: RulesService,
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
   /**
-   * Resolve AI model for a given mode agent.
-   * Uses 4-level priority: agent > mode > global > system
+   * Resolve AI model from global configuration.
+   * Uses 2-level priority: global config > system default.
    *
-   * @param modeAgentName - Optional mode agent name to load model config from
    * @returns Resolved model with source information
    */
-  async resolveForMode(modeAgentName?: string): Promise<ResolvedModel> {
+  async resolve(): Promise<ResolvedModel> {
     const globalDefaultModel = await this.loadGlobalDefaultModel();
-    const modeModel = await this.loadModeModel(modeAgentName);
-    return resolveModel({ modeModel, globalDefaultModel });
-  }
-
-  /**
-   * Resolve AI model for a specific agent.
-   * Uses 4-level priority: agent > mode > global > system
-   *
-   * @param agentModel - Optional agent model configuration
-   * @returns Resolved model with source information
-   */
-  async resolveForAgent(agentModel?: ModelConfig): Promise<ResolvedModel> {
-    const globalDefaultModel = await this.loadGlobalDefaultModel();
-    return resolveModel({ agentModel, globalDefaultModel });
+    return resolveModel({ globalDefaultModel });
   }
 
   /**
@@ -54,25 +37,6 @@ export class ModelResolverService {
     } catch (error) {
       this.logger.warn(
         `Failed to load global config for model resolution: ${error instanceof Error ? error.message : 'Unknown error'}. Using system default.`,
-      );
-      return undefined;
-    }
-  }
-
-  /**
-   * Load mode-specific model from agent configuration.
-   */
-  private async loadModeModel(
-    agentName?: string,
-  ): Promise<ModelConfig | undefined> {
-    if (!agentName) return undefined;
-
-    try {
-      const modeAgent = await this.rulesService.getAgent(agentName);
-      return isModelConfig(modeAgent.model) ? modeAgent.model : undefined;
-    } catch (error) {
-      this.logger.warn(
-        `Failed to load mode agent '${agentName}' for model resolution: ${error instanceof Error ? error.message : 'Unknown error'}. Using fallback.`,
       );
       return undefined;
     }

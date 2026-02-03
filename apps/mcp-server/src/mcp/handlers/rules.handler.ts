@@ -4,8 +4,7 @@ import type { ToolResponse } from '../response.utils';
 import { AbstractHandler } from './abstract-handler';
 import { RulesService } from '../../rules/rules.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
-import { resolveModel } from '../../model';
-import type { ModelConfig } from '../../model';
+import { ModelResolverService } from '../../model';
 import { extractRequiredString } from '../../shared/validation.constants';
 
 /**
@@ -15,7 +14,10 @@ import { extractRequiredString } from '../../shared/validation.constants';
  */
 @Injectable()
 export class RulesHandler extends AbstractHandler {
-  constructor(private readonly rulesService: RulesService) {
+  constructor(
+    private readonly rulesService: RulesService,
+    private readonly modelResolverService: ModelResolverService,
+  ) {
     super();
   }
 
@@ -85,10 +87,9 @@ export class RulesHandler extends AbstractHandler {
     try {
       const agent = await this.rulesService.getAgent(agentName);
 
-      // Resolve model using 4-level priority: agent > mode > global > system
-      // For get_agent_details, we only have agent context (no mode or global config)
-      const agentModel = agent.model as ModelConfig | undefined;
-      const resolvedModel = resolveModel({ agentModel });
+      // Resolve model using 2-level priority: global > system
+      // @since v4.0.0 - Agent model configs are no longer supported
+      const resolvedModel = await this.modelResolverService.resolve();
 
       return createJsonResponse({
         ...agent,

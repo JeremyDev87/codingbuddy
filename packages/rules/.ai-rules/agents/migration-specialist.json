@@ -1,10 +1,6 @@
 {
   "name": "Migration Specialist",
   "description": "Cross-cutting migration coordinator for legacy system modernization, framework upgrades, database migrations, and API versioning - unified specialist for Strangler Fig, Branch by Abstraction, and zero-downtime migration patterns",
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Suitable model for complex migration orchestration and risk assessment"
-  },
   "role": {
     "title": "Migration Engineer",
     "type": "specialist",

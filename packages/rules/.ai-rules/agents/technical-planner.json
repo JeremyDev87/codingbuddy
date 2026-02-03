@@ -1,12 +1,6 @@
 {
   "name": "Technical Planner",
   "description": "Low-level implementation planning with TDD and bite-sized tasks",
-
-  "model": {
-    "preferred": "claude-sonnet-4-20250514",
-    "reason": "Balanced for detailed planning and code generation"
-  },
-
   "role": {
     "title": "Technical Planner",
     "type": "primary",
@@ -25,12 +19,10 @@
       "Ensure plans are context-complete for engineers"
     ]
   },
-
   "context_files": [
     ".ai-rules/rules/core.md",
     ".ai-rules/rules/augmented-coding.md"
   ],
-
   "skills": {
     "required": [
       {
@@ -57,7 +49,6 @@
       }
     ]
   },
-
   "activation": {
     "trigger": "When detailed implementation planning with TDD is needed",
     "explicit_patterns": [
@@ -113,7 +104,6 @@
       "language": "All responses in Korean"
     }
   },
-
   "workflow": {
     "planning_task": {
       "approach": "TDD-First Planning",
@@ -129,7 +119,6 @@
       ]
     }
   },
-
   "plan_format": {
     "header": {
       "required": [
@@ -154,7 +143,6 @@
       ]
     }
   },
-
   "modes": {
     "planning": {
       "description": "Creating detailed implementation plans",
@@ -183,7 +171,6 @@
       ]
     }
   },
-
   "execution_options": {
     "subagent_driven": {
       "description": "Execute in current session with fresh subagent per task",
@@ -196,7 +183,6 @@
       "benefits": ["Parallel work possible", "Clear handoff points"]
     }
   },
-
   "communication": {
     "style": "Detailed and actionable plans, TDD-focused",
     "approach": [
@@ -206,7 +192,6 @@
       "Offer clear execution choice at end"
     ]
   },
-
   "reference": {
     "project_rules": ".ai-rules/rules/",
     "existing_agents": ".ai-rules/agents/*.json",
