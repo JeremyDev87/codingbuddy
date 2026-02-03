@@ -1,0 +1,93 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    "group:monorepos",
+    "group:recommended"
+  ],
+  "labels": ["dependencies"],
+  "schedule": ["before 9am on monday"],
+  "timezone": "Asia/Seoul",
+  "prHourlyLimit": 10,
+  "packageRules": [
+    {
+      "description": "MCP Server - Dev Dependencies",
+      "matchPaths": ["apps/mcp-server/**"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "mcp-server dev dependencies",
+      "automerge": true
+    },
+    {
+      "description": "MCP Server - Production Dependencies (patch only)",
+      "matchPaths": ["apps/mcp-server/**"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "mcp-server production dependencies",
+      "automerge": true
+    },
+    {
+      "description": "Rules Package - Dev Dependencies",
+      "matchPaths": ["packages/rules/**"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "rules dev dependencies",
+      "additionalLabels": ["rules-package"],
+      "automerge": true
+    },
+    {
+      "description": "Claude Code Plugin - Dev Dependencies",
+      "matchPaths": ["packages/claude-code-plugin/**"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "claude-code-plugin dev dependencies",
+      "additionalLabels": ["claude-code-plugin"],
+      "automerge": true
+    },
+    {
+      "description": "Claude Code Plugin - Production Dependencies (patch only)",
+      "matchPaths": ["packages/claude-code-plugin/**"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "claude-code-plugin production dependencies",
+      "additionalLabels": ["claude-code-plugin"],
+      "automerge": true
+    },
+    {
+      "description": "GitHub Actions - minor/patch automerge",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "github-actions",
+      "additionalLabels": ["github-actions"],
+      "automerge": true
+    },
+    {
+      "description": "GitHub Actions - major requires review",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "github-actions major",
+      "additionalLabels": ["github-actions"],
+      "automerge": false
+    },
+    {
+      "description": "Security vulnerabilities - require review",
+      "matchCategories": ["security"],
+      "labels": ["dependencies", "security"],
+      "automerge": false
+    },
+    {
+      "description": "Major updates - require manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "breaking-change"]
+    }
+  ],
+  "commitMessagePrefix": "chore(deps):",
+  "commitMessageAction": "update",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on the first day of the month"]
+  }
+}
