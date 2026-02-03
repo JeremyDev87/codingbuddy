@@ -85,9 +85,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@anthropic-ai/sdk@npm:^0.71.2":
-  version: 0.71.2
-  resolution: "@anthropic-ai/sdk@npm:0.71.2"
+"@anthropic-ai/sdk@npm:0.72.1":
+  version: 0.72.1
+  resolution: "@anthropic-ai/sdk@npm:0.72.1"
   dependencies:
     json-schema-to-ts: "npm:^3.1.1"
   peerDependencies:
@@ -97,7 +97,7 @@ __metadata:
       optional: true
   bin:
     anthropic-ai-sdk: bin/cli
-  checksum: 10c0/6561264d2d516b0a2a2f48bba739497b76ec1ef85a5b78deca7900701513ca7cb5317dc4ee8147fc3f734709d364e29e2aaf79b39afe8284b0bf0c0c172f8223
+  checksum: 10c0/0a7aaa77f772b14b0cb07c421215cd697feefaf147834fa204e38fd6be1e8bcee15a30cb0f85db0716a958690ba4c0d6f5ef1fcf681729f40ef2f53a9b2f0e16
   languageName: node
   linkType: hard
 
@@ -488,7 +488,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:9.39.2, @eslint/js@npm:^9.17.0, @eslint/js@npm:^9.39.2":
+"@eslint/js@npm:9.39.2":
   version: 9.39.2
   resolution: "@eslint/js@npm:9.39.2"
   checksum: 10c0/00f51c52b04ac79faebfaa65a9652b2093b9c924e945479f1f3945473f78aee83cbc76c8d70bbffbf06f7024626575b16d97b66eab16182e1d0d39daff2f26f5
@@ -924,7 +924,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inquirer/prompts@npm:^8.1.0":
+"@inquirer/prompts@npm:8.1.0":
   version: 8.1.0
   resolution: "@inquirer/prompts@npm:8.1.0"
   dependencies:
@@ -1173,7 +1173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/sdk@npm:^1.25.2":
+"@modelcontextprotocol/sdk@npm:1.25.2":
   version: 1.25.2
   resolution: "@modelcontextprotocol/sdk@npm:1.25.2"
   dependencies:
@@ -1205,7 +1205,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/cli@npm:^11.0.14":
+"@nestjs/cli@npm:11.0.14":
   version: 11.0.14
   resolution: "@nestjs/cli@npm:11.0.14"
   dependencies:
@@ -1241,7 +1241,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:^11.1.9":
+"@nestjs/common@npm:11.1.9":
   version: 11.1.9
   resolution: "@nestjs/common@npm:11.1.9"
   dependencies:
@@ -1264,7 +1264,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/config@npm:^4.0.2":
+"@nestjs/config@npm:4.0.2":
   version: 4.0.2
   resolution: "@nestjs/config@npm:4.0.2"
   dependencies:
@@ -1278,7 +1278,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/core@npm:^11.1.9":
+"@nestjs/core@npm:11.1.9":
   version: 11.1.9
   resolution: "@nestjs/core@npm:11.1.9"
   dependencies:
@@ -1306,7 +1306,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/platform-express@npm:^11.1.9":
+"@nestjs/platform-express@npm:11.1.9":
   version: 11.1.9
   resolution: "@nestjs/platform-express@npm:11.1.9"
   dependencies:
@@ -1322,7 +1322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/schematics@npm:^11.0.1, @nestjs/schematics@npm:^11.0.9":
+"@nestjs/schematics@npm:11.0.9, @nestjs/schematics@npm:^11.0.1":
   version: 11.0.9
   resolution: "@nestjs/schematics@npm:11.0.9"
   dependencies:
@@ -1742,7 +1742,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^5.0.6":
+"@types/express@npm:5.0.6":
   version: 5.0.6
   resolution: "@types/express@npm:5.0.6"
   dependencies:
@@ -1767,7 +1767,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^25.0.3":
+"@types/node@npm:*, @types/node@npm:25.0.3":
   version: 25.0.3
   resolution: "@types/node@npm:25.0.3"
   dependencies:
@@ -1783,7 +1783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^25.0.9":
+"@types/node@npm:25.0.9":
   version: 25.0.9
   resolution: "@types/node@npm:25.0.9"
   dependencies:
@@ -1825,7 +1825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:8.50.0, @typescript-eslint/eslint-plugin@npm:^8.18.0":
+"@typescript-eslint/eslint-plugin@npm:8.50.0":
   version: 8.50.0
   resolution: "@typescript-eslint/eslint-plugin@npm:8.50.0"
   dependencies:
@@ -1845,7 +1845,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^8.20.0":
+"@typescript-eslint/eslint-plugin@npm:8.53.0":
   version: 8.53.0
   resolution: "@typescript-eslint/eslint-plugin@npm:8.53.0"
   dependencies:
@@ -1865,7 +1865,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:8.50.0, @typescript-eslint/parser@npm:^8.18.0":
+"@typescript-eslint/parser@npm:8.50.0":
   version: 8.50.0
   resolution: "@typescript-eslint/parser@npm:8.50.0"
   dependencies:
@@ -1881,7 +1881,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^8.20.0":
+"@typescript-eslint/parser@npm:8.53.0":
   version: 8.53.0
   resolution: "@typescript-eslint/parser@npm:8.53.0"
   dependencies:
@@ -2131,7 +2131,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vercel/node@npm:^5.5.16":
+"@vercel/node@npm:5.5.16":
   version: 5.5.16
   resolution: "@vercel/node@npm:5.5.16"
   dependencies:
@@ -2173,7 +2173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-v8@npm:^4.0.15":
+"@vitest/coverage-v8@npm:4.0.16":
   version: 4.0.16
   resolution: "@vitest/coverage-v8@npm:4.0.16"
   dependencies:
@@ -2198,7 +2198,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-v8@npm:^4.0.17":
+"@vitest/coverage-v8@npm:4.0.17":
   version: 4.0.17
   resolution: "@vitest/coverage-v8@npm:4.0.17"
   dependencies:
@@ -3218,20 +3218,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "codingbuddy-claude-plugin@workspace:packages/claude-code-plugin"
   dependencies:
-    "@eslint/js": "npm:^9.39.2"
-    "@types/node": "npm:^25.0.9"
-    "@typescript-eslint/eslint-plugin": "npm:^8.20.0"
-    "@typescript-eslint/parser": "npm:^8.20.0"
-    "@vitest/coverage-v8": "npm:^4.0.17"
+    "@eslint/js": "npm:9.39.2"
+    "@types/node": "npm:25.0.9"
+    "@typescript-eslint/eslint-plugin": "npm:8.53.0"
+    "@typescript-eslint/parser": "npm:8.53.0"
+    "@vitest/coverage-v8": "npm:4.0.17"
     codingbuddy-rules: "workspace:*"
-    eslint: "npm:^9.39.2"
-    eslint-config-prettier: "npm:^10.1.8"
-    globals: "npm:^17.0.0"
-    madge: "npm:^8.0.0"
-    prettier: "npm:^3.7.4"
-    ts-node: "npm:^10.9.1"
-    typescript: "npm:^5.1.3"
-    vitest: "npm:^4.0.17"
+    eslint: "npm:9.39.2"
+    eslint-config-prettier: "npm:10.1.8"
+    globals: "npm:17.0.0"
+    madge: "npm:8.0.0"
+    prettier: "npm:3.7.4"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:5.9.3"
+    vitest: "npm:4.0.17"
   peerDependencies:
     codingbuddy: ^3.0.0
   peerDependenciesMeta:
@@ -3244,14 +3244,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "codingbuddy-monorepo@workspace:."
   dependencies:
-    "@eslint/js": "npm:^9.17.0"
-    "@typescript-eslint/eslint-plugin": "npm:^8.18.0"
-    "@typescript-eslint/parser": "npm:^8.18.0"
-    eslint: "npm:^9.17.0"
-    eslint-config-prettier: "npm:^10.1.8"
-    globals: "npm:^15.13.0"
-    prettier: "npm:^3.4.2"
-    typescript: "npm:^5.9.3"
+    "@eslint/js": "npm:9.39.2"
+    "@typescript-eslint/eslint-plugin": "npm:8.53.0"
+    "@typescript-eslint/parser": "npm:8.53.0"
+    eslint: "npm:9.39.2"
+    eslint-config-prettier: "npm:10.1.8"
+    globals: "npm:15.15.0"
+    prettier: "npm:3.7.4"
+    typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
 
@@ -3265,34 +3265,34 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "codingbuddy@workspace:apps/mcp-server"
   dependencies:
-    "@anthropic-ai/sdk": "npm:^0.71.2"
-    "@eslint/js": "npm:^9.39.2"
-    "@inquirer/prompts": "npm:^8.1.0"
-    "@modelcontextprotocol/sdk": "npm:^1.25.2"
-    "@nestjs/cli": "npm:^11.0.14"
-    "@nestjs/common": "npm:^11.1.9"
-    "@nestjs/config": "npm:^4.0.2"
-    "@nestjs/core": "npm:^11.1.9"
-    "@nestjs/platform-express": "npm:^11.1.9"
-    "@nestjs/schematics": "npm:^11.0.9"
-    "@types/express": "npm:^5.0.6"
-    "@types/node": "npm:^25.0.3"
-    "@vercel/node": "npm:^5.5.16"
-    "@vitest/coverage-v8": "npm:^4.0.15"
+    "@anthropic-ai/sdk": "npm:0.72.1"
+    "@eslint/js": "npm:9.39.2"
+    "@inquirer/prompts": "npm:8.1.0"
+    "@modelcontextprotocol/sdk": "npm:1.25.2"
+    "@nestjs/cli": "npm:11.0.14"
+    "@nestjs/common": "npm:11.1.9"
+    "@nestjs/config": "npm:4.0.2"
+    "@nestjs/core": "npm:11.1.9"
+    "@nestjs/platform-express": "npm:11.1.9"
+    "@nestjs/schematics": "npm:11.0.9"
+    "@types/express": "npm:5.0.6"
+    "@types/node": "npm:25.0.3"
+    "@vercel/node": "npm:5.5.16"
+    "@vitest/coverage-v8": "npm:4.0.16"
     codingbuddy-rules: "workspace:*"
-    eslint: "npm:^9.39.2"
-    eslint-config-prettier: "npm:^10.1.8"
-    madge: "npm:^8.0.0"
-    minimatch: "npm:^10.1.1"
-    prettier: "npm:^3.7.4"
-    reflect-metadata: "npm:^0.2.2"
-    rxjs: "npm:^7.8.1"
-    ts-node: "npm:^10.9.1"
-    typescript: "npm:^5.1.3"
-    typescript-eslint: "npm:^8.50.0"
-    vitest: "npm:^4.0.15"
-    yaml: "npm:^2.8.2"
-    zod: "npm:^4.2.1"
+    eslint: "npm:9.39.2"
+    eslint-config-prettier: "npm:10.1.8"
+    madge: "npm:8.0.0"
+    minimatch: "npm:10.1.1"
+    prettier: "npm:3.7.4"
+    reflect-metadata: "npm:0.2.2"
+    rxjs: "npm:7.8.2"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:5.9.3"
+    typescript-eslint: "npm:8.50.0"
+    vitest: "npm:4.0.16"
+    yaml: "npm:2.8.2"
+    zod: "npm:4.2.1"
   bin:
     codingbuddy: ./dist/src/cli/cli.js
   languageName: unknown
@@ -4165,7 +4165,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^10.1.8":
+"eslint-config-prettier@npm:10.1.8":
   version: 10.1.8
   resolution: "eslint-config-prettier@npm:10.1.8"
   peerDependencies:
@@ -4210,7 +4210,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^9.17.0, eslint@npm:^9.39.2":
+"eslint@npm:9.39.2":
   version: 9.39.2
   resolution: "eslint@npm:9.39.2"
   dependencies:
@@ -4843,24 +4843,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:^14.0.0":
-  version: 14.0.0
-  resolution: "globals@npm:14.0.0"
-  checksum: 10c0/b96ff42620c9231ad468d4c58ff42afee7777ee1c963013ff8aabe095a451d0ceeb8dcd8ef4cbd64d2538cef45f787a78ba3a9574f4a634438963e334471302d
-  languageName: node
-  linkType: hard
-
-"globals@npm:^15.13.0":
+"globals@npm:15.15.0":
   version: 15.15.0
   resolution: "globals@npm:15.15.0"
   checksum: 10c0/f9ae80996392ca71316495a39bec88ac43ae3525a438b5626cd9d5ce9d5500d0a98a266409605f8cd7241c7acf57c354a48111ea02a767ba4f374b806d6861fe
   languageName: node
   linkType: hard
 
-"globals@npm:^17.0.0":
+"globals@npm:17.0.0":
   version: 17.0.0
   resolution: "globals@npm:17.0.0"
   checksum: 10c0/e3c169fdcb0fc6755707b697afb367bea483eb29992cfc0de1637382eb893146e17f8f96db6d7453e3696b478a7863ae2000e6c71cd2f4061410285106d3847a
+  languageName: node
+  linkType: hard
+
+"globals@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "globals@npm:14.0.0"
+  checksum: 10c0/b96ff42620c9231ad468d4c58ff42afee7777ee1c963013ff8aabe095a451d0ceeb8dcd8ef4cbd64d2538cef45f787a78ba3a9574f4a634438963e334471302d
   languageName: node
   linkType: hard
 
@@ -5422,7 +5422,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"madge@npm:^8.0.0":
+"madge@npm:8.0.0":
   version: 8.0.0
   resolution: "madge@npm:8.0.0"
   dependencies:
@@ -5613,7 +5613,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.1.1":
+"minimatch@npm:10.1.1, minimatch@npm:^10.1.1":
   version: 10.1.1
   resolution: "minimatch@npm:10.1.1"
   dependencies:
@@ -6279,7 +6279,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.4.2, prettier@npm:^3.7.4":
+"prettier@npm:3.7.4":
   version: 3.7.4
   resolution: "prettier@npm:3.7.4"
   bin:
@@ -6414,7 +6414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.2.2":
+"reflect-metadata@npm:0.2.2":
   version: 0.2.2
   resolution: "reflect-metadata@npm:0.2.2"
   checksum: 10c0/1cd93a15ea291e420204955544637c264c216e7aac527470e393d54b4bb075f10a17e60d8168ec96600c7e0b9fcc0cb0bb6e91c3fbf5b0d8c9056f04e6ac1ec2
@@ -6631,7 +6631,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.8.1":
+"rxjs@npm:7.8.2":
   version: 7.8.2
   resolution: "rxjs@npm:7.8.2"
   dependencies:
@@ -7290,7 +7290,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.1":
+"ts-node@npm:10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
@@ -7402,7 +7402,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.50.0":
+"typescript-eslint@npm:8.50.0":
   version: 8.50.0
   resolution: "typescript-eslint@npm:8.50.0"
   dependencies:
@@ -7417,7 +7417,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript5@npm:typescript@5.9.3, typescript@npm:5.9.3, typescript@npm:^5.1.3, typescript@npm:^5.7.3, typescript@npm:^5.8.3, typescript@npm:^5.9.3":
+"typescript5@npm:typescript@5.9.3, typescript@npm:5.9.3, typescript@npm:^5.7.3, typescript@npm:^5.8.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -7447,7 +7447,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.1.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
@@ -7620,7 +7620,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^4.0.15":
+"vitest@npm:4.0.16":
   version: 4.0.16
   resolution: "vitest@npm:4.0.16"
   dependencies:
@@ -7679,7 +7679,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^4.0.17":
+"vitest@npm:4.0.17":
   version: 4.0.17
   resolution: "vitest@npm:4.0.17"
   dependencies:
@@ -7924,7 +7924,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.8.2":
+"yaml@npm:2.8.2":
   version: 2.8.2
   resolution: "yaml@npm:2.8.2"
   bin:
@@ -7970,7 +7970,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25 || ^4.0, zod@npm:^4.2.1":
+"zod@npm:4.2.1, zod@npm:^3.25 || ^4.0":
   version: 4.2.1
   resolution: "zod@npm:4.2.1"
   checksum: 10c0/ecb5219bddf76a42d092a843fb98ad4cb78f1e1077082772b03ef032ee5cbc80790a4051836b962d26fb4af854323bc784d628bd1b8d9898149eba7af21c5560
