@@ -75,20 +75,20 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.2",
-    "@nestjs/cli": "11.0.14",
+    "@nestjs/cli": "11.0.16",
     "@nestjs/schematics": "11.0.9",
     "@types/express": "5.0.6",
-    "@types/node": "25.0.3",
-    "@vercel/node": "5.5.16",
-    "@vitest/coverage-v8": "4.0.16",
+    "@types/node": "25.2.0",
+    "@vercel/node": "5.5.28",
+    "@vitest/coverage-v8": "4.0.18",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "madge": "8.0.0",
-    "prettier": "3.7.4",
+    "prettier": "3.8.1",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.50.0",
-    "vitest": "4.0.16"
+    "typescript-eslint": "8.54.0",
+    "vitest": "4.0.18"
   },
   "packageManager": "yarn@4.11.0"
 }
