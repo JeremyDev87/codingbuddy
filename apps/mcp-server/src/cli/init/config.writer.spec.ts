@@ -4,7 +4,6 @@ import * as path from 'path';
 import {
   writeConfig,
   findExistingConfig,
-  formatConfigAsJs,
   formatConfigAsJson,
   CONFIG_FILE_NAMES,
 } from './config.writer';
@@ -35,41 +34,9 @@ describe('config.writer', () => {
   });
 
   describe('CONFIG_FILE_NAMES', () => {
-    it('should include js and json config file names', () => {
-      expect(CONFIG_FILE_NAMES).toContain('codingbuddy.config.js');
+    it('should only support JSON format', () => {
       expect(CONFIG_FILE_NAMES).toContain('codingbuddy.config.json');
-    });
-  });
-
-  describe('formatConfigAsJs', () => {
-    it('should format config as JS module export', () => {
-      const result = formatConfigAsJs(mockConfig);
-
-      expect(result).toContain('/** @type {import');
-      expect(result).toContain('module.exports');
-      expect(result).toContain('projectName');
-      expect(result).toContain('test-app');
-    });
-
-    it('should include proper JSDoc type annotation', () => {
-      const result = formatConfigAsJs(mockConfig);
-
-      expect(result).toMatch(/@type.*CodingBuddyConfig/);
-    });
-
-    it('should format nested objects correctly', () => {
-      const result = formatConfigAsJs(mockConfig);
-
-      expect(result).toContain('techStack');
-      expect(result).toContain('frontend');
-      expect(result).toContain('React');
-    });
-
-    it('should handle empty config', () => {
-      const result = formatConfigAsJs({});
-
-      expect(result).toContain('module.exports');
-      expect(result).toContain('{}');
+      expect(CONFIG_FILE_NAMES).toHaveLength(1);
     });
   });
 
@@ -88,21 +55,25 @@ describe('config.writer', () => {
 
       expect(() => JSON.parse(result)).not.toThrow();
     });
+
+    it('should handle empty config', () => {
+      const result = formatConfigAsJson({});
+
+      expect(result).toBe('{}\n');
+    });
+
+    it('should format nested objects correctly', () => {
+      const result = formatConfigAsJson(mockConfig);
+
+      expect(result).toContain('"techStack"');
+      expect(result).toContain('"frontend"');
+      expect(result).toContain('"React"');
+    });
   });
 
   describe('findExistingConfig', () => {
-    it('should return path if config file exists', async () => {
+    it('should return path if JSON config file exists', async () => {
       vi.mocked(fs.access).mockResolvedValueOnce(undefined);
-
-      const result = await findExistingConfig('/project');
-
-      expect(result).toBe(path.join('/project', 'codingbuddy.config.js'));
-    });
-
-    it('should check multiple file names', async () => {
-      vi.mocked(fs.access)
-        .mockRejectedValueOnce(new Error('ENOENT'))
-        .mockResolvedValueOnce(undefined);
 
       const result = await findExistingConfig('/project');
 
@@ -119,25 +90,10 @@ describe('config.writer', () => {
   });
 
   describe('writeConfig', () => {
-    it('should write JS config file by default', async () => {
+    it('should write JSON config file', async () => {
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await writeConfig('/project', mockConfig);
-
-      expect(result).toContain('codingbuddy.config.js');
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('codingbuddy.config.js'),
-        expect.stringContaining('module.exports'),
-        'utf-8',
-      );
-    });
-
-    it('should write JSON config when format is json', async () => {
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
-
-      const result = await writeConfig('/project', mockConfig, {
-        format: 'json',
-      });
 
       expect(result).toContain('codingbuddy.config.json');
       expect(fs.writeFile).toHaveBeenCalledWith(
@@ -152,7 +108,7 @@ describe('config.writer', () => {
 
       const result = await writeConfig('/project', mockConfig);
 
-      expect(result).toBe(path.join('/project', 'codingbuddy.config.js'));
+      expect(result).toBe(path.join('/project', 'codingbuddy.config.json'));
     });
 
     it('should throw on write error', async () => {
@@ -160,6 +116,19 @@ describe('config.writer', () => {
 
       await expect(writeConfig('/project', mockConfig)).rejects.toThrow(
         'Permission denied',
+      );
+    });
+
+    it('should use raw content when raw option is true', async () => {
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+      const rawContent = '{"custom": "content"}';
+
+      await writeConfig('/project', rawContent, { raw: true });
+
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('codingbuddy.config.json'),
+        rawContent,
+        'utf-8',
       );
     });
   });

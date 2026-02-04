@@ -131,7 +131,7 @@ export class ModeHandler extends AbstractHandler {
       if (!configLanguage) {
         this.logger.warn(
           `No language found in config. Project root: ${projectRoot}. ` +
-            `Please check if codingbuddy.config.js exists and has 'language' field.`,
+            `Please check if codingbuddy.config.json exists and has 'language' field.`,
         );
         // File-based diagnostic logging for config loading failures
         await this.diagnosticLogService.logConfigLoading(

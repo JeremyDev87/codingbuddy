@@ -8,7 +8,7 @@ import type { ResolvedModel } from './model.types';
  * Uses 2-level priority: global config > system default.
  *
  * @since v4.0.0 - Agent/Mode model configs are no longer supported.
- *                 Use codingbuddy.config.js ai.defaultModel instead.
+ *                 Use codingbuddy.config.json ai.defaultModel instead.
  */
 @Injectable()
 export class ModelResolverService {

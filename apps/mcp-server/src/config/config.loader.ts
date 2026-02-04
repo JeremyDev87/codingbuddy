@@ -1,17 +1,57 @@
 import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
-import { pathToFileURL } from 'url';
 import { validateConfig, type CodingBuddyConfig } from './config.schema';
 
 /**
  * Supported config file names in priority order
+ *
+ * Only JSON format is supported to ensure compatibility with both
+ * CommonJS and ESM projects.
  */
-export const CONFIG_FILE_NAMES = [
+export const CONFIG_FILE_NAMES = ['codingbuddy.config.json'] as const;
+
+/**
+ * Deprecated config file names that are no longer supported.
+ * Used to detect and warn users about legacy configurations.
+ *
+ * @since 3.2.0 - JavaScript config files removed for ESM/CJS compatibility
+ */
+export const DEPRECATED_CONFIG_FILE_NAMES = [
   'codingbuddy.config.js',
   'codingbuddy.config.mjs',
-  'codingbuddy.config.json',
+  'codingbuddy.config.cjs',
 ] as const;
+
+/**
+ * Version when JavaScript config support was removed.
+ * Used in deprecation warning messages.
+ */
+export const JS_CONFIG_DEPRECATION_VERSION = '3.2.0';
+
+/**
+ * URL to migration documentation for users upgrading from JavaScript configs.
+ * Uses HEAD reference to avoid staleness when branch names change.
+ */
+export const CONFIG_MIGRATION_DOCS_URL =
+  'https://github.com/JeremyDev87/codingbuddy/blob/HEAD/apps/mcp-server/README.md#configuration-file';
+
+/**
+ * Detect if running in a CI environment.
+ * Checks common CI environment variables used by major CI/CD platforms.
+ */
+export function isCI(): boolean {
+  return !!(
+    process.env.CI ||
+    process.env.CONTINUOUS_INTEGRATION ||
+    process.env.GITHUB_ACTIONS ||
+    process.env.GITLAB_CI ||
+    process.env.CIRCLECI ||
+    process.env.JENKINS_URL ||
+    process.env.BUILDKITE ||
+    process.env.TRAVIS
+  );
+}
 
 /**
  * Result of loading a config file
@@ -50,6 +90,55 @@ export function findConfigFile(projectRoot: string): string | null {
     }
   }
   return null;
+}
+
+/**
+ * Find deprecated JavaScript config files in the project root.
+ * Returns all found deprecated config files for warning purposes.
+ *
+ * @param projectRoot - Project root directory to search
+ * @returns Array of deprecated config file paths found
+ */
+export function findDeprecatedConfigFiles(projectRoot: string): string[] {
+  const found: string[] = [];
+  for (const fileName of DEPRECATED_CONFIG_FILE_NAMES) {
+    const filePath = path.join(projectRoot, fileName);
+    if (existsSync(filePath)) {
+      found.push(filePath);
+    }
+  }
+  return found;
+}
+
+/**
+ * Generate a deprecation warning message for legacy JavaScript config files.
+ * Returns a shorter message in CI environments to reduce log noise.
+ *
+ * @param deprecatedFiles - Array of deprecated config file paths
+ * @returns Warning message with migration guidance
+ */
+export function getDeprecatedConfigWarning(deprecatedFiles: string[]): string {
+  const fileNames = deprecatedFiles.map(f => path.basename(f));
+
+  // In CI, emit a shorter single-line warning to reduce log noise
+  if (isCI()) {
+    return (
+      `[DEPRECATION] JS config detected (${fileNames.join(', ')}). ` +
+      `Migrate to codingbuddy.config.json. See: ${CONFIG_MIGRATION_DOCS_URL}`
+    );
+  }
+
+  // In interactive mode, provide detailed migration guidance
+  const fileList = fileNames.map(f => `  - ${f}`).join('\n');
+  return (
+    `Deprecated JavaScript config file(s) detected:\n${fileList}\n\n` +
+    `JavaScript configuration files are no longer supported as of v${JS_CONFIG_DEPRECATION_VERSION}.\n` +
+    `Please migrate to JSON format:\n` +
+    `  1. Rename your config to codingbuddy.config.json\n` +
+    `  2. Convert the export to a JSON object\n` +
+    `  3. Remove the deprecated .js/.mjs/.cjs file\n\n` +
+    `For more information, see: ${CONFIG_MIGRATION_DOCS_URL}`
+  );
 }
 
 /**
@@ -130,9 +219,7 @@ export function getProjectRootCacheSize(): number {
  * @security
  * **Monorepo Security Considerations:**
  * - In monorepo setups, sub-packages will load config from parent directories
- * - JavaScript config files (.js, .mjs) execute arbitrary code when loaded
  * - Ensure parent directory configs are trusted before running in sub-packages
- * - Consider using JSON configs in shared/untrusted environments
  *
  * **Symlink Behavior:**
  * - This function follows symbolic links without verification
@@ -187,26 +274,6 @@ export function findProjectRoot(startDir?: string): string {
 }
 
 /**
- * Load a JavaScript/ESM config file using dynamic import
- */
-export async function loadJsConfig(filePath: string): Promise<unknown> {
-  try {
-    // Convert to file:// URL for cross-platform compatibility (Windows/Unix)
-    const fileUrl = pathToFileURL(filePath).href;
-    const module = await import(fileUrl);
-
-    // Handle both default export and module.exports
-    return module.default ?? module;
-  } catch (error) {
-    throw new ConfigLoadError(
-      `Failed to load JavaScript config: ${error instanceof Error ? error.message : String(error)}`,
-      filePath,
-      error instanceof Error ? error : undefined,
-    );
-  }
-}
-
-/**
  * Load a JSON config file
  */
 export async function loadJsonConfig(filePath: string): Promise<unknown> {
@@ -230,7 +297,9 @@ export async function loadJsonConfig(filePath: string): Promise<unknown> {
 }
 
 /**
- * Load config from a file path (auto-detects format)
+ * Load config from a file path
+ *
+ * Only JSON format is supported.
  */
 export async function loadConfigFromFile(filePath: string): Promise<unknown> {
   const ext = path.extname(filePath).toLowerCase();
@@ -239,11 +308,10 @@ export async function loadConfigFromFile(filePath: string): Promise<unknown> {
     return loadJsonConfig(filePath);
   }
 
-  if (ext === '.js' || ext === '.mjs') {
-    return loadJsConfig(filePath);
-  }
-
-  throw new ConfigLoadError(`Unsupported config file format: ${ext}`, filePath);
+  throw new ConfigLoadError(
+    `Unsupported config file format: ${ext}. Only .json is supported.`,
+    filePath,
+  );
 }
 
 /**
@@ -273,25 +341,6 @@ export function validateAndTransform(
 }
 
 /**
- * Check if a file is a JavaScript config (potentially executable code)
- */
-export function isJsConfig(filePath: string): boolean {
-  const ext = path.extname(filePath).toLowerCase();
-  return ext === '.js' || ext === '.mjs';
-}
-
-/**
- * Generate security warning for JavaScript config files
- */
-export function getJsConfigWarning(filePath: string): string {
-  return (
-    `Security notice: Loading JavaScript config file (${path.basename(filePath)}). ` +
-    'JS configs execute code and may pose security risks in untrusted projects. ' +
-    'Consider using codingbuddy.config.json for safer static configuration.'
-  );
-}
-
-/**
  * Load project configuration from the specified root directory
  *
  * @param projectRoot - Project root directory (defaults to process.cwd())
@@ -302,13 +351,20 @@ export async function loadConfig(
 ): Promise<ConfigLoadResult> {
   const root = projectRoot ?? process.cwd();
   const configPath = findConfigFile(root);
+  const deprecatedFiles = findDeprecatedConfigFiles(root);
 
-  // No config file found - return empty config
+  // Collect warnings for deprecated config files
+  const deprecationWarnings: string[] = [];
+  if (deprecatedFiles.length > 0) {
+    deprecationWarnings.push(getDeprecatedConfigWarning(deprecatedFiles));
+  }
+
+  // No config file found - return empty config with deprecation warnings if any
   if (!configPath) {
     return {
       config: {},
       source: null,
-      warnings: [],
+      warnings: deprecationWarnings,
     };
   }
 
@@ -316,15 +372,10 @@ export async function loadConfig(
   const raw = await loadConfigFromFile(configPath);
   const { config, warnings } = validateAndTransform(raw, configPath);
 
-  // Add security warning for JS configs
-  if (isJsConfig(configPath)) {
-    warnings.push(getJsConfigWarning(configPath));
-  }
-
   return {
     config,
     source: configPath,
-    warnings,
+    warnings: [...deprecationWarnings, ...warnings],
   };
 }
 

@@ -52,7 +52,7 @@ describe('StateService', () => {
       const metadata: ProjectMetadata = {
         projectRoot: mockProjectRoot,
         detectedAt: new Date().toISOString(),
-        configFile: 'codingbuddy.config.js',
+        configFile: 'codingbuddy.config.json',
         lastMode: 'PLAN',
       };
 

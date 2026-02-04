@@ -11,7 +11,7 @@
  * Model configuration in Agent/Mode JSON files
  *
  * @deprecated v4.0.0 - Agent/Mode model configs are no longer supported.
- * Model resolution now uses only global config (codingbuddy.config.js) or system default.
+ * Model resolution now uses only global config (codingbuddy.config.json) or system default.
  * Kept for backward compatibility with external consumers.
  * **Will be removed in v5.0.0** - Migrate to global config before upgrading.
  */
@@ -65,7 +65,7 @@ export interface ResolvedModel {
  * @since v4.0.0 - Simplified to only globalDefaultModel and additionalPrefixes
  */
 export interface ResolveModelParams {
-  /** Global config default model from codingbuddy.config.js */
+  /** Global config default model from codingbuddy.config.json */
   globalDefaultModel?: string;
   /** Additional model prefixes to recognize as valid (from config) */
   additionalPrefixes?: readonly string[];

@@ -28,7 +28,7 @@ import type { CodingBuddyConfig } from './config.schema';
  * Complete project configuration including all loaded data
  */
 export interface ProjectConfig {
-  /** Main configuration from codingbuddy.config.js */
+  /** Main configuration from codingbuddy.config.json */
   settings: CodingBuddyConfig;
   /** Ignore patterns from .codingignore + defaults */
   ignorePatterns: string[];
@@ -191,6 +191,12 @@ export class ConfigService implements OnModuleInit {
         this.logger.log(`Loaded config from: ${configResult.source}`);
       } else {
         this.logger.log('No config file found, using defaults');
+      }
+      // Log deprecation warnings and other config warnings
+      if (configResult.warnings.length > 0) {
+        for (const warning of configResult.warnings) {
+          this.logger.warn(warning);
+        }
       }
     } catch (error) {
       if (error instanceof ConfigLoadError) {

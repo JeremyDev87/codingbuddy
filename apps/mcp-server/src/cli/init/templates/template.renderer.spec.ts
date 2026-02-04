@@ -1,11 +1,13 @@
 /**
  * Template Renderer Tests
+ *
+ * Only JSON rendering is tested as JavaScript rendering was removed
+ * for ESM/CJS compatibility.
  */
 
 import { describe, it, expect } from 'vitest';
-import { renderConfigAsJs, renderConfigAsJson } from './template.renderer';
+import { renderConfigAsJson } from './template.renderer';
 import type { ConfigTemplate } from './template.types';
-import { nextjsTemplate } from './frameworks';
 
 describe('Template Renderer', () => {
   const mockTemplate: ConfigTemplate = {
@@ -35,110 +37,6 @@ describe('Template Renderer', () => {
       footer: '// Footer comment',
     },
   };
-
-  describe('renderConfigAsJs', () => {
-    it('renders config with header comment', () => {
-      const result = renderConfigAsJs(mockTemplate);
-
-      expect(result).toContain('// Header comment');
-      expect(result).toContain('module.exports = {');
-    });
-
-    it('renders language setting with comment', () => {
-      const result = renderConfigAsJs(mockTemplate);
-
-      expect(result).toContain('// Language comment');
-      expect(result).toContain("language: 'ko'");
-    });
-
-    it('renders techStack with comment', () => {
-      const result = renderConfigAsJs(mockTemplate);
-
-      expect(result).toContain('// TechStack comment');
-      expect(result).toContain('techStack: {');
-      expect(result).toContain("languages: ['TypeScript']");
-    });
-
-    it('renders footer comment', () => {
-      const result = renderConfigAsJs(mockTemplate);
-
-      expect(result).toContain('// Footer comment');
-    });
-
-    it('overrides project name when provided', () => {
-      const result = renderConfigAsJs(mockTemplate, { projectName: 'my-app' });
-
-      expect(result).toContain("projectName: 'my-app'");
-    });
-
-    it('overrides language when provided', () => {
-      const result = renderConfigAsJs(mockTemplate, { language: 'en' });
-
-      expect(result).toContain("language: 'en'");
-    });
-
-    it('renders ai section when defaultModel is provided', () => {
-      const result = renderConfigAsJs(mockTemplate, {
-        defaultModel: 'claude-opus-4-20250514',
-      });
-
-      expect(result).toContain('// AI Configuration');
-      expect(result).toContain('ai: {');
-      expect(result).toContain("defaultModel: 'claude-opus-4-20250514'");
-    });
-
-    it('renders ai section when primaryAgent is provided', () => {
-      const result = renderConfigAsJs(mockTemplate, {
-        primaryAgent: 'frontend-developer',
-      });
-
-      expect(result).toContain('// AI Configuration');
-      expect(result).toContain('ai: {');
-      expect(result).toContain("primaryAgent: 'frontend-developer'");
-    });
-
-    it('renders both defaultModel and primaryAgent in ai section', () => {
-      const result = renderConfigAsJs(mockTemplate, {
-        defaultModel: 'claude-opus-4-20250514',
-        primaryAgent: 'backend-developer',
-      });
-
-      expect(result).toContain('// AI Configuration');
-      expect(result).toContain("defaultModel: 'claude-opus-4-20250514'");
-      expect(result).toContain("primaryAgent: 'backend-developer'");
-    });
-
-    it('does not render ai section when neither defaultModel nor primaryAgent is provided', () => {
-      const result = renderConfigAsJs(mockTemplate);
-
-      expect(result).not.toContain('// AI Configuration');
-      expect(result).not.toContain('ai: {');
-    });
-
-    it('renders Next.js template correctly', () => {
-      const result = renderConfigAsJs(nextjsTemplate, {
-        projectName: 'nextjs-app',
-      });
-
-      expect(result).toContain('Next.js');
-      expect(result).toContain("projectName: 'nextjs-app'");
-      expect(result).toContain("frontend: ['React', 'Next.js']");
-    });
-
-    it('produces well-formed JavaScript module export', () => {
-      const result = renderConfigAsJs(mockTemplate);
-
-      // Check basic structure
-      expect(result).toMatch(/^\/\//); // Starts with comment
-      expect(result).toContain('module.exports = {');
-      expect(result).toContain('};'); // Contains closing
-
-      // Check no syntax issues (balanced braces)
-      const openBraces = (result.match(/{/g) || []).length;
-      const closeBraces = (result.match(/}/g) || []).length;
-      expect(openBraces).toBe(closeBraces);
-    });
-  });
 
   describe('renderConfigAsJson', () => {
     it('renders valid JSON', () => {

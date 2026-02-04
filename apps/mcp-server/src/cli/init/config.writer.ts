@@ -6,40 +6,17 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import type { CodingBuddyConfig } from '../../config';
+import { CONFIG_FILE_NAMES, type CodingBuddyConfig } from '../../config';
 
-/**
- * Supported config file names
- */
-export const CONFIG_FILE_NAMES = [
-  'codingbuddy.config.js',
-  'codingbuddy.config.json',
-] as const;
-
-/**
- * Config file format
- */
-export type ConfigFormat = 'js' | 'json';
+// Re-export for backward compatibility
+export { CONFIG_FILE_NAMES };
 
 /**
  * Write options
  */
 export interface WriteConfigOptions {
-  /** Output format (default: 'js') */
-  format?: ConfigFormat;
   /** Write raw content without formatting (for pre-rendered templates) */
   raw?: boolean;
-}
-
-/**
- * Format config as JavaScript module
- */
-export function formatConfigAsJs(config: CodingBuddyConfig): string {
-  const jsonContent = JSON.stringify(config, null, 2);
-
-  return `/** @type {import('codingbuddy').CodingBuddyConfig} */
-module.exports = ${jsonContent};
-`;
 }
 
 /**
@@ -72,6 +49,8 @@ export async function findExistingConfig(
 /**
  * Write configuration file to project root
  *
+ * Only JSON format is supported.
+ *
  * @param projectRoot - Project root directory
  * @param config - Configuration object or pre-rendered string (when raw: true)
  * @param options - Write options
@@ -82,10 +61,7 @@ export async function writeConfig(
   config: CodingBuddyConfig | string,
   options: WriteConfigOptions = {},
 ): Promise<string> {
-  const format = options.format ?? 'js';
-
-  const fileName =
-    format === 'json' ? 'codingbuddy.config.json' : 'codingbuddy.config.js';
+  const fileName = 'codingbuddy.config.json';
 
   let content: string;
 
@@ -93,9 +69,8 @@ export async function writeConfig(
     // Use pre-rendered content as-is
     content = config;
   } else if (typeof config === 'object') {
-    // Format the config object
-    content =
-      format === 'json' ? formatConfigAsJson(config) : formatConfigAsJs(config);
+    // Format the config object as JSON
+    content = formatConfigAsJson(config);
   } else {
     throw new Error(
       'Invalid config: expected object or string with raw option',

@@ -37,13 +37,6 @@ describe('cli', () => {
       expect(result.options.force).toBe(true);
     });
 
-    it('should parse init with --format option', () => {
-      const result = parseArgs(['init', '--format', 'json']);
-
-      expect(result.command).toBe('init');
-      expect(result.options.format).toBe('json');
-    });
-
     it('should parse init with --api-key option', () => {
       const result = parseArgs(['init', '--api-key', 'test-key']);
 
@@ -288,19 +281,11 @@ describe('cli', () => {
     it('should handle init command with all options', async () => {
       runInitMock.mockResolvedValue({ success: true });
 
-      await main([
-        'init',
-        '/custom/path',
-        '--format',
-        'json',
-        '--force',
-        '--yes',
-      ]);
+      await main(['init', '/custom/path', '--force', '--yes']);
 
       expect(runInitMock).toHaveBeenCalledWith(
         expect.objectContaining({
           projectRoot: '/custom/path',
-          format: 'json',
           force: true,
           useDefaults: true,
         }),

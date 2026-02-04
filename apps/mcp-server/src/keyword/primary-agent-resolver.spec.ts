@@ -270,10 +270,10 @@ describe('PrimaryAgentResolver', () => {
         ]);
       });
 
-      it('returns tooling-engineer for codingbuddy.config.js prompt', async () => {
+      it('returns tooling-engineer for codingbuddy.config.json prompt', async () => {
         const result = await resolver.resolve(
           'ACT',
-          'codingbuddy.config.js 수정해',
+          'codingbuddy.config.json 수정해',
         );
 
         expect(result.agentName).toBe('tooling-engineer');

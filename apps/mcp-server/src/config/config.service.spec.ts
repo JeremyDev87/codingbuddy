@@ -635,6 +635,30 @@ describe('ConfigService', () => {
       expect(config.settings).toEqual({});
       expect(config.sources.config).toBeNull();
     });
+
+    it('should log deprecation warnings when deprecated JS config files exist', async () => {
+      testTempDir = createTestDir();
+
+      // Create a deprecated JS config file (will be detected but not loaded)
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
+
+      const service = new ConfigService();
+      service.setProjectRoot(testTempDir);
+
+      // Spy on logger.warn
+      const warnSpy = vi.spyOn(service['logger'], 'warn');
+
+      await service.loadProjectConfig();
+
+      // Should have logged a deprecation warning (check for both CI and non-CI formats)
+      expect(warnSpy).toHaveBeenCalled();
+      const warningCall = warnSpy.mock.calls.find(
+        call =>
+          call[0].includes('Deprecated JavaScript config') ||
+          call[0].includes('[DEPRECATION]'),
+      );
+      expect(warningCall).toBeDefined();
+    });
   });
 
   // Note: The following edge cases in setProjectRootAndReload are difficult to test in ESM:

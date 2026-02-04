@@ -287,7 +287,7 @@ export class ConfigDiffService {
     }
 
     lines.push(
-      '💡 Apply these changes to codingbuddy.config.js to keep your AI context accurate.',
+      '💡 Apply these changes to codingbuddy.config.json to keep your AI context accurate.',
     );
 
     return lines.join('\n');

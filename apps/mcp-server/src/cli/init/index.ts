@@ -6,7 +6,7 @@ export {
   findExistingConfig,
   CONFIG_FILE_NAMES,
 } from './config.writer';
-export type { ConfigFormat, WriteConfigOptions } from './config.writer';
+export type { WriteConfigOptions } from './config.writer';
 export {
   ensureGitignoreEntries,
   GitignoreReadError,

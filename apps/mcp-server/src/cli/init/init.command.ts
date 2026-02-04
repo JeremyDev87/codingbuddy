@@ -10,7 +10,7 @@ import { AnalyzerService, type ProjectAnalysis } from '../../analyzer';
 import { ConfigGenerator } from './config.generator';
 import { findExistingConfig, writeConfig } from './config.writer';
 import { createConsoleUtils } from '../utils/console';
-import { renderConfigObjectAsJs, renderConfigObjectAsJson } from './templates';
+import { renderConfigObjectAsJson } from './templates';
 import { runInitWizard, wizardDataToConfig } from './init.wizard';
 import { ensureGitignoreEntries } from './gitignore.utils';
 import { CODINGBUDDY_GITIGNORE_ENTRIES } from './init.constants';
@@ -93,16 +93,13 @@ async function runTemplateInit(
 
   const config = wizardDataToConfig(wizardData);
 
-  const configContent =
-    options.format === 'json'
-      ? renderConfigObjectAsJson(config)
-      : renderConfigObjectAsJs(config);
+  // Only JSON format is supported
+  const configContent = renderConfigObjectAsJson(config);
 
   // Step 4: Write config file
   console.log.step('💾', 'Writing configuration file...');
 
   const configPath = await writeConfig(options.projectRoot, configContent, {
-    format: options.format,
     raw: true, // Write as-is (already rendered)
   });
 
@@ -122,7 +119,7 @@ async function runTemplateInit(
 
   // Success message
   console.log.success('');
-  console.log.step('✅', `codingbuddy.config.${options.format} created!`);
+  console.log.step('✅', 'codingbuddy.config.json created!');
   console.log.info('');
   console.log.info('Please review the generated configuration.');
   console.log.info('');
@@ -178,9 +175,7 @@ async function runAiInit(
   // Step 3: Write config file
   console.log.step('💾', 'Writing configuration file...');
 
-  const configPath = await writeConfig(options.projectRoot, config, {
-    format: options.format,
-  });
+  const configPath = await writeConfig(options.projectRoot, config);
 
   console.log.success(`Configuration saved to ${configPath}`);
 
@@ -198,7 +193,7 @@ async function runAiInit(
 
   // Success message
   console.log.success('');
-  console.log.step('✅', `codingbuddy.config.${options.format} created!`);
+  console.log.step('✅', 'codingbuddy.config.json created!');
   console.log.info('');
   console.log.info('Please review the generated configuration.');
 

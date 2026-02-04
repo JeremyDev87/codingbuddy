@@ -49,6 +49,7 @@ coverage/
 # AI
 .mcp.json
 codingbuddy.config.js
+codingbuddy.config.json
 custom.mdc
 .serena/
 .codingbuddy/

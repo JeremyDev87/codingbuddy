@@ -24,7 +24,6 @@ export interface ParsedArgs {
 export function parseArgs(args: string[]): ParsedArgs {
   const options: Partial<InitOptions> = {
     projectRoot: process.cwd(),
-    format: 'js',
     force: false,
     useDefaults: false,
   };
@@ -57,11 +56,6 @@ export function parseArgs(args: string[]): ParsedArgs {
       options.force = true;
     } else if (arg === '--yes' || arg === '-y') {
       options.useDefaults = true;
-    } else if (arg === '--format') {
-      const format = args[++i];
-      if (format === 'js' || format === 'json') {
-        options.format = format;
-      }
     } else if (arg === '--api-key') {
       options.apiKey = args[++i];
     } else if (!arg.startsWith('-')) {
@@ -87,7 +81,6 @@ Usage:
   codingbuddy --version                Show version
 
 Options:
-  --format <js|json>    Output format (default: js)
   --force, -f           Overwrite existing config
   --yes, -y             Accept detected defaults (quick setup)
   --api-key <key>       Anthropic API key (or set ANTHROPIC_API_KEY env)
@@ -95,9 +88,12 @@ Options:
 Examples:
   codingbuddy init                     Initialize in current directory
   codingbuddy init ./my-project        Initialize in specific directory
-  codingbuddy init --format json       Generate JSON config
   codingbuddy init --force             Overwrite existing config
   codingbuddy mcp                      Start MCP server for AI assistants
+
+Note:
+  Configuration is always saved as codingbuddy.config.json (JSON format only).
+  This ensures compatibility with both CommonJS and ESM projects.
 
 Environment:
   ANTHROPIC_API_KEY    API key for AI generation

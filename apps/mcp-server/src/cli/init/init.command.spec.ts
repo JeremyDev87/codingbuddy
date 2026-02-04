@@ -12,7 +12,6 @@ const {
   mockWriteConfig,
   mockRunInitWizard,
   mockWizardDataToConfig,
-  mockRenderConfigObjectAsJs,
   mockRenderConfigObjectAsJson,
   mockEnsureGitignoreEntries,
 } = vi.hoisted(() => ({
@@ -22,7 +21,6 @@ const {
   mockWriteConfig: vi.fn(),
   mockRunInitWizard: vi.fn(),
   mockWizardDataToConfig: vi.fn(),
-  mockRenderConfigObjectAsJs: vi.fn(),
   mockRenderConfigObjectAsJson: vi.fn(),
   mockEnsureGitignoreEntries: vi.fn(),
 }));
@@ -46,7 +44,6 @@ vi.mock('./config.writer', () => ({
 }));
 
 vi.mock('./templates', () => ({
-  renderConfigObjectAsJs: mockRenderConfigObjectAsJs,
   renderConfigObjectAsJson: mockRenderConfigObjectAsJson,
 }));
 
@@ -148,10 +145,9 @@ describe('init.command', () => {
     mockAnalyzeProject.mockResolvedValue(mockAnalysis);
     mockGenerate.mockResolvedValue(mockConfig);
     mockFindExistingConfig.mockResolvedValue(null);
-    mockWriteConfig.mockResolvedValue('/project/codingbuddy.config.js');
+    mockWriteConfig.mockResolvedValue('/project/codingbuddy.config.json');
     mockRunInitWizard.mockResolvedValue(mockWizardData);
     mockWizardDataToConfig.mockReturnValue(mockConfig);
-    mockRenderConfigObjectAsJs.mockReturnValue('// rendered config');
     mockRenderConfigObjectAsJson.mockReturnValue('{}');
     mockEnsureGitignoreEntries.mockResolvedValue({
       added: [],
@@ -197,20 +193,18 @@ describe('init.command', () => {
     it('should complete successfully without API key', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
       const result = await runInit(options);
 
       expect(result.success).toBe(true);
-      expect(result.configPath).toBe('/project/codingbuddy.config.js');
+      expect(result.configPath).toBe('/project/codingbuddy.config.json');
     });
 
     it('should call analyzer service', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -222,7 +216,6 @@ describe('init.command', () => {
     it('should run init wizard with analysis', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -238,7 +231,6 @@ describe('init.command', () => {
     it('should convert wizard data to config', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -247,52 +239,33 @@ describe('init.command', () => {
       expect(mockWizardDataToConfig).toHaveBeenCalledWith(mockWizardData);
     });
 
-    it('should render config as JS by default', async () => {
+    it('should render config as JSON', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
-        force: false,
-      };
-
-      await runInit(options);
-
-      expect(mockRenderConfigObjectAsJs).toHaveBeenCalledWith(mockConfig);
-      expect(mockRenderConfigObjectAsJson).not.toHaveBeenCalled();
-    });
-
-    it('should render config as JSON when format is json', async () => {
-      const options: InitOptions = {
-        projectRoot: '/project',
-        format: 'json',
         force: false,
       };
 
       await runInit(options);
 
       expect(mockRenderConfigObjectAsJson).toHaveBeenCalledWith(mockConfig);
-      expect(mockRenderConfigObjectAsJs).not.toHaveBeenCalled();
     });
 
     it('should write rendered config with raw option', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
       await runInit(options);
 
-      expect(mockWriteConfig).toHaveBeenCalledWith(
-        '/project',
-        '// rendered config',
-        { format: 'js', raw: true },
-      );
+      expect(mockWriteConfig).toHaveBeenCalledWith('/project', '{}', {
+        raw: true,
+      });
     });
 
     it('should pass useDefaults option to wizard', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
         useDefaults: true,
       };
@@ -309,7 +282,6 @@ describe('init.command', () => {
     it('should pass skipPrompts option to wizard', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
         skipPrompts: true,
       };
@@ -328,7 +300,6 @@ describe('init.command', () => {
 
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -343,7 +314,6 @@ describe('init.command', () => {
     it('should fail without API key when useAi is true', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
         useAi: true,
       };
@@ -357,7 +327,6 @@ describe('init.command', () => {
     it('should use AI generator when useAi is true with API key', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
         useAi: true,
         apiKey: 'test-key',
@@ -373,7 +342,6 @@ describe('init.command', () => {
     it('should write config without raw option in AI mode', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
         useAi: true,
         apiKey: 'test-key',
@@ -381,9 +349,7 @@ describe('init.command', () => {
 
       await runInit(options);
 
-      expect(mockWriteConfig).toHaveBeenCalledWith('/project', mockConfig, {
-        format: 'js',
-      });
+      expect(mockWriteConfig).toHaveBeenCalledWith('/project', mockConfig);
     });
   });
 
@@ -391,7 +357,6 @@ describe('init.command', () => {
     it('should check for existing config', async () => {
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -402,12 +367,11 @@ describe('init.command', () => {
 
     it('should fail if config exists and force is false', async () => {
       mockFindExistingConfig.mockResolvedValue(
-        '/project/codingbuddy.config.js',
+        '/project/codingbuddy.config.json',
       );
 
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -419,12 +383,11 @@ describe('init.command', () => {
 
     it('should overwrite if config exists and force is true', async () => {
       mockFindExistingConfig.mockResolvedValue(
-        '/project/codingbuddy.config.js',
+        '/project/codingbuddy.config.json',
       );
 
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: true,
       };
 
@@ -439,7 +402,6 @@ describe('init.command', () => {
 
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 
@@ -454,7 +416,6 @@ describe('init.command', () => {
 
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
         useAi: true,
         apiKey: 'test-key',
@@ -471,7 +432,6 @@ describe('init.command', () => {
 
       const options: InitOptions = {
         projectRoot: '/project',
-        format: 'js',
         force: false,
       };
 

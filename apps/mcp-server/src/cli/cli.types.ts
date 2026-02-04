@@ -10,8 +10,6 @@
 export interface InitOptions {
   /** Project root directory */
   projectRoot: string;
-  /** Output format for config file */
-  format: 'js' | 'json';
   /** Force overwrite existing config */
   force: boolean;
   /** Use AI to generate config (requires API key) */

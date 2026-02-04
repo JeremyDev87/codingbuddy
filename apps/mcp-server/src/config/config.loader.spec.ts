@@ -4,14 +4,19 @@ import * as path from 'path';
 import * as os from 'os';
 import {
   CONFIG_FILE_NAMES,
+  DEPRECATED_CONFIG_FILE_NAMES,
+  JS_CONFIG_DEPRECATION_VERSION,
+  CONFIG_MIGRATION_DOCS_URL,
   ConfigLoadError,
   validateAndTransform,
-  isJsConfig,
-  getJsConfigWarning,
   findProjectRoot,
   findConfigFile,
+  findDeprecatedConfigFiles,
+  getDeprecatedConfigWarning,
   clearProjectRootCache,
   getProjectRootCacheSize,
+  loadConfig,
+  isCI,
 } from './config.loader';
 
 /**
@@ -38,14 +43,12 @@ function cleanupTestDir(dir: string): void {
 
 describe('config.loader', () => {
   describe('CONFIG_FILE_NAMES', () => {
-    it('should have correct priority order', () => {
-      expect(CONFIG_FILE_NAMES[0]).toBe('codingbuddy.config.js');
-      expect(CONFIG_FILE_NAMES[1]).toBe('codingbuddy.config.mjs');
-      expect(CONFIG_FILE_NAMES[2]).toBe('codingbuddy.config.json');
+    it('should only support JSON format', () => {
+      expect(CONFIG_FILE_NAMES[0]).toBe('codingbuddy.config.json');
     });
 
-    it('should have 3 supported file names', () => {
-      expect(CONFIG_FILE_NAMES).toHaveLength(3);
+    it('should have exactly 1 supported file name', () => {
+      expect(CONFIG_FILE_NAMES).toHaveLength(1);
     });
   });
 
@@ -141,45 +144,6 @@ describe('config.loader', () => {
     });
   });
 
-  describe('isJsConfig', () => {
-    it('should return true for .js files', () => {
-      expect(isJsConfig('/path/codingbuddy.config.js')).toBe(true);
-    });
-
-    it('should return true for .mjs files', () => {
-      expect(isJsConfig('/path/codingbuddy.config.mjs')).toBe(true);
-    });
-
-    it('should return false for .json files', () => {
-      expect(isJsConfig('/path/codingbuddy.config.json')).toBe(false);
-    });
-
-    it('should be case-insensitive', () => {
-      expect(isJsConfig('/path/config.JS')).toBe(true);
-      expect(isJsConfig('/path/config.MJS')).toBe(true);
-    });
-  });
-
-  describe('getJsConfigWarning', () => {
-    it('should include file name in warning', () => {
-      const warning = getJsConfigWarning('/path/to/codingbuddy.config.js');
-
-      expect(warning).toContain('codingbuddy.config.js');
-    });
-
-    it('should mention security risk', () => {
-      const warning = getJsConfigWarning('/path/to/config.js');
-
-      expect(warning).toContain('security');
-    });
-
-    it('should recommend JSON alternative', () => {
-      const warning = getJsConfigWarning('/path/to/config.js');
-
-      expect(warning).toContain('codingbuddy.config.json');
-    });
-  });
-
   describe('findConfigFile', () => {
     let testTempDir: string;
 
@@ -189,21 +153,8 @@ describe('config.loader', () => {
       }
     });
 
-    it('should find codingbuddy.config.js when it exists', () => {
-      testTempDir = createTestDir('findConfigFile-test');
-      writeFileSync(
-        path.join(testTempDir, 'codingbuddy.config.js'),
-        'module.exports = {};',
-      );
-
-      const result = findConfigFile(testTempDir);
-
-      expect(result).not.toBeNull();
-      expect(result).toContain('codingbuddy.config.js');
-    });
-
     it('should find codingbuddy.config.json when it exists', () => {
-      testTempDir = createTestDir('config-loader-test');
+      testTempDir = createTestDir('findConfigFile-test');
       writeFileSync(path.join(testTempDir, 'codingbuddy.config.json'), '{}');
 
       const result = findConfigFile(testTempDir);
@@ -239,10 +190,7 @@ describe('config.loader', () => {
       const srcDir = path.join(projectDir, 'src', 'components');
 
       mkdirSync(srcDir, { recursive: true });
-      writeFileSync(
-        path.join(projectDir, 'codingbuddy.config.js'),
-        'module.exports = {};',
-      );
+      writeFileSync(path.join(projectDir, 'codingbuddy.config.json'), '{}');
 
       const result = findProjectRoot(srcDir);
 
@@ -332,7 +280,7 @@ describe('config.loader', () => {
 
     it('should find codingbuddy config in parent directory even when child has package.json (monorepo)', () => {
       // Setup: monorepo structure
-      // /tempdir/monorepo/codingbuddy.config.js  <- config here
+      // /tempdir/monorepo/codingbuddy.config.json  <- config here
       // /tempdir/monorepo/package.json
       // /tempdir/monorepo/apps/sub-package/package.json  <- no config
       // /tempdir/monorepo/apps/sub-package/src/  <- start here
@@ -342,10 +290,7 @@ describe('config.loader', () => {
       const srcDir = path.join(subPackageDir, 'src');
 
       mkdirSync(srcDir, { recursive: true });
-      writeFileSync(
-        path.join(monorepoRoot, 'codingbuddy.config.js'),
-        'module.exports = {};',
-      );
+      writeFileSync(path.join(monorepoRoot, 'codingbuddy.config.json'), '{}');
       writeFileSync(path.join(monorepoRoot, 'package.json'), '{}');
       writeFileSync(path.join(subPackageDir, 'package.json'), '{}');
 
@@ -360,10 +305,7 @@ describe('config.loader', () => {
       const srcDir = path.join(projectDir, 'src');
 
       mkdirSync(srcDir, { recursive: true });
-      writeFileSync(
-        path.join(projectDir, 'codingbuddy.config.js'),
-        'module.exports = {};',
-      );
+      writeFileSync(path.join(projectDir, 'codingbuddy.config.json'), '{}');
 
       // First call - should traverse filesystem
       const result1 = findProjectRoot(srcDir);
@@ -390,10 +332,7 @@ describe('config.loader', () => {
       expect(result1).toBe(projectDir);
 
       // Add config file after first call
-      writeFileSync(
-        path.join(projectDir, 'codingbuddy.config.js'),
-        'module.exports = {};',
-      );
+      writeFileSync(path.join(projectDir, 'codingbuddy.config.json'), '{}');
 
       // Without clearing cache, should still return package.json location
       // (This is expected caching behavior - result is stale)
@@ -438,10 +377,7 @@ describe('config.loader', () => {
       const srcDir = path.join(projectDir, 'src');
 
       mkdirSync(srcDir, { recursive: true });
-      writeFileSync(
-        path.join(projectDir, 'codingbuddy.config.js'),
-        'module.exports = {};',
-      );
+      writeFileSync(path.join(projectDir, 'codingbuddy.config.json'), '{}');
 
       // First call - populates cache
       const result1 = findProjectRoot(srcDir);
@@ -449,7 +385,7 @@ describe('config.loader', () => {
       expect(getProjectRootCacheSize()).toBe(1);
 
       // Remove config file - cache should still return old result
-      rmSync(path.join(projectDir, 'codingbuddy.config.js'));
+      rmSync(path.join(projectDir, 'codingbuddy.config.json'));
 
       // Second call - should return cached result (stale but expected)
       const result2 = findProjectRoot(srcDir);
@@ -457,6 +393,302 @@ describe('config.loader', () => {
 
       // Cache size should still be 1
       expect(getProjectRootCacheSize()).toBe(1);
+    });
+  });
+
+  describe('DEPRECATED_CONFIG_FILE_NAMES', () => {
+    it('should contain all legacy JavaScript config file names', () => {
+      expect(DEPRECATED_CONFIG_FILE_NAMES).toContain('codingbuddy.config.js');
+      expect(DEPRECATED_CONFIG_FILE_NAMES).toContain('codingbuddy.config.mjs');
+      expect(DEPRECATED_CONFIG_FILE_NAMES).toContain('codingbuddy.config.cjs');
+    });
+
+    it('should have exactly 3 deprecated file names', () => {
+      expect(DEPRECATED_CONFIG_FILE_NAMES).toHaveLength(3);
+    });
+  });
+
+  describe('findDeprecatedConfigFiles', () => {
+    let testTempDir: string;
+
+    afterEach(() => {
+      if (testTempDir) {
+        cleanupTestDir(testTempDir);
+      }
+    });
+
+    it('should return empty array when no deprecated files exist', () => {
+      testTempDir = createTestDir('deprecated-test');
+
+      const result = findDeprecatedConfigFiles(testTempDir);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should find codingbuddy.config.js when it exists', () => {
+      testTempDir = createTestDir('deprecated-test');
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
+
+      const result = findDeprecatedConfigFiles(testTempDir);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toContain('codingbuddy.config.js');
+    });
+
+    it('should find multiple deprecated files when they exist', () => {
+      testTempDir = createTestDir('deprecated-test');
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.mjs'), '');
+
+      const result = findDeprecatedConfigFiles(testTempDir);
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should not include JSON config files', () => {
+      testTempDir = createTestDir('deprecated-test');
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.json'), '{}');
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
+
+      const result = findDeprecatedConfigFiles(testTempDir);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toContain('.js');
+      expect(result[0]).not.toContain('.json');
+    });
+  });
+
+  describe('deprecation constants', () => {
+    it('JS_CONFIG_DEPRECATION_VERSION should be a valid semver string', () => {
+      expect(JS_CONFIG_DEPRECATION_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+    });
+
+    it('CONFIG_MIGRATION_DOCS_URL should be a valid URL', () => {
+      expect(CONFIG_MIGRATION_DOCS_URL).toMatch(/^https?:\/\//);
+    });
+  });
+
+  describe('getDeprecatedConfigWarning', () => {
+    // CI env vars to clear for non-CI tests
+    const ciEnvVars = [
+      'CI',
+      'CONTINUOUS_INTEGRATION',
+      'GITHUB_ACTIONS',
+      'GITLAB_CI',
+      'CIRCLECI',
+      'JENKINS_URL',
+      'BUILDKITE',
+      'TRAVIS',
+    ];
+
+    /**
+     * Helper to run a test in non-CI mode by temporarily clearing CI env vars
+     */
+    function withoutCI<T>(fn: () => T): T {
+      const originalValues: Record<string, string | undefined> = {};
+      ciEnvVars.forEach(v => {
+        originalValues[v] = process.env[v];
+        delete process.env[v];
+      });
+
+      try {
+        return fn();
+      } finally {
+        ciEnvVars.forEach(v => {
+          if (originalValues[v] !== undefined) {
+            process.env[v] = originalValues[v];
+          }
+        });
+      }
+    }
+
+    it('should generate warning message with file list', () => {
+      withoutCI(() => {
+        const files = ['/project/codingbuddy.config.js'];
+
+        const result = getDeprecatedConfigWarning(files);
+
+        expect(result).toContain(
+          'Deprecated JavaScript config file(s) detected',
+        );
+        expect(result).toContain('codingbuddy.config.js');
+        expect(result).toContain(`v${JS_CONFIG_DEPRECATION_VERSION}`);
+        expect(result).toContain('codingbuddy.config.json');
+        expect(result).toContain(CONFIG_MIGRATION_DOCS_URL);
+      });
+    });
+
+    it('should list multiple files when provided', () => {
+      withoutCI(() => {
+        const files = [
+          '/project/codingbuddy.config.js',
+          '/project/codingbuddy.config.mjs',
+        ];
+
+        const result = getDeprecatedConfigWarning(files);
+
+        expect(result).toContain('codingbuddy.config.js');
+        expect(result).toContain('codingbuddy.config.mjs');
+      });
+    });
+
+    it('should include migration steps', () => {
+      withoutCI(() => {
+        const files = ['/project/codingbuddy.config.js'];
+
+        const result = getDeprecatedConfigWarning(files);
+
+        expect(result).toContain('Rename your config');
+        expect(result).toContain('Convert the export to a JSON object');
+        expect(result).toContain('Remove the deprecated');
+      });
+    });
+
+    it('should return short message in CI environment', () => {
+      const originalCI = process.env.CI;
+      process.env.CI = 'true';
+
+      try {
+        const files = ['/project/codingbuddy.config.js'];
+        const result = getDeprecatedConfigWarning(files);
+
+        expect(result).toContain('[DEPRECATION]');
+        expect(result).toContain('codingbuddy.config.js');
+        expect(result).not.toContain('Rename your config');
+        expect(result).toContain(CONFIG_MIGRATION_DOCS_URL);
+      } finally {
+        if (originalCI === undefined) {
+          delete process.env.CI;
+        } else {
+          process.env.CI = originalCI;
+        }
+      }
+    });
+
+    it('should list multiple files in CI mode', () => {
+      const originalCI = process.env.CI;
+      process.env.CI = 'true';
+
+      try {
+        const files = [
+          '/project/codingbuddy.config.js',
+          '/project/codingbuddy.config.mjs',
+        ];
+        const result = getDeprecatedConfigWarning(files);
+
+        expect(result).toContain('codingbuddy.config.js');
+        expect(result).toContain('codingbuddy.config.mjs');
+      } finally {
+        if (originalCI === undefined) {
+          delete process.env.CI;
+        } else {
+          process.env.CI = originalCI;
+        }
+      }
+    });
+  });
+
+  describe('isCI', () => {
+    const ciEnvVars = [
+      'CI',
+      'CONTINUOUS_INTEGRATION',
+      'GITHUB_ACTIONS',
+      'GITLAB_CI',
+      'CIRCLECI',
+      'JENKINS_URL',
+      'BUILDKITE',
+      'TRAVIS',
+    ];
+
+    it('should return false when no CI env vars are set', () => {
+      const originalValues: Record<string, string | undefined> = {};
+      ciEnvVars.forEach(v => {
+        originalValues[v] = process.env[v];
+        delete process.env[v];
+      });
+
+      try {
+        expect(isCI()).toBe(false);
+      } finally {
+        ciEnvVars.forEach(v => {
+          if (originalValues[v] !== undefined) {
+            process.env[v] = originalValues[v];
+          }
+        });
+      }
+    });
+
+    it.each(ciEnvVars)('should return true when %s is set', envVar => {
+      const originalValue = process.env[envVar];
+
+      try {
+        process.env[envVar] = 'true';
+        expect(isCI()).toBe(true);
+      } finally {
+        if (originalValue === undefined) {
+          delete process.env[envVar];
+        } else {
+          process.env[envVar] = originalValue;
+        }
+      }
+    });
+  });
+
+  describe('loadConfig with deprecated files', () => {
+    let testTempDir: string;
+
+    afterEach(() => {
+      if (testTempDir) {
+        cleanupTestDir(testTempDir);
+      }
+    });
+
+    it('should include deprecation warning when .js config exists', async () => {
+      testTempDir = createTestDir('loadConfig-deprecated-test');
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
+
+      const result = await loadConfig(testTempDir);
+
+      expect(result.warnings).toHaveLength(1);
+      // Check for common content in both CI and non-CI warning formats
+      expect(result.warnings[0]).toContain('codingbuddy.config.js');
+      expect(
+        result.warnings[0].includes('Deprecated') ||
+          result.warnings[0].includes('DEPRECATION'),
+      ).toBe(true);
+      expect(result.source).toBeNull();
+    });
+
+    it('should include deprecation warning even when .json config exists', async () => {
+      testTempDir = createTestDir('loadConfig-deprecated-test');
+      writeFileSync(
+        path.join(testTempDir, 'codingbuddy.config.json'),
+        '{"language": "en"}',
+      );
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
+
+      const result = await loadConfig(testTempDir);
+
+      expect(
+        result.warnings.some(
+          w => w.includes('Deprecated') || w.includes('DEPRECATION'),
+        ),
+      ).toBe(true);
+      expect(result.source).toContain('codingbuddy.config.json');
+      expect(result.config.language).toBe('en');
+    });
+
+    it('should have no warnings when only .json config exists', async () => {
+      testTempDir = createTestDir('loadConfig-deprecated-test');
+      writeFileSync(
+        path.join(testTempDir, 'codingbuddy.config.json'),
+        '{"language": "ko"}',
+      );
+
+      const result = await loadConfig(testTempDir);
+
+      expect(result.warnings).toHaveLength(0);
+      expect(result.config.language).toBe('ko');
     });
   });
 });

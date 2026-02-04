@@ -119,9 +119,11 @@ export class PrimaryAgentResolver {
    * This allows projects to prevent certain agents from being recommended.
    *
    * @example
-   * // codingbuddy.config.js
-   * ai: {
-   *   excludeAgents: ['mobile-developer', 'frontend-developer'],
+   * // codingbuddy.config.json
+   * {
+   *   "ai": {
+   *     "excludeAgents": ["mobile-developer", "frontend-developer"]
+   *   }
    * }
    */
   private async filterExcludedAgents(agents: string[]): Promise<string[]> {

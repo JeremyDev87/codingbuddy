@@ -182,7 +182,7 @@ const createMockConfigService = (
     ignorePatterns: ['node_modules', '.git'],
     contextFiles: [],
     sources: {
-      config: '/test/codingbuddy.config.js',
+      config: '/test/codingbuddy.config.json',
       ignore: null,
       context: null,
     },
@@ -196,7 +196,7 @@ const createMockConfigService = (
     ignorePatterns: ['node_modules', '.git'],
     contextFiles: [],
     sources: {
-      config: '/test/codingbuddy.config.js',
+      config: '/test/codingbuddy.config.json',
       ignore: null,
       context: null,
     },
@@ -206,7 +206,7 @@ const createMockConfigService = (
     ignorePatterns: ['node_modules', '.git'],
     contextFiles: [],
     sources: {
-      config: '/test/codingbuddy.config.js',
+      config: '/test/codingbuddy.config.json',
       ignore: null,
       context: null,
     },
