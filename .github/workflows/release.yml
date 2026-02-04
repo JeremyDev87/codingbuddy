@@ -38,6 +38,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Verify version consistency
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          chmod +x scripts/verify-release-versions.sh
+          ./scripts/verify-release-versions.sh "$TAG_NAME"
+        env:
+          GITHUB_REF: ${{ github.ref }}
+
       - name: Build mcp-server
         run: yarn workspace codingbuddy build
 
