@@ -247,6 +247,46 @@ npm install -g codingbuddy
 
 ---
 
+## 配置
+
+### AI 模型设置
+
+在 `codingbuddy.config.js` 中配置默认 AI 模型：
+
+```javascript
+module.exports = {
+  ai: {
+    defaultModel: 'claude-sonnet-4-20250514', // 默认值
+    // 选项：claude-opus-4-*、claude-sonnet-4-*、claude-haiku-3-5-*
+  }
+}
+```
+
+| 模型 | 最适合 |
+|------|--------|
+| `claude-opus-4-*` | 复杂架构、深度分析 |
+| `claude-sonnet-4-*` | 通用开发（默认） |
+| `claude-haiku-3-5-*` | 快速查询（不推荐用于编码） |
+
+### 详细度设置
+
+通过详细度级别优化令牌使用：
+
+```javascript
+module.exports = {
+  verbosity: 'compact', // 选项：'minimal'、'compact'、'standard'、'detailed'
+}
+```
+
+| 级别 | 用途 |
+|------|------|
+| `minimal` | 最大程度节省令牌，仅包含必要信息 |
+| `compact` | 平衡模式，精简格式（默认） |
+| `standard` | 完整格式，结构化响应 |
+| `detailed` | 扩展说明，包含示例 |
+
+---
+
 ## 文档
 
 | 文档 | 描述 |

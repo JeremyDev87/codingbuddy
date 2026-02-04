@@ -247,6 +247,46 @@ npm install -g codingbuddy
 
 ---
 
+## 設定
+
+### AIモデル設定
+
+`codingbuddy.config.js`でデフォルトのAIモデルを設定します：
+
+```javascript
+module.exports = {
+  ai: {
+    defaultModel: 'claude-sonnet-4-20250514', // デフォルト
+    // オプション：claude-opus-4-*、claude-sonnet-4-*、claude-haiku-3-5-*
+  }
+}
+```
+
+| モデル | 最適な用途 |
+|--------|-----------|
+| `claude-opus-4-*` | 複雑なアーキテクチャ、深い分析 |
+| `claude-sonnet-4-*` | 一般的な開発（デフォルト） |
+| `claude-haiku-3-5-*` | クイック検索（コーディングには非推奨） |
+
+### 詳細度設定
+
+詳細度レベルでトークン使用量を最適化します：
+
+```javascript
+module.exports = {
+  verbosity: 'compact', // オプション：'minimal'、'compact'、'standard'、'detailed'
+}
+```
+
+| レベル | 用途 |
+|--------|------|
+| `minimal` | 最大限のトークン節約、必須情報のみ |
+| `compact` | バランス型、簡潔なフォーマット（デフォルト） |
+| `standard` | 完全なフォーマット、構造化されたレスポンス |
+| `detailed` | 拡張された説明、例を含む |
+
+---
+
 ## ドキュメント
 
 | ドキュメント | 説明 |

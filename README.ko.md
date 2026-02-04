@@ -247,6 +247,46 @@ npm install -g codingbuddy
 
 ---
 
+## 설정
+
+### AI 모델 설정
+
+`codingbuddy.config.js`에서 기본 AI 모델을 설정합니다:
+
+```javascript
+module.exports = {
+  ai: {
+    defaultModel: 'claude-sonnet-4-20250514', // 기본값
+    // 옵션: claude-opus-4-*, claude-sonnet-4-*, claude-haiku-3-5-*
+  }
+}
+```
+
+| 모델 | 적합한 용도 |
+|------|------------|
+| `claude-opus-4-*` | 복잡한 아키텍처, 심층 분석 |
+| `claude-sonnet-4-*` | 일반 개발 (기본값) |
+| `claude-haiku-3-5-*` | 빠른 조회 (코딩에는 권장하지 않음) |
+
+### Verbosity 설정
+
+verbosity 레벨로 토큰 사용량을 최적화합니다:
+
+```javascript
+module.exports = {
+  verbosity: 'compact', // 옵션: 'minimal', 'compact', 'standard', 'detailed'
+}
+```
+
+| 레벨 | 용도 |
+|------|------|
+| `minimal` | 최대 토큰 절약, 필수 정보만 |
+| `compact` | 균형 잡힌 포맷, 간결한 출력 (기본값) |
+| `standard` | 완전한 포맷, 구조화된 응답 |
+| `detailed` | 확장된 설명, 예제 포함 |
+
+---
+
 ## 문서
 
 | 문서 | 설명 |

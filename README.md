@@ -247,6 +247,46 @@ npm install -g codingbuddy
 
 ---
 
+## Configuration
+
+### AI Model Settings
+
+Configure the default AI model in `codingbuddy.config.js`:
+
+```javascript
+module.exports = {
+  ai: {
+    defaultModel: 'claude-sonnet-4-20250514', // Default
+    // Options: claude-opus-4-*, claude-sonnet-4-*, claude-haiku-3-5-*
+  }
+}
+```
+
+| Model | Best For |
+|-------|----------|
+| `claude-opus-4-*` | Complex architecture, deep analysis |
+| `claude-sonnet-4-*` | General development (default) |
+| `claude-haiku-3-5-*` | Quick lookups (not recommended for coding) |
+
+### Verbosity Settings
+
+Optimize token usage with verbosity levels:
+
+```javascript
+module.exports = {
+  verbosity: 'compact', // Options: 'minimal', 'compact', 'standard', 'detailed'
+}
+```
+
+| Level | Use Case |
+|-------|----------|
+| `minimal` | Maximum token savings, essential info only |
+| `compact` | Balanced, reduced formatting (default) |
+| `standard` | Full formatting, structured responses |
+| `detailed` | Extended explanations, examples included |
+
+---
+
 ## Documentation
 
 | Document | Description |
