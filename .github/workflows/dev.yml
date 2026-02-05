@@ -7,6 +7,7 @@ on:
       - stag-**
     paths:
       - 'apps/mcp-server/**'
+      - 'apps/landing-page/**'
       - 'packages/rules/**'
       - 'packages/claude-code-plugin/**'
       - '.antigravity/**'
@@ -227,3 +228,81 @@ jobs:
 
       - name: Security audit
         run: yarn workspace codingbuddy-claude-plugin npm audit --severity high
+
+  # ─────────────── Landing Page CI Jobs ───────────────
+  landing-lint:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Lint
+        run: yarn workspace landing-page lint
+
+  landing-type-check:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Type check
+        run: yarn workspace landing-page typecheck
+
+  landing-test:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Test with coverage
+        run: yarn workspace landing-page test:coverage
+
+  landing-build:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Build Next.js app
+        run: yarn workspace landing-page build
+
+  landing-circular-check:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Circular dependency check
+        run: yarn workspace landing-page check:circular
+
+  landing-format-check:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Format check
+        run: yarn workspace landing-page format:check
+
+  landing-security-check:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Security audit
+        run: yarn workspace landing-page npm audit --severity high
