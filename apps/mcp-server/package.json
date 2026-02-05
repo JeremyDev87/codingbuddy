@@ -61,7 +61,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "0.72.1",
     "@inquirer/prompts": "8.1.0",
-    "@modelcontextprotocol/sdk": "1.25.2",
+    "@modelcontextprotocol/sdk": "1.26.0",
     "@nestjs/common": "11.1.9",
     "@nestjs/config": "4.0.2",
     "@nestjs/core": "11.1.9",

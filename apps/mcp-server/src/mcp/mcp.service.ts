@@ -114,24 +114,67 @@ export class McpService implements OnModuleInit {
   /**
    * Request roots from client with timeout.
    * Prevents startup delays if client is slow or unresponsive.
+   *
+   * @remarks
+   * Uses AbortController pattern to properly cleanup the timeout timer
+   * when the request completes before timeout.
    */
   private async listRootsWithTimeout(): Promise<{ roots?: { uri: string }[] }> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(
+      timeoutId = setTimeout(
         () => reject(new Error('listRoots timeout')),
         McpService.LIST_ROOTS_TIMEOUT_MS,
       );
     });
 
-    return Promise.race([this.server.listRoots(), timeoutPromise]);
+    try {
+      return await Promise.race([this.server.listRoots(), timeoutPromise]);
+    } finally {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    }
   }
 
   getServer() {
     return this.server;
   }
 
+  /**
+   * Create a new Server instance with all handlers registered.
+   * Used for per-connection Server isolation in SSE mode.
+   */
+  createServer(): Server {
+    const newServer = new Server(
+      {
+        name: 'codingbuddy-rules-server',
+        version: getPackageVersion(),
+      },
+      {
+        capabilities: {
+          resources: {},
+          tools: {},
+          prompts: {},
+        },
+      },
+    );
+
+    // Register all handlers on the new server
+    this.registerResourcesOn(newServer);
+    this.registerToolsOn(newServer);
+    this.registerPromptsOn(newServer);
+
+    return newServer;
+  }
+
   private registerResources() {
-    this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    this.registerResourcesOn(this.server);
+  }
+
+  private registerResourcesOn(server: Server) {
+    server.setRequestHandler(ListResourcesRequestSchema, async () => {
       const agents = await this.rulesService.listAgents();
       const coreRules = [
         'rules/core.md',
@@ -165,7 +208,7 @@ export class McpService implements OnModuleInit {
       };
     });
 
-    this.server.setRequestHandler(ReadResourceRequestSchema, async request => {
+    server.setRequestHandler(ReadResourceRequestSchema, async request => {
       const uri = request.params.uri;
 
       // Handle config://project resource
@@ -218,8 +261,12 @@ export class McpService implements OnModuleInit {
   }
 
   private registerTools() {
+    this.registerToolsOn(this.server);
+  }
+
+  private registerToolsOn(server: Server) {
     // Collect tool definitions from all handlers
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+    server.setRequestHandler(ListToolsRequestSchema, async () => {
       const tools = this.toolHandlers.flatMap(handler =>
         handler.getToolDefinitions(),
       );
@@ -227,7 +274,7 @@ export class McpService implements OnModuleInit {
     });
 
     // Delegate tool calls to handlers
-    this.server.setRequestHandler(CallToolRequestSchema, async request => {
+    server.setRequestHandler(CallToolRequestSchema, async request => {
       const { name, arguments: args } = request.params;
 
       for (const handler of this.toolHandlers) {
@@ -242,7 +289,11 @@ export class McpService implements OnModuleInit {
   }
 
   private registerPrompts() {
-    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
+    this.registerPromptsOn(this.server);
+  }
+
+  private registerPromptsOn(server: Server) {
+    server.setRequestHandler(ListPromptsRequestSchema, async () => {
       return {
         prompts: [
           {
@@ -261,7 +312,7 @@ export class McpService implements OnModuleInit {
       };
     });
 
-    this.server.setRequestHandler(GetPromptRequestSchema, async request => {
+    server.setRequestHandler(GetPromptRequestSchema, async request => {
       if (request.params.name === 'activate_agent') {
         const role = String(request.params.arguments?.role);
         try {

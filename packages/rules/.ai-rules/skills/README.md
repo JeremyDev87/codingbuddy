@@ -21,6 +21,7 @@ Reusable workflows for consistent development practices.
 | systematic-debugging | Systematic approach before proposing fixes | Encountering bugs or failures |
 | test-driven-development | Write tests first, then minimal code to pass | Before implementing features |
 | performance-optimization | Profiling-first performance optimization workflow | Performance issues, bottleneck analysis, optimization |
+| widget-slot-architecture | Next.js App Router Parallel Routes based Widget-Slot architecture | Large-scale Next.js project page structure design |
 | writing-plans | Create implementation plans before coding | Multi-step tasks with specs |
 
 ## Skill Format
@@ -147,6 +148,8 @@ EOF
 ├── systematic-debugging/
 │   └── SKILL.md
 ├── test-driven-development/
+│   └── SKILL.md
+├── widget-slot-architecture/
 │   └── SKILL.md
 └── writing-plans/
     └── SKILL.md
