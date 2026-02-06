@@ -40,7 +40,7 @@ Paste any error messages here
 ## Configuration
 
 <details>
-<summary>codingbuddy.config.js</summary>
+<summary>codingbuddy.config.json</summary>
 
 ```javascript
 // Paste your config here (remove sensitive data)

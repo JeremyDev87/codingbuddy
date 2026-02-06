@@ -229,7 +229,7 @@ Você devera ver ferramentas do CodingBuddy como:
 
 ### Configuração em Nível de Projeto
 
-Crie `codingbuddy.config.js` na raiz do seu projeto:
+Crie `codingbuddy.config.json` na raiz do seu projeto:
 
 ```javascript
 module.exports = {

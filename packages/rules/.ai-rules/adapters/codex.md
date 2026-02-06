@@ -236,7 +236,7 @@ When using GitHub Copilot Chat with AUTO mode:
 
 ### Configuration
 
-Configure in `codingbuddy.config.js`:
+Configure in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

@@ -251,7 +251,7 @@ npm install -g codingbuddy
 
 ### AI 模型设置
 
-在 `codingbuddy.config.js` 中配置默认 AI 模型：
+在 `codingbuddy.config.json` 中配置默认 AI 模型：
 
 ```javascript
 module.exports = {

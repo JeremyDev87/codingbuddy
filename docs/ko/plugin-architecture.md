@@ -264,7 +264,7 @@ sequenceDiagram
 }
 ```
 
-### 프로젝트 설정 (`codingbuddy.config.js`)
+### 프로젝트 설정 (`codingbuddy.config.json`)
 
 ```javascript
 module.exports = {

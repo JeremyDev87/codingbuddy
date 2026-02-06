@@ -231,7 +231,7 @@ Claude Code で利用可能なツールを確認します：
 
 ### プロジェクトレベル設定
 
-プロジェクトルートに `codingbuddy.config.js` を作成：
+プロジェクトルートに `codingbuddy.config.json` を作成：
 
 ```javascript
 module.exports = {

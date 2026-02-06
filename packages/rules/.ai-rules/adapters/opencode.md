@@ -188,7 +188,7 @@ Once connected, you can use:
 
 OpenCode agents get language instructions dynamically from the MCP server:
 
-1. **Set language in codingbuddy.config.js:**
+1. **Set language in codingbuddy.config.json:**
    ```javascript
    module.exports = {
      language: 'ko',  // or 'en', 'ja', 'zh', 'es', etc.
@@ -236,7 +236,7 @@ The `parse_mode` tool now returns additional Mode Agent information and dynamic 
 ```
 
 **New Fields:**
-- `language`: Language code from codingbuddy.config.js
+- `language`: Language code from codingbuddy.config.json
 - `languageInstruction`: Formatted instruction text for AI assistants (🆕)
 - `agent`: Mode Agent name (plan-mode, act-mode, eval-mode)
 - `delegates_to`: Which specialist agent the Mode Agent delegates to
@@ -598,7 +598,7 @@ Loop or Exit
 
 ### Configuration
 
-Configure in `codingbuddy.config.js`:
+Configure in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

@@ -300,7 +300,7 @@ task_boundary(
 
 ### Configuration
 
-Configure in `codingbuddy.config.js`:
+Configure in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

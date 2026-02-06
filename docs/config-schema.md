@@ -4,26 +4,24 @@ This document describes the configuration schema for CodingBuddy. The configurat
 
 ## Quick Start
 
-Create a `codingbuddy.config.js` file in your project root:
+Create a `codingbuddy.config.json` file in your project root:
 
-```javascript
-module.exports = {
-  language: 'ko',
-  projectName: 'my-awesome-app',
-  techStack: {
-    frontend: ['React', 'TypeScript'],
-    backend: ['NestJS'],
-  },
-};
+```json
+{
+  "language": "ko",
+  "projectName": "my-awesome-app",
+  "techStack": {
+    "frontend": ["React", "TypeScript"],
+    "backend": ["NestJS"]
+  }
+}
 ```
 
 ## Configuration File Formats
 
-CodingBuddy supports multiple configuration file formats (in priority order):
+CodingBuddy supports only JSON configuration format:
 
-1. `codingbuddy.config.js` - JavaScript (recommended, supports dynamic values)
-2. `codingbuddy.config.json` - JSON
-3. `.codingbuddyrc` - RC file format
+1. `codingbuddy.config.json` - JSON (only supported format)
 
 ## Schema Reference
 
@@ -40,25 +38,26 @@ CodingBuddy supports multiple configuration file formats (in priority order):
 
 Configure your project's technology stack:
 
-```javascript
-techStack: {
-  // Basic (Nested)
-  languages: ['TypeScript', 'Python'],
-  frontend: ['React', 'Next.js', 'Tailwind CSS'],
-  backend: ['NestJS', 'Express'],
-  database: ['PostgreSQL', 'Redis'],
-  infrastructure: ['Docker', 'AWS', 'Kubernetes'],
-  tools: ['ESLint', 'Prettier', 'Husky'],
-
-  // Deep (Optional) - detailed tech info
-  details: {
-    'TypeScript': {
-      version: '5.x',
-      notes: 'Strict mode enabled'
+```json
+{
+  "techStack": {
+    "languages": ["TypeScript", "Python"],
+    "frontend": ["React", "Next.js", "Tailwind CSS"],
+    "backend": ["NestJS", "Express"],
+    "database": ["PostgreSQL", "Redis"],
+    "infrastructure": ["Docker", "AWS", "Kubernetes"],
+    "tools": ["ESLint", "Prettier", "Husky"],
+    "details": {
+      "TypeScript": {
+        "version": "5.x",
+        "notes": "Strict mode enabled"
+      }
     }
   }
 }
 ```
+
+> `details` is optional and provides deeper information about specific technologies.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -74,20 +73,21 @@ techStack: {
 
 Define your project's architecture:
 
-```javascript
-architecture: {
-  // Basic (Nested)
-  pattern: 'feature-sliced',
-  structure: ['src/', 'app/', 'features/', 'entities/', 'shared/'],
-  componentStyle: 'feature-based',
-
-  // Deep (Optional) - layer definitions
-  layers: [
-    { name: 'app', path: 'src/app', description: 'Application layer' },
-    { name: 'features', path: 'src/features', dependencies: ['entities', 'shared'] }
-  ]
+```json
+{
+  "architecture": {
+    "pattern": "feature-sliced",
+    "structure": ["src/", "app/", "features/", "entities/", "shared/"],
+    "componentStyle": "feature-based",
+    "layers": [
+      { "name": "app", "path": "src/app", "description": "Application layer" },
+      { "name": "features", "path": "src/features", "dependencies": ["entities", "shared"] }
+    ]
+  }
 }
 ```
+
+> `layers` is optional and provides detailed layer definitions with dependency information.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -100,28 +100,29 @@ architecture: {
 
 Specify coding conventions:
 
-```javascript
-conventions: {
-  // Basic (Nested)
-  style: 'airbnb',
-  naming: {
-    files: 'kebab-case',
-    components: 'PascalCase',
-    functions: 'camelCase',
-    variables: 'camelCase',
-    constants: 'UPPER_SNAKE_CASE'
-  },
-  importOrder: ['react', '@/', '~/', '.'],
-  maxLineLength: 100,
-  semicolons: true,
-  quotes: 'single',
-
-  // Deep (Optional) - custom rules
-  rules: {
-    'no-console': 'warn'
+```json
+{
+  "conventions": {
+    "style": "airbnb",
+    "naming": {
+      "files": "kebab-case",
+      "components": "PascalCase",
+      "functions": "camelCase",
+      "variables": "camelCase",
+      "constants": "UPPER_SNAKE_CASE"
+    },
+    "importOrder": ["react", "@/", "~/", "."],
+    "maxLineLength": 100,
+    "semicolons": true,
+    "quotes": "single",
+    "rules": {
+      "no-console": "warn"
+    }
   }
 }
 ```
+
+> `rules` is optional and allows custom linting rule overrides.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -137,14 +138,16 @@ conventions: {
 
 Configure testing approach:
 
-```javascript
-testStrategy: {
-  approach: 'tdd',
-  frameworks: ['vitest', 'playwright'],
-  coverage: 80,
-  unitTestPattern: 'colocated',
-  e2eDirectory: 'e2e/',
-  mockingStrategy: 'minimal'
+```json
+{
+  "testStrategy": {
+    "approach": "tdd",
+    "frameworks": ["vitest", "playwright"],
+    "coverage": 80,
+    "unitTestPattern": "colocated",
+    "e2eDirectory": "e2e/",
+    "mockingStrategy": "minimal"
+  }
 }
 ```
 
@@ -161,9 +164,11 @@ testStrategy: {
 
 Configure AI model settings:
 
-```javascript
-ai: {
-  defaultModel: 'claude-sonnet-4-20250514',
+```json
+{
+  "ai": {
+    "defaultModel": "claude-sonnet-4-20250514"
+  }
 }
 ```
 
@@ -181,99 +186,82 @@ When running `npx codingbuddy init`, you'll be prompted to select a default mode
 
 ### Additional Context
 
-```javascript
-// Key files AI should be aware of
-keyFiles: [
-  'src/core/types.ts',
-  'docs/architecture.md',
-  'CONTRIBUTING.md'
-],
-
-// Topics or areas to avoid
-avoid: [
-  'legacy-api',
-  'deprecated-module'
-],
-
-// Custom freeform context
-custom: {
-  team: 'Platform Team',
-  domain: 'E-commerce'
+```json
+{
+  "keyFiles": [
+    "src/core/types.ts",
+    "docs/architecture.md",
+    "CONTRIBUTING.md"
+  ],
+  "avoid": [
+    "legacy-api",
+    "deprecated-module"
+  ],
+  "custom": {
+    "team": "Platform Team",
+    "domain": "E-commerce"
+  }
 }
 ```
 
+- `keyFiles`: Key files AI should be aware of
+- `avoid`: Topics or areas to avoid
+- `custom`: Custom freeform context
+
 ## Complete Example
 
-```javascript
-// codingbuddy.config.js
-module.exports = {
-  // Basic
-  language: 'ko',
-  projectName: 'wishket-platform',
-  description: 'Freelancer marketplace platform',
-  repository: 'https://github.com/example/wishket-platform',
-
-  // Tech Stack
-  techStack: {
-    languages: ['TypeScript'],
-    frontend: ['React', 'Next.js', 'Tailwind CSS', 'React Query'],
-    backend: ['NestJS', 'TypeORM'],
-    database: ['PostgreSQL', 'Redis'],
-    infrastructure: ['Docker', 'AWS ECS', 'GitHub Actions'],
+```json
+{
+  "language": "ko",
+  "projectName": "wishket-platform",
+  "description": "Freelancer marketplace platform",
+  "repository": "https://github.com/example/wishket-platform",
+  "techStack": {
+    "languages": ["TypeScript"],
+    "frontend": ["React", "Next.js", "Tailwind CSS", "React Query"],
+    "backend": ["NestJS", "TypeORM"],
+    "database": ["PostgreSQL", "Redis"],
+    "infrastructure": ["Docker", "AWS ECS", "GitHub Actions"]
   },
-
-  // Architecture
-  architecture: {
-    pattern: 'feature-sliced',
-    structure: ['src/app', 'src/features', 'src/entities', 'src/shared'],
-    componentStyle: 'feature-based',
+  "architecture": {
+    "pattern": "feature-sliced",
+    "structure": ["src/app", "src/features", "src/entities", "src/shared"],
+    "componentStyle": "feature-based"
   },
-
-  // Conventions
-  conventions: {
-    style: 'airbnb',
-    naming: {
-      files: 'kebab-case',
-      components: 'PascalCase',
-      functions: 'camelCase',
+  "conventions": {
+    "style": "airbnb",
+    "naming": {
+      "files": "kebab-case",
+      "components": "PascalCase",
+      "functions": "camelCase"
     },
-    quotes: 'single',
-    semicolons: true,
+    "quotes": "single",
+    "semicolons": true
   },
-
-  // Test Strategy
-  testStrategy: {
-    approach: 'tdd',
-    frameworks: ['vitest', 'playwright'],
-    coverage: 80,
-    unitTestPattern: 'colocated',
-    mockingStrategy: 'minimal',
+  "testStrategy": {
+    "approach": "tdd",
+    "frameworks": ["vitest", "playwright"],
+    "coverage": 80,
+    "unitTestPattern": "colocated",
+    "mockingStrategy": "minimal"
   },
-
-  // AI Configuration
-  ai: {
-    defaultModel: 'claude-sonnet-4-20250514',
+  "ai": {
+    "defaultModel": "claude-sonnet-4-20250514"
   },
-
-  // Additional
-  keyFiles: ['src/shared/types/index.ts', 'docs/api.md'],
-  avoid: ['legacy-v1-api'],
-};
+  "keyFiles": ["src/shared/types/index.ts", "docs/api.md"],
+  "avoid": ["legacy-v1-api"]
+}
 ```
 
 ## TypeScript Types
 
-Import types for type-safe configuration:
+You can use TypeScript types for IDE autocomplete when authoring your JSON config:
 
 ```typescript
 import type { CodingBuddyConfig } from 'codingbuddy/config';
 
-const config: CodingBuddyConfig = {
-  language: 'en',
-  // ... IDE autocomplete works here
-};
-
-module.exports = config;
+// Use this type to validate your codingbuddy.config.json structure
+type Config = CodingBuddyConfig;
 ```
 
 ## Validation

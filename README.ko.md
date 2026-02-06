@@ -251,7 +251,7 @@ npm install -g codingbuddy
 
 ### AI 모델 설정
 
-`codingbuddy.config.js`에서 기본 AI 모델을 설정합니다:
+`codingbuddy.config.json`에서 기본 AI 모델을 설정합니다:
 
 ```javascript
 module.exports = {

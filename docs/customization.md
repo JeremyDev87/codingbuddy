@@ -20,53 +20,42 @@ Generate a configuration file using AI analysis:
 npx codingbuddy init
 ```
 
-This creates `codingbuddy.config.js` with settings based on your project.
+This creates `codingbuddy.config.json` with settings based on your project.
 
 ### Manual Configuration
 
-Create `codingbuddy.config.js` in your project root:
+Create `codingbuddy.config.json` in your project root:
 
-```javascript
-module.exports = {
-  // Response language (required)
-  language: 'ko',  // 'ko', 'en', 'ja', 'zh', etc.
-
-  // Project metadata
-  projectName: 'my-awesome-app',
-  description: 'A modern web application',
-
-  // Technology stack
-  techStack: {
-    languages: ['TypeScript'],
-    frontend: ['React', 'Next.js', 'Tailwind CSS'],
-    backend: ['Node.js', 'Prisma'],
-    database: ['PostgreSQL'],
-    tools: ['ESLint', 'Prettier', 'Vitest'],
+```json
+{
+  "language": "ko",
+  "projectName": "my-awesome-app",
+  "description": "A modern web application",
+  "techStack": {
+    "languages": ["TypeScript"],
+    "frontend": ["React", "Next.js", "Tailwind CSS"],
+    "backend": ["Node.js", "Prisma"],
+    "database": ["PostgreSQL"],
+    "tools": ["ESLint", "Prettier", "Vitest"]
   },
-
-  // Architecture pattern
-  architecture: {
-    pattern: 'feature-sliced-design',
-    structure: ['app', 'widgets', 'features', 'entities', 'shared'],
+  "architecture": {
+    "pattern": "feature-sliced-design",
+    "structure": ["app", "widgets", "features", "entities", "shared"]
   },
-
-  // Coding conventions
-  conventions: {
-    style: 'airbnb',
-    naming: {
-      files: 'kebab-case',
-      components: 'PascalCase',
-      functions: 'camelCase',
-    },
+  "conventions": {
+    "style": "airbnb",
+    "naming": {
+      "files": "kebab-case",
+      "components": "PascalCase",
+      "functions": "camelCase"
+    }
   },
-
-  // Testing strategy
-  testStrategy: {
-    approach: 'tdd',
-    frameworks: ['Vitest', 'Playwright'],
-    coverage: 80,
-  },
-};
+  "testStrategy": {
+    "approach": "tdd",
+    "frameworks": ["Vitest", "Playwright"],
+    "coverage": 80
+  }
+}
 ```
 
 ### Configuration Options
@@ -86,13 +75,15 @@ Response language for AI assistants.
 
 Define your project's technology stack:
 
-```javascript
-techStack: {
-  languages: ['TypeScript', 'Python'],
-  frontend: ['React', 'Next.js'],
-  backend: ['FastAPI', 'PostgreSQL'],
-  database: ['PostgreSQL', 'Redis'],
-  tools: ['Docker', 'GitHub Actions'],
+```json
+{
+  "techStack": {
+    "languages": ["TypeScript", "Python"],
+    "frontend": ["React", "Next.js"],
+    "backend": ["FastAPI", "PostgreSQL"],
+    "database": ["PostgreSQL", "Redis"],
+    "tools": ["Docker", "GitHub Actions"]
+  }
 }
 ```
 
@@ -100,23 +91,36 @@ techStack: {
 
 Define your architecture pattern:
 
-```javascript
-// Feature-Sliced Design
-architecture: {
-  pattern: 'feature-sliced-design',
-  structure: ['app', 'widgets', 'features', 'entities', 'shared'],
-}
+Feature-Sliced Design:
 
-// Clean Architecture
-architecture: {
-  pattern: 'clean-architecture',
-  structure: ['presentation', 'application', 'domain', 'infrastructure'],
+```json
+{
+  "architecture": {
+    "pattern": "feature-sliced-design",
+    "structure": ["app", "widgets", "features", "entities", "shared"]
+  }
 }
+```
 
-// Simple layers
-architecture: {
-  pattern: 'layered',
-  structure: ['controllers', 'services', 'repositories', 'models'],
+Clean Architecture:
+
+```json
+{
+  "architecture": {
+    "pattern": "clean-architecture",
+    "structure": ["presentation", "application", "domain", "infrastructure"]
+  }
+}
+```
+
+Simple layers:
+
+```json
+{
+  "architecture": {
+    "pattern": "layered",
+    "structure": ["controllers", "services", "repositories", "models"]
+  }
 }
 ```
 
@@ -124,15 +128,17 @@ architecture: {
 
 Define naming and style conventions:
 
-```javascript
-conventions: {
-  style: 'airbnb',  // ESLint config preset
-  naming: {
-    files: 'kebab-case',       // my-component.tsx
-    components: 'PascalCase',   // MyComponent
-    functions: 'camelCase',     // myFunction
-    constants: 'SCREAMING_SNAKE_CASE',  // MAX_RETRIES
-  },
+```json
+{
+  "conventions": {
+    "style": "airbnb",
+    "naming": {
+      "files": "kebab-case",
+      "components": "PascalCase",
+      "functions": "camelCase",
+      "constants": "SCREAMING_SNAKE_CASE"
+    }
+  }
 }
 ```
 
@@ -140,17 +146,19 @@ conventions: {
 
 Define your testing approach:
 
-```javascript
-testStrategy: {
-  approach: 'tdd',           // 'tdd' or 'test-after'
-  frameworks: ['Vitest', 'Playwright'],
-  coverage: 80,              // Target coverage percentage
+```json
+{
+  "testStrategy": {
+    "approach": "tdd",
+    "frameworks": ["Vitest", "Playwright"],
+    "coverage": 80
+  }
 }
 ```
 
-### JSON Format
+### Minimal Configuration
 
-You can also use `codingbuddy.config.json`:
+A minimal `codingbuddy.config.json` example:
 
 ```json
 {
@@ -438,7 +446,7 @@ For specialist agents, use the `modes` structure:
 1. **Backup your customizations**:
    ```bash
    cp -r .ai-rules .ai-rules.backup
-   cp codingbuddy.config.js codingbuddy.config.js.backup
+   cp codingbuddy.config.json codingbuddy.config.json.backup
    ```
 
 2. **Check release notes** for breaking changes

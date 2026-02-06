@@ -321,7 +321,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
    - 每次 PLAN 一个功能
 
 2. **减少专家代理**
-   - 在 `codingbuddy.config.js` 中配置更少的专家
+   - 在 `codingbuddy.config.json` 中配置更少的专家
    ```javascript
    module.exports = {
      specialists: ['security-specialist']  // 只保留必要的
@@ -357,17 +357,17 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 ### 项目配置未加载
 
-**症状**：`codingbuddy.config.js` 设置未应用。
+**症状**：`codingbuddy.config.json` 设置未应用。
 
 **解决方案**：
 
 1. **检查文件位置**
    - 必须在项目根目录
-   - 文件名必须是 `codingbuddy.config.js`
+   - 文件名必须是 `codingbuddy.config.json`
 
 2. **验证语法**
    ```bash
-   node -e "console.log(require('./codingbuddy.config.js'))"
+   node -e "console.log(require('./codingbuddy.config.json'))"
    ```
 
 3. **检查导出格式**
@@ -387,7 +387,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 1. **在配置中设置语言**
    ```javascript
-   // codingbuddy.config.js
+   // codingbuddy.config.json
    module.exports = {
      language: 'zh'  // 'en', 'ko', 'ja', 'zh', 'es'
    };

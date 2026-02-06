@@ -251,7 +251,7 @@ npm install -g codingbuddy
 
 ### AI Model Settings
 
-Configure the default AI model in `codingbuddy.config.js`:
+Configure the default AI model in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

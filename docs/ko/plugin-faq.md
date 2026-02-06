@@ -199,7 +199,7 @@ EVAL             → 구현 검토
 
 1. **작업 컨텍스트**: 프롬프트의 키워드
 2. **모드**: PLAN vs ACT vs EVAL에 따라 다른 에이전트
-3. **설정**: `codingbuddy.config.js`의 커스텀 에이전트
+3. **설정**: `codingbuddy.config.json`의 커스텀 에이전트
 
 ### 여러 에이전트를 사용할 수 있나요?
 
@@ -225,7 +225,7 @@ MCP 도구를 사용하세요:
 
 ### 플러그인을 어떻게 설정하나요?
 
-프로젝트 루트에 `codingbuddy.config.js` 생성:
+프로젝트 루트에 `codingbuddy.config.json` 생성:
 
 ```javascript
 module.exports = {

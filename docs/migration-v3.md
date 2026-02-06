@@ -95,7 +95,7 @@ npm install codingbuddy@latest
 
 ### 2. Verify Configuration
 
-Your existing `codingbuddy.config.js` remains compatible. No changes required.
+Your existing `codingbuddy.config.json` remains compatible. No changes required.
 
 ### 3. Optional: Install Claude Code Plugin
 

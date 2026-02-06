@@ -1178,7 +1178,7 @@ Activate a specific specialist agent with project context.
 | `Resource not found: {uri}` | Requested rule file doesn't exist | Check file path in `packages/rules/.ai-rules/` |
 | `Agent '{name}' not found` | Invalid agent name | Use valid agent name from list |
 | `Tool not found: {name}` | Invalid tool name | Use one of: `search_rules`, `get_agent_details`, `parse_mode`, `get_project_config`, `suggest_config_updates`, `recommend_skills`, `list_skills`, `get_agent_system_prompt`, `prepare_parallel_agents`, `generate_checklist`, `analyze_task`, `read_context`, `update_context`, `create_session`, `get_session`, `get_active_session`, `update_session` |
-| `Failed to load project configuration` | Missing or invalid `codingbuddy.config.js` | Run `npx codingbuddy init` |
+| `Failed to load project configuration` | Missing or invalid `codingbuddy.config.json` | Run `npx codingbuddy init` |
 
 ---
 

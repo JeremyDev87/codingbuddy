@@ -26,7 +26,7 @@ Get up and running with Codingbuddy in minutes.
 npx codingbuddy init
 ```
 
-This command analyzes your project and creates a `codingbuddy.config.js` file with:
+This command analyzes your project and creates a `codingbuddy.config.json` file with:
 
 - Detected tech stack (languages, frameworks, tools)
 - Architecture patterns
@@ -145,7 +145,7 @@ AI: # Mode: PLAN
 
 ### Generated Config File
 
-The `codingbuddy.config.js` file customizes AI behavior:
+The `codingbuddy.config.json` file customizes AI behavior:
 
 ```javascript
 module.exports = {
@@ -191,7 +191,7 @@ Add project-specific documentation that AI should know about:
 
 ```
 my-project/
-├── codingbuddy.config.js
+├── codingbuddy.config.json
 └── .codingbuddy/
     └── context/
         ├── architecture.md    # System architecture docs

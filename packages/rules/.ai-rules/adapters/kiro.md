@@ -219,7 +219,7 @@ Kiro: # Mode: AUTO (Iteration 1/3)
 
 ### Configuration
 
-Configure in `codingbuddy.config.js`:
+Configure in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

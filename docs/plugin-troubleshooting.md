@@ -320,7 +320,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
    - Use PLAN for one feature at a time
 
 2. **Reduce specialist agents**
-   - Configure fewer specialists in `codingbuddy.config.js`
+   - Configure fewer specialists in `codingbuddy.config.json`
    ```javascript
    module.exports = {
      specialists: ['security-specialist']  // Only essential ones
@@ -356,17 +356,17 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 ### Project Config Not Loading
 
-**Symptom**: `codingbuddy.config.js` settings not applied.
+**Symptom**: `codingbuddy.config.json` settings not applied.
 
 **Solutions**:
 
 1. **Check file location**
    - Must be in project root
-   - Named exactly `codingbuddy.config.js`
+   - Named exactly `codingbuddy.config.json`
 
 2. **Verify syntax**
    ```bash
-   node -e "console.log(require('./codingbuddy.config.js'))"
+   node -e "console.log(require('./codingbuddy.config.json'))"
    ```
 
 3. **Check export format**
@@ -386,7 +386,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 1. **Set language in config**
    ```javascript
-   // codingbuddy.config.js
+   // codingbuddy.config.json
    module.exports = {
      language: 'ko'  // 'en', 'ko', 'ja', 'zh', 'es'
    };

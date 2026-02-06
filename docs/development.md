@@ -111,7 +111,7 @@ codingbuddy/
 ├── docs/                         # Documentation
 ├── CLAUDE.md                     # Claude Code instructions
 ├── CONTRIBUTING.md               # Contribution guidelines
-└── codingbuddy.config.js         # Project configuration (optional)
+└── codingbuddy.config.json         # Project configuration (optional)
 ```
 
 ### Module Architecture

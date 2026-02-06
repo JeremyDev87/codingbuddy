@@ -26,7 +26,7 @@
 npx codingbuddy init
 ```
 
-此命令会分析您的项目并创建 `codingbuddy.config.js` 文件，包含：
+此命令会分析您的项目并创建 `codingbuddy.config.json` 文件，包含：
 
 - 检测到的技术栈（语言、框架、工具）
 - 架构模式
@@ -88,7 +88,7 @@ AI：# Mode: PLAN
 
 ### 生成的配置文件
 
-`codingbuddy.config.js` 文件用于自定义 AI 行为：
+`codingbuddy.config.json` 文件用于自定义 AI 行为：
 
 ```javascript
 module.exports = {
@@ -134,7 +134,7 @@ module.exports = {
 
 ```
 my-project/
-├── codingbuddy.config.js
+├── codingbuddy.config.json
 └── .codingbuddy/
     └── context/
         ├── architecture.md    # 系统架构文档

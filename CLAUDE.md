@@ -90,4 +90,4 @@ When working in this codebase, use these modes:
 
 ## Communication
 
-Follow the `language` setting in `codingbuddy.config.js` - use `get_project_config` MCP tool to retrieve current language setting.
+Follow the `language` setting in `codingbuddy.config.json` - use `get_project_config` MCP tool to retrieve current language setting.

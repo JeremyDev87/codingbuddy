@@ -26,7 +26,7 @@
 npx codingbuddy init
 ```
 
-このコマンドはプロジェクトを分析し、以下を含む`codingbuddy.config.js`を作成します：
+このコマンドはプロジェクトを分析し、以下を含む`codingbuddy.config.json`を作成します：
 
 - 検出された技術スタック（言語、フレームワーク、ツール）
 - アーキテクチャパターン
@@ -88,7 +88,7 @@ AI：# Mode: PLAN
 
 ### 生成される設定ファイル
 
-`codingbuddy.config.js`ファイルでAIの動作をカスタマイズします：
+`codingbuddy.config.json`ファイルでAIの動作をカスタマイズします：
 
 ```javascript
 module.exports = {
@@ -134,7 +134,7 @@ AIが知っておくべきプロジェクト固有のドキュメントを追加
 
 ```
 my-project/
-├── codingbuddy.config.js
+├── codingbuddy.config.json
 └── .codingbuddy/
     └── context/
         ├── architecture.md    # システムアーキテクチャドキュメント

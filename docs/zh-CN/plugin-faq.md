@@ -199,7 +199,7 @@ EVAL                     → 审查实现
 
 1. **任务上下文**：您提示中的关键词
 2. **模式**：PLAN vs ACT vs EVAL 使用不同的代理
-3. **配置**：`codingbuddy.config.js` 中的自定义代理
+3. **配置**：`codingbuddy.config.json` 中的自定义代理
 
 ### 可以使用多个代理吗？
 
@@ -225,7 +225,7 @@ EVAL with security and accessibility focus
 
 ### 如何配置插件？
 
-在您的项目根目录创建 `codingbuddy.config.js`：
+在您的项目根目录创建 `codingbuddy.config.json`：
 
 ```javascript
 module.exports = {

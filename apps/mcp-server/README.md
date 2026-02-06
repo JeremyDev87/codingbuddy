@@ -10,7 +10,7 @@ A NestJS-based Model Context Protocol (MCP) server that provides AI coding assis
 # Initialize project configuration (AI-powered)
 npx codingbuddy init
 
-# This analyzes your project and creates codingbuddy.config.js
+# This analyzes your project and creates codingbuddy.config.json
 ```
 
 ## Features
@@ -272,7 +272,7 @@ npx codingbuddy init --api-key sk-...     # Pass API key directly
 
 ### Configuration File
 
-The `codingbuddy init` command creates a `codingbuddy.config.js` file:
+The `codingbuddy init` command creates a `codingbuddy.config.json` file:
 
 ```javascript
 module.exports = {
@@ -321,7 +321,7 @@ module.exports = {
 
 ```
 my-project/
-├── codingbuddy.config.js     # Main configuration
+├── codingbuddy.config.json     # Main configuration
 ├── .codingignore             # Files to ignore (gitignore syntax)
 └── .codingbuddy/             # Additional context (optional)
     └── context/

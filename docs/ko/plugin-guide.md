@@ -231,7 +231,7 @@ Claude Code에서 사용 가능한 도구 확인:
 
 ### 프로젝트별 설정
 
-프로젝트 루트에 `codingbuddy.config.js` 생성:
+프로젝트 루트에 `codingbuddy.config.json` 생성:
 
 ```javascript
 module.exports = {

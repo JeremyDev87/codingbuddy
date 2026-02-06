@@ -199,7 +199,7 @@ Los agentes se seleccionan basándose en:
 
 1. **Contexto de la tarea**: Palabras clave en su prompt
 2. **Modo**: Diferentes agentes para PLAN vs ACT vs EVAL
-3. **Configuración**: Agentes personalizados en `codingbuddy.config.js`
+3. **Configuración**: Agentes personalizados en `codingbuddy.config.json`
 
 ### ¿Puedo usar múltiples agentes?
 
@@ -225,7 +225,7 @@ Use la herramienta MCP:
 
 ### ¿Cómo configuro el plugin?
 
-Cree `codingbuddy.config.js` en la raíz de su proyecto:
+Cree `codingbuddy.config.json` en la raíz de su proyecto:
 
 ```javascript
 module.exports = {

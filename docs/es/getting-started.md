@@ -26,7 +26,7 @@ Pon en marcha Codingbuddy en minutos.
 npx codingbuddy init
 ```
 
-Este comando analiza tu proyecto y crea `codingbuddy.config.js` con:
+Este comando analiza tu proyecto y crea `codingbuddy.config.json` con:
 
 - Stack tecnológico detectado (lenguajes, frameworks, herramientas)
 - Patrones de arquitectura
@@ -88,7 +88,7 @@ IA: # Mode: PLAN
 
 ### Archivo de configuración generado
 
-El archivo `codingbuddy.config.js` personaliza el comportamiento de la IA:
+El archivo `codingbuddy.config.json` personaliza el comportamiento de la IA:
 
 ```javascript
 module.exports = {
@@ -134,7 +134,7 @@ Añade documentación específica del proyecto que la IA debería conocer:
 
 ```
 my-project/
-├── codingbuddy.config.js
+├── codingbuddy.config.json
 └── .codingbuddy/
     └── context/
         ├── architecture.md    # Documentación de arquitectura del sistema

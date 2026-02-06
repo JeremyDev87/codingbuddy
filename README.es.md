@@ -251,7 +251,7 @@ npm install -g codingbuddy
 
 ### Configuración del Modelo de IA
 
-Configure el modelo de IA predeterminado en `codingbuddy.config.js`:
+Configure el modelo de IA predeterminado en `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

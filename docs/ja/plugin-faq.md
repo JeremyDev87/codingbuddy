@@ -199,7 +199,7 @@ EVAL                     → 実装をレビュー
 
 1. **タスクコンテキスト**: プロンプト内のキーワード
 2. **モード**: PLAN、ACT、EVAL で異なるエージェント
-3. **設定**: `codingbuddy.config.js` のカスタムエージェント
+3. **設定**: `codingbuddy.config.json` のカスタムエージェント
 
 ### 複数のエージェントを使用できますか？
 
@@ -225,7 +225,7 @@ MCP ツールを使用します：
 
 ### プラグインを設定するには？
 
-プロジェクトルートに `codingbuddy.config.js` を作成：
+プロジェクトルートに `codingbuddy.config.json` を作成：
 
 ```javascript
 module.exports = {

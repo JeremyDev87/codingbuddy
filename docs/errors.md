@@ -166,7 +166,7 @@ Agent 'unknown-agent' not found.
 Failed to load project configuration
 ```
 
-**Cause**: `codingbuddy.config.js` not found in project root.
+**Cause**: `codingbuddy.config.json` not found in project root.
 
 **Resolution**:
 
@@ -175,7 +175,7 @@ Failed to load project configuration
 npx codingbuddy init
 
 # Or create manually
-touch codingbuddy.config.js
+touch codingbuddy.config.json
 ```
 
 ---
@@ -191,7 +191,7 @@ Configuration validation failed
 
 **Resolution**:
 
-Check your `codingbuddy.config.js` matches the expected schema:
+Check your `codingbuddy.config.json` matches the expected schema:
 
 ```javascript
 module.exports = {

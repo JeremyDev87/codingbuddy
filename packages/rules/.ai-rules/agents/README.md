@@ -626,7 +626,7 @@ Unified specialist agents organized by domain:
 
 **Expertise:**
 
-- Project Configuration (codingbuddy.config.js, .env)
+- Project Configuration (codingbuddy.config.json, .env)
 - TypeScript Configuration (tsconfig.json, paths)
 - Linting & Formatting (ESLint, Prettier, Stylelint)
 - Build Tools (Vite, Webpack, Next.js config, Rollup)

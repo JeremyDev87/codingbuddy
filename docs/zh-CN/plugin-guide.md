@@ -231,7 +231,7 @@ PLAN implement a user login feature
 
 ### 项目级配置
 
-在您的项目根目录创建 `codingbuddy.config.js`：
+在您的项目根目录创建 `codingbuddy.config.json`：
 
 ```javascript
 module.exports = {

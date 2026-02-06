@@ -578,7 +578,7 @@ AUTO implement user authentication with JWT tokens
 
 ### Configuration
 
-Configure AUTO mode in `codingbuddy.config.js`:
+Configure AUTO mode in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {

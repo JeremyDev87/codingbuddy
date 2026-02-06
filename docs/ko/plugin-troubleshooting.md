@@ -319,7 +319,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
    - 한 번에 하나의 기능에 대해 PLAN 사용
 
 2. **전문가 에이전트 줄이기**
-   - `codingbuddy.config.js`에서 전문가 수 줄이기
+   - `codingbuddy.config.json`에서 전문가 수 줄이기
    ```javascript
    module.exports = {
      specialists: ['security-specialist']  // 필수적인 것만
@@ -355,17 +355,17 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 ### 프로젝트 설정이 로드되지 않음
 
-**증상**: `codingbuddy.config.js` 설정이 적용되지 않음.
+**증상**: `codingbuddy.config.json` 설정이 적용되지 않음.
 
 **해결 방법**:
 
 1. **파일 위치 확인**
    - 프로젝트 루트에 있어야 함
-   - 정확히 `codingbuddy.config.js`로 명명
+   - 정확히 `codingbuddy.config.json`로 명명
 
 2. **구문 확인**
    ```bash
-   node -e "console.log(require('./codingbuddy.config.js'))"
+   node -e "console.log(require('./codingbuddy.config.json'))"
    ```
 
 3. **내보내기 형식 확인**
@@ -385,7 +385,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 1. **설정에서 언어 설정**
    ```javascript
-   // codingbuddy.config.js
+   // codingbuddy.config.json
    module.exports = {
      language: 'ko'  // 'en', 'ko', 'ja', 'zh', 'es'
    };

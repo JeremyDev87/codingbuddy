@@ -320,7 +320,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
    - Usar PLAN para uma funcionalidade por vez
 
 2. **Reduzir agentes especialistas**
-   - Configurar menos especialistas em `codingbuddy.config.js`
+   - Configurar menos especialistas em `codingbuddy.config.json`
    ```javascript
    module.exports = {
      specialists: ['security-specialist']  // Apenas essenciais
@@ -356,17 +356,17 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 ### Configuração do Projeto Não Carrega
 
-**Sintoma**: Configurações de `codingbuddy.config.js` não aplicadas.
+**Sintoma**: Configurações de `codingbuddy.config.json` não aplicadas.
 
 **Soluções**:
 
 1. **Verificar localização do arquivo**
    - Deve estar na raiz do projeto
-   - Nomeado exatamente `codingbuddy.config.js`
+   - Nomeado exatamente `codingbuddy.config.json`
 
 2. **Verificar sintaxe**
    ```bash
-   node -e "console.log(require('./codingbuddy.config.js'))"
+   node -e "console.log(require('./codingbuddy.config.json'))"
    ```
 
 3. **Verificar formato de export**
@@ -386,7 +386,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 1. **Definir idioma na configuração**
    ```javascript
-   // codingbuddy.config.js
+   // codingbuddy.config.json
    module.exports = {
      language: 'ko'  // 'en', 'ko', 'ja', 'zh', 'es'
    };

@@ -26,7 +26,7 @@
 npx codingbuddy init
 ```
 
-이 명령어는 프로젝트를 분석하고 다음 내용이 포함된 `codingbuddy.config.js` 파일을 생성합니다:
+이 명령어는 프로젝트를 분석하고 다음 내용이 포함된 `codingbuddy.config.json` 파일을 생성합니다:
 
 - 감지된 기술 스택 (언어, 프레임워크, 도구)
 - 아키텍처 패턴
@@ -107,7 +107,7 @@ AI: # Mode: PLAN
 
 ### 생성된 설정 파일
 
-`codingbuddy.config.js` 파일로 AI 동작을 커스터마이징합니다:
+`codingbuddy.config.json` 파일로 AI 동작을 커스터마이징합니다:
 
 ```javascript
 module.exports = {
@@ -153,7 +153,7 @@ AI가 알아야 할 프로젝트별 문서를 추가합니다:
 
 ```
 my-project/
-├── codingbuddy.config.js
+├── codingbuddy.config.json
 └── .codingbuddy/
     └── context/
         ├── architecture.md    # 시스템 아키텍처 문서

@@ -264,7 +264,7 @@ Context is persisted to `docs/codingbuddy/context.md`:
 }
 ```
 
-### Project Configuration (`codingbuddy.config.js`)
+### Project Configuration (`codingbuddy.config.json`)
 
 ```javascript
 module.exports = {

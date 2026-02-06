@@ -320,7 +320,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
    - 一度に 1 つの機能に対して PLAN を使用
 
 2. **スペシャリストエージェントを減らす**
-   - `codingbuddy.config.js` でスペシャリストを減らす設定
+   - `codingbuddy.config.json` でスペシャリストを減らす設定
    ```javascript
    module.exports = {
      specialists: ['security-specialist']  // 必須のものだけ
@@ -356,17 +356,17 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 ### プロジェクト設定が読み込まれない
 
-**症状**: `codingbuddy.config.js` の設定が適用されない。
+**症状**: `codingbuddy.config.json` の設定が適用されない。
 
 **解決策**:
 
 1. **ファイルの場所を確認**
    - プロジェクトルートにある必要がある
-   - 正確に `codingbuddy.config.js` という名前
+   - 正確に `codingbuddy.config.json` という名前
 
 2. **構文を検証**
    ```bash
-   node -e "console.log(require('./codingbuddy.config.js'))"
+   node -e "console.log(require('./codingbuddy.config.json'))"
    ```
 
 3. **エクスポート形式を確認**
@@ -386,7 +386,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
 
 1. **設定で言語を指定**
    ```javascript
-   // codingbuddy.config.js
+   // codingbuddy.config.json
    module.exports = {
      language: 'ja'  // 'en', 'ko', 'ja', 'zh', 'es'
    };

@@ -207,7 +207,7 @@ Amazon Q's AWS expertise complements AUTO mode:
 
 ### Configuration
 
-Configure in `codingbuddy.config.js`:
+Configure in `codingbuddy.config.json`:
 
 ```javascript
 module.exports = {
