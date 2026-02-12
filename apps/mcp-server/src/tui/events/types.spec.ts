@@ -43,8 +43,18 @@ describe('tui/events/types', () => {
       const event: AgentDeactivatedEvent = {
         agentId: 'agent-1',
         reason: 'completed',
+        durationMs: 0,
       };
       expect(event.reason).toBe('completed');
+    });
+
+    it('AgentDeactivatedEvent should include durationMs', () => {
+      const event: AgentDeactivatedEvent = {
+        agentId: 'agent-1',
+        reason: 'completed',
+        durationMs: 150,
+      };
+      expect(event.durationMs).toBe(150);
     });
 
     it('should create ModeChangedEvent', () => {
@@ -89,7 +99,7 @@ describe('tui/events/types', () => {
           role: 'tester',
           isPrimary: false,
         },
-        'agent:deactivated': { agentId: 'a1', reason: 'done' },
+        'agent:deactivated': { agentId: 'a1', reason: 'done', durationMs: 0 },
         'mode:changed': { from: 'PLAN', to: 'ACT' },
         'skill:recommended': { skillName: 's1', reason: 'r' },
         'parallel:started': { specialists: [], mode: 'PLAN' },

@@ -431,6 +431,17 @@ const createMockContextDocService = (): Partial<ContextDocumentService> => ({
   contextExists: vi.fn().mockResolvedValue(true),
 });
 
+// Mock TuiInterceptor (pass-through by default)
+const mockTuiInterceptor = {
+  intercept: vi.fn(
+    (_name: string, _args: unknown, execute: () => Promise<unknown>) =>
+      execute(),
+  ),
+  enable: vi.fn(),
+  disable: vi.fn(),
+  isEnabled: vi.fn(() => false),
+};
+
 // Import after mocks
 import { McpService } from './mcp.service';
 
@@ -492,6 +503,7 @@ function createMcpServiceWithHandlers(
     services.rulesService as RulesService,
     services.configService as ConfigService,
     toolHandlers,
+    mockTuiInterceptor as never,
   );
 }
 
@@ -528,6 +540,10 @@ describe('McpService', () => {
   beforeEach(() => {
     handlers.clear();
     listRootsMock.mockReset();
+    mockTuiInterceptor.intercept.mockImplementation(
+      (_name: string, _args: unknown, execute: () => Promise<unknown>) =>
+        execute(),
+    );
     // Default: client doesn't support roots
     listRootsMock.mockRejectedValue(new Error('Client does not support roots'));
     mockRulesService = createMockRulesService();

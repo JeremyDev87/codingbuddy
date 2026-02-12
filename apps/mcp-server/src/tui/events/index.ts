@@ -1,4 +1,6 @@
 export { TuiEventBus } from './event-bus';
+export { TuiInterceptor } from './tui-interceptor';
+export { parseAgentFromToolName } from './parse-agent';
 export { TuiEventsModule } from './events.module';
 export {
   TUI_EVENTS,

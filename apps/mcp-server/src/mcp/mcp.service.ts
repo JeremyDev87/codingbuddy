@@ -17,6 +17,7 @@ import { getPackageVersion } from '../shared/version.utils';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import type { ToolHandler } from './handlers';
 import { TOOL_HANDLERS } from './handlers';
+import { TuiInterceptor } from '../tui/events';
 import { fileURLToPath } from 'url';
 
 @Injectable()
@@ -28,6 +29,7 @@ export class McpService implements OnModuleInit {
     private rulesService: RulesService,
     private configService: ConfigService,
     @Inject(TOOL_HANDLERS) private toolHandlers: ToolHandler[],
+    private tuiInterceptor: TuiInterceptor,
   ) {
     this.server = new Server(
       {
@@ -273,18 +275,20 @@ export class McpService implements OnModuleInit {
       return { tools };
     });
 
-    // Delegate tool calls to handlers
+    // Delegate tool calls to handlers (wrapped by TuiInterceptor for agent event emission)
     server.setRequestHandler(CallToolRequestSchema, async request => {
       const { name, arguments: args } = request.params;
 
-      for (const handler of this.toolHandlers) {
-        const result = await handler.handle(name, args);
-        if (result !== null) {
-          return result;
+      return this.tuiInterceptor.intercept(name, args, async () => {
+        for (const handler of this.toolHandlers) {
+          const result = await handler.handle(name, args);
+          if (result !== null) {
+            return result;
+          }
         }
-      }
 
-      throw new McpError(ErrorCode.MethodNotFound, `Tool not found: ${name}`);
+        throw new McpError(ErrorCode.MethodNotFound, `Tool not found: ${name}`);
+      });
     });
   }
 

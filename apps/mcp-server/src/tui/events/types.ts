@@ -32,6 +32,7 @@ export interface AgentActivatedEvent {
 export interface AgentDeactivatedEvent {
   agentId: string;
   reason: string;
+  durationMs: number;
 }
 
 /** Payload when the workflow mode changes */

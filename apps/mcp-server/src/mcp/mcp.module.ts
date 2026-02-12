@@ -10,6 +10,7 @@ import { ChecklistModule } from '../checklist/checklist.module';
 import { ContextModule } from '../context/context.module';
 import { StateModule } from '../state/state.module';
 import { DiagnosticModule } from '../diagnostic/diagnostic.module';
+import { TuiEventsModule } from '../tui/events';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import { LanguageService } from '../shared/language.service';
 import { ModelResolverService } from '../model';
@@ -49,6 +50,7 @@ const handlers = [
     ContextModule,
     StateModule,
     DiagnosticModule,
+    TuiEventsModule,
   ],
   controllers: [McpController],
   providers: [
