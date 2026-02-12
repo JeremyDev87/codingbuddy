@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TuiEventBus } from './event-bus';
 import { TUI_EVENTS } from './types';
-import type {
-  AgentActivatedEvent,
-  ModeChangedEvent,
-} from './types';
+import type { AgentActivatedEvent, ModeChangedEvent } from './types';
 
 describe('TuiEventBus', () => {
   let eventBus: TuiEventBus;
