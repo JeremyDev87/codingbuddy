@@ -25,7 +25,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.spec.ts', '**/*.test.ts'],
+    files: ['**/*.spec.{ts,tsx}', '**/*.test.{ts,tsx}'],
     languageOptions: {
       globals: {
         describe: 'readonly',
