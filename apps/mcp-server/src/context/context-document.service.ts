@@ -251,6 +251,8 @@ export class ContextDocumentService {
         timestamp,
         task: data.task,
         primaryAgent: data.primaryAgent,
+        recommendedActAgent: data.recommendedActAgent,
+        recommendedActAgentConfidence: data.recommendedActAgentConfidence,
         decisions: truncateArray(data.decisions, limits),
         notes: truncateArray(data.notes, limits),
         progress: truncateArray(data.progress, limits),

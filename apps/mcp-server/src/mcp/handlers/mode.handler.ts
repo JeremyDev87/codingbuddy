@@ -248,6 +248,10 @@ export class ModeHandler extends AbstractHandler {
       mode,
       task: originalPrompt || `${mode} mode execution`,
       primaryAgent: agent,
+      ...(recommendedActAgent && {
+        recommendedActAgent: recommendedActAgent.agentName,
+        recommendedActAgentConfidence: recommendedActAgent.confidence,
+      }),
       status: 'in_progress',
     });
 

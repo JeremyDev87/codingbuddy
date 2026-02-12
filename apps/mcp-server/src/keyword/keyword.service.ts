@@ -581,7 +581,7 @@ export class KeywordService {
     mode: Mode,
     originalPrompt: string,
   ): Promise<void> {
-    if (mode !== 'PLAN' || !this.primaryAgentResolver) {
+    if ((mode !== 'PLAN' && mode !== 'EVAL') || !this.primaryAgentResolver) {
       return;
     }
 

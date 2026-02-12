@@ -56,7 +56,7 @@ export interface ContextSection {
   notes?: string[];
   /** Primary agent used in this mode */
   primaryAgent?: string;
-  /** Agent recommended for next ACT phase (PLAN only) */
+  /** Agent recommended for next ACT phase (PLAN/EVAL) */
   recommendedActAgent?: string;
   /** Confidence score for recommendation (0-1) */
   recommendedActAgentConfidence?: number;
@@ -131,6 +131,10 @@ export interface AppendContextData {
   findings?: string[];
   /** Recommendations (EVAL) */
   recommendations?: string[];
+  /** Agent recommended for next ACT phase (PLAN/EVAL) */
+  recommendedActAgent?: string;
+  /** Confidence score for recommendation (0-1) */
+  recommendedActAgentConfidence?: number;
   /** Section status */
   status?: 'in_progress' | 'completed' | 'blocked';
 }

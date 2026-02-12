@@ -98,7 +98,7 @@ Call this at the end of each mode to persist decisions and notes.`,
             },
             recommendedActAgent: {
               type: 'string',
-              description: 'Agent recommended for ACT phase (PLAN mode only)',
+              description: 'Agent recommended for ACT phase (PLAN/EVAL mode)',
             },
             recommendedActAgentConfidence: {
               type: 'number',
@@ -278,6 +278,12 @@ Call this at the end of each mode to persist decisions and notes.`,
       mode: typedMode,
       task: extractOptionalString(args, 'task') ?? undefined,
       primaryAgent: extractOptionalString(args, 'primaryAgent') ?? undefined,
+      recommendedActAgent:
+        extractOptionalString(args, 'recommendedActAgent') ?? undefined,
+      recommendedActAgentConfidence:
+        typeof args?.recommendedActAgentConfidence === 'number'
+          ? args.recommendedActAgentConfidence
+          : undefined,
       decisions: Array.isArray(args?.decisions)
         ? (args.decisions as string[])
         : undefined,

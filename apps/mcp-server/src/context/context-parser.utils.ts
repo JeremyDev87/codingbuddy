@@ -350,12 +350,16 @@ function isContentLine(line: string): boolean {
 export function extractRecommendedActAgent(
   document: ContextDocument,
 ): { agent: string; confidence: number } | null {
-  const planSection = document.sections.find(s => s.mode === 'PLAN');
+  // Find the latest PLAN or EVAL section that has a recommendation (latest wins)
+  const relevantSections = document.sections.filter(
+    s => (s.mode === 'PLAN' || s.mode === 'EVAL') && s.recommendedActAgent,
+  );
+  const latest = relevantSections[relevantSections.length - 1];
 
-  if (planSection?.recommendedActAgent) {
+  if (latest?.recommendedActAgent) {
     return {
-      agent: planSection.recommendedActAgent,
-      confidence: planSection.recommendedActAgentConfidence || 0,
+      agent: latest.recommendedActAgent,
+      confidence: latest.recommendedActAgentConfidence || 0,
     };
   }
 
