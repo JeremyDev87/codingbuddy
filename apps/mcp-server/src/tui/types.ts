@@ -41,6 +41,13 @@ export const TUI_EVENT_TYPES = Object.freeze([
   'agent:complete',
   'agent:fail',
   'mode:change',
+  // EventBus events (see events/types.ts for typed interfaces)
+  'agent:activated',
+  'agent:deactivated',
+  'mode:changed',
+  'skill:recommended',
+  'parallel:started',
+  'parallel:completed',
 ] as const);
 
 export type TuiEventType = (typeof TUI_EVENT_TYPES)[number];

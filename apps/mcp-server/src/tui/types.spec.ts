@@ -31,6 +31,12 @@ describe('tui/types', () => {
         'agent:complete',
         'agent:fail',
         'mode:change',
+        'agent:activated',
+        'agent:deactivated',
+        'mode:changed',
+        'skill:recommended',
+        'parallel:started',
+        'parallel:completed',
       ]);
     });
 

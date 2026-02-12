@@ -1,0 +1,101 @@
+import { describe, it, expect } from 'vitest';
+import {
+  TUI_EVENTS,
+  type AgentActivatedEvent,
+  type AgentDeactivatedEvent,
+  type ModeChangedEvent,
+  type SkillRecommendedEvent,
+  type ParallelStartedEvent,
+  type ParallelCompletedEvent,
+  type TuiEventMap,
+} from './types';
+
+describe('tui/events/types', () => {
+  describe('TUI_EVENTS', () => {
+    it('should define all 6 event names', () => {
+      expect(TUI_EVENTS).toEqual({
+        AGENT_ACTIVATED: 'agent:activated',
+        AGENT_DEACTIVATED: 'agent:deactivated',
+        MODE_CHANGED: 'mode:changed',
+        SKILL_RECOMMENDED: 'skill:recommended',
+        PARALLEL_STARTED: 'parallel:started',
+        PARALLEL_COMPLETED: 'parallel:completed',
+      });
+    });
+
+    it('should be readonly', () => {
+      expect(Object.isFrozen(TUI_EVENTS)).toBe(true);
+    });
+  });
+
+  describe('event interfaces type compatibility', () => {
+    it('should create AgentActivatedEvent', () => {
+      const event: AgentActivatedEvent = {
+        agentId: 'agent-1',
+        name: 'frontend-developer',
+        role: 'Frontend Developer',
+        isPrimary: true,
+      };
+      expect(event.agentId).toBe('agent-1');
+    });
+
+    it('should create AgentDeactivatedEvent', () => {
+      const event: AgentDeactivatedEvent = {
+        agentId: 'agent-1',
+        reason: 'completed',
+      };
+      expect(event.reason).toBe('completed');
+    });
+
+    it('should create ModeChangedEvent', () => {
+      const event: ModeChangedEvent = {
+        from: 'PLAN',
+        to: 'ACT',
+      };
+      expect(event.to).toBe('ACT');
+    });
+
+    it('should create SkillRecommendedEvent', () => {
+      const event: SkillRecommendedEvent = {
+        skillName: 'brainstorming',
+        reason: 'Creative task detected',
+      };
+      expect(event.skillName).toBe('brainstorming');
+    });
+
+    it('should create ParallelStartedEvent', () => {
+      const event: ParallelStartedEvent = {
+        specialists: ['security-specialist', 'performance-specialist'],
+        mode: 'EVAL',
+      };
+      expect(event.specialists).toHaveLength(2);
+    });
+
+    it('should create ParallelCompletedEvent', () => {
+      const event: ParallelCompletedEvent = {
+        specialists: ['security-specialist'],
+        results: { 'security-specialist': 'completed' },
+      };
+      expect(event.results).toBeDefined();
+    });
+  });
+
+  describe('TuiEventMap', () => {
+    it('should map event names to payload types', () => {
+      const map: TuiEventMap = {
+        'agent:activated': {
+          agentId: 'a1',
+          name: 'test',
+          role: 'tester',
+          isPrimary: false,
+        },
+        'agent:deactivated': { agentId: 'a1', reason: 'done' },
+        'mode:changed': { from: 'PLAN', to: 'ACT' },
+        'skill:recommended': { skillName: 's1', reason: 'r' },
+        'parallel:started': { specialists: [], mode: 'PLAN' },
+        'parallel:completed': { specialists: [], results: {} },
+      };
+      expect(map['agent:activated'].agentId).toBe('a1');
+    });
+  });
+});
