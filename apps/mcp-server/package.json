@@ -44,6 +44,7 @@
     "build": "yarn tsc -p tsconfig.build.json",
     "start": "node dist/src/main.js",
     "start:dev": "yarn ts-node src/main.ts",
+    "start:tui": "yarn ts-node src/main.ts --tui",
     "test": "yarn vitest run",
     "test:watch": "yarn vitest",
     "test:coverage": "yarn vitest run --coverage",

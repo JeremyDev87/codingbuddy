@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import { NestFactory } from '@nestjs/core';
+import type { INestApplicationContext } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { McpService } from './mcp/mcp.service';
+import { hasTuiFlag } from './tui/cli-flags';
+import type { Instance } from 'ink';
 
 /**
  * Parse CORS origin configuration from environment variable
@@ -39,8 +42,46 @@ function debugLog(message: string): void {
   }
 }
 
+/**
+ * Set up graceful shutdown for Ink TUI instance
+ * Unmounts the Ink application and closes NestJS on SIGINT/SIGTERM
+ */
+function setupGracefulShutdown(
+  instance: Instance,
+  app: INestApplicationContext,
+): void {
+  let shuttingDown = false;
+  const shutdown = async (): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    debugLog('Graceful shutdown: unmounting TUI...');
+    instance.unmount();
+    await app.close();
+    process.exit(0);
+  };
+
+  process.once('SIGINT', () => void shutdown());
+  process.once('SIGTERM', () => void shutdown());
+}
+
+/**
+ * Initialize TUI Agent Monitor with dynamic imports
+ * Isolates React/Ink dependencies behind --tui flag
+ */
+async function initTui(
+  app: INestApplicationContext,
+  stdout?: NodeJS.WriteStream,
+): Promise<void> {
+  const { TuiEventBus } = await import('./tui/events');
+  const { startTui } = await import('./tui');
+  const eventBus = app.get(TuiEventBus);
+  const instance = startTui({ eventBus, ...(stdout ? { stdout } : {}) });
+  setupGracefulShutdown(instance, app);
+}
+
 export async function bootstrap(): Promise<void> {
   const transportMode = process.env.MCP_TRANSPORT || 'stdio';
+  const tuiEnabled = hasTuiFlag(process.argv);
 
   if (transportMode === 'sse') {
     // Import Logger only when needed (SSE mode)
@@ -64,6 +105,16 @@ export async function bootstrap(): Promise<void> {
     }
 
     logger.log(`MCP Server running in SSE mode on port ${port}`);
+
+    // TUI: SSE mode renders to stdout
+    if (tuiEnabled) {
+      try {
+        await initTui(app);
+        logger.log('TUI Agent Monitor started (stdout)');
+      } catch (error) {
+        logger.error('Failed to start TUI Agent Monitor', error);
+      }
+    }
   } else {
     // Stdio Mode: Run as Standalone App
     // Disable NestJS logger to prevent ANSI color codes from breaking MCP protocol
@@ -75,6 +126,18 @@ export async function bootstrap(): Promise<void> {
     const mcpService = app.get(McpService);
     await mcpService.startStdio();
     debugLog('MCP Server connected via stdio');
+
+    // TUI: stdio mode renders to stderr (protect stdout for MCP JSON-RPC)
+    if (tuiEnabled && process.stderr.isTTY) {
+      try {
+        await initTui(app, process.stderr);
+        debugLog('TUI Agent Monitor started (stderr)');
+      } catch (error) {
+        debugLog(`Failed to start TUI Agent Monitor: ${error}`);
+      }
+    } else if (tuiEnabled) {
+      debugLog('TUI requested but stderr is not a TTY; skipping TUI render');
+    }
   }
 }
 
