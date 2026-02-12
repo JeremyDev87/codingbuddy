@@ -4,7 +4,11 @@ import type { INestApplicationContext } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { McpService } from './mcp/mcp.service';
 import { hasTuiFlag } from './tui/cli-flags';
-import type { Instance } from 'ink';
+
+/** Minimal subset of Ink's Instance used for lifecycle management */
+interface TuiInstance {
+  readonly unmount: () => void;
+}
 
 /**
  * Parse CORS origin configuration from environment variable
@@ -47,7 +51,7 @@ function debugLog(message: string): void {
  * Unmounts the Ink application and closes NestJS on SIGINT/SIGTERM
  */
 function setupGracefulShutdown(
-  instance: Instance,
+  instance: TuiInstance,
   app: INestApplicationContext,
 ): void {
   let shuttingDown = false;
