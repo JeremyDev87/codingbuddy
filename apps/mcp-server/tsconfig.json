@@ -12,6 +12,7 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
+    "jsx": "react",
     "strict": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
