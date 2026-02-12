@@ -2,45 +2,141 @@ import { describe, it, expect } from 'vitest';
 import { parseAgentFromToolName } from './parse-agent';
 
 describe('parseAgentFromToolName', () => {
-  it('should return agent info for get_agent_system_prompt', () => {
-    const result = parseAgentFromToolName('get_agent_system_prompt', {
-      agentName: 'security-specialist',
-      context: { mode: 'EVAL' },
+  describe('get_agent_system_prompt', () => {
+    it('should return agent info for get_agent_system_prompt', () => {
+      const result = parseAgentFromToolName('get_agent_system_prompt', {
+        agentName: 'security-specialist',
+        context: { mode: 'EVAL' },
+      });
+      expect(result).toEqual({
+        agentId: 'security-specialist',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: true,
+      });
     });
-    expect(result).toEqual({
-      agentId: 'security-specialist',
-      name: 'security-specialist',
-      role: 'specialist',
-      isPrimary: true,
+
+    it('should return null when get_agent_system_prompt has no agentName', () => {
+      expect(parseAgentFromToolName('get_agent_system_prompt', {})).toBeNull();
+      expect(
+        parseAgentFromToolName('get_agent_system_prompt', undefined),
+      ).toBeNull();
     });
   });
 
-  it('should return null for non-agent tool names', () => {
-    expect(parseAgentFromToolName('search_rules', {})).toBeNull();
-    expect(
-      parseAgentFromToolName('parse_mode', { prompt: 'PLAN test' }),
-    ).toBeNull();
-    expect(parseAgentFromToolName('get_project_config', {})).toBeNull();
+  describe('parse_mode', () => {
+    it('should detect PLAN mode agent', () => {
+      const result = parseAgentFromToolName('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+      expect(result).toEqual({
+        agentId: 'plan-mode',
+        name: 'plan-mode',
+        role: 'mode',
+        isPrimary: false,
+      });
+    });
+
+    it('should detect ACT mode agent', () => {
+      const result = parseAgentFromToolName('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+      expect(result).toEqual({
+        agentId: 'act-mode',
+        name: 'act-mode',
+        role: 'mode',
+        isPrimary: false,
+      });
+    });
+
+    it('should detect EVAL mode agent', () => {
+      const result = parseAgentFromToolName('parse_mode', {
+        prompt: 'EVAL review code',
+      });
+      expect(result).toEqual({
+        agentId: 'eval-mode',
+        name: 'eval-mode',
+        role: 'mode',
+        isPrimary: false,
+      });
+    });
+
+    it('should detect AUTO mode agent', () => {
+      const result = parseAgentFromToolName('parse_mode', {
+        prompt: 'AUTO build dashboard',
+      });
+      expect(result).toEqual({
+        agentId: 'auto-mode',
+        name: 'auto-mode',
+        role: 'mode',
+        isPrimary: false,
+      });
+    });
+
+    it('should be case-insensitive for mode keywords', () => {
+      const result = parseAgentFromToolName('parse_mode', {
+        prompt: 'plan something',
+      });
+      expect(result).toEqual({
+        agentId: 'plan-mode',
+        name: 'plan-mode',
+        role: 'mode',
+        isPrimary: false,
+      });
+    });
+
+    it('should return null if prompt does not start with a mode keyword', () => {
+      expect(
+        parseAgentFromToolName('parse_mode', { prompt: 'hello world' }),
+      ).toBeNull();
+    });
+
+    it('should return null if prompt is missing', () => {
+      expect(parseAgentFromToolName('parse_mode', {})).toBeNull();
+      expect(parseAgentFromToolName('parse_mode', undefined)).toBeNull();
+    });
   });
 
-  it('should return null when get_agent_system_prompt has no agentName', () => {
-    expect(parseAgentFromToolName('get_agent_system_prompt', {})).toBeNull();
-    expect(
-      parseAgentFromToolName('get_agent_system_prompt', undefined),
-    ).toBeNull();
+  describe('prepare_parallel_agents', () => {
+    it('should return parallel-dispatch agent when specialists provided', () => {
+      const result = parseAgentFromToolName('prepare_parallel_agents', {
+        specialists: ['security-specialist', 'performance-specialist'],
+        mode: 'EVAL',
+      });
+      expect(result).toEqual({
+        agentId: 'parallel-dispatch',
+        name: 'parallel-dispatch',
+        role: 'orchestrator',
+        isPrimary: false,
+      });
+    });
+
+    it('should return null if specialists is empty', () => {
+      expect(
+        parseAgentFromToolName('prepare_parallel_agents', {
+          specialists: [],
+          mode: 'EVAL',
+        }),
+      ).toBeNull();
+    });
+
+    it('should return null if specialists is missing', () => {
+      expect(
+        parseAgentFromToolName('prepare_parallel_agents', { mode: 'EVAL' }),
+      ).toBeNull();
+    });
   });
 
-  it('should return null for get_agent_details (read-only, not activation)', () => {
-    expect(
-      parseAgentFromToolName('get_agent_details', { agentName: 'test' }),
-    ).toBeNull();
-  });
+  describe('unhandled tools', () => {
+    it('should return null for non-agent tool names', () => {
+      expect(parseAgentFromToolName('search_rules', {})).toBeNull();
+      expect(parseAgentFromToolName('get_project_config', {})).toBeNull();
+    });
 
-  it('should return null for prepare_parallel_agents (separate event path)', () => {
-    expect(
-      parseAgentFromToolName('prepare_parallel_agents', {
-        specialists: ['security', 'performance'],
-      }),
-    ).toBeNull();
+    it('should return null for get_agent_details (read-only, not activation)', () => {
+      expect(
+        parseAgentFromToolName('get_agent_details', { agentName: 'test' }),
+      ).toBeNull();
+    });
   });
 });
