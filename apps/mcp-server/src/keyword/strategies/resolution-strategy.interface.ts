@@ -36,6 +36,7 @@ export interface StrategyContext {
   readonly availableAgents: string[];
   readonly context?: ResolutionContext;
   readonly recommendedActAgent?: string;
+  readonly isRecommendation?: boolean;
 }
 
 /**

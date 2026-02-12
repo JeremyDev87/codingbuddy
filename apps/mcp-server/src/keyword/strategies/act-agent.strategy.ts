@@ -155,7 +155,13 @@ export class ActAgentStrategy implements ResolutionStrategy {
   constructor(private readonly getProjectConfig: GetProjectConfigFn) {}
 
   async resolve(ctx: StrategyContext): Promise<PrimaryAgentResolutionResult> {
-    const { prompt, availableAgents, context, recommendedActAgent } = ctx;
+    const {
+      prompt,
+      availableAgents,
+      context,
+      recommendedActAgent,
+      isRecommendation,
+    } = ctx;
 
     // 1. Check explicit request in prompt
     const explicit = parseExplicitRequest(prompt, availableAgents);
@@ -177,11 +183,13 @@ export class ActAgentStrategy implements ResolutionStrategy {
       );
     }
 
-    // 3. Check project configuration
-    const fromConfig = await this.getFromProjectConfig(availableAgents);
-    if (fromConfig) {
-      this.logger.debug(`Agent from project config: ${fromConfig.agentName}`);
-      return fromConfig;
+    // 3. Check project configuration (skip in recommendation mode)
+    if (!isRecommendation) {
+      const fromConfig = await this.getFromProjectConfig(availableAgents);
+      if (fromConfig) {
+        this.logger.debug(`Agent from project config: ${fromConfig.agentName}`);
+        return fromConfig;
+      }
     }
 
     // 4. Meta-discussion detection
@@ -218,6 +226,17 @@ export class ActAgentStrategy implements ResolutionStrategy {
       if (fromContext && fromContext.confidence >= 0.8) {
         this.logger.debug(`Context-based agent: ${fromContext.agentName}`);
         return fromContext;
+      }
+    }
+
+    // 12.5. In recommendation mode, try project config as late fallback
+    if (isRecommendation) {
+      const fromConfig = await this.getFromProjectConfig(availableAgents);
+      if (fromConfig) {
+        this.logger.debug(
+          `Agent from project config (recommendation fallback): ${fromConfig.agentName}`,
+        );
+        return fromConfig;
       }
     }
 

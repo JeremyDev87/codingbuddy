@@ -908,7 +908,14 @@ export class KeywordService {
     return asyncWithFallback({
       fn: async () => {
         // Use resolver to analyze prompt as if it were ACT mode
-        const result = await this.primaryAgentResolver!.resolve('ACT', prompt);
+        // isRecommendation=true skips project config priority, allowing intent analysis
+        const result = await this.primaryAgentResolver!.resolve(
+          'ACT',
+          prompt,
+          undefined,
+          undefined,
+          true,
+        );
 
         return {
           agentName: result.agentName,

@@ -75,6 +75,7 @@ export class PrimaryAgentResolver {
     prompt: string,
     context?: ResolutionContext,
     recommendedActAgent?: string,
+    isRecommendation?: boolean,
   ): Promise<PrimaryAgentResolutionResult> {
     // Get available agents and filter out excluded ones
     const allAgents = await this.safeListPrimaryAgents();
@@ -86,6 +87,7 @@ export class PrimaryAgentResolver {
       availableAgents,
       context,
       recommendedActAgent,
+      isRecommendation,
     };
 
     // Delegate to mode-specific strategy
