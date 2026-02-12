@@ -23,3 +23,5 @@ export function startTui(options: StartTuiOptions): Instance {
 export { App } from './app';
 export type { AppProps } from './app';
 export * from './types';
+export { useEventBus, useAgentState } from './hooks';
+export type { EventBusState, AgentStateView } from './hooks';
