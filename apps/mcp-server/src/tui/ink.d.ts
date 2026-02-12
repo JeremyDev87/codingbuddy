@@ -10,14 +10,29 @@ declare module 'ink' {
   import type { ReactElement, ReactNode, Key } from 'react';
 
   export interface BoxProps {
-    readonly flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
+    readonly flexDirection?:
+      | 'row'
+      | 'column'
+      | 'row-reverse'
+      | 'column-reverse';
     readonly flexGrow?: number;
     readonly flexShrink?: number;
     readonly flexBasis?: string | number;
     readonly flexWrap?: 'wrap' | 'nowrap' | 'wrap-reverse';
     readonly alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch';
-    readonly alignSelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'stretch';
-    readonly justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
+    readonly alignSelf?:
+      | 'auto'
+      | 'flex-start'
+      | 'flex-end'
+      | 'center'
+      | 'stretch';
+    readonly justifyContent?:
+      | 'flex-start'
+      | 'flex-end'
+      | 'center'
+      | 'space-between'
+      | 'space-around'
+      | 'space-evenly';
     readonly width?: number | string;
     readonly height?: number | string;
     readonly minWidth?: number | string;
@@ -39,7 +54,15 @@ declare module 'ink' {
     readonly gap?: number;
     readonly columnGap?: number;
     readonly rowGap?: number;
-    readonly borderStyle?: 'single' | 'double' | 'round' | 'bold' | 'singleDouble' | 'doubleSingle' | 'classic' | 'arrow';
+    readonly borderStyle?:
+      | 'single'
+      | 'double'
+      | 'round'
+      | 'bold'
+      | 'singleDouble'
+      | 'doubleSingle'
+      | 'classic'
+      | 'arrow';
     readonly borderColor?: string;
     readonly borderTop?: boolean;
     readonly borderBottom?: boolean;
@@ -62,7 +85,12 @@ declare module 'ink' {
     readonly color?: string;
     readonly backgroundColor?: string;
     readonly inverse?: boolean;
-    readonly wrap?: 'wrap' | 'truncate' | 'truncate-start' | 'truncate-middle' | 'truncate-end';
+    readonly wrap?:
+      | 'wrap'
+      | 'truncate'
+      | 'truncate-start'
+      | 'truncate-middle'
+      | 'truncate-end';
     readonly children?: ReactNode;
   }
 
@@ -100,9 +128,19 @@ declare module 'ink' {
   ): void;
 
   export function useApp(): { exit: (error?: Error) => void };
-  export function useStdin(): { stdin: NodeJS.ReadStream; isRawModeSupported: boolean; setRawMode: (mode: boolean) => void };
-  export function useStdout(): { stdout: NodeJS.WriteStream; write: (data: string) => void };
-  export function useStderr(): { stderr: NodeJS.WriteStream; write: (data: string) => void };
+  export function useStdin(): {
+    stdin: NodeJS.ReadStream;
+    isRawModeSupported: boolean;
+    setRawMode: (mode: boolean) => void;
+  };
+  export function useStdout(): {
+    stdout: NodeJS.WriteStream;
+    write: (data: string) => void;
+  };
+  export function useStderr(): {
+    stderr: NodeJS.WriteStream;
+    write: (data: string) => void;
+  };
 
   export interface KeyInput {
     readonly upArrow: boolean;
