@@ -254,6 +254,105 @@ Review implementation
 
       expect(result).toBeNull();
     });
+
+    it('returns agent from EVAL section', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '',
+          lastUpdatedAt: '',
+          currentMode: 'EVAL',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+          },
+          {
+            mode: 'EVAL',
+            timestamp: '12:00',
+            recommendedActAgent: 'backend-developer',
+            recommendedActAgentConfidence: 0.95,
+          },
+        ],
+      };
+
+      const result = extractRecommendedActAgent(doc);
+
+      expect(result).toEqual({
+        agent: 'backend-developer',
+        confidence: 0.95,
+      });
+    });
+
+    it('EVAL recommendation takes priority over PLAN (latest wins)', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '',
+          lastUpdatedAt: '',
+          currentMode: 'EVAL',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            recommendedActAgent: 'frontend-developer',
+            recommendedActAgentConfidence: 0.8,
+          },
+          {
+            mode: 'ACT',
+            timestamp: '11:00',
+          },
+          {
+            mode: 'EVAL',
+            timestamp: '12:00',
+            recommendedActAgent: 'backend-developer',
+            recommendedActAgentConfidence: 0.95,
+          },
+        ],
+      };
+
+      const result = extractRecommendedActAgent(doc);
+
+      expect(result).toEqual({
+        agent: 'backend-developer',
+        confidence: 0.95,
+      });
+    });
+
+    it('falls back to PLAN when EVAL has no recommendation', () => {
+      const doc: ContextDocument = {
+        metadata: {
+          title: 'Test',
+          createdAt: '',
+          lastUpdatedAt: '',
+          currentMode: 'EVAL',
+          status: 'active',
+        },
+        sections: [
+          {
+            mode: 'PLAN',
+            timestamp: '10:00',
+            recommendedActAgent: 'frontend-developer',
+            recommendedActAgentConfidence: 0.8,
+          },
+          {
+            mode: 'EVAL',
+            timestamp: '12:00',
+          },
+        ],
+      };
+
+      const result = extractRecommendedActAgent(doc);
+
+      expect(result).toEqual({
+        agent: 'frontend-developer',
+        confidence: 0.8,
+      });
+    });
   });
 
   describe('getAllDecisions', () => {

@@ -1136,7 +1136,7 @@ describe('KeywordService', () => {
       expect(result.available_act_agents).toBeUndefined();
     });
 
-    it('does not return recommended_act_agent in EVAL mode', async () => {
+    it('returns recommended_act_agent in EVAL mode when resolver is provided', async () => {
       const mockResolver = {
         resolve: vi.fn().mockResolvedValue({
           agentName: 'code-reviewer',
@@ -1156,8 +1156,10 @@ describe('KeywordService', () => {
 
       const result = await serviceWithResolver.parseMode('EVAL review');
 
-      expect(result.recommended_act_agent).toBeUndefined();
-      expect(result.available_act_agents).toBeUndefined();
+      expect(result.recommended_act_agent).toBeDefined();
+      expect(result.recommended_act_agent?.agentName).toBe('code-reviewer');
+      expect(result.recommended_act_agent?.confidence).toBe(1.0);
+      expect(result.available_act_agents).toBeDefined();
     });
 
     it('handles resolver error gracefully', async () => {

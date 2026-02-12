@@ -534,6 +534,30 @@ describe('ContextDocumentService', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
     });
+
+    it('should include recommendedActAgent in EVAL section', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(
+        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
+      );
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const result = await service.appendContext({
+        mode: 'EVAL',
+        task: 'Code review',
+        findings: ['Needs better agent'],
+        recommendedActAgent: 'backend-developer',
+        recommendedActAgentConfidence: 0.95,
+        status: 'completed',
+      });
+
+      expect(result.success).toBe(true);
+      const evalSection = result.document?.sections.find(
+        s => s.mode === 'EVAL',
+      );
+      expect(evalSection?.recommendedActAgent).toBe('backend-developer');
+      expect(evalSection?.recommendedActAgentConfidence).toBe(0.95);
+    });
   });
 
   describe('updateContext', () => {
