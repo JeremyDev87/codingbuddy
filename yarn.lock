@@ -5830,6 +5830,7 @@ __metadata:
     ink: "npm:6.7.0"
     ink-gradient: "npm:4.0.0"
     ink-spinner: "npm:5.0.0"
+    ink-testing-library: "npm:^4.0.0"
     madge: "npm:8.0.0"
     minimatch: "npm:10.1.1"
     prettier: "npm:3.7.4"
@@ -8286,6 +8287,18 @@ __metadata:
     ink: ">=4.0.0"
     react: ">=18.0.0"
   checksum: 10c0/47b0201bc8b0b1fb475a6f8a117d5a099dde6f7ee2439b547ec60511e8460095ae6e78e8d34a7b8e54cb4c69def4310ce3649467c98ac8540d3c49ad030dd014
+  languageName: node
+  linkType: hard
+
+"ink-testing-library@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "ink-testing-library@npm:4.0.0"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/88d9b70c1e3881cf2d32d678a27e689bfc03c02553d8c06bc4db97ac06d812be9b74f29009a66673f2cc036e01545894bf412dce50ed7ac668f3c68e8c046efd
   languageName: node
   linkType: hard
 
