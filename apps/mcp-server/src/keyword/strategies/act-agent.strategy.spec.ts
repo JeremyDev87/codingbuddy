@@ -170,6 +170,46 @@ describe('ActAgentStrategy', () => {
   });
 
   describe('intent pattern matching', () => {
+    describe('frontend-developer patterns', () => {
+      const frontendPrompts = [
+        'React 컴포넌트 만들어줘', // matches /react\s*(컴포넌트|component)/i
+        'Build a Vue.js component', // matches /vue\.?js/i
+        'UI 컴포넌트 개발해줘', // matches /UI\s*(컴포넌트|component)/i
+        'Add tailwind styling', // matches /tailwind/i
+        '프론트엔드 개발해줘', // matches /프론트엔드\s*(개발)/i
+      ];
+
+      it.each(frontendPrompts)(
+        'should detect frontend-developer intent: "%s"',
+        async prompt => {
+          const result = await strategy.resolve(createActContext({ prompt }));
+
+          expect(result.agentName).toBe('frontend-developer');
+          expect(result.source).toBe('intent');
+        },
+      );
+    });
+
+    describe('devops-engineer patterns', () => {
+      const devopsPrompts = [
+        'Set up GitHub Actions workflow', // matches /github\s*actions/i
+        'Configure Jenkins pipeline', // matches /jenkins/i
+        'CI/CD 파이프라인 설계해줘', // matches /CI\s*\/?\s*CD\s*(파이프라인)/i
+        'Docker compose 설정해줘', // matches /docker\s*(compose)/i
+        '데브옵스 구축해줘', // matches /데브옵스/i
+      ];
+
+      it.each(devopsPrompts)(
+        'should detect devops-engineer intent: "%s"',
+        async prompt => {
+          const result = await strategy.resolve(createActContext({ prompt }));
+
+          expect(result.agentName).toBe('devops-engineer');
+          expect(result.source).toBe('intent');
+        },
+      );
+    });
+
     describe('agent-architect patterns', () => {
       // Patterns that match agent.patterns.ts:
       // - /MCP\s*(서버|server|tool|도구)/i
@@ -465,6 +505,140 @@ describe('ActAgentStrategy', () => {
 
       expect(result.agentName).toBe('frontend-developer');
       expect(result.source).toBe('explicit');
+    });
+  });
+
+  describe('recommendation mode (isRecommendation)', () => {
+    it('should skip project config when isRecommendation is true', async () => {
+      const configStrategy = new ActAgentStrategy(
+        vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+      );
+
+      const result = await configStrategy.resolve(
+        createActContext({
+          prompt: 'REST API 설계해줘',
+          isRecommendation: true,
+        }),
+      );
+
+      // Intent pattern should match backend-developer, not project config
+      expect(result.agentName).toBe('backend-developer');
+      expect(result.source).toBe('intent');
+    });
+
+    it('should still use project config when isRecommendation is false', async () => {
+      const configStrategy = new ActAgentStrategy(
+        vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+      );
+
+      const result = await configStrategy.resolve(
+        createActContext({
+          prompt: 'REST API 설계해줘',
+        }),
+      );
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('config');
+    });
+
+    it('should fall back to project config when no intent matches in recommendation mode', async () => {
+      const configStrategy = new ActAgentStrategy(
+        vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+      );
+
+      const result = await configStrategy.resolve(
+        createActContext({
+          prompt: 'do something generic',
+          isRecommendation: true,
+        }),
+      );
+
+      // No intent match → falls through to project config as late fallback
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('config');
+    });
+
+    it('should still respect explicit request in recommendation mode', async () => {
+      const configStrategy = new ActAgentStrategy(
+        vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+      );
+
+      const result = await configStrategy.resolve(
+        createActContext({
+          prompt: 'Use backend-developer for this task',
+          isRecommendation: true,
+        }),
+      );
+
+      expect(result.agentName).toBe('backend-developer');
+      expect(result.source).toBe('explicit');
+    });
+
+    it('should still respect recommendedActAgent in recommendation mode', async () => {
+      const configStrategy = new ActAgentStrategy(
+        vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+      );
+
+      const result = await configStrategy.resolve(
+        createActContext({
+          prompt: 'Implement the feature',
+          isRecommendation: true,
+          recommendedActAgent: 'data-engineer',
+        }),
+      );
+
+      expect(result.agentName).toBe('data-engineer');
+      expect(result.source).toBe('config');
+    });
+
+    describe('issue #360 scenarios', () => {
+      it('"design API" should recommend backend-developer, not project config', async () => {
+        const configStrategy = new ActAgentStrategy(
+          vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+        );
+
+        const result = await configStrategy.resolve(
+          createActContext({
+            prompt: 'design REST API',
+            isRecommendation: true,
+          }),
+        );
+
+        expect(result.agentName).toBe('backend-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('"build UI" should recommend frontend-developer', async () => {
+        const configStrategy = new ActAgentStrategy(
+          vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+        );
+
+        const result = await configStrategy.resolve(
+          createActContext({
+            prompt: 'build UI component with React',
+            isRecommendation: true,
+          }),
+        );
+
+        expect(result.agentName).toBe('frontend-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('"setup CI/CD" should recommend devops-engineer', async () => {
+        const configStrategy = new ActAgentStrategy(
+          vi.fn().mockResolvedValue({ primaryAgent: 'agent-architect' }),
+        );
+
+        const result = await configStrategy.resolve(
+          createActContext({
+            prompt: 'setup CI/CD pipeline',
+            isRecommendation: true,
+          }),
+        );
+
+        expect(result.agentName).toBe('devops-engineer');
+        expect(result.source).toBe('intent');
+      });
     });
   });
 });
