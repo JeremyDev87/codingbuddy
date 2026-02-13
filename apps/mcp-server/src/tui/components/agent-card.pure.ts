@@ -1,6 +1,8 @@
 import type { AgentStatus } from '../types';
 import { getStatusColor } from '../utils/colors';
 
+export const CARD_WIDTH = 11;
+
 const RUNNING_MIN_PROGRESS = 10;
 const ELLIPSIS = '\u2026';
 

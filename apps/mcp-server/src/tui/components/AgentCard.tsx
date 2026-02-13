@@ -9,9 +9,9 @@ import {
   buildStatusLabel,
   getCardBorderColor,
   resolveIcon,
+  CARD_WIDTH,
 } from './agent-card.pure';
 
-const CARD_WIDTH = 11;
 const NAME_MAX_LENGTH = 7;
 const BAR_WIDTH = 7;
 
