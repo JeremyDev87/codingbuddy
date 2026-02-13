@@ -9,4 +9,13 @@ export {
   buildStatusLabel,
   getCardBorderColor,
   resolveIcon,
+  CARD_WIDTH,
 } from './agent-card.pure';
+export { AgentTree, type AgentTreeProps } from './AgentTree';
+export {
+  shouldRenderTree,
+  TREE_CHARS,
+  buildVerticalConnector,
+  buildBranchLine,
+  buildDropLines,
+} from './agent-tree.pure';
