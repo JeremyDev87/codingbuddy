@@ -16,7 +16,7 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 
 **Mode Flow**: PLAN (default) → ACT (user types "ACT") → PLAN (automatic) → EVAL (user types "EVAL") | AUTO (autonomous cycle)
 
-**Mode Indicators**: Always print `# Mode: PLAN|ACT|EVAL|AUTO` at the start of responses
+**Mode Indicators**: Display `activation_message.formatted` from the `parse_mode` response (e.g., `🤖 agent-name [Primary Agent]`), then print `# Mode: PLAN|ACT|EVAL|AUTO` and `## Agent : [Agent Name]` at the start of responses
 
 ### 🏗️ Project Context
 
