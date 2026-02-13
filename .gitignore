@@ -46,6 +46,9 @@ coverage/
 # Yarn PnP (Zero-install 미사용)
 .pnp.*
 
+# Worktrees
+.worktrees/
+
 # AI
 .mcp.json
 codingbuddy.config.js
