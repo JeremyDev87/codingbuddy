@@ -19,3 +19,19 @@ export {
   buildBranchLine,
   buildDropLines,
 } from './agent-tree.pure';
+export { AgentMiniCard, type AgentMiniCardProps } from './AgentMiniCard';
+export {
+  getMiniCardBorderColor,
+  getMiniCardTextDimmed,
+  abbreviateMiniName,
+  MINI_CARD_NAME_MAX,
+} from './agent-mini-card.pure';
+export { CategoryRow, type CategoryRowProps } from './CategoryRow';
+export { buildCategoryLabel } from './category-row.pure';
+export { AgentGrid, type AgentGridProps } from './AgentGrid';
+export {
+  groupByCategory,
+  sortCategoriesByActivity,
+  computeColumns,
+  computeCardWidth,
+} from './agent-grid.pure';
