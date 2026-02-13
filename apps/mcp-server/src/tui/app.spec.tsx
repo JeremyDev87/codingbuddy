@@ -74,4 +74,32 @@ describe('tui/App', () => {
     expect(frame).toContain('securi');
     expect(frame).toContain('test-s');
   });
+
+  it('should display StatusBar with active agent count', async () => {
+    const eventBus = new TuiEventBus();
+    const { lastFrame } = render(<App eventBus={eventBus} />);
+
+    eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+      agentId: 'p1',
+      name: 'solution-architect',
+      role: 'primary',
+      isPrimary: true,
+    });
+    await tick();
+
+    expect(lastFrame()).toContain('1 active');
+  });
+
+  it('should display StatusBar skill name', async () => {
+    const eventBus = new TuiEventBus();
+    const { lastFrame } = render(<App eventBus={eventBus} />);
+
+    eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
+      skillName: 'brainstorming',
+      reason: 'creative task',
+    });
+    await tick();
+
+    expect(lastFrame()).toContain('brainstorming');
+  });
 });
