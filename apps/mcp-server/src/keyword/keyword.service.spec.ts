@@ -149,7 +149,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('ACT');
         expect(result.originalPrompt).toBe('implement login API');
-        expect(result.instructions).toBe('Red-Green-Refactor cycle.');
+        expect(result.instructions).toContain('Red-Green-Refactor cycle.');
         expect(result.rules).toHaveLength(2);
         expect(result.agent).toBe('act-mode');
         expect(result.delegates_to).toBe('frontend-developer');
@@ -166,7 +166,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('EVAL');
         expect(result.originalPrompt).toBe('review security');
-        expect(result.instructions).toBe('Code quality review.');
+        expect(result.instructions).toContain('Code quality review.');
         expect(result.agent).toBe('eval-mode');
         expect(result.delegates_to).toBe('code-reviewer');
         expect(result.delegate_agent_info).toEqual({
@@ -1259,6 +1259,40 @@ describe('KeywordService', () => {
 
       expect(result.activation_message).toBeDefined();
       expect(result.activation_message?.activations[0].tier).toBe('primary');
+    });
+  });
+
+  describe('display instruction in instructions field', () => {
+    it('prepends display instruction for PLAN mode', async () => {
+      const result = await service.parseMode('PLAN design feature');
+      expect(result.instructions).toContain('📌 OUTPUT FORMAT:');
+      expect(result.instructions).toContain('[Primary Agent]');
+      expect(result.instructions).toContain('# Mode: PLAN');
+    });
+
+    it('prepends display instruction for ACT mode', async () => {
+      const result = await service.parseMode('ACT implement feature');
+      expect(result.instructions).toContain('📌 OUTPUT FORMAT:');
+      expect(result.instructions).toContain('# Mode: ACT');
+    });
+
+    it('prepends display instruction for EVAL mode', async () => {
+      const result = await service.parseMode('EVAL review code');
+      expect(result.instructions).toContain('📌 OUTPUT FORMAT:');
+      expect(result.instructions).toContain('# Mode: EVAL');
+    });
+
+    it('preserves original instructions content after prefix', async () => {
+      const result = await service.parseMode('PLAN design feature');
+      expect(result.instructions).toContain('Design first approach');
+    });
+
+    it('includes resolved agent name in display instruction', async () => {
+      const result = await service.parseMode('PLAN design feature');
+      // activation_message.formatted에 포함된 agent 이름이 instructions에도 포함
+      expect(result.instructions).toContain(
+        result.activation_message!.formatted,
+      );
     });
   });
 

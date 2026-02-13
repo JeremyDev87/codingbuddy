@@ -492,6 +492,9 @@ export class KeywordService {
     // 5. Add activation message
     this.addActivationMessageToResult(result, resolvedAgent);
 
+    // 5.5. Add display instruction for activation message
+    this.addDisplayInstructionToResult(result, mode);
+
     // 6. Add AUTO config for AUTO mode
     await this.addAutoConfigToResult(result, mode);
 
@@ -614,6 +617,23 @@ export class KeywordService {
         resolvedAgent.agentName,
       );
     }
+  }
+
+  /**
+   * Prepends a display instruction to result.instructions so AI clients
+   * show the activation_message and mode indicator at response start.
+   */
+  private addDisplayInstructionToResult(
+    result: ParseModeResult,
+    mode: Mode,
+  ): void {
+    if (!result.activation_message?.formatted) {
+      return;
+    }
+
+    const displayPrefix = `📌 OUTPUT FORMAT: Start your response with "${result.activation_message.formatted}" followed by "# Mode: ${mode}" header.`;
+
+    result.instructions = `${displayPrefix} ${result.instructions}`;
   }
 
   /**
