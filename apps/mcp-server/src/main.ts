@@ -76,12 +76,22 @@ async function initTui(
   app: INestApplicationContext,
   stdout?: NodeJS.WriteStream,
 ): Promise<void> {
-  const { TuiEventBus, TuiInterceptor } = await import('./tui/events');
+  const { TuiEventBus, TuiInterceptor, AgentMetadataService, TUI_EVENTS } =
+    await import('./tui/events');
   const { startTui } = await import('./tui');
   const tuiInterceptor = app.get(TuiInterceptor);
   tuiInterceptor.enable();
   const eventBus = app.get(TuiEventBus);
   const instance = startTui({ eventBus, ...(stdout ? { stdout } : {}) });
+
+  // Load and emit all agent metadata for AgentGrid
+  const metadataService = app.get(AgentMetadataService);
+  await metadataService.initialize();
+  const allAgents = metadataService.getAllMetadata();
+  if (allAgents.length > 0) {
+    eventBus.emit(TUI_EVENTS.AGENTS_LOADED, { agents: allAgents });
+  }
+
   setupGracefulShutdown(instance, app);
 }
 
