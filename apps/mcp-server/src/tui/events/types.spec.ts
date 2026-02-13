@@ -7,12 +7,13 @@ import {
   type SkillRecommendedEvent,
   type ParallelStartedEvent,
   type ParallelCompletedEvent,
+  type AgentsLoadedEvent,
   type TuiEventMap,
 } from './types';
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 6 event names', () => {
+    it('should define all 7 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -20,7 +21,12 @@ describe('tui/events/types', () => {
         SKILL_RECOMMENDED: 'skill:recommended',
         PARALLEL_STARTED: 'parallel:started',
         PARALLEL_COMPLETED: 'parallel:completed',
+        AGENTS_LOADED: 'agents:loaded',
       });
+    });
+
+    it('should include AGENTS_LOADED event', () => {
+      expect(TUI_EVENTS.AGENTS_LOADED).toBe('agents:loaded');
     });
 
     it('should be readonly', () => {
@@ -88,6 +94,22 @@ describe('tui/events/types', () => {
       };
       expect(event.results).toBeDefined();
     });
+
+    it('should create AgentsLoadedEvent', () => {
+      const event: AgentsLoadedEvent = {
+        agents: [
+          {
+            id: 'fe',
+            name: 'FE',
+            description: 'd',
+            category: 'Frontend',
+            icon: '🎨',
+            expertise: [],
+          },
+        ],
+      };
+      expect(event.agents).toHaveLength(1);
+    });
   });
 
   describe('TuiEventMap', () => {
@@ -104,6 +126,7 @@ describe('tui/events/types', () => {
         'skill:recommended': { skillName: 's1', reason: 'r' },
         'parallel:started': { specialists: [], mode: 'PLAN' },
         'parallel:completed': { specialists: [], results: {} },
+        'agents:loaded': { agents: [] },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
     });

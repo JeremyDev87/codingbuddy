@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render } from 'ink-testing-library';
 import { Text } from 'ink';
-import { TuiEventBus, TUI_EVENTS } from '../events';
+import { TuiEventBus, TUI_EVENTS, type AgentMetadata } from '../events';
 import {
   useEventBus,
   eventBusReducer,
@@ -220,10 +220,41 @@ describe('eventBusReducer', () => {
       expect(state).toBe(initialState);
     });
   });
+
+  describe('AGENTS_LOADED', () => {
+    it('should store all agent metadata', () => {
+      const agents: AgentMetadata[] = [
+        {
+          id: 'frontend-developer',
+          name: 'Frontend Developer',
+          description: 'desc',
+          category: 'Frontend',
+          icon: '🎨',
+          expertise: ['React'],
+        },
+        {
+          id: 'security-specialist',
+          name: 'Security Specialist',
+          description: 'desc',
+          category: 'Security',
+          icon: '🔒',
+          expertise: ['OWASP'],
+        },
+      ];
+      const action: EventBusAction = {
+        type: 'AGENTS_LOADED',
+        payload: { agents },
+      };
+      const state = eventBusReducer(initialState, action);
+
+      expect(state.allAgents).toHaveLength(2);
+      expect(state.allAgents[0].id).toBe('frontend-developer');
+    });
+  });
 });
 
 function TestComponent({ eventBus }: { eventBus: TuiEventBus }) {
-  const { agents, mode, skills } = useEventBus(eventBus);
+  const { agents, mode, skills, allAgents } = useEventBus(eventBus);
   return (
     <Text>
       {JSON.stringify({
@@ -231,6 +262,7 @@ function TestComponent({ eventBus }: { eventBus: TuiEventBus }) {
         mode,
         skillCount: skills.length,
         agentNames: agents.map(a => a.name),
+        allAgentCount: allAgents.length,
       })}
     </Text>
   );
@@ -327,6 +359,7 @@ describe('useEventBus', () => {
     expect(eventBus.listenerCount(TUI_EVENTS.SKILL_RECOMMENDED)).toBe(0);
     expect(eventBus.listenerCount(TUI_EVENTS.PARALLEL_STARTED)).toBe(0);
     expect(eventBus.listenerCount(TUI_EVENTS.PARALLEL_COMPLETED)).toBe(0);
+    expect(eventBus.listenerCount(TUI_EVENTS.AGENTS_LOADED)).toBe(0);
   });
 
   it('should handle PARALLEL_STARTED event without error', async () => {
@@ -353,6 +386,26 @@ describe('useEventBus', () => {
     await tick();
 
     expect(lastFrame()).toContain('"agentCount":0');
+  });
+
+  it('should update allAgents on AGENTS_LOADED event', async () => {
+    const { lastFrame } = render(<TestComponent eventBus={eventBus} />);
+
+    eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
+      agents: [
+        {
+          id: 'fe',
+          name: 'FE',
+          description: 'd',
+          category: 'Frontend' as const,
+          icon: '🎨',
+          expertise: [],
+        },
+      ],
+    });
+    await tick();
+
+    expect(lastFrame()).toContain('"allAgentCount":1');
   });
 });
 

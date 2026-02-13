@@ -13,6 +13,7 @@ export {
   type SkillRecommendedEvent,
   type ParallelStartedEvent,
   type ParallelCompletedEvent,
+  type AgentsLoadedEvent,
 } from './types';
 export {
   type AgentMetadata,
