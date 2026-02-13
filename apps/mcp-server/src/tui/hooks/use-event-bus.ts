@@ -18,6 +18,7 @@ export interface EventBusState {
   mode: Mode | null;
   skills: SkillRecommendedEvent[];
   allAgents: AgentMetadata[];
+  isParallelPhase: boolean;
 }
 
 export type EventBusAction =
@@ -34,6 +35,7 @@ export const initialState: EventBusState = {
   mode: null,
   skills: [],
   allAgents: [],
+  isParallelPhase: false,
 };
 
 export function eventBusReducer(
@@ -74,8 +76,9 @@ export function eventBusReducer(
     case 'SKILL_RECOMMENDED':
       return { ...state, skills: [...state.skills, action.payload] };
     case 'PARALLEL_STARTED':
+      return { ...state, isParallelPhase: true };
     case 'PARALLEL_COMPLETED':
-      return state;
+      return { ...state, isParallelPhase: false };
     case 'AGENTS_LOADED':
       return { ...state, allAgents: action.payload.agents };
     default: {

@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render } from 'ink-testing-library';
 import { Text } from 'ink';
 import { TuiEventBus, TUI_EVENTS, type AgentMetadata } from '../events';
+import type { Mode } from '../types';
 import {
   useEventBus,
   eventBusReducer,
@@ -195,29 +196,32 @@ describe('eventBusReducer', () => {
   });
 
   describe('PARALLEL_STARTED', () => {
-    it('should return state unchanged', () => {
-      const action: EventBusAction = {
+    it('should set isParallelPhase true on PARALLEL_STARTED', () => {
+      const result = eventBusReducer(initialState, {
         type: 'PARALLEL_STARTED',
-        payload: { specialists: ['security', 'perf'], mode: 'EVAL' },
-      };
-      const state = eventBusReducer(initialState, action);
-
-      expect(state).toBe(initialState);
+        payload: {
+          specialists: ['security', 'test-strategy'],
+          mode: 'PLAN' as Mode,
+        },
+      });
+      expect(result.isParallelPhase).toBe(true);
     });
   });
 
   describe('PARALLEL_COMPLETED', () => {
-    it('should return state unchanged', () => {
-      const action: EventBusAction = {
+    it('should set isParallelPhase false on PARALLEL_COMPLETED', () => {
+      const stateWithParallel = { ...initialState, isParallelPhase: true };
+      const result = eventBusReducer(stateWithParallel, {
         type: 'PARALLEL_COMPLETED',
-        payload: {
-          specialists: ['security'],
-          results: { security: 'done' },
-        },
-      };
-      const state = eventBusReducer(initialState, action);
+        payload: { specialists: ['security'], results: {} },
+      });
+      expect(result.isParallelPhase).toBe(false);
+    });
+  });
 
-      expect(state).toBe(initialState);
+  describe('initialState', () => {
+    it('should include isParallelPhase false in initial state', () => {
+      expect(initialState.isParallelPhase).toBe(false);
     });
   });
 
