@@ -436,4 +436,114 @@ describe('EventBus ↔ UI Integration', () => {
       expect(frame).toContain('Security');
     });
   });
+
+  describe('복합 시나리오 통합 테스트', () => {
+    it('should handle real workflow: mode → agents → parallel → skills → completion', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      // 1. Load agent metadata
+      const agents: AgentMetadata[] = [
+        { id: 'security-specialist', name: 'security-specialist', description: 'Security', category: 'Security', icon: '🔒', expertise: ['security'] },
+        { id: 'test-strategy-specialist', name: 'test-strategy-specialist', description: 'Testing', category: 'Testing', icon: '🧪', expertise: ['testing'] },
+        { id: 'architecture-specialist', name: 'architecture-specialist', description: 'Architecture', category: 'Architecture', icon: '🏛️', expertise: ['architecture'] },
+      ];
+      eventBus.emit(TUI_EVENTS.AGENTS_LOADED, { agents });
+      await tick();
+
+      // 2. Mode change to PLAN
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
+      await tick();
+      expect(lastFrame()).toContain('PLAN');
+
+      // 3. Primary agent activates
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'arch-1',
+        name: 'architecture-specialist',
+        role: 'primary',
+        isPrimary: true,
+      });
+      await tick();
+      expect(lastFrame()).toContain('1 active');
+
+      // 4. Skill recommended
+      eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
+        skillName: 'brainstorming',
+        reason: 'planning phase',
+      });
+      await tick();
+      expect(lastFrame()).toContain('brainstorming');
+
+      // 5. Parallel execution
+      eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
+        specialists: ['security-specialist', 'test-strategy-specialist'],
+        mode: 'PLAN',
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'sec-1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'test-1',
+        name: 'test-strategy-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      await tick();
+      expect(lastFrame()).toContain('3 active');
+
+      // 6. Specialists complete
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'sec-1', reason: 'completed', durationMs: 600 });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'test-1', reason: 'completed', durationMs: 800 });
+      eventBus.emit(TUI_EVENTS.PARALLEL_COMPLETED, {
+        specialists: ['security-specialist', 'test-strategy-specialist'],
+        results: { 'security-specialist': 'ok', 'test-strategy-specialist': 'ok' },
+      });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('PLAN');
+      expect(frame).toContain('1 active');
+      expect(frame).toContain('brainstorming');
+      // Grid should still show categories from AGENTS_LOADED
+      expect(frame).toContain('Security');
+      expect(frame).toContain('Testing');
+    });
+
+    it('should handle error scenario: activate → error deactivation → re-activate', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      // 1. Activate agent
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'a1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: true,
+      });
+      await tick();
+      expect(lastFrame()).toContain('1 active');
+
+      // 2. Agent fails with error
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'a1',
+        reason: 'error',
+        durationMs: 300,
+      });
+      await tick();
+      expect(lastFrame()).toContain('0 active');
+
+      // 3. Re-activate the same agent (retry scenario)
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'a1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: true,
+      });
+      await tick();
+      expect(lastFrame()).toContain('1 active');
+    });
+  });
 });
