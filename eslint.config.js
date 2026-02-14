@@ -7,12 +7,13 @@ const prettier = require('eslint-config-prettier');
 module.exports = [
   js.configs.recommended,
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: './apps/mcp-server/tsconfig.json',
         sourceType: 'module',
+        ecmaFeatures: { jsx: true },
       },
       globals: {
         ...globals.node,
@@ -26,11 +27,29 @@ module.exports = [
       ...tsPlugin.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': [
         'error',
-        { argsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      'no-undef': 'off',
+    },
+  },
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts', '**/*.spec.tsx', '**/*.test.tsx'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        test: 'readonly',
+        jest: 'readonly',
+        vi: 'readonly',
+      },
     },
   },
   prettier,
@@ -45,6 +64,8 @@ module.exports = [
       '**/*.md',
       '**/*.mdc',
       '**/vitest.config.ts',
+      'apps/landing-page/**',
+      'packages/claude-code-plugin/**',
     ],
   },
 ];
