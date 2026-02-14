@@ -5,12 +5,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  * in main.ts: unmount TUI → close NestJS app → exit process.
  */
 describe('Graceful Shutdown', () => {
-  let sigintListeners: Function[];
-  let sigtermListeners: Function[];
+  let sigintListeners: NodeJS.SignalsListener[];
+  let sigtermListeners: NodeJS.SignalsListener[];
 
   beforeEach(() => {
-    sigintListeners = process.listeners('SIGINT').slice() as Function[];
-    sigtermListeners = process.listeners('SIGTERM').slice() as Function[];
+    sigintListeners = process.listeners('SIGINT').slice() as NodeJS.SignalsListener[];
+    sigtermListeners = process.listeners('SIGTERM').slice() as NodeJS.SignalsListener[];
     process.removeAllListeners('SIGINT');
     process.removeAllListeners('SIGTERM');
   });

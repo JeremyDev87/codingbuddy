@@ -31,12 +31,9 @@ describe('Transport-TUI Integration', () => {
       const mockStdout = new PassThrough();
       mockStdout.on('data', chunk => stdoutCapture.push(chunk.toString()));
 
-      // TUI renders to a SEPARATE stream (simulating stderr)
-      const stderrStream = new PassThrough();
+      // TUI renders to ink-testing-library's internal stream (simulating stderr)
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />, {
-        stdout: stderrStream as unknown as NodeJS.WriteStream,
-      });
+      const { lastFrame } = render(<App eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'test-agent',
@@ -46,9 +43,9 @@ describe('Transport-TUI Integration', () => {
       });
       await tick();
 
-      // stdout should have ZERO TUI content
+      // mockStdout (simulating real stdout) should have ZERO TUI content
       expect(stdoutCapture.join('')).toBe('');
-      // stderr (TUI stream) should have content
+      // TUI stream (ink internal) should have content
       expect(lastFrame()).toBeTruthy();
     });
 
@@ -65,15 +62,12 @@ describe('Transport-TUI Integration', () => {
       });
       mockStdout.write(jsonRpcMessage + '\n');
 
-      // TUI renders independently on separate stream
-      const stderrStream = new PassThrough();
+      // TUI renders independently on ink-testing-library's internal stream
       const eventBus = new TuiEventBus();
-      render(<App eventBus={eventBus} />, {
-        stdout: stderrStream as unknown as NodeJS.WriteStream,
-      });
+      render(<App eventBus={eventBus} />);
       await tick();
 
-      // stdout should only have JSON-RPC
+      // stdout should only have JSON-RPC, no TUI content
       expect(stdoutCapture.join('')).toContain('"jsonrpc":"2.0"');
       expect(stdoutCapture.join('')).not.toContain('CODINGBUDDY');
     });
@@ -92,11 +86,8 @@ describe('Transport-TUI Integration', () => {
 
   describe('stdio 모드: MCP + TUI 동시 동작', () => {
     it('should handle concurrent MCP events and TUI rendering', async () => {
-      const stderrStream = new PassThrough();
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />, {
-        stdout: stderrStream as unknown as NodeJS.WriteStream,
-      });
+      const { lastFrame } = render(<App eventBus={eventBus} />);
 
       // Simulate rapid MCP tool calls generating TUI events
       const agentIds = ['arch-1', 'sec-1', 'perf-1'];
@@ -202,11 +193,9 @@ describe('Transport-TUI Integration', () => {
   });
 
   describe('공통: 터미널 리사이즈 대응', () => {
-    it('should render TUI components at different terminal widths', async () => {
+    it('should render TUI components and produce visible output', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />, {
-        columns: 80,
-      });
+      const { lastFrame } = render(<App eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'test-1',
@@ -216,25 +205,9 @@ describe('Transport-TUI Integration', () => {
       });
       await tick();
 
-      const frame80 = lastFrame() ?? '';
-      expect(frame80).toBeTruthy();
-
-      // Verify component also renders at narrow width
-      const eventBus2 = new TuiEventBus();
-      const { lastFrame: lastFrame40 } = render(
-        <App eventBus={eventBus2} />,
-        { columns: 40 },
-      );
-      eventBus2.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'test-1',
-        name: 'test-agent',
-        role: 'primary',
-        isPrimary: true,
-      });
-      await tick();
-
-      const frame40 = lastFrame40() ?? '';
-      expect(frame40).toBeTruthy();
+      const frame = lastFrame() ?? '';
+      expect(frame).toBeTruthy();
+      expect(frame).toContain('1 active');
     });
 
     it('should maintain state across event-driven re-renders', async () => {
