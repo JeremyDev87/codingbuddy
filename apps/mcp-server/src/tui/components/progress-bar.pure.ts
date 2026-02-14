@@ -6,11 +6,16 @@ export function clampValue(value: number): number {
   return Math.max(0, Math.min(100, value));
 }
 
-export function buildProgressBar(value: number, width: number): string {
+export function buildProgressBar(
+  value: number,
+  width: number,
+  filledChar: string = FILLED_CHAR,
+  emptyChar: string = EMPTY_CHAR,
+): string {
   const safeWidth = Math.max(0, Math.floor(width));
   if (safeWidth === 0) return '';
   const clamped = clampValue(value);
   const filledCount = Math.round((clamped / 100) * safeWidth);
   const emptyCount = safeWidth - filledCount;
-  return FILLED_CHAR.repeat(filledCount) + EMPTY_CHAR.repeat(emptyCount);
+  return filledChar.repeat(filledCount) + emptyChar.repeat(emptyCount);
 }
