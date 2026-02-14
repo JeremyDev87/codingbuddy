@@ -77,7 +77,7 @@ function setupGracefulShutdown(
  */
 const esmImport = new Function('s', 'return import(s)') as (
   specifier: string,
-) => Promise<unknown>;
+) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /**
  * Initialize TUI Agent Monitor with dynamic imports
