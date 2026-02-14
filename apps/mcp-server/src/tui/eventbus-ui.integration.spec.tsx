@@ -371,4 +371,69 @@ describe('EventBus ↔ UI Integration', () => {
       expect(frame).toContain('systematic-debugging');
     });
   });
+
+  describe('이벤트 버퍼링 (TUI 시작 전 이벤트)', () => {
+    it('should NOT reflect MODE_CHANGED emitted before App mount', async () => {
+      const eventBus = new TuiEventBus();
+
+      // Emit BEFORE render
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'ACT' });
+
+      // Render AFTER emit
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      // Mode should NOT be reflected because listener wasn't registered yet
+      const frame = lastFrame() ?? '';
+      expect(frame).not.toContain('ACT');
+    });
+
+    it('should NOT reflect AGENT_ACTIVATED emitted before App mount', async () => {
+      const eventBus = new TuiEventBus();
+
+      // Emit BEFORE render
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'a1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: true,
+      });
+
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      // Agent should NOT be reflected
+      expect(lastFrame()).toContain('0 active');
+    });
+
+    it('should sync state via re-emitting events after App mount', async () => {
+      const eventBus = new TuiEventBus();
+
+      // These events are lost (emitted before mount)
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
+
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      // Re-emit after mount to sync state
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
+      eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
+        agents: [
+          {
+            id: 'security-specialist',
+            name: 'security-specialist',
+            description: 'Security analysis',
+            category: 'Security' as const,
+            icon: '🔒',
+            expertise: ['security'],
+          },
+        ],
+      });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('PLAN');
+      expect(frame).toContain('Security');
+    });
+  });
 });
