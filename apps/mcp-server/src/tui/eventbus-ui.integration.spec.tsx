@@ -287,7 +287,11 @@ describe('EventBus ↔ UI Integration', () => {
       expect(lastFrame()).toContain('1 active');
 
       eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
-        specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
+        specialists: [
+          'security-specialist',
+          'accessibility-specialist',
+          'performance-specialist',
+        ],
         mode: 'PLAN',
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -311,11 +315,27 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
       expect(lastFrame()).toContain('4 active');
 
-      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'sec-1', reason: 'completed', durationMs: 500 });
-      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'acc-1', reason: 'completed', durationMs: 700 });
-      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'perf-1', reason: 'completed', durationMs: 900 });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'sec-1',
+        reason: 'completed',
+        durationMs: 500,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'acc-1',
+        reason: 'completed',
+        durationMs: 700,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'perf-1',
+        reason: 'completed',
+        durationMs: 900,
+      });
       eventBus.emit(TUI_EVENTS.PARALLEL_COMPLETED, {
-        specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
+        specialists: [
+          'security-specialist',
+          'accessibility-specialist',
+          'performance-specialist',
+        ],
         results: {
           'security-specialist': 'done',
           'accessibility-specialist': 'done',
@@ -444,9 +464,30 @@ describe('EventBus ↔ UI Integration', () => {
 
       // 1. Load agent metadata
       const agents: AgentMetadata[] = [
-        { id: 'security-specialist', name: 'security-specialist', description: 'Security', category: 'Security', icon: '🔒', expertise: ['security'] },
-        { id: 'test-strategy-specialist', name: 'test-strategy-specialist', description: 'Testing', category: 'Testing', icon: '🧪', expertise: ['testing'] },
-        { id: 'architecture-specialist', name: 'architecture-specialist', description: 'Architecture', category: 'Architecture', icon: '🏛️', expertise: ['architecture'] },
+        {
+          id: 'security-specialist',
+          name: 'security-specialist',
+          description: 'Security',
+          category: 'Security',
+          icon: '🔒',
+          expertise: ['security'],
+        },
+        {
+          id: 'test-strategy-specialist',
+          name: 'test-strategy-specialist',
+          description: 'Testing',
+          category: 'Testing',
+          icon: '🧪',
+          expertise: ['testing'],
+        },
+        {
+          id: 'architecture-specialist',
+          name: 'architecture-specialist',
+          description: 'Architecture',
+          category: 'Architecture',
+          icon: '🏛️',
+          expertise: ['architecture'],
+        },
       ];
       eventBus.emit(TUI_EVENTS.AGENTS_LOADED, { agents });
       await tick();
@@ -495,11 +536,22 @@ describe('EventBus ↔ UI Integration', () => {
       expect(lastFrame()).toContain('3 active');
 
       // 6. Specialists complete
-      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'sec-1', reason: 'completed', durationMs: 600 });
-      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'test-1', reason: 'completed', durationMs: 800 });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'sec-1',
+        reason: 'completed',
+        durationMs: 600,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'test-1',
+        reason: 'completed',
+        durationMs: 800,
+      });
       eventBus.emit(TUI_EVENTS.PARALLEL_COMPLETED, {
         specialists: ['security-specialist', 'test-strategy-specialist'],
-        results: { 'security-specialist': 'ok', 'test-strategy-specialist': 'ok' },
+        results: {
+          'security-specialist': 'ok',
+          'test-strategy-specialist': 'ok',
+        },
       });
       await tick();
 
