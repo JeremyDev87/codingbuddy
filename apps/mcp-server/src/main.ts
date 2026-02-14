@@ -4,6 +4,7 @@ import type { INestApplicationContext } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { McpService } from './mcp/mcp.service';
 import { hasTuiFlag } from './tui/cli-flags';
+import { resolveTuiConfig } from './tui/tui-config';
 
 /** Minimal subset of Ink's Instance used for lifecycle management */
 interface TuiInstance {
@@ -123,10 +124,15 @@ export async function bootstrap(): Promise<void> {
     logger.log(`MCP Server running in SSE mode on port ${port}`);
 
     // TUI: SSE mode renders to stdout
-    if (tuiEnabled) {
+    const tuiConfig = resolveTuiConfig({
+      transportMode: 'sse',
+      tuiEnabled,
+      stderrIsTTY: process.stderr.isTTY ?? false,
+    });
+    if (tuiConfig.shouldRender) {
       try {
         await initTui(app);
-        logger.log('TUI Agent Monitor started (stdout)');
+        logger.log(`TUI Agent Monitor started (${tuiConfig.target})`);
       } catch (error) {
         logger.error('Failed to start TUI Agent Monitor', error);
       }
@@ -144,15 +150,22 @@ export async function bootstrap(): Promise<void> {
     debugLog('MCP Server connected via stdio');
 
     // TUI: stdio mode renders to stderr (protect stdout for MCP JSON-RPC)
-    if (tuiEnabled && process.stderr.isTTY) {
+    const tuiConfig = resolveTuiConfig({
+      transportMode: 'stdio',
+      tuiEnabled,
+      stderrIsTTY: process.stderr.isTTY ?? false,
+    });
+    if (tuiConfig.shouldRender) {
       try {
-        await initTui(app, process.stderr);
-        debugLog('TUI Agent Monitor started (stderr)');
+        const stdout =
+          tuiConfig.target === 'stderr' ? process.stderr : undefined;
+        await initTui(app, stdout);
+        debugLog(`TUI Agent Monitor started (${tuiConfig.target})`);
       } catch (error) {
         debugLog(`Failed to start TUI Agent Monitor: ${error}`);
       }
     } else if (tuiEnabled) {
-      debugLog('TUI requested but stderr is not a TTY; skipping TUI render');
+      debugLog(tuiConfig.reason);
     }
   }
 }
