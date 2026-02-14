@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { AgentMetadata, AgentCategory } from '../events';
-import {
-  groupByCategory,
-  sortCategoriesByActivity,
-} from './agent-grid.pure';
+import { groupByCategory, sortCategoriesByActivity } from './agent-grid.pure';
 
 const makeAgent = (id: string, category: AgentCategory): AgentMetadata => ({
   id,

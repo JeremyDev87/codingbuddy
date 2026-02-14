@@ -9,13 +9,13 @@
  */
 function isWide(code: number): boolean {
   return (
-    code > 0xffff ||                    // Supplementary Plane (most emojis)
+    code > 0xffff || // Supplementary Plane (most emojis)
     (code >= 0x2600 && code <= 0x27bf) || // Misc Symbols + Dingbats
     (code >= 0x4e00 && code <= 0x9fff) || // CJK Unified Ideographs
     (code >= 0x3400 && code <= 0x4dbf) || // CJK Extension A
     (code >= 0xac00 && code <= 0xd7af) || // Hangul Syllables
     (code >= 0xff01 && code <= 0xff60) || // Fullwidth Forms
-    (code >= 0xf900 && code <= 0xfaff)    // CJK Compatibility Ideographs
+    (code >= 0xf900 && code <= 0xfaff) // CJK Compatibility Ideographs
   );
 }
 

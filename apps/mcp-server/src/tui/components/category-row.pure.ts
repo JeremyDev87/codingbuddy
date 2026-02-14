@@ -1,5 +1,9 @@
 import { joinAgentTags } from './agent-mini-card.pure';
-import { estimateDisplayWidth, truncateToDisplayWidth, padEndDisplayWidth } from '../utils/display-width';
+import {
+  estimateDisplayWidth,
+  truncateToDisplayWidth,
+  padEndDisplayWidth,
+} from '../utils/display-width';
 
 export const LABEL_WIDTH = 18;
 const ELLIPSIS = '\u2026';

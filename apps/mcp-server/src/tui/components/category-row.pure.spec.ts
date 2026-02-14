@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { buildCategoryLabel, buildCompactCategoryRow } from './category-row.pure';
+import {
+  buildCategoryLabel,
+  buildCompactCategoryRow,
+} from './category-row.pure';
 import { estimateDisplayWidth } from '../utils/display-width';
 
 describe('category-row.pure', () => {
@@ -15,13 +18,23 @@ describe('category-row.pure', () => {
 
   describe('buildCompactCategoryRow', () => {
     it('should build single-line row with label and agent tags', () => {
-      const result = buildCompactCategoryRow('🏛️', 'Architecture', ['solution-architect', 'agent-architect']);
+      const result = buildCompactCategoryRow('🏛️', 'Architecture', [
+        'solution-architect',
+        'agent-architect',
+      ]);
       expect(result).toContain('🏛️ Architecture');
       expect(result).toContain('solution-architect \u00b7 agent-architect');
     });
 
     it('should truncate agent list to fit maxWidth', () => {
-      const agents = ['agent-one', 'agent-two', 'agent-three', 'agent-four', 'agent-five', 'agent-six'];
+      const agents = [
+        'agent-one',
+        'agent-two',
+        'agent-three',
+        'agent-four',
+        'agent-five',
+        'agent-six',
+      ];
       const result = buildCompactCategoryRow('🧪', 'Testing', agents, 50);
       expect(estimateDisplayWidth(result)).toBeLessThanOrEqual(50);
     });

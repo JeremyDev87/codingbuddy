@@ -1,6 +1,10 @@
 import type { AgentStatus } from '../types';
 import { buildProgressBar } from './progress-bar.pure';
-import { estimateDisplayWidth, truncateToDisplayWidth, padEndDisplayWidth } from '../utils/display-width';
+import {
+  estimateDisplayWidth,
+  truncateToDisplayWidth,
+  padEndDisplayWidth,
+} from '../utils/display-width';
 
 export const INLINE_NAME_COL_WIDTH = 22;
 const INLINE_BAR_WIDTH = 10;

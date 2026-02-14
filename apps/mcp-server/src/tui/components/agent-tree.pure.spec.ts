@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  TREE_CHARS,
-  buildCompactTree,
-} from './agent-tree.pure';
+import { TREE_CHARS, buildCompactTree } from './agent-tree.pure';
 
 describe('tui/components/agent-tree.pure', () => {
   describe('TREE_CHARS', () => {

@@ -18,10 +18,7 @@ export {
   type CompactAgentLine,
   type TreeLine,
 } from './agent-tree.pure';
-export {
-  buildInlineAgentTag,
-  joinAgentTags,
-} from './agent-mini-card.pure';
+export { buildInlineAgentTag, joinAgentTags } from './agent-mini-card.pure';
 export { CategoryRow, type CategoryRowProps } from './CategoryRow';
 export {
   buildCategoryLabel,
@@ -29,10 +26,7 @@ export {
   LABEL_WIDTH,
 } from './category-row.pure';
 export { AgentGrid, type AgentGridProps } from './AgentGrid';
-export {
-  groupByCategory,
-  sortCategoriesByActivity,
-} from './agent-grid.pure';
+export { groupByCategory, sortCategoriesByActivity } from './agent-grid.pure';
 export { StatusBar, type StatusBarProps } from './StatusBar';
 export {
   countActiveAgents,
