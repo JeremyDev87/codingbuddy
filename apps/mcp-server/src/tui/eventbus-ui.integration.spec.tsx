@@ -329,4 +329,46 @@ describe('EventBus ↔ UI Integration', () => {
       expect(frame).toContain('PLAN');
     });
   });
+
+  describe('Skill 추천 → StatusBar 업데이트', () => {
+    it('should display all skill names when multiple skills recommended sequentially', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
+        skillName: 'brainstorming',
+        reason: 'creative work',
+      });
+      eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
+        skillName: 'test-driven-development',
+        reason: 'TDD cycle',
+      });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('brainstorming');
+      expect(frame).toContain('test-driven-development');
+    });
+
+    it('should handle skill recommendation alongside agent activation', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'a1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: true,
+      });
+      eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
+        skillName: 'systematic-debugging',
+        reason: 'bug detected',
+      });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('1 active');
+      expect(frame).toContain('systematic-debugging');
+    });
+  });
 });
