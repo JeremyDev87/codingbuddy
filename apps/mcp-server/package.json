@@ -42,9 +42,10 @@
   "scripts": {
     "prepublishOnly": "yarn build && chmod +x dist/src/main.js dist/src/cli/cli.js",
     "build": "yarn tsc -p tsconfig.build.json",
+    "build:tui": "node scripts/build-tui.js",
     "start": "node dist/src/main.js",
     "start:dev": "yarn ts-node src/main.ts",
-    "start:tui": "yarn ts-node src/main.ts --tui",
+    "start:tui": "yarn build && yarn build:tui && MCP_TRANSPORT=sse node dist/src/main.js --tui",
     "test": "yarn vitest run",
     "test:watch": "yarn vitest",
     "test:coverage": "yarn vitest run --coverage",
@@ -94,6 +95,7 @@
     "madge": "8.0.0",
     "prettier": "3.7.4",
     "ts-node": "10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.50.0",
     "vitest": "4.0.16"

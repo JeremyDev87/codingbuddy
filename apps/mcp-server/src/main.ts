@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as path from 'path';
 import { NestFactory } from '@nestjs/core';
 import type { INestApplicationContext } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -70,6 +71,15 @@ function setupGracefulShutdown(
 }
 
 /**
+ * Real dynamic import() that preserves ESM loading in CJS output.
+ * TypeScript compiles import() to require() in CommonJS mode,
+ * but ink v6+ requires ESM with top-level await.
+ */
+const esmImport = new Function('s', 'return import(s)') as (
+  specifier: string,
+) => Promise<any>;
+
+/**
  * Initialize TUI Agent Monitor with dynamic imports
  * Isolates React/Ink dependencies behind --tui flag
  */
@@ -79,7 +89,9 @@ async function initTui(
 ): Promise<void> {
   const { TuiEventBus, TuiInterceptor, AgentMetadataService, TUI_EVENTS } =
     await import('./tui/events');
-  const { startTui } = await import('./tui');
+  const { startTui } = await esmImport(
+    path.resolve(__dirname, 'tui-bundle.mjs'),
+  );
   const tuiInterceptor = app.get(TuiInterceptor);
   tuiInterceptor.enable();
   const eventBus = app.get(TuiEventBus);
