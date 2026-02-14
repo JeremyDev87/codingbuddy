@@ -3,14 +3,14 @@ import { Box, useStdout } from 'ink';
 import type { TuiEventBus } from './events';
 import { useEventBus } from './hooks';
 import { useAgentState } from './hooks/use-agent-state';
-import { Header, AgentTree, AgentGrid } from './components';
+import { Header, AgentTree, AgentGrid, StatusBar } from './components';
 
 export interface AppProps {
   eventBus?: TuiEventBus;
 }
 
 export function App({ eventBus }: AppProps): React.ReactElement {
-  const { mode, agents, allAgents } = useEventBus(eventBus);
+  const { mode, agents, skills, allAgents } = useEventBus(eventBus);
   const { primaryAgent, activeAgents } = useAgentState(agents);
   const parallelAgents = activeAgents.filter(a => !a.isPrimary);
   const { stdout } = useStdout();
@@ -28,6 +28,7 @@ export function App({ eventBus }: AppProps): React.ReactElement {
         activeAgentIds={activeAgentIds}
         terminalWidth={terminalWidth}
       />
+      <StatusBar agents={agents} skills={skills} />
     </Box>
   );
 }
