@@ -3,8 +3,8 @@ import {
   resolveProgress,
   abbreviateName,
   buildStatusLabel,
-  getCardBorderColor,
   resolveIcon,
+  buildInlineCard,
 } from './agent-card.pure';
 
 describe('tui/components/agent-card.pure', () => {
@@ -94,24 +94,6 @@ describe('tui/components/agent-card.pure', () => {
     });
   });
 
-  describe('getCardBorderColor', () => {
-    it('should return gray for idle', () => {
-      expect(getCardBorderColor('idle')).toBe('gray');
-    });
-
-    it('should return cyan for running', () => {
-      expect(getCardBorderColor('running')).toBe('cyan');
-    });
-
-    it('should return green for completed', () => {
-      expect(getCardBorderColor('completed')).toBe('green');
-    });
-
-    it('should return red for failed', () => {
-      expect(getCardBorderColor('failed')).toBe('red');
-    });
-  });
-
   describe('resolveIcon', () => {
     it('should return original icon for idle status', () => {
       expect(resolveIcon('idle', '\ud83e\uddea')).toBe('\ud83e\uddea');
@@ -127,6 +109,47 @@ describe('tui/components/agent-card.pure', () => {
 
     it('should return X for failed status', () => {
       expect(resolveIcon('failed', '\ud83e\uddea')).toBe('\u2717');
+    });
+  });
+
+  describe('buildInlineCard', () => {
+    it('should build single-line format with icon, name, progress bar, percentage, and status', () => {
+      const result = buildInlineCard(
+        '\ud83e\udd16',
+        'solution-architect',
+        50,
+        'Running',
+      );
+      expect(result).toBe(
+        '\ud83e\udd16 solution-architect     \u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591  50%  Running',
+      );
+    });
+
+    it('should pad name to INLINE_NAME_COL_WIDTH display columns', () => {
+      const result = buildInlineCard('\ud83e\uddea', 'test', 20, 'Running');
+      expect(result).toContain('\ud83e\uddea test');
+      expect(result).toContain('20%');
+      expect(result).toContain('Running');
+    });
+
+    it('should truncate long names with ellipsis', () => {
+      const result = buildInlineCard(
+        '\ud83d\udd12',
+        'very-long-agent-name-that-exceeds',
+        10,
+        'Running',
+      );
+      expect(result).toContain('\u2026');
+    });
+
+    it('should show 100% for completed status', () => {
+      const result = buildInlineCard('\u2713', 'agent', 100, 'Done');
+      expect(result).toContain('100%');
+      expect(result).toContain('Done');
+      // All filled
+      expect(result).toContain(
+        '\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593',
+      );
     });
   });
 });

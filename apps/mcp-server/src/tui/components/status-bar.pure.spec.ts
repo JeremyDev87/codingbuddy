@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   countActiveAgents,
   calculateOverallProgress,
-  buildStatusProgressBar,
   determinePhase,
   buildSkillsDisplay,
+  buildCompactStatusParts,
+  getPhaseColor,
 } from './status-bar.pure';
 import type { AgentState } from '../types';
 import type { SkillRecommendedEvent } from '../events';
@@ -76,44 +77,6 @@ describe('tui/components/status-bar.pure', () => {
     });
   });
 
-  describe('buildStatusProgressBar', () => {
-    it('should render a full bar for value 100', () => {
-      expect(buildStatusProgressBar(100, 10)).toBe('▲▲▲▲▲▲▲▲▲▲');
-    });
-
-    it('should render an empty bar for value 0', () => {
-      expect(buildStatusProgressBar(0, 10)).toBe('▱▱▱▱▱▱▱▱▱▱');
-    });
-
-    it('should render proportional fill for value 50', () => {
-      expect(buildStatusProgressBar(50, 10)).toBe('▲▲▲▲▲▱▱▱▱▱');
-    });
-
-    it('should render proportional fill for value 70', () => {
-      expect(buildStatusProgressBar(70, 10)).toBe('▲▲▲▲▲▲▲▱▱▱');
-    });
-
-    it('should return empty string for width 0', () => {
-      expect(buildStatusProgressBar(50, 0)).toBe('');
-    });
-
-    it('should clamp values below 0', () => {
-      expect(buildStatusProgressBar(-10, 10)).toBe('▱▱▱▱▱▱▱▱▱▱');
-    });
-
-    it('should clamp values above 100', () => {
-      expect(buildStatusProgressBar(150, 10)).toBe('▲▲▲▲▲▲▲▲▲▲');
-    });
-
-    it('should handle NaN value', () => {
-      expect(buildStatusProgressBar(NaN, 10)).toBe('▱▱▱▱▱▱▱▱▱▱');
-    });
-
-    it('should treat negative width as 0', () => {
-      expect(buildStatusProgressBar(50, -5)).toBe('');
-    });
-  });
-
   describe('determinePhase', () => {
     it('should return Waiting when no agents are running', () => {
       expect(determinePhase([])).toBe('Waiting');
@@ -181,6 +144,50 @@ describe('tui/components/status-bar.pure', () => {
         { skillName: 'debugging', reason: 'r3' },
       ];
       expect(buildSkillsDisplay(skills)).toBe('brainstorming, tdd, debugging');
+    });
+  });
+
+  describe('getPhaseColor', () => {
+    it('should return cyan for Parallel', () => {
+      expect(getPhaseColor('Parallel')).toBe('cyan');
+    });
+
+    it('should return green for Sequential', () => {
+      expect(getPhaseColor('Sequential')).toBe('green');
+    });
+
+    it('should return gray for Waiting', () => {
+      expect(getPhaseColor('Waiting')).toBe('gray');
+    });
+  });
+
+  describe('buildCompactStatusParts', () => {
+    it('should return separate mainContent and phaseContent', () => {
+      const parts = buildCompactStatusParts(2, 'tdd', 50, 'Parallel', 80);
+      expect(parts.mainContent).toContain('🤖 2 active');
+      expect(parts.mainContent).toContain('🎹 tdd');
+      expect(parts.mainContent).toContain('50%');
+      expect(parts.phaseContent).toBe('⚡ Parallel');
+      expect(parts.leftDivider).toMatch(/^─+$/);
+      expect(parts.rightDivider).toMatch(/^─+$/);
+    });
+
+    it('should return empty phaseContent when truncated for narrow terminal', () => {
+      const parts = buildCompactStatusParts(1, 'skill', 50, 'Sequential', 40);
+      expect(parts.phaseContent).toBe('');
+    });
+
+    it('should not overshoot terminal width when remaining space is small', () => {
+      // Use a width that leaves only a few columns for dividers
+      const parts = buildCompactStatusParts(1, '-', 0, 'Waiting', 60);
+      const totalWidth =
+        parts.leftDivider.length +
+        1 + // space after left divider
+        parts.mainContent.length +
+        parts.phaseContent.length +
+        1 + // space before right divider
+        parts.rightDivider.length;
+      expect(totalWidth).toBeLessThanOrEqual(60);
     });
   });
 });

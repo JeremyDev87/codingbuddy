@@ -37,7 +37,6 @@ describe('AgentGrid', () => {
       <AgentGrid
         allAgents={[]}
         activeAgentIds={new Set()}
-        terminalWidth={120}
       />,
     );
     expect(lastFrame()).toBe('');
@@ -48,7 +47,6 @@ describe('AgentGrid', () => {
       <AgentGrid
         allAgents={mockAgents}
         activeAgentIds={new Set()}
-        terminalWidth={120}
       />,
     );
     expect(lastFrame()).toContain('Architecture');
@@ -61,7 +59,6 @@ describe('AgentGrid', () => {
       <AgentGrid
         allAgents={mockAgents}
         activeAgentIds={new Set(['security-specialist'])}
-        terminalWidth={120}
       />,
     );
     const output = lastFrame() ?? '';

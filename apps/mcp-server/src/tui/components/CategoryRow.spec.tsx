@@ -24,7 +24,7 @@ const mockAgents: AgentMetadata[] = [
 ];
 
 describe('CategoryRow', () => {
-  it('should render category label', () => {
+  it('should render category label with inline agent tags', () => {
     const { lastFrame } = render(
       <CategoryRow
         category="Architecture"
@@ -33,10 +33,14 @@ describe('CategoryRow', () => {
         icon="🏛️"
       />,
     );
-    expect(lastFrame()).toContain('🏛️ Architecture');
+    const output = lastFrame() ?? '';
+    expect(output).toContain('🏛️ Architecture');
+    // Agent names joined with middle dot separator
+    expect(output).toContain('Solution Architect');
+    expect(output).toContain('\u00b7');
   });
 
-  it('should render agent mini cards', () => {
+  it('should not contain border characters', () => {
     const { lastFrame } = render(
       <CategoryRow
         category="Architecture"
@@ -45,6 +49,51 @@ describe('CategoryRow', () => {
         icon="🏛️"
       />,
     );
-    expect(lastFrame()).toContain('Solution Archite');
+    const output = lastFrame() ?? '';
+    expect(output).not.toContain('┌');
+    expect(output).not.toContain('┐');
+    expect(output).not.toContain('└');
+    expect(output).not.toContain('┘');
+    expect(output).not.toContain('│');
+  });
+
+  it('should render bold when category has active agents', () => {
+    const { lastFrame } = render(
+      <CategoryRow
+        category="Architecture"
+        agents={mockAgents}
+        activeAgentIds={new Set(['solution-architect'])}
+        icon="🏛️"
+      />,
+    );
+    // When active, bold text is rendered (ink renders bold escape codes)
+    const output = lastFrame() ?? '';
+    expect(output).toContain('🏛️ Architecture');
+  });
+
+  it('should render dimmed when no active agents', () => {
+    const { lastFrame } = render(
+      <CategoryRow
+        category="Architecture"
+        agents={mockAgents}
+        activeAgentIds={new Set()}
+        icon="🏛️"
+      />,
+    );
+    const output = lastFrame() ?? '';
+    expect(output).toContain('🏛️ Architecture');
+  });
+
+  it('should handle empty agents list', () => {
+    const { lastFrame } = render(
+      <CategoryRow
+        category="Architecture"
+        agents={[]}
+        activeAgentIds={new Set()}
+        icon="🏛️"
+      />,
+    );
+    const output = lastFrame() ?? '';
+    expect(output).toContain('🏛️ Architecture');
   });
 });

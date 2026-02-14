@@ -14,6 +14,25 @@ vi.mock('../utils/icons', async importOriginal => {
 });
 
 describe('tui/components/AgentCard', () => {
+  it('should render inline format with name, percentage, and status', () => {
+    const agent = createDefaultAgentState({
+      id: '1',
+      name: 'test-agent',
+      role: 'specialist',
+      status: 'running',
+      progress: 50,
+    });
+    const { lastFrame } = render(<AgentCard agent={agent} />);
+    const output = lastFrame() ?? '';
+    // Single line with name, progress bar, percentage, status
+    expect(output).toContain('test-agent');
+    expect(output).toContain('50%');
+    expect(output).toContain('Running');
+    // No border characters
+    expect(output).not.toContain('\u256D'); // ╭
+    expect(output).not.toContain('\u2570'); // ╰
+  });
+
   it('should render agent icon', () => {
     const agent = createDefaultAgentState({
       id: '1',
@@ -32,11 +51,13 @@ describe('tui/components/AgentCard', () => {
       status: 'idle',
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
-    expect(lastFrame()).toContain('░░░░░░░');
-    expect(lastFrame()).toContain('Idle');
+    const output = lastFrame() ?? '';
+    expect(output).toContain('\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591'); // 10 empty chars
+    expect(output).toContain('Idle');
+    expect(output).toContain('0%');
   });
 
-  it('should render running state with progress bar', () => {
+  it('should render running state with progress bar and percentage', () => {
     const agent = createDefaultAgentState({
       id: '1',
       name: 'security-specialist',
@@ -45,8 +66,10 @@ describe('tui/components/AgentCard', () => {
       progress: 50,
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
-    expect(lastFrame()).toContain('Running');
-    expect(lastFrame()).toContain('███');
+    const output = lastFrame() ?? '';
+    expect(output).toContain('Running');
+    expect(output).toContain('50%');
+    expect(output).toContain('\u2593'); // filled chars
   });
 
   it('should render completed state with full progress bar', () => {
@@ -58,9 +81,11 @@ describe('tui/components/AgentCard', () => {
       progress: 60,
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
-    expect(lastFrame()).toContain('███████');
-    expect(lastFrame()).toContain('Done');
-    expect(lastFrame()).toContain('✓');
+    const output = lastFrame() ?? '';
+    expect(output).toContain('\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593'); // 10 filled chars
+    expect(output).toContain('Done');
+    expect(output).toContain('100%');
+    expect(output).toContain('\u2713'); // checkmark
   });
 
   it('should render failed state', () => {
@@ -72,8 +97,10 @@ describe('tui/components/AgentCard', () => {
       progress: 30,
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
-    expect(lastFrame()).toContain('Failed');
-    expect(lastFrame()).toContain('✗');
+    const output = lastFrame() ?? '';
+    expect(output).toContain('Failed');
+    expect(output).toContain('\u2717'); // X mark
+    expect(output).toContain('30%');
   });
 
   it('should render default icon for unknown agent name', () => {
@@ -86,15 +113,17 @@ describe('tui/components/AgentCard', () => {
     expect(lastFrame()).toContain('[?]');
   });
 
-  it('should abbreviate long agent names', () => {
+  it('should abbreviate long agent names with ellipsis', () => {
     const agent = createDefaultAgentState({
       id: '1',
-      name: 'architecture-specialist',
+      name: 'a-very-long-agent-name-that-exceeds-column-width',
       role: 'specialist',
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
     const frame = lastFrame() ?? '';
-    // Name should be truncated, not full "architecture-specialist"
-    expect(frame).not.toContain('architecture-specialist');
+    expect(frame).toContain('\u2026'); // ellipsis
+    expect(frame).not.toContain(
+      'a-very-long-agent-name-that-exceeds-column-width',
+    );
   });
 });

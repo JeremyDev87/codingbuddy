@@ -1,8 +1,7 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Text, useStdout } from 'ink';
 import type { AgentMetadata, AgentCategory } from '../events';
-import { AgentMiniCard } from './AgentMiniCard';
-import { buildCategoryLabel } from './category-row.pure';
+import { buildCompactCategoryRow } from './category-row.pure';
 
 export interface CategoryRowProps {
   category: AgentCategory;
@@ -11,30 +10,17 @@ export interface CategoryRowProps {
   icon: string;
 }
 
-const LABEL_WIDTH = 20;
-
 export function CategoryRow({
   category,
   agents,
   activeAgentIds,
   icon,
 }: CategoryRowProps): React.ReactElement {
-  const label = buildCategoryLabel(icon, category);
+  const { stdout } = useStdout();
+  const terminalWidth = stdout?.columns ?? 80;
+  const agentNames = agents.map(a => a.name);
+  const line = buildCompactCategoryRow(icon, category, agentNames, terminalWidth);
+  const hasActive = agents.some(a => activeAgentIds.has(a.id));
 
-  return (
-    <Box flexDirection="row" alignItems="center">
-      <Box width={LABEL_WIDTH}>
-        <Text bold>{label}</Text>
-      </Box>
-      <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
-        {agents.map(agent => (
-          <AgentMiniCard
-            key={agent.id}
-            agent={agent}
-            isActive={activeAgentIds.has(agent.id)}
-          />
-        ))}
-      </Box>
-    </Box>
-  );
+  return <Text bold={hasActive} dimColor={!hasActive}>{line}</Text>;
 }

@@ -1,7 +1,11 @@
 import type { AgentStatus } from '../types';
-import { getStatusColor } from '../utils/colors';
+import { buildProgressBar } from './progress-bar.pure';
+import { estimateDisplayWidth, truncateToDisplayWidth, padEndDisplayWidth } from '../utils/display-width';
 
-export const CARD_WIDTH = 11;
+export const INLINE_NAME_COL_WIDTH = 22;
+const INLINE_BAR_WIDTH = 10;
+const INLINE_FILLED = '\u2593';
+const INLINE_EMPTY = '\u2591';
 
 const RUNNING_MIN_PROGRESS = 10;
 const ELLIPSIS = '\u2026';
@@ -20,10 +24,10 @@ export function resolveProgress(status: AgentStatus, progress: number): number {
   }
 }
 
-export function abbreviateName(name: string, maxLength: number): string {
-  if (maxLength <= 0) return '';
-  if (name.length <= maxLength) return name;
-  return name.slice(0, maxLength - 1) + ELLIPSIS;
+export function abbreviateName(name: string, maxWidth: number): string {
+  if (maxWidth <= 0) return '';
+  if (estimateDisplayWidth(name) <= maxWidth) return name;
+  return truncateToDisplayWidth(name, maxWidth - 1) + ELLIPSIS;
 }
 
 const STATUS_LABELS: Readonly<Record<AgentStatus, string>> = {
@@ -35,10 +39,6 @@ const STATUS_LABELS: Readonly<Record<AgentStatus, string>> = {
 
 export function buildStatusLabel(status: AgentStatus): string {
   return STATUS_LABELS[status];
-}
-
-export function getCardBorderColor(status: AgentStatus): string {
-  return getStatusColor(status);
 }
 
 const COMPLETED_ICON = '\u2713';
@@ -54,4 +54,24 @@ export function resolveIcon(status: AgentStatus, icon: string): string {
     case 'running':
       return icon;
   }
+}
+
+export function buildInlineCard(
+  icon: string,
+  name: string,
+  progress: number,
+  statusLabel: string,
+): string {
+  const displayName = padEndDisplayWidth(
+    abbreviateName(name, INLINE_NAME_COL_WIDTH),
+    INLINE_NAME_COL_WIDTH,
+  );
+  const bar = buildProgressBar(
+    progress,
+    INLINE_BAR_WIDTH,
+    INLINE_FILLED,
+    INLINE_EMPTY,
+  );
+  const pct = `${progress}%`.padStart(4); // Safe: ASCII-only content
+  return `${icon} ${displayName} ${bar} ${pct}  ${statusLabel}`;
 }

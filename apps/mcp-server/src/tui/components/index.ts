@@ -7,40 +7,40 @@ export {
   resolveProgress,
   abbreviateName,
   buildStatusLabel,
-  getCardBorderColor,
   resolveIcon,
-  CARD_WIDTH,
+  buildInlineCard,
+  INLINE_NAME_COL_WIDTH,
 } from './agent-card.pure';
 export { AgentTree, type AgentTreeProps } from './AgentTree';
 export {
-  shouldRenderTree,
   TREE_CHARS,
-  buildVerticalConnector,
-  buildBranchLine,
-  buildDropLines,
+  buildCompactTree,
+  type CompactAgentLine,
+  type TreeLine,
 } from './agent-tree.pure';
-export { AgentMiniCard, type AgentMiniCardProps } from './AgentMiniCard';
 export {
-  getMiniCardBorderColor,
-  getMiniCardTextDimmed,
-  abbreviateMiniName,
-  MINI_CARD_NAME_MAX,
+  buildInlineAgentTag,
+  joinAgentTags,
 } from './agent-mini-card.pure';
 export { CategoryRow, type CategoryRowProps } from './CategoryRow';
-export { buildCategoryLabel } from './category-row.pure';
+export {
+  buildCategoryLabel,
+  buildCompactCategoryRow,
+  LABEL_WIDTH,
+} from './category-row.pure';
 export { AgentGrid, type AgentGridProps } from './AgentGrid';
 export {
   groupByCategory,
   sortCategoriesByActivity,
-  computeColumns,
-  computeCardWidth,
 } from './agent-grid.pure';
 export { StatusBar, type StatusBarProps } from './StatusBar';
 export {
   countActiveAgents,
   calculateOverallProgress,
-  buildStatusProgressBar,
   determinePhase,
   buildSkillsDisplay,
+  buildCompactStatusParts,
+  getPhaseColor,
+  type CompactStatusParts,
   type Phase,
 } from './status-bar.pure';

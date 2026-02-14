@@ -1,23 +1,15 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Text, useStdout } from 'ink';
 import type { AgentState } from '../types';
 import type { SkillRecommendedEvent } from '../events';
 import {
   countActiveAgents,
   calculateOverallProgress,
-  buildStatusProgressBar,
   determinePhase,
   buildSkillsDisplay,
-  type Phase,
+  buildCompactStatusParts,
+  getPhaseColor,
 } from './status-bar.pure';
-
-const PROGRESS_WIDTH = 10;
-
-const PHASE_COLORS: Record<Phase, string> = {
-  Parallel: 'cyan',
-  Sequential: 'green',
-  Waiting: 'gray',
-};
 
 export interface StatusBarProps {
   agents: AgentState[];
@@ -28,22 +20,26 @@ export function StatusBar({
   agents,
   skills,
 }: StatusBarProps): React.ReactElement {
+  const { stdout } = useStdout();
+  const terminalWidth = stdout?.columns ?? 80;
   const activeCount = countActiveAgents(agents);
   const progress = calculateOverallProgress(agents);
-  const progressBar = buildStatusProgressBar(progress, PROGRESS_WIDTH);
   const phase = determinePhase(agents);
   const skillsText = buildSkillsDisplay(skills);
-  const phaseColor = PHASE_COLORS[phase];
+  const parts = buildCompactStatusParts(activeCount, skillsText, progress, phase, terminalWidth);
+  const phaseColor = getPhaseColor(phase);
 
+  if (!parts.mainContent && !parts.phaseContent) {
+    return <Text dimColor>{parts.leftDivider}</Text>;
+  }
+
+  // The spaces between dividers and content are accounted for in
+  // buildCompactStatusParts (the -2 in remaining width calculation).
   return (
-    <Box borderStyle="single" paddingX={1}>
-      <Text>🤖 {activeCount} active</Text>
-      <Text> 🎹 {skillsText}</Text>
-      <Text>
-        {' '}
-        {progressBar} {progress}%
-      </Text>
-      <Text color={phaseColor}> ⚡ {phase}</Text>
-    </Box>
+    <Text>
+      <Text dimColor>{parts.leftDivider} {parts.mainContent}</Text>
+      <Text color={phaseColor}>{parts.phaseContent}</Text>
+      <Text dimColor> {parts.rightDivider}</Text>
+    </Text>
   );
 }

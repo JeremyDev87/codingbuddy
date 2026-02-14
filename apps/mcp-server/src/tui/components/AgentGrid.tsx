@@ -8,13 +8,11 @@ import { groupByCategory, sortCategoriesByActivity } from './agent-grid.pure';
 export interface AgentGridProps {
   allAgents: AgentMetadata[];
   activeAgentIds: Set<string>;
-  terminalWidth: number;
 }
 
 export function AgentGrid({
   allAgents,
   activeAgentIds,
-  terminalWidth: _terminalWidth,
 }: AgentGridProps): React.ReactElement | null {
   const { sortedCategories, agentsByCategory } = useMemo(() => {
     const grouped = groupByCategory(allAgents);
@@ -30,7 +28,7 @@ export function AgentGrid({
   if (allAgents.length === 0) return null;
 
   return (
-    <Box flexDirection="column" marginTop={1}>
+    <Box flexDirection="column">
       {sortedCategories.map(category => (
         <CategoryRow
           key={category}

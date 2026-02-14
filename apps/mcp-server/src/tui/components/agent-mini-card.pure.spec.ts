@@ -1,42 +1,45 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getMiniCardBorderColor,
-  getMiniCardTextDimmed,
-  abbreviateMiniName,
-  MINI_CARD_NAME_MAX,
+  buildInlineAgentTag,
+  joinAgentTags,
 } from './agent-mini-card.pure';
+import { estimateDisplayWidth } from '../utils/display-width';
 
 describe('agent-mini-card.pure', () => {
-  describe('getMiniCardBorderColor', () => {
-    it('should return category color when active', () => {
-      expect(getMiniCardBorderColor(true)).toBe('cyan');
+  describe('buildInlineAgentTag', () => {
+    it('should return agent name as-is when short enough', () => {
+      expect(buildInlineAgentTag('security')).toBe('security');
     });
 
-    it('should return gray when inactive', () => {
-      expect(getMiniCardBorderColor(false)).toBe('gray');
-    });
-  });
-
-  describe('getMiniCardTextDimmed', () => {
-    it('should not dim active card text', () => {
-      expect(getMiniCardTextDimmed(true)).toBe(false);
+    it('should truncate long names with ellipsis', () => {
+      const result = buildInlineAgentTag('very-long-agent-specialist-name');
+      expect(estimateDisplayWidth(result)).toBeLessThanOrEqual(20);
+      expect(result).toContain('\u2026');
     });
 
-    it('should dim inactive card text', () => {
-      expect(getMiniCardTextDimmed(false)).toBe(true);
+    it('should handle exact max length', () => {
+      const name = 'a'.repeat(20);
+      expect(buildInlineAgentTag(name)).toBe(name);
     });
   });
 
-  describe('abbreviateMiniName', () => {
-    it('should return name as-is if within max length', () => {
-      expect(abbreviateMiniName('short')).toBe('short');
+  describe('joinAgentTags', () => {
+    it('should join names with middle dot separator', () => {
+      expect(joinAgentTags(['agent-a', 'agent-b'])).toBe('agent-a \u00b7 agent-b');
     });
 
-    it('should truncate with ellipsis if too long', () => {
-      const long = 'security-specialist';
-      const result = abbreviateMiniName(long);
-      expect(result.length).toBeLessThanOrEqual(MINI_CARD_NAME_MAX);
-      expect(result.endsWith('\u2026')).toBe(true);
+    it('should handle single agent', () => {
+      expect(joinAgentTags(['solo-agent'])).toBe('solo-agent');
+    });
+
+    it('should handle empty array', () => {
+      expect(joinAgentTags([])).toBe('');
+    });
+
+    it('should truncate individual long names', () => {
+      const result = joinAgentTags(['very-long-agent-specialist-name', 'short']);
+      expect(result).toContain('\u2026');
+      expect(result).toContain('short');
     });
   });
 });

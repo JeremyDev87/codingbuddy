@@ -1,118 +1,97 @@
 import { describe, it, expect } from 'vitest';
 import {
-  shouldRenderTree,
   TREE_CHARS,
-  buildVerticalConnector,
-  buildBranchLine,
-  buildDropLines,
+  buildCompactTree,
 } from './agent-tree.pure';
-import { createDefaultAgentState } from '../types';
 
 describe('tui/components/agent-tree.pure', () => {
-  describe('shouldRenderTree', () => {
-    it('should return false when primaryAgent is null', () => {
-      expect(shouldRenderTree(null)).toBe(false);
-    });
-
-    it('should return true when primaryAgent is provided', () => {
-      const agent = createDefaultAgentState({
-        id: '1',
-        name: 'solution-architect',
-        role: 'primary',
-      });
-      expect(shouldRenderTree(agent)).toBe(true);
-    });
-  });
-
   describe('TREE_CHARS', () => {
     it('should export box drawing character constants', () => {
       expect(TREE_CHARS.VERTICAL).toBe('│');
       expect(TREE_CHARS.HORIZONTAL).toBe('─');
       expect(TREE_CHARS.TOP_LEFT).toBe('┌');
-      expect(TREE_CHARS.TOP_RIGHT).toBe('┐');
-      expect(TREE_CHARS.TOP_TEE).toBe('┬');
+      expect(TREE_CHARS.BOTTOM_LEFT).toBe('└');
+      expect(TREE_CHARS.TEE_RIGHT).toBe('├');
     });
   });
 
-  describe('buildVerticalConnector', () => {
-    it('should return a single vertical bar character', () => {
-      expect(buildVerticalConnector()).toBe('│');
-    });
-  });
-
-  describe('buildBranchLine', () => {
-    const cardWidth = 11;
-    const gap = 1;
-
-    it('should return vertical bar for 0 agents', () => {
-      expect(buildBranchLine(0, cardWidth, gap)).toBe('│');
-    });
-
-    it('should return vertical bar for 1 agent', () => {
-      expect(buildBranchLine(1, cardWidth, gap)).toBe('│');
-    });
-
-    it('should build branch for 2 agents', () => {
-      // Total width = 2*11 + 1*1 = 23
-      // Card centers at: 5, 17
-      // ┌ at 5, ┐ at 17, ─ between
-      const result = buildBranchLine(2, cardWidth, gap);
-      expect(result.length).toBe(23);
-      expect(result[5]).toBe('┌');
-      expect(result[17]).toBe('┐');
-      for (let i = 6; i < 17; i++) {
-        expect(result[i]).toBe('─');
-      }
+  describe('buildCompactTree', () => {
+    it('should return primary-only lines when no parallel agents', () => {
+      const result = buildCompactTree(
+        {
+          icon: '\ud83e\udd16',
+          name: 'architect',
+          progress: 50,
+          statusLabel: 'Running',
+        },
+        [],
+      );
+      expect(result.length).toBe(2);
+      expect(result[0].key).toBe('primary-header');
+      expect(result[0].content).toBe('\u250c Primary');
+      expect(result[1].key).toBe('primary-card');
+      expect(result[1].content).toContain('\u2514 ');
+      expect(result[1].content).toContain('\ud83e\udd16');
+      expect(result[1].content).toContain('architect');
+      expect(result[1].content).toContain('50%');
+      expect(result[1].content).toContain('Running');
     });
 
-    it('should build branch for 3 agents', () => {
-      // Total width = 3*11 + 2*1 = 35
-      // Card centers at: 5, 17, 29
-      const result = buildBranchLine(3, cardWidth, gap);
-      expect(result.length).toBe(35);
-      expect(result[5]).toBe('┌');
-      expect(result[17]).toBe('┬');
-      expect(result[29]).toBe('┐');
+    it('should build tree with parallel agents', () => {
+      const result = buildCompactTree(
+        {
+          icon: '\ud83e\udd16',
+          name: 'architect',
+          progress: 50,
+          statusLabel: 'Running',
+        },
+        [
+          {
+            icon: '\ud83e\uddea',
+            name: 'test-strategy',
+            progress: 20,
+            statusLabel: 'Running',
+          },
+          {
+            icon: '\ud83d\udd12',
+            name: 'security',
+            progress: 10,
+            statusLabel: 'Running',
+          },
+        ],
+      );
+      expect(result[0].content).toBe('\u250c Primary');
+      expect(result[1].content).toContain('\ud83e\udd16 architect');
+      expect(result[2].content).toBe('\u251c\u2500 Parallel');
+      expect(result[3].key).toBe('parallel-test-strategy');
+      expect(result[3].content).toContain('\ud83e\uddea test-strategy');
+      expect(result[4].key).toBe('parallel-security');
+      expect(result[4].content).toContain('\ud83d\udd12 security');
+      expect(result[5].key).toBe('footer');
+      expect(result[5].content).toBe('\u2514');
     });
 
-    it('should have spaces outside the branch span', () => {
-      const result = buildBranchLine(2, cardWidth, gap);
-      for (let i = 0; i < 5; i++) {
-        expect(result[i]).toBe(' ');
-      }
-      for (let i = 18; i < 23; i++) {
-        expect(result[i]).toBe(' ');
-      }
-    });
-  });
-
-  describe('buildDropLines', () => {
-    const cardWidth = 11;
-    const gap = 1;
-
-    it('should return vertical bar for 0 agents', () => {
-      expect(buildDropLines(0, cardWidth, gap)).toBe('│');
-    });
-
-    it('should return vertical bar for 1 agent', () => {
-      expect(buildDropLines(1, cardWidth, gap)).toBe('│');
-    });
-
-    it('should place vertical bars at each card center for 2 agents', () => {
-      const result = buildDropLines(2, cardWidth, gap);
-      expect(result.length).toBe(23);
-      expect(result[5]).toBe('│');
-      expect(result[17]).toBe('│');
-      expect(result[0]).toBe(' ');
-      expect(result[10]).toBe(' ');
-    });
-
-    it('should place vertical bars at each card center for 3 agents', () => {
-      const result = buildDropLines(3, cardWidth, gap);
-      expect(result.length).toBe(35);
-      expect(result[5]).toBe('│');
-      expect(result[17]).toBe('│');
-      expect(result[29]).toBe('│');
+    it('should prefix primary card line with vertical bar when parallel agents exist', () => {
+      const result = buildCompactTree(
+        {
+          icon: '\ud83e\udd16',
+          name: 'arch',
+          progress: 30,
+          statusLabel: 'Running',
+        },
+        [
+          {
+            icon: '\ud83e\uddea',
+            name: 'test',
+            progress: 10,
+            statusLabel: 'Running',
+          },
+        ],
+      );
+      // Primary card line starts with '│ '
+      expect(result[1].content.startsWith('\u2502 ')).toBe(true);
+      // Parallel card line starts with '│  '
+      expect(result[3].content.startsWith('\u2502  ')).toBe(true);
     });
   });
 });

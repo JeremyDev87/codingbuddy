@@ -1,65 +1,58 @@
-import type { AgentState } from '../types';
+import { buildInlineCard } from './agent-card.pure';
 
 export const TREE_CHARS = {
   VERTICAL: '│',
   HORIZONTAL: '─',
   TOP_LEFT: '┌',
-  TOP_RIGHT: '┐',
-  TOP_TEE: '┬',
+  BOTTOM_LEFT: '└',
+  TEE_RIGHT: '├',
 } as const;
 
-export function buildVerticalConnector(): string {
-  return TREE_CHARS.VERTICAL;
+export interface CompactAgentLine {
+  icon: string;
+  name: string;
+  progress: number;
+  statusLabel: string;
 }
 
-export function buildBranchLine(
-  agentCount: number,
-  cardWidth: number,
-  gap: number,
-): string {
-  if (agentCount <= 1) return TREE_CHARS.VERTICAL;
-
-  const totalWidth = agentCount * cardWidth + (agentCount - 1) * gap;
-  const chars: string[] = new Array(totalWidth).fill(' ');
-  const halfCard = Math.floor(cardWidth / 2);
-
-  for (let i = 0; i < agentCount; i++) {
-    const center = i * (cardWidth + gap) + halfCard;
-    if (i === 0) chars[center] = TREE_CHARS.TOP_LEFT;
-    else if (i === agentCount - 1) chars[center] = TREE_CHARS.TOP_RIGHT;
-    else chars[center] = TREE_CHARS.TOP_TEE;
-  }
-
-  const firstCenter = halfCard;
-  const lastCenter = (agentCount - 1) * (cardWidth + gap) + halfCard;
-  for (let pos = firstCenter + 1; pos < lastCenter; pos++) {
-    if (chars[pos] === ' ') chars[pos] = TREE_CHARS.HORIZONTAL;
-  }
-
-  return chars.join('');
+export interface TreeLine {
+  key: string;
+  content: string;
 }
 
-export function buildDropLines(
-  agentCount: number,
-  cardWidth: number,
-  gap: number,
-): string {
-  if (agentCount <= 1) return TREE_CHARS.VERTICAL;
+export function buildCompactTree(
+  primary: CompactAgentLine,
+  parallel: CompactAgentLine[],
+): TreeLine[] {
+  const lines: TreeLine[] = [];
+  const primaryCard = buildInlineCard(
+    primary.icon,
+    primary.name,
+    primary.progress,
+    primary.statusLabel,
+  );
 
-  const totalWidth = agentCount * cardWidth + (agentCount - 1) * gap;
-  const chars: string[] = new Array(totalWidth).fill(' ');
-  const halfCard = Math.floor(cardWidth / 2);
+  const { TOP_LEFT, BOTTOM_LEFT, VERTICAL, TEE_RIGHT, HORIZONTAL } = TREE_CHARS;
 
-  for (let i = 0; i < agentCount; i++) {
-    const center = i * (cardWidth + gap) + halfCard;
-    chars[center] = TREE_CHARS.VERTICAL;
+  lines.push({ key: 'primary-header', content: `${TOP_LEFT} Primary` });
+
+  if (parallel.length === 0) {
+    lines.push({ key: 'primary-card', content: `${BOTTOM_LEFT} ${primaryCard}` });
+    return lines;
   }
 
-  return chars.join('');
-}
-
-export function shouldRenderTree(
-  primaryAgent: AgentState | null,
-): primaryAgent is AgentState {
-  return primaryAgent !== null;
+  lines.push({ key: 'primary-card', content: `${VERTICAL} ${primaryCard}` });
+  lines.push({ key: 'parallel-header', content: `${TEE_RIGHT}${HORIZONTAL} Parallel` });
+  for (let i = 0; i < parallel.length; i++) {
+    const agent = parallel[i];
+    const card = buildInlineCard(
+      agent.icon,
+      agent.name,
+      agent.progress,
+      agent.statusLabel,
+    );
+    lines.push({ key: `parallel-${agent.name}`, content: `${VERTICAL}  ${card}` });
+  }
+  lines.push({ key: 'footer', content: BOTTOM_LEFT });
+  return lines;
 }

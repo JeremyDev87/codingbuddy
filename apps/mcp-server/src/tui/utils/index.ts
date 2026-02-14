@@ -13,3 +13,5 @@ export {
 } from './colors';
 
 export { MODE_COLORS, getModeColor } from './constants';
+
+export { estimateDisplayWidth, truncateToDisplayWidth, padEndDisplayWidth } from './display-width';

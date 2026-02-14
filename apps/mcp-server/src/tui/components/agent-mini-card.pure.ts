@@ -1,15 +1,15 @@
-export const MINI_CARD_NAME_MAX = 18;
+import { estimateDisplayWidth, truncateToDisplayWidth } from '../utils/display-width';
+
 const ELLIPSIS = '\u2026';
 
-export function getMiniCardBorderColor(isActive: boolean): string {
-  return isActive ? 'cyan' : 'gray';
+const TAG_NAME_MAX = 20;
+const TAG_SEPARATOR = ' \u00b7 ';
+
+export function buildInlineAgentTag(name: string): string {
+  if (estimateDisplayWidth(name) <= TAG_NAME_MAX) return name;
+  return truncateToDisplayWidth(name, TAG_NAME_MAX - 1) + ELLIPSIS;
 }
 
-export function getMiniCardTextDimmed(isActive: boolean): boolean {
-  return !isActive;
-}
-
-export function abbreviateMiniName(name: string): string {
-  if (name.length <= MINI_CARD_NAME_MAX) return name;
-  return name.slice(0, MINI_CARD_NAME_MAX - 1) + ELLIPSIS;
+export function joinAgentTags(names: string[]): string {
+  return names.map(buildInlineAgentTag).join(TAG_SEPARATOR);
 }

@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from 'ink-testing-library';
 import { StatusBar } from './StatusBar';
 import type { AgentState } from '../types';
+import { createDefaultAgentState } from '../types';
 import type { SkillRecommendedEvent } from '../events';
 
 function makeAgent(overrides: Partial<AgentState> = {}): AgentState {
@@ -18,6 +19,20 @@ function makeAgent(overrides: Partial<AgentState> = {}): AgentState {
 }
 
 describe('tui/components/StatusBar', () => {
+  it('should render single-line status without border', () => {
+    const agents = [createDefaultAgentState({
+      id: '1', name: 'agent', role: 'r', status: 'running', progress: 50,
+    })];
+    const { lastFrame } = render(<StatusBar agents={agents} skills={[]} />);
+    const output = lastFrame() ?? '';
+    expect(output).toContain('───');
+    expect(output).toContain('🤖 1 active');
+    expect(output).toContain('50%');
+    // No border characters
+    expect(output).not.toContain('┌');
+    expect(output).not.toContain('└');
+  });
+
   it('should render active agent count', () => {
     const agents: AgentState[] = [
       makeAgent({ id: 'a1', status: 'running' }),
@@ -41,12 +56,14 @@ describe('tui/components/StatusBar', () => {
     expect(lastFrame()).toContain('brainstorming, tdd');
   });
 
-  it('should render progress bar with ▲▱ characters', () => {
+  it('should render progress bar with ▓░ characters', () => {
     const agents: AgentState[] = [
       makeAgent({ id: 'a1', status: 'running', progress: 70 }),
     ];
     const { lastFrame } = render(<StatusBar agents={agents} skills={[]} />);
-    expect(lastFrame()).toContain('▲▲▲▲▲▲▲▱▱▱');
+    const output = lastFrame() ?? '';
+    expect(output).toContain('▓');
+    expect(output).toContain('░');
   });
 
   it('should render progress percentage', () => {

@@ -1,13 +1,11 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { AgentState } from '../types';
-import { AgentCard } from './AgentCard';
-import { CARD_WIDTH } from './agent-card.pure';
+import { getAgentIcon } from '../utils/icons';
+import { resolveProgress, buildStatusLabel, resolveIcon } from './agent-card.pure';
 import {
-  shouldRenderTree,
-  buildVerticalConnector,
-  buildBranchLine,
-  buildDropLines,
+  buildCompactTree,
+  type CompactAgentLine,
 } from './agent-tree.pure';
 
 export interface AgentTreeProps {
@@ -15,42 +13,32 @@ export interface AgentTreeProps {
   parallelAgents: AgentState[];
 }
 
-const PARALLEL_GAP = 1;
+function toCompactLine(agent: AgentState): CompactAgentLine {
+  const icon = resolveIcon(agent.status, getAgentIcon(agent.name));
+  return {
+    icon,
+    name: agent.name,
+    progress: resolveProgress(agent.status, agent.progress),
+    statusLabel: buildStatusLabel(agent.status),
+  };
+}
 
 export function AgentTree({
   primaryAgent,
   parallelAgents,
 }: AgentTreeProps): React.ReactElement | null {
-  if (!shouldRenderTree(primaryAgent)) return null;
+  if (primaryAgent === null) return null;
 
-  const hasParallel = parallelAgents.length > 0;
-  const showBranch = parallelAgents.length >= 2;
+  const lines = buildCompactTree(
+    toCompactLine(primaryAgent),
+    parallelAgents.map(toCompactLine),
+  );
 
   return (
-    <Box flexDirection="column" alignItems="center">
-      <AgentCard agent={primaryAgent} />
-      {hasParallel && <Text>{buildVerticalConnector()}</Text>}
-      {showBranch && (
-        <Text>
-          {buildBranchLine(parallelAgents.length, CARD_WIDTH, PARALLEL_GAP)}
-        </Text>
-      )}
-      {showBranch && (
-        <Text>
-          {buildDropLines(parallelAgents.length, CARD_WIDTH, PARALLEL_GAP)}
-        </Text>
-      )}
-      {hasParallel && (
-        <Box
-          flexDirection="row"
-          justifyContent="center"
-          columnGap={PARALLEL_GAP}
-        >
-          {parallelAgents.map(agent => (
-            <AgentCard key={agent.id} agent={agent} />
-          ))}
-        </Box>
-      )}
+    <Box flexDirection="column">
+      {lines.map(line => (
+        <Text key={line.key}>{line.content}</Text>
+      ))}
     </Box>
   );
 }
