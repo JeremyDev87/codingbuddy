@@ -77,7 +77,7 @@ function setupGracefulShutdown(
  */
 const esmImport = new Function('s', 'return import(s)') as (
   specifier: string,
-) => Promise<any>;
+) => Promise<unknown>;
 
 /**
  * Initialize TUI Agent Monitor with dynamic imports

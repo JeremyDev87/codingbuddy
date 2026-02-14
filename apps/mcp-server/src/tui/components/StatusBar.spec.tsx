@@ -20,9 +20,15 @@ function makeAgent(overrides: Partial<AgentState> = {}): AgentState {
 
 describe('tui/components/StatusBar', () => {
   it('should render single-line status without border', () => {
-    const agents = [createDefaultAgentState({
-      id: '1', name: 'agent', role: 'r', status: 'running', progress: 50,
-    })];
+    const agents = [
+      createDefaultAgentState({
+        id: '1',
+        name: 'agent',
+        role: 'r',
+        status: 'running',
+        progress: 50,
+      }),
+    ];
     const { lastFrame } = render(<StatusBar agents={agents} skills={[]} />);
     const output = lastFrame() ?? '';
     expect(output).toContain('───');

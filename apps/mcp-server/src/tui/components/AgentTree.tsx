@@ -2,11 +2,12 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import type { AgentState } from '../types';
 import { getAgentIcon } from '../utils/icons';
-import { resolveProgress, buildStatusLabel, resolveIcon } from './agent-card.pure';
 import {
-  buildCompactTree,
-  type CompactAgentLine,
-} from './agent-tree.pure';
+  resolveProgress,
+  buildStatusLabel,
+  resolveIcon,
+} from './agent-card.pure';
+import { buildCompactTree, type CompactAgentLine } from './agent-tree.pure';
 
 export interface AgentTreeProps {
   primaryAgent: AgentState | null;

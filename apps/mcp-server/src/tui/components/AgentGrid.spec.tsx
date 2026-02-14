@@ -34,20 +34,14 @@ const mockAgents: AgentMetadata[] = [
 describe('AgentGrid', () => {
   it('should render nothing when no agents', () => {
     const { lastFrame } = render(
-      <AgentGrid
-        allAgents={[]}
-        activeAgentIds={new Set()}
-      />,
+      <AgentGrid allAgents={[]} activeAgentIds={new Set()} />,
     );
     expect(lastFrame()).toBe('');
   });
 
   it('should render category rows', () => {
     const { lastFrame } = render(
-      <AgentGrid
-        allAgents={mockAgents}
-        activeAgentIds={new Set()}
-      />,
+      <AgentGrid allAgents={mockAgents} activeAgentIds={new Set()} />,
     );
     expect(lastFrame()).toContain('Architecture');
     expect(lastFrame()).toContain('Security');

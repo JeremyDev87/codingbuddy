@@ -26,7 +26,13 @@ export function StatusBar({
   const progress = calculateOverallProgress(agents);
   const phase = determinePhase(agents);
   const skillsText = buildSkillsDisplay(skills);
-  const parts = buildCompactStatusParts(activeCount, skillsText, progress, phase, terminalWidth);
+  const parts = buildCompactStatusParts(
+    activeCount,
+    skillsText,
+    progress,
+    phase,
+    terminalWidth,
+  );
   const phaseColor = getPhaseColor(phase);
 
   if (!parts.mainContent && !parts.phaseContent) {
@@ -37,7 +43,9 @@ export function StatusBar({
   // buildCompactStatusParts (the -2 in remaining width calculation).
   return (
     <Text>
-      <Text dimColor>{parts.leftDivider} {parts.mainContent}</Text>
+      <Text dimColor>
+        {parts.leftDivider} {parts.mainContent}
+      </Text>
       <Text color={phaseColor}>{parts.phaseContent}</Text>
       <Text dimColor> {parts.rightDivider}</Text>
     </Text>
