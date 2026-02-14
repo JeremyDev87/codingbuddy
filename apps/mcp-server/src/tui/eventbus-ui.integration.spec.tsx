@@ -180,4 +180,153 @@ describe('EventBus ↔ UI Integration', () => {
       expect(lastFrame()).toContain('AUTO');
     });
   });
+
+  describe('Parallel 시작/완료 → AgentTree 업데이트', () => {
+    it('should show specialists in AgentTree after PARALLEL_STARTED + individual activations', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'p1',
+        name: 'solution-architect',
+        role: 'primary',
+        isPrimary: true,
+      });
+
+      eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
+        specialists: ['security-specialist', 'test-strategy-specialist'],
+        mode: 'PLAN',
+      });
+
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'sec-1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'test-1',
+        name: 'test-strategy-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('securi');
+      expect(frame).toContain('test-s');
+      expect(frame).toContain('3 active');
+    });
+
+    it('should clear specialists from AgentTree after individual deactivations + PARALLEL_COMPLETED', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'p1',
+        name: 'solution-architect',
+        role: 'primary',
+        isPrimary: true,
+      });
+      eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
+        specialists: ['security-specialist', 'test-strategy-specialist'],
+        mode: 'PLAN',
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'sec-1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'test-1',
+        name: 'test-strategy-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      await tick();
+      expect(lastFrame()).toContain('3 active');
+
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'sec-1',
+        reason: 'completed',
+        durationMs: 800,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'test-1',
+        reason: 'completed',
+        durationMs: 1200,
+      });
+      eventBus.emit(TUI_EVENTS.PARALLEL_COMPLETED, {
+        specialists: ['security-specialist', 'test-strategy-specialist'],
+        results: {
+          'security-specialist': 'No issues found',
+          'test-strategy-specialist': 'Tests designed',
+        },
+      });
+      await tick();
+
+      expect(lastFrame()).toContain('1 active');
+    });
+
+    it('should handle full parallel lifecycle: start → activate → deactivate → complete', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
+      await tick();
+      expect(lastFrame()).toContain('PLAN');
+
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'p1',
+        name: 'solution-architect',
+        role: 'primary',
+        isPrimary: true,
+      });
+      await tick();
+      expect(lastFrame()).toContain('1 active');
+
+      eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
+        specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
+        mode: 'PLAN',
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'sec-1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'acc-1',
+        name: 'accessibility-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'perf-1',
+        name: 'performance-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      await tick();
+      expect(lastFrame()).toContain('4 active');
+
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'sec-1', reason: 'completed', durationMs: 500 });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'acc-1', reason: 'completed', durationMs: 700 });
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, { agentId: 'perf-1', reason: 'completed', durationMs: 900 });
+      eventBus.emit(TUI_EVENTS.PARALLEL_COMPLETED, {
+        specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
+        results: {
+          'security-specialist': 'done',
+          'accessibility-specialist': 'done',
+          'performance-specialist': 'done',
+        },
+      });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('1 active');
+      expect(frame).toContain('PLAN');
+    });
+  });
 });
