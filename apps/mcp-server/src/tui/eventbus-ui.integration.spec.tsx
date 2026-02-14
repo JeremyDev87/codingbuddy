@@ -2,7 +2,12 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render } from 'ink-testing-library';
 import { App } from './app';
-import { TuiEventBus, TUI_EVENTS, type AgentMetadata } from './events';
+import {
+  TuiEventBus,
+  TUI_EVENTS,
+  TuiInterceptor,
+  type AgentMetadata,
+} from './events';
 
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
@@ -596,6 +601,163 @@ describe('EventBus ↔ UI Integration', () => {
       });
       await tick();
       expect(lastFrame()).toContain('1 active');
+    });
+  });
+
+  describe('Interceptor → EventBus → UI 통합 (semantic events)', () => {
+    it('should update Header mode when parse_mode tool is intercepted', async () => {
+      const eventBus = new TuiEventBus();
+      const interceptor = new TuiInterceptor(eventBus);
+      interceptor.enable();
+
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      // Simulate parse_mode tool call through interceptor
+      await interceptor.intercept(
+        'parse_mode',
+        { prompt: 'PLAN design auth feature' },
+        async () => ({
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                mode: 'PLAN',
+                originalPrompt: 'design auth feature',
+              }),
+            },
+          ],
+        }),
+      );
+
+      // Wait for setImmediate events to propagate
+      await new Promise(resolve => setImmediate(resolve));
+      await tick();
+
+      expect(lastFrame()).toContain('PLAN');
+    });
+
+    it('should show skills in StatusBar when parse_mode returns included_skills', async () => {
+      const eventBus = new TuiEventBus();
+      const interceptor = new TuiInterceptor(eventBus);
+      interceptor.enable();
+
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      await interceptor.intercept(
+        'parse_mode',
+        { prompt: 'PLAN something' },
+        async () => ({
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                mode: 'PLAN',
+                included_skills: [
+                  { name: 'brainstorming', reason: 'creative work' },
+                  { name: 'writing-plans', reason: 'multi-step task' },
+                ],
+              }),
+            },
+          ],
+        }),
+      );
+
+      await new Promise(resolve => setImmediate(resolve));
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('PLAN');
+      expect(frame).toContain('brainstorming');
+      expect(frame).toContain('writing-plans');
+    });
+
+    it('should show agent activation for mapped general tools like search_rules', async () => {
+      const eventBus = new TuiEventBus();
+      const interceptor = new TuiInterceptor(eventBus);
+      interceptor.enable();
+
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      await interceptor.intercept(
+        'search_rules',
+        { query: 'test' },
+        async () => ({
+          content: [{ type: 'text', text: '{"results":[]}' }],
+        }),
+      );
+
+      await new Promise(resolve => setImmediate(resolve));
+      await tick();
+
+      // search_rules is now mapped → should show in status
+      // After deactivation it becomes 0 active (completed), but the agent entry exists
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('0 active');
+    });
+
+    it('should handle full interceptor workflow: parse_mode + parallel agents', async () => {
+      const eventBus = new TuiEventBus();
+      const interceptor = new TuiInterceptor(eventBus);
+      interceptor.enable();
+
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+      await tick();
+
+      // 1. parse_mode call sets mode and skills
+      await interceptor.intercept(
+        'parse_mode',
+        { prompt: 'EVAL review code' },
+        async () => ({
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                mode: 'EVAL',
+                included_skills: [
+                  { name: 'systematic-debugging', reason: 'bug' },
+                ],
+              }),
+            },
+          ],
+        }),
+      );
+
+      await new Promise(resolve => setImmediate(resolve));
+      await tick();
+
+      let frame = lastFrame() ?? '';
+      expect(frame).toContain('EVAL');
+      expect(frame).toContain('systematic-debugging');
+
+      // 2. prepare_parallel_agents call triggers parallel:started
+      await interceptor.intercept(
+        'prepare_parallel_agents',
+        { specialists: ['security', 'perf'], mode: 'EVAL' },
+        async () => ({
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                agents: [
+                  { agentName: 'security-specialist' },
+                  { agentName: 'performance-specialist' },
+                ],
+                mode: 'EVAL',
+              }),
+            },
+          ],
+        }),
+      );
+
+      await new Promise(resolve => setImmediate(resolve));
+      await tick();
+
+      frame = lastFrame() ?? '';
+      expect(frame).toContain('EVAL');
+      expect(frame).toContain('systematic-debugging');
     });
   });
 });

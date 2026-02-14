@@ -127,16 +127,77 @@ describe('parseAgentFromToolName', () => {
     });
   });
 
-  describe('unhandled tools', () => {
-    it('should return null for non-agent tool names', () => {
-      expect(parseAgentFromToolName('search_rules', {})).toBeNull();
-      expect(parseAgentFromToolName('get_project_config', {})).toBeNull();
+  describe('mapped general tools', () => {
+    it('should return agent info for search_rules', () => {
+      expect(parseAgentFromToolName('search_rules', {})).toEqual({
+        agentId: 'search_rules',
+        name: 'search_rules',
+        role: 'query',
+        isPrimary: false,
+      });
     });
 
-    it('should return null for get_agent_details (read-only, not activation)', () => {
+    it('should return agent info for get_project_config', () => {
+      expect(parseAgentFromToolName('get_project_config', {})).toEqual({
+        agentId: 'get_project_config',
+        name: 'get_project_config',
+        role: 'config',
+        isPrimary: false,
+      });
+    });
+
+    it('should return agent info for get_agent_details', () => {
       expect(
         parseAgentFromToolName('get_agent_details', { agentName: 'test' }),
-      ).toBeNull();
+      ).toEqual({
+        agentId: 'get_agent_details',
+        name: 'get_agent_details',
+        role: 'query',
+        isPrimary: false,
+      });
+    });
+
+    it('should return agent info for analyze_task', () => {
+      expect(parseAgentFromToolName('analyze_task', {})).toEqual({
+        agentId: 'analyze_task',
+        name: 'analyze_task',
+        role: 'analysis',
+        isPrimary: false,
+      });
+    });
+
+    it('should return agent info for update_context', () => {
+      expect(parseAgentFromToolName('update_context', {})).toEqual({
+        agentId: 'update_context',
+        name: 'update_context',
+        role: 'context',
+        isPrimary: false,
+      });
+    });
+
+    it('should return agent info for recommend_skills', () => {
+      expect(parseAgentFromToolName('recommend_skills', {})).toEqual({
+        agentId: 'recommend_skills',
+        name: 'recommend_skills',
+        role: 'skill',
+        isPrimary: false,
+      });
+    });
+
+    it('should return agent info for cleanup_context', () => {
+      expect(parseAgentFromToolName('cleanup_context', {})).toEqual({
+        agentId: 'cleanup_context',
+        name: 'cleanup_context',
+        role: 'context',
+        isPrimary: false,
+      });
+    });
+  });
+
+  describe('unhandled tools', () => {
+    it('should return null for completely unknown tool names', () => {
+      expect(parseAgentFromToolName('unknown_tool', {})).toBeNull();
+      expect(parseAgentFromToolName('some_other_tool', {})).toBeNull();
     });
   });
 });
