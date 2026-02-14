@@ -143,4 +143,41 @@ describe('EventBus ↔ UI Integration', () => {
       expect(frame).toContain('0 active');
     });
   });
+
+  describe('Mode 변경 → Header 업데이트', () => {
+    it('should display ACT in Header when mode changes from PLAN to ACT', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'PLAN', to: 'ACT' });
+      await tick();
+
+      expect(lastFrame()).toContain('ACT');
+    });
+
+    it('should display EVAL in Header when mode changes from ACT to EVAL', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'ACT' });
+      await tick();
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'ACT', to: 'EVAL' });
+      await tick();
+
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('EVAL');
+    });
+
+    it('should reflect only the latest mode after rapid consecutive changes', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<App eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'PLAN', to: 'ACT' });
+      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'ACT', to: 'AUTO' });
+      await tick();
+
+      expect(lastFrame()).toContain('AUTO');
+    });
+  });
 });
