@@ -35,3 +35,12 @@ export {
   computeColumns,
   computeCardWidth,
 } from './agent-grid.pure';
+export { StatusBar, type StatusBarProps } from './StatusBar';
+export {
+  countActiveAgents,
+  calculateOverallProgress,
+  buildStatusProgressBar,
+  determinePhase,
+  buildSkillsDisplay,
+  type Phase,
+} from './status-bar.pure';
