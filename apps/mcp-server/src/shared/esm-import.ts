@@ -35,7 +35,6 @@ export async function esmImport(
   // import() to require() in CommonJS mode. The path guard above (lines 18-28)
   // restricts input to absolute paths within PROJECT_ROOT, preventing arbitrary
   // module loading. This is the accepted mitigation for the eval-equivalent risk.
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   const dynamicImport = new Function('s', 'return import(s)') as (
     s: string,
   ) => Promise<Record<string, unknown>>;

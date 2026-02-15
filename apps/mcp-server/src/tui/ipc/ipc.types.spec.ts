@@ -1,3 +1,4 @@
+import path from 'path';
 import { describe, it, expect } from 'vitest';
 import {
   serializeIpcMessage,
@@ -58,7 +59,6 @@ describe('IpcMessage serialization', () => {
   });
 
   it('should generate socket path from PID', () => {
-    const path = require('path');
     const socketPath = getSocketPath(12345);
     expect(socketPath).toBe(
       path.join(getSocketDir(), 'codingbuddy-12345.sock'),
