@@ -31,8 +31,6 @@ describe('types barrel export', () => {
     const widget: WidgetProps = { locale: 'ko' };
     const codeExample: CodeExampleProps = {
       locale: 'en',
-      beforeCode: '',
-      afterCode: '',
     };
     const step: QuickStartStep = {
       step: 1,

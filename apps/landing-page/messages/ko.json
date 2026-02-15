@@ -22,9 +22,13 @@
     "count": "{count}개 에이전트"
   },
   "codeExample": {
-    "title": "코드 예시",
-    "before": "이전",
-    "after": "이후"
+    "title": "차이를 확인하세요",
+    "subtitle": "하나의 규칙 세트로 모든 AI 도구의 분산된 설정을 대체합니다",
+    "before": "이전: Codingbuddy 없이",
+    "after": "이후: Codingbuddy 사용",
+    "copy": "코드 복사",
+    "copied": "복사 완료!",
+    "copyFailed": "복사 실패"
   },
   "quickStart": {
     "title": "빠른 시작",

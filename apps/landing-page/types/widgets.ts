@@ -17,12 +17,7 @@ export interface SlotProps {
 }
 
 /** 코드 비교 예시 Props */
-export interface CodeExampleProps extends WidgetProps {
-  /** 변경 전 코드 */
-  beforeCode: string;
-  /** 변경 후 코드 */
-  afterCode: string;
-}
+export type CodeExampleProps = WidgetProps;
 
 /** 빠른 시작 가이드 단계 */
 export interface QuickStartStep {

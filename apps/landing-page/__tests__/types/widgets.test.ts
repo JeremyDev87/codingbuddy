@@ -12,16 +12,12 @@ describe('Widget types', () => {
     expect(props.locale).toBe('ko');
   });
 
-  test('CodeExampleProps extends WidgetProps', () => {
+  test('CodeExampleProps is equivalent to WidgetProps', () => {
     const props: CodeExampleProps = {
       locale: 'en',
-      beforeCode: 'const x = 1;',
-      afterCode: 'const x: number = 1;',
     };
 
     expect(props.locale).toBe('en');
-    expect(props.beforeCode).toBeDefined();
-    expect(props.afterCode).toBeDefined();
   });
 
   test('QuickStartStep has required properties', () => {

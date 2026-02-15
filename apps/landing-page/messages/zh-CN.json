@@ -22,9 +22,13 @@
     "count": "{count}个代理"
   },
   "codeExample": {
-    "title": "代码示例",
-    "before": "之前",
-    "after": "之后"
+    "title": "看看区别",
+    "subtitle": "一套规则替代所有AI工具中分散的配置",
+    "before": "之前：没有Codingbuddy",
+    "after": "之后：使用Codingbuddy",
+    "copy": "复制代码",
+    "copied": "已复制！",
+    "copyFailed": "复制失败"
   },
   "quickStart": {
     "title": "快速入门",

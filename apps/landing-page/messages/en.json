@@ -22,9 +22,13 @@
     "count": "{count} agents"
   },
   "codeExample": {
-    "title": "Code Example",
-    "before": "Before",
-    "after": "After"
+    "title": "See the Difference",
+    "subtitle": "One ruleset replaces scattered configs across all your AI tools",
+    "before": "Before: Without Codingbuddy",
+    "after": "After: With Codingbuddy",
+    "copy": "Copy code",
+    "copied": "Copied!",
+    "copyFailed": "Copy failed"
   },
   "quickStart": {
     "title": "Quick Start",

@@ -22,11 +22,7 @@ const renderLocalePage = (locale: 'en' | 'ko' = 'en') =>
         <p>Multi-AI Rules for Consistent Coding</p>
       </section>
       <AgentsShowcase locale={locale} />
-      <CodeExample
-        locale={locale}
-        beforeCode="// before"
-        afterCode="// after"
-      />
+      <CodeExample locale={locale} />
       <QuickStart locale={locale} />
     </main>,
   );

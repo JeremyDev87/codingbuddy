@@ -22,9 +22,13 @@
     "count": "{count} agentes"
   },
   "codeExample": {
-    "title": "Ejemplo de Código",
-    "before": "Antes",
-    "after": "Después"
+    "title": "Mira la Diferencia",
+    "subtitle": "Un conjunto de reglas reemplaza configuraciones dispersas en todas tus herramientas de IA",
+    "before": "Antes: Sin Codingbuddy",
+    "after": "Después: Con Codingbuddy",
+    "copy": "Copiar código",
+    "copied": "¡Copiado!",
+    "copyFailed": "Error al copiar"
   },
   "quickStart": {
     "title": "Inicio Rápido",

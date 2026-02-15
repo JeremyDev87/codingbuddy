@@ -22,9 +22,13 @@
     "count": "{count}エージェント"
   },
   "codeExample": {
-    "title": "コード例",
-    "before": "変更前",
-    "after": "変更後"
+    "title": "違いを確認",
+    "subtitle": "1つのルールセットで全AIツールの分散設定を置き換え",
+    "before": "変更前：Codingbuddyなし",
+    "after": "変更後：Codingbuddy使用",
+    "copy": "コードをコピー",
+    "copied": "コピーしました！",
+    "copyFailed": "コピーに失敗しました"
   },
   "quickStart": {
     "title": "クイックスタート",

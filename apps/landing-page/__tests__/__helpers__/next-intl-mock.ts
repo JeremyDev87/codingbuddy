@@ -7,20 +7,33 @@ import { vi } from 'vitest';
  * Usage: import '@/__tests__/__helpers__/next-intl-mock';
  */
 vi.mock('next-intl', () => ({
-  useTranslations: () => {
-    const translations: Record<string, string> = {
-      title: 'AI Specialist Agents',
-      subtitle: '29 specialized AI agents',
-      filter: 'Filter by category',
-      search: 'Search agents...',
-      allCategories: 'All Categories',
-      noResults: 'No agents found matching your criteria',
-      'categories.Planning': 'Planning',
-      'categories.Development': 'Development',
-      'categories.Review': 'Review',
-      'categories.Security': 'Security',
-      'categories.UX': 'UX',
+  useTranslations: (namespace?: string) => {
+    const allTranslations: Record<string, Record<string, string>> = {
+      agents: {
+        title: 'AI Specialist Agents',
+        subtitle: '29 specialized AI agents',
+        filter: 'Filter by category',
+        search: 'Search agents...',
+        allCategories: 'All Categories',
+        noResults: 'No agents found matching your criteria',
+        'categories.Planning': 'Planning',
+        'categories.Development': 'Development',
+        'categories.Review': 'Review',
+        'categories.Security': 'Security',
+        'categories.UX': 'UX',
+      },
+      codeExample: {
+        title: 'See the Difference',
+        subtitle:
+          'One ruleset replaces scattered configs across all your AI tools',
+        before: 'Before: Without Codingbuddy',
+        after: 'After: With Codingbuddy',
+        copy: 'Copy code',
+        copied: 'Copied!',
+        copyFailed: 'Copy failed',
+      },
     };
+    const translations = namespace ? (allTranslations[namespace] ?? {}) : {};
     const t = (key: string, params?: Record<string, unknown>) => {
       if (key === 'count') return `${params?.count} agents`;
       return translations[key] ?? key;
