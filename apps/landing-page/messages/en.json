@@ -6,9 +6,20 @@
     "cta": "Get Started"
   },
   "agents": {
-    "title": "AI Agents",
+    "title": "AI Specialist Agents",
+    "subtitle": "29 specialized AI agents to enhance your development workflow",
     "filter": "Filter by category",
-    "search": "Search agents..."
+    "search": "Search agents...",
+    "allCategories": "All Categories",
+    "noResults": "No agents found matching your criteria",
+    "categories": {
+      "Planning": "Planning",
+      "Development": "Development",
+      "Review": "Review",
+      "Security": "Security",
+      "UX": "UX"
+    },
+    "count": "{count} agents"
   },
   "codeExample": {
     "title": "Code Example",

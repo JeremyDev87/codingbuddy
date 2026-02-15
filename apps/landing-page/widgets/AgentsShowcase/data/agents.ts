@@ -1,0 +1,304 @@
+import type { Agent } from '@/types';
+
+export const agents: Agent[] = [
+  // === Planning (5) ===
+  {
+    id: 'plan-mode',
+    name: 'Plan Mode Agent',
+    description: 'Specialized for work planning and design',
+    category: 'Planning',
+    icon: '📋',
+    tags: ['Planning', 'Design'],
+    expertise: ['Work Planning', 'Design Strategy'],
+  },
+  {
+    id: 'technical-planner',
+    name: 'Technical Planner',
+    description:
+      'Low-level implementation planning with TDD and bite-sized tasks',
+    category: 'Planning',
+    icon: '🗺️',
+    tags: ['TDD', 'Task Decomposition'],
+    expertise: [
+      'Implementation Planning',
+      'TDD Strategy',
+      'Task Decomposition',
+    ],
+  },
+  {
+    id: 'architecture-specialist',
+    name: 'Architecture Specialist',
+    description:
+      'Architecture expert for Planning, Implementation, and Evaluation',
+    category: 'Planning',
+    icon: '🏛️',
+    tags: ['Architecture', 'System Design'],
+    expertise: ['System Architecture', 'Design Patterns', 'Scalability'],
+  },
+  {
+    id: 'solution-architect',
+    name: 'Solution Architect',
+    description:
+      'High-level system design and architecture planning specialist',
+    category: 'Planning',
+    icon: '🔷',
+    tags: ['System Design', 'Architecture'],
+    expertise: [
+      'Solution Design',
+      'Technical Strategy',
+      'Architecture Planning',
+    ],
+  },
+  {
+    id: 'migration-specialist',
+    name: 'Migration Specialist',
+    description:
+      'Cross-cutting migration coordinator for legacy system modernization',
+    category: 'Planning',
+    icon: '🔄',
+    tags: ['Migration', 'Modernization'],
+    expertise: ['Legacy Migration', 'Framework Upgrades', 'Data Migration'],
+  },
+
+  // === Development (12) ===
+  {
+    id: 'act-mode',
+    name: 'Act Mode Agent',
+    description: 'Specialized for actual implementation execution',
+    category: 'Development',
+    icon: '⚡',
+    tags: ['Implementation', 'Execution'],
+    expertise: ['Code Implementation', 'TDD Execution'],
+  },
+  {
+    id: 'frontend-developer',
+    name: 'Frontend Developer',
+    description:
+      'Modern React/Next.js specialist with Server Components, TDD, and accessibility',
+    category: 'Development',
+    icon: '⚛️',
+    tags: ['React', 'Next.js', 'TypeScript'],
+    expertise: ['React', 'Next.js App Router', 'TypeScript', 'TDD'],
+  },
+  {
+    id: 'backend-developer',
+    name: 'Backend Developer',
+    description:
+      'Language-agnostic backend specialist with Clean Architecture and TDD',
+    category: 'Development',
+    icon: '🖥️',
+    tags: ['Backend', 'Clean Architecture'],
+    expertise: ['Clean Architecture', 'API Design', 'TDD', 'Security'],
+  },
+  {
+    id: 'mobile-developer',
+    name: 'Mobile Developer',
+    description: 'Cross-platform and native mobile specialist',
+    category: 'Development',
+    icon: '📱',
+    tags: ['React Native', 'Flutter', 'iOS'],
+    expertise: ['React Native', 'Flutter', 'iOS', 'Android'],
+  },
+  {
+    id: 'data-engineer',
+    name: 'Data Engineer',
+    description:
+      'Data specialist focused on database design, schema optimization, and migrations',
+    category: 'Development',
+    icon: '🗄️',
+    tags: ['Database', 'Schema', 'Migration'],
+    expertise: ['Database Design', 'Schema Optimization', 'Data Migration'],
+  },
+  {
+    id: 'devops-engineer',
+    name: 'DevOps Engineer',
+    description:
+      'Docker, Datadog monitoring, and Next.js deployment specialist',
+    category: 'Development',
+    icon: '🚀',
+    tags: ['Docker', 'CI/CD', 'Monitoring'],
+    expertise: ['Docker', 'Datadog', 'Next.js Deployment', 'CI/CD'],
+  },
+  {
+    id: 'tooling-engineer',
+    name: 'Tooling Engineer',
+    description:
+      'Project configuration, build tools, and development environment specialist',
+    category: 'Development',
+    icon: '🔧',
+    tags: ['Build Tools', 'Config', 'DX'],
+    expertise: ['Build Configuration', 'Development Tools', 'DX Optimization'],
+  },
+  {
+    id: 'platform-engineer',
+    name: 'Platform Engineer',
+    description:
+      'Cloud-native infrastructure expert for Planning, Implementation, and Evaluation',
+    category: 'Development',
+    icon: '☁️',
+    tags: ['Cloud', 'Infrastructure', 'K8s'],
+    expertise: ['Cloud Infrastructure', 'Kubernetes', 'Platform Design'],
+  },
+  {
+    id: 'agent-architect',
+    name: 'Agent Architect',
+    description:
+      'Primary Agent for creating, validating, and managing AI agent configurations',
+    category: 'Development',
+    icon: '🤖',
+    tags: ['AI Agents', 'Configuration'],
+    expertise: ['Agent Design', 'AI Configuration', 'Agent Validation'],
+  },
+  {
+    id: 'ai-ml-engineer',
+    name: 'AI/ML Engineer',
+    description:
+      'AI/ML expert for Planning, Implementation, and Evaluation modes',
+    category: 'Development',
+    icon: '🧠',
+    tags: ['AI', 'ML', 'Deep Learning'],
+    expertise: ['Machine Learning', 'Deep Learning', 'AI Systems'],
+  },
+  {
+    id: 'event-architecture-specialist',
+    name: 'Event Architecture Specialist',
+    description: 'Event-driven architecture specialist for real-time systems',
+    category: 'Development',
+    icon: '📨',
+    tags: ['Event-Driven', 'Real-Time'],
+    expertise: ['Event-Driven Architecture', 'WebSocket', 'SSE'],
+  },
+  {
+    id: 'integration-specialist',
+    name: 'Integration Specialist',
+    description:
+      'External service integration specialist for APIs and third-party services',
+    category: 'Development',
+    icon: '🔗',
+    tags: ['API', 'Integration', 'Third-Party'],
+    expertise: ['API Integration', 'Third-Party Services', 'OAuth'],
+  },
+
+  // === Review (5) ===
+  {
+    id: 'eval-mode',
+    name: 'Eval Mode Agent',
+    description:
+      'Specialized for code quality evaluation and improvement suggestions',
+    category: 'Review',
+    icon: '🔍',
+    tags: ['Evaluation', 'Quality'],
+    expertise: [
+      'Code Evaluation',
+      'Quality Assessment',
+      'Improvement Suggestions',
+    ],
+  },
+  {
+    id: 'code-reviewer',
+    name: 'Code Reviewer',
+    description:
+      'Senior software engineer specializing in comprehensive code quality evaluation',
+    category: 'Review',
+    icon: '👀',
+    tags: ['Code Review', 'Quality'],
+    expertise: ['Code Review', 'Best Practices', 'Quality Standards'],
+  },
+  {
+    id: 'code-quality-specialist',
+    name: 'Code Quality Specialist',
+    description:
+      'Code quality expert for linting, formatting, and best practices',
+    category: 'Review',
+    icon: '📏',
+    tags: ['Linting', 'Standards', 'SOLID'],
+    expertise: ['Code Quality', 'Linting', 'SOLID Principles'],
+  },
+  {
+    id: 'test-strategy-specialist',
+    name: 'Test Strategy Specialist',
+    description: 'Test strategy expert for comprehensive testing approaches',
+    category: 'Review',
+    icon: '🧪',
+    tags: ['Testing', 'TDD', 'Strategy'],
+    expertise: ['Test Strategy', 'TDD', 'Integration Testing'],
+  },
+  {
+    id: 'documentation-specialist',
+    name: 'Documentation Specialist',
+    description: 'Documentation expert for technical writing and API docs',
+    category: 'Review',
+    icon: '📝',
+    tags: ['Documentation', 'Technical Writing'],
+    expertise: ['Technical Writing', 'API Documentation', 'README'],
+  },
+
+  // === Security (2) ===
+  {
+    id: 'security-specialist',
+    name: 'Security Specialist',
+    description:
+      'Security expert for vulnerability assessment and secure coding',
+    category: 'Security',
+    icon: '🔒',
+    tags: ['Security', 'OWASP', 'Audit'],
+    expertise: ['Security Audit', 'OWASP', 'Secure Coding'],
+  },
+  {
+    id: 'observability-specialist',
+    name: 'Observability Specialist',
+    description: 'Observability expert for monitoring, logging, and alerting',
+    category: 'Security',
+    icon: '📊',
+    tags: ['Monitoring', 'Logging', 'Alerting'],
+    expertise: ['Monitoring', 'Logging', 'Distributed Tracing'],
+  },
+
+  // === UX (5) ===
+  {
+    id: 'ui-ux-designer',
+    name: 'UI/UX Designer',
+    description: 'UI/UX design specialist based on universal design principles',
+    category: 'UX',
+    icon: '🎨',
+    tags: ['UI Design', 'UX', 'Accessibility'],
+    expertise: ['UI Design', 'UX Research', 'Design Systems'],
+  },
+  {
+    id: 'accessibility-specialist',
+    name: 'Accessibility Specialist',
+    description:
+      'Accessibility expert for WCAG compliance and inclusive design',
+    category: 'UX',
+    icon: '♿',
+    tags: ['A11y', 'WCAG', 'Inclusive Design'],
+    expertise: ['WCAG', 'Screen Readers', 'Keyboard Navigation'],
+  },
+  {
+    id: 'performance-specialist',
+    name: 'Performance Specialist',
+    description: 'Performance expert for optimization and profiling',
+    category: 'UX',
+    icon: '⚡',
+    tags: ['Performance', 'Optimization', 'Core Web Vitals'],
+    expertise: ['Performance Optimization', 'Core Web Vitals', 'Profiling'],
+  },
+  {
+    id: 'seo-specialist',
+    name: 'SEO Specialist',
+    description: 'SEO expert for search engine optimization and meta tags',
+    category: 'UX',
+    icon: '🔎',
+    tags: ['SEO', 'Meta Tags', 'Structured Data'],
+    expertise: ['SEO', 'Meta Tags', 'Structured Data', 'Site Performance'],
+  },
+  {
+    id: 'i18n-specialist',
+    name: 'i18n Specialist',
+    description: 'Internationalization expert for multi-language support',
+    category: 'UX',
+    icon: '🌐',
+    tags: ['i18n', 'L10n', 'Multi-Language'],
+    expertise: ['Internationalization', 'Localization', 'RTL Support'],
+  },
+];

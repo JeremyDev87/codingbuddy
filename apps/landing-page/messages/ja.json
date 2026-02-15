@@ -6,9 +6,20 @@
     "cta": "始める"
   },
   "agents": {
-    "title": "AIエージェント",
+    "title": "AI専門エージェント",
+    "subtitle": "開発ワークフローを強化する29の専門AIエージェント",
     "filter": "カテゴリで絞り込み",
-    "search": "エージェントを検索..."
+    "search": "エージェントを検索...",
+    "allCategories": "すべてのカテゴリ",
+    "noResults": "条件に一致するエージェントが見つかりません",
+    "categories": {
+      "Planning": "企画",
+      "Development": "開発",
+      "Review": "レビュー",
+      "Security": "セキュリティ",
+      "UX": "UX"
+    },
+    "count": "{count}エージェント"
   },
   "codeExample": {
     "title": "コード例",

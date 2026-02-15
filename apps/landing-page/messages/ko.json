@@ -6,9 +6,20 @@
     "cta": "시작하기"
   },
   "agents": {
-    "title": "AI 에이전트",
+    "title": "AI 전문 에이전트",
+    "subtitle": "개발 워크플로우를 향상시키는 29개의 전문 AI 에이전트",
     "filter": "카테고리별 필터",
-    "search": "에이전트 검색..."
+    "search": "에이전트 검색...",
+    "allCategories": "전체 카테고리",
+    "noResults": "조건에 맞는 에이전트를 찾을 수 없습니다",
+    "categories": {
+      "Planning": "기획",
+      "Development": "개발",
+      "Review": "리뷰",
+      "Security": "보안",
+      "UX": "UX"
+    },
+    "count": "{count}개 에이전트"
   },
   "codeExample": {
     "title": "코드 예시",

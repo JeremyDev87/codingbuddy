@@ -6,9 +6,20 @@
     "cta": "开始使用"
   },
   "agents": {
-    "title": "AI 代理",
+    "title": "AI 专业代理",
+    "subtitle": "29个专业AI代理，提升您的开发工作流程",
     "filter": "按类别筛选",
-    "search": "搜索代理..."
+    "search": "搜索代理...",
+    "allCategories": "所有类别",
+    "noResults": "未找到符合条件的代理",
+    "categories": {
+      "Planning": "规划",
+      "Development": "开发",
+      "Review": "审查",
+      "Security": "安全",
+      "UX": "用户体验"
+    },
+    "count": "{count}个代理"
   },
   "codeExample": {
     "title": "代码示例",

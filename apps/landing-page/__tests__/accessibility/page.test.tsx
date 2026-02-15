@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { run } from 'axe-core';
+import '@/__tests__/__helpers__/next-intl-mock';
 import { AgentsShowcase } from '@/widgets/AgentsShowcase';
 import { CodeExample } from '@/widgets/CodeExample';
 import { QuickStart } from '@/widgets/QuickStart';

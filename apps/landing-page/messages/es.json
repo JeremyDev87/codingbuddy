@@ -6,9 +6,20 @@
     "cta": "Comenzar"
   },
   "agents": {
-    "title": "Agentes IA",
+    "title": "Agentes AI Especializados",
+    "subtitle": "29 agentes AI especializados para mejorar tu flujo de desarrollo",
     "filter": "Filtrar por categoría",
-    "search": "Buscar agentes..."
+    "search": "Buscar agentes...",
+    "allCategories": "Todas las categorías",
+    "noResults": "No se encontraron agentes que coincidan con los criterios",
+    "categories": {
+      "Planning": "Planificación",
+      "Development": "Desarrollo",
+      "Review": "Revisión",
+      "Security": "Seguridad",
+      "UX": "UX"
+    },
+    "count": "{count} agentes"
   },
   "codeExample": {
     "title": "Ejemplo de Código",
