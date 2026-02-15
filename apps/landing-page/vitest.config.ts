@@ -29,6 +29,7 @@ export default defineConfig({
         '**/node_modules/**',
         'components/ui/**',
         '**/*.config.{ts,js}',
+        '**/layout.tsx',
         'middleware.ts',
         'i18n.ts',
       ],

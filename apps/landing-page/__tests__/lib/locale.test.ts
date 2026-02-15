@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  SUPPORTED_LOCALES,
-  DEFAULT_LOCALE,
-  isValidLocale,
-} from '@/lib/locale';
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE, isValidLocale } from '@/lib/locale';
 import type { SupportedLocale } from '@/lib/locale';
 
 describe('locale utilities', () => {
