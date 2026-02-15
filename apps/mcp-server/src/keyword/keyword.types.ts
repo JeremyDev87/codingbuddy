@@ -1,5 +1,4 @@
 import { type VerbosityLevel } from '../shared/verbosity.types';
-import type { DispatchedAgent } from '../agent/agent.types';
 
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
@@ -432,13 +431,25 @@ export interface ParseModeResult {
 }
 
 /**
- * Reuse DispatchedAgent from agent.types for consistency.
- * Re-exported here for convenience in keyword module consumers.
+ * Dispatch parameters for Task tool execution (keyword-module-local definition
+ * to avoid circular dependency with agent.types).
  */
-export type DispatchReadyAgent = Pick<
-  DispatchedAgent,
-  'name' | 'displayName' | 'description' | 'dispatchParams'
->;
+export interface DispatchReadyParams {
+  subagent_type: 'general-purpose';
+  prompt: string;
+  description: string;
+  run_in_background?: true;
+}
+
+/**
+ * A dispatch-ready agent with metadata and Task-tool-ready parameters.
+ */
+export interface DispatchReadyAgent {
+  name: string;
+  displayName: string;
+  description: string;
+  dispatchParams: DispatchReadyParams;
+}
 
 /**
  * Pre-built dispatch data included in parse_mode response.
