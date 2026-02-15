@@ -90,14 +90,21 @@ Examples:
 
 <PARALLEL_EXECUTION_MANDATORY_RULE>
 
-**When `parse_mode` returns `parallelAgentsRecommendation`, you MUST execute parallel specialists.**
+**When `parse_mode` returns `dispatchReady`, use it directly with the Task tool — no extra calls needed.**
 
-**Quick Checklist:**
-- [ ] Call `prepare_parallel_agents` with recommended specialists
-- [ ] Execute each agent via Task tool (`subagent_type: "general-purpose"`, `run_in_background: true`)
-- [ ] Display activation status (🚀 Dispatching...)
+**Quick Checklist (Auto-Dispatch - Preferred):**
+- [ ] Check `dispatchReady` in `parse_mode` response
+- [ ] Use `dispatchReady.primaryAgent.dispatchParams` with Task tool
+- [ ] Use `dispatchReady.parallelAgents[].dispatchParams` with Task tool (`run_in_background: true`)
 - [ ] Collect results with `TaskOutput`
-- [ ] Summarize all findings (📊 Specialist Analysis Complete)
+- [ ] Summarize all findings
+
+**Fallback (if `dispatchReady` is not present):**
+- [ ] Call `dispatch_agents` or `prepare_parallel_agents` with recommended specialists
+- [ ] Execute each agent via Task tool (`subagent_type: "general-purpose"`, `run_in_background: true`)
+- [ ] Display activation status
+- [ ] Collect results with `TaskOutput`
+- [ ] Summarize all findings
 
 **Mode-specific Specialists:**
 

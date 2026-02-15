@@ -17,8 +17,15 @@ import {
   CONTEXT_FILE_PATH,
   type ContextDocument,
 } from '../../context/context-document.types';
-import type { Mode } from '../../keyword/keyword.types';
+import type {
+  Mode,
+  DispatchReady,
+  DispatchReadyAgent,
+  IncludedAgent,
+  ParallelAgentRecommendation,
+} from '../../keyword/keyword.types';
 import { isValidVerbosity } from '../../shared/verbosity.types';
+import { AgentService } from '../../agent/agent.service';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -53,6 +60,7 @@ export class ModeHandler extends AbstractHandler {
     private readonly stateService: StateService,
     private readonly contextDocService: ContextDocumentService,
     private readonly diagnosticLogService: DiagnosticLogService,
+    private readonly agentService: AgentService,
   ) {
     super();
   }
@@ -169,11 +177,22 @@ export class ModeHandler extends AbstractHandler {
       // Persist state for context recovery after compaction
       await this.persistModeState(result.mode);
 
+      // Build dispatchReady from included_agent and parallelAgentsRecommendation
+      // Only include parallel agent prompts when verbosity is 'full' (token efficiency)
+      const dispatchReady = await this.buildDispatchReady(
+        result.included_agent,
+        verbosity === 'full' ? result.parallelAgentsRecommendation : undefined,
+        result.mode as Mode,
+        result.originalPrompt,
+      );
+
       return createJsonResponse({
         ...result,
         language,
         languageInstruction: languageInstructionResult.instruction,
         resolvedModel,
+        // Include dispatch-ready data when available
+        ...(dispatchReady && { dispatchReady }),
         // Include context document info (mandatory)
         ...contextResult,
       });
@@ -270,6 +289,74 @@ export class ModeHandler extends AbstractHandler {
   private generateContextTitle(prompt: string): string {
     const slug = generateSlug(prompt, CONTEXT_TITLE_MAX_LENGTH);
     return slug === 'untitled' ? 'untitled-context' : slug;
+  }
+
+  /**
+   * Build dispatchReady data from included agent and parallel recommendations.
+   * Returns undefined if no agents are available for dispatch.
+   */
+  private async buildDispatchReady(
+    includedAgent?: IncludedAgent,
+    parallelRecommendation?: ParallelAgentRecommendation,
+    mode?: Mode,
+    taskDescription?: string,
+  ): Promise<DispatchReady | undefined> {
+    if (!includedAgent && !parallelRecommendation) {
+      return undefined;
+    }
+
+    const dispatchReady: DispatchReady = {};
+    const currentMode: Mode = mode || 'PLAN';
+
+    // Build primary agent dispatch params from included_agent
+    if (includedAgent) {
+      const agentId = generateSlug(includedAgent.name);
+      const description = `${includedAgent.name} - ${currentMode} mode`;
+      dispatchReady.primaryAgent = {
+        name: agentId,
+        displayName: includedAgent.name,
+        description,
+        dispatchParams: {
+          subagent_type: 'general-purpose',
+          prompt: includedAgent.systemPrompt,
+          description,
+        },
+      };
+    }
+
+    // Build parallel agents dispatch params from recommendation
+    if (parallelRecommendation?.specialists?.length) {
+      try {
+        const result = await this.agentService.dispatchAgents({
+          mode: currentMode,
+          specialists: parallelRecommendation.specialists,
+          includeParallel: true,
+          taskDescription,
+        });
+
+        if (result.parallelAgents?.length) {
+          dispatchReady.parallelAgents = result.parallelAgents.map(
+            (agent): DispatchReadyAgent => ({
+              name: agent.name,
+              displayName: agent.displayName,
+              description: agent.description,
+              dispatchParams: agent.dispatchParams,
+            }),
+          );
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to build parallel dispatch data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+
+    // Return undefined if nothing was built
+    if (!dispatchReady.primaryAgent && !dispatchReady.parallelAgents) {
+      return undefined;
+    }
+
+    return dispatchReady;
   }
 
   /**

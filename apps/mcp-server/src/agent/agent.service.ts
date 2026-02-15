@@ -7,6 +7,9 @@ import type {
   ParallelAgentSet,
   PreparedAgent,
   FailedAgent,
+  DispatchAgentsInput,
+  DispatchResult,
+  DispatchedAgent,
 } from './agent.types';
 import { FILE_PATTERN_SPECIALISTS } from './agent.types';
 import {
@@ -192,5 +195,84 @@ export class AgentService {
         agents.forEach(agent => recommended.add(agent));
       }
     }
+  }
+
+  /**
+   * Dispatch agents with Task-tool-ready parameters.
+   *
+   * Returns structured dispatch data that can be directly used with
+   * Claude Code's Task tool, eliminating the need for manual prompt assembly.
+   */
+  async dispatchAgents(input: DispatchAgentsInput): Promise<DispatchResult> {
+    const context: AgentContext = {
+      mode: input.mode,
+      targetFiles: input.targetFiles,
+      taskDescription: input.taskDescription,
+    };
+
+    const result: DispatchResult = {
+      executionHint: buildParallelExecutionHint(),
+    };
+
+    // Dispatch primary agent
+    if (input.primaryAgent) {
+      try {
+        const agentPrompt = await this.getAgentSystemPrompt(
+          input.primaryAgent,
+          context,
+        );
+        result.primaryAgent = {
+          name: input.primaryAgent,
+          displayName: agentPrompt.displayName,
+          description: agentPrompt.description,
+          dispatchParams: {
+            subagent_type: 'general-purpose',
+            prompt: agentPrompt.systemPrompt,
+            description: agentPrompt.description,
+          },
+        };
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.warn(
+          `Failed to dispatch primary agent '${input.primaryAgent}': ${reason}`,
+        );
+        result.failedAgents = [
+          ...(result.failedAgents || []),
+          { id: input.primaryAgent, reason },
+        ];
+      }
+    }
+
+    // Dispatch parallel agents
+    if (input.includeParallel && input.specialists?.length) {
+      const uniqueSpecialists = Array.from(new Set(input.specialists));
+      const { agents, failedAgents } = await this.loadAgents(
+        uniqueSpecialists,
+        context,
+        true, // always include full prompt for dispatch
+      );
+
+      result.parallelAgents = agents.map(
+        (agent): DispatchedAgent => ({
+          name: agent.id,
+          displayName: agent.displayName,
+          description: agent.description,
+          dispatchParams: {
+            subagent_type: 'general-purpose',
+            prompt:
+              agent.taskPrompt ||
+              `Perform ${agent.displayName} analysis in ${input.mode} mode`,
+            description: agent.description,
+            run_in_background: true,
+          },
+        }),
+      );
+
+      if (failedAgents.length > 0) {
+        result.failedAgents = failedAgents;
+      }
+    }
+
+    return result;
   }
 }

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentService } from './agent.service';
 import type { RulesService } from '../rules/rules.service';
 import type { AgentProfile } from '../rules/rules.types';
-import type { AgentContext } from './agent.types';
+import type { AgentContext, DispatchResult } from './agent.types';
 
 describe('AgentService', () => {
   let service: AgentService;
@@ -523,6 +523,174 @@ describe('AgentService', () => {
         expect(result).toContain('migration-specialist');
         expect(result).toContain('integration-specialist');
       });
+    });
+  });
+
+  describe('dispatchAgents', () => {
+    it('should dispatch primary agent with Task-tool-ready params', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+        mockSecurityAgent,
+      );
+
+      const result: DispatchResult = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+        taskDescription: 'Security review',
+      });
+
+      expect(result.primaryAgent).toBeDefined();
+      expect(result.primaryAgent!.name).toBe('security-specialist');
+      expect(result.primaryAgent!.displayName).toBe('Security Specialist');
+      expect(result.primaryAgent!.dispatchParams.subagent_type).toBe(
+        'general-purpose',
+      );
+      expect(result.primaryAgent!.dispatchParams.prompt).toContain(
+        'Security Specialist',
+      );
+      expect(result.primaryAgent!.dispatchParams.description).toBeDefined();
+    });
+
+    it('should dispatch parallel agents with run_in_background', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockAccessibilityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'accessibility-specialist'],
+        includeParallel: true,
+        taskDescription: 'Code review',
+      });
+
+      expect(result.parallelAgents).toBeDefined();
+      expect(result.parallelAgents).toHaveLength(2);
+      expect(result.parallelAgents![0].dispatchParams.run_in_background).toBe(
+        true,
+      );
+      expect(result.parallelAgents![1].dispatchParams.run_in_background).toBe(
+        true,
+      );
+    });
+
+    it('should dispatch both primary and parallel agents', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent) // primary
+        .mockResolvedValueOnce(mockAccessibilityAgent) // parallel
+        .mockResolvedValueOnce(mockPerformanceAgent); // parallel
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+        specialists: ['accessibility-specialist', 'performance-specialist'],
+        includeParallel: true,
+      });
+
+      expect(result.primaryAgent).toBeDefined();
+      expect(result.primaryAgent!.name).toBe('security-specialist');
+      expect(result.parallelAgents).toHaveLength(2);
+    });
+
+    it('should include executionHint', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+        mockSecurityAgent,
+      );
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+      });
+
+      expect(result.executionHint).toBeDefined();
+      expect(result.executionHint).toContain('Task');
+    });
+
+    it('should handle failed parallel agents gracefully', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockRejectedValueOnce(new Error('Agent not found'));
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'invalid-agent'],
+        includeParallel: true,
+      });
+
+      expect(result.parallelAgents).toHaveLength(1);
+      expect(result.failedAgents).toHaveLength(1);
+      expect(result.failedAgents![0].id).toBe('invalid-agent');
+    });
+
+    it('should pass targetFiles to agent context', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+        mockSecurityAgent,
+      );
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+        targetFiles: ['src/auth/login.ts'],
+        taskDescription: 'Review auth',
+      });
+
+      expect(result.primaryAgent!.dispatchParams.prompt).toContain(
+        'src/auth/login.ts',
+      );
+    });
+
+    it('should return empty result when no agents specified', async () => {
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+      });
+
+      expect(result.primaryAgent).toBeUndefined();
+      expect(result.parallelAgents).toBeUndefined();
+      expect(result.executionHint).toBeDefined();
+    });
+
+    it('should not include primary agent as run_in_background', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+        mockSecurityAgent,
+      );
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+      });
+
+      expect(
+        result.primaryAgent!.dispatchParams.run_in_background,
+      ).toBeUndefined();
+    });
+
+    it('should track failed primary agent in failedAgents', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
+        new Error('Agent not found'),
+      );
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'nonexistent-agent',
+      });
+
+      expect(result.primaryAgent).toBeUndefined();
+      expect(result.failedAgents).toBeDefined();
+      expect(result.failedAgents).toHaveLength(1);
+      expect(result.failedAgents![0].id).toBe('nonexistent-agent');
+      expect(result.failedAgents![0].reason).toBe('Agent not found');
+    });
+
+    it('should deduplicate parallel specialists', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
+        mockSecurityAgent,
+      );
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'security-specialist'],
+        includeParallel: true,
+      });
+
+      expect(result.parallelAgents).toHaveLength(1);
     });
   });
 });

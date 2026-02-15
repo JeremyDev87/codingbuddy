@@ -7,6 +7,7 @@ import { ModelResolverService } from '../../model';
 import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
+import type { AgentService } from '../../agent/agent.service';
 
 describe('ModeHandler', () => {
   let handler: ModeHandler;
@@ -17,6 +18,7 @@ describe('ModeHandler', () => {
   let mockStateService: StateService;
   let mockContextDocService: ContextDocumentService;
   let mockDiagnosticLogService: DiagnosticLogService;
+  let mockAgentService: Partial<AgentService>;
 
   const mockParseModeResult = {
     mode: 'PLAN',
@@ -114,6 +116,12 @@ describe('ModeHandler', () => {
       error: vi.fn().mockResolvedValue({ success: true }),
     } as unknown as DiagnosticLogService;
 
+    mockAgentService = {
+      dispatchAgents: vi.fn().mockResolvedValue({
+        executionHint: 'Use Task tool...',
+      }),
+    };
+
     handler = new ModeHandler(
       mockKeywordService,
       mockConfigService,
@@ -122,6 +130,7 @@ describe('ModeHandler', () => {
       mockStateService,
       mockContextDocService,
       mockDiagnosticLogService,
+      mockAgentService as AgentService,
     );
   });
 
@@ -280,6 +289,50 @@ describe('ModeHandler', () => {
           text: expect.stringContaining('Parse error'),
         });
       });
+
+      it('should include dispatchReady.primaryAgent when included_agent is present', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          included_agent: {
+            name: 'frontend-developer',
+            systemPrompt: 'You are a frontend developer',
+            expertise: ['React', 'TypeScript'],
+          },
+        });
+
+        const result = await handler.handle('parse_mode', {
+          prompt: 'PLAN test',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        const parsed = JSON.parse(
+          (result?.content[0] as { text: string }).text,
+        );
+        expect(parsed.dispatchReady).toBeDefined();
+        expect(parsed.dispatchReady.primaryAgent).toBeDefined();
+        expect(parsed.dispatchReady.primaryAgent.name).toBe(
+          'frontend-developer',
+        );
+        expect(
+          parsed.dispatchReady.primaryAgent.dispatchParams.subagent_type,
+        ).toBe('general-purpose');
+        expect(
+          parsed.dispatchReady.primaryAgent.dispatchParams.prompt,
+        ).toContain('You are a frontend developer');
+      });
+
+      it('should not include dispatchReady when no agents are present', async () => {
+        // mockParseModeResult has no included_agent or parallelAgentsRecommendation
+        const result = await handler.handle('parse_mode', {
+          prompt: 'PLAN test',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        const parsed = JSON.parse(
+          (result?.content[0] as { text: string }).text,
+        );
+        expect(parsed.dispatchReady).toBeUndefined();
+      });
     });
   });
 
@@ -436,6 +489,141 @@ describe('ModeHandler', () => {
         expect(result?.isError).toBeFalsy();
         expect(mockContextDocService.appendContext).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('dispatchReady in parse_mode response', () => {
+    it('should include dispatchReady when included_agent is present', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        included_agent: {
+          name: 'Solution Architect',
+          systemPrompt: 'You are a solution architect...',
+          expertise: ['architecture'],
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const response = JSON.parse(result?.content[0]?.text as string);
+      expect(response.dispatchReady).toBeDefined();
+      expect(response.dispatchReady.primaryAgent).toBeDefined();
+      expect(response.dispatchReady.primaryAgent.name).toBe(
+        'solution-architect',
+      );
+      expect(response.dispatchReady.primaryAgent.displayName).toBe(
+        'Solution Architect',
+      );
+      expect(
+        response.dispatchReady.primaryAgent.dispatchParams.subagent_type,
+      ).toBe('general-purpose');
+    });
+
+    it('should include parallel agents in dispatchReady when verbosity is full', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        parallelAgentsRecommendation: {
+          specialists: ['security-specialist', 'performance-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+
+      mockAgentService.dispatchAgents = vi.fn().mockResolvedValue({
+        executionHint: 'Use Task tool...',
+        parallelAgents: [
+          {
+            name: 'security-specialist',
+            displayName: 'Security Specialist',
+            description: 'Security review',
+            dispatchParams: {
+              subagent_type: 'general-purpose',
+              prompt: 'You are a security specialist...',
+              description: 'Security review',
+              run_in_background: true,
+            },
+          },
+        ],
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+        verbosity: 'full',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const response = JSON.parse(result?.content[0]?.text as string);
+      expect(response.dispatchReady).toBeDefined();
+      expect(response.dispatchReady.parallelAgents).toHaveLength(1);
+      expect(
+        response.dispatchReady.parallelAgents[0].dispatchParams
+          .run_in_background,
+      ).toBe(true);
+    });
+
+    it('should not include parallel agents when verbosity is not full', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        parallelAgentsRecommendation: {
+          specialists: ['security-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+        verbosity: 'standard',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const response = JSON.parse(result?.content[0]?.text as string);
+      // dispatchReady should be absent since no included_agent and verbosity != full
+      expect(response.dispatchReady).toBeUndefined();
+      expect(mockAgentService.dispatchAgents).not.toHaveBeenCalled();
+    });
+
+    it('should not include dispatchReady when no agents are recommended', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const response = JSON.parse(result?.content[0]?.text as string);
+      expect(response.dispatchReady).toBeUndefined();
+    });
+
+    it('should handle dispatchAgents failure gracefully', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        included_agent: {
+          name: 'Solution Architect',
+          systemPrompt: 'You are a solution architect...',
+          expertise: ['architecture'],
+        },
+        parallelAgentsRecommendation: {
+          specialists: ['security-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+
+      mockAgentService.dispatchAgents = vi
+        .fn()
+        .mockRejectedValue(new Error('Agent load failed'));
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+        verbosity: 'full',
+      });
+
+      // Should not fail the whole operation
+      expect(result?.isError).toBeFalsy();
+      const response = JSON.parse(result?.content[0]?.text as string);
+      // Primary agent should still be present even if parallel failed
+      expect(response.dispatchReady).toBeDefined();
+      expect(response.dispatchReady.primaryAgent).toBeDefined();
+      expect(response.dispatchReady.parallelAgents).toBeUndefined();
     });
   });
 

@@ -1,4 +1,5 @@
 import { type VerbosityLevel } from '../shared/verbosity.types';
+import type { DispatchedAgent } from '../agent/agent.types';
 
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
@@ -421,6 +422,31 @@ export interface ParseModeResult {
    * AI clients should adopt this agent's persona without additional tool calls.
    */
   included_agent?: IncludedAgent;
+  /**
+   * @apiProperty External API - do not rename.
+   * Pre-built dispatch data for Task tool execution.
+   * When present, AI clients can directly use dispatchParams with the Task tool
+   * without needing to call dispatch_agents or prepare_parallel_agents.
+   */
+  dispatchReady?: DispatchReady;
+}
+
+/**
+ * Reuse DispatchedAgent from agent.types for consistency.
+ * Re-exported here for convenience in keyword module consumers.
+ */
+export type DispatchReadyAgent = Pick<
+  DispatchedAgent,
+  'name' | 'displayName' | 'description' | 'dispatchParams'
+>;
+
+/**
+ * Pre-built dispatch data included in parse_mode response.
+ * Eliminates the need for separate dispatch_agents or prepare_parallel_agents calls.
+ */
+export interface DispatchReady {
+  primaryAgent?: DispatchReadyAgent;
+  parallelAgents?: DispatchReadyAgent[];
 }
 
 export interface ModeConfig {

@@ -16,6 +16,7 @@ import {
  * Handler for agent-related tools
  * - get_agent_system_prompt: Get complete system prompt for a specialist agent
  * - prepare_parallel_agents: Prepare multiple agents for parallel execution
+ * - dispatch_agents: Get Task-tool-ready dispatch parameters for agents
  */
 @Injectable()
 export class AgentHandler extends AbstractHandler {
@@ -24,7 +25,11 @@ export class AgentHandler extends AbstractHandler {
   }
 
   protected getHandledTools(): string[] {
-    return ['get_agent_system_prompt', 'prepare_parallel_agents'];
+    return [
+      'get_agent_system_prompt',
+      'prepare_parallel_agents',
+      'dispatch_agents',
+    ];
   }
 
   protected async handleTool(
@@ -36,6 +41,8 @@ export class AgentHandler extends AbstractHandler {
         return this.handleGetAgentSystemPrompt(args);
       case 'prepare_parallel_agents':
         return this.handlePrepareParallelAgents(args);
+      case 'dispatch_agents':
+        return this.handleDispatchAgents(args);
       default:
         return createErrorResponse(`Unknown tool: ${toolName}`);
     }
@@ -117,7 +124,83 @@ export class AgentHandler extends AbstractHandler {
           required: ['mode', 'specialists'],
         },
       },
+      {
+        name: 'dispatch_agents',
+        description:
+          'Get Task-tool-ready dispatch parameters for agents. Returns structured data that can be directly used with Claude Code Task tool, eliminating manual prompt assembly. Use this to bridge the gap between agent recommendation and execution.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            mode: {
+              type: 'string',
+              enum: ['PLAN', 'ACT', 'EVAL', 'AUTO'],
+              description: 'Current workflow mode',
+            },
+            primaryAgent: {
+              type: 'string',
+              description:
+                'Primary agent to dispatch (e.g., "security-specialist", "frontend-developer")',
+            },
+            specialists: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'List of specialist agents for parallel execution (e.g., ["security-specialist", "accessibility-specialist"])',
+            },
+            targetFiles: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Files to analyze or review',
+            },
+            taskDescription: {
+              type: 'string',
+              description: 'Description of the task for agent context',
+            },
+            includeParallel: {
+              type: 'boolean',
+              description:
+                'Whether to include parallel specialist agents (default: false)',
+            },
+          },
+          required: ['mode'],
+        },
+      },
     ];
+  }
+
+  private async handleDispatchAgents(
+    args: Record<string, unknown> | undefined,
+  ): Promise<ToolResponse> {
+    const mode = args?.mode;
+    if (!isValidMode(mode)) {
+      return createErrorResponse(
+        mode === undefined || mode === null
+          ? 'Missing required parameter: mode (PLAN, ACT, EVAL, or AUTO)'
+          : `Invalid mode: ${mode}. Must be PLAN, ACT, EVAL, or AUTO`,
+      );
+    }
+
+    const primaryAgent = extractOptionalString(args, 'primaryAgent');
+    const specialists = extractStringArray(args, 'specialists');
+    const targetFiles = extractStringArray(args, 'targetFiles');
+    const taskDescription = extractOptionalString(args, 'taskDescription');
+    const includeParallel = args?.includeParallel === true;
+
+    try {
+      const result = await this.agentService.dispatchAgents({
+        mode: mode as Mode,
+        primaryAgent,
+        specialists,
+        targetFiles,
+        taskDescription,
+        includeParallel,
+      });
+      return createJsonResponse(result);
+    } catch (error) {
+      return createErrorResponse(
+        `Failed to dispatch agents: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   private async handleGetAgentSystemPrompt(

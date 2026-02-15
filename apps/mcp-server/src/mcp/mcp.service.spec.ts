@@ -309,6 +309,10 @@ const createMockAgentService = (): Partial<AgentService> => ({
   getRecommendedAgents: vi
     .fn()
     .mockReturnValue(['security-specialist', 'accessibility-specialist']),
+  dispatchAgents: vi.fn().mockResolvedValue({
+    executionHint:
+      'Use Claude Code Task tool with subagent_type: "general-purpose"',
+  }),
 });
 
 const createMockChecklistService = (): Partial<ChecklistService> => ({
@@ -492,6 +496,7 @@ function createMcpServiceWithHandlers(
       services.stateService as StateService,
       services.contextDocService as ContextDocumentService,
       services.diagnosticLogService as DiagnosticLogService,
+      services.agentService as AgentService,
     ),
     new ChecklistContextHandler(
       services.checklistService as ChecklistService,

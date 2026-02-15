@@ -354,7 +354,85 @@ The `parse_mode` MCP tool returns this field to recommend parallel specialist ex
 }
 ```
 
-### Parallel Execution Workflow
+### Auto-Dispatch Workflow (Recommended)
+
+When `parse_mode` returns `dispatchReady`, use it directly with the Task tool — no extra tool calls needed:
+
+```
+Call parse_mode
+     ↓
+Check dispatchReady
+     ↓ (if exists)
+Use dispatchReady.primaryAgent.dispatchParams with Task tool
+     ↓
+Use dispatchReady.parallelAgents[].dispatchParams with Task tool (run_in_background: true)
+     ↓
+Collect results with TaskOutput
+     ↓
+Display consolidated results to user
+```
+
+### Code Example (Auto-Dispatch)
+
+```typescript
+// Step 1: parse_mode returns dispatchReady with Task-tool-ready params
+const parseModeResult = await parse_mode({ prompt: "EVAL review auth implementation" });
+
+if (parseModeResult.dispatchReady) {
+  const { primaryAgent, parallelAgents } = parseModeResult.dispatchReady;
+
+  // Step 2: Dispatch primary agent (if present)
+  if (primaryAgent) {
+    Task({
+      subagent_type: primaryAgent.dispatchParams.subagent_type,
+      prompt: primaryAgent.dispatchParams.prompt,
+      description: primaryAgent.dispatchParams.description,
+    });
+  }
+
+  // Step 3: Dispatch parallel agents (if present)
+  const tasks = [];
+  if (parallelAgents) {
+    for (const agent of parallelAgents) {
+      tasks.push(Task({
+        subagent_type: agent.dispatchParams.subagent_type,
+        prompt: agent.dispatchParams.prompt,
+        description: agent.dispatchParams.description,
+        run_in_background: true,
+      }));
+    }
+  }
+
+  // Step 4: Collect results
+  const results = await Promise.all(tasks.map(task => TaskOutput(task.id)));
+
+  // Step 5: Display summary
+  console.log("Specialist Analysis Complete:");
+  results.forEach(result => console.log(result.summary));
+}
+```
+
+### Standalone Dispatch Tool
+
+For cases outside the `parse_mode` flow, use the `dispatch_agents` tool directly:
+
+```typescript
+const result = await dispatch_agents({
+  mode: "EVAL",
+  primaryAgent: "security-specialist",
+  specialists: ["accessibility-specialist", "performance-specialist"],
+  includeParallel: true,
+  taskDescription: "Review auth implementation",
+  targetFiles: ["src/auth/login.tsx"]
+});
+
+// result.primaryAgent.dispatchParams → ready for Task tool
+// result.parallelAgents[].dispatchParams → ready for Task tool with run_in_background
+```
+
+### Legacy Workflow (prepare_parallel_agents)
+
+The `prepare_parallel_agents` tool is still available for backward compatibility:
 
 ```
 Call parse_mode
@@ -373,48 +451,6 @@ Call each agent.taskPrompt via Task tool in parallel:
 Collect results with TaskOutput
      ↓
 Display consolidated results to user
-```
-
-### Code Example
-
-```typescript
-// Step 1: Parse mode returns parallelAgentsRecommendation
-const parseModeResult = await parse_mode({ prompt: "EVAL review auth implementation" });
-
-if (parseModeResult.parallelAgentsRecommendation) {
-  // Step 2: Display start message to user
-  console.log("🚀 Dispatching 4 specialist agents in parallel...");
-  console.log("   → 🔒 security-specialist");
-  console.log("   → ♿ accessibility-specialist");
-  console.log("   → ⚡ performance-specialist");
-  console.log("   → 📏 code-quality-specialist");
-
-  // Step 3: Prepare parallel agents
-  const preparedAgents = await prepare_parallel_agents({
-    mode: "EVAL",
-    specialists: parseModeResult.parallelAgentsRecommendation.specialists,
-    sharedContext: "Review authentication implementation",
-    targetFiles: ["src/auth/login.tsx"]
-  });
-
-  // Step 4: Execute in parallel using Task tool
-  const agentTasks = preparedAgents.agents.map(agent =>
-    Task({
-      subagent_type: "general-purpose",
-      prompt: agent.taskPrompt,
-      description: agent.description,
-      run_in_background: true,
-      model: "opus" // Use opus for thorough analysis
-    })
-  );
-
-  // Step 5: Collect results
-  const results = await Promise.all(agentTasks.map(task => TaskOutput(task.id)));
-
-  // Step 6: Display summary
-  console.log("📊 Specialist Analysis Complete:");
-  results.forEach(result => console.log(result.summary));
-}
 ```
 
 ### Visibility Pattern

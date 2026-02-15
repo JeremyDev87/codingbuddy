@@ -149,6 +149,11 @@ describe('Handler Security Integration', () => {
       mockConfigDiffService,
       mockAnalyzerService,
     );
+    const mockAgentServiceForMode: Partial<AgentService> = {
+      dispatchAgents: vi.fn().mockResolvedValue({
+        executionHint: 'Use Task tool...',
+      }),
+    };
     modeHandler = new ModeHandler(
       mockKeywordService,
       mockConfigService,
@@ -157,6 +162,7 @@ describe('Handler Security Integration', () => {
       mockStateService,
       mockContextDocService,
       mockDiagnosticLogService,
+      mockAgentServiceForMode as AgentService,
     );
     rulesHandler = new RulesHandler(mockRulesService, mockModelResolverService);
     skillHandler = new SkillHandler(

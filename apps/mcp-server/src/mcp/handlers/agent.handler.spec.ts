@@ -273,16 +273,121 @@ describe('AgentHandler', () => {
         );
       });
     });
+
+    describe('dispatch_agents', () => {
+      const mockDispatchResult = {
+        primaryAgent: {
+          name: 'security-specialist',
+          displayName: 'Security Specialist',
+          description: 'Security review',
+          dispatchParams: {
+            subagent_type: 'general-purpose' as const,
+            prompt: 'You are a security specialist...',
+            description: 'Security review',
+          },
+        },
+        executionHint: 'Use Task tool...',
+      };
+
+      beforeEach(() => {
+        mockAgentService.dispatchAgents = vi
+          .fn()
+          .mockResolvedValue(mockDispatchResult);
+      });
+
+      it('should dispatch agents with valid args', async () => {
+        const result = await handler.handle('dispatch_agents', {
+          mode: 'EVAL',
+          primaryAgent: 'security-specialist',
+          taskDescription: 'Review security',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+            taskDescription: 'Review security',
+          }),
+        );
+      });
+
+      it('should return error for missing mode', async () => {
+        const result = await handler.handle('dispatch_agents', {
+          primaryAgent: 'security-specialist',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0]).toMatchObject({
+          type: 'text',
+          text: expect.stringContaining('Missing required parameter: mode'),
+        });
+      });
+
+      it('should return error for invalid mode', async () => {
+        const result = await handler.handle('dispatch_agents', {
+          mode: 'INVALID',
+          primaryAgent: 'security-specialist',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0]).toMatchObject({
+          type: 'text',
+          text: expect.stringContaining('Invalid mode'),
+        });
+      });
+
+      it('should pass optional parameters', async () => {
+        const result = await handler.handle('dispatch_agents', {
+          mode: 'EVAL',
+          primaryAgent: 'security-specialist',
+          specialists: ['accessibility-specialist'],
+          targetFiles: ['src/app.ts'],
+          taskDescription: 'Review code',
+          includeParallel: true,
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+            specialists: ['accessibility-specialist'],
+            targetFiles: ['src/app.ts'],
+            taskDescription: 'Review code',
+            includeParallel: true,
+          }),
+        );
+      });
+
+      it('should return error when service fails', async () => {
+        mockAgentService.dispatchAgents = vi
+          .fn()
+          .mockRejectedValue(new Error('Dispatch failed'));
+
+        const result = await handler.handle('dispatch_agents', {
+          mode: 'EVAL',
+          primaryAgent: 'security-specialist',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0]).toMatchObject({
+          type: 'text',
+          text: expect.stringContaining('Dispatch failed'),
+        });
+      });
+    });
   });
 
   describe('getToolDefinitions', () => {
     it('should return tool definitions', () => {
       const definitions = handler.getToolDefinitions();
 
-      expect(definitions).toHaveLength(2);
+      expect(definitions).toHaveLength(3);
       expect(definitions.map(d => d.name)).toEqual([
         'get_agent_system_prompt',
         'prepare_parallel_agents',
+        'dispatch_agents',
       ]);
     });
 
@@ -304,6 +409,11 @@ describe('AgentHandler', () => {
         'mode',
         'specialists',
       ]);
+
+      const dispatchAgents = definitions.find(
+        d => d.name === 'dispatch_agents',
+      );
+      expect(dispatchAgents?.inputSchema.required).toEqual(['mode']);
     });
   });
 });

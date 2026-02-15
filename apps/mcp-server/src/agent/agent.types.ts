@@ -54,6 +54,49 @@ export interface ParallelAgentSet {
 }
 
 /**
+ * Dispatch parameters for a single agent, ready to use with Claude Code Task tool
+ */
+export interface DispatchParams {
+  subagent_type: 'general-purpose';
+  prompt: string;
+  description: string;
+  run_in_background?: true;
+}
+
+/**
+ * A dispatched agent with metadata and Task-tool-ready parameters
+ */
+export interface DispatchedAgent {
+  name: string;
+  displayName: string;
+  description: string;
+  dispatchParams: DispatchParams;
+}
+
+/**
+ * Result of dispatching agents for execution
+ */
+export interface DispatchResult {
+  primaryAgent?: DispatchedAgent;
+  parallelAgents?: DispatchedAgent[];
+  executionHint: string;
+  /** Agents that failed to load */
+  failedAgents?: FailedAgent[];
+}
+
+/**
+ * Input parameters for the dispatch_agents tool
+ */
+export interface DispatchAgentsInput {
+  mode: Mode;
+  taskDescription?: string;
+  targetFiles?: string[];
+  specialists?: string[];
+  includeParallel?: boolean;
+  primaryAgent?: string;
+}
+
+/**
  * File pattern to specialist mapping for recommendations
  */
 export const FILE_PATTERN_SPECIALISTS: Record<string, string[]> = {
