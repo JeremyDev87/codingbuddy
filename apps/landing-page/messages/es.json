@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "badge": "Código Abierto",
+    "title": "Reglas Multi-IA para Codificación Consistente",
+    "description": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro. Codificación asistida por IA consistente en todas tus herramientas.",
+    "cta": "Comenzar"
+  },
+  "agents": {
+    "title": "Agentes IA",
+    "filter": "Filtrar por categoría",
+    "search": "Buscar agentes..."
+  },
+  "codeExample": {
+    "title": "Ejemplo de Código",
+    "before": "Antes",
+    "after": "Después"
+  },
+  "quickStart": {
+    "title": "Inicio Rápido",
+    "step1": "Instalar el paquete",
+    "step2": "Configurar tu herramienta IA",
+    "step3": "Empezar a codificar"
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes"
+  }
+}

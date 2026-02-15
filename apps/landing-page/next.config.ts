@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // Performance: React Compiler for automatic memoization
@@ -13,6 +16,9 @@ const nextConfig: NextConfig = {
   generateEtags: true,
 
   // Security & Performance: Image Optimization
+  // Risk acceptance: dangerouslyAllowSVG is required for SVG optimization.
+  // Mitigated by contentDispositionType:'attachment' (forces download) and
+  // sandboxed contentSecurityPolicy (blocks script execution in SVGs).
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -54,12 +60,14 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains',
           },
-          // Content Security Policy
+          // Content Security Policy (stricter in production)
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-inline/eval in dev
+              process.env.NODE_ENV === 'development'
+                ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+                : "script-src 'self'",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
               "img-src 'self' data: https: blob:",
@@ -75,4 +83,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

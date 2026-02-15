@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "badge": "オープンソース",
+    "title": "一貫したコーディングのためのマルチAIルール",
+    "description": "Cursor、Claude Code、Codex、Antigravity、Q、Kiro対応の統一ルールセット。すべてのツールで一貫したAI支援コーディング。",
+    "cta": "始める"
+  },
+  "agents": {
+    "title": "AIエージェント",
+    "filter": "カテゴリで絞り込み",
+    "search": "エージェントを検索..."
+  },
+  "codeExample": {
+    "title": "コード例",
+    "before": "変更前",
+    "after": "変更後"
+  },
+  "quickStart": {
+    "title": "クイックスタート",
+    "step1": "パッケージをインストール",
+    "step2": "AIツールを設定",
+    "step3": "コーディング開始"
+  },
+  "faq": {
+    "title": "よくある質問"
+  }
+}

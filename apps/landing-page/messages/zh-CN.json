@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "badge": "开源",
+    "title": "统一 AI 编码规则",
+    "description": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。所有工具中一致的 AI 辅助编码。",
+    "cta": "开始使用"
+  },
+  "agents": {
+    "title": "AI 代理",
+    "filter": "按类别筛选",
+    "search": "搜索代理..."
+  },
+  "codeExample": {
+    "title": "代码示例",
+    "before": "之前",
+    "after": "之后"
+  },
+  "quickStart": {
+    "title": "快速入门",
+    "step1": "安装包",
+    "step2": "配置 AI 工具",
+    "step3": "开始编码"
+  },
+  "faq": {
+    "title": "常见问题"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "badge": "오픈 소스",
+    "title": "일관된 코딩을 위한 멀티 AI 규칙",
+    "description": "Cursor, Claude Code, Codex, Antigravity, Q, Kiro를 위한 하나의 규칙 세트. 모든 도구에서 일관된 AI 지원 코딩.",
+    "cta": "시작하기"
+  },
+  "agents": {
+    "title": "AI 에이전트",
+    "filter": "카테고리별 필터",
+    "search": "에이전트 검색..."
+  },
+  "codeExample": {
+    "title": "코드 예시",
+    "before": "이전",
+    "after": "이후"
+  },
+  "quickStart": {
+    "title": "빠른 시작",
+    "step1": "패키지 설치",
+    "step2": "AI 도구 설정",
+    "step3": "코딩 시작"
+  },
+  "faq": {
+    "title": "자주 묻는 질문"
+  }
+}
