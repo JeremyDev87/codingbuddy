@@ -14,7 +14,7 @@ import type { InitOptions } from './cli.types';
  * Parsed command line arguments
  */
 export interface ParsedArgs {
-  command: 'init' | 'mcp' | 'help' | 'version';
+  command: 'init' | 'mcp' | 'tui' | 'help' | 'version';
   options: Partial<InitOptions>;
 }
 
@@ -42,6 +42,10 @@ export function parseArgs(args: string[]): ParsedArgs {
 
   if (command === 'mcp') {
     return { command: 'mcp', options };
+  }
+
+  if (command === 'tui') {
+    return { command: 'tui', options };
   }
 
   if (command !== 'init') {
@@ -77,6 +81,7 @@ CodingBuddy CLI - AI-powered project configuration generator
 Usage:
   codingbuddy init [path] [options]    Initialize configuration
   codingbuddy mcp                      Start MCP server (stdio mode)
+  codingbuddy tui                      Monitor agent execution in real-time
   codingbuddy --help                   Show this help
   codingbuddy --version                Show version
 
@@ -151,6 +156,12 @@ export async function main(
     case 'mcp':
       await bootstrap();
       break;
+
+    case 'tui': {
+      const { runTui } = await import('./run-tui');
+      await runTui();
+      break;
+    }
 
     case 'init': {
       const result = await runInit(options as InitOptions);

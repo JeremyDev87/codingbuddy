@@ -1,16 +1,10 @@
 #!/usr/bin/env node
-import * as path from 'path';
 import { NestFactory } from '@nestjs/core';
 import type { INestApplicationContext } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { McpService } from './mcp/mcp.service';
 import { hasTuiFlag } from './tui/cli-flags';
 import { resolveTuiConfig } from './tui/tui-config';
-
-/** Minimal subset of Ink's Instance used for lifecycle management */
-interface TuiInstance {
-  readonly unmount: () => void;
-}
 
 /**
  * Parse CORS origin configuration from environment variable
@@ -48,64 +42,145 @@ function debugLog(message: string): void {
   }
 }
 
+import { esmImport } from './shared/esm-import';
+
+/** Forced-exit timeout for server-side graceful shutdown (ms) */
+const SHUTDOWN_TIMEOUT_MS = 5000;
+
 /**
- * Set up graceful shutdown for Ink TUI instance
- * Unmounts the Ink application and closes NestJS on SIGINT/SIGTERM
+ * Register SIGINT/SIGTERM handlers that run graceful shutdown with forced-exit timeout.
+ * Shared by both SSE and stdio modes.
  */
-function setupGracefulShutdown(
-  instance: TuiInstance,
-  app: INestApplicationContext,
+function registerShutdownSignals(
+  manager: { shutdown: () => Promise<void> },
+  timeoutMs: number,
 ): void {
   let shuttingDown = false;
-  const shutdown = async (): Promise<void> => {
+  const handleSignal = (): void => {
     if (shuttingDown) return;
     shuttingDown = true;
-    debugLog('Graceful shutdown: unmounting TUI...');
-    instance.unmount();
-    await app.close();
-    process.exit(0);
+    const timeout = setTimeout(() => {
+      debugLog('Graceful shutdown timed out, forcing exit');
+      process.exit(1);
+    }, timeoutMs);
+    timeout.unref();
+    manager
+      .shutdown()
+      .then(() => {
+        process.exitCode = 0;
+      })
+      .catch(() => {
+        process.exitCode = 1;
+      });
   };
+  process.once('SIGINT', handleSignal);
+  process.once('SIGTERM', handleSignal);
+}
 
-  process.once('SIGINT', () => void shutdown());
-  process.once('SIGTERM', () => void shutdown());
+/** Minimal subset of Ink's Instance used for lifecycle management */
+interface TuiInstance {
+  readonly unmount: () => void;
 }
 
 /**
- * Real dynamic import() that preserves ESM loading in CJS output.
- * TypeScript compiles import() to require() in CommonJS mode,
- * but ink v6+ requires ESM with top-level await.
- */
-const esmImport = new Function('s', 'return import(s)') as (
-  specifier: string,
-) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-/**
- * Initialize TUI Agent Monitor with dynamic imports
- * Isolates React/Ink dependencies behind --tui flag
+ * Initialize TUI Agent Monitor with dynamic imports.
+ * Returns the TUI instance for external lifecycle management.
+ * Isolates React/Ink dependencies behind --tui flag.
  */
 async function initTui(
   app: INestApplicationContext,
   stdout?: NodeJS.WriteStream,
-): Promise<void> {
-  const { TuiEventBus, TuiInterceptor, AgentMetadataService, TUI_EVENTS } =
-    await import('./tui/events');
-  const { startTui } = await esmImport(
-    path.resolve(__dirname, 'tui-bundle.mjs'),
-  );
-  const tuiInterceptor = app.get(TuiInterceptor);
-  tuiInterceptor.enable();
+): Promise<TuiInstance> {
+  const { ensureTuiReady } = await import('./tui/ensure-tui-ready');
+  await ensureTuiReady(app);
+
+  const { TuiEventBus } = await import('./tui/events');
+  const { getTuiBundlePath } = await import('./shared/tui-bundle-path');
+  const tuiBundle = await esmImport(getTuiBundlePath());
+  const startTui = tuiBundle.startTui as (opts: {
+    eventBus: InstanceType<typeof TuiEventBus>;
+    stdout?: NodeJS.WriteStream;
+  }) => TuiInstance;
   const eventBus = app.get(TuiEventBus);
-  const instance = startTui({ eventBus, ...(stdout ? { stdout } : {}) });
+  return startTui({ eventBus, ...(stdout ? { stdout } : {}) });
+}
 
-  // Load and emit all agent metadata for AgentGrid
-  const metadataService = app.get(AgentMetadataService);
-  await metadataService.initialize();
-  const allAgents = metadataService.getAllMetadata();
-  if (allAgents.length > 0) {
-    eventBus.emit(TUI_EVENTS.AGENTS_LOADED, { agents: allAgents });
-  }
+/**
+ * Initialize IPC server for remote TUI clients.
+ * Graceful degradation: IPC failure does not block MCP server.
+ */
+async function initIpc(
+  app: INestApplicationContext,
+): Promise<() => Promise<void>> {
+  const { ensureTuiReady } = await import('./tui/ensure-tui-ready');
+  await ensureTuiReady(app);
 
-  setupGracefulShutdown(instance, app);
+  const { TuiEventBus, TUI_EVENTS } = await import('./tui/events');
+  const {
+    TuiIpcServer,
+    TuiIpcBridge,
+    IpcStateCache,
+    InstanceRegistry,
+    getSocketPath,
+    getInstancesFilePath,
+  } = await import('./tui/ipc');
+
+  const pid = process.pid;
+  const socketPath = getSocketPath(pid);
+  const eventBus = app.get(TuiEventBus);
+
+  // State cache for late-connecting TUI clients (see IpcStateCache for strategies).
+  // Uses bound on/off to bypass TuiEventBus generic narrowing — safe because
+  // event names come from TUI_EVENTS and handlers only cache payloads.
+  const stateCache = new IpcStateCache({
+    on: eventBus.on.bind(eventBus) as (
+      e: string,
+      h: (p: unknown) => void,
+    ) => void,
+    off: eventBus.off.bind(eventBus) as (
+      e: string,
+      h: (p: unknown) => void,
+    ) => void,
+  });
+  stateCache.trackSimple(TUI_EVENTS.AGENTS_LOADED);
+  stateCache.trackSimple(TUI_EVENTS.MODE_CHANGED);
+  stateCache.trackCompound(
+    TUI_EVENTS.AGENT_ACTIVATED,
+    TUI_EVENTS.AGENT_DEACTIVATED,
+    (p: unknown) => (p as { agentId: string }).agentId,
+  );
+  stateCache.trackToggle(
+    TUI_EVENTS.PARALLEL_STARTED,
+    TUI_EVENTS.PARALLEL_COMPLETED,
+  );
+
+  // Provide initial state snapshot for late-connecting TUI clients
+  const ipcServer = new TuiIpcServer(socketPath, {
+    getInitialState: () => stateCache.getSnapshot(),
+  });
+  await ipcServer.listen();
+
+  const bridge = new TuiIpcBridge(eventBus, ipcServer);
+
+  // Register in instance discovery
+  const registry = new InstanceRegistry(getInstancesFilePath());
+  registry.prune();
+  registry.register({
+    pid,
+    socketPath,
+    projectRoot: process.env.CODINGBUDDY_PROJECT_ROOT || process.cwd(),
+    startedAt: new Date().toISOString(),
+  });
+
+  debugLog(`IPC server listening on ${socketPath}`);
+
+  // Return cleanup function
+  return async () => {
+    stateCache.destroy();
+    bridge.destroy();
+    await ipcServer.close();
+    registry.unregister(pid);
+  };
 }
 
 export async function bootstrap(): Promise<void> {
@@ -135,6 +210,12 @@ export async function bootstrap(): Promise<void> {
 
     logger.log(`MCP Server running in SSE mode on port ${port}`);
 
+    // Unified shutdown manager for SSE mode — created before TUI/IPC init so
+    // all resources can be registered as they are created, and signal handlers
+    // are always registered even if subsequent initialization fails.
+    const { ShutdownManager } = await import('./tui/ipc');
+    const sseShutdownManager = new ShutdownManager();
+
     // TUI: SSE mode renders to stdout
     const tuiConfig = resolveTuiConfig({
       transportMode: 'sse',
@@ -143,12 +224,36 @@ export async function bootstrap(): Promise<void> {
     });
     if (tuiConfig.shouldRender) {
       try {
-        await initTui(app);
+        const tuiInstance = await initTui(app);
+        sseShutdownManager.register(async () => {
+          debugLog('SSE graceful shutdown: unmounting TUI...');
+          tuiInstance.unmount();
+        });
         logger.log(`TUI Agent Monitor started (${tuiConfig.target})`);
       } catch (error) {
         logger.error('Failed to start TUI Agent Monitor', error);
       }
     }
+
+    // Always start IPC server for remote TUI clients (SSE mode, graceful degradation)
+    try {
+      const cleanupIpc = await initIpc(app);
+      sseShutdownManager.register(cleanupIpc);
+    } catch (error) {
+      logger.warn(`IPC server failed to start (non-blocking): ${error}`);
+    }
+
+    // Release module-level references before closing DI container
+    sseShutdownManager.register(async () => {
+      const { resetTuiReady } = await import('./tui/ensure-tui-ready');
+      resetTuiReady();
+    });
+    // App close is the last cleanup step (NestJS DI must stay alive for IPC cleanup)
+    sseShutdownManager.register(async () => {
+      await app.close();
+    });
+
+    registerShutdownSignals(sseShutdownManager, SHUTDOWN_TIMEOUT_MS);
   } else {
     // Stdio Mode: Run as Standalone App
     // Disable NestJS logger to prevent ANSI color codes from breaking MCP protocol
@@ -161,6 +266,18 @@ export async function bootstrap(): Promise<void> {
     await mcpService.startStdio();
     debugLog('MCP Server connected via stdio');
 
+    // Unified shutdown manager for all stdio-mode resources
+    const { ShutdownManager } = await import('./tui/ipc');
+    const shutdownManager = new ShutdownManager();
+
+    // Always start IPC server for remote TUI clients (graceful degradation)
+    try {
+      const cleanupIpc = await initIpc(app);
+      shutdownManager.register(cleanupIpc);
+    } catch (error) {
+      debugLog(`IPC server failed to start (non-blocking): ${error}`);
+    }
+
     // TUI: stdio mode renders to stderr (protect stdout for MCP JSON-RPC)
     const tuiConfig = resolveTuiConfig({
       transportMode: 'stdio',
@@ -171,7 +288,12 @@ export async function bootstrap(): Promise<void> {
       try {
         const stdout =
           tuiConfig.target === 'stderr' ? process.stderr : undefined;
-        await initTui(app, stdout);
+        const tuiInstance = await initTui(app, stdout);
+        // Register TUI unmount in unified shutdown manager
+        shutdownManager.register(async () => {
+          debugLog('Graceful shutdown: unmounting TUI...');
+          tuiInstance.unmount();
+        });
         debugLog(`TUI Agent Monitor started (${tuiConfig.target})`);
       } catch (error) {
         debugLog(`Failed to start TUI Agent Monitor: ${error}`);
@@ -179,6 +301,18 @@ export async function bootstrap(): Promise<void> {
     } else if (tuiEnabled) {
       debugLog(tuiConfig.reason);
     }
+
+    // Release module-level references before closing DI container
+    shutdownManager.register(async () => {
+      const { resetTuiReady } = await import('./tui/ensure-tui-ready');
+      resetTuiReady();
+    });
+    // App close is always the last cleanup step
+    shutdownManager.register(async () => {
+      await app.close();
+    });
+
+    registerShutdownSignals(shutdownManager, SHUTDOWN_TIMEOUT_MS);
   }
 }
 

@@ -17,6 +17,33 @@ yarn start:dev -- --tui
 
 The TUI will render automatically when the server starts. Use `--tui` with either stdio or SSE transport modes.
 
+## Standalone TUI Mode (Recommended for MCP Users)
+
+When the MCP server runs as a subprocess of an AI tool (Claude Code, Cursor, etc.),
+you cannot use the `--tui` flag directly. Instead, open a separate terminal and run:
+
+```bash
+npx codingbuddy tui
+```
+
+### How It Works
+
+1. The MCP server automatically opens a Unix Domain Socket IPC server on startup
+2. `codingbuddy tui` connects to this socket and receives real-time events
+3. The same TUI dashboard renders in your separate terminal
+
+### Multiple Instances
+
+If multiple MCP servers are running simultaneously, the TUI automatically connects
+to the most recent instance.
+
+### Troubleshooting
+
+- **"No running codingbuddy MCP server found"**: Ensure your AI tool is running with codingbuddy MCP configured
+- **"Failed to connect"**: The MCP server may have shut down. Restart your AI tool
+
+---
+
 ## Transport Mode Behavior
 
 The TUI rendering behavior depends on your configured transport mode:
