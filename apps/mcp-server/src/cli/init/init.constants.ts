@@ -7,6 +7,16 @@
 import type { GitignoreEntry } from './gitignore.utils';
 
 /**
+ * Default Claude Code global env settings
+ *
+ * These entries are added to ~/.claude/settings.json env section
+ * during `codingbuddy init` to configure Claude Code behavior.
+ */
+export const CLAUDE_SETTINGS_ENV_ENTRIES: Record<string, string> = {
+  ENABLE_TOOL_SEARCH: 'false',
+};
+
+/**
  * Default gitignore entries for codingbuddy
  *
  * These entries are added to .gitignore during `codingbuddy init`
@@ -14,7 +24,13 @@ import type { GitignoreEntry } from './gitignore.utils';
  */
 export const CODINGBUDDY_GITIGNORE_ENTRIES: GitignoreEntry[] = [
   {
-    pattern: 'docs/codingbuddy/context.md',
+    pattern: 'codingbuddy.config.json',
     comment: '# Codingbuddy (local workspace)',
+  },
+  {
+    pattern: 'docs/codingbuddy/context.md',
+  },
+  {
+    pattern: '.codingbuddy/',
   },
 ];

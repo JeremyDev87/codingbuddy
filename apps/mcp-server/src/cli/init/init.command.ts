@@ -13,7 +13,11 @@ import { createConsoleUtils } from '../utils/console';
 import { renderConfigObjectAsJson } from './templates';
 import { runInitWizard, wizardDataToConfig } from './init.wizard';
 import { ensureGitignoreEntries } from './gitignore.utils';
-import { CODINGBUDDY_GITIGNORE_ENTRIES } from './init.constants';
+import { ensureClaudeSettingsEnv } from './claude-settings.utils';
+import {
+  CODINGBUDDY_GITIGNORE_ENTRIES,
+  CLAUDE_SETTINGS_ENV_ENTRIES,
+} from './init.constants';
 import type { InitOptions, InitResult } from '../cli.types';
 
 /**
@@ -61,6 +65,35 @@ export function getApiKey(options: InitOptions): string | null {
 }
 
 /**
+ * Post-write steps: update .gitignore and Claude global settings
+ */
+async function ensureWorkspaceSettings(
+  projectRoot: string,
+  console: ReturnType<typeof createConsoleUtils>,
+): Promise<void> {
+  const gitignoreResult = await ensureGitignoreEntries(
+    projectRoot,
+    CODINGBUDDY_GITIGNORE_ENTRIES,
+  );
+  if (gitignoreResult.added.length > 0) {
+    console.log.step(
+      '📝',
+      `Updated .gitignore: ${gitignoreResult.added.join(', ')}`,
+    );
+  }
+
+  const claudeSettingsResult = await ensureClaudeSettingsEnv(
+    CLAUDE_SETTINGS_ENV_ENTRIES,
+  );
+  if (claudeSettingsResult.added.length > 0) {
+    console.log.step(
+      '⚙️',
+      `Updated Claude settings: ${claudeSettingsResult.added.join(', ')}`,
+    );
+  }
+}
+
+/**
  * Run the init command with template-based generation (default)
  */
 async function runTemplateInit(
@@ -105,17 +138,8 @@ async function runTemplateInit(
 
   console.log.success(`Configuration saved to ${configPath}`);
 
-  // Step 5: Update .gitignore
-  const gitignoreResult = await ensureGitignoreEntries(
-    options.projectRoot,
-    CODINGBUDDY_GITIGNORE_ENTRIES,
-  );
-  if (gitignoreResult.added.length > 0) {
-    console.log.step(
-      '📝',
-      `Updated .gitignore: ${gitignoreResult.added.join(', ')}`,
-    );
-  }
+  // Step 5: Update .gitignore and Claude settings
+  await ensureWorkspaceSettings(options.projectRoot, console);
 
   // Success message
   console.log.success('');
@@ -179,17 +203,8 @@ async function runAiInit(
 
   console.log.success(`Configuration saved to ${configPath}`);
 
-  // Step 4: Update .gitignore
-  const gitignoreResult = await ensureGitignoreEntries(
-    options.projectRoot,
-    CODINGBUDDY_GITIGNORE_ENTRIES,
-  );
-  if (gitignoreResult.added.length > 0) {
-    console.log.step(
-      '📝',
-      `Updated .gitignore: ${gitignoreResult.added.join(', ')}`,
-    );
-  }
+  // Step 4: Update .gitignore and Claude settings
+  await ensureWorkspaceSettings(options.projectRoot, console);
 
   // Success message
   console.log.success('');

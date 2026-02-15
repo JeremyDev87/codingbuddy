@@ -14,6 +14,7 @@ const {
   mockWizardDataToConfig,
   mockRenderConfigObjectAsJson,
   mockEnsureGitignoreEntries,
+  mockEnsureClaudeSettingsEnv,
 } = vi.hoisted(() => ({
   mockAnalyzeProject: vi.fn(),
   mockGenerate: vi.fn(),
@@ -23,6 +24,7 @@ const {
   mockWizardDataToConfig: vi.fn(),
   mockRenderConfigObjectAsJson: vi.fn(),
   mockEnsureGitignoreEntries: vi.fn(),
+  mockEnsureClaudeSettingsEnv: vi.fn(),
 }));
 
 // Mock all modules
@@ -54,6 +56,10 @@ vi.mock('./init.wizard', () => ({
 
 vi.mock('./gitignore.utils', () => ({
   ensureGitignoreEntries: mockEnsureGitignoreEntries,
+}));
+
+vi.mock('./claude-settings.utils', () => ({
+  ensureClaudeSettingsEnv: mockEnsureClaudeSettingsEnv,
 }));
 
 vi.mock('../utils/console', () => ({
@@ -150,6 +156,10 @@ describe('init.command', () => {
     mockWizardDataToConfig.mockReturnValue(mockConfig);
     mockRenderConfigObjectAsJson.mockReturnValue('{}');
     mockEnsureGitignoreEntries.mockResolvedValue({
+      added: [],
+      alreadyExists: [],
+    });
+    mockEnsureClaudeSettingsEnv.mockResolvedValue({
       added: [],
       alreadyExists: [],
     });
@@ -295,6 +305,19 @@ describe('init.command', () => {
       });
     });
 
+    it('should call ensureClaudeSettingsEnv with env entries', async () => {
+      const options: InitOptions = {
+        projectRoot: '/project',
+        force: false,
+      };
+
+      await runInit(options);
+
+      expect(mockEnsureClaudeSettingsEnv).toHaveBeenCalledWith({
+        ENABLE_TOOL_SEARCH: 'false',
+      });
+    });
+
     it('should handle wizard cancellation', async () => {
       mockRunInitWizard.mockResolvedValue(null);
 
@@ -337,6 +360,21 @@ describe('init.command', () => {
       expect(result.success).toBe(true);
       expect(mockGenerate).toHaveBeenCalledWith(mockAnalysis);
       expect(mockRunInitWizard).not.toHaveBeenCalled();
+    });
+
+    it('should call ensureClaudeSettingsEnv in AI mode', async () => {
+      const options: InitOptions = {
+        projectRoot: '/project',
+        force: false,
+        useAi: true,
+        apiKey: 'test-key',
+      };
+
+      await runInit(options);
+
+      expect(mockEnsureClaudeSettingsEnv).toHaveBeenCalledWith({
+        ENABLE_TOOL_SEARCH: 'false',
+      });
     });
 
     it('should write config without raw option in AI mode', async () => {
