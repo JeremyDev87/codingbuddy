@@ -3,10 +3,17 @@
  * @description Landing page 위젯 공용 타입
  */
 
+import type { SupportedLocale } from '@/lib/locale';
+
 /** 위젯 기본 Props */
 export interface WidgetProps {
   /** i18n 로케일 */
-  locale: string;
+  locale: SupportedLocale;
+}
+
+/** Parallel Route Slot Props (locale validated by layout) */
+export interface SlotProps {
+  params: Promise<{ locale: SupportedLocale }>;
 }
 
 /** 코드 비교 예시 Props */

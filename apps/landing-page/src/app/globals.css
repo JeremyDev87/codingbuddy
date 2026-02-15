@@ -98,6 +98,13 @@
   --chart-5: oklch(0.645 0.246 16.439);
 }
 
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+}
+
 @layer base {
   /* shadcn/ui standard reset: consistent border-color and outline-color across all elements */
   * {
