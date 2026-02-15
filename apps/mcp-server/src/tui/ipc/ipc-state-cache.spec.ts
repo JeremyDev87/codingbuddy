@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { IpcStateCache } from './ipc-state-cache';
 import type { StateCacheEventBus } from './ipc-state-cache';
 
-
 function createMockEventBus(): StateCacheEventBus & {
   emit: (event: string, payload: unknown) => void;
 } {
