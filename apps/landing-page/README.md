@@ -43,9 +43,9 @@ yarn validate
 
 Set in Vercel Dashboard → Settings → Environment Variables:
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NODE_ENV` | Set to `production` (auto) | No |
+| Variable   | Description                | Required |
+| ---------- | -------------------------- | -------- |
+| `NODE_ENV` | Set to `production` (auto) | No       |
 
 ### Manual Deployment
 
@@ -82,10 +82,10 @@ src/app/
 
 ## Supported Locales
 
-| Locale | Language |
-|--------|----------|
-| `en`   | English (default) |
-| `ko`   | Korean |
-| `zh-CN`| Simplified Chinese |
-| `ja`   | Japanese |
-| `es`   | Spanish |
+| Locale  | Language           |
+| ------- | ------------------ |
+| `en`    | English (default)  |
+| `ko`    | Korean             |
+| `zh-CN` | Simplified Chinese |
+| `ja`    | Japanese           |
+| `es`    | Spanish            |
