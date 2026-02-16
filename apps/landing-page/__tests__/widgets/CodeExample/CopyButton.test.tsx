@@ -10,7 +10,7 @@ vi.mock('sonner', () => ({
 
 // copyToClipboard mock
 const mockCopyToClipboard = vi.fn();
-vi.mock('@/widgets/CodeExample/lib/copyToClipboard', () => ({
+vi.mock('@/lib/copyToClipboard', () => ({
   copyToClipboard: (...args: unknown[]) => mockCopyToClipboard(...args),
 }));
 

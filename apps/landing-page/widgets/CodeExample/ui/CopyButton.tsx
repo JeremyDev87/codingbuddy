@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { cn } from '@/lib/utils';
-import { copyToClipboard } from '../lib/copyToClipboard';
 
 interface CopyButtonProps {
   /** 복사할 텍스트 */
@@ -26,24 +24,10 @@ export const CopyButton = ({
   failedLabel = 'Copy failed',
   className,
 }: CopyButtonProps) => {
-  const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(() => {
-    return () => clearTimeout(timerRef.current);
-  }, []);
-
-  const handleCopy = async () => {
-    const success = await copyToClipboard(code);
-    if (success) {
-      clearTimeout(timerRef.current);
-      setCopied(true);
-      toast.success(copiedLabel);
-      timerRef.current = setTimeout(() => setCopied(false), 2000);
-    } else {
-      toast.error(failedLabel);
-    }
-  };
+  const { copied, handleCopy } = useCopyToClipboard(code, {
+    copiedLabel,
+    failedLabel,
+  });
 
   return (
     <Button
