@@ -32,7 +32,7 @@ export const Hero = ({ locale }: WidgetProps) => {
 
         <h1
           id="hero-heading"
-          className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl"
+          className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl"
         >
           {t('title')}
         </h1>
