@@ -10,6 +10,7 @@ import {
   isString,
   isStringArray,
   isValidMode,
+  isRecordObject,
   extractRequiredString,
   extractOptionalString,
   extractStringArray,
@@ -234,6 +235,22 @@ describe('isValidMode', () => {
     expect(isValidMode(null)).toBe(false);
     expect(isValidMode(undefined)).toBe(false);
     expect(isValidMode(123)).toBe(false);
+  });
+});
+
+describe('isRecordObject', () => {
+  it('should return true for plain objects', () => {
+    expect(isRecordObject({ key: 'value' })).toBe(true);
+    expect(isRecordObject({})).toBe(true);
+  });
+  it('should return false for arrays', () => {
+    expect(isRecordObject([1, 2])).toBe(false);
+  });
+  it('should return false for null/undefined/primitives', () => {
+    expect(isRecordObject(null)).toBe(false);
+    expect(isRecordObject(undefined)).toBe(false);
+    expect(isRecordObject('string')).toBe(false);
+    expect(isRecordObject(123)).toBe(false);
   });
 });
 

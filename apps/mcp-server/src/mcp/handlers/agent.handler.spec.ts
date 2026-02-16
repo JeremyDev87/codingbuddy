@@ -119,6 +119,42 @@ describe('AgentHandler', () => {
         );
       });
 
+      it('should return error when context is a string', async () => {
+        const result = await handler.handle('get_agent_system_prompt', {
+          agentName: 'security-specialist',
+          context: 'not-an-object',
+        });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0]).toMatchObject({
+          type: 'text',
+          text: expect.stringContaining('context (must be an object'),
+        });
+      });
+
+      it('should return error when context is an array', async () => {
+        const result = await handler.handle('get_agent_system_prompt', {
+          agentName: 'security-specialist',
+          context: ['EVAL'],
+        });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0]).toMatchObject({
+          type: 'text',
+          text: expect.stringContaining('context (must be an object'),
+        });
+      });
+
+      it('should return error when context is a number', async () => {
+        const result = await handler.handle('get_agent_system_prompt', {
+          agentName: 'security-specialist',
+          context: 42,
+        });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0]).toMatchObject({
+          type: 'text',
+          text: expect.stringContaining('context (must be an object'),
+        });
+      });
+
       it('should return error when service fails', async () => {
         mockAgentService.getAgentSystemPrompt = vi
           .fn()
@@ -251,6 +287,39 @@ describe('AgentHandler', () => {
           undefined,
           undefined,
           'minimal',
+        );
+      });
+
+      it('should fallback to standard for invalid verbosity', async () => {
+        const result = await handler.handle('prepare_parallel_agents', {
+          mode: 'EVAL',
+          specialists: ['security-specialist'],
+          verbosity: 'INVALID_LEVEL',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['security-specialist'],
+          undefined,
+          undefined,
+          'standard',
+        );
+      });
+
+      it('should pass undefined verbosity when not provided', async () => {
+        const result = await handler.handle('prepare_parallel_agents', {
+          mode: 'EVAL',
+          specialists: ['security-specialist'],
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['security-specialist'],
+          undefined,
+          undefined,
+          undefined,
         );
       });
 

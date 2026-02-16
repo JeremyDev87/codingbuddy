@@ -381,6 +381,15 @@ export function isStringArray(value: unknown): value is string[] {
 }
 
 /**
+ * Check if a value is a plain object (not null, not array)
+ * @param value - Value to check
+ * @returns True if value is a non-null, non-array object
+ */
+export function isRecordObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
  * Check if a value is a valid workflow mode
  * @param value - Value to check
  * @returns True if value is PLAN, ACT, EVAL, or AUTO

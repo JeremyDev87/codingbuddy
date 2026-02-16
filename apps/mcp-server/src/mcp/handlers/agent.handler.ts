@@ -4,12 +4,14 @@ import type { ToolResponse } from '../response.utils';
 import { AbstractHandler } from './abstract-handler';
 import { AgentService } from '../../agent/agent.service';
 import type { Mode } from '../../keyword/keyword.types';
+import { isValidVerbosity } from '../../shared/verbosity.types';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
 import {
   extractRequiredString,
   extractStringArray,
   extractOptionalString,
   isValidMode,
+  isRecordObject,
 } from '../../shared/validation.constants';
 
 /**
@@ -211,12 +213,13 @@ export class AgentHandler extends AbstractHandler {
       return createErrorResponse('Missing required parameter: agentName');
     }
 
-    const context = args?.context as Record<string, unknown> | undefined;
-    if (!context) {
+    const rawContext = args?.context;
+    if (!isRecordObject(rawContext)) {
       return createErrorResponse(
-        'Missing required parameter: context.mode (PLAN, ACT, EVAL, or AUTO)',
+        'Missing required parameter: context (must be an object with mode)',
       );
     }
+    const context = rawContext;
 
     const mode = context.mode;
     if (!isValidMode(mode)) {
@@ -265,11 +268,12 @@ export class AgentHandler extends AbstractHandler {
 
     const targetFiles = extractStringArray(args, 'targetFiles');
     const sharedContext = extractOptionalString(args, 'sharedContext');
-    const verbosity = extractOptionalString(args, 'verbosity') as
-      | 'minimal'
-      | 'standard'
-      | 'full'
-      | undefined;
+    const verbosityStr = extractOptionalString(args, 'verbosity');
+    const verbosity = verbosityStr === undefined
+      ? undefined
+      : isValidVerbosity(verbosityStr)
+        ? verbosityStr
+        : 'standard';
 
     try {
       const result = await this.agentService.prepareParallelAgents(
