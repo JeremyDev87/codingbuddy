@@ -68,6 +68,37 @@
     "copied": "복사 완료!",
     "copyFailed": "복사 실패"
   },
+  "header": {
+    "nav": {
+      "features": "기능",
+      "agents": "에이전트",
+      "quickStart": "시작하기",
+      "faq": "FAQ"
+    },
+    "theme": {
+      "label": "테마 변경",
+      "light": "라이트",
+      "dark": "다크",
+      "system": "시스템"
+    },
+    "language": {
+      "label": "언어 선택",
+      "en": "English",
+      "ko": "한국어",
+      "ja": "日本語",
+      "zh-CN": "中文",
+      "es": "Español"
+    },
+    "mobileMenu": {
+      "open": "메뉴 열기",
+      "close": "메뉴 닫기",
+      "title": "내비게이션",
+      "description": "사이트 내비게이션 및 설정"
+    },
+    "brand": {
+      "homeLink": "Codingbuddy - 홈으로 돌아가기"
+    }
+  },
   "faq": {
     "title": "자주 묻는 질문",
     "subtitle": "Codingbuddy에 대해 알아야 할 모든 것",

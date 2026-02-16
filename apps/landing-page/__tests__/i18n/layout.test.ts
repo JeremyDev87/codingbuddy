@@ -1,5 +1,15 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 import { SUPPORTED_LOCALES } from '../../lib/locale';
+
+// Mock navigation module used by Header (imported by layout)
+vi.mock('next-intl/navigation', () => ({
+  createNavigation: () => ({
+    Link: 'a',
+    redirect: vi.fn(),
+    usePathname: () => '/',
+    useRouter: () => ({ replace: vi.fn() }),
+  }),
+}));
 
 // Import generateStaticParams directly to test static generation
 // Note: Full layout rendering requires Next.js server context (NextIntlClientProvider, getMessages)

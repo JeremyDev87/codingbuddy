@@ -56,6 +56,7 @@ describe('i18n request config logic', () => {
         'agents',
         'codeExample',
         'quickStart',
+        'header',
         'faq',
       ]);
     });

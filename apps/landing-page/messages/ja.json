@@ -68,6 +68,37 @@
     "copied": "コピーしました！",
     "copyFailed": "コピーに失敗しました"
   },
+  "header": {
+    "nav": {
+      "features": "機能",
+      "agents": "エージェント",
+      "quickStart": "クイックスタート",
+      "faq": "FAQ"
+    },
+    "theme": {
+      "label": "テーマ切替",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
+    "language": {
+      "label": "言語選択",
+      "en": "English",
+      "ko": "한국어",
+      "ja": "日本語",
+      "zh-CN": "中文",
+      "es": "Español"
+    },
+    "mobileMenu": {
+      "open": "メニューを開く",
+      "close": "メニューを閉じる",
+      "title": "ナビゲーション",
+      "description": "サイトナビゲーションと設定"
+    },
+    "brand": {
+      "homeLink": "Codingbuddy - ホームに戻る"
+    }
+  },
   "faq": {
     "title": "よくある質問",
     "subtitle": "Codingbuddyについて知っておくべきすべて",

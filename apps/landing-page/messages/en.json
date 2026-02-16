@@ -68,6 +68,37 @@
     "copied": "Copied!",
     "copyFailed": "Copy failed"
   },
+  "header": {
+    "nav": {
+      "features": "Features",
+      "agents": "Agents",
+      "quickStart": "Quick Start",
+      "faq": "FAQ"
+    },
+    "theme": {
+      "label": "Toggle theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "label": "Select language",
+      "en": "English",
+      "ko": "한국어",
+      "ja": "日本語",
+      "zh-CN": "中文",
+      "es": "Español"
+    },
+    "mobileMenu": {
+      "open": "Open menu",
+      "close": "Close menu",
+      "title": "Navigation",
+      "description": "Site navigation and settings"
+    },
+    "brand": {
+      "homeLink": "Codingbuddy - Back to home"
+    }
+  },
   "faq": {
     "title": "Frequently Asked Questions",
     "subtitle": "Everything you need to know about Codingbuddy",

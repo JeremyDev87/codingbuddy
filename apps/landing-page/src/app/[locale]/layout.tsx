@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { isValidLocale, SUPPORTED_LOCALES } from '@/lib/locale';
 import { SetDocumentLang } from '@/components/set-document-lang';
+import { Header } from '@/components/Header';
 
 export const generateStaticParams = () =>
   SUPPORTED_LOCALES.map(locale => ({ locale }));
@@ -34,6 +35,7 @@ const LocaleLayout = async ({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
+      <Header />
       <main
         id="main-content"
         lang={locale}

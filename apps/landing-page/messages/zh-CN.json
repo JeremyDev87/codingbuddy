@@ -68,6 +68,37 @@
     "copied": "已复制！",
     "copyFailed": "复制失败"
   },
+  "header": {
+    "nav": {
+      "features": "功能",
+      "agents": "代理",
+      "quickStart": "快速开始",
+      "faq": "常见问题"
+    },
+    "theme": {
+      "label": "切换主题",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "系统"
+    },
+    "language": {
+      "label": "选择语言",
+      "en": "English",
+      "ko": "한국어",
+      "ja": "日本語",
+      "zh-CN": "中文",
+      "es": "Español"
+    },
+    "mobileMenu": {
+      "open": "打开菜单",
+      "close": "关闭菜单",
+      "title": "导航",
+      "description": "网站导航和设置"
+    },
+    "brand": {
+      "homeLink": "Codingbuddy - 返回首页"
+    }
+  },
   "faq": {
     "title": "常见问题",
     "subtitle": "关于 Codingbuddy 您需要了解的一切",

@@ -7,6 +7,7 @@ import { vi } from 'vitest';
  * Usage: import '@/__tests__/__helpers__/next-intl-mock';
  */
 vi.mock('next-intl', () => ({
+  useLocale: () => 'en',
   useTranslations: (namespace?: string) => {
     const allTranslations: Record<string, Record<string, string>> = {
       hero: {
@@ -88,6 +89,27 @@ vi.mock('next-intl', () => ({
         copy: 'Copy',
         copied: 'Copied!',
         copyFailed: 'Copy failed',
+      },
+      header: {
+        'nav.features': 'Features',
+        'nav.agents': 'Agents',
+        'nav.quickStart': 'Quick Start',
+        'nav.faq': 'FAQ',
+        'theme.label': 'Toggle theme',
+        'theme.light': 'Light',
+        'theme.dark': 'Dark',
+        'theme.system': 'System',
+        'language.label': 'Select language',
+        'language.en': 'English',
+        'language.ko': '한국어',
+        'language.ja': '日本語',
+        'language.zh-CN': '中文',
+        'language.es': 'Español',
+        'mobileMenu.open': 'Open menu',
+        'mobileMenu.close': 'Close menu',
+        'mobileMenu.title': 'Navigation',
+        'mobileMenu.description': 'Site navigation and settings',
+        'brand.homeLink': 'Codingbuddy - Back to home',
       },
       faq: {
         title: 'Frequently Asked Questions',
