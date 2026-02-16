@@ -133,10 +133,7 @@ const LocaleLayout = async ({
             messages={pickClientMessages(messages)}
           >
             <Header />
-            <main
-              id="main-content"
-              className="flex min-h-screen flex-col"
-            >
+            <main id="main-content" className="flex min-h-screen flex-col">
               {children}
               {agents}
               {code_example}
