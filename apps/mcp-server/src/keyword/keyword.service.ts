@@ -34,6 +34,7 @@ import { filterRulesByMode } from './rule-filter';
 import { truncateSkillContent } from '../skill/skill-content.utils';
 import { createAgentSummary } from '../agent/agent-summary.utils';
 import { truncateRuleContent } from '../rules/rules-content.utils';
+import { getDefaultModeConfig } from '../shared/keyword-core';
 
 /**
  * Options for parseMode method
@@ -107,7 +108,17 @@ export interface AgentSystemPromptInfo {
 }
 
 /**
+ * Base mode configuration from the shared single source of truth.
+ * Provides: description, instructions, rules, defaultMode.
+ */
+const BASE_CONFIG = getDefaultModeConfig();
+
+/**
  * Default configuration for keyword modes.
+ *
+ * Built by spreading the shared BASE_CONFIG (single source of truth for
+ * description, rules) and overlaying KeywordService-specific fields:
+ * enriched instructions, agent, delegates_to, defaultSpecialists.
  *
  * NOTE: `defaultSpecialists` arrays are synchronized with:
  * - packages/rules/.ai-rules/keyword-modes.json
@@ -119,13 +130,13 @@ export interface AgentSystemPromptInfo {
 const DEFAULT_CONFIG: KeywordModesConfig = {
   modes: {
     PLAN: {
-      description: 'Task planning and design phase',
+      ...BASE_CONFIG.modes.PLAN,
+      // Enriched instructions: context prefix + base instructions + mandatory action suffix
       instructions:
         '🔴 CONTEXT: Check contextDocument field for previous mode context (decisions, notes, recommendedActAgent). ' +
-        'Design first approach. Define test cases from TDD perspective. Review architecture before implementation. ' +
-        '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=PLAN, recommendedActAgent, task, decisions, and notes. ' +
+        BASE_CONFIG.modes.PLAN.instructions +
+        ' 📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=PLAN, recommendedActAgent, task, decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content, not overwritten.',
-      rules: ['rules/core.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[0],
       // delegates_to is now resolved dynamically via PrimaryAgentResolver
       defaultSpecialists: [
@@ -138,13 +149,13 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       ],
     },
     ACT: {
-      description: 'Actual task execution phase',
+      ...BASE_CONFIG.modes.ACT,
+      // Enriched instructions: context prefix + ACT-specific guidance + mandatory action suffix
       instructions:
         '🔴 CONTEXT: contextDocument contains PLAN decisions and recommendedActAgent. Use this context! ' +
         'Follow Red-Green-Refactor cycle. Use recommended agent from PLAN. ' +
         '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=ACT, task (what was done), decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content.',
-      rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[1],
       // delegates_to is now resolved dynamically via PrimaryAgentResolver
       defaultSpecialists: [
@@ -155,13 +166,13 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       ],
     },
     EVAL: {
-      description: 'Result review and assessment phase',
+      ...BASE_CONFIG.modes.EVAL,
+      // Enriched instructions: context prefix + EVAL-specific guidance + mandatory action suffix
       instructions:
         '🔴 CONTEXT: contextDocument contains all PLAN and ACT decisions/notes. Review this accumulated context! ' +
         'Evaluate code quality. Verify SOLID principles. Check test coverage. ' +
         '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=EVAL, task (evaluation summary), decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content.',
-      rules: ['rules/core.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[2],
       delegates_to: 'code-reviewer', // EVAL always uses code-reviewer
       defaultSpecialists: [
@@ -176,14 +187,13 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       ],
     },
     AUTO: {
-      description:
-        'Autonomous execution mode - PLAN → ACT → EVAL cycle until quality achieved',
+      ...BASE_CONFIG.modes.AUTO,
+      // Enriched instructions: context prefix + AUTO-specific guidance + mandatory action suffix
       instructions:
         '🔴 CONTEXT: Check contextDocument for accumulated context across iterations. ' +
         'Execute PLAN → ACT → EVAL cycle automatically. Repeat until Critical/High issues = 0 or max iterations reached. ' +
         '📝 MANDATORY AT EACH PHASE: Call update_context to record progress. Decisions and notes are APPENDED. ' +
         'This maintains full context history across iterations.',
-      rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       agent: MODE_AGENTS[3], // 'auto-mode'
       defaultSpecialists: [
         'architecture-specialist',
@@ -197,7 +207,7 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       ],
     },
   },
-  defaultMode: 'PLAN',
+  defaultMode: BASE_CONFIG.defaultMode,
 };
 
 /** Cache entry with TTL */

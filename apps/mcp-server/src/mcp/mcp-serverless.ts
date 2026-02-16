@@ -3,21 +3,13 @@ import * as z from 'zod';
 import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
-import type { AgentProfile, SearchResult } from '../rules/rules.types';
+import type { SearchResult } from '../rules/rules.types';
 import type {
-  Mode,
-  RuleContent,
   ParseModeResult,
-  KeywordModesConfig,
 } from '../keyword/keyword.types';
-import { KEYWORDS } from '../keyword/keyword.types';
 import { loadConfig } from '../config/config.loader';
 import type { CodingBuddyConfig } from '../config/config.schema';
-import { isPathSafe } from '../shared/security.utils';
 import { getPackageVersion } from '../shared/version.utils';
-import { parseAgentProfile, AgentSchemaError } from '../rules/agent.schema';
-import { parseSkill, SkillSchemaError } from '../rules/skill.schema';
-import type { Skill } from '../rules/skill.schema';
 import {
   validateQuery,
   validatePrompt,
@@ -29,6 +21,20 @@ import {
   createErrorResponse,
   type ToolResponse,
 } from './response.utils';
+import {
+  resolveRulesDir,
+  readRuleContent,
+  listAgentNames,
+  loadAgentProfile,
+  searchInRuleFiles,
+  listSkillSummaries,
+  loadSkill,
+} from '../shared/rules-core';
+import {
+  extractModeFromPrompt,
+  getDefaultModeConfig,
+  loadRulesForMode,
+} from '../shared/keyword-core';
 
 // ============================================================================
 // Types
@@ -37,45 +43,6 @@ import {
 interface ParseModeResponse extends ParseModeResult {
   language?: string;
 }
-
-interface SkillSummary {
-  name: string;
-  description: string;
-}
-
-// ============================================================================
-// Default Configuration
-// ============================================================================
-
-const DEFAULT_MODE_CONFIG: KeywordModesConfig = {
-  modes: {
-    PLAN: {
-      description: 'Task planning and design phase',
-      instructions:
-        'Design first approach. Define test cases from TDD perspective. Review architecture before implementation.',
-      rules: ['rules/core.md', 'rules/augmented-coding.md'],
-    },
-    ACT: {
-      description: 'Actual task execution phase',
-      instructions:
-        'Follow Red-Green-Refactor cycle. Implement minimally then improve incrementally. Verify quality standards.',
-      rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
-    },
-    EVAL: {
-      description: 'Result review and assessment phase',
-      instructions:
-        'Review code quality. Verify SOLID principles. Check test coverage. Suggest improvements.',
-      rules: ['rules/core.md', 'rules/augmented-coding.md'],
-    },
-    AUTO: {
-      description: 'Autonomous PLAN → ACT → EVAL cycle',
-      instructions:
-        'Execute autonomous iteration cycle. Run PLAN → ACT → EVAL until quality achieved or max iterations reached. Self-correct based on EVAL feedback.',
-      rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
-    },
-  },
-  defaultMode: 'PLAN',
-};
 
 // ============================================================================
 // McpServerlessService
@@ -87,7 +54,7 @@ export class McpServerlessService {
   private projectRoot: string;
 
   constructor(rulesDir?: string, projectRoot?: string) {
-    this.rulesDir = rulesDir ?? this.findRulesDir();
+    this.rulesDir = rulesDir ?? this.resolveRulesDirectory();
     this.projectRoot = projectRoot ?? process.cwd();
 
     this.server = new McpServer({
@@ -119,37 +86,21 @@ export class McpServerlessService {
   // Rules Directory Resolution
   // ============================================================================
 
-  private findRulesDir(): string {
-    // 1. Environment variable takes precedence
-    if (process.env.CODINGBUDDY_RULES_DIR) {
-      return process.env.CODINGBUDDY_RULES_DIR;
-    }
-
-    // 2. Try to find codingbuddy-rules package
+  private resolveRulesDirectory(): string {
+    let packageRulesPath: string | undefined;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { rulesPath } = require('codingbuddy-rules');
-      return rulesPath;
+      packageRulesPath = rulesPath;
     } catch {
-      // Package not found, use development fallback
+      /* not found */
     }
 
-    // 3. Development fallback: search for .ai-rules directory
-    const candidates = [
-      path.resolve(__dirname, '../../../../packages/rules/.ai-rules'),
-      path.resolve(__dirname, '../../../packages/rules/.ai-rules'),
-      path.resolve(__dirname, '../../../../.ai-rules'),
-      path.resolve(__dirname, '../../../.ai-rules'),
-    ];
-
-    for (const candidate of candidates) {
-      if (existsSync(candidate)) {
-        return candidate;
-      }
-    }
-
-    // Return first candidate as fallback
-    return candidates[0];
+    return resolveRulesDir(__dirname, {
+      envRulesDir: process.env.CODINGBUDDY_RULES_DIR,
+      packageRulesPath,
+      existsSync,
+    });
   }
 
   // ============================================================================
@@ -305,7 +256,7 @@ export class McpServerlessService {
     }
 
     try {
-      const agent = await this.getAgent(agentName);
+      const agent = await loadAgentProfile(this.rulesDir, agentName);
       return createJsonResponse(agent);
     } catch {
       return createErrorResponse(`Agent '${agentName}' not found.`);
@@ -347,7 +298,7 @@ export class McpServerlessService {
 
   private async handleListSkills(): Promise<ToolResponse> {
     try {
-      const skills = await this.listSkills();
+      const skills = await listSkillSummaries(this.rulesDir);
       return createJsonResponse(skills);
     } catch (error) {
       return createErrorResponse(
@@ -357,16 +308,13 @@ export class McpServerlessService {
   }
 
   private async handleGetSkill(skillName: string): Promise<ToolResponse> {
-    // Validate skill name
-    if (!skillName || !/^[a-z0-9-]+$/.test(skillName)) {
-      return createErrorResponse('Invalid skill name format');
-    }
-
     try {
-      const skill = await this.getSkill(skillName);
+      const skill = await loadSkill(this.rulesDir, skillName);
       return createJsonResponse(skill);
-    } catch {
-      return createErrorResponse(`Skill '${skillName}' not found.`);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : `Skill '${skillName}' not found.`;
+      return createErrorResponse(message);
     }
   }
 
@@ -452,55 +400,11 @@ export class McpServerlessService {
   }
 
   // ============================================================================
-  // Rules Operations (extracted from RulesService)
+  // Rules Operations (delegating to shared/rules-core)
   // ============================================================================
 
-  private async getRuleContent(relativePath: string): Promise<string> {
-    // Security: Validate path to prevent directory traversal
-    if (!isPathSafe(this.rulesDir, relativePath)) {
-      throw new Error(`Access denied: Invalid path`);
-    }
-
-    const fullPath = path.join(this.rulesDir, relativePath);
-    try {
-      return await fs.readFile(fullPath, 'utf-8');
-    } catch {
-      throw new Error(`Failed to read rule file: ${relativePath}`);
-    }
-  }
-
-  private async listAgents(): Promise<string[]> {
-    const agentsDir = path.join(this.rulesDir, 'agents');
-    try {
-      const files = await fs.readdir(agentsDir);
-      return files
-        .filter(f => f.endsWith('.json'))
-        .map(f => f.replace('.json', ''));
-    } catch {
-      return [];
-    }
-  }
-
-  private async getAgent(name: string): Promise<AgentProfile> {
-    const content = await this.getRuleContent(`agents/${name}.json`);
-    try {
-      const parsed = JSON.parse(content);
-      // Validate against schema and check for prototype pollution
-      const validated = parseAgentProfile(parsed);
-      return validated as unknown as AgentProfile;
-    } catch (error) {
-      if (error instanceof AgentSchemaError) {
-        throw new Error(`Invalid agent profile: ${name}`);
-      }
-      throw error;
-    }
-  }
-
   private async searchRules(query: string): Promise<SearchResult[]> {
-    const results: SearchResult[] = [];
-    const queryLower = query.toLowerCase();
-
-    const agents = await this.listAgents();
+    const agents = await listAgentNames(this.rulesDir);
     const filesToSearch = [
       'rules/core.md',
       'rules/project.md',
@@ -508,131 +412,26 @@ export class McpServerlessService {
       ...agents.map(a => `agents/${a}.json`),
     ];
 
-    for (const file of filesToSearch) {
-      try {
-        const content = await this.getRuleContent(file);
-        const lines = content.split('\n');
-        const matches: string[] = [];
-        let score = 0;
-
-        lines.forEach((line, index) => {
-          if (line.toLowerCase().includes(queryLower)) {
-            matches.push(`Line ${index + 1}: ${line.trim()}`);
-            score++;
-          }
-        });
-
-        if (score > 0) {
-          results.push({ file, matches, score });
-        }
-      } catch {
-        // Ignore errors for missing files
-      }
-    }
-
-    return results.sort((a, b) => b.score - a.score);
+    return searchInRuleFiles(this.rulesDir, query, filesToSearch);
   }
 
   // ============================================================================
-  // Skills Operations
-  // ============================================================================
-
-  async listSkills(): Promise<SkillSummary[]> {
-    const skillsDir = path.join(this.rulesDir, 'skills');
-    const summaries: SkillSummary[] = [];
-
-    try {
-      const entries = await fs.readdir(skillsDir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const skillPath = path.join(skillsDir, entry.name, 'SKILL.md');
-          try {
-            const content = await fs.readFile(skillPath, 'utf-8');
-            const skill = parseSkill(content, `skills/${entry.name}/SKILL.md`);
-            summaries.push({
-              name: skill.name,
-              description: skill.description,
-            });
-          } catch {
-            // Skip invalid skills
-          }
-        }
-      }
-    } catch {
-      // Skills directory doesn't exist
-    }
-
-    return summaries;
-  }
-
-  async getSkill(name: string): Promise<Skill> {
-    // Validate name format
-    if (!/^[a-z0-9-]+$/.test(name)) {
-      throw new Error(`Invalid skill name format: ${name}`);
-    }
-
-    const skillPath = `skills/${name}/SKILL.md`;
-
-    // Security check
-    if (!isPathSafe(this.rulesDir, skillPath)) {
-      throw new Error('Access denied: Invalid path');
-    }
-
-    const fullPath = path.join(this.rulesDir, skillPath);
-
-    try {
-      const content = await fs.readFile(fullPath, 'utf-8');
-      return parseSkill(content, skillPath);
-    } catch (error) {
-      if (error instanceof SkillSchemaError) {
-        throw new Error(`Invalid skill: ${name}`);
-      }
-      throw new Error(`Skill not found: ${name}`);
-    }
-  }
-
-  // ============================================================================
-  // Keyword/Mode Operations (extracted from KeywordService)
+  // Keyword/Mode Operations (delegating to shared/keyword-core)
   // ============================================================================
 
   private async parseMode(prompt: string): Promise<ParseModeResult> {
-    const config = DEFAULT_MODE_CONFIG;
-    const warnings: string[] = [];
-
-    const trimmed = prompt.trim();
-    const parts = trimmed.split(/\s+/);
-    const firstWord = parts[0]?.toUpperCase() ?? '';
-
-    let mode: Mode;
-    let originalPrompt: string;
-
-    const isKeyword = KEYWORDS.includes(firstWord as Mode);
-
-    if (isKeyword) {
-      mode = firstWord as Mode;
-      originalPrompt = trimmed.slice(parts[0].length).trim();
-
-      // Check for multiple keywords
-      if (parts.length > 1) {
-        const secondWord = parts[1].toUpperCase();
-        if (KEYWORDS.includes(secondWord as Mode)) {
-          warnings.push('Multiple keywords found, using first');
-        }
-      }
-
-      // Check for empty content after keyword
-      if (originalPrompt === '') {
-        warnings.push('No prompt content after keyword');
-      }
-    } else {
-      mode = config.defaultMode;
-      originalPrompt = trimmed;
-      warnings.push('No keyword found, defaulting to PLAN');
-    }
+    const config = getDefaultModeConfig();
+    const { mode, originalPrompt, warnings } = extractModeFromPrompt(
+      prompt,
+      config.defaultMode,
+    );
 
     const modeConfig = config.modes[mode];
-    const rules = await this.getRulesForMode(mode, config);
+    const rules = await loadRulesForMode(
+      mode,
+      config,
+      (rulePath: string) => readRuleContent(this.rulesDir, rulePath),
+    );
 
     return {
       mode,
@@ -641,25 +440,6 @@ export class McpServerlessService {
       rules,
       ...(warnings.length > 0 ? { warnings } : {}),
     };
-  }
-
-  private async getRulesForMode(
-    mode: Mode,
-    config: KeywordModesConfig,
-  ): Promise<RuleContent[]> {
-    const modeConfig = config.modes[mode];
-    const rules: RuleContent[] = [];
-
-    for (const rulePath of modeConfig.rules) {
-      try {
-        const content = await this.getRuleContent(rulePath);
-        rules.push({ name: rulePath, content });
-      } catch {
-        // Skip missing files
-      }
-    }
-
-    return rules;
   }
 
   // ============================================================================

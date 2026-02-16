@@ -1,14 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
-import * as path from 'path';
 import { AgentProfile, SearchResult } from './rules.types';
-import { isPathSafe } from '../shared/security.utils';
-import { parseAgentProfile, AgentSchemaError } from './agent.schema';
-import { parseSkill, SkillSchemaError, type Skill } from './skill.schema';
+import type { Skill } from './skill.schema';
 import { CustomService } from '../custom';
 import { ConfigService } from '../config/config.service';
 import { MODE_AGENTS } from '../keyword/keyword.types';
+import {
+  resolveRulesDir,
+  readRuleContent,
+  listAgentNames,
+  loadAgentProfile,
+  searchInRuleFiles,
+  listSkillSummaries,
+  loadSkill,
+} from '../shared/rules-core';
 
 @Injectable()
 export class RulesService {
@@ -25,7 +30,9 @@ export class RulesService {
     // 3. Development fallback: when require.resolve fails
 
     if (process.env.CODINGBUDDY_RULES_DIR) {
-      this.rulesDir = process.env.CODINGBUDDY_RULES_DIR;
+      this.rulesDir = resolveRulesDir(__dirname, {
+        envRulesDir: process.env.CODINGBUDDY_RULES_DIR,
+      });
       this.logger.log(`Rules directory set from env: ${this.rulesDir}`);
       return;
     }
@@ -34,70 +41,47 @@ export class RulesService {
       // Get rulesPath from codingbuddy-rules package
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { rulesPath } = require('codingbuddy-rules');
-      this.rulesDir = rulesPath;
+      this.rulesDir = resolveRulesDir(__dirname, {
+        packageRulesPath: rulesPath,
+      });
       this.logger.log(`Rules directory set from package: ${this.rulesDir}`);
     } catch {
       // Development fallback: when package is not found
       this.logger.warn(
         'codingbuddy-rules package not found, using development fallback',
       );
-      this.rulesDir = this.findDevRulesDir();
+      this.rulesDir = resolveRulesDir(__dirname, {
+        existsSync: (pathStr: string) => {
+          try {
+            return existsSync(pathStr);
+          } catch {
+            return false;
+          }
+        },
+      });
       this.logger.log(`Rules directory set to: ${this.rulesDir}`);
     }
   }
 
-  private findDevRulesDir(): string {
-    // Find packages/rules/.ai-rules or root .ai-rules symlink in development
-    // After build: dist/src/rules → 4 levels up is apps/mcp-server
-    // Development: src/rules → 3 levels up is apps/mcp-server
-    const candidates = [
-      path.resolve(__dirname, '../../../../packages/rules/.ai-rules'), // after build
-      path.resolve(__dirname, '../../../packages/rules/.ai-rules'), // development
-      path.resolve(__dirname, '../../../../.ai-rules'), // symlink (after build)
-      path.resolve(__dirname, '../../../.ai-rules'), // symlink (development)
-    ];
-
-    for (const candidate of candidates) {
-      if (this.checkExists(candidate)) {
-        return candidate;
-      }
-    }
-
-    // Final fallback
-    return candidates[0];
-  }
-
-  private checkExists(pathStr: string): boolean {
-    try {
-      return existsSync(pathStr);
-    } catch {
-      return false;
-    }
-  }
   async getRuleContent(relativePath: string): Promise<string> {
-    // Security: Validate path to prevent directory traversal
-    if (!isPathSafe(this.rulesDir, relativePath)) {
-      this.logger.warn(`Path traversal attempt blocked: ${relativePath}`);
-      throw new Error(`Access denied: Invalid path`);
-    }
-
-    const fullPath = path.join(this.rulesDir, relativePath);
     try {
-      return await fs.readFile(fullPath, 'utf-8');
+      return await readRuleContent(this.rulesDir, relativePath);
     } catch (error) {
-      this.logger.error(`Failed to read rule file: ${relativePath}`, error);
-      throw new Error(`Failed to read rule file: ${relativePath}`);
+      if (
+        error instanceof Error &&
+        error.message.startsWith('Access denied')
+      ) {
+        this.logger.warn(`Path traversal attempt blocked: ${relativePath}`);
+      } else {
+        this.logger.error(`Failed to read rule file: ${relativePath}`, error);
+      }
+      throw error;
     }
   }
 
   async listAgents(): Promise<string[]> {
-    const agentsDir = path.join(this.rulesDir, 'agents');
     try {
-      const files = await fs.readdir(agentsDir);
-      const agents = files
-        .filter(f => f.endsWith('.json'))
-        .map(f => f.replace('.json', ''));
-
+      const agents = await listAgentNames(this.rulesDir);
       return this.sortAgentsByPriority(agents);
     } catch (error) {
       this.logger.error('Failed to list agents', error);
@@ -123,14 +107,11 @@ export class RulesService {
   }
 
   async getAgent(name: string): Promise<AgentProfile> {
-    const content = await this.getRuleContent(`agents/${name}.json`);
     try {
-      const parsed = JSON.parse(content);
-      // Validate against schema and check for prototype pollution
-      const validated = parseAgentProfile(parsed);
+      const profile = await loadAgentProfile(this.rulesDir, name);
       // Add source field for default agents
       const agent: AgentProfile = {
-        ...(validated as unknown as AgentProfile),
+        ...profile,
         source: 'default',
       };
 
@@ -151,9 +132,11 @@ export class RulesService {
 
       return agent;
     } catch (error) {
-      if (error instanceof AgentSchemaError) {
+      if (
+        error instanceof Error &&
+        error.message.startsWith('Invalid agent profile')
+      ) {
         this.logger.warn(`Invalid agent profile: ${name}`, error.message);
-        throw new Error(`Invalid agent profile: ${name}`);
       }
       throw error;
     }
@@ -198,26 +181,15 @@ export class RulesService {
       ...agents.map(a => `agents/${a}.json`),
     ];
 
-    for (const file of filesToSearch) {
-      try {
-        const content = await this.getRuleContent(file);
-        const lines = content.split('\n');
-        const matches: string[] = [];
-        let score = 0;
+    const defaultResults = await searchInRuleFiles(
+      this.rulesDir,
+      query,
+      filesToSearch,
+    );
 
-        lines.forEach((line, index) => {
-          if (line.toLowerCase().includes(queryLower)) {
-            matches.push(`Line ${index + 1}: ${line.trim()}`);
-            score++;
-          }
-        });
-
-        if (score > 0) {
-          results.push({ file, matches, score, source: 'default' });
-        }
-      } catch {
-        // Ignore errors
-      }
+    // Add source: 'default' to results from searchInRuleFiles
+    for (const result of defaultResults) {
+      results.push({ ...result, source: 'default' });
     }
 
     return results.sort((a, b) => b.score - a.score);
@@ -234,37 +206,14 @@ export class RulesService {
   async listSkillsFromDir(): Promise<
     Array<{ name: string; description: string }>
   > {
-    const skillsDir = path.join(this.rulesDir, 'skills');
-    const summaries: Array<{ name: string; description: string }> = [];
-
     try {
-      const entries = await fs.readdir(skillsDir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const skillPath = path.join(skillsDir, entry.name, 'SKILL.md');
-          try {
-            const content = await fs.readFile(skillPath, 'utf-8');
-            const skill = parseSkill(content, `skills/${entry.name}/SKILL.md`);
-            summaries.push({
-              name: skill.name,
-              description: skill.description,
-            });
-          } catch (error) {
-            // Skip invalid skills but log warning
-            this.logger.warn(
-              `Failed to parse skill '${entry.name}': ${error instanceof Error ? error.message : 'Unknown error'}`,
-            );
-          }
-        }
-      }
+      return await listSkillSummaries(this.rulesDir);
     } catch (error) {
       this.logger.warn(
         `Failed to list skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      return [];
     }
-
-    return summaries;
   }
 
   /**
@@ -274,30 +223,17 @@ export class RulesService {
    * @throws Error if skill not found or invalid
    */
   async getSkill(name: string): Promise<Skill> {
-    // Validate name format (lowercase alphanumeric with hyphens)
-    if (!/^[a-z0-9-]+$/.test(name)) {
-      throw new Error(`Invalid skill name format: ${name}`);
-    }
-
-    const skillPath = `skills/${name}/SKILL.md`;
-
-    // Security check
-    if (!isPathSafe(this.rulesDir, skillPath)) {
-      this.logger.warn(`Path traversal attempt blocked for skill: ${name}`);
-      throw new Error('Access denied: Invalid path');
-    }
-
-    const fullPath = path.join(this.rulesDir, skillPath);
-
     try {
-      const content = await fs.readFile(fullPath, 'utf-8');
-      return parseSkill(content, skillPath);
+      return await loadSkill(this.rulesDir, name);
     } catch (error) {
-      if (error instanceof SkillSchemaError) {
-        this.logger.warn(`Invalid skill '${name}': ${error.message}`);
-        throw new Error(`Invalid skill: ${name}`);
+      if (error instanceof Error) {
+        if (error.message.startsWith('Access denied')) {
+          this.logger.warn(`Path traversal attempt blocked for skill: ${name}`);
+        } else if (error.message.startsWith('Invalid skill:')) {
+          this.logger.warn(`Invalid skill '${name}': ${error.message}`);
+        }
       }
-      throw new Error(`Skill not found: ${name}`);
+      throw error;
     }
   }
 }
