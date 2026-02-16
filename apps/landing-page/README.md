@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Codingbuddy Landing Page
+
+Multi-AI Rules for Consistent Coding - Landing page built with Next.js 16, shadcn/ui, and Widget-Slot Architecture.
+
+## Tech Stack
+
+- **Framework**: Next.js 16.1.6 (App Router, React Compiler, Partial Prerendering)
+- **UI**: shadcn/ui + Tailwind CSS 4
+- **i18n**: next-intl (en, ko, zh-CN, ja, es)
+- **Testing**: Vitest + Testing Library
+- **Analytics**: Vercel Analytics + Speed Insights
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
+# Install dependencies
+yarn install
+
+# Development server
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production build
+yarn build
+
+# Run tests
+yarn test
+
+# Full validation (lint + format + typecheck + test + circular check)
+yarn validate
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Vercel Dashboard Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Import repository from GitHub
+2. Set **Root Directory** to `apps/landing-page`
+3. Framework will be auto-detected as Next.js
+4. Deploy
 
-## Learn More
+### Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Set in Vercel Dashboard → Settings → Environment Variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NODE_ENV` | Set to `production` (auto) | No |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Manual Deployment
 
-## Deploy on Vercel
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Preview deployment
+cd apps/landing-page
+vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Production deployment
+vercel --prod
+```
+
+### Custom Domain
+
+Configure in Vercel Dashboard → Settings → Domains.
+
+## Project Structure
+
+```
+src/app/
+├── layout.tsx          # Root layout (fonts, theme, analytics)
+├── page.tsx            # Root redirect → /en
+├── globals.css         # Global styles
+└── [locale]/
+    ├── layout.tsx      # Locale layout (i18n, header, footer)
+    ├── page.tsx        # Main page (Hero, Problem, Solution, FAQ)
+    ├── @agents/        # Parallel route: Agents section
+    ├── @code_example/  # Parallel route: Code example section
+    └── @quick_start/   # Parallel route: Quick start section
+```
+
+## Supported Locales
+
+| Locale | Language |
+|--------|----------|
+| `en`   | English (default) |
+| `ko`   | Korean |
+| `zh-CN`| Simplified Chinese |
+| `ja`   | Japanese |
+| `es`   | Spanish |
