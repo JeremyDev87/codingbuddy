@@ -28,6 +28,7 @@ export const AgentsShowcase = ({ locale }: WidgetProps) => {
 
   return (
     <section
+      id="agents"
       data-testid="agents-showcase"
       lang={locale}
       aria-labelledby="agents-heading"

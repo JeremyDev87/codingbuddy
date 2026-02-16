@@ -7,6 +7,7 @@ export const FAQ = async ({ locale }: WidgetProps) => {
 
   return (
     <section
+      id="faq"
       data-testid="faq"
       lang={locale}
       aria-labelledby="faq-heading"

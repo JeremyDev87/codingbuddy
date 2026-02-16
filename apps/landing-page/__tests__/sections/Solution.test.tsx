@@ -21,6 +21,11 @@ describe('Solution', () => {
     );
   });
 
+  it('should have id attribute for anchor navigation', async () => {
+    render(await Solution({ locale: 'en' }));
+    expect(screen.getByTestId('solution')).toHaveAttribute('id', 'solution');
+  });
+
   it('should have aria-labelledby linking to heading', async () => {
     render(await Solution({ locale: 'en' }));
     const section = screen.getByTestId('solution');
