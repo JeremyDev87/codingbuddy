@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { run } from 'axe-core';
+import '@/__tests__/__helpers__/next-intl-server-mock';
 import '@/__tests__/__helpers__/next-intl-mock';
 import { Hero } from '@/sections/Hero';
 import { Problem } from '@/sections/Problem';
@@ -18,49 +19,55 @@ import { SlotError } from '@/components/SlotError';
  * Locale Page Accessibility Tests
  * Tests the widget-slot architecture components for a11y compliance.
  */
-const renderLocalePage = (locale: 'en' | 'ko' = 'en') =>
-  render(
+const renderLocalePage = async (locale: 'en' | 'ko' = 'en') => {
+  const heroJsx = await Hero({ locale });
+  const problemJsx = await Problem({ locale });
+  const solutionJsx = await Solution({ locale });
+  const faqJsx = await FAQ({ locale });
+
+  return render(
     <main id="main-content">
-      <Hero locale={locale} />
-      <Problem locale={locale} />
-      <Solution locale={locale} />
+      {heroJsx}
+      {problemJsx}
+      {solutionJsx}
       <AgentsShowcase locale={locale} />
       <CodeExample locale={locale} />
       <QuickStart locale={locale} />
-      <FAQ locale={locale} />
+      {faqJsx}
     </main>,
   );
+};
 
 describe('Locale Page Accessibility', () => {
   test('should have no axe violations (English)', async () => {
-    const { container } = renderLocalePage('en');
+    const { container } = await renderLocalePage('en');
     const results = await run(container);
     expect(results.violations).toHaveLength(0);
   });
 
   test('should have no axe violations (Korean)', async () => {
-    const { container } = renderLocalePage('ko');
+    const { container } = await renderLocalePage('ko');
     const results = await run(container);
     expect(results.violations).toHaveLength(0);
   });
 
-  test('main landmark exists with correct id', () => {
-    const { getByRole } = renderLocalePage();
+  test('main landmark exists with correct id', async () => {
+    const { getByRole } = await renderLocalePage();
     const main = getByRole('main');
     expect(main).toBeInTheDocument();
     expect(main).toHaveAttribute('id', 'main-content');
   });
 
-  test('heading hierarchy is valid', () => {
-    const { container } = renderLocalePage();
+  test('heading hierarchy is valid', async () => {
+    const { container } = await renderLocalePage();
     const h1 = container.querySelector('h1');
     const h2Elements = container.querySelectorAll('h2');
     expect(h1).toBeInTheDocument();
     expect(h2Elements.length).toBe(6);
   });
 
-  test('all sections have test ids', () => {
-    const { getByTestId } = renderLocalePage();
+  test('all sections have test ids', async () => {
+    const { getByTestId } = await renderLocalePage();
     expect(getByTestId('hero')).toBeInTheDocument();
     expect(getByTestId('problem')).toBeInTheDocument();
     expect(getByTestId('solution')).toBeInTheDocument();
@@ -70,8 +77,8 @@ describe('Locale Page Accessibility', () => {
     expect(getByTestId('faq')).toBeInTheDocument();
   });
 
-  test('all sections have lang attribute', () => {
-    const { getByTestId } = renderLocalePage();
+  test('all sections have lang attribute', async () => {
+    const { getByTestId } = await renderLocalePage();
     expect(getByTestId('hero')).toHaveAttribute('lang', 'en');
     expect(getByTestId('problem')).toHaveAttribute('lang', 'en');
     expect(getByTestId('solution')).toHaveAttribute('lang', 'en');
@@ -81,8 +88,8 @@ describe('Locale Page Accessibility', () => {
     expect(getByTestId('faq')).toHaveAttribute('lang', 'en');
   });
 
-  test('all sections have aria-labelledby', () => {
-    renderLocalePage();
+  test('all sections have aria-labelledby', async () => {
+    await renderLocalePage();
     expect(screen.getByTestId('hero')).toHaveAttribute(
       'aria-labelledby',
       'hero-heading',
@@ -113,8 +120,8 @@ describe('Locale Page Accessibility', () => {
     );
   });
 
-  test('Korean locale sets correct lang attributes', () => {
-    const { getByTestId } = renderLocalePage('ko');
+  test('Korean locale sets correct lang attributes', async () => {
+    const { getByTestId } = await renderLocalePage('ko');
     expect(getByTestId('hero')).toHaveAttribute('lang', 'ko');
     expect(getByTestId('problem')).toHaveAttribute('lang', 'ko');
     expect(getByTestId('solution')).toHaveAttribute('lang', 'ko');

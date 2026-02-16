@@ -57,6 +57,9 @@ describe('i18n request config logic', () => {
         'codeExample',
         'quickStart',
         'header',
+        'cookieConsent',
+        'footer',
+        'metadata',
         'faq',
       ]);
     });
