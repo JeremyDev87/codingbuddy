@@ -94,34 +94,6 @@ describe('build script orchestration', () => {
   });
 
   // ============================================================================
-  // peerDependencies Sync Logic
-  // ============================================================================
-  describe('peerDependencies sync logic', () => {
-    function computeExpectedPeer(version: string): string {
-      const [major, minor] = version.split('.');
-      return `^${major}.${minor}.0`;
-    }
-
-    it('computes correct peerDependencies from version', () => {
-      expect(computeExpectedPeer('4.0.1')).toBe('^4.0.0');
-      expect(computeExpectedPeer('4.1.0')).toBe('^4.1.0');
-      expect(computeExpectedPeer('5.2.3')).toBe('^5.2.0');
-    });
-
-    it('detects peerDependencies mismatch when version already matches', () => {
-      const currentVersion = '4.0.1';
-      const pluginVersion = '4.0.1';
-      const stalePeer = '^3.0.0';
-      const expectedPeer = computeExpectedPeer(currentVersion);
-
-      // version matches but peer is stale - this was the bug in #409
-      expect(pluginVersion).toBe(currentVersion);
-      expect(stalePeer).not.toBe(expectedPeer);
-      expect(expectedPeer).toBe('^4.0.0');
-    });
-  });
-
-  // ============================================================================
   // BuildResult Interface
   // ============================================================================
   describe('BuildResult interface consistency', () => {
@@ -131,20 +103,6 @@ describe('build script orchestration', () => {
       details: string[];
       errors: string[];
     }
-
-    it('has correct shape for version sync', () => {
-      const buildResult: BuildResult = {
-        step: 'Version Sync',
-        success: true,
-        details: ['package.json updated to 2.4.1'],
-        errors: [],
-      };
-
-      expect(buildResult.step).toBe('Version Sync');
-      expect(buildResult.success).toBe(true);
-      expect(buildResult.details).toContain('package.json updated to 2.4.1');
-      expect(buildResult.errors).toHaveLength(0);
-    });
 
     it('has correct shape for README generation', () => {
       const buildResult: BuildResult = {
@@ -162,14 +120,14 @@ describe('build script orchestration', () => {
 
     it('captures errors correctly', () => {
       const buildResult: BuildResult = {
-        step: 'Version Sync',
+        step: 'README Generation',
         success: false,
         details: [],
-        errors: ['MCP server package.json not found'],
+        errors: ['Failed to write README.md'],
       };
 
       expect(buildResult.success).toBe(false);
-      expect(buildResult.errors).toContain('MCP server package.json not found');
+      expect(buildResult.errors).toContain('Failed to write README.md');
     });
   });
 });

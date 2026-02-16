@@ -3,8 +3,9 @@
  * Build Script for Claude Code Plugin
  *
  * Orchestrates the plugin build process:
- * 1. Sync version from MCP server
- * 2. Generate README
+ * 1. Generate README
+ *
+ * Version sync is handled by the prebuild script (sync-version.js).
  *
  * Note: Agents, commands, and skills are NOT generated here.
  * They live in packages/rules/.ai-rules/ (single source of truth).
@@ -22,83 +23,12 @@ import { getErrorMessage } from '../src/utils';
 
 // Paths
 const ROOT_DIR = path.resolve(__dirname, '..');
-const MCP_SERVER_DIR = path.resolve(__dirname, '../../..', 'apps/mcp-server');
 
 interface BuildResult {
   step: string;
   success: boolean;
   details: string[];
   errors: string[];
-}
-
-function syncVersion(): BuildResult {
-  const result: BuildResult = {
-    step: 'Version Sync',
-    success: true,
-    details: [],
-    errors: [],
-  };
-
-  try {
-    const mcpPkgPath = path.join(MCP_SERVER_DIR, 'package.json');
-    const pluginPkgPath = path.join(ROOT_DIR, 'package.json');
-    const manifestPath = path.join(ROOT_DIR, '.claude-plugin', 'plugin.json');
-
-    if (!fs.existsSync(mcpPkgPath)) {
-      result.errors.push('MCP server package.json not found');
-      result.success = false;
-      return result;
-    }
-
-    const mcpPkg = JSON.parse(fs.readFileSync(mcpPkgPath, 'utf8'));
-    const version = mcpPkg.version;
-
-    // Update plugin package.json
-    const pluginPkg = JSON.parse(fs.readFileSync(pluginPkgPath, 'utf8'));
-    let pkgChanged = false;
-
-    if (pluginPkg.version !== version) {
-      pluginPkg.version = version;
-      pkgChanged = true;
-      result.details.push(`package.json version updated to ${version}`);
-    }
-
-    // Always check peerDependencies (even if version already matches)
-    const [major, minor] = version.split('.');
-    const expectedPeer = `^${major}.${minor}.0`;
-    pluginPkg.peerDependencies = pluginPkg.peerDependencies || {};
-    if (pluginPkg.peerDependencies.codingbuddy !== expectedPeer) {
-      pluginPkg.peerDependencies.codingbuddy = expectedPeer;
-      pkgChanged = true;
-      result.details.push(
-        `peerDependencies.codingbuddy updated to ${expectedPeer}`,
-      );
-    }
-
-    if (pkgChanged) {
-      fs.writeFileSync(
-        pluginPkgPath,
-        JSON.stringify(pluginPkg, null, 2) + '\n',
-      );
-    } else {
-      result.details.push(`package.json already at ${version}`);
-    }
-
-    // Update manifest
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    if (manifest.version !== version) {
-      manifest.version = version;
-      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
-      result.details.push(`plugin.json updated to ${version}`);
-    } else {
-      result.details.push(`plugin.json already at ${version}`);
-    }
-  } catch (error) {
-    result.success = false;
-    result.errors.push(getErrorMessage(error));
-  }
-
-  return result;
 }
 
 function createReadme(): BuildResult {
@@ -214,14 +144,13 @@ async function main(): Promise<void> {
   console.log('╚════════════════════════════════════════════════════════════╝');
   console.log('');
 
+  console.log('ℹ️  Version sync handled by prebuild script (sync-version.js)');
+  console.log('');
+
   const results: BuildResult[] = [];
 
-  // Step 1: Version Sync
-  console.log('📦 Step 1: Syncing version...');
-  results.push(syncVersion());
-
-  // Step 2: Generate README
-  console.log('📖 Step 2: Generating README...');
+  // Step 1: Generate README
+  console.log('📖 Step 1: Generating README...');
   results.push(createReadme());
 
   // Summary
