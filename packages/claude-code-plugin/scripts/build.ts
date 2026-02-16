@@ -70,7 +70,9 @@ function syncVersion(): BuildResult {
     if (pluginPkg.peerDependencies.codingbuddy !== expectedPeer) {
       pluginPkg.peerDependencies.codingbuddy = expectedPeer;
       pkgChanged = true;
-      result.details.push(`peerDependencies.codingbuddy updated to ${expectedPeer}`);
+      result.details.push(
+        `peerDependencies.codingbuddy updated to ${expectedPeer}`,
+      );
     }
 
     if (pkgChanged) {
