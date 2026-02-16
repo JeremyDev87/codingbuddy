@@ -1,17 +1,9 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { getTranslations } from 'next-intl/server';
+import { FAQAccordion } from './FAQAccordion';
 import type { WidgetProps } from '@/types';
-import { faqItems } from './data/questions';
 
-export const FAQ = ({ locale }: WidgetProps) => {
-  const t = useTranslations('faq');
+export const FAQ = async ({ locale }: WidgetProps) => {
+  const t = await getTranslations({ locale, namespace: 'faq' });
 
   return (
     <section
@@ -31,21 +23,7 @@ export const FAQ = ({ locale }: WidgetProps) => {
           <p className="text-muted-foreground mt-4 text-lg">{t('subtitle')}</p>
         </div>
 
-        <Accordion type="single" collapsible defaultValue="q1">
-          {faqItems.map(({ key }) => {
-            const answerKey = key.replace('q', 'a');
-            return (
-              <AccordionItem key={key} value={key}>
-                <AccordionTrigger className="text-left text-base font-medium">
-                  {t(key)}
-                </AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-muted-foreground">{t(answerKey)}</p>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
+        <FAQAccordion />
       </div>
     </section>
   );

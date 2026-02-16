@@ -1,13 +1,11 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { ArrowRight, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { WidgetProps } from '@/types';
 
-export const Hero = ({ locale }: WidgetProps) => {
-  const t = useTranslations('hero');
+export const Hero = async ({ locale }: WidgetProps) => {
+  const t = await getTranslations({ locale, namespace: 'hero' });
 
   return (
     <section
@@ -32,7 +30,7 @@ export const Hero = ({ locale }: WidgetProps) => {
 
         <h1
           id="hero-heading"
-          className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl"
+          className="brand-gradient-text bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl"
         >
           {t('title')}
         </h1>
@@ -45,7 +43,7 @@ export const Hero = ({ locale }: WidgetProps) => {
           <Button size="lg" asChild>
             <a href="#quick-start">
               {t('cta')}
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-4" aria-hidden="true" />
             </a>
           </Button>
           <Button variant="outline" size="lg" asChild>
@@ -54,7 +52,7 @@ export const Hero = ({ locale }: WidgetProps) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Github className="size-4" />
+              <Github className="size-4" aria-hidden="true" />
               {t('github')}
             </a>
           </Button>

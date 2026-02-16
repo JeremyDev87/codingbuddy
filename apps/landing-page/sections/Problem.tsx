@@ -1,6 +1,4 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { FileWarning, Copy, ShieldOff, Unplug } from 'lucide-react';
 import {
   Card,
@@ -17,8 +15,8 @@ const painPoints = [
   { key: 'pain4', icon: Unplug },
 ] as const;
 
-export const Problem = ({ locale }: WidgetProps) => {
-  const t = useTranslations('problem');
+export const Problem = async ({ locale }: WidgetProps) => {
+  const t = await getTranslations({ locale, namespace: 'problem' });
 
   return (
     <section

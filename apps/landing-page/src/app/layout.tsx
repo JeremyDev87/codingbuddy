@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { CookieConsent } from '@/components/cookie-consent';
 import './globals.css';
 
 const inter = Inter({
@@ -55,7 +54,6 @@ const RootLayout = ({
           </a>
           {children}
           <Toaster />
-          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

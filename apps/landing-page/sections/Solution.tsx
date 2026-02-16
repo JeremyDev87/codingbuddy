@@ -1,6 +1,4 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { DatabaseZap, Bot, ArrowRightLeft, ShieldCheck } from 'lucide-react';
 import {
   Card,
@@ -17,8 +15,8 @@ const benefits = [
   { key: 'benefit4', icon: ShieldCheck },
 ] as const;
 
-export const Solution = ({ locale }: WidgetProps) => {
-  const t = useTranslations('solution');
+export const Solution = async ({ locale }: WidgetProps) => {
+  const t = await getTranslations({ locale, namespace: 'solution' });
 
   return (
     <section
