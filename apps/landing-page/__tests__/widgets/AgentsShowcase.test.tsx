@@ -24,7 +24,10 @@ describe('AgentsShowcase', () => {
 
   it('should have id attribute for anchor navigation', () => {
     render(<AgentsShowcase locale="en" />);
-    expect(screen.getByTestId('agents-showcase')).toHaveAttribute('id', 'agents');
+    expect(screen.getByTestId('agents-showcase')).toHaveAttribute(
+      'id',
+      'agents',
+    );
   });
 
   it('should have aria-labelledby linking to heading', () => {
