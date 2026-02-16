@@ -3,7 +3,32 @@
     "badge": "开源",
     "title": "统一 AI 编码规则",
     "description": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。所有工具中一致的 AI 辅助编码。",
-    "cta": "开始使用"
+    "cta": "开始使用",
+    "github": "GitHub"
+  },
+  "problem": {
+    "title": "当今 AI 编码的问题",
+    "subtitle": "每个 AI 工具都有自己的规则格式。您的团队浪费时间维护重复的配置。",
+    "pain1Title": "规则不一致",
+    "pain1Desc": "每个工具需要各自的配置 — .cursorrules、CLAUDE.md、.codex — 没有共享标准。",
+    "pain2Title": "重复劳动",
+    "pain2Desc": "每次更新时都需要将相同的编码规则复制粘贴到多个工具中。",
+    "pain3Title": "缺乏质量标准",
+    "pain3Desc": "AI 在没有结构化 TDD、SOLID 原则或覆盖率要求的情况下生成代码。",
+    "pain4Title": "上下文丢失",
+    "pain4Desc": "每个工具不同的工作流意味着无法共享专家知识或一致的方法论。"
+  },
+  "solution": {
+    "title": "一套规则。所有工具。",
+    "subtitle": "Codingbuddy 为您的 AI 助手提供一致的规则、专家代理和结构化工作流。",
+    "benefit1Title": "单一事实来源",
+    "benefit1Desc": "一套规则自动应用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。",
+    "benefit2Title": "29 个专家代理",
+    "benefit2Desc": "为架构、安全、测试、性能、可访问性等提供专业知识。",
+    "benefit3Title": "结构化工作流",
+    "benefit3Desc": "PLAN → ACT → EVAL 循环确保所有 AI 辅助开发中的一致质量。",
+    "benefit4Title": "内置质量标准",
+    "benefit4Desc": "TDD、SOLID 原则和 90% 以上测试覆盖率作为标准实践执行。"
   },
   "agents": {
     "title": "AI 专业代理",
@@ -44,6 +69,19 @@
     "copyFailed": "复制失败"
   },
   "faq": {
-    "title": "常见问题"
+    "title": "常见问题",
+    "subtitle": "关于 Codingbuddy 您需要了解的一切",
+    "q1": "支持哪些 AI 工具？",
+    "a1": "Codingbuddy 支持 Cursor、Claude Code、GitHub Copilot（Codex）、Antigravity（Gemini）、Amazon Q 和 Kiro。通过 MCP 服务器协议，一套规则在所有工具中生效。",
+    "q2": "PLAN/ACT/EVAL 工作流如何运作？",
+    "a2": "PLAN 模式通过 TDD 方法设计实施方案。ACT 模式执行变更。EVAL 模式审查代码质量并提出改进建议。您也可以使用 AUTO 模式自动循环直到达到质量目标。",
+    "q3": "需要为每个 AI 工具单独配置吗？",
+    "a3": "不需要。Codingbuddy 使用单一的 .ai-rules 目录作为唯一事实来源。每个 AI 工具通过适配器读取此共享规则集，因此只需维护一份配置。",
+    "q4": "Codingbuddy 是免费开源的吗？",
+    "a4": "是的。Codingbuddy 基于 MIT 许可证完全开源。您可以在个人和商业项目中自由使用。",
+    "q5": "可以自定义规则和代理吗？",
+    "a5": "当然可以。您可以在 .ai-rules 目录中创建自定义规则、定义自己的专家代理，并根据团队工作流调整质量标准。",
+    "q6": "什么是专家代理？",
+    "a6": "专家代理是 29 个在架构审查、安全审计、测试策略、性能优化、可访问性等特定领域具有专业知识的 AI 角色。它们提供深入的领域特定指导。"
   }
 }

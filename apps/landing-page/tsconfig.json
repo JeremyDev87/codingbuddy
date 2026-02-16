@@ -24,7 +24,8 @@
       "@/*": ["./*"],
       "@/types": ["./types"],
       "@/widgets/*": ["./widgets/*"],
-      "@/components/*": ["./components/*"]
+      "@/components/*": ["./components/*"],
+      "@/sections/*": ["./sections/*"]
     }
   },
   "include": [

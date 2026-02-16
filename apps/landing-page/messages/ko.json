@@ -3,7 +3,32 @@
     "badge": "오픈 소스",
     "title": "일관된 코딩을 위한 멀티 AI 규칙",
     "description": "Cursor, Claude Code, Codex, Antigravity, Q, Kiro를 위한 하나의 규칙 세트. 모든 도구에서 일관된 AI 지원 코딩.",
-    "cta": "시작하기"
+    "cta": "시작하기",
+    "github": "GitHub"
+  },
+  "problem": {
+    "title": "오늘날 AI 코딩의 문제점",
+    "subtitle": "모든 AI 도구마다 고유한 규칙 형식이 있습니다. 팀은 중복 설정을 유지하느라 시간을 낭비합니다.",
+    "pain1Title": "일관성 없는 규칙",
+    "pain1Desc": "각 도구마다 .cursorrules, CLAUDE.md, .codex 등 별도의 설정이 필요하며, 공유 표준이 없습니다.",
+    "pain2Title": "중복된 노력",
+    "pain2Desc": "업데이트할 때마다 동일한 코딩 규칙을 여러 도구에 복사-붙여넣기 해야 합니다.",
+    "pain3Title": "품질 기준 부재",
+    "pain3Desc": "AI가 구조화된 TDD, SOLID 원칙, 커버리지 요구사항 없이 코드를 생성합니다.",
+    "pain4Title": "컨텍스트 손실",
+    "pain4Desc": "도구마다 다른 워크플로우로 인해 전문가 지식이나 일관된 방법론을 공유할 수 없습니다."
+  },
+  "solution": {
+    "title": "하나의 규칙 세트. 모든 도구.",
+    "subtitle": "Codingbuddy는 AI 어시스턴트에게 일관된 규칙, 전문 에이전트, 구조화된 워크플로우를 제공합니다.",
+    "benefit1Title": "단일 진실 공급원",
+    "benefit1Desc": "하나의 규칙 세트가 Cursor, Claude Code, Codex, Antigravity, Q, Kiro에 자동 적용됩니다.",
+    "benefit2Title": "29개 전문 에이전트",
+    "benefit2Desc": "아키텍처, 보안, 테스팅, 성능, 접근성 등에 특화된 전문 지식을 제공합니다.",
+    "benefit3Title": "구조화된 워크플로우",
+    "benefit3Desc": "PLAN → ACT → EVAL 사이클로 모든 AI 지원 개발에서 일관된 품질을 보장합니다.",
+    "benefit4Title": "내장된 품질 기준",
+    "benefit4Desc": "TDD, SOLID 원칙, 90% 이상 테스트 커버리지가 표준 관행으로 적용됩니다."
   },
   "agents": {
     "title": "AI 전문 에이전트",
@@ -44,6 +69,19 @@
     "copyFailed": "복사 실패"
   },
   "faq": {
-    "title": "자주 묻는 질문"
+    "title": "자주 묻는 질문",
+    "subtitle": "Codingbuddy에 대해 알아야 할 모든 것",
+    "q1": "어떤 AI 도구를 지원하나요?",
+    "a1": "Codingbuddy는 Cursor, Claude Code, GitHub Copilot(Codex), Antigravity(Gemini), Amazon Q, Kiro를 지원합니다. MCP 서버 프로토콜을 통해 하나의 규칙 세트가 모든 도구에서 작동합니다.",
+    "q2": "PLAN/ACT/EVAL 워크플로우는 어떻게 동작하나요?",
+    "a2": "PLAN 모드는 TDD 접근으로 구현 방안을 설계합니다. ACT 모드는 변경 사항을 실행합니다. EVAL 모드는 코드 품질을 검토하고 개선을 제안합니다. AUTO 모드로 품질 목표 달성까지 자동 순환할 수도 있습니다.",
+    "q3": "각 AI 도구를 개별적으로 설정해야 하나요?",
+    "a3": "아닙니다. Codingbuddy는 단일 .ai-rules 디렉토리를 진실 공급원으로 사용합니다. 각 AI 도구는 어댑터를 통해 이 공유 규칙 세트를 읽으므로, 하나의 설정만 관리하면 됩니다.",
+    "q4": "Codingbuddy는 무료이고 오픈 소스인가요?",
+    "a4": "네. Codingbuddy는 MIT 라이선스 하에 완전히 오픈 소스입니다. 개인 및 상업 프로젝트에서 자유롭게 사용할 수 있습니다.",
+    "q5": "규칙과 에이전트를 커스터마이즈할 수 있나요?",
+    "a5": "물론입니다. .ai-rules 디렉토리에서 커스텀 규칙을 만들고, 자신만의 전문 에이전트를 정의하고, 팀의 워크플로우에 맞게 품질 기준을 조정할 수 있습니다.",
+    "q6": "전문 에이전트란 무엇인가요?",
+    "a6": "전문 에이전트는 아키텍처 리뷰, 보안 감사, 테스트 전략, 성능 최적화, 접근성 등 특정 영역에 전문성을 가진 29개의 AI 페르소나입니다. 도메인별 심층 가이드를 제공합니다."
   }
 }

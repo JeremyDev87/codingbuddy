@@ -16,6 +16,7 @@ export const QuickStart = ({ locale }: WidgetProps) => {
 
   return (
     <section
+      id="quick-start"
       data-testid="quick-start"
       lang={locale}
       aria-labelledby="quick-start-heading"

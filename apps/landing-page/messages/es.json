@@ -3,7 +3,32 @@
     "badge": "Código Abierto",
     "title": "Reglas Multi-IA para Codificación Consistente",
     "description": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro. Codificación asistida por IA consistente en todas tus herramientas.",
-    "cta": "Comenzar"
+    "cta": "Comenzar",
+    "github": "GitHub"
+  },
+  "problem": {
+    "title": "El Problema con la Codificación IA Hoy",
+    "subtitle": "Cada herramienta IA tiene su propio formato de reglas. Tu equipo pierde tiempo manteniendo configuraciones duplicadas.",
+    "pain1Title": "Reglas Inconsistentes",
+    "pain1Desc": "Cada herramienta necesita su propia configuración — .cursorrules, CLAUDE.md, .codex — sin un estándar compartido.",
+    "pain2Title": "Esfuerzo Duplicado",
+    "pain2Desc": "Copiar y pegar las mismas reglas de codificación en múltiples herramientas cada vez que las actualizas.",
+    "pain3Title": "Sin Estándares de Calidad",
+    "pain3Desc": "La IA genera código sin TDD estructurado, principios SOLID ni requisitos de cobertura.",
+    "pain4Title": "Contexto Perdido",
+    "pain4Desc": "Flujos de trabajo diferentes por herramienta significa que no hay conocimiento especialista compartido ni metodología consistente."
+  },
+  "solution": {
+    "title": "Un Conjunto de Reglas. Todas las Herramientas.",
+    "subtitle": "Codingbuddy da a tus asistentes IA reglas consistentes, agentes especialistas y flujos de trabajo estructurados.",
+    "benefit1Title": "Fuente Única de Verdad",
+    "benefit1Desc": "Un conjunto de reglas aplicado automáticamente a Cursor, Claude Code, Codex, Antigravity, Q y Kiro.",
+    "benefit2Title": "29 Agentes Especialistas",
+    "benefit2Desc": "Experiencia enfocada en arquitectura, seguridad, testing, rendimiento, accesibilidad y más.",
+    "benefit3Title": "Flujo de Trabajo Estructurado",
+    "benefit3Desc": "El ciclo PLAN → ACT → EVAL asegura calidad consistente en todo tu desarrollo asistido por IA.",
+    "benefit4Title": "Calidad Incorporada",
+    "benefit4Desc": "TDD, principios SOLID y cobertura de tests del 90%+ aplicados como práctica estándar."
   },
   "agents": {
     "title": "Agentes AI Especializados",
@@ -44,6 +69,19 @@
     "copyFailed": "Error al copiar"
   },
   "faq": {
-    "title": "Preguntas Frecuentes"
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre Codingbuddy",
+    "q1": "¿Qué herramientas IA soporta Codingbuddy?",
+    "a1": "Codingbuddy soporta Cursor, Claude Code, GitHub Copilot (Codex), Antigravity (Gemini), Amazon Q y Kiro. Un conjunto de reglas funciona en todas estas herramientas a través del protocolo MCP.",
+    "q2": "¿Cómo funciona el flujo PLAN/ACT/EVAL?",
+    "a2": "El modo PLAN diseña tu enfoque de implementación con TDD. El modo ACT ejecuta los cambios. El modo EVAL revisa la calidad del código y sugiere mejoras. También puedes usar AUTO para ciclar automáticamente hasta alcanzar los objetivos de calidad.",
+    "q3": "¿Necesito configurar cada herramienta IA por separado?",
+    "a3": "No. Codingbuddy usa un único directorio .ai-rules como fuente de verdad. Cada herramienta IA lee de este conjunto de reglas compartido a través de su adaptador, así que solo mantienes una configuración.",
+    "q4": "¿Es Codingbuddy gratuito y de código abierto?",
+    "a4": "Sí. Codingbuddy es completamente de código abierto bajo la licencia MIT. Puedes usarlo libremente en proyectos personales y comerciales.",
+    "q5": "¿Puedo personalizar las reglas y agentes?",
+    "a5": "Por supuesto. Puedes crear reglas personalizadas en el directorio .ai-rules, definir tus propios agentes especialistas y ajustar los estándares de calidad al flujo de trabajo de tu equipo.",
+    "q6": "¿Qué son los agentes especialistas?",
+    "a6": "Los agentes especialistas son 29 personas IA enfocadas con experiencia en áreas específicas como revisión de arquitectura, auditoría de seguridad, estrategia de testing, optimización de rendimiento y accesibilidad. Proporcionan guía profunda y específica del dominio."
   }
 }

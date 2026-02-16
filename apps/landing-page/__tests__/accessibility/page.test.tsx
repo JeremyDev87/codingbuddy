@@ -2,6 +2,10 @@ import { describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { run } from 'axe-core';
 import '@/__tests__/__helpers__/next-intl-mock';
+import { Hero } from '@/sections/Hero';
+import { Problem } from '@/sections/Problem';
+import { Solution } from '@/sections/Solution';
+import { FAQ } from '@/sections/FAQ';
 import { AgentsShowcase } from '@/widgets/AgentsShowcase';
 import { CodeExample } from '@/widgets/CodeExample';
 import { QuickStart } from '@/widgets/QuickStart';
@@ -17,13 +21,13 @@ import { SlotError } from '@/components/SlotError';
 const renderLocalePage = (locale: 'en' | 'ko' = 'en') =>
   render(
     <main id="main-content">
-      <section className="py-16 px-4 text-center" lang={locale}>
-        <h1>Codingbuddy</h1>
-        <p>Multi-AI Rules for Consistent Coding</p>
-      </section>
+      <Hero locale={locale} />
+      <Problem locale={locale} />
+      <Solution locale={locale} />
       <AgentsShowcase locale={locale} />
       <CodeExample locale={locale} />
       <QuickStart locale={locale} />
+      <FAQ locale={locale} />
     </main>,
   );
 
@@ -52,25 +56,45 @@ describe('Locale Page Accessibility', () => {
     const h1 = container.querySelector('h1');
     const h2Elements = container.querySelectorAll('h2');
     expect(h1).toBeInTheDocument();
-    expect(h2Elements.length).toBe(3);
+    expect(h2Elements.length).toBe(6);
   });
 
-  test('all widget sections have test ids', () => {
+  test('all sections have test ids', () => {
     const { getByTestId } = renderLocalePage();
+    expect(getByTestId('hero')).toBeInTheDocument();
+    expect(getByTestId('problem')).toBeInTheDocument();
+    expect(getByTestId('solution')).toBeInTheDocument();
     expect(getByTestId('agents-showcase')).toBeInTheDocument();
     expect(getByTestId('code-example')).toBeInTheDocument();
     expect(getByTestId('quick-start')).toBeInTheDocument();
+    expect(getByTestId('faq')).toBeInTheDocument();
   });
 
-  test('widget sections have lang attribute', () => {
+  test('all sections have lang attribute', () => {
     const { getByTestId } = renderLocalePage();
+    expect(getByTestId('hero')).toHaveAttribute('lang', 'en');
+    expect(getByTestId('problem')).toHaveAttribute('lang', 'en');
+    expect(getByTestId('solution')).toHaveAttribute('lang', 'en');
     expect(getByTestId('agents-showcase')).toHaveAttribute('lang', 'en');
     expect(getByTestId('code-example')).toHaveAttribute('lang', 'en');
     expect(getByTestId('quick-start')).toHaveAttribute('lang', 'en');
+    expect(getByTestId('faq')).toHaveAttribute('lang', 'en');
   });
 
-  test('widget sections have aria-labelledby', () => {
+  test('all sections have aria-labelledby', () => {
     renderLocalePage();
+    expect(screen.getByTestId('hero')).toHaveAttribute(
+      'aria-labelledby',
+      'hero-heading',
+    );
+    expect(screen.getByTestId('problem')).toHaveAttribute(
+      'aria-labelledby',
+      'problem-heading',
+    );
+    expect(screen.getByTestId('solution')).toHaveAttribute(
+      'aria-labelledby',
+      'solution-heading',
+    );
     expect(screen.getByTestId('agents-showcase')).toHaveAttribute(
       'aria-labelledby',
       'agents-heading',
@@ -83,13 +107,21 @@ describe('Locale Page Accessibility', () => {
       'aria-labelledby',
       'quick-start-heading',
     );
+    expect(screen.getByTestId('faq')).toHaveAttribute(
+      'aria-labelledby',
+      'faq-heading',
+    );
   });
 
   test('Korean locale sets correct lang attributes', () => {
     const { getByTestId } = renderLocalePage('ko');
+    expect(getByTestId('hero')).toHaveAttribute('lang', 'ko');
+    expect(getByTestId('problem')).toHaveAttribute('lang', 'ko');
+    expect(getByTestId('solution')).toHaveAttribute('lang', 'ko');
     expect(getByTestId('agents-showcase')).toHaveAttribute('lang', 'ko');
     expect(getByTestId('code-example')).toHaveAttribute('lang', 'ko');
     expect(getByTestId('quick-start')).toHaveAttribute('lang', 'ko');
+    expect(getByTestId('faq')).toHaveAttribute('lang', 'ko');
   });
 });
 

@@ -51,6 +51,8 @@ describe('i18n request config logic', () => {
       expect(messages).toBeDefined();
       expect(Object.keys(messages)).toEqual([
         'hero',
+        'problem',
+        'solution',
         'agents',
         'codeExample',
         'quickStart',
