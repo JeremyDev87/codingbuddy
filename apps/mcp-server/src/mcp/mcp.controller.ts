@@ -7,11 +7,13 @@ import {
   Logger,
   OnModuleDestroy,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { McpService } from './mcp.service';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SseAuthGuard } from './sse-auth.guard';
 
 /**
  * MCP Controller for SSE-based communication.
@@ -29,10 +31,11 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
  * **Security:** Each SSE connection gets its own Server instance to prevent
  * cross-client data leaks and state contamination.
  *
- * **Authentication:** No authentication is implemented as this is intended for
- * development/testing use. For production SSE deployment, add authentication
- * middleware (API key, JWT, etc.) and rate limiting.
+ * **Authentication:** Set the `MCP_SSE_TOKEN` environment variable to enable
+ * Bearer token authentication on all SSE endpoints. If unset, no authentication
+ * is required (backward compatible).
  */
+@UseGuards(SseAuthGuard)
 @Controller()
 export class McpController implements OnModuleDestroy {
   private readonly logger = new Logger(McpController.name);

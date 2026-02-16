@@ -25,6 +25,7 @@ vi.mock('@modelcontextprotocol/sdk/server/sse.js', () => ({
 // Import after mocks
 import { McpController } from './mcp.controller';
 import { McpService } from './mcp.service';
+import { SseAuthGuard } from './sse-auth.guard';
 
 /**
  * Type for accessing private connection property in tests.
@@ -324,6 +325,14 @@ describe('McpController', () => {
 
       // Should not throw
       await expect(controller.onModuleDestroy()).resolves.not.toThrow();
+    });
+  });
+
+  describe('Security: SseAuthGuard applied', () => {
+    it('should have UseGuards decorator with SseAuthGuard', () => {
+      const guards = Reflect.getMetadata('__guards__', McpController);
+      expect(guards).toBeDefined();
+      expect(guards).toContain(SseAuthGuard);
     });
   });
 });
