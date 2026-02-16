@@ -190,6 +190,48 @@ Design API
 **Status**: completed
 
 ---`,
+  // Context with multiple ACT sections (after cleanup creates duplicates)
+  MULTIPLE_ACT_SECTIONS_CONTEXT: `# Context: Test Task
+
+**Created**: 2024-01-01T00:00:00.000Z
+**Updated**: 2024-01-01T03:00:00.000Z
+**Current Mode**: ACT
+**Status**: active
+
+---
+
+## PLAN (10:00)
+
+**Status**: completed
+
+### Task
+Planning
+
+---
+
+## ACT (11:00)
+
+**Status**: completed
+
+### Task
+First implementation
+
+### Progress
+- Old step done
+
+---
+
+## ACT (12:00)
+
+**Status**: in_progress
+
+### Task
+Second implementation
+
+### Progress
+- Recent step done
+
+---`,
 } as const;
 
 describe('ContextDocumentService', () => {
@@ -533,6 +575,34 @@ describe('ContextDocumentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
+    });
+
+    it('should merge with the latest section when multiple sections of same mode exist', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(
+        TEST_FIXTURES.MULTIPLE_ACT_SECTIONS_CONTEXT,
+      );
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+
+      const result = await service.appendContext({
+        mode: 'ACT',
+        progress: ['Newest step done'],
+        status: 'in_progress',
+      });
+
+      expect(result.success).toBe(true);
+      // Should still have 3 sections (PLAN + old ACT + merged latest ACT)
+      expect(result.document?.sections).toHaveLength(3);
+      // The LATEST ACT section (index 2) should have the merged data
+      const latestAct = result.document?.sections[2];
+      expect(latestAct?.mode).toBe('ACT');
+      expect(latestAct?.progress).toContain('Recent step done');
+      expect(latestAct?.progress).toContain('Newest step done');
+      // The FIRST ACT section (index 1) should remain untouched
+      const firstAct = result.document?.sections[1];
+      expect(firstAct?.mode).toBe('ACT');
+      expect(firstAct?.progress).toEqual(['Old step done']);
+      expect(firstAct?.progress).not.toContain('Newest step done');
     });
 
     it('should include recommendedActAgent in EVAL section', async () => {

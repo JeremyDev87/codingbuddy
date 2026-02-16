@@ -241,7 +241,7 @@ export class ContextDocumentService {
       const limits = await this.getContextLimits();
 
       // Find existing section for this mode
-      const existingIndex = document.sections.findIndex(
+      const existingIndex = document.sections.findLastIndex(
         s => s.mode === data.mode,
       );
 
