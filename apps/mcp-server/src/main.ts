@@ -318,5 +318,10 @@ export async function bootstrap(): Promise<void> {
 
 // Run if executed directly
 if (require.main === module) {
-  bootstrap();
+  bootstrap().catch((error: unknown) => {
+    process.stderr.write(
+      `Fatal: ${error instanceof Error ? error.message : error}\n`,
+    );
+    process.exit(1);
+  });
 }
