@@ -23,25 +23,19 @@ describe('ContextDocumentHandler', () => {
   beforeEach(() => {
     mockContextDocService = {
       readContext: vi.fn().mockResolvedValue(mockReadResult),
-      resetContext: vi
-        .fn()
-        .mockResolvedValue({
-          success: true,
-          document: mockReadResult.document,
-        }),
-      appendContext: vi
-        .fn()
-        .mockResolvedValue({
-          success: true,
-          document: mockReadResult.document,
-        }),
-      performCleanup: vi
-        .fn()
-        .mockResolvedValue({
-          success: true,
-          message: 'Cleaned up',
-          document: mockReadResult.document,
-        }),
+      resetContext: vi.fn().mockResolvedValue({
+        success: true,
+        document: mockReadResult.document,
+      }),
+      appendContext: vi.fn().mockResolvedValue({
+        success: true,
+        document: mockReadResult.document,
+      }),
+      performCleanup: vi.fn().mockResolvedValue({
+        success: true,
+        message: 'Cleaned up',
+        document: mockReadResult.document,
+      }),
     } as unknown as ContextDocumentService;
 
     handler = new ContextDocumentHandler(mockContextDocService);
