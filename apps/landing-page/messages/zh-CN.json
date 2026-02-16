@@ -99,6 +99,22 @@
       "homeLink": "Codingbuddy - 返回首页"
     }
   },
+  "cookieConsent": {
+    "label": "Cookie 同意",
+    "message": "我们使用 Cookie 来提升您的体验并分析网站流量。点击「接受」即表示您同意我们使用分析 Cookie。",
+    "accept": "接受",
+    "decline": "拒绝"
+  },
+  "footer": {
+    "label": "网站页脚",
+    "copyright": "\u00a9 {year} Codingbuddy. 保留所有权利。",
+    "github": "GitHub",
+    "license": "MIT 许可证"
+  },
+  "metadata": {
+    "title": "Codingbuddy - 统一 AI 编码规则",
+    "description": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。所有工具中一致的 AI 辅助编码。"
+  },
   "faq": {
     "title": "常见问题",
     "subtitle": "关于 Codingbuddy 您需要了解的一切",

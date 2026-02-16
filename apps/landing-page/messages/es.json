@@ -99,6 +99,22 @@
       "homeLink": "Codingbuddy - Volver al inicio"
     }
   },
+  "cookieConsent": {
+    "label": "Consentimiento de cookies",
+    "message": "Usamos cookies para mejorar tu experiencia y analizar el tráfico del sitio. Al hacer clic en \"Aceptar\", consientes el uso de cookies analíticas.",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
+  },
+  "footer": {
+    "label": "Pie de página",
+    "copyright": "\u00a9 {year} Codingbuddy. Todos los derechos reservados.",
+    "github": "GitHub",
+    "license": "Licencia MIT"
+  },
+  "metadata": {
+    "title": "Codingbuddy - Reglas Multi-IA para Codificación Consistente",
+    "description": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro. Codificación asistida por IA consistente en todas tus herramientas."
+  },
   "faq": {
     "title": "Preguntas Frecuentes",
     "subtitle": "Todo lo que necesitas saber sobre Codingbuddy",

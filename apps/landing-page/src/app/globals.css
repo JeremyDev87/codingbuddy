@@ -100,8 +100,13 @@
 
 /* Accessibility: Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-  .animate-pulse {
-    animation: none;
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -112,6 +117,17 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Accessibility: Support forced-colors (Windows High Contrast) for gradient text */
+@media (forced-colors: active) {
+  .brand-gradient-text {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    -webkit-text-fill-color: unset !important;
+    color: CanvasText !important;
   }
 }
 

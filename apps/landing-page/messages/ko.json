@@ -99,6 +99,22 @@
       "homeLink": "Codingbuddy - 홈으로 돌아가기"
     }
   },
+  "cookieConsent": {
+    "label": "쿠키 동의",
+    "message": "사이트 경험 향상 및 트래픽 분석을 위해 쿠키를 사용합니다. \"동의\"를 클릭하면 분석 쿠키 사용에 동의하는 것입니다.",
+    "accept": "동의",
+    "decline": "거부"
+  },
+  "footer": {
+    "label": "사이트 푸터",
+    "copyright": "\u00a9 {year} Codingbuddy. 모든 권리 보유.",
+    "github": "GitHub",
+    "license": "MIT 라이선스"
+  },
+  "metadata": {
+    "title": "Codingbuddy - 일관된 코딩을 위한 멀티 AI 규칙",
+    "description": "Cursor, Claude Code, Codex, Antigravity, Q, Kiro를 위한 하나의 규칙 세트. 모든 도구에서 일관된 AI 지원 코딩."
+  },
   "faq": {
     "title": "자주 묻는 질문",
     "subtitle": "Codingbuddy에 대해 알아야 할 모든 것",
