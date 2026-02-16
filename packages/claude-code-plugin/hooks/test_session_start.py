@@ -60,6 +60,22 @@ class TestFindPluginSource:
                     # Compare resolved paths (implementation now resolves symlinks)
                     assert result == source_file.resolve()
 
+    def test_finds_source_from_dev_workspace(self):
+        """Test finding source from dev workspace directory pattern."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+
+            # Create mock dev workspace structure
+            dev_dir = home / "workspace/codingbuddy/packages/claude-code-plugin/hooks"
+            dev_dir.mkdir(parents=True)
+            source_file = dev_dir / "user-prompt-submit.py"
+            source_file.write_text("# mock hook")
+
+            with patch.dict(os.environ, {"CLAUDE_PLUGIN_DIR": ""}, clear=False):
+                with patch.object(Path, "home", return_value=home):
+                    result = session_hook.find_plugin_source()
+                    assert result == source_file.resolve()
+
     def test_returns_none_when_no_source_found(self):
         """Test returns None when no source file found anywhere."""
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -209,10 +209,10 @@ def _find_source_from_dev(home: Path) -> Optional[Path]:
     Security: Uses Path.resolve() to prevent symlink traversal attacks.
     """
     dev_patterns = [
-        "workspace/codebuddy/packages/claude-code-plugin/hooks",
-        "dev/codebuddy/packages/claude-code-plugin/hooks",
-        "projects/codebuddy/packages/claude-code-plugin/hooks",
-        "code/codebuddy/packages/claude-code-plugin/hooks",
+        "workspace/codingbuddy/packages/claude-code-plugin/hooks",
+        "dev/codingbuddy/packages/claude-code-plugin/hooks",
+        "projects/codingbuddy/packages/claude-code-plugin/hooks",
+        "code/codingbuddy/packages/claude-code-plugin/hooks",
     ]
 
     for pattern in dev_patterns:
