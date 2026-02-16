@@ -31,5 +31,4 @@ describe('Widget types', () => {
     expect(step.title).toBe('Install dependencies');
     expect(step.code).toBeDefined();
   });
-
 });
