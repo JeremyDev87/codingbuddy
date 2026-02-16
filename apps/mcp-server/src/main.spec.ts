@@ -122,9 +122,7 @@ describe('bootstrap error handler', () => {
       };
       catchHandler(error);
 
-      expect(stderrSpy).toHaveBeenCalledWith(
-        'Fatal: EADDRINUSE: Port 3000\n',
-      );
+      expect(stderrSpy).toHaveBeenCalledWith('Fatal: EADDRINUSE: Port 3000\n');
       expect(exitSpy).toHaveBeenCalledWith(1);
 
       stderrSpy.mockRestore();
