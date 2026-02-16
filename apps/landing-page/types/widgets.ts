@@ -27,6 +27,4 @@ export interface QuickStartStep {
   title: string;
   /** 코드 스니펫 */
   code: string;
-  /** 코드 언어 (bash, json 등) */
-  language?: string;
 }

@@ -32,9 +32,16 @@
   },
   "quickStart": {
     "title": "빠른 시작",
+    "subtitle": "3단계로 간단하게 시작하세요",
     "step1": "패키지 설치",
+    "step1Desc": "한 줄 명령어로 codingbuddy-rules를 프로젝트에 추가하세요",
     "step2": "AI 도구 설정",
-    "step3": "코딩 시작"
+    "step2Desc": "AI 도구의 설정 파일에 MCP 서버 구성을 추가하세요",
+    "step3": "코딩 시작",
+    "step3Desc": "모든 도구에서 PLAN, ACT, EVAL 모드와 전문 에이전트를 활용하세요",
+    "copy": "복사",
+    "copied": "복사 완료!",
+    "copyFailed": "복사 실패"
   },
   "faq": {
     "title": "자주 묻는 질문"

@@ -32,20 +32,4 @@ describe('Widget types', () => {
     expect(step.code).toBeDefined();
   });
 
-  test('QuickStartStep language is optional', () => {
-    const stepWithLang: QuickStartStep = {
-      step: 2,
-      title: 'Configure',
-      code: '{ "name": "project" }',
-      language: 'json',
-    };
-    const stepWithoutLang: QuickStartStep = {
-      step: 1,
-      title: 'Install',
-      code: 'yarn add codingbuddy',
-    };
-
-    expect(stepWithLang.language).toBe('json');
-    expect(stepWithoutLang.language).toBeUndefined();
-  });
 });

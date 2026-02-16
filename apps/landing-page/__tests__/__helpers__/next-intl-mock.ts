@@ -32,6 +32,21 @@ vi.mock('next-intl', () => ({
         copied: 'Copied!',
         copyFailed: 'Copy failed',
       },
+      quickStart: {
+        title: 'Quick Start',
+        subtitle: 'Get started in 3 simple steps',
+        step1: 'Install the Package',
+        step1Desc:
+          'Add codingbuddy-rules to your project with a single command',
+        step2: 'Configure Your AI Tool',
+        step2Desc: "Add the MCP server config to your AI tool's settings file",
+        step3: 'Start Coding',
+        step3Desc:
+          'Use PLAN, ACT, and EVAL modes with specialist agents across all your tools',
+        copy: 'Copy',
+        copied: 'Copied!',
+        copyFailed: 'Copy failed',
+      },
     };
     const translations = namespace ? (allTranslations[namespace] ?? {}) : {};
     const t = (key: string, params?: Record<string, unknown>) => {

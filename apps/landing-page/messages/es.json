@@ -32,9 +32,16 @@
   },
   "quickStart": {
     "title": "Inicio Rápido",
+    "subtitle": "Comienza en 3 simples pasos",
     "step1": "Instalar el paquete",
+    "step1Desc": "Agrega codingbuddy-rules a tu proyecto con un solo comando",
     "step2": "Configurar tu herramienta IA",
-    "step3": "Empezar a codificar"
+    "step2Desc": "Agrega la configuración del servidor MCP al archivo de tu herramienta IA",
+    "step3": "Empezar a codificar",
+    "step3Desc": "Usa los modos PLAN, ACT y EVAL con agentes especialistas en todas tus herramientas",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "copyFailed": "Error al copiar"
   },
   "faq": {
     "title": "Preguntas Frecuentes"

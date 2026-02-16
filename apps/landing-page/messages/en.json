@@ -32,9 +32,16 @@
   },
   "quickStart": {
     "title": "Quick Start",
-    "step1": "Install the package",
-    "step2": "Configure your AI tool",
-    "step3": "Start coding"
+    "subtitle": "Get started in 3 simple steps",
+    "step1": "Install the Package",
+    "step1Desc": "Add codingbuddy-rules to your project with a single command",
+    "step2": "Configure Your AI Tool",
+    "step2Desc": "Add the MCP server config to your AI tool's settings file",
+    "step3": "Start Coding",
+    "step3Desc": "Use PLAN, ACT, and EVAL modes with specialist agents across all your tools",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyFailed": "Copy failed"
   },
   "faq": {
     "title": "Frequently Asked Questions"

@@ -32,9 +32,16 @@
   },
   "quickStart": {
     "title": "快速入门",
+    "subtitle": "3个简单步骤即可开始",
     "step1": "安装包",
+    "step1Desc": "一条命令将 codingbuddy-rules 添加到项目中",
     "step2": "配置 AI 工具",
-    "step3": "开始编码"
+    "step2Desc": "将 MCP 服务器配置添加到 AI 工具的设置文件中",
+    "step3": "开始编码",
+    "step3Desc": "在所有工具中使用 PLAN、ACT、EVAL 模式和专业代理",
+    "copy": "复制",
+    "copied": "已复制！",
+    "copyFailed": "复制失败"
   },
   "faq": {
     "title": "常见问题"

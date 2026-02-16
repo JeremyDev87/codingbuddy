@@ -32,9 +32,16 @@
   },
   "quickStart": {
     "title": "クイックスタート",
+    "subtitle": "3つの簡単なステップで始めましょう",
     "step1": "パッケージをインストール",
+    "step1Desc": "1つのコマンドでcodingbuddy-rulesをプロジェクトに追加",
     "step2": "AIツールを設定",
-    "step3": "コーディング開始"
+    "step2Desc": "AIツールの設定ファイルにMCPサーバー構成を追加",
+    "step3": "コーディング開始",
+    "step3Desc": "すべてのツールでPLAN、ACT、EVALモードとスペシャリストエージェントを活用",
+    "copy": "コピー",
+    "copied": "コピーしました！",
+    "copyFailed": "コピーに失敗しました"
   },
   "faq": {
     "title": "よくある質問"
