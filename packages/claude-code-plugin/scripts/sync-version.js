@@ -28,18 +28,29 @@ function syncVersion() {
 
   // Update plugin package.json
   const pluginPkg = JSON.parse(fs.readFileSync(PLUGIN_PKG_PATH, 'utf8'));
+  let pkgChanged = false;
+
   if (pluginPkg.version !== version) {
     pluginPkg.version = version;
-    // Also update peerDependencies to match major.minor
-    const [major, minor] = version.split('.');
-    pluginPkg.peerDependencies = pluginPkg.peerDependencies || {};
-    pluginPkg.peerDependencies.codingbuddy = `^${major}.${minor}.0`;
+    pkgChanged = true;
+    console.log(`[sync-version] Updated package.json version to ${version}`);
+  }
 
+  // Always check peerDependencies (even if version already matches)
+  const [major, minor] = version.split('.');
+  const expectedPeer = `^${major}.${minor}.0`;
+  pluginPkg.peerDependencies = pluginPkg.peerDependencies || {};
+  if (pluginPkg.peerDependencies.codingbuddy !== expectedPeer) {
+    pluginPkg.peerDependencies.codingbuddy = expectedPeer;
+    pkgChanged = true;
+    console.log(`[sync-version] Updated peerDependencies.codingbuddy to ${expectedPeer}`);
+  }
+
+  if (pkgChanged) {
     fs.writeFileSync(
       PLUGIN_PKG_PATH,
       JSON.stringify(pluginPkg, null, 2) + '\n',
     );
-    console.log(`[sync-version] Updated package.json to ${version}`);
   } else {
     console.log(`[sync-version] package.json already at ${version}`);
   }

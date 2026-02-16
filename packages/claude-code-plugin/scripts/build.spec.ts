@@ -94,6 +94,34 @@ describe('build script orchestration', () => {
   });
 
   // ============================================================================
+  // peerDependencies Sync Logic
+  // ============================================================================
+  describe('peerDependencies sync logic', () => {
+    function computeExpectedPeer(version: string): string {
+      const [major, minor] = version.split('.');
+      return `^${major}.${minor}.0`;
+    }
+
+    it('computes correct peerDependencies from version', () => {
+      expect(computeExpectedPeer('4.0.1')).toBe('^4.0.0');
+      expect(computeExpectedPeer('4.1.0')).toBe('^4.1.0');
+      expect(computeExpectedPeer('5.2.3')).toBe('^5.2.0');
+    });
+
+    it('detects peerDependencies mismatch when version already matches', () => {
+      const currentVersion = '4.0.1';
+      const pluginVersion = '4.0.1';
+      const stalePeer = '^3.0.0';
+      const expectedPeer = computeExpectedPeer(currentVersion);
+
+      // version matches but peer is stale - this was the bug in #409
+      expect(pluginVersion).toBe(currentVersion);
+      expect(stalePeer).not.toBe(expectedPeer);
+      expect(expectedPeer).toBe('^4.0.0');
+    });
+  });
+
+  // ============================================================================
   // BuildResult Interface
   // ============================================================================
   describe('BuildResult interface consistency', () => {

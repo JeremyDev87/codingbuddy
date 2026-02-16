@@ -46,7 +46,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "peerDependencies": {
-    "codingbuddy": "^3.0.0"
+    "codingbuddy": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "codingbuddy": {
