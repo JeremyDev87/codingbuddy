@@ -67,10 +67,7 @@ export class RulesService {
     try {
       return await readRuleContent(this.rulesDir, relativePath);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.startsWith('Access denied')
-      ) {
+      if (error instanceof Error && error.message.startsWith('Access denied')) {
         this.logger.warn(`Path traversal attempt blocked: ${relativePath}`);
       } else {
         this.logger.error(`Failed to read rule file: ${relativePath}`, error);

@@ -41,10 +41,7 @@ describe('extractModeFromPrompt', () => {
     });
 
     it('extracts AUTO keyword and remaining prompt', () => {
-      const result = extractModeFromPrompt(
-        'AUTO build user dashboard',
-        'PLAN',
-      );
+      const result = extractModeFromPrompt('AUTO build user dashboard', 'PLAN');
 
       expect(result.mode).toBe('AUTO');
       expect(result.originalPrompt).toBe('build user dashboard');
@@ -106,10 +103,7 @@ describe('extractModeFromPrompt', () => {
     });
 
     it('handles full-width colon "KEYWORD\uff1a task" (CJK keyboards)', () => {
-      const result = extractModeFromPrompt(
-        'EVAL\uff1a review code',
-        'PLAN',
-      );
+      const result = extractModeFromPrompt('EVAL\uff1a review code', 'PLAN');
 
       expect(result.mode).toBe('EVAL');
       expect(result.originalPrompt).toBe('review code');
@@ -122,21 +116,34 @@ describe('extractModeFromPrompt', () => {
 
   describe('localized keywords', () => {
     it('recognises Korean keyword \uacc4\ud68d (PLAN)', () => {
-      const result = extractModeFromPrompt('\uacc4\ud68d \uc778\uc99d \uae30\ub2a5 \uc124\uacc4', 'PLAN');
+      const result = extractModeFromPrompt(
+        '\uacc4\ud68d \uc778\uc99d \uae30\ub2a5 \uc124\uacc4',
+        'PLAN',
+      );
 
       expect(result.mode).toBe('PLAN');
-      expect(result.originalPrompt).toBe('\uc778\uc99d \uae30\ub2a5 \uc124\uacc4');
+      expect(result.originalPrompt).toBe(
+        '\uc778\uc99d \uae30\ub2a5 \uc124\uacc4',
+      );
     });
 
     it('recognises Japanese keyword \u5b9f\u884c (ACT)', () => {
-      const result = extractModeFromPrompt('\u5b9f\u884c \u30ed\u30b0\u30a4\u30f3\u5b9f\u88c5', 'PLAN');
+      const result = extractModeFromPrompt(
+        '\u5b9f\u884c \u30ed\u30b0\u30a4\u30f3\u5b9f\u88c5',
+        'PLAN',
+      );
 
       expect(result.mode).toBe('ACT');
-      expect(result.originalPrompt).toBe('\u30ed\u30b0\u30a4\u30f3\u5b9f\u88c5');
+      expect(result.originalPrompt).toBe(
+        '\u30ed\u30b0\u30a4\u30f3\u5b9f\u88c5',
+      );
     });
 
     it('recognises Chinese keyword \u8bc4\u4f30 (EVAL)', () => {
-      const result = extractModeFromPrompt('\u8bc4\u4f30 \u4ee3\u7801\u8d28\u91cf', 'PLAN');
+      const result = extractModeFromPrompt(
+        '\u8bc4\u4f30 \u4ee3\u7801\u8d28\u91cf',
+        'PLAN',
+      );
 
       expect(result.mode).toBe('EVAL');
       expect(result.originalPrompt).toBe('\u4ee3\u7801\u8d28\u91cf');
@@ -160,18 +167,17 @@ describe('extractModeFromPrompt', () => {
 
       expect(result.mode).toBe('PLAN');
       expect(result.originalPrompt).toBe('ACT something');
-      expect(result.warnings).toContain(
-        'Multiple keywords found, using first',
-      );
+      expect(result.warnings).toContain('Multiple keywords found, using first');
     });
 
     it('warns when a localized keyword follows an English keyword', () => {
-      const result = extractModeFromPrompt('PLAN \uacc4\ud68d something', 'PLAN');
+      const result = extractModeFromPrompt(
+        'PLAN \uacc4\ud68d something',
+        'PLAN',
+      );
 
       expect(result.mode).toBe('PLAN');
-      expect(result.warnings).toContain(
-        'Multiple keywords found, using first',
-      );
+      expect(result.warnings).toContain('Multiple keywords found, using first');
     });
 
     it('does not warn when only a single keyword is present', () => {
@@ -217,16 +223,11 @@ describe('extractModeFromPrompt', () => {
 
   describe('no keyword (default mode)', () => {
     it('falls back to defaultMode and warns', () => {
-      const result = extractModeFromPrompt(
-        'just do some refactoring',
-        'PLAN',
-      );
+      const result = extractModeFromPrompt('just do some refactoring', 'PLAN');
 
       expect(result.mode).toBe('PLAN');
       expect(result.originalPrompt).toBe('just do some refactoring');
-      expect(result.warnings).toContain(
-        'No keyword found, defaulting to PLAN',
-      );
+      expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
     });
 
     it('respects a non-PLAN defaultMode', () => {
@@ -234,9 +235,7 @@ describe('extractModeFromPrompt', () => {
 
       expect(result.mode).toBe('ACT');
       expect(result.originalPrompt).toBe('hello world');
-      expect(result.warnings).toContain(
-        'No keyword found, defaulting to PLAN',
-      );
+      expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
     });
 
     it('falls back for an empty prompt', () => {
@@ -244,9 +243,7 @@ describe('extractModeFromPrompt', () => {
 
       expect(result.mode).toBe('PLAN');
       expect(result.originalPrompt).toBe('');
-      expect(result.warnings).toContain(
-        'No keyword found, defaulting to PLAN',
-      );
+      expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
     });
 
     it('falls back for whitespace-only prompt', () => {
@@ -254,9 +251,7 @@ describe('extractModeFromPrompt', () => {
 
       expect(result.mode).toBe('PLAN');
       expect(result.originalPrompt).toBe('');
-      expect(result.warnings).toContain(
-        'No keyword found, defaulting to PLAN',
-      );
+      expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
     });
   });
 
@@ -292,9 +287,7 @@ describe('extractModeFromPrompt', () => {
       const result = extractModeFromPrompt('PLAN ACT', 'PLAN');
 
       expect(result.mode).toBe('PLAN');
-      expect(result.warnings).toContain(
-        'Multiple keywords found, using first',
-      );
+      expect(result.warnings).toContain('Multiple keywords found, using first');
       // originalPrompt is "ACT" which is not empty
       expect(result.originalPrompt).toBe('ACT');
     });
@@ -356,9 +349,7 @@ describe('getDefaultModeConfig', () => {
     const config = getDefaultModeConfig();
 
     for (const mode of ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const) {
-      expect(config.modes[mode].rules).toContain(
-        'rules/augmented-coding.md',
-      );
+      expect(config.modes[mode].rules).toContain('rules/augmented-coding.md');
     }
   });
 
@@ -479,9 +470,7 @@ describe('loadRulesForMode', () => {
   });
 
   it('returns empty array when all rules fail to load', async () => {
-    const readRuleFn = vi
-      .fn()
-      .mockRejectedValue(new Error('Read error'));
+    const readRuleFn = vi.fn().mockRejectedValue(new Error('Read error'));
 
     const rules = await loadRulesForMode('PLAN', config, readRuleFn);
 

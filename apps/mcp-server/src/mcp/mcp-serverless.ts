@@ -4,9 +4,7 @@ import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
 import type { SearchResult } from '../rules/rules.types';
-import type {
-  ParseModeResult,
-} from '../keyword/keyword.types';
+import type { ParseModeResult } from '../keyword/keyword.types';
 import { loadConfig } from '../config/config.loader';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import { getPackageVersion } from '../shared/version.utils';
@@ -313,7 +311,9 @@ export class McpServerlessService {
       return createJsonResponse(skill);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : `Skill '${skillName}' not found.`;
+        error instanceof Error
+          ? error.message
+          : `Skill '${skillName}' not found.`;
       return createErrorResponse(message);
     }
   }
@@ -427,10 +427,8 @@ export class McpServerlessService {
     );
 
     const modeConfig = config.modes[mode];
-    const rules = await loadRulesForMode(
-      mode,
-      config,
-      (rulePath: string) => readRuleContent(this.rulesDir, rulePath),
+    const rules = await loadRulesForMode(mode, config, (rulePath: string) =>
+      readRuleContent(this.rulesDir, rulePath),
     );
 
     return {
