@@ -269,11 +269,12 @@ export class AgentHandler extends AbstractHandler {
     const targetFiles = extractStringArray(args, 'targetFiles');
     const sharedContext = extractOptionalString(args, 'sharedContext');
     const verbosityStr = extractOptionalString(args, 'verbosity');
-    const verbosity = verbosityStr === undefined
-      ? undefined
-      : isValidVerbosity(verbosityStr)
-        ? verbosityStr
-        : 'standard';
+    const verbosity =
+      verbosityStr === undefined
+        ? undefined
+        : isValidVerbosity(verbosityStr)
+          ? verbosityStr
+          : 'standard';
 
     try {
       const result = await this.agentService.prepareParallelAgents(

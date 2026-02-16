@@ -385,7 +385,9 @@ export function isStringArray(value: unknown): value is string[] {
  * @param value - Value to check
  * @returns True if value is a non-null, non-array object
  */
-export function isRecordObject(value: unknown): value is Record<string, unknown> {
+export function isRecordObject(
+  value: unknown,
+): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 

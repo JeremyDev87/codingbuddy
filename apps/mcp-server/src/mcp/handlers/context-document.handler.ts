@@ -10,7 +10,10 @@ import {
 } from '../../shared/validation.constants';
 import { CONTEXT_FILE_PATH } from '../../context/context-document.types';
 import type { Mode } from '../../keyword/keyword.types';
-import { isValidVerbosity, getVerbosityConfig } from '../../shared/verbosity.types';
+import {
+  isValidVerbosity,
+  getVerbosityConfig,
+} from '../../shared/verbosity.types';
 
 /**
  * Handler for context document tools.
@@ -165,7 +168,9 @@ Call this at the end of each mode to persist decisions and notes.`,
   ): Promise<ToolResponse> {
     // Extract verbosity level (defaults to 'standard')
     const verbosityStr = extractOptionalString(args, 'verbosity') || 'standard';
-    const verbosity = isValidVerbosity(verbosityStr) ? verbosityStr : 'standard';
+    const verbosity = isValidVerbosity(verbosityStr)
+      ? verbosityStr
+      : 'standard';
     const verbosityConfig = getVerbosityConfig(verbosity);
 
     // Apply verbosity settings to read options
