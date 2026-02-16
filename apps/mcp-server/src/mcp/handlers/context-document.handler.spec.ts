@@ -146,6 +146,250 @@ describe('ContextDocumentHandler', () => {
         expect(result?.content[0].text).toContain('File read failed');
       });
     });
+
+    describe('update_context', () => {
+      it('should return error when mode is missing', async () => {
+        const result = await handler.handle('update_context', {});
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Missing required parameter: mode');
+      });
+
+      it('should return error when mode is invalid', async () => {
+        const result = await handler.handle('update_context', { mode: 'INVALID' });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid mode: INVALID');
+      });
+
+      it('should return error when args is undefined', async () => {
+        const result = await handler.handle('update_context', undefined);
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Missing required parameter: mode');
+      });
+
+      it('should reset context in PLAN mode', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Test Task',
+          task: 'Implement feature',
+          primaryAgent: 'plan-mode',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith({
+          title: 'Test Task',
+          task: 'Implement feature',
+          primaryAgent: 'plan-mode',
+          recommendedActAgent: undefined,
+          recommendedActAgentConfidence: undefined,
+          decisions: undefined,
+          notes: undefined,
+        });
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.success).toBe(true);
+        expect(responseData.message).toContain('PLAN mode');
+      });
+
+      it('should use "Untitled Task" as default title in PLAN mode', async () => {
+        await handler.handle('update_context', { mode: 'PLAN' });
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Untitled Task' }),
+        );
+      });
+
+      it('should pass all optional params in PLAN mode', async () => {
+        await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Full Test',
+          task: 'Full task',
+          primaryAgent: 'agent',
+          recommendedActAgent: 'agent-architect',
+          recommendedActAgentConfidence: 0.9,
+          decisions: ['Decision 1'],
+          notes: ['Note 1'],
+        });
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith({
+          title: 'Full Test',
+          task: 'Full task',
+          primaryAgent: 'agent',
+          recommendedActAgent: 'agent-architect',
+          recommendedActAgentConfidence: 0.9,
+          decisions: ['Decision 1'],
+          notes: ['Note 1'],
+        });
+      });
+
+      it('should ignore non-number recommendedActAgentConfidence', async () => {
+        await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Type Test',
+          recommendedActAgentConfidence: '0.9',
+        });
+
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            recommendedActAgentConfidence: undefined,
+          }),
+        );
+      });
+
+      it('should ignore non-array decisions and notes', async () => {
+        await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Type Test',
+          decisions: 'not-an-array',
+          notes: 42,
+        });
+
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            decisions: undefined,
+            notes: undefined,
+          }),
+        );
+      });
+
+      it('should return error when resetContext fails', async () => {
+        mockContextDocService.resetContext = vi.fn().mockResolvedValue({
+          success: false,
+          error: 'Reset failed',
+        });
+        const result = await handler.handle('update_context', { mode: 'PLAN', title: 'Test' });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Reset failed');
+      });
+
+      it('should append context in ACT mode', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'ACT',
+          task: 'Implementing feature',
+          progress: ['Step 1 done'],
+          status: 'in_progress',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.appendContext).toHaveBeenCalledWith({
+          mode: 'ACT',
+          task: 'Implementing feature',
+          primaryAgent: undefined,
+          recommendedActAgent: undefined,
+          recommendedActAgentConfidence: undefined,
+          decisions: undefined,
+          notes: undefined,
+          progress: ['Step 1 done'],
+          findings: undefined,
+          recommendations: undefined,
+          status: 'in_progress',
+        });
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.message).toContain('ACT mode');
+      });
+
+      it('should append context in EVAL mode with findings', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'EVAL',
+          findings: ['Finding 1'],
+          recommendations: ['Rec 1'],
+          status: 'completed',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.appendContext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'EVAL',
+            findings: ['Finding 1'],
+            recommendations: ['Rec 1'],
+            status: 'completed',
+          }),
+        );
+      });
+
+      it('should append context in AUTO mode', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'AUTO',
+          decisions: ['Auto decision'],
+          notes: ['Auto note'],
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.appendContext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'AUTO',
+            decisions: ['Auto decision'],
+            notes: ['Auto note'],
+          }),
+        );
+      });
+
+      it('should return error when appendContext fails', async () => {
+        mockContextDocService.appendContext = vi.fn().mockResolvedValue({
+          success: false,
+          error: 'Append failed',
+        });
+        const result = await handler.handle('update_context', { mode: 'ACT' });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Append failed');
+      });
+    });
+
+    describe('cleanup_context', () => {
+      it('should cleanup with default parameters', async () => {
+        const result = await handler.handle('cleanup_context', {});
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5);
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.success).toBe(true);
+      });
+
+      it('should cleanup with custom parameters', async () => {
+        const result = await handler.handle('cleanup_context', {
+          keepRecentSectionsFull: 3,
+          keepRecentItems: 10,
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(3, 10);
+      });
+
+      it('should cleanup with undefined args using defaults', async () => {
+        const result = await handler.handle('cleanup_context', undefined);
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5);
+      });
+
+      it('should accept keepRecentSectionsFull of 0 as valid boundary', async () => {
+        const result = await handler.handle('cleanup_context', {
+          keepRecentSectionsFull: 0,
+          keepRecentItems: 1,
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(0, 1);
+      });
+
+      it('should return error for negative keepRecentSectionsFull', async () => {
+        const result = await handler.handle('cleanup_context', { keepRecentSectionsFull: -1 });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('keepRecentSectionsFull must be >= 0');
+      });
+
+      it('should return error for keepRecentItems less than 1', async () => {
+        const result = await handler.handle('cleanup_context', { keepRecentItems: 0 });
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('keepRecentItems must be >= 1');
+      });
+
+      it('should return error when performCleanup fails', async () => {
+        mockContextDocService.performCleanup = vi.fn().mockResolvedValue({
+          success: false,
+          error: 'Cleanup failed',
+        });
+        const result = await handler.handle('cleanup_context', {});
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Cleanup failed');
+      });
+    });
   });
 
   describe('getToolDefinitions', () => {
