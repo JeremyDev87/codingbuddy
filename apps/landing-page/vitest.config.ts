@@ -23,6 +23,9 @@ export default defineConfig({
         'app/**/*.{ts,tsx}',
         'hooks/**/*.ts',
         'lib/**/*.ts',
+        'components/**/*.{ts,tsx}',
+        'sections/**/*.{ts,tsx}',
+        'i18n/**/*.ts',
       ],
       exclude: [
         '**/__tests__/**',
