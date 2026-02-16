@@ -1,6 +1,12 @@
 import { describe, test, expect, vi } from 'vitest';
 import { SUPPORTED_LOCALES } from '../../lib/locale';
 
+// Mock font loaders moved from root layout to locale layout
+vi.mock('next/font/google', () => ({
+  Inter: () => ({ variable: '--font-inter' }),
+  JetBrains_Mono: () => ({ variable: '--font-jetbrains-mono' }),
+}));
+
 // Mock navigation module used by Header (imported by layout)
 vi.mock('next-intl/navigation', () => ({
   createNavigation: () => ({

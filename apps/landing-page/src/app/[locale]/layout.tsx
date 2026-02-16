@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense, type ReactNode } from 'react';
 import { notFound } from 'next/navigation';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import type { AbstractIntlMessages } from 'next-intl';
 import {
@@ -8,11 +9,28 @@ import {
   getTranslations,
   setRequestLocale,
 } from 'next-intl/server';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 import { isValidLocale, SUPPORTED_LOCALES } from '@/lib/locale';
-import { SetDocumentLang } from '@/components/set-document-lang';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CookieConsent } from '@/components/cookie-consent';
+
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+  adjustFontFallback: true,
+});
 
 const CLIENT_NAMESPACES = [
   'header',
@@ -94,29 +112,47 @@ const LocaleLayout = async ({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={pickClientMessages(messages)}
-    >
-      <Header />
-      <main
-        id="main-content"
-        lang={locale}
-        className="flex min-h-screen flex-col"
+    <html lang={locale} suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <SetDocumentLang locale={locale} />
-        {children}
-        {agents}
-        {code_example}
-        {quick_start}
-      </main>
-      <Suspense>
-        <Footer locale={locale} />
-      </Suspense>
-      <Suspense>
-        <CookieConsent />
-      </Suspense>
-    </NextIntlClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded"
+          >
+            Skip to main content
+          </a>
+          <NextIntlClientProvider
+            locale={locale}
+            messages={pickClientMessages(messages)}
+          >
+            <Header />
+            <main
+              id="main-content"
+              className="flex min-h-screen flex-col"
+            >
+              {children}
+              {agents}
+              {code_example}
+              {quick_start}
+            </main>
+            <Suspense>
+              <Footer locale={locale} />
+            </Suspense>
+            <Suspense>
+              <CookieConsent />
+            </Suspense>
+          </NextIntlClientProvider>
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
   );
 };
 
