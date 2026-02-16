@@ -67,11 +67,11 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               process.env.NODE_ENV === 'development'
                 ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-                : "script-src 'self'",
+                : "script-src 'self' https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self'",
+              "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
