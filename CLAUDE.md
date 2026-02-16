@@ -51,6 +51,7 @@ yarn start              # Run compiled version
 
 - `MCP_TRANSPORT`: `stdio` (default) or `sse`
 - `PORT`: HTTP port when using SSE mode (default: 3000)
+- `MCP_SSE_TOKEN`: Bearer token for SSE endpoint authentication (optional, auth disabled if unset)
 
 ## Architecture
 
