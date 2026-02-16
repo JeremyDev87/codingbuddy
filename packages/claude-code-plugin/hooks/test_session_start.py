@@ -222,18 +222,13 @@ class TestVersionSorting:
                 hooks_dir.mkdir(parents=True)
                 (hooks_dir / "user-prompt-submit.py").write_text(f"# version {v}")
 
-            # Get sorted directories (as the function does)
-            version_dirs = sorted(
-                [d for d in base.iterdir() if d.is_dir()],
-                reverse=True
+            # Use actual sort_version_dirs() for semantic version sorting
+            version_dirs = session_hook.sort_version_dirs(
+                [d for d in base.iterdir() if d.is_dir()]
             )
 
-            # Note: String sorting will give wrong order for semantic versions
-            # This test documents the current behavior
             dir_names = [d.name for d in version_dirs]
-            # With string sorting: ['3.0.0', '2.0.0', '10.0.0', '1.0.0']
-            # Expected with semver: ['10.0.0', '3.0.0', '2.0.0', '1.0.0']
-            assert dir_names[0] == "3.0.0"  # Current behavior (string sort)
+            assert dir_names == ["10.0.0", "3.0.0", "2.0.0", "1.0.0"]
 
 
 if __name__ == "__main__":
