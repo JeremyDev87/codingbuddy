@@ -26,5 +26,11 @@ export { StageHealthBar, type StageHealthBarProps } from './StageHealthBar';
 export { formatStageHealthBar } from './stage-health.pure';
 export { computeStageHealth, detectBottlenecks } from './stage-health.pure';
 export { computeGridLayout } from './grid-layout.pure';
-export { MonitorPanel, type MonitorPanelProps } from './MonitorPanel';
-export { renderEventLog, renderAgentTimeline, renderTaskProgress } from './monitor-panel.pure';
+export { ActivityVisualizer, type ActivityVisualizerProps } from './ActivityVisualizer';
+export {
+  aggregateToolCalls,
+  getDensityChar,
+  renderHeatmap,
+  renderBubbles,
+  type HeatmapData,
+} from './activity-visualizer.pure';

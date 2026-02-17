@@ -5,6 +5,7 @@ import type {
   Edge,
   EventLogEntry,
   TaskItem,
+  ToolCallRecord,
 } from '../dashboard-types';
 import type { TuiEventBus } from '../events';
 import {
@@ -25,6 +26,7 @@ import { selectFocusedAgent } from './use-focus-agent';
 
 const EVENT_LOG_MAX = 100;
 const EDGE_MAX = 200;
+export const TOOL_CALLS_MAX = 200;
 
 /**
  * Creates fresh initial dashboard state.
@@ -41,6 +43,7 @@ export function createInitialDashboardState(): DashboardState {
     focusedAgentId: null,
     tasks: [],
     eventLog: [],
+    toolCalls: [],
     objectives: [],
     activeSkills: [],
     tokenUsage: 0,
@@ -179,7 +182,21 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         }
       }
 
-      return { ...state, agents, eventLog: [...base, entry] };
+      const toolCall: ToolCallRecord = {
+        agentId: action.payload.agentId ?? 'unknown',
+        toolName: action.payload.toolName,
+        timestamp: action.payload.timestamp,
+        status: 'completed',
+      };
+      const toolCallsBase =
+        state.toolCalls.length >= TOOL_CALLS_MAX ? state.toolCalls.slice(1) : state.toolCalls;
+
+      return {
+        ...state,
+        agents,
+        eventLog: [...base, entry],
+        toolCalls: [...toolCallsBase, toolCall],
+      };
     }
 
     case 'OBJECTIVE_SET':

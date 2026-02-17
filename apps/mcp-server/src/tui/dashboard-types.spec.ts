@@ -9,7 +9,9 @@ import {
   type StageStats,
   type GridRegion,
   type DashboardGrid,
+  type ToolCallRecord,
 } from './dashboard-types';
+import { createInitialDashboardState } from './hooks/use-dashboard-state';
 
 describe('tui/dashboard-types', () => {
   describe('getLayoutMode', () => {
@@ -118,6 +120,26 @@ describe('tui/dashboard-types', () => {
 
       expect(stats1).not.toBe(stats2);
       expect(stats1).toEqual(stats2);
+    });
+  });
+
+  describe('ToolCallRecord / toolCalls in DashboardState', () => {
+    it('createInitialDashboardState has toolCalls as empty array', () => {
+      const state = createInitialDashboardState();
+      expect(state.toolCalls).toEqual([]);
+    });
+
+    it('ToolCallRecord type compiles with expected fields', () => {
+      const record: ToolCallRecord = {
+        agentId: 'a1',
+        toolName: 'Read',
+        timestamp: 1000,
+        status: 'completed',
+      };
+      expect(record.agentId).toBe('a1');
+      expect(record.toolName).toBe('Read');
+      expect(record.timestamp).toBe(1000);
+      expect(record.status).toBe('completed');
     });
   });
 

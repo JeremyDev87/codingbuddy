@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   dashboardReducer,
   createInitialDashboardState,
+  TOOL_CALLS_MAX,
   type DashboardAction,
 } from './use-dashboard-state';
 
@@ -446,6 +447,41 @@ describe('dashboardReducer', () => {
       payload: { agentId: 'a1', reason: 'error', durationMs: 500 },
     });
     expect(state.agents.get('a1')?.progress).toBe(progressBefore);
+  });
+
+  it('accumulates ToolCallRecord on TOOL_INVOKED', () => {
+    const state = dashboardReducer(initialDashboardState, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'Read', agentId: 'a1', timestamp: 1000 },
+    });
+    expect(state.toolCalls).toHaveLength(1);
+    expect(state.toolCalls[0]).toEqual({
+      agentId: 'a1',
+      toolName: 'Read',
+      timestamp: 1000,
+      status: 'completed',
+    });
+  });
+
+  it('replaces null agentId with "unknown" in toolCalls', () => {
+    const state = dashboardReducer(initialDashboardState, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'Bash', agentId: null, timestamp: 2000 },
+    });
+    expect(state.toolCalls[0].agentId).toBe('unknown');
+  });
+
+  it('enforces TOOL_CALLS_MAX ring buffer (200)', () => {
+    let state = initialDashboardState;
+    for (let i = 0; i < 210; i++) {
+      state = dashboardReducer(state, {
+        type: 'TOOL_INVOKED',
+        payload: { toolName: `tool_${i}`, agentId: null, timestamp: i },
+      });
+    }
+    expect(state.toolCalls).toHaveLength(200);
+    expect(state.toolCalls[0].toolName).toBe('tool_10');
+    expect(state.toolCalls[199].toolName).toBe('tool_209');
   });
 
   it('produces correct timestamp format in eventLog', () => {

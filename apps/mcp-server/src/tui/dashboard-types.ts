@@ -123,6 +123,23 @@ export interface TaskItem {
 export type GlobalRunState = 'RUNNING' | 'IDLE' | 'ERROR';
 
 /**
+ * Status of a tool call record.
+ *
+ * Currently only `'completed'` is produced (via TOOL_INVOKED after tool
+ * finishes). `'active'` and `'error'` are reserved for a future
+ * TOOL_STARTED / TOOL_ERRORED event pair that would enable real-time
+ * in-progress tracking.
+ */
+export type ToolCallStatus = 'active' | 'completed' | 'error';
+
+export interface ToolCallRecord {
+  agentId: string;
+  toolName: string;
+  timestamp: number;
+  status: ToolCallStatus;
+}
+
+/**
  * Complete dashboard state containing all data needed to render the TUI.
  */
 export interface DashboardState {
@@ -135,6 +152,7 @@ export interface DashboardState {
   focusedAgentId: string | null;
   tasks: TaskItem[];
   eventLog: EventLogEntry[];
+  toolCalls: ToolCallRecord[];
   objectives: string[];
   activeSkills: string[];
   tokenUsage: number;

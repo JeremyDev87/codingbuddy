@@ -7,7 +7,7 @@ import { HeaderBar } from './components/HeaderBar';
 import { FlowMap } from './components/FlowMap';
 import { FocusedAgentPanel } from './components/FocusedAgentPanel';
 import { StageHealthBar } from './components/StageHealthBar';
-import { MonitorPanel } from './components/MonitorPanel';
+import { ActivityVisualizer } from './components/ActivityVisualizer';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
 import { computeGridLayout } from './components/grid-layout.pure';
 
@@ -81,10 +81,8 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
               width={grid.flowMap.width}
               height={grid.flowMap.height}
             />
-            <MonitorPanel
-              eventLog={state.eventLog}
-              agents={state.agents}
-              tasks={state.tasks}
+            <ActivityVisualizer
+              toolCalls={state.toolCalls}
               width={grid.monitorPanel.width}
               height={grid.monitorPanel.height}
             />
