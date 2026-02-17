@@ -7,6 +7,7 @@ import { HeaderBar } from './components/HeaderBar';
 import { FlowMap } from './components/FlowMap';
 import { FocusedAgentPanel } from './components/FocusedAgentPanel';
 import { StageHealthBar } from './components/StageHealthBar';
+import { MonitorPanel } from './components/MonitorPanel';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
 import { computeGridLayout } from './components/grid-layout.pure';
 
@@ -74,14 +75,23 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
           />
         </Box>
       ) : (
-        <Box flexDirection="row" width={grid.total.width} height={grid.flowMap.height}>
-          <FlowMap
-            agents={state.agents}
-            edges={state.edges}
-            layoutMode={layoutMode}
-            width={grid.flowMap.width}
-            height={grid.flowMap.height}
-          />
+        <Box flexDirection="row" width={grid.total.width} height={grid.focusedAgent.height}>
+          <Box flexDirection="column" width={grid.flowMap.width}>
+            <FlowMap
+              agents={state.agents}
+              edges={state.edges}
+              layoutMode={layoutMode}
+              width={grid.flowMap.width}
+              height={grid.flowMap.height}
+            />
+            <MonitorPanel
+              eventLog={state.eventLog}
+              agents={state.agents}
+              tasks={state.tasks}
+              width={grid.monitorPanel.width}
+              height={grid.monitorPanel.height}
+            />
+          </Box>
           <FocusedAgentPanel
             agent={focusedAgent}
             objectives={EMPTY_OBJECTIVES}

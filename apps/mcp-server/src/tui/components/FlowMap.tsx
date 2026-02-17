@@ -66,6 +66,10 @@ export function FlowMap({
   height,
   activeStage = null,
 }: FlowMapProps): React.ReactElement {
+  // Border consumes 2 chars width + 2 lines height; header "FLOW MAP" takes 1 line
+  const contentWidth = Math.max(1, width - 2);
+  const contentHeight = Math.max(1, height - 3);
+
   const compactContent = useMemo(() => {
     if (layoutMode !== 'narrow') return null;
     return renderFlowMapCompact(agents);
@@ -75,14 +79,20 @@ export function FlowMap({
     if (layoutMode === 'narrow') return null;
     const buf =
       layoutMode === 'wide'
-        ? renderFlowMap(agents, edges, width, height, activeStage)
-        : renderFlowMapSimplified(agents, width, height);
+        ? renderFlowMap(agents, edges, contentWidth, contentHeight, activeStage)
+        : renderFlowMapSimplified(agents, contentWidth, contentHeight);
     return buf.toLinesDirect();
-  }, [agents, edges, width, height, layoutMode, activeStage]);
+  }, [agents, edges, contentWidth, contentHeight, layoutMode, activeStage]);
 
   if (layoutMode === 'narrow') {
     return (
-      <Box flexDirection="column">
+      <Box
+        borderStyle="single"
+        borderColor="gray"
+        flexDirection="column"
+        width={width}
+        height={height}
+      >
         <Text bold color="cyan">
           FLOW MAP
         </Text>
@@ -93,7 +103,13 @@ export function FlowMap({
 
   if (!lines) {
     return (
-      <Box flexDirection="column" width={width}>
+      <Box
+        borderStyle="single"
+        borderColor="gray"
+        flexDirection="column"
+        width={width}
+        height={height}
+      >
         <Text bold color="cyan">
           FLOW MAP
         </Text>
@@ -102,7 +118,13 @@ export function FlowMap({
   }
 
   return (
-    <Box flexDirection="column" width={width}>
+    <Box
+      borderStyle="single"
+      borderColor="gray"
+      flexDirection="column"
+      width={width}
+      height={height}
+    >
       <Text bold color="cyan">
         FLOW MAP
       </Text>

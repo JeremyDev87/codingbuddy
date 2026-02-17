@@ -39,9 +39,22 @@ describe('computeGridLayout', () => {
       expect(grid.focusedAgent.x + grid.focusedAgent.width).toBe(120);
     });
 
-    it('flowMap and focusedAgent fill the main area height', () => {
+    it('flowMap and monitorPanel split the left column height evenly', () => {
+      const mainHeight = 40 - 3 - 3; // 34
+      const flowMapHeight = Math.ceil(mainHeight / 2); // 17
+      const monitorHeight = mainHeight - flowMapHeight; // 17
+      expect(grid.flowMap.height).toBe(flowMapHeight);
+      expect(grid.monitorPanel.height).toBe(monitorHeight);
+    });
+
+    it('monitorPanel sits below flowMap with same width', () => {
+      expect(grid.monitorPanel.x).toBe(0);
+      expect(grid.monitorPanel.y).toBe(grid.flowMap.y + grid.flowMap.height);
+      expect(grid.monitorPanel.width).toBe(grid.flowMap.width);
+    });
+
+    it('focusedAgent spans full main height', () => {
       const mainHeight = 40 - 3 - 3;
-      expect(grid.flowMap.height).toBe(mainHeight);
       expect(grid.focusedAgent.height).toBe(mainHeight);
     });
 
@@ -77,7 +90,24 @@ describe('computeGridLayout', () => {
 
     it('main area height is total - header(3) - stageHealth(3)', () => {
       const mainHeight = 30 - 3 - 3;
-      expect(grid.flowMap.height).toBe(mainHeight);
+      expect(grid.focusedAgent.height).toBe(mainHeight);
+    });
+
+    it('flowMap and monitorPanel split the left column height', () => {
+      const mainHeight = 30 - 3 - 3; // 24
+      const flowMapHeight = Math.ceil(mainHeight / 2); // 12
+      const monitorHeight = mainHeight - flowMapHeight; // 12
+      expect(grid.flowMap.height).toBe(flowMapHeight);
+      expect(grid.monitorPanel.height).toBe(monitorHeight);
+    });
+
+    it('monitorPanel sits below flowMap', () => {
+      expect(grid.monitorPanel.y).toBe(grid.flowMap.y + grid.flowMap.height);
+      expect(grid.monitorPanel.width).toBe(grid.flowMap.width);
+    });
+
+    it('focusedAgent spans full main height', () => {
+      const mainHeight = 30 - 3 - 3;
       expect(grid.focusedAgent.height).toBe(mainHeight);
     });
   });
@@ -115,6 +145,10 @@ describe('computeGridLayout', () => {
       expect(grid.header.y).toBeLessThan(grid.focusedAgent.y);
       expect(grid.focusedAgent.y).toBeLessThan(grid.flowMap.y);
       expect(grid.flowMap.y).toBeLessThan(grid.stageHealth.y);
+    });
+
+    it('monitorPanel is hidden in narrow mode', () => {
+      expect(grid.monitorPanel).toEqual({ x: 0, y: 0, width: 0, height: 0 });
     });
   });
 
@@ -176,8 +210,19 @@ describe('computeGridLayout', () => {
     for (const tc of testCases) {
       describe(tc.name, () => {
         const grid = computeGridLayout(tc.cols, tc.rows, tc.mode);
-        const regions = [grid.header, grid.flowMap, grid.focusedAgent, grid.stageHealth];
-        const regionNames = ['header', 'flowMap', 'focusedAgent', 'stageHealth'];
+        const allRegions = [
+          grid.header,
+          grid.flowMap,
+          grid.focusedAgent,
+          grid.stageHealth,
+          grid.monitorPanel,
+        ];
+        const allNames = ['header', 'flowMap', 'focusedAgent', 'stageHealth', 'monitorPanel'];
+        // narrow 모드에서는 monitorPanel이 0x0이므로 필터링
+        const regions = allRegions.filter(r => r.width > 0 && r.height > 0);
+        const regionNames = allNames.filter(
+          (_, i) => allRegions[i].width > 0 && allRegions[i].height > 0,
+        );
 
         it('no regions overlap', () => {
           for (let i = 0; i < regions.length; i++) {
@@ -245,7 +290,14 @@ describe('computeGridLayout', () => {
 
     it('clamped layout still satisfies all invariants', () => {
       const grid = computeGridLayout(5, 3, 'narrow');
-      const regions = [grid.header, grid.flowMap, grid.focusedAgent, grid.stageHealth];
+      const allRegions = [
+        grid.header,
+        grid.flowMap,
+        grid.focusedAgent,
+        grid.stageHealth,
+        grid.monitorPanel,
+      ];
+      const regions = allRegions.filter(r => r.width > 0 && r.height > 0);
 
       // No overlap
       for (let i = 0; i < regions.length; i++) {
@@ -316,6 +368,8 @@ describe('computeGridLayout', () => {
       expect(grid.focusedAgent.height - 2).toBeGreaterThanOrEqual(1);
       expect(grid.flowMap.width - 2).toBeGreaterThanOrEqual(1);
       expect(grid.flowMap.height - 2).toBeGreaterThanOrEqual(1);
+      expect(grid.monitorPanel.width - 2).toBeGreaterThanOrEqual(1);
+      expect(grid.monitorPanel.height - 2).toBeGreaterThanOrEqual(1);
     });
   });
 });

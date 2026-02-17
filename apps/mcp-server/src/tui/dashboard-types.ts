@@ -155,6 +155,7 @@ export interface GridRegion {
 export interface DashboardGrid {
   header: GridRegion;
   flowMap: GridRegion;
+  monitorPanel: GridRegion;
   focusedAgent: GridRegion;
   stageHealth: GridRegion;
   total: Pick<GridRegion, 'width' | 'height'>;

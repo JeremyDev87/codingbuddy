@@ -53,6 +53,7 @@ export function computeGridLayout(
       header,
       focusedAgent: { x: 0, y: mainY, width: cols, height: focusedHeight },
       flowMap: { x: 0, y: mainY + focusedHeight, width: cols, height: flowMapHeight },
+      monitorPanel: { x: 0, y: 0, width: 0, height: 0 },
       stageHealth,
       total: { width: cols, height: r },
     };
@@ -60,10 +61,13 @@ export function computeGridLayout(
 
   const focusedWidth = Math.min(FOCUSED_AGENT_WIDTH[layoutMode], cols - MIN_COLUMNS);
   const flowMapWidth = cols - focusedWidth;
+  const flowMapHeight = Math.ceil(mainHeight / 2);
+  const monitorHeight = mainHeight - flowMapHeight;
 
   return {
     header,
-    flowMap: { x: 0, y: mainY, width: flowMapWidth, height: mainHeight },
+    flowMap: { x: 0, y: mainY, width: flowMapWidth, height: flowMapHeight },
+    monitorPanel: { x: 0, y: mainY + flowMapHeight, width: flowMapWidth, height: monitorHeight },
     focusedAgent: { x: flowMapWidth, y: mainY, width: focusedWidth, height: mainHeight },
     stageHealth,
     total: { width: cols, height: r },
