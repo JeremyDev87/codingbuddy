@@ -2,14 +2,15 @@
  * Extracts semantic TUI events from MCP tool responses.
  *
  * The TuiInterceptor calls this after execute() to derive
- * mode:changed, skill:recommended, and parallel:started events
- * from the tool response payload.
+ * mode:changed, skill:recommended, parallel:started, and agent:activated
+ * events from the tool response payload.
  */
 import {
   TUI_EVENTS,
   type ModeChangedEvent,
   type SkillRecommendedEvent,
   type ParallelStartedEvent,
+  type AgentActivatedEvent,
 } from './types';
 import { parseToolResponseJson } from './parse-tool-response';
 import type { Mode } from '../../keyword/keyword.types';
@@ -25,6 +26,10 @@ export type ExtractedEvent =
   | {
       event: typeof TUI_EVENTS.PARALLEL_STARTED;
       payload: ParallelStartedEvent;
+    }
+  | {
+      event: typeof TUI_EVENTS.AGENT_ACTIVATED;
+      payload: AgentActivatedEvent;
     };
 
 /**
@@ -73,6 +78,20 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
         },
       });
     }
+  }
+
+  // agent:activated (primary agent from delegates_to)
+  const delegateName = typeof json.delegates_to === 'string' ? json.delegates_to : null;
+  if (delegateName) {
+    events.push({
+      event: TUI_EVENTS.AGENT_ACTIVATED,
+      payload: {
+        agentId: `primary:${delegateName}`,
+        name: delegateName,
+        role: 'primary',
+        isPrimary: true,
+      },
+    });
   }
 
   return events;

@@ -10,6 +10,7 @@ export class TuiInterceptor {
   private readonly logger = new Logger(TuiInterceptor.name);
   private enabled = false;
   private currentMode: Mode | null = null;
+  private currentPrimaryAgentId: string | null = null;
 
   constructor(private readonly eventBus: TuiEventBus) {}
 
@@ -21,6 +22,7 @@ export class TuiInterceptor {
   disable(): void {
     this.enabled = false;
     this.currentMode = null;
+    this.currentPrimaryAgentId = null;
   }
 
   isEnabled(): boolean {
@@ -88,6 +90,18 @@ export class TuiInterceptor {
         const payload = { ...evt.payload, from: this.currentMode };
         this.currentMode = evt.payload.to;
         this.eventBus.emit(TUI_EVENTS.MODE_CHANGED, payload);
+        break;
+      }
+      case TUI_EVENTS.AGENT_ACTIVATED: {
+        if (this.currentPrimaryAgentId) {
+          this.eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+            agentId: this.currentPrimaryAgentId,
+            reason: 'replaced',
+            durationMs: 0,
+          });
+        }
+        this.currentPrimaryAgentId = evt.payload.agentId;
+        this.eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, evt.payload);
         break;
       }
       case TUI_EVENTS.SKILL_RECOMMENDED:

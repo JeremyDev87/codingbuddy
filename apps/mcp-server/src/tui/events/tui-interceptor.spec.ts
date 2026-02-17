@@ -206,6 +206,84 @@ describe('TuiInterceptor', () => {
       });
     });
 
+    it('should emit agent:activated for primary agent from parse_mode delegates_to', async () => {
+      const activatedHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
+
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN design auth' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'PLAN',
+              delegates_to: 'solution-architect',
+            }),
+          },
+        ],
+      }));
+
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(activatedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentId: 'primary:solution-architect',
+          name: 'solution-architect',
+          isPrimary: true,
+        }),
+      );
+    });
+
+    it('should deactivate previous primary agent when new parse_mode arrives', async () => {
+      const activatedHandler = vi.fn();
+      const deactivatedHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
+      eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, deactivatedHandler);
+
+      // First call: PLAN with solution-architect
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN design auth' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'PLAN',
+              delegates_to: 'solution-architect',
+            }),
+          },
+        ],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      // Second call: ACT with frontend-developer
+      await interceptor.intercept('parse_mode', { prompt: 'ACT implement feature' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'ACT',
+              delegates_to: 'frontend-developer',
+            }),
+          },
+        ],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      // solution-architect should be deactivated with 'replaced' reason
+      expect(deactivatedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentId: 'primary:solution-architect',
+          reason: 'replaced',
+        }),
+      );
+      // frontend-developer should be activated
+      expect(activatedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentId: 'primary:frontend-developer',
+          name: 'frontend-developer',
+          isPrimary: true,
+        }),
+      );
+    });
+
     it('should track previous mode in mode:changed from field', async () => {
       const modeHandler = vi.fn();
       eventBus.on(TUI_EVENTS.MODE_CHANGED, modeHandler);
@@ -319,6 +397,47 @@ describe('TuiInterceptor', () => {
       interceptor.enable();
       interceptor.disable();
       expect(interceptor.isEnabled()).toBe(false);
+    });
+
+    it('should reset currentPrimaryAgentId on disable()', async () => {
+      interceptor.enable();
+      const activatedHandler = vi.fn();
+      const deactivatedHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
+      eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, deactivatedHandler);
+
+      // Activate a primary agent
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN test' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ mode: 'PLAN', delegates_to: 'solution-architect' }),
+          },
+        ],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      // Disable and re-enable
+      interceptor.disable();
+      interceptor.enable();
+      deactivatedHandler.mockClear();
+
+      // New primary agent should NOT trigger deactivation of old one
+      await interceptor.intercept('parse_mode', { prompt: 'ACT impl' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ mode: 'ACT', delegates_to: 'frontend-developer' }),
+          },
+        ],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      // Should not have emitted 'replaced' deactivation for solution-architect
+      const replacedCalls = deactivatedHandler.mock.calls.filter(
+        (call: unknown[]) => (call[0] as { reason: string }).reason === 'replaced',
+      );
+      expect(replacedCalls).toHaveLength(0);
     });
   });
 });

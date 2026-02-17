@@ -23,6 +23,7 @@ const TOOL_AGENT_MAP: Record<string, string> = {
   update_context: 'context',
   cleanup_context: 'context',
   get_code_conventions: 'conventions',
+  dispatch_agents: 'orchestrator',
 };
 
 export function parseAgentFromToolName(

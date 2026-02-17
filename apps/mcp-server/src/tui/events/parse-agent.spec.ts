@@ -184,6 +184,15 @@ describe('parseAgentFromToolName', () => {
         isPrimary: false,
       });
     });
+
+    it('should return agent info for dispatch_agents', () => {
+      expect(parseAgentFromToolName('dispatch_agents', { mode: 'EVAL' })).toEqual({
+        agentId: 'dispatch_agents',
+        name: 'dispatch_agents',
+        role: 'orchestrator',
+        isPrimary: false,
+      });
+    });
   });
 
   describe('unhandled tools', () => {

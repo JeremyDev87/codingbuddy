@@ -129,6 +129,66 @@ describe('extractEventsFromResponse', () => {
     });
   });
 
+  describe('parse_mode → agent:activated', () => {
+    it('should extract agent:activated from delegates_to in parse_mode response', () => {
+      const result = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'solution-architect',
+          included_skills: [],
+        }),
+      );
+      const agentEvent = result.find(e => e.event === TUI_EVENTS.AGENT_ACTIVATED);
+      expect(agentEvent).toBeDefined();
+      expect(agentEvent!.payload).toEqual({
+        agentId: 'primary:solution-architect',
+        name: 'solution-architect',
+        role: 'primary',
+        isPrimary: true,
+      });
+    });
+
+    it('should not emit agent:activated if delegates_to is missing', () => {
+      const result = extractEventsFromResponse('parse_mode', makeResponse({ mode: 'PLAN' }));
+      const agentEvents = result.filter(e => e.event === TUI_EVENTS.AGENT_ACTIVATED);
+      expect(agentEvents).toHaveLength(0);
+    });
+
+    it('should not emit agent:activated if delegates_to is an empty string', () => {
+      const result = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({ mode: 'PLAN', delegates_to: '' }),
+      );
+      const agentEvents = result.filter(e => e.event === TUI_EVENTS.AGENT_ACTIVATED);
+      expect(agentEvents).toHaveLength(0);
+    });
+
+    it('should not emit agent:activated if delegates_to is not a string', () => {
+      const result = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({ mode: 'PLAN', delegates_to: 123 }),
+      );
+      const agentEvents = result.filter(e => e.event === TUI_EVENTS.AGENT_ACTIVATED);
+      expect(agentEvents).toHaveLength(0);
+    });
+
+    it('should emit mode:changed, skill:recommended, and agent:activated together', () => {
+      const result = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'technical-planner',
+          included_skills: [{ name: 'writing-plans', reason: 'matched' }],
+        }),
+      );
+      expect(result).toHaveLength(3);
+      expect(result[0].event).toBe(TUI_EVENTS.MODE_CHANGED);
+      expect(result[1].event).toBe(TUI_EVENTS.SKILL_RECOMMENDED);
+      expect(result[2].event).toBe(TUI_EVENTS.AGENT_ACTIVATED);
+    });
+  });
+
   describe('prepare_parallel_agents → parallel:started', () => {
     it('should extract parallel:started from prepare_parallel_agents response', () => {
       const result = extractEventsFromResponse(
