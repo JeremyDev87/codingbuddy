@@ -1,5 +1,10 @@
-export { useEventBus, eventBusReducer, initialState } from './use-event-bus';
-export type { EventBusState, EventBusAction } from './use-event-bus';
-export { useAgentState } from './use-agent-state';
-export type { AgentStateView } from './use-agent-state';
+export {
+  useDashboardState,
+  dashboardReducer,
+  createInitialDashboardState,
+} from './use-dashboard-state';
+export type { DashboardAction } from './use-dashboard-state';
+export { selectFocusedAgent } from './use-focus-agent';
+export { useTerminalSize, getTerminalSize } from './use-terminal-size';
+export type { TerminalSize } from './use-terminal-size';
 export { useClock } from './use-clock';

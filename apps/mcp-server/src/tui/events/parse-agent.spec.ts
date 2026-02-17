@@ -12,7 +12,7 @@ describe('parseAgentFromToolName', () => {
         agentId: 'security-specialist',
         name: 'security-specialist',
         role: 'specialist',
-        isPrimary: true,
+        isPrimary: false,
       });
     });
 

@@ -14,6 +14,9 @@ export {
   type ParallelStartedEvent,
   type ParallelCompletedEvent,
   type AgentsLoadedEvent,
+  type AgentRelationshipEvent,
+  type TaskSyncedEvent,
+  type ToolInvokedEvent,
 } from './types';
 export {
   type AgentMetadata,

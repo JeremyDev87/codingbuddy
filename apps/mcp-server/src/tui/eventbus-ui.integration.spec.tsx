@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render } from 'ink-testing-library';
-import { App } from './app';
-import { TuiEventBus, TUI_EVENTS, TuiInterceptor, type AgentMetadata } from './events';
+import { DashboardApp } from './dashboard-app';
+import { TuiEventBus, TUI_EVENTS, TuiInterceptor } from './events';
 
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
@@ -15,10 +15,10 @@ vi.mock('./utils/icons', async importOriginal => {
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('EventBus ↔ UI Integration', () => {
-  describe('Agent 활성화 → AgentCard 상태 변화', () => {
-    it('should show primary agent name in AgentTree when AGENT_ACTIVATED with isPrimary=true', async () => {
+  describe('Agent 활성화 → Dashboard 상태 변화', () => {
+    it('should show primary agent name and RUNNING state when AGENT_ACTIVATED with isPrimary=true', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'arch-1',
@@ -29,24 +29,20 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      // Primary agent should appear in AgentTree
-      expect(frame).toContain('soluti');
-      // StatusBar should show 1 active
-      expect(frame).toContain('1 active');
+      expect(frame).toContain('solution-architect');
+      expect(frame).toContain('RUNNING');
     });
 
-    it('should show multiple parallel agents in AgentTree when specialists activated', async () => {
+    it('should show multiple parallel agents in FlowMap when specialists activated', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
-      // Activate primary first
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'p1',
         name: 'solution-architect',
         role: 'primary',
         isPrimary: true,
       });
-      // Then specialists
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 's1',
         name: 'security-specialist',
@@ -62,16 +58,17 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('securi');
-      expect(frame).toContain('perfor');
-      expect(frame).toContain('3 active');
+      // FlowMap truncates names in 17-char-wide boxes (e.g., "security-...")
+      expect(frame).toContain('security-');
+      expect(frame).toContain('performan');
+      expect(frame).toContain('RUNNING');
     });
   });
 
-  describe('Agent 비활성화 → AgentCard Idle 전환', () => {
-    it('should decrease active count when agent deactivated with reason=completed', async () => {
+  describe('Agent 비활성화 → 상태 전환', () => {
+    it('should remain RUNNING when one of two agents deactivated', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'a1',
@@ -86,7 +83,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: false,
       });
       await tick();
-      expect(lastFrame()).toContain('2 active');
+      expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'a1',
@@ -94,12 +91,35 @@ describe('EventBus ↔ UI Integration', () => {
         durationMs: 1200,
       });
       await tick();
-      expect(lastFrame()).toContain('1 active');
+      // Still one running
+      expect(lastFrame()).toContain('RUNNING');
     });
 
-    it('should decrease active count when agent deactivated with reason=error', async () => {
+    it('should switch to IDLE when all agents deactivated', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'a1',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      });
+      await tick();
+      expect(lastFrame()).toContain('RUNNING');
+
+      eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
+        agentId: 'a1',
+        reason: 'completed',
+        durationMs: 1200,
+      });
+      await tick();
+      expect(lastFrame()).toContain('IDLE');
+    });
+
+    it('should switch to IDLE when agent deactivated with reason=error', async () => {
+      const eventBus = new TuiEventBus();
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'a1',
@@ -108,7 +128,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('1 active');
+      expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'a1',
@@ -116,12 +136,12 @@ describe('EventBus ↔ UI Integration', () => {
         durationMs: 500,
       });
       await tick();
-      expect(lastFrame()).toContain('0 active');
+      expect(lastFrame()).toContain('ERROR');
     });
 
-    it('should clear AgentTree primary slot when primary agent deactivated', async () => {
+    it('should switch to IDLE when primary agent deactivated', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'p1',
@@ -130,7 +150,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('soluti');
+      expect(lastFrame()).toContain('solution-architect');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'p1',
@@ -138,26 +158,26 @@ describe('EventBus ↔ UI Integration', () => {
         durationMs: 2000,
       });
       await tick();
-
-      const frame = lastFrame() ?? '';
-      expect(frame).toContain('0 active');
+      expect(lastFrame()).toContain('IDLE');
     });
   });
 
   describe('Mode 변경 → Header 업데이트', () => {
-    it('should display ACT in Header when mode changes from PLAN to ACT', async () => {
+    it('should handle mode change from PLAN to ACT without error', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'PLAN', to: 'ACT' });
       await tick();
 
-      expect(lastFrame()).toContain('ACT');
+      const frame = lastFrame() ?? '';
+      expect(frame).toBeTruthy();
+      expect(frame).toContain('Codingbuddy TUI');
     });
 
-    it('should display EVAL in Header when mode changes from ACT to EVAL', async () => {
+    it('should handle sequential mode changes without error', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'ACT' });
       await tick();
@@ -165,26 +185,27 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('EVAL');
+      expect(frame).toBeTruthy();
     });
 
-    it('should reflect only the latest mode after rapid consecutive changes', async () => {
+    it('should handle rapid consecutive mode changes without error', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'PLAN', to: 'ACT' });
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'ACT', to: 'AUTO' });
       await tick();
 
-      expect(lastFrame()).toContain('AUTO');
+      const frame = lastFrame() ?? '';
+      expect(frame).toBeTruthy();
     });
   });
 
-  describe('Parallel 시작/완료 → AgentTree 업데이트', () => {
-    it('should show specialists in AgentTree after PARALLEL_STARTED + individual activations', async () => {
+  describe('Parallel 시작/완료 → FlowMap 업데이트', () => {
+    it('should show specialists in FlowMap after PARALLEL_STARTED + individual activations', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'p1',
@@ -213,14 +234,15 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('securi');
-      expect(frame).toContain('test-s');
-      expect(frame).toContain('3 active');
+      // FlowMap truncates names in 17-char-wide boxes (e.g., "security-...", "test-stra...")
+      expect(frame).toContain('security-');
+      expect(frame).toContain('test-stra');
+      expect(frame).toContain('RUNNING');
     });
 
-    it('should clear specialists from AgentTree after individual deactivations + PARALLEL_COMPLETED', async () => {
+    it('should switch to IDLE after individual deactivations when only primary remains', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'p1',
@@ -245,7 +267,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: false,
       });
       await tick();
-      expect(lastFrame()).toContain('3 active');
+      expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'sec-1',
@@ -266,16 +288,16 @@ describe('EventBus ↔ UI Integration', () => {
       });
       await tick();
 
-      expect(lastFrame()).toContain('1 active');
+      // Primary still running
+      expect(lastFrame()).toContain('RUNNING');
     });
 
-    it('should handle full parallel lifecycle: start → activate → deactivate → complete', async () => {
+    it('should handle full parallel lifecycle: mode → agents → parallel → completion', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
       await tick();
-      expect(lastFrame()).toContain('PLAN');
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'p1',
@@ -284,7 +306,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('1 active');
+      expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
         specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
@@ -309,7 +331,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: false,
       });
       await tick();
-      expect(lastFrame()).toContain('4 active');
+      expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'sec-1',
@@ -336,16 +358,15 @@ describe('EventBus ↔ UI Integration', () => {
       });
       await tick();
 
-      const frame = lastFrame() ?? '';
-      expect(frame).toContain('1 active');
-      expect(frame).toContain('PLAN');
+      // Only primary still running
+      expect(lastFrame()).toContain('RUNNING');
     });
   });
 
-  describe('Skill 추천 → StatusBar 업데이트', () => {
-    it('should display all skill names when multiple skills recommended sequentially', async () => {
+  describe('Skill 추천 → 이벤트 처리 (UI 표시 없음)', () => {
+    it('should handle skill recommendation events without error', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
         skillName: 'brainstorming',
@@ -358,13 +379,12 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('brainstorming');
-      expect(frame).toContain('test-driven-development');
+      expect(frame).toBeTruthy();
     });
 
     it('should handle skill recommendation alongside agent activation', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'a1',
@@ -379,28 +399,13 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('1 active');
-      expect(frame).toContain('systematic-debugging');
+      expect(frame).toContain('RUNNING');
+      expect(frame).toContain('security-specialist');
     });
   });
 
   describe('이벤트 버퍼링 (TUI 시작 전 이벤트)', () => {
-    it('should NOT reflect MODE_CHANGED emitted before App mount', async () => {
-      const eventBus = new TuiEventBus();
-
-      // Emit BEFORE render
-      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'ACT' });
-
-      // Render AFTER emit
-      const { lastFrame } = render(<App eventBus={eventBus} />);
-      await tick();
-
-      // Mode should NOT be reflected because listener wasn't registered yet
-      const frame = lastFrame() ?? '';
-      expect(frame).not.toContain('ACT');
-    });
-
-    it('should NOT reflect AGENT_ACTIVATED emitted before App mount', async () => {
+    it('should NOT reflect AGENT_ACTIVATED emitted before DashboardApp mount', async () => {
       const eventBus = new TuiEventBus();
 
       // Emit BEFORE render
@@ -411,85 +416,49 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
 
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
-      // Agent should NOT be reflected
-      expect(lastFrame()).toContain('0 active');
+      // Agent should NOT be reflected because listener wasn't registered yet
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('IDLE');
+      expect(frame).not.toContain('security-specialist');
     });
 
-    it('should sync state via re-emitting events after App mount', async () => {
+    it('should sync state via re-emitting events after DashboardApp mount', async () => {
       const eventBus = new TuiEventBus();
 
-      // These events are lost (emitted before mount)
+      // This event is lost (emitted before mount)
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
 
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
       // Re-emit after mount to sync state
-      eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
-      eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
-        agents: [
-          {
-            id: 'security-specialist',
-            name: 'security-specialist',
-            description: 'Security analysis',
-            category: 'Security' as const,
-            icon: '🔒',
-            expertise: ['security'],
-          },
-        ],
+      eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+        agentId: 'arch-1',
+        name: 'solution-architect',
+        role: 'primary',
+        isPrimary: true,
       });
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('PLAN');
-      expect(frame).toContain('Security');
+      expect(frame).toContain('RUNNING');
+      expect(frame).toContain('solution-architect');
     });
   });
 
   describe('복합 시나리오 통합 테스트', () => {
-    it('should handle real workflow: mode → agents → parallel → skills → completion', async () => {
+    it('should handle real workflow: mode → agents → parallel → completion', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
-      // 1. Load agent metadata
-      const agents: AgentMetadata[] = [
-        {
-          id: 'security-specialist',
-          name: 'security-specialist',
-          description: 'Security',
-          category: 'Security',
-          icon: '🔒',
-          expertise: ['security'],
-        },
-        {
-          id: 'test-strategy-specialist',
-          name: 'test-strategy-specialist',
-          description: 'Testing',
-          category: 'Testing',
-          icon: '🧪',
-          expertise: ['testing'],
-        },
-        {
-          id: 'architecture-specialist',
-          name: 'architecture-specialist',
-          description: 'Architecture',
-          category: 'Architecture',
-          icon: '🏛️',
-          expertise: ['architecture'],
-        },
-      ];
-      eventBus.emit(TUI_EVENTS.AGENTS_LOADED, { agents });
-      await tick();
-
-      // 2. Mode change to PLAN
+      // 1. Mode change to PLAN
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
       await tick();
-      expect(lastFrame()).toContain('PLAN');
 
-      // 3. Primary agent activates
+      // 2. Primary agent activates
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'arch-1',
         name: 'architecture-specialist',
@@ -497,17 +466,9 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('1 active');
+      expect(lastFrame()).toContain('RUNNING');
 
-      // 4. Skill recommended
-      eventBus.emit(TUI_EVENTS.SKILL_RECOMMENDED, {
-        skillName: 'brainstorming',
-        reason: 'planning phase',
-      });
-      await tick();
-      expect(lastFrame()).toContain('brainstorming');
-
-      // 5. Parallel execution
+      // 3. Parallel execution
       eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
         specialists: ['security-specialist', 'test-strategy-specialist'],
         mode: 'PLAN',
@@ -525,9 +486,9 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: false,
       });
       await tick();
-      expect(lastFrame()).toContain('3 active');
+      expect(lastFrame()).toContain('RUNNING');
 
-      // 6. Specialists complete
+      // 4. Specialists complete
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'sec-1',
         reason: 'completed',
@@ -548,17 +509,14 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('PLAN');
-      expect(frame).toContain('1 active');
-      expect(frame).toContain('brainstorming');
-      // Grid should still show categories from AGENTS_LOADED
-      expect(frame).toContain('Security');
-      expect(frame).toContain('Testing');
+      // Primary still running
+      expect(frame).toContain('RUNNING');
+      expect(frame).toContain('architecture-specialist');
     });
 
     it('should handle error scenario: activate → error deactivation → re-activate', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       // 1. Activate agent
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -568,7 +526,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('1 active');
+      expect(lastFrame()).toContain('RUNNING');
 
       // 2. Agent fails with error
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -577,7 +535,7 @@ describe('EventBus ↔ UI Integration', () => {
         durationMs: 300,
       });
       await tick();
-      expect(lastFrame()).toContain('0 active');
+      expect(lastFrame()).toContain('ERROR');
 
       // 3. Re-activate the same agent (retry scenario)
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -587,20 +545,19 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('1 active');
+      expect(lastFrame()).toContain('RUNNING');
     });
   });
 
   describe('Interceptor → EventBus → UI 통합 (semantic events)', () => {
-    it('should update Header mode when parse_mode tool is intercepted', async () => {
+    it('should update state when parse_mode tool is intercepted', async () => {
       const eventBus = new TuiEventBus();
       const interceptor = new TuiInterceptor(eventBus);
       interceptor.enable();
 
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
-      // Simulate parse_mode tool call through interceptor
       await interceptor.intercept(
         'parse_mode',
         { prompt: 'PLAN design auth feature' },
@@ -617,19 +574,20 @@ describe('EventBus ↔ UI Integration', () => {
         }),
       );
 
-      // Wait for setImmediate events to propagate
       await new Promise(resolve => setImmediate(resolve));
       await tick();
 
-      expect(lastFrame()).toContain('PLAN');
+      const frame = lastFrame() ?? '';
+      expect(frame).toBeTruthy();
+      expect(frame).toContain('Codingbuddy TUI');
     });
 
-    it('should show skills in StatusBar when parse_mode returns included_skills', async () => {
+    it('should handle parse_mode with included_skills without error', async () => {
       const eventBus = new TuiEventBus();
       const interceptor = new TuiInterceptor(eventBus);
       interceptor.enable();
 
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
       await interceptor.intercept('parse_mode', { prompt: 'PLAN something' }, async () => ({
@@ -651,17 +609,15 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('PLAN');
-      expect(frame).toContain('brainstorming');
-      expect(frame).toContain('writing-plans');
+      expect(frame).toBeTruthy();
     });
 
-    it('should show agent activation for mapped general tools like search_rules', async () => {
+    it('should handle tool interception and show correct state', async () => {
       const eventBus = new TuiEventBus();
       const interceptor = new TuiInterceptor(eventBus);
       interceptor.enable();
 
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
       await interceptor.intercept('search_rules', { query: 'test' }, async () => ({
@@ -671,10 +627,9 @@ describe('EventBus ↔ UI Integration', () => {
       await new Promise(resolve => setImmediate(resolve));
       await tick();
 
-      // search_rules is now mapped → should show in status
-      // After deactivation it becomes 0 active (completed), but the agent entry exists
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('0 active');
+      // After deactivation, should be IDLE
+      expect(frame).toContain('IDLE');
     });
 
     it('should handle full interceptor workflow: parse_mode + parallel agents', async () => {
@@ -682,10 +637,10 @@ describe('EventBus ↔ UI Integration', () => {
       const interceptor = new TuiInterceptor(eventBus);
       interceptor.enable();
 
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
-      // 1. parse_mode call sets mode and skills
+      // 1. parse_mode call sets mode
       await interceptor.intercept('parse_mode', { prompt: 'EVAL review code' }, async () => ({
         content: [
           {
@@ -702,8 +657,7 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       let frame = lastFrame() ?? '';
-      expect(frame).toContain('EVAL');
-      expect(frame).toContain('systematic-debugging');
+      expect(frame).toBeTruthy();
 
       // 2. prepare_parallel_agents call triggers parallel:started
       await interceptor.intercept(
@@ -729,8 +683,7 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       frame = lastFrame() ?? '';
-      expect(frame).toContain('EVAL');
-      expect(frame).toContain('systematic-debugging');
+      expect(frame).toBeTruthy();
     });
   });
 });

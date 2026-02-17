@@ -43,6 +43,9 @@ export const TUI_EVENT_TYPES = Object.freeze([
   'skill:recommended',
   'parallel:started',
   'parallel:completed',
+  'agent:relationship',
+  'task:synced',
+  'tool:invoked',
 ] as const);
 
 export type TuiEventType = (typeof TUI_EVENT_TYPES)[number];

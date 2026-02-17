@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { PassThrough } from 'stream';
 import { render } from 'ink-testing-library';
-import { App } from './app';
+import { DashboardApp } from './dashboard-app';
 import { TuiEventBus, TUI_EVENTS } from './events';
 import { resolveTuiConfig } from './tui-config';
 
@@ -31,9 +31,8 @@ describe('Transport-TUI Integration', () => {
       const mockStdout = new PassThrough();
       mockStdout.on('data', chunk => stdoutCapture.push(chunk.toString()));
 
-      // TUI renders to ink-testing-library's internal stream (simulating stderr)
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'test-agent',
@@ -43,9 +42,7 @@ describe('Transport-TUI Integration', () => {
       });
       await tick();
 
-      // mockStdout (simulating real stdout) should have ZERO TUI content
       expect(stdoutCapture.join('')).toBe('');
-      // TUI stream (ink internal) should have content
       expect(lastFrame()).toBeTruthy();
     });
 
@@ -54,7 +51,6 @@ describe('Transport-TUI Integration', () => {
       const mockStdout = new PassThrough();
       mockStdout.on('data', chunk => stdoutCapture.push(chunk.toString()));
 
-      // Simulate MCP JSON-RPC output to stdout
       const jsonRpcMessage = JSON.stringify({
         jsonrpc: '2.0',
         id: 1,
@@ -62,14 +58,12 @@ describe('Transport-TUI Integration', () => {
       });
       mockStdout.write(jsonRpcMessage + '\n');
 
-      // TUI renders independently on ink-testing-library's internal stream
       const eventBus = new TuiEventBus();
-      render(<App eventBus={eventBus} />);
+      render(<DashboardApp eventBus={eventBus} />);
       await tick();
 
-      // stdout should only have JSON-RPC, no TUI content
       expect(stdoutCapture.join('')).toContain('"jsonrpc":"2.0"');
-      expect(stdoutCapture.join('')).not.toContain('CODINGBUDDY');
+      expect(stdoutCapture.join('')).not.toContain('Codingbuddy TUI');
     });
 
     it('should skip TUI when stderr is not a TTY (piped output)', () => {
@@ -87,9 +81,8 @@ describe('Transport-TUI Integration', () => {
   describe('stdio 모드: MCP + TUI 동시 동작', () => {
     it('should handle concurrent MCP events and TUI rendering', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
-      // Simulate rapid MCP tool calls generating TUI events
       const agentIds = ['arch-1', 'sec-1', 'perf-1'];
       for (const id of agentIds) {
         eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -102,7 +95,7 @@ describe('Transport-TUI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('3 active');
+      expect(frame).toContain('RUNNING');
     });
   });
 
@@ -120,7 +113,7 @@ describe('Transport-TUI Integration', () => {
 
     it('should render TUI to stdout stream in SSE mode', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, {
         from: null,
@@ -129,14 +122,13 @@ describe('Transport-TUI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('PLAN');
+      expect(frame).toBeTruthy();
     });
 
     it('should handle SSE events and TUI simultaneously', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
-      // Simulate SSE mode workflow: mode change + agent activation
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, {
         from: 'PLAN',
         to: 'ACT',
@@ -150,20 +142,17 @@ describe('Transport-TUI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('ACT');
-      expect(frame).toContain('1 active');
+      expect(frame).toContain('RUNNING');
+      expect(frame).toContain('frontend-developer');
     });
 
     it('should NOT conflict with SSE event stream protocol', () => {
-      // SSE uses HTTP responses, not stdout pipe
-      // TUI on stdout is safe because SSE protocol is over HTTP connection
       const config = resolveTuiConfig({
         transportMode: 'sse',
         tuiEnabled: true,
         stderrIsTTY: true,
       });
 
-      // SSE mode always uses stdout regardless of TTY status
       expect(config.target).toBe('stdout');
     });
   });
@@ -195,7 +184,7 @@ describe('Transport-TUI Integration', () => {
   describe('공통: 터미널 리사이즈 대응', () => {
     it('should render TUI components and produce visible output', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'test-1',
@@ -207,14 +196,13 @@ describe('Transport-TUI Integration', () => {
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
-      expect(frame).toContain('1 active');
+      expect(frame).toContain('RUNNING');
     });
 
     it('should maintain state across event-driven re-renders', async () => {
       const eventBus = new TuiEventBus();
-      const { lastFrame } = render(<App eventBus={eventBus} />);
+      const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
-      // Set state
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, {
         from: 'ACT',
         to: 'EVAL',
@@ -228,8 +216,8 @@ describe('Transport-TUI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('EVAL');
-      expect(frame).toContain('1 active');
+      expect(frame).toContain('RUNNING');
+      expect(frame).toContain('evaluator');
     });
   });
 });

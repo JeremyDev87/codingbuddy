@@ -28,6 +28,9 @@ describe('tui/types', () => {
         'skill:recommended',
         'parallel:started',
         'parallel:completed',
+        'agent:relationship',
+        'task:synced',
+        'tool:invoked',
       ]);
     });
 

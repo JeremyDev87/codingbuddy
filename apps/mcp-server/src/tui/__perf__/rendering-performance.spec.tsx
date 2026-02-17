@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render } from 'ink-testing-library';
-import { App } from '../app';
+import { DashboardApp } from '../dashboard-app';
 import {
   TuiEventBus,
   TUI_EVENTS,
@@ -56,7 +56,7 @@ describe('29 Agent 초기 렌더링', () => {
 
     for (let run = 0; run < 3; run++) {
       const eventBus = new TuiEventBus();
-      const { unmount, lastFrame } = render(<App eventBus={eventBus} />);
+      const { unmount, lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       // Load agent metadata first
       eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
@@ -80,9 +80,9 @@ describe('29 Agent 초기 렌더링', () => {
       const end = performance.now();
       durations.push(end - start);
 
-      // Verify render completed
+      // Verify render completed - dashboard should show RUNNING
       const frame = lastFrame() ?? '';
-      expect(frame).toContain(`${ALL_AGENT_NAMES.length} active`);
+      expect(frame).toContain('RUNNING');
 
       unmount();
     }
@@ -106,7 +106,7 @@ describe('단일 Agent 상태 변경 리렌더', () => {
 
     for (let run = 0; run < 3; run++) {
       const eventBus = new TuiEventBus();
-      const { unmount, lastFrame } = render(<App eventBus={eventBus} />);
+      const { unmount, lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       unmountFn = unmount;
 
       // Load agent metadata
@@ -127,7 +127,7 @@ describe('단일 Agent 상태 변경 리렌더', () => {
       await flushRender();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain(`${ALL_AGENT_NAMES.length} active`);
+      expect(frame).toContain('RUNNING');
 
       // Measure activating one more agent
       const start = performance.now();
@@ -144,7 +144,7 @@ describe('단일 Agent 상태 변경 리렌더', () => {
       durations.push(end - start);
 
       const updatedFrame = lastFrame() ?? '';
-      expect(updatedFrame).toContain(`${ALL_AGENT_NAMES.length + 1} active`);
+      expect(updatedFrame).toContain('RUNNING');
 
       unmount();
       unmountFn = undefined;
@@ -168,7 +168,7 @@ describe('29 Agent 동시 상태 업데이트', () => {
 
     for (let run = 0; run < 3; run++) {
       const eventBus = new TuiEventBus();
-      const { unmount, lastFrame } = render(<App eventBus={eventBus} />);
+      const { unmount, lastFrame } = render(<DashboardApp eventBus={eventBus} />);
       unmountFn = unmount;
 
       // Load agent metadata
@@ -189,7 +189,7 @@ describe('29 Agent 동시 상태 업데이트', () => {
       await flushRender();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain(`${ALL_AGENT_NAMES.length} active`);
+      expect(frame).toContain('RUNNING');
 
       // Measure rapid deactivation of all 29 agents
       const start = performance.now();
@@ -207,7 +207,7 @@ describe('29 Agent 동시 상태 업데이트', () => {
       durations.push(end - start);
 
       const updatedFrame = lastFrame() ?? '';
-      expect(updatedFrame).toContain('0 active');
+      expect(updatedFrame).toContain('IDLE');
 
       unmount();
       unmountFn = undefined;

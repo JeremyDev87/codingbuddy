@@ -1,7 +1,7 @@
 /**
  * TUI EventBus Event Types and Interfaces
  *
- * Defines the 7 core events for the TUI Agent Monitor event system.
+ * Defines the 10 core events for the TUI Agent Monitor event system.
  * Each event has a typed payload interface for type-safe emit/subscribe.
  */
 import type { Mode } from '../../keyword/keyword.types';
@@ -18,6 +18,9 @@ export const TUI_EVENTS = Object.freeze({
   PARALLEL_STARTED: 'parallel:started',
   PARALLEL_COMPLETED: 'parallel:completed',
   AGENTS_LOADED: 'agents:loaded',
+  AGENT_RELATIONSHIP: 'agent:relationship',
+  TASK_SYNCED: 'task:synced',
+  TOOL_INVOKED: 'tool:invoked',
 } as const);
 
 export type TuiEventName = (typeof TUI_EVENTS)[keyof typeof TUI_EVENTS];
@@ -33,7 +36,7 @@ export interface AgentActivatedEvent {
 /** Payload when a specialist agent is deactivated */
 export interface AgentDeactivatedEvent {
   agentId: string;
-  reason: string;
+  reason: 'completed' | 'error' | 'replaced';
   durationMs: number;
 }
 
@@ -66,6 +69,27 @@ export interface AgentsLoadedEvent {
   agents: AgentMetadata[];
 }
 
+/** Payload when an agent relationship (edge) is established */
+export interface AgentRelationshipEvent {
+  from: string;
+  to: string;
+  label: string;
+  type: 'delegation' | 'output' | 'dependency';
+}
+
+/** Payload when tasks are synced for an agent */
+export interface TaskSyncedEvent {
+  agentId: string;
+  tasks: Array<{ id: string; subject: string; completed: boolean }>;
+}
+
+/** Payload when a tool is invoked */
+export interface ToolInvokedEvent {
+  toolName: string;
+  agentId: string | null;
+  timestamp: number;
+}
+
 /**
  * Maps event names to their payload types for type-safe emit/subscribe.
  */
@@ -77,4 +101,7 @@ export interface TuiEventMap {
   [TUI_EVENTS.PARALLEL_STARTED]: ParallelStartedEvent;
   [TUI_EVENTS.PARALLEL_COMPLETED]: ParallelCompletedEvent;
   [TUI_EVENTS.AGENTS_LOADED]: AgentsLoadedEvent;
+  [TUI_EVENTS.AGENT_RELATIONSHIP]: AgentRelationshipEvent;
+  [TUI_EVENTS.TASK_SYNCED]: TaskSyncedEvent;
+  [TUI_EVENTS.TOOL_INVOKED]: ToolInvokedEvent;
 }

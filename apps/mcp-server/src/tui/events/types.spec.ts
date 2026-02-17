@@ -8,12 +8,15 @@ import {
   type ParallelStartedEvent,
   type ParallelCompletedEvent,
   type AgentsLoadedEvent,
+  type AgentRelationshipEvent,
+  type TaskSyncedEvent,
+  type ToolInvokedEvent,
   type TuiEventMap,
 } from './types';
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 7 event names', () => {
+    it('should define all 10 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -22,6 +25,9 @@ describe('tui/events/types', () => {
         PARALLEL_STARTED: 'parallel:started',
         PARALLEL_COMPLETED: 'parallel:completed',
         AGENTS_LOADED: 'agents:loaded',
+        AGENT_RELATIONSHIP: 'agent:relationship',
+        TASK_SYNCED: 'task:synced',
+        TOOL_INVOKED: 'tool:invoked',
       });
     });
 
@@ -110,6 +116,40 @@ describe('tui/events/types', () => {
       };
       expect(event.agents).toHaveLength(1);
     });
+
+    it('should create AgentRelationshipEvent', () => {
+      const event: AgentRelationshipEvent = {
+        from: 'agent-1',
+        to: 'agent-2',
+        label: 'delegates security review',
+        type: 'delegation',
+      };
+      expect(event.from).toBe('agent-1');
+      expect(event.to).toBe('agent-2');
+      expect(event.type).toBe('delegation');
+    });
+
+    it('should create TaskSyncedEvent', () => {
+      const event: TaskSyncedEvent = {
+        agentId: 'agent-1',
+        tasks: [
+          { id: 't1', subject: 'Implement auth', completed: false },
+          { id: 't2', subject: 'Write tests', completed: true },
+        ],
+      };
+      expect(event.agentId).toBe('agent-1');
+      expect(event.tasks).toHaveLength(2);
+    });
+
+    it('should create ToolInvokedEvent', () => {
+      const event: ToolInvokedEvent = {
+        toolName: 'search_rules',
+        agentId: null,
+        timestamp: 1700000000000,
+      };
+      expect(event.toolName).toBe('search_rules');
+      expect(event.agentId).toBeNull();
+    });
   });
 
   describe('TuiEventMap', () => {
@@ -121,12 +161,20 @@ describe('tui/events/types', () => {
           role: 'tester',
           isPrimary: false,
         },
-        'agent:deactivated': { agentId: 'a1', reason: 'done', durationMs: 0 },
+        'agent:deactivated': { agentId: 'a1', reason: 'completed', durationMs: 0 },
         'mode:changed': { from: 'PLAN', to: 'ACT' },
         'skill:recommended': { skillName: 's1', reason: 'r' },
         'parallel:started': { specialists: [], mode: 'PLAN' },
         'parallel:completed': { specialists: [], results: {} },
         'agents:loaded': { agents: [] },
+        'agent:relationship': {
+          from: 'a1',
+          to: 'a2',
+          label: 'delegates',
+          type: 'delegation',
+        },
+        'task:synced': { agentId: 'a1', tasks: [] },
+        'tool:invoked': { toolName: 'search_rules', agentId: null, timestamp: 0 },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
     });

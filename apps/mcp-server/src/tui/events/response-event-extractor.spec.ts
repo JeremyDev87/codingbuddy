@@ -268,6 +268,188 @@ describe('extractEventsFromResponse', () => {
     });
   });
 
+  describe('dispatch_agents → agent:relationship', () => {
+    it('should extract delegation relationships from dispatch_agents response', () => {
+      const result = extractEventsFromResponse(
+        'dispatch_agents',
+        makeResponse({
+          primaryAgent: { name: 'solution-architect' },
+          specialists: [{ name: 'security-specialist' }, { agentName: 'performance-specialist' }],
+        }),
+      );
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        event: TUI_EVENTS.AGENT_RELATIONSHIP,
+        payload: {
+          from: 'primary:solution-architect',
+          to: 'specialist:security-specialist',
+          label: 'delegates',
+          type: 'delegation',
+        },
+      });
+      expect(result[1]).toEqual({
+        event: TUI_EVENTS.AGENT_RELATIONSHIP,
+        payload: {
+          from: 'primary:solution-architect',
+          to: 'specialist:performance-specialist',
+          label: 'delegates',
+          type: 'delegation',
+        },
+      });
+    });
+
+    it('should return empty if primaryAgent is missing', () => {
+      const result = extractEventsFromResponse(
+        'dispatch_agents',
+        makeResponse({
+          specialists: [{ name: 'security-specialist' }],
+        }),
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    it('should return empty if specialists array is missing', () => {
+      const result = extractEventsFromResponse(
+        'dispatch_agents',
+        makeResponse({
+          primaryAgent: { name: 'solution-architect' },
+        }),
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    it('should use parallelAgents as fallback for specialists', () => {
+      const result = extractEventsFromResponse(
+        'dispatch_agents',
+        makeResponse({
+          primaryAgent: { name: 'architect' },
+          parallelAgents: [{ name: 'sec' }],
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].payload).toEqual(
+        expect.objectContaining({
+          from: 'primary:architect',
+          to: 'specialist:sec',
+        }),
+      );
+    });
+
+    it('should skip specialists without name or agentName', () => {
+      const result = extractEventsFromResponse(
+        'dispatch_agents',
+        makeResponse({
+          primaryAgent: { name: 'architect' },
+          specialists: [{ name: 'valid' }, { other: 'no-name' }, null],
+        }),
+      );
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('update_context → task:synced', () => {
+    it('should extract task:synced from update_context response with progress', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'ACT',
+                primaryAgent: 'frontend-developer',
+                status: 'in_progress',
+                progress: ['Implemented login form', 'Added validation'],
+              },
+            ],
+          },
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].event).toBe(TUI_EVENTS.TASK_SYNCED);
+      expect(result[0].payload).toEqual({
+        agentId: 'frontend-developer',
+        tasks: [
+          { id: 'ctx-0', subject: 'Implemented login form', completed: false },
+          { id: 'ctx-1', subject: 'Added validation', completed: false },
+        ],
+      });
+    });
+
+    it('should set completed: true when section status is completed', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'ACT',
+                primaryAgent: 'dev',
+                status: 'completed',
+                progress: ['Task done'],
+              },
+            ],
+          },
+        }),
+      );
+      expect(result[0].payload).toEqual({
+        agentId: 'dev',
+        tasks: [{ id: 'ctx-0', subject: 'Task done', completed: true }],
+      });
+    });
+
+    it('should return empty if document is missing', () => {
+      const result = extractEventsFromResponse('update_context', makeResponse({ success: true }));
+      expect(result).toHaveLength(0);
+    });
+
+    it('should return empty if sections is empty', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({ document: { sections: [] } }),
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    it('should return empty if progress is empty', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [{ mode: 'ACT', primaryAgent: 'dev', progress: [] }],
+          },
+        }),
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    it('should use unknown-agent as fallback agentId', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [{ progress: ['task1'] }],
+          },
+        }),
+      );
+      expect(result[0].payload).toEqual(expect.objectContaining({ agentId: 'unknown-agent' }));
+    });
+
+    it('should use the last section for progress extraction', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              { primaryAgent: 'old', progress: ['old task'] },
+              { primaryAgent: 'new', progress: ['new task'] },
+            ],
+          },
+        }),
+      );
+      expect(result[0].payload).toEqual(expect.objectContaining({ agentId: 'new' }));
+    });
+  });
+
   describe('other tools', () => {
     it('should return empty array for non-semantic tools', () => {
       expect(extractEventsFromResponse('search_rules', makeResponse({ results: [] }))).toEqual([]);

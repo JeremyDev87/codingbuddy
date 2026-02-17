@@ -65,7 +65,7 @@ function parseGetAgentSystemPrompt(
     agentId: agentName,
     name: agentName,
     role: 'specialist',
-    isPrimary: true,
+    isPrimary: false,
   };
 }
 

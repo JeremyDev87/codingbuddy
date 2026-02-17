@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { formatTime } from '../components/header.pure';
+import { formatTime } from '../components/header-bar.pure';
 
 export function useClock(): string {
   const [time, setTime] = useState(() => formatTime(new Date()));

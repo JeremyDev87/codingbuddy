@@ -110,8 +110,11 @@ describe('TuiInterceptor', () => {
       );
     });
 
-    it('should not emit events for unknown tools', async () => {
-      const emitSpy = vi.spyOn(eventBus, 'emit');
+    it('should not emit agent events for unknown tools', async () => {
+      const activatedHandler = vi.fn();
+      const deactivatedHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
+      eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, deactivatedHandler);
 
       await interceptor.intercept('completely_unknown_tool', { query: 'test' }, async () => ({
         content: [{ type: 'text', text: 'result' }],
@@ -119,7 +122,26 @@ describe('TuiInterceptor', () => {
 
       await new Promise(resolve => setImmediate(resolve));
 
-      expect(emitSpy).not.toHaveBeenCalled();
+      expect(activatedHandler).not.toHaveBeenCalled();
+      expect(deactivatedHandler).not.toHaveBeenCalled();
+    });
+
+    it('should emit tool:invoked for all tools including unknown ones', async () => {
+      const toolHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.TOOL_INVOKED, toolHandler);
+
+      await interceptor.intercept('completely_unknown_tool', { query: 'test' }, async () => ({
+        content: [{ type: 'text', text: 'result' }],
+      }));
+
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(toolHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toolName: 'completely_unknown_tool',
+          agentId: null,
+        }),
+      );
     });
 
     it('should emit mode:changed from parse_mode response', async () => {
@@ -281,6 +303,34 @@ describe('TuiInterceptor', () => {
           name: 'frontend-developer',
           isPrimary: true,
         }),
+      );
+    });
+
+    it('should emit args-based AGENT_ACTIVATED before response-based AGENT_ACTIVATED', async () => {
+      const activatedHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
+
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN design auth' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'PLAN',
+              delegates_to: 'solution-architect',
+            }),
+          },
+        ],
+      }));
+
+      await new Promise(resolve => setImmediate(resolve));
+
+      // Args-based activation (plan-mode) fires before response-based (primary:solution-architect)
+      expect(activatedHandler).toHaveBeenCalledTimes(2);
+      expect(activatedHandler.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ agentId: 'plan-mode' }),
+      );
+      expect(activatedHandler.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ agentId: 'primary:solution-architect', isPrimary: true }),
       );
     });
 

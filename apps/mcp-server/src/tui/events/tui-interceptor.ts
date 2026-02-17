@@ -29,6 +29,19 @@ export class TuiInterceptor {
     return this.enabled;
   }
 
+  /**
+   * Safely defer event emission to avoid blocking MCP responses.
+   */
+  private safeDefer(fn: () => void): void {
+    setImmediate(() => {
+      try {
+        fn();
+      } catch (error) {
+        this.logger.error('Event emission failed', error);
+      }
+    });
+  }
+
   async intercept<T>(
     toolName: string,
     args: Record<string, unknown> | undefined,
@@ -42,26 +55,39 @@ export class TuiInterceptor {
 
     if (agentInfo) {
       // Emit agent:activated asynchronously to prevent MCP response delay
-      setImmediate(() => {
+      this.safeDefer(() => {
         this.eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, agentInfo);
       });
     }
+
+    // Emit tool:invoked for every tool call
+    this.safeDefer(() => {
+      this.eventBus.emit(TUI_EVENTS.TOOL_INVOKED, {
+        toolName,
+        agentId: agentInfo?.agentId ?? null,
+        timestamp: Date.now(),
+      });
+    });
 
     const startTime = Date.now();
 
     try {
       const result = await execute();
+      const endTime = Date.now();
 
-      setImmediate(() => {
-        if (agentInfo) {
+      // Separate safeDefer calls to prevent cascade failure
+      if (agentInfo) {
+        this.safeDefer(() => {
           this.eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
             agentId: agentInfo.agentId,
             reason: 'completed',
-            durationMs: Date.now() - startTime,
+            durationMs: endTime - startTime,
           });
-        }
+        });
+      }
 
-        // Extract and emit semantic events from tool response
+      // Extract and emit semantic events from tool response
+      this.safeDefer(() => {
         const semanticEvents = extractEventsFromResponse(toolName, result);
         for (const evt of semanticEvents) {
           this.emitSemanticEvent(evt);
@@ -70,12 +96,14 @@ export class TuiInterceptor {
 
       return result;
     } catch (error) {
+      const endTime = Date.now();
+
       if (agentInfo) {
-        setImmediate(() => {
+        this.safeDefer(() => {
           this.eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
             agentId: agentInfo.agentId,
             reason: 'error',
-            durationMs: Date.now() - startTime,
+            durationMs: endTime - startTime,
           });
         });
       }
@@ -94,6 +122,7 @@ export class TuiInterceptor {
       }
       case TUI_EVENTS.AGENT_ACTIVATED: {
         if (this.currentPrimaryAgentId) {
+          // durationMs: 0 signals "replaced before tool-level deactivation" (not measured)
           this.eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
             agentId: this.currentPrimaryAgentId,
             reason: 'replaced',
@@ -110,6 +139,16 @@ export class TuiInterceptor {
       case TUI_EVENTS.PARALLEL_STARTED:
         this.eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, evt.payload);
         break;
+      case TUI_EVENTS.AGENT_RELATIONSHIP:
+        this.eventBus.emit(TUI_EVENTS.AGENT_RELATIONSHIP, evt.payload);
+        break;
+      case TUI_EVENTS.TASK_SYNCED:
+        this.eventBus.emit(TUI_EVENTS.TASK_SYNCED, evt.payload);
+        break;
+      default: {
+        const _exhaustive: never = evt;
+        this.logger.warn(`Unhandled semantic event: ${(_exhaustive as { event: string }).event}`);
+      }
     }
   }
 }

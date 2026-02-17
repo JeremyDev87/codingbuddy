@@ -2,8 +2,8 @@
  * Extracts semantic TUI events from MCP tool responses.
  *
  * The TuiInterceptor calls this after execute() to derive
- * mode:changed, skill:recommended, parallel:started, and agent:activated
- * events from the tool response payload.
+ * mode:changed, skill:recommended, parallel:started, agent:activated,
+ * agent:relationship, and task:synced events from the tool response payload.
  */
 import {
   TUI_EVENTS,
@@ -11,11 +11,14 @@ import {
   type SkillRecommendedEvent,
   type ParallelStartedEvent,
   type AgentActivatedEvent,
+  type AgentRelationshipEvent,
+  type TaskSyncedEvent,
 } from './types';
 import { parseToolResponseJson } from './parse-tool-response';
 import type { Mode } from '../../keyword/keyword.types';
 
 const VALID_MODES: ReadonlySet<string> = new Set<Mode>(['PLAN', 'ACT', 'EVAL', 'AUTO']);
+export const UNKNOWN_AGENT_ID = 'unknown-agent';
 
 export type ExtractedEvent =
   | { event: typeof TUI_EVENTS.MODE_CHANGED; payload: ModeChangedEvent }
@@ -30,6 +33,14 @@ export type ExtractedEvent =
   | {
       event: typeof TUI_EVENTS.AGENT_ACTIVATED;
       payload: AgentActivatedEvent;
+    }
+  | {
+      event: typeof TUI_EVENTS.AGENT_RELATIONSHIP;
+      payload: AgentRelationshipEvent;
+    }
+  | {
+      event: typeof TUI_EVENTS.TASK_SYNCED;
+      payload: TaskSyncedEvent;
     };
 
 /**
@@ -48,6 +59,14 @@ export function extractEventsFromResponse(toolName: string, result: unknown): Ex
 
   if (toolName === 'prepare_parallel_agents') {
     return extractFromPrepareParallelAgents(json);
+  }
+
+  if (toolName === 'dispatch_agents') {
+    return extractFromDispatchAgents(json);
+  }
+
+  if (toolName === 'update_context') {
+    return extractFromUpdateContext(json);
   }
 
   return [];
@@ -120,6 +139,81 @@ function extractFromPrepareParallelAgents(json: Record<string, unknown>): Extrac
     {
       event: TUI_EVENTS.PARALLEL_STARTED,
       payload: { specialists, mode },
+    },
+  ];
+}
+
+/**
+ * Extract delegation relationships from dispatch_agents response.
+ */
+function extractFromDispatchAgents(json: Record<string, unknown>): ExtractedEvent[] {
+  const events: ExtractedEvent[] = [];
+
+  // Extract primary agent name
+  const primary = json.primaryAgent;
+  const primaryName =
+    primary && typeof primary === 'object' ? (primary as Record<string, unknown>).name : null;
+
+  // Extract specialist agents and create delegation relationships
+  const specialists = json.specialists ?? json.parallelAgents;
+  if (Array.isArray(specialists) && typeof primaryName === 'string') {
+    for (const spec of specialists) {
+      if (!spec || typeof spec !== 'object') continue;
+      const s = spec as Record<string, unknown>;
+      const specName =
+        typeof s.name === 'string' ? s.name : typeof s.agentName === 'string' ? s.agentName : null;
+      if (!specName) continue;
+
+      events.push({
+        event: TUI_EVENTS.AGENT_RELATIONSHIP,
+        payload: {
+          from: `primary:${primaryName}`,
+          to: `specialist:${specName}`,
+          label: 'delegates',
+          type: 'delegation',
+        },
+      });
+    }
+  }
+
+  return events;
+}
+
+/**
+ * Extract task sync events from update_context response.
+ */
+function extractFromUpdateContext(json: Record<string, unknown>): ExtractedEvent[] {
+  const doc = json.document;
+  if (!doc || typeof doc !== 'object') return [];
+
+  const document = doc as Record<string, unknown>;
+  const sections = document.sections;
+  if (!Array.isArray(sections) || sections.length === 0) return [];
+
+  // Get the most recent section's progress items
+  const lastSection = sections[sections.length - 1] as Record<string, unknown>;
+  const progress = lastSection?.progress;
+  if (!Array.isArray(progress) || progress.length === 0) return [];
+
+  const sectionCompleted = lastSection?.status === 'completed';
+  const tasks = progress
+    .filter((p): p is string => typeof p === 'string')
+    .map((p, idx) => ({
+      // Positional IDs are intentionally ephemeral; each TASK_SYNCED replaces all tasks.
+      id: `ctx-${idx}`,
+      subject: p,
+      completed: sectionCompleted,
+    }));
+
+  if (tasks.length === 0) return [];
+
+  const agentId =
+    typeof lastSection.primaryAgent === 'string' ? lastSection.primaryAgent : UNKNOWN_AGENT_ID;
+
+  return [
+    {
+      event: TUI_EVENTS.TASK_SYNCED,
+      payload: { agentId, tasks },
     },
   ];
 }

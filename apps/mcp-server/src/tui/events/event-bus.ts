@@ -13,7 +13,7 @@ type EventHandler<T> = (payload: T) => void;
 @Injectable()
 export class TuiEventBus {
   private readonly logger = new Logger(TuiEventBus.name);
-  private readonly emitter = new EventEmitter2();
+  private readonly emitter = new EventEmitter2({ maxListeners: 30 });
 
   emit<K extends TuiEventName>(event: K, payload: TuiEventMap[K]): void {
     this.logger.debug(`Emitting event: ${event}`);
