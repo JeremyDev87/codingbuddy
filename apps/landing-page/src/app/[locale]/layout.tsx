@@ -8,6 +8,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { isValidLocale, SUPPORTED_LOCALES } from '@/lib/locale';
+import { generateJsonLd } from '@/lib/json-ld';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CookieConsent } from '@/components/cookie-consent';
@@ -96,9 +97,21 @@ const LocaleLayout = async ({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  const jsonLd = generateJsonLd({
+    name: t('title'),
+    description: t('description'),
+    locale,
+  });
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
         <ThemeProvider
           attribute="class"

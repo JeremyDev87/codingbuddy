@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 import { SUPPORTED_LOCALES } from '../../lib/locale';
+import { generateJsonLd } from '../../lib/json-ld';
 
 // Mock font loaders moved from root layout to locale layout
 vi.mock('next/font/google', () => ({
@@ -44,5 +45,20 @@ describe('locale layout', () => {
       { locale: 'ja' },
       { locale: 'es' },
     ]);
+  });
+
+  test('JSON-LD can be generated for each supported locale', () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const result = generateJsonLd({
+        name: `Test App - ${locale}`,
+        description: `Description for ${locale}`,
+        locale,
+      });
+
+      expect(result['@context']).toBe('https://schema.org');
+      expect(result['@type']).toBe('SoftwareApplication');
+      expect(result.inLanguage).toBe(locale);
+      expect(result.name).toContain(locale);
+    }
   });
 });
