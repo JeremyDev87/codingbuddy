@@ -17,6 +17,7 @@ export {
   type AgentRelationshipEvent,
   type TaskSyncedEvent,
   type ToolInvokedEvent,
+  type ObjectiveSetEvent,
 } from './types';
 export {
   type AgentMetadata,

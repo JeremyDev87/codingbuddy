@@ -189,6 +189,47 @@ describe('extractEventsFromResponse', () => {
     });
   });
 
+  describe('parse_mode → objective:set', () => {
+    it('should extract OBJECTIVE_SET from parse_mode with originalPrompt', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          originalPrompt: 'implement auth feature',
+          delegates_to: 'technical-planner',
+        }),
+      );
+      const objectiveEvent = events.find(e => e.event === TUI_EVENTS.OBJECTIVE_SET);
+      expect(objectiveEvent).toBeDefined();
+      expect(objectiveEvent!.payload).toEqual({ objective: 'implement auth feature' });
+    });
+
+    it('should not extract OBJECTIVE_SET when originalPrompt is missing', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'technical-planner',
+        }),
+      );
+      const objectiveEvent = events.find(e => e.event === TUI_EVENTS.OBJECTIVE_SET);
+      expect(objectiveEvent).toBeUndefined();
+    });
+
+    it('should not extract OBJECTIVE_SET when originalPrompt is empty string', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          originalPrompt: '   ',
+          delegates_to: 'technical-planner',
+        }),
+      );
+      const objectiveEvent = events.find(e => e.event === TUI_EVENTS.OBJECTIVE_SET);
+      expect(objectiveEvent).toBeUndefined();
+    });
+  });
+
   describe('prepare_parallel_agents → parallel:started', () => {
     it('should extract parallel:started from prepare_parallel_agents response', () => {
       const result = extractEventsFromResponse(

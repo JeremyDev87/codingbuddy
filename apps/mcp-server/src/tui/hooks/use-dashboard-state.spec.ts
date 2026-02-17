@@ -319,4 +319,26 @@ describe('dashboardReducer', () => {
     expect(state.eventLog[0].timestamp).toHaveLength(8);
     expect(state.eventLog[0].timestamp).toMatch(/^\d{2}:\d{2}:\d{2}$/);
   });
+
+  it('should set objectives on OBJECTIVE_SET', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'OBJECTIVE_SET',
+      payload: { objective: 'implement auth feature' },
+    });
+    expect(state.objectives).toEqual(['implement auth feature']);
+  });
+
+  it('should replace objectives on new OBJECTIVE_SET (not accumulate)', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'OBJECTIVE_SET',
+      payload: { objective: 'first task' },
+    });
+    state = dashboardReducer(state, {
+      type: 'OBJECTIVE_SET',
+      payload: { objective: 'second task' },
+    });
+    expect(state.objectives).toEqual(['second task']);
+  });
 });

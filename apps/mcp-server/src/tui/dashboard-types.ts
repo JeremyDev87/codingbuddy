@@ -135,6 +135,7 @@ export interface DashboardState {
   focusedAgentId: string | null;
   tasks: TaskItem[];
   eventLog: EventLogEntry[];
+  objectives: string[];
 }
 
 /**

@@ -11,7 +11,6 @@ import { MonitorPanel } from './components/MonitorPanel';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
 import { computeGridLayout } from './components/grid-layout.pure';
 
-const EMPTY_OBJECTIVES: string[] = [];
 const EMPTY_INPUTS: string[] = [];
 const EMPTY_OUTPUTS = { files: 0, commits: 0 } as const;
 
@@ -57,7 +56,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
         <Box flexDirection="column">
           <FocusedAgentPanel
             agent={focusedAgent}
-            objectives={EMPTY_OBJECTIVES}
+            objectives={state.objectives}
             tasks={state.tasks}
             tools={tools}
             inputs={EMPTY_INPUTS}
@@ -94,7 +93,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
           </Box>
           <FocusedAgentPanel
             agent={focusedAgent}
-            objectives={EMPTY_OBJECTIVES}
+            objectives={state.objectives}
             tasks={state.tasks}
             tools={tools}
             inputs={EMPTY_INPUTS}

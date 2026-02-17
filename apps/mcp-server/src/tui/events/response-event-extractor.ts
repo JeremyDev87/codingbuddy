@@ -13,6 +13,7 @@ import {
   type AgentActivatedEvent,
   type AgentRelationshipEvent,
   type TaskSyncedEvent,
+  type ObjectiveSetEvent,
 } from './types';
 import { parseToolResponseJson } from './parse-tool-response';
 import type { Mode } from '../types';
@@ -41,6 +42,10 @@ export type ExtractedEvent =
   | {
       event: typeof TUI_EVENTS.TASK_SYNCED;
       payload: TaskSyncedEvent;
+    }
+  | {
+      event: typeof TUI_EVENTS.OBJECTIVE_SET;
+      payload: ObjectiveSetEvent;
     };
 
 /**
@@ -110,6 +115,14 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
         role: 'primary',
         isPrimary: true,
       },
+    });
+  }
+
+  // objective:set
+  if (typeof json.originalPrompt === 'string' && json.originalPrompt.trim()) {
+    events.push({
+      event: TUI_EVENTS.OBJECTIVE_SET,
+      payload: { objective: json.originalPrompt.trim() },
     });
   }
 

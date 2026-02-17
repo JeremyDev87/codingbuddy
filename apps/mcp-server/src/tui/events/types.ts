@@ -21,6 +21,7 @@ export const TUI_EVENTS = Object.freeze({
   AGENT_RELATIONSHIP: 'agent:relationship',
   TASK_SYNCED: 'task:synced',
   TOOL_INVOKED: 'tool:invoked',
+  OBJECTIVE_SET: 'objective:set',
 } as const);
 
 export type TuiEventName = (typeof TUI_EVENTS)[keyof typeof TUI_EVENTS];
@@ -90,6 +91,11 @@ export interface ToolInvokedEvent {
   timestamp: number;
 }
 
+/** Payload when an objective is set from parse_mode originalPrompt */
+export interface ObjectiveSetEvent {
+  objective: string;
+}
+
 /**
  * Maps event names to their payload types for type-safe emit/subscribe.
  */
@@ -104,4 +110,5 @@ export interface TuiEventMap {
   [TUI_EVENTS.AGENT_RELATIONSHIP]: AgentRelationshipEvent;
   [TUI_EVENTS.TASK_SYNCED]: TaskSyncedEvent;
   [TUI_EVENTS.TOOL_INVOKED]: ToolInvokedEvent;
+  [TUI_EVENTS.OBJECTIVE_SET]: ObjectiveSetEvent;
 }

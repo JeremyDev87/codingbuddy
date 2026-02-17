@@ -19,6 +19,7 @@ import {
   type AgentRelationshipEvent,
   type TaskSyncedEvent,
   type ToolInvokedEvent,
+  type ObjectiveSetEvent,
 } from '../events';
 import { selectFocusedAgent } from './use-focus-agent';
 
@@ -40,6 +41,7 @@ export function createInitialDashboardState(): DashboardState {
     focusedAgentId: null,
     tasks: [],
     eventLog: [],
+    objectives: [],
   };
 }
 
@@ -53,7 +55,8 @@ export type DashboardAction =
   | { type: 'AGENTS_LOADED'; payload: AgentsLoadedEvent }
   | { type: 'AGENT_RELATIONSHIP'; payload: AgentRelationshipEvent }
   | { type: 'TASK_SYNCED'; payload: TaskSyncedEvent }
-  | { type: 'TOOL_INVOKED'; payload: ToolInvokedEvent };
+  | { type: 'TOOL_INVOKED'; payload: ToolInvokedEvent }
+  | { type: 'OBJECTIVE_SET'; payload: ObjectiveSetEvent };
 
 function cloneAgents(agents: Map<string, DashboardNode>): Map<string, DashboardNode> {
   return new Map(agents);
@@ -158,6 +161,9 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       return { ...state, agents, eventLog: [...base, entry] };
     }
 
+    case 'OBJECTIVE_SET':
+      return { ...state, objectives: [action.payload.objective] };
+
     case 'SKILL_RECOMMENDED':
     case 'PARALLEL_STARTED':
     // falls through — Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
@@ -198,6 +204,8 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       dispatch({ type: 'AGENT_RELATIONSHIP', payload: p });
     const onTaskSynced = (p: TaskSyncedEvent) => dispatch({ type: 'TASK_SYNCED', payload: p });
     const onToolInvoked = (p: ToolInvokedEvent) => dispatch({ type: 'TOOL_INVOKED', payload: p });
+    const onObjectiveSet = (p: ObjectiveSetEvent) =>
+      dispatch({ type: 'OBJECTIVE_SET', payload: p });
 
     eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
     eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, onDeactivated);
@@ -209,6 +217,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
     eventBus.on(TUI_EVENTS.AGENT_RELATIONSHIP, onRelationship);
     eventBus.on(TUI_EVENTS.TASK_SYNCED, onTaskSynced);
     eventBus.on(TUI_EVENTS.TOOL_INVOKED, onToolInvoked);
+    eventBus.on(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
 
     return () => {
       eventBus.off(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
@@ -221,6 +230,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       eventBus.off(TUI_EVENTS.AGENT_RELATIONSHIP, onRelationship);
       eventBus.off(TUI_EVENTS.TASK_SYNCED, onTaskSynced);
       eventBus.off(TUI_EVENTS.TOOL_INVOKED, onToolInvoked);
+      eventBus.off(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
     };
   }, [eventBus]);
 

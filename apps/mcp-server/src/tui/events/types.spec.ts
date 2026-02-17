@@ -11,12 +11,13 @@ import {
   type AgentRelationshipEvent,
   type TaskSyncedEvent,
   type ToolInvokedEvent,
+  type ObjectiveSetEvent,
   type TuiEventMap,
 } from './types';
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 10 event names', () => {
+    it('should define all 11 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -28,6 +29,7 @@ describe('tui/events/types', () => {
         AGENT_RELATIONSHIP: 'agent:relationship',
         TASK_SYNCED: 'task:synced',
         TOOL_INVOKED: 'tool:invoked',
+        OBJECTIVE_SET: 'objective:set',
       });
     });
 
@@ -175,8 +177,16 @@ describe('tui/events/types', () => {
         },
         'task:synced': { agentId: 'a1', tasks: [] },
         'tool:invoked': { toolName: 'search_rules', agentId: null, timestamp: 0 },
+        'objective:set': { objective: 'implement auth feature' },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
+    });
+  });
+
+  describe('ObjectiveSetEvent', () => {
+    it('should have correct shape', () => {
+      const event: ObjectiveSetEvent = { objective: 'implement auth feature' };
+      expect(event.objective).toBe('implement auth feature');
     });
   });
 });
