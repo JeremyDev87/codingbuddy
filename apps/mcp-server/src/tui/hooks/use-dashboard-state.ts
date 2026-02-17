@@ -171,8 +171,25 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       return { ...state, activeSkills: [...state.activeSkills, skillName] };
     }
 
-    case 'PARALLEL_STARTED':
-    // falls through — Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
+    case 'PARALLEL_STARTED': {
+      const { specialists, mode } = action.payload;
+      const agents = cloneAgents(state.agents);
+      for (const name of specialists) {
+        const id = `specialist:${name}`;
+        if (agents.has(id)) continue;
+        agents.set(id, {
+          id,
+          name,
+          stage: mode,
+          status: 'idle',
+          isPrimary: false,
+          progress: 0,
+        });
+      }
+      return { ...state, agents };
+    }
+
+    // Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
     case 'PARALLEL_COMPLETED':
     case 'AGENTS_LOADED':
       return state;

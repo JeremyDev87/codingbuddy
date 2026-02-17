@@ -220,13 +220,13 @@ describe('EventBus ↔ UI Integration', () => {
       });
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         name: 'security-specialist',
         role: 'specialist',
         isPrimary: false,
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'test-1',
+        agentId: 'specialist:test-strategy-specialist',
         name: 'test-strategy-specialist',
         role: 'specialist',
         isPrimary: false,
@@ -255,13 +255,13 @@ describe('EventBus ↔ UI Integration', () => {
         mode: 'PLAN',
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         name: 'security-specialist',
         role: 'specialist',
         isPrimary: false,
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'test-1',
+        agentId: 'specialist:test-strategy-specialist',
         name: 'test-strategy-specialist',
         role: 'specialist',
         isPrimary: false,
@@ -270,12 +270,12 @@ describe('EventBus ↔ UI Integration', () => {
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         reason: 'completed',
         durationMs: 800,
       });
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'test-1',
+        agentId: 'specialist:test-strategy-specialist',
         reason: 'completed',
         durationMs: 1200,
       });
@@ -313,19 +313,19 @@ describe('EventBus ↔ UI Integration', () => {
         mode: 'PLAN',
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         name: 'security-specialist',
         role: 'specialist',
         isPrimary: false,
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'acc-1',
+        agentId: 'specialist:accessibility-specialist',
         name: 'accessibility-specialist',
         role: 'specialist',
         isPrimary: false,
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'perf-1',
+        agentId: 'specialist:performance-specialist',
         name: 'performance-specialist',
         role: 'specialist',
         isPrimary: false,
@@ -334,17 +334,17 @@ describe('EventBus ↔ UI Integration', () => {
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         reason: 'completed',
         durationMs: 500,
       });
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'acc-1',
+        agentId: 'specialist:accessibility-specialist',
         reason: 'completed',
         durationMs: 700,
       });
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'perf-1',
+        agentId: 'specialist:performance-specialist',
         reason: 'completed',
         durationMs: 900,
       });
@@ -474,13 +474,13 @@ describe('EventBus ↔ UI Integration', () => {
         mode: 'PLAN',
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         name: 'security-specialist',
         role: 'specialist',
         isPrimary: false,
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
-        agentId: 'test-1',
+        agentId: 'specialist:test-strategy-specialist',
         name: 'test-strategy-specialist',
         role: 'specialist',
         isPrimary: false,
@@ -490,12 +490,12 @@ describe('EventBus ↔ UI Integration', () => {
 
       // 4. Specialists complete
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'sec-1',
+        agentId: 'specialist:security-specialist',
         reason: 'completed',
         durationMs: 600,
       });
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
-        agentId: 'test-1',
+        agentId: 'specialist:test-strategy-specialist',
         reason: 'completed',
         durationMs: 800,
       });

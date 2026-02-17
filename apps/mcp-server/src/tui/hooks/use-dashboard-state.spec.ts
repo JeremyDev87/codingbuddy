@@ -234,12 +234,53 @@ describe('dashboardReducer', () => {
     expect(state.activeSkills).toEqual([]);
   });
 
-  it('handles PARALLEL_STARTED as no-op', () => {
+  it('should pre-register specialists as idle agents on PARALLEL_STARTED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'MODE_CHANGED',
+      payload: { from: null, to: 'EVAL' },
+    });
+    state = dashboardReducer(state, {
+      type: 'PARALLEL_STARTED',
+      payload: { specialists: ['security-specialist', 'perf-specialist'], mode: 'EVAL' },
+    });
+    expect(state.agents.size).toBe(2);
+
+    const sec = state.agents.get('specialist:security-specialist');
+    expect(sec).toBeDefined();
+    expect(sec!.status).toBe('idle');
+    expect(sec!.isPrimary).toBe(false);
+    expect(sec!.stage).toBe('EVAL');
+
+    const perf = state.agents.get('specialist:perf-specialist');
+    expect(perf).toBeDefined();
+    expect(perf!.status).toBe('idle');
+  });
+
+  it('should not overwrite already running specialist on PARALLEL_STARTED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: {
+        agentId: 'specialist:security-specialist',
+        name: 'security-specialist',
+        role: 'specialist',
+        isPrimary: false,
+      },
+    });
+    state = dashboardReducer(state, {
+      type: 'PARALLEL_STARTED',
+      payload: { specialists: ['security-specialist'], mode: 'EVAL' },
+    });
+    expect(state.agents.get('specialist:security-specialist')!.status).toBe('running');
+  });
+
+  it('should handle empty specialists array as no-op on PARALLEL_STARTED', () => {
     const state = dashboardReducer(initialDashboardState, {
       type: 'PARALLEL_STARTED',
-      payload: { specialists: ['sec'], mode: 'EVAL' },
+      payload: { specialists: [], mode: 'EVAL' },
     });
-    expect(state).toEqual(initialDashboardState);
+    expect(state.agents.size).toBe(0);
   });
 
   it('handles PARALLEL_COMPLETED as no-op', () => {
