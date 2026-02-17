@@ -125,7 +125,7 @@ export function FocusedAgentPanel({
       {/* Skills Section */}
       <SectionDivider title="Skills" />
       {activeSkills.length > 0 ? (
-        activeSkills.map((s, i) => <Text key={i}>  {s}</Text>)
+        activeSkills.map((s, i) => <Text key={i}> {s}</Text>)
       ) : (
         <Text dimColor>No skills</Text>
       )}
