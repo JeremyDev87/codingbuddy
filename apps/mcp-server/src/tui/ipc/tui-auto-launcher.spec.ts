@@ -329,6 +329,54 @@ describe('TuiAutoLauncher', () => {
     expect((launcher as unknown as { codingbuddyBin: string }).codingbuddyBin).toBe('codingbuddy');
   });
 
+  describe('enabled activation matrix (--tui flag OR env var)', () => {
+    // Documents the expected behavior from main.ts:
+    //   enabled: tuiEnabled || process.env.CODINGBUDDY_AUTO_TUI === '1'
+    // TuiAutoLauncher itself accepts a plain boolean; these tests
+    // verify launch/disabled behavior for each combination.
+
+    beforeEach(() => {
+      setPlatform('darwin');
+      process.env.TERM_PROGRAM = 'Apple_Terminal';
+    });
+
+    it('should launch when enabled via --tui flag only (enabled=true)', async () => {
+      createMockChildProcess(8001);
+      const launcher = new TuiAutoLauncher({ enabled: true, delayMs: 0 });
+      const result = await launcher.launch(createMockIpcServer(0));
+
+      expect(result.launched).toBe(true);
+      expect(result.reason).toBe('spawned');
+    });
+
+    it('should launch when enabled via env var only (enabled=true)', async () => {
+      createMockChildProcess(8002);
+      const launcher = new TuiAutoLauncher({ enabled: true, delayMs: 0 });
+      const result = await launcher.launch(createMockIpcServer(0));
+
+      expect(result.launched).toBe(true);
+      expect(result.reason).toBe('spawned');
+    });
+
+    it('should launch when both --tui flag and env var are set (enabled=true)', async () => {
+      createMockChildProcess(8003);
+      const launcher = new TuiAutoLauncher({ enabled: true, delayMs: 0 });
+      const result = await launcher.launch(createMockIpcServer(0));
+
+      expect(result.launched).toBe(true);
+      expect(result.reason).toBe('spawned');
+    });
+
+    it('should not launch when neither --tui flag nor env var is set (enabled=false)', async () => {
+      const launcher = new TuiAutoLauncher({ enabled: false, delayMs: 0 });
+      const result = await launcher.launch(createMockIpcServer(0));
+
+      expect(result.launched).toBe(false);
+      expect(result.reason).toBe('disabled');
+      expect(mockSpawn).not.toHaveBeenCalled();
+    });
+  });
+
   describe('SAFE_PATH_PATTERN rejection', () => {
     beforeEach(() => {
       setPlatform('darwin');

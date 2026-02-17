@@ -108,11 +108,14 @@ async function initTui(
  * Auto-launch TUI client in a new terminal window (non-blocking helper).
  * Extracted to avoid duplication between SSE and stdio modes.
  */
-async function launchAutoTui(ipcServer: { clientCount(): number }): Promise<void> {
+async function launchAutoTui(
+  ipcServer: { clientCount(): number },
+  tuiEnabled: boolean,
+): Promise<void> {
   const { TuiAutoLauncher } = await import('./tui/ipc');
   const codingbuddyBin = path.resolve(process.argv[1]);
   const launcher = new TuiAutoLauncher({
-    enabled: process.env.CODINGBUDDY_AUTO_TUI === '1',
+    enabled: tuiEnabled || process.env.CODINGBUDDY_AUTO_TUI === '1',
     codingbuddyBin,
   });
   const result = await launcher.launch(ipcServer);
@@ -252,7 +255,7 @@ export async function bootstrap(): Promise<void> {
       sseShutdownManager.register(ipcResult.cleanup);
 
       // Auto-launch TUI client in a new terminal window (non-blocking)
-      launchAutoTui(ipcResult.ipcServer).catch(err => {
+      launchAutoTui(ipcResult.ipcServer, tuiEnabled).catch(err => {
         debugLog(`TUI auto-launch failed (non-blocking): ${err}`);
       });
     } catch (error) {
@@ -292,7 +295,7 @@ export async function bootstrap(): Promise<void> {
       shutdownManager.register(ipcResult.cleanup);
 
       // Auto-launch TUI client in a new terminal window (non-blocking)
-      launchAutoTui(ipcResult.ipcServer).catch(err => {
+      launchAutoTui(ipcResult.ipcServer, tuiEnabled).catch(err => {
         debugLog(`TUI auto-launch failed (non-blocking): ${err}`);
       });
     } catch (error) {
