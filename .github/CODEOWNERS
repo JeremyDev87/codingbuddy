@@ -26,3 +26,7 @@ scripts/ @JeremyDev87
 package.json @JeremyDev87
 apps/mcp-server/package.json @JeremyDev87
 packages/rules/package.json @JeremyDev87
+
+# Copilot code review instructions
+.github/copilot-instructions.md @JeremyDev87
+.github/instructions/ @JeremyDev87
