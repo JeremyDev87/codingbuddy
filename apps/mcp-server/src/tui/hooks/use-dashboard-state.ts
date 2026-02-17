@@ -85,6 +85,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         agents.set(agentId, {
           ...existing,
           status: reason === 'error' ? 'error' : 'done',
+          progress: reason === 'error' ? existing.progress : 100,
         });
       }
       // Check if any agents still running
@@ -139,7 +140,22 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       // Ring buffer: drop oldest when at capacity, then append (consistent with edges)
       const base =
         state.eventLog.length >= EVENT_LOG_MAX ? state.eventLog.slice(1) : state.eventLog;
-      return { ...state, eventLog: [...base, entry] };
+
+      // Progress increment for matched agent
+      const invokedAgentId = action.payload.agentId;
+      let agents = state.agents;
+      if (invokedAgentId) {
+        const agent = state.agents.get(invokedAgentId);
+        if (agent && agent.status === 'running') {
+          agents = cloneAgents(state.agents);
+          agents.set(invokedAgentId, {
+            ...agent,
+            progress: Math.min(95, agent.progress + 5),
+          });
+        }
+      }
+
+      return { ...state, agents, eventLog: [...base, entry] };
     }
 
     case 'SKILL_RECOMMENDED':

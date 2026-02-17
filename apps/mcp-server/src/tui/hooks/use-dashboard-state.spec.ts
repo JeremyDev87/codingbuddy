@@ -240,6 +240,75 @@ describe('dashboardReducer', () => {
     expect(originalAgents.size).toBe(0);
   });
 
+  it('should increment agent progress on TOOL_INVOKED with matching agentId', () => {
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'test-agent', role: 'primary', isPrimary: true },
+    });
+    expect(state.agents.get('a1')?.progress).toBe(0);
+
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: Date.now() },
+    });
+    expect(state.agents.get('a1')?.progress).toBeGreaterThan(0);
+  });
+
+  it('should set progress to 100 on AGENT_DEACTIVATED with reason=completed', () => {
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'test-agent', role: 'primary', isPrimary: true },
+    });
+    state = dashboardReducer(state, {
+      type: 'AGENT_DEACTIVATED',
+      payload: { agentId: 'a1', reason: 'completed', durationMs: 1000 },
+    });
+    expect(state.agents.get('a1')?.progress).toBe(100);
+  });
+
+  it('should cap progress at 95 before completion', () => {
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'test-agent', role: 'primary', isPrimary: true },
+    });
+    for (let i = 0; i < 20; i++) {
+      state = dashboardReducer(state, {
+        type: 'TOOL_INVOKED',
+        payload: { toolName: `tool_${i}`, agentId: 'a1', timestamp: Date.now() },
+      });
+    }
+    expect(state.agents.get('a1')?.progress).toBe(95);
+  });
+
+  it('should not change progress for TOOL_INVOKED without agentId', () => {
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'test-agent', role: 'primary', isPrimary: true },
+    });
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: null, timestamp: Date.now() },
+    });
+    expect(state.agents.get('a1')?.progress).toBe(0);
+  });
+
+  it('should keep current progress on AGENT_DEACTIVATED with reason=error', () => {
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'test-agent', role: 'primary', isPrimary: true },
+    });
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: Date.now() },
+    });
+    const progressBefore = state.agents.get('a1')!.progress;
+    state = dashboardReducer(state, {
+      type: 'AGENT_DEACTIVATED',
+      payload: { agentId: 'a1', reason: 'error', durationMs: 500 },
+    });
+    expect(state.agents.get('a1')?.progress).toBe(progressBefore);
+  });
+
   it('produces correct timestamp format in eventLog', () => {
     const fixedTime = new Date('2026-02-17T14:30:45.123Z');
     const state = dashboardReducer(initialDashboardState, {
