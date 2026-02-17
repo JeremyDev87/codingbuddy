@@ -118,6 +118,44 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
     });
   }
 
+  // agent:relationship (recommended_act_agent → next-phase recommendation)
+  const recAgent = json.recommended_act_agent;
+  if (recAgent && typeof recAgent === 'object') {
+    const rec = recAgent as Record<string, unknown>;
+    if (typeof rec.agentName === 'string' && delegateName) {
+      events.push({
+        event: TUI_EVENTS.AGENT_RELATIONSHIP,
+        payload: {
+          from: `primary:${delegateName}`,
+          to: `recommended:${rec.agentName}`,
+          label: 'recommends',
+          type: 'recommendation',
+        },
+      });
+    }
+  }
+
+  // parallel:started (parallelAgentsRecommendation → pre-register specialists)
+  const parRec = json.parallelAgentsRecommendation;
+  if (parRec && typeof parRec === 'object') {
+    const par = parRec as Record<string, unknown>;
+    if (Array.isArray(par.specialists) && par.specialists.length > 0) {
+      const specialists = par.specialists.filter((s): s is string => typeof s === 'string');
+      if (specialists.length > 0) {
+        events.push({
+          event: TUI_EVENTS.PARALLEL_STARTED,
+          payload: {
+            specialists,
+            mode:
+              typeof json.mode === 'string' && VALID_MODES.has(json.mode)
+                ? (json.mode as Mode)
+                : 'PLAN',
+          },
+        });
+      }
+    }
+  }
+
   // objective:set
   if (typeof json.originalPrompt === 'string' && json.originalPrompt.trim()) {
     events.push({

@@ -5,6 +5,7 @@
  * Each event has a typed payload interface for type-safe emit/subscribe.
  */
 import type { Mode } from '../types';
+import type { EdgeType } from '../dashboard-types';
 import type { AgentMetadata } from './agent-metadata.types';
 
 /**
@@ -75,7 +76,7 @@ export interface AgentRelationshipEvent {
   from: string;
   to: string;
   label: string;
-  type: 'delegation' | 'output' | 'dependency';
+  type: EdgeType;
 }
 
 /** Payload when tasks are synced for an agent */

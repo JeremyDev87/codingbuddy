@@ -189,6 +189,138 @@ describe('extractEventsFromResponse', () => {
     });
   });
 
+  describe('parse_mode → agent:relationship (recommended_act_agent)', () => {
+    it('should extract AGENT_RELATIONSHIP from recommended_act_agent', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'technical-planner',
+          recommended_act_agent: { agentName: 'frontend-developer', confidence: 0.9 },
+        }),
+      );
+      const rel = events.find(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      expect(rel).toBeDefined();
+      expect(rel!.payload).toEqual({
+        from: 'primary:technical-planner',
+        to: 'recommended:frontend-developer',
+        label: 'recommends',
+        type: 'recommendation',
+      });
+    });
+
+    it('should not extract AGENT_RELATIONSHIP without delegates_to', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          recommended_act_agent: { agentName: 'frontend-developer', confidence: 0.9 },
+        }),
+      );
+      const rel = events.find(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      expect(rel).toBeUndefined();
+    });
+
+    it('should not extract AGENT_RELATIONSHIP if agentName is not a string', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'technical-planner',
+          recommended_act_agent: { agentName: 123 },
+        }),
+      );
+      const rel = events.find(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      expect(rel).toBeUndefined();
+    });
+
+    it('should not extract AGENT_RELATIONSHIP if recommended_act_agent is missing', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'technical-planner',
+        }),
+      );
+      const rel = events.find(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      expect(rel).toBeUndefined();
+    });
+  });
+
+  describe('parse_mode → parallel:started (parallelAgentsRecommendation)', () => {
+    it('should extract PARALLEL_STARTED from parallelAgentsRecommendation', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'EVAL',
+          delegates_to: 'evaluator',
+          parallelAgentsRecommendation: {
+            specialists: ['security-specialist', 'performance-specialist'],
+          },
+        }),
+      );
+      const ps = events.find(e => e.event === TUI_EVENTS.PARALLEL_STARTED);
+      expect(ps).toBeDefined();
+      expect(ps!.payload).toEqual({
+        specialists: ['security-specialist', 'performance-specialist'],
+        mode: 'EVAL',
+      });
+    });
+
+    it('should default mode to PLAN if mode is missing in json', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          parallelAgentsRecommendation: {
+            specialists: ['arch-specialist'],
+          },
+        }),
+      );
+      const ps = events.find(e => e.event === TUI_EVENTS.PARALLEL_STARTED);
+      expect(ps).toBeDefined();
+      expect(ps!.payload).toEqual({
+        specialists: ['arch-specialist'],
+        mode: 'PLAN',
+      });
+    });
+
+    it('should filter out non-string specialists', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'ACT',
+          parallelAgentsRecommendation: {
+            specialists: ['valid', 123, null, 'also-valid'],
+          },
+        }),
+      );
+      const ps = events.find(e => e.event === TUI_EVENTS.PARALLEL_STARTED);
+      expect(ps).toBeDefined();
+      expect(ps!.payload).toEqual({
+        specialists: ['valid', 'also-valid'],
+        mode: 'ACT',
+      });
+    });
+
+    it('should not extract PARALLEL_STARTED if specialists is empty', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          parallelAgentsRecommendation: { specialists: [] },
+        }),
+      );
+      const ps = events.find(e => e.event === TUI_EVENTS.PARALLEL_STARTED);
+      expect(ps).toBeUndefined();
+    });
+
+    it('should not extract PARALLEL_STARTED if parallelAgentsRecommendation is missing', () => {
+      const events = extractEventsFromResponse('parse_mode', makeResponse({ mode: 'PLAN' }));
+      const ps = events.find(e => e.event === TUI_EVENTS.PARALLEL_STARTED);
+      expect(ps).toBeUndefined();
+    });
+  });
+
   describe('parse_mode → objective:set', () => {
     it('should extract OBJECTIVE_SET from parse_mode with originalPrompt', () => {
       const events = extractEventsFromResponse(

@@ -64,7 +64,7 @@ export function createDefaultDashboardNode(
 /**
  * Relationship type between two agent nodes.
  */
-export type EdgeType = 'delegation' | 'output' | 'dependency';
+export type EdgeType = 'delegation' | 'output' | 'dependency' | 'recommendation';
 
 /**
  * Represents a directed edge between two agent nodes.
