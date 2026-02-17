@@ -172,7 +172,7 @@ describe('EventBus ↔ UI Integration', () => {
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
-      expect(frame).toContain('Codingbuddy TUI');
+      expect(frame).toContain('CODINGBUDDY');
     });
 
     it('should handle sequential mode changes without error', async () => {
@@ -579,7 +579,7 @@ describe('EventBus ↔ UI Integration', () => {
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
-      expect(frame).toContain('Codingbuddy TUI');
+      expect(frame).toContain('CODINGBUDDY');
     });
 
     it('should handle parse_mode with included_skills without error', async () => {

@@ -1,4 +1,4 @@
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 import type { LayoutMode, GlobalRunState } from '../dashboard-types';
 
 export interface HeaderBarData {

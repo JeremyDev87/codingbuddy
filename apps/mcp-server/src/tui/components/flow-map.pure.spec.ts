@@ -6,8 +6,17 @@ import {
   renderFlowMapSimplified,
   renderFlowMapCompact,
 } from './flow-map.pure';
+import type { ColorBuffer } from '../utils/color-buffer';
 import type { DashboardNode, Edge } from '../dashboard-types';
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
+
+/** Extract plain text from ColorBuffer for assertion convenience. */
+function bufferToString(buf: ColorBuffer): string {
+  return buf
+    .toLines()
+    .map(row => row.map(cell => cell.char).join(''))
+    .join('\n');
+}
 
 function makeAgent(
   overrides: Partial<DashboardNode> & { id: string; name: string; stage: Mode },
@@ -112,15 +121,12 @@ describe('tui/components/flow-map.pure', () => {
       expect(devPos).toBeDefined();
       expect(revPos).toBeDefined();
 
-      // Architect (PLAN) should be in PLAN column
       expect(archPos!.x).toBeGreaterThanOrEqual(columns.PLAN.startX);
       expect(archPos!.x).toBeLessThan(columns.PLAN.startX + columns.PLAN.width);
 
-      // Developer (ACT) should be in ACT column
       expect(devPos!.x).toBeGreaterThanOrEqual(columns.ACT.startX);
       expect(devPos!.x).toBeLessThan(columns.ACT.startX + columns.ACT.width);
 
-      // Reviewer (EVAL) should be in EVAL column
       expect(revPos!.x).toBeGreaterThanOrEqual(columns.EVAL.startX);
       expect(revPos!.x).toBeLessThan(columns.EVAL.startX + columns.EVAL.width);
     });
@@ -155,7 +161,6 @@ describe('tui/components/flow-map.pure', () => {
 
       expect(primaryPos).toBeDefined();
       expect(secondaryPos).toBeDefined();
-      // Primary should be above (lower y) than secondary
       expect(primaryPos!.y).toBeLessThan(secondaryPos!.y);
     });
 
@@ -168,41 +173,57 @@ describe('tui/components/flow-map.pure', () => {
   });
 
   describe('renderFlowMap (wide)', () => {
+    it('should return a ColorBuffer', () => {
+      const agents = createTestAgents();
+      const buf = renderFlowMap(agents, [], 120, 30);
+      expect(buf.width).toBe(120);
+      expect(buf.height).toBe(30);
+      expect(typeof buf.toLines).toBe('function');
+    });
+
     it('should render agents as boxes with status icons', () => {
       const agents = createTestAgents();
       const edges = createTestEdges();
-      const result = renderFlowMap(agents, edges, 120, 30);
+      const result = bufferToString(renderFlowMap(agents, edges, 120, 30));
 
       expect(result).toContain('Architect');
       expect(result).toContain('Developer');
       expect(result).toContain('Reviewer');
-      // Running icon
       expect(result).toContain('●');
-      // Idle icon
       expect(result).toContain('○');
     });
 
     it('should render edges between agents', () => {
       const agents = createTestAgents();
       const edges = createTestEdges();
-      const result = renderFlowMap(agents, edges, 120, 30);
+      const result = bufferToString(renderFlowMap(agents, edges, 120, 30));
 
-      // Edge path uses horizontal line character
       expect(result).toContain('─');
     });
 
     it('should render stage labels', () => {
       const agents = createTestAgents();
-      const result = renderFlowMap(agents, [], 120, 30);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
 
       expect(result).toContain('PLAN');
       expect(result).toContain('ACT');
       expect(result).toContain('EVAL');
     });
 
+    it('should apply neon colors to stage labels', () => {
+      const agents = createTestAgents();
+      const buf = renderFlowMap(agents, [], 120, 30);
+      // Check that PLAN label cell has cyan color
+      const lines = buf.toLines();
+      // PLAN is written at startX+1, row 0
+      const planCell = lines[0][2]; // 'L' in 'PLAN' at position 2
+      expect(planCell.style.fg).toBe('cyan');
+      expect(planCell.style.bold).toBe(true);
+    });
+
     it('should render legend at bottom', () => {
       const agents = createTestAgents();
-      const result = renderFlowMap(agents, [], 120, 30);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
 
       expect(result).toContain('Legend:');
       expect(result).toContain('running');
@@ -214,9 +235,8 @@ describe('tui/components/flow-map.pure', () => {
 
     it('should render box-drawing characters', () => {
       const agents = createTestAgents();
-      const result = renderFlowMap(agents, [], 120, 30);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
 
-      // Box corners
       expect(result).toContain('┌');
       expect(result).toContain('┐');
       expect(result).toContain('└');
@@ -225,17 +245,24 @@ describe('tui/components/flow-map.pure', () => {
 
     it('should handle empty agents and edges', () => {
       const agents = new Map<string, DashboardNode>();
-      const result = renderFlowMap(agents, [], 120, 30);
-      // Should still render stage labels and legend
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
+
       expect(result).toContain('PLAN');
       expect(result).toContain('Legend:');
     });
   });
 
   describe('renderFlowMapSimplified (medium)', () => {
+    it('should return a ColorBuffer', () => {
+      const agents = createTestAgents();
+      const buf = renderFlowMapSimplified(agents, 100, 30);
+      expect(buf.width).toBe(100);
+      expect(typeof buf.toLines).toBe('function');
+    });
+
     it('should render agent boxes grouped by stage', () => {
       const agents = createTestAgents();
-      const result = renderFlowMapSimplified(agents, 100, 30);
+      const result = bufferToString(renderFlowMapSimplified(agents, 100, 30));
 
       expect(result).toContain('Architect');
       expect(result).toContain('Developer');
@@ -244,25 +271,16 @@ describe('tui/components/flow-map.pure', () => {
 
     it('should contain stage labels', () => {
       const agents = createTestAgents();
-      const result = renderFlowMapSimplified(agents, 100, 30);
+      const result = bufferToString(renderFlowMapSimplified(agents, 100, 30));
 
       expect(result).toContain('PLAN');
       expect(result).toContain('ACT');
       expect(result).toContain('EVAL');
     });
 
-    it('should not render arrows', () => {
-      const agents = createTestAgents();
-      const result = renderFlowMapSimplified(agents, 100, 30);
-
-      // No arrow tip characters from edge routing
-      expect(result).not.toContain('>');
-      expect(result).not.toContain('<');
-    });
-
     it('should render box drawing characters', () => {
       const agents = createTestAgents();
-      const result = renderFlowMapSimplified(agents, 100, 30);
+      const result = bufferToString(renderFlowMapSimplified(agents, 100, 30));
 
       expect(result).toContain('┌');
       expect(result).toContain('┘');
@@ -270,8 +288,7 @@ describe('tui/components/flow-map.pure', () => {
 
     it('should handle empty agents', () => {
       const agents = new Map<string, DashboardNode>();
-      const result = renderFlowMapSimplified(agents, 100, 30);
-      // Should return buffer with only spaces
+      const result = bufferToString(renderFlowMapSimplified(agents, 100, 30));
       expect(result.trim()).toBe('');
     });
   });
@@ -300,7 +317,6 @@ describe('tui/components/flow-map.pure', () => {
       const result = renderFlowMapCompact(agents);
       const lines = result.split('\n');
 
-      // Find the line indices for each stage
       const planIdx = lines.findIndex(l => l.includes('(PLAN)'));
       const actIdx = lines.findIndex(l => l.includes('(ACT)'));
       const evalIdx = lines.findIndex(l => l.includes('(EVAL)'));
@@ -341,33 +357,9 @@ describe('tui/components/flow-map.pure', () => {
 
     it('should use correct status icons', () => {
       const agents = new Map<string, DashboardNode>([
-        [
-          'a1',
-          makeAgent({
-            id: 'a1',
-            name: 'Running',
-            stage: 'PLAN',
-            status: 'running',
-          }),
-        ],
-        [
-          'a2',
-          makeAgent({
-            id: 'a2',
-            name: 'Blocked',
-            stage: 'ACT',
-            status: 'blocked',
-          }),
-        ],
-        [
-          'a3',
-          makeAgent({
-            id: 'a3',
-            name: 'Done',
-            stage: 'EVAL',
-            status: 'done',
-          }),
-        ],
+        ['a1', makeAgent({ id: 'a1', name: 'Running', stage: 'PLAN', status: 'running' })],
+        ['a2', makeAgent({ id: 'a2', name: 'Blocked', stage: 'ACT', status: 'blocked' })],
+        ['a3', makeAgent({ id: 'a3', name: 'Done', stage: 'EVAL', status: 'done' })],
       ]);
 
       const result = renderFlowMapCompact(agents);

@@ -91,7 +91,6 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
         stageHealth={stageHealth}
         bottlenecks={bottlenecks}
         tokenCount={0}
-        layoutMode={layoutMode}
         width={columns}
       />
     </Box>

@@ -15,7 +15,7 @@ describe('DashboardApp', () => {
   it('renders without eventBus (idle state)', () => {
     const { lastFrame } = render(<DashboardApp />);
     const frame = lastFrame() ?? '';
-    expect(frame).toContain('Codingbuddy TUI');
+    expect(frame).toContain('CODINGBUDDY');
     expect(frame).toContain('IDLE');
   });
 

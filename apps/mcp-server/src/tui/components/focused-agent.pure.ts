@@ -1,5 +1,5 @@
 import type { DashboardNodeStatus, TaskItem, EventLogEntry } from '../dashboard-types';
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 
 const STATUS_LABELS: Record<DashboardNodeStatus, string> = {
   running: 'RUNNING ●',
@@ -56,4 +56,28 @@ export function formatToolIO(tools: string[], inputs: string[], outputs: ToolIOD
 export function formatLogTail(events: EventLogEntry[], maxLines = 10): string {
   const tail = events.slice(-maxLines);
   return tail.map(e => `${e.timestamp} ${e.message}`).join('\n');
+}
+
+/**
+ * Format a section divider line: ─── Title ───────
+ */
+export function formatSectionDivider(title: string, width = 50): string {
+  const prefix = '─── ';
+  const suffix = ' ';
+  const remaining = Math.max(0, width - prefix.length - title.length - suffix.length);
+  return `${prefix}${title}${suffix}${'─'.repeat(remaining)}`;
+}
+
+/**
+ * Format a progress bar with filled and empty segments.
+ * Returns [filledStr, emptyStr] for separate styling.
+ */
+export function formatProgressBar(progress: number, width = 40): { filled: string; empty: string } {
+  const clamped = Math.max(0, Math.min(100, progress));
+  const filledCount = Math.round((clamped / 100) * width);
+  const emptyCount = width - filledCount;
+  return {
+    filled: '█'.repeat(filledCount),
+    empty: '░'.repeat(emptyCount),
+  };
 }

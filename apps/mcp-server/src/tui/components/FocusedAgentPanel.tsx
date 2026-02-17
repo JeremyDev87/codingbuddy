@@ -1,12 +1,14 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { DashboardNode, TaskItem, EventLogEntry } from '../dashboard-types';
+import { STATUS_ICONS, getNodeStatusColor } from '../utils/theme';
 import {
-  formatAgentHeader,
   formatObjective,
   formatChecklist,
   formatToolIO,
   formatLogTail,
+  formatSectionDivider,
+  formatProgressBar,
   type ToolIOData,
 } from './focused-agent.pure';
 
@@ -20,6 +22,39 @@ export interface FocusedAgentPanelProps {
   eventLog: EventLogEntry[];
 }
 
+function SectionDivider({ title }: { title: string }): React.ReactElement {
+  return <Text color="magenta">{formatSectionDivider(title)}</Text>;
+}
+
+function LogSection({
+  logs,
+  eventLog,
+}: {
+  logs: string | null;
+  eventLog: EventLogEntry[];
+}): React.ReactElement {
+  if (!logs) return <Text dimColor>No events</Text>;
+  const logLines = logs.split('\n');
+  const offset = eventLog.length - logLines.length;
+  return (
+    <>
+      {logLines.map((line, i) => {
+        const ev = eventLog[offset + i];
+        const isError = ev?.level === 'error';
+        const spaceIdx = line.indexOf(' ');
+        const timestamp = spaceIdx > 0 ? line.slice(0, spaceIdx) : line;
+        const message = spaceIdx > 0 ? line.slice(spaceIdx + 1) : '';
+        return (
+          <Box key={i} gap={1}>
+            <Text dimColor>{timestamp}</Text>
+            <Text color={isError ? 'red' : undefined}>{message}</Text>
+          </Box>
+        );
+      })}
+    </>
+  );
+}
+
 export function FocusedAgentPanel({
   agent,
   objectives,
@@ -31,39 +66,66 @@ export function FocusedAgentPanel({
 }: FocusedAgentPanelProps): React.ReactElement {
   if (!agent) {
     return (
-      <Box borderStyle="single" flexDirection="column">
+      <Box borderStyle="single" borderColor="cyan" flexDirection="column">
         <Text dimColor>No agent focused</Text>
       </Box>
     );
   }
 
-  const header = formatAgentHeader(agent.name, agent.id, agent.status, agent.stage, agent.progress);
+  const icon = STATUS_ICONS[agent.status] ?? '?';
+  const statusColor = getNodeStatusColor(agent.status);
+  const statusLabel = agent.status.toUpperCase();
+  const progressBar = formatProgressBar(agent.progress);
   const objective = formatObjective(objectives);
   const checklist = formatChecklist(tasks);
   const toolIO = formatToolIO(tools, inputs, outputs);
   const logs = formatLogTail(eventLog);
 
   return (
-    <Box flexDirection="column">
-      <Box borderStyle="single" flexDirection="column">
-        <Text bold>{header}</Text>
+    <Box borderStyle="single" borderColor="cyan" flexDirection="column">
+      {/* Agent Header */}
+      <Box gap={2}>
+        <Text color={statusColor} bold>
+          {icon}
+        </Text>
+        <Text bold>{agent.name}</Text>
+        <Text color={statusColor}>{statusLabel}</Text>
+        <Text dimColor>{agent.stage}</Text>
+        <Text>[{agent.progress}%]</Text>
       </Box>
-      <Box borderStyle="single" flexDirection="column">
-        <Text bold>Objective</Text>
-        <Text>{objective}</Text>
+
+      {/* Progress Bar */}
+      <Box>
+        <Text color="magenta">{progressBar.filled}</Text>
+        <Text dimColor>{progressBar.empty}</Text>
       </Box>
-      <Box borderStyle="single" flexDirection="column">
-        <Text bold>Checklist</Text>
-        <Text>{checklist}</Text>
-      </Box>
-      <Box borderStyle="single" flexDirection="column">
-        <Text bold>Tool / IO</Text>
-        <Text>{toolIO}</Text>
-      </Box>
-      <Box borderStyle="single" flexDirection="column" flexGrow={1}>
-        <Text bold>Logs (tail)</Text>
-        <Text>{logs}</Text>
-      </Box>
+
+      {/* Objective Section */}
+      <SectionDivider title="Objective" />
+      {objective ? <Text>{objective}</Text> : <Text dimColor>No objectives</Text>}
+
+      {/* Checklist Section */}
+      <SectionDivider title="Checklist" />
+      {checklist ? (
+        checklist.split('\n').map((line, i) => {
+          const isCompleted = line.startsWith('[x]');
+          return (
+            <Text key={i} color={isCompleted ? 'green' : undefined}>
+              {line}
+            </Text>
+          );
+        })
+      ) : (
+        <Text dimColor>No tasks</Text>
+      )}
+
+      {/* Tools / IO Section */}
+      <SectionDivider title="Tools / IO" />
+      <Text>{toolIO}</Text>
+
+      {/* Event Log Section */}
+      <SectionDivider title="Event Log" />
+      <LogSection logs={logs} eventLog={eventLog} />
     </Box>
   );
 }

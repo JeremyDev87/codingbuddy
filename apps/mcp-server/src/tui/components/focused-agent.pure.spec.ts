@@ -5,6 +5,8 @@ import {
   formatChecklist,
   formatToolIO,
   formatLogTail,
+  formatSectionDivider,
+  formatProgressBar,
 } from './focused-agent.pure';
 import type { TaskItem, EventLogEntry } from '../dashboard-types';
 
@@ -175,6 +177,57 @@ describe('tui/components/focused-agent.pure', () => {
 
       const result = formatLogTail(events, 10);
       expect(result).toBe('10:00:01 Only event');
+    });
+  });
+
+  describe('formatSectionDivider', () => {
+    it('should format section divider with title', () => {
+      const result = formatSectionDivider('Objective', 30);
+      expect(result).toContain('─── Objective');
+      expect(result).toMatch(/^───/);
+    });
+
+    it('should pad with dashes to fill width', () => {
+      const result = formatSectionDivider('Test', 20);
+      // "─── Test " = 9 chars, remaining = 11 dashes
+      expect(result.length).toBe(20);
+    });
+
+    it('should handle title longer than width gracefully', () => {
+      const result = formatSectionDivider('VeryLongTitle', 10);
+      expect(result).toContain('VeryLongTitle');
+    });
+  });
+
+  describe('formatProgressBar', () => {
+    it('should return filled and empty segments', () => {
+      const { filled, empty } = formatProgressBar(50, 20);
+      expect(filled).toBe('██████████');
+      expect(empty).toBe('░░░░░░░░░░');
+    });
+
+    it('should handle 0% progress', () => {
+      const { filled, empty } = formatProgressBar(0, 10);
+      expect(filled).toBe('');
+      expect(empty).toBe('░░░░░░░░░░');
+    });
+
+    it('should handle 100% progress', () => {
+      const { filled, empty } = formatProgressBar(100, 10);
+      expect(filled).toBe('██████████');
+      expect(empty).toBe('');
+    });
+
+    it('should clamp values above 100', () => {
+      const { filled, empty } = formatProgressBar(150, 10);
+      expect(filled).toBe('██████████');
+      expect(empty).toBe('');
+    });
+
+    it('should clamp values below 0', () => {
+      const { filled, empty } = formatProgressBar(-10, 10);
+      expect(filled).toBe('');
+      expect(empty).toBe('░░░░░░░░░░');
     });
   });
 });

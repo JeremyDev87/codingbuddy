@@ -3,7 +3,7 @@ import { TuiEventBus } from './event-bus';
 import { TUI_EVENTS } from './types';
 import { parseAgentFromToolName } from './parse-agent';
 import { extractEventsFromResponse, type ExtractedEvent } from './response-event-extractor';
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 
 @Injectable()
 export class TuiInterceptor {

@@ -14,30 +14,33 @@ function makeHealth() {
 }
 
 describe('tui/components/StageHealthBar', () => {
-  it('should render stage counters', () => {
-    const { lastFrame } = render(
-      <StageHealthBar
-        stageHealth={makeHealth()}
-        bottlenecks={['tests failing(3)']}
-        tokenCount={128000}
-        layoutMode="wide"
-        width={120}
-      />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('PLAN');
-    expect(frame).toContain('ACT');
-  });
-
-  it('should render token count', () => {
+  it('should render stage names with colors', () => {
     const { lastFrame } = render(
       <StageHealthBar
         stageHealth={makeHealth()}
         bottlenecks={[]}
-        tokenCount={64000}
-        layoutMode="wide"
+        tokenCount={128000}
         width={120}
       />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('PLAN:');
+    expect(frame).toContain('ACT:');
+    expect(frame).toContain('EVAL:');
+  });
+
+  it('should render running/done/error stats', () => {
+    const { lastFrame } = render(
+      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} tokenCount={0} width={120} />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('running');
+    expect(frame).toContain('err');
+  });
+
+  it('should render token count', () => {
+    const { lastFrame } = render(
+      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} tokenCount={64000} width={120} />,
     );
     expect(lastFrame()).toContain('64k');
   });
@@ -48,11 +51,12 @@ describe('tui/components/StageHealthBar', () => {
         stageHealth={makeHealth()}
         bottlenecks={['tests failing(3)', 'lint errors']}
         tokenCount={0}
-        layoutMode="wide"
         width={120}
       />,
     );
-    expect(lastFrame()).toContain('tests failing');
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('tests failing');
+    expect(frame).toContain('Bottlenecks');
   });
 
   it('should render in narrow mode', () => {
@@ -61,7 +65,6 @@ describe('tui/components/StageHealthBar', () => {
         stageHealth={makeHealth()}
         bottlenecks={['long bottleneck description']}
         tokenCount={50000}
-        layoutMode="narrow"
         width={60}
       />,
     );
@@ -76,14 +79,19 @@ describe('tui/components/StageHealthBar', () => {
       AUTO: createEmptyStageStats(),
     };
     const { lastFrame } = render(
-      <StageHealthBar
-        stageHealth={empty}
-        bottlenecks={[]}
-        tokenCount={0}
-        layoutMode="wide"
-        width={120}
-      />,
+      <StageHealthBar stageHealth={empty} bottlenecks={[]} tokenCount={0} width={120} />,
     );
-    expect(lastFrame()).toBeTruthy();
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('PLAN:');
+    expect(frame).toContain('idle');
+  });
+
+  it('should render double border', () => {
+    const { lastFrame } = render(
+      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} tokenCount={0} width={120} />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('╔');
+    expect(frame).toContain('╝');
   });
 });

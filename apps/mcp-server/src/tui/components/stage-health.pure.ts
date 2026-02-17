@@ -1,4 +1,4 @@
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 import type { DashboardNode, StageStats, EventLogEntry, LayoutMode } from '../dashboard-types';
 import { createEmptyStageStats } from '../dashboard-types';
 

@@ -15,7 +15,7 @@ import {
   type TaskSyncedEvent,
 } from './types';
 import { parseToolResponseJson } from './parse-tool-response';
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 
 const VALID_MODES: ReadonlySet<string> = new Set<Mode>(['PLAN', 'ACT', 'EVAL', 'AUTO']);
 export const UNKNOWN_AGENT_ID = 'unknown-agent';

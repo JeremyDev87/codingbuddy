@@ -14,7 +14,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     progress: 50,
   });
 
-  it('should render agent header', () => {
+  it('should render agent name and status', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
@@ -26,7 +26,47 @@ describe('tui/components/FocusedAgentPanel', () => {
         eventLog={[]}
       />,
     );
-    expect(lastFrame()).toContain('BackendDev');
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('BackendDev');
+    expect(frame).toContain('RUNNING');
+    expect(frame).toContain('●');
+  });
+
+  it('should render progress bar', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('█');
+    expect(frame).toContain('░');
+    expect(frame).toContain('[50%]');
+  });
+
+  it('should render section dividers', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        objectives={['Design auth']}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('─── Objective');
+    expect(frame).toContain('─── Checklist');
+    expect(frame).toContain('─── Tools / IO');
+    expect(frame).toContain('─── Event Log');
   });
 
   it('should render objectives', () => {
@@ -112,5 +152,23 @@ describe('tui/components/FocusedAgentPanel', () => {
       />,
     );
     expect(lastFrame()).toContain('No agent focused');
+  });
+
+  it('should render single border with cyan color', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    // Single border uses ┌ ┐ └ ┘
+    expect(frame).toContain('┌');
+    expect(frame).toContain('┘');
   });
 });

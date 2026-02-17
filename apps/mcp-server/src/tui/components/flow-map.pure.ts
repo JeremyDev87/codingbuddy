@@ -1,19 +1,18 @@
-import { CharBuffer } from '../utils/char-buffer';
+import { ColorBuffer, type CellStyle } from '../utils/color-buffer';
 import { computeEdgePath, computeLabelPosition, type Point } from '../utils/edge-router';
+import {
+  STAGE_LABEL_STYLES,
+  STATUS_STYLES,
+  STATUS_ICONS,
+  EDGE_STYLES,
+  LEGEND_STYLE,
+} from '../utils/theme';
 import type { DashboardNode, DashboardNodeStatus, Edge } from '../dashboard-types';
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 
 const NODE_WIDTH = 17;
 const NODE_HEIGHT = 3;
 const STAGE_ORDER: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
-
-const STATUS_ICONS: Record<DashboardNodeStatus, string> = {
-  running: '●',
-  idle: '○',
-  blocked: '⏸',
-  error: '!',
-  done: '✓',
-};
 
 export interface StageColumn {
   startX: number;
@@ -30,7 +29,6 @@ export interface NodePosition {
 
 /**
  * Group agents by stage, returning a Map sorted by STAGE_ORDER.
- * Reusable across all rendering modes.
  */
 function groupByStage(agents: Map<string, DashboardNode>): Map<Mode, DashboardNode[]> {
   const byStage = new Map<Mode, DashboardNode[]>();
@@ -44,7 +42,6 @@ function groupByStage(agents: Map<string, DashboardNode>): Map<Mode, DashboardNo
 
 /**
  * Sort agents: primary first, then by name.
- * Spread + sort is acceptable: agent count per stage is small (< 10 in practice).
  */
 function sortAgents(agents: DashboardNode[]): DashboardNode[] {
   return [...agents].sort((a, b) => {
@@ -55,7 +52,6 @@ function sortAgents(agents: DashboardNode[]): DashboardNode[] {
 
 /**
  * Divide total width into stage columns.
- * Uses 4 columns when AUTO agents are present, 3 otherwise.
  */
 export function layoutStageColumns(
   totalWidth: number,
@@ -85,7 +81,6 @@ export function layoutStageColumns(
 
 /**
  * Position agents vertically within their stage column.
- * Primary agents are placed first.
  */
 export function layoutAgentNodes(
   agents: Map<string, DashboardNode>,
@@ -99,7 +94,7 @@ export function layoutAgentNodes(
     if (!col) continue;
 
     const sorted = sortAgents(stageAgents);
-    const startY = 2; // Leave room for stage label
+    const startY = 2;
     sorted.forEach((agent, idx) => {
       positions.set(agent.id, {
         x: col.startX + Math.floor((col.width - NODE_WIDTH) / 2),
@@ -114,14 +109,30 @@ export function layoutAgentNodes(
 }
 
 /**
- * Wide mode (120+): Full boxes + arrows + labels + legend
+ * Get the node border style based on agent status.
+ */
+function getNodeBorderStyle(status: DashboardNodeStatus): CellStyle {
+  return STATUS_STYLES[status] ?? STATUS_STYLES.idle;
+}
+
+/**
+ * Get the node text style based on agent status.
+ */
+function getNodeTextStyle(status: DashboardNodeStatus): CellStyle {
+  if (status === 'running') return { fg: 'white', bold: true };
+  return { dim: true };
+}
+
+/**
+ * Wide mode (120+): Full boxes + arrows + labels + legend.
+ * Returns ColorBuffer for colored rendering.
  */
 export function renderFlowMap(
   agents: Map<string, DashboardNode>,
   edges: Edge[],
   width: number,
   height: number,
-): string {
+): ColorBuffer {
   let hasAutoAgents = false;
   for (const a of agents.values()) {
     if (a.stage === 'AUTO') {
@@ -129,30 +140,35 @@ export function renderFlowMap(
       break;
     }
   }
-  const buf = new CharBuffer(width, height);
+  const buf = new ColorBuffer(width, height);
   const columns = layoutStageColumns(width, hasAutoAgents);
   const positions = layoutAgentNodes(agents, columns);
 
-  // Draw stage labels (skip AUTO in 3-column mode to avoid overwriting PLAN)
+  // Draw stage labels with neon colors
   const stagesToDraw = hasAutoAgents ? STAGE_ORDER : STAGE_ORDER.filter(s => s !== 'AUTO');
   for (const stage of stagesToDraw) {
     const col = columns[stage];
-    buf.writeText(col.startX + 1, 0, stage);
+    const style = STAGE_LABEL_STYLES[stage];
+    buf.writeText(col.startX + 1, 0, stage, style);
   }
 
-  // Draw agent boxes
+  // Draw agent boxes with status-colored borders
   for (const [id, pos] of positions) {
     const agent = agents.get(id);
     if (!agent) continue;
 
-    buf.drawBox(pos.x, pos.y, pos.width, pos.height);
+    const borderStyle = getNodeBorderStyle(agent.status);
+    buf.drawBox(pos.x, pos.y, pos.width, pos.height, borderStyle);
+
     const icon = STATUS_ICONS[agent.status];
     const nameStr =
       agent.name.length > pos.width - 5 ? agent.name.slice(0, pos.width - 8) + '...' : agent.name;
-    buf.writeText(pos.x + 2, pos.y + 1, `${nameStr} ${icon}`);
+    const textStyle = getNodeTextStyle(agent.status);
+    buf.writeText(pos.x + 2, pos.y + 1, nameStr, textStyle);
+    buf.writeText(pos.x + 2 + nameStr.length + 1, pos.y + 1, icon, STATUS_STYLES[agent.status]);
   }
 
-  // Draw edges
+  // Draw edges with neon colors
   for (const edge of edges) {
     const fromPos = positions.get(edge.from);
     const toPos = positions.get(edge.to);
@@ -169,32 +185,34 @@ export function renderFlowMap(
 
     const path = computeEdgePath(fromPoint, toPoint);
     for (const seg of path) {
-      buf.setChar(seg.x, seg.y, seg.char);
+      const isArrow = seg.char === '>' || seg.char === '<';
+      buf.setChar(seg.x, seg.y, seg.char, isArrow ? EDGE_STYLES.arrow : EDGE_STYLES.path);
     }
 
-    // Label
+    // Edge label
     const labelPos = computeLabelPosition(path, edge.label);
     if (labelPos) {
-      buf.writeText(labelPos.x, labelPos.y - 1, edge.label);
+      buf.writeText(labelPos.x, labelPos.y - 1, edge.label, EDGE_STYLES.label);
     }
   }
 
   // Legend at bottom
   const legendY = height - 1;
-  buf.writeText(1, legendY, 'Legend: ● running  ○ idle  ⏸ blocked  ! error  ✓ done');
+  buf.writeText(1, legendY, 'Legend: ● running  ○ idle  ⏸ blocked  ! error  ✓ done', LEGEND_STYLE);
 
-  return buf.toString();
+  return buf;
 }
 
 /**
  * Medium mode (80-119): Boxes grouped by stage, no arrows.
+ * Returns ColorBuffer.
  */
 export function renderFlowMapSimplified(
   agents: Map<string, DashboardNode>,
   width: number,
   height: number,
-): string {
-  const buf = new CharBuffer(width, height);
+): ColorBuffer {
+  const buf = new ColorBuffer(width, height);
   const byStage = groupByStage(agents);
 
   let y = 0;
@@ -202,27 +220,29 @@ export function renderFlowMapSimplified(
     const stageAgents = byStage.get(stage);
     if (!stageAgents || stageAgents.length === 0) continue;
 
-    buf.writeText(1, y, stage);
+    buf.writeText(1, y, stage, STAGE_LABEL_STYLES[stage]);
     y++;
 
     for (const agent of stageAgents) {
       if (y >= height - 1) break;
       const boxW = Math.min(width - 2, NODE_WIDTH);
-      buf.drawBox(1, y, boxW, NODE_HEIGHT);
+      const borderStyle = getNodeBorderStyle(agent.status);
+      buf.drawBox(1, y, boxW, NODE_HEIGHT, borderStyle);
       const icon = STATUS_ICONS[agent.status];
       const nameStr =
         agent.name.length > boxW - 5 ? agent.name.slice(0, boxW - 8) + '...' : agent.name;
-      buf.writeText(3, y + 1, `${nameStr} ${icon}`);
+      buf.writeText(3, y + 1, nameStr, getNodeTextStyle(agent.status));
+      buf.writeText(3 + nameStr.length + 1, y + 1, icon, STATUS_STYLES[agent.status]);
       y += NODE_HEIGHT + 1;
     }
   }
 
-  return buf.toString();
+  return buf;
 }
 
 /**
  * Narrow mode (<80): Flat list: "● AgentName (STAGE)"
- * Uses single-pass grouping instead of per-stage filtering.
+ * Returns plain string (no buffer needed).
  */
 export function renderFlowMapCompact(agents: Map<string, DashboardNode>): string {
   const lines: string[] = [];

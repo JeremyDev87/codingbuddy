@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { computeStageHealth, detectBottlenecks, formatStageHealthBar } from './stage-health.pure';
 import type { DashboardNode, EventLogEntry, StageStats } from '../dashboard-types';
 import { createEmptyStageStats } from '../dashboard-types';
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 
 function makeAgent(
   overrides: Partial<DashboardNode> & { id: string; name: string; stage: Mode },

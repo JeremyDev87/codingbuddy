@@ -4,7 +4,7 @@
  * Types for the redesigned TUI dashboard that visualizes agent orchestration,
  * task progress, stage health, and event logs.
  */
-import type { Mode } from '../keyword/keyword.types';
+import type { Mode } from './types';
 
 /**
  * Layout breakpoints based on terminal column width.

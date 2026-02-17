@@ -63,7 +63,7 @@ describe('Transport-TUI Integration', () => {
       await tick();
 
       expect(stdoutCapture.join('')).toContain('"jsonrpc":"2.0"');
-      expect(stdoutCapture.join('')).not.toContain('Codingbuddy TUI');
+      expect(stdoutCapture.join('')).not.toContain('CODINGBUDDY');
     });
 
     it('should skip TUI when stderr is not a TTY (piped output)', () => {

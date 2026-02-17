@@ -4,7 +4,7 @@
  * Defines the 10 core events for the TUI Agent Monitor event system.
  * Each event has a typed payload interface for type-safe emit/subscribe.
  */
-import type { Mode } from '../../keyword/keyword.types';
+import type { Mode } from '../types';
 import type { AgentMetadata } from './agent-metadata.types';
 
 /**

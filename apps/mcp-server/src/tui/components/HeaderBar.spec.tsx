@@ -1,19 +1,10 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render } from 'ink-testing-library';
 import { HeaderBar } from './HeaderBar';
 
 describe('tui/components/HeaderBar', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2026, 0, 1, 14, 30, 0));
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('should render title', () => {
+  it('should render title with neon branding', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo/myapp"
@@ -24,10 +15,10 @@ describe('tui/components/HeaderBar', () => {
         width={120}
       />,
     );
-    expect(lastFrame()).toContain('Codingbuddy TUI');
+    expect(lastFrame()).toContain('CODINGBUDDY');
   });
 
-  it('should render mode flow', () => {
+  it('should render mode flow with active mode highlighted', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo/myapp"
@@ -38,10 +29,13 @@ describe('tui/components/HeaderBar', () => {
         width={120}
       />,
     );
-    expect(lastFrame()).toContain('ACT');
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('[ACT]');
+    expect(frame).toContain('PLAN');
+    expect(frame).toContain('EVAL');
   });
 
-  it('should render state indicator', () => {
+  it('should render state indicator with icon', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
@@ -52,10 +46,44 @@ describe('tui/components/HeaderBar', () => {
         width={120}
       />,
     );
-    expect(lastFrame()).toContain('IDLE');
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('IDLE');
+    expect(frame).toContain('○');
   });
 
-  it('should render in narrow mode without workspace', () => {
+  it('should render RUNNING state with filled circle', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        sessionId="s"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('●');
+    expect(frame).toContain('RUNNING');
+  });
+
+  it('should render ERROR state with ! icon', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        sessionId="s"
+        currentMode="PLAN"
+        globalState="ERROR"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('!');
+    expect(frame).toContain('ERROR');
+  });
+
+  it('should render in narrow mode with shortened title', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/very/long/workspace/path"
@@ -66,9 +94,24 @@ describe('tui/components/HeaderBar', () => {
         width={60}
       />,
     );
-    // In narrow mode, workspace should be hidden
     const frame = lastFrame() ?? '';
-    expect(frame).toContain('Codingbuddy');
+    expect(frame).toContain('CODINGBUDDY');
+  });
+
+  it('should render workspace and session in wide mode', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo/myapp"
+        sessionId="abc123def"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('/repo/myapp');
+    expect(frame).toContain('sess:');
   });
 
   it('should render with null mode', () => {
@@ -83,5 +126,24 @@ describe('tui/components/HeaderBar', () => {
       />,
     );
     expect(lastFrame()).toBeTruthy();
+  });
+
+  it('should render double border (Ink box rendering)', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        sessionId="s"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    // Double border uses ╔ ╗ ╚ ╝ characters
+    expect(frame).toContain('╔');
+    expect(frame).toContain('╗');
+    expect(frame).toContain('╚');
+    expect(frame).toContain('╝');
   });
 });
