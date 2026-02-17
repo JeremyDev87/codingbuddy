@@ -15,6 +15,9 @@ NC='\033[0m' # No Color
 
 ERRORS=0
 
+# Base directory for AI rules (relative to monorepo root)
+RULES_DIR="packages/rules/.ai-rules"
+
 # Parse arguments
 SCHEMA_ONLY=false
 MARKDOWN_ONLY=false
@@ -52,24 +55,24 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$MARKDOWN_ONLY" = false ]; then
   echo ""
 
   # Check .ai-rules directory exists
-  if [ ! -d ".ai-rules" ]; then
-    echo -e "${RED}❌ .ai-rules/ directory not found${NC}"
+  if [ ! -d "$RULES_DIR" ]; then
+    echo -e "${RED}❌ $RULES_DIR/ directory not found${NC}"
     exit 1
   fi
 
-  echo -e "${GREEN}✅ .ai-rules/ directory exists${NC}"
+  echo -e "${GREEN}✅ $RULES_DIR/ directory exists${NC}"
 
   # Check subdirectories exist
   for dir in rules agents adapters schemas; do
-    if [ ! -d ".ai-rules/$dir" ]; then
+    if [ ! -d "$RULES_DIR/$dir" ]; then
       if [ "$dir" = "schemas" ]; then
-        echo -e "${YELLOW}⚠️  .ai-rules/$dir/ directory not found (optional)${NC}"
+        echo -e "${YELLOW}⚠️  $RULES_DIR/$dir/ directory not found (optional)${NC}"
       else
-        echo -e "${RED}❌ .ai-rules/$dir/ directory not found${NC}"
+        echo -e "${RED}❌ $RULES_DIR/$dir/ directory not found${NC}"
         ((ERRORS++))
       fi
     else
-      echo -e "${GREEN}✅ .ai-rules/$dir/ directory exists${NC}"
+      echo -e "${GREEN}✅ $RULES_DIR/$dir/ directory exists${NC}"
     fi
   done
 
@@ -78,15 +81,15 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$MARKDOWN_ONLY" = false ]; then
 
   # Check required rule files
   for rule in core.md project.md augmented-coding.md; do
-    if [ ! -f ".ai-rules/rules/$rule" ]; then
-      echo -e "${RED}❌ Missing rule: .ai-rules/rules/$rule${NC}"
+    if [ ! -f "$RULES_DIR/rules/$rule" ]; then
+      echo -e "${RED}❌ Missing rule: $RULES_DIR/rules/$rule${NC}"
       ((ERRORS++))
     else
-      if [ ! -s ".ai-rules/rules/$rule" ]; then
-        echo -e "${RED}❌ Empty rule file: .ai-rules/rules/$rule${NC}"
+      if [ ! -s "$RULES_DIR/rules/$rule" ]; then
+        echo -e "${RED}❌ Empty rule file: $RULES_DIR/rules/$rule${NC}"
         ((ERRORS++))
       else
-        echo -e "${GREEN}✅ Found: .ai-rules/rules/$rule${NC}"
+        echo -e "${GREEN}✅ Found: $RULES_DIR/rules/$rule${NC}"
       fi
     fi
   done
@@ -95,11 +98,11 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$MARKDOWN_ONLY" = false ]; then
   echo "🤖 Checking Agent Files..."
 
   # Check agent README
-  if [ ! -f ".ai-rules/agents/README.md" ]; then
-    echo -e "${RED}❌ Missing .ai-rules/agents/README.md${NC}"
+  if [ ! -f "$RULES_DIR/agents/README.md" ]; then
+    echo -e "${RED}❌ Missing $RULES_DIR/agents/README.md${NC}"
     ((ERRORS++))
   else
-    echo -e "${GREEN}✅ Found: .ai-rules/agents/README.md${NC}"
+    echo -e "${GREEN}✅ Found: $RULES_DIR/agents/README.md${NC}"
   fi
 
   # Check required agent JSON files
@@ -120,7 +123,7 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$MARKDOWN_ONLY" = false ]; then
   )
 
   for agent in "${REQUIRED_AGENTS[@]}"; do
-    file=".ai-rules/agents/$agent.json"
+    file="$RULES_DIR/agents/$agent.json"
     if [ ! -f "$file" ]; then
       echo -e "${RED}❌ Missing agent: $file${NC}"
       ((ERRORS++))
@@ -142,7 +145,7 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$MARKDOWN_ONLY" = false ]; then
   ADAPTERS=("cursor" "claude-code" "codex" "antigravity" "q" "kiro")
 
   for adapter in "${ADAPTERS[@]}"; do
-    file=".ai-rules/adapters/$adapter.md"
+    file="$RULES_DIR/adapters/$adapter.md"
     if [ ! -f "$file" ]; then
       echo -e "${RED}❌ Missing adapter: $file${NC}"
       ((ERRORS++))
@@ -154,11 +157,11 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$MARKDOWN_ONLY" = false ]; then
   echo ""
   echo "📖 Checking Main README..."
 
-  if [ ! -f ".ai-rules/README.md" ]; then
-    echo -e "${RED}❌ Missing .ai-rules/README.md${NC}"
+  if [ ! -f "$RULES_DIR/README.md" ]; then
+    echo -e "${RED}❌ Missing $RULES_DIR/README.md${NC}"
     ((ERRORS++))
   else
-    echo -e "${GREEN}✅ Found: .ai-rules/README.md${NC}"
+    echo -e "${GREEN}✅ Found: $RULES_DIR/README.md${NC}"
   fi
 
   echo ""
@@ -172,15 +175,15 @@ if [ "$MARKDOWN_ONLY" = false ] && [ "$SKIP_SCHEMA" = false ]; then
   echo "📋 Running JSON Schema Validation..."
   echo ""
 
-  SCHEMA_FILE=".ai-rules/schemas/agent.schema.json"
+  SCHEMA_FILE="$RULES_DIR/schemas/agent.schema.json"
 
   if [ ! -f "$SCHEMA_FILE" ]; then
     echo -e "${YELLOW}⚠️  Schema file not found: $SCHEMA_FILE${NC}"
     echo -e "${YELLOW}   Skipping schema validation${NC}"
   else
     # Check if ajv-cli is available via yarn dlx
-    if yarn dlx ajv-cli validate -s "$SCHEMA_FILE" -d ".ai-rules/agents/*.json" --spec=draft7 2>&1 | grep -q "valid"; then
-      SCHEMA_RESULTS=$(yarn dlx ajv-cli validate -s "$SCHEMA_FILE" -d ".ai-rules/agents/*.json" --spec=draft7 2>&1)
+    if yarn dlx ajv-cli validate -s "$SCHEMA_FILE" -d "$RULES_DIR/agents/*.json" --spec=draft7 2>&1 | grep -q "valid"; then
+      SCHEMA_RESULTS=$(yarn dlx ajv-cli validate -s "$SCHEMA_FILE" -d "$RULES_DIR/agents/*.json" --spec=draft7 2>&1)
       INVALID_COUNT=$(echo "$SCHEMA_RESULTS" | grep -c "invalid" || true)
 
       if [ "$INVALID_COUNT" -gt 0 ]; then
@@ -212,12 +215,12 @@ if [ "$SCHEMA_ONLY" = false ] && [ "$SKIP_MARKDOWN" = false ]; then
     echo -e "${YELLOW}   Skipping Markdown linting${NC}"
   else
     # Run markdownlint
-    LINT_OUTPUT=$(yarn dlx markdownlint-cli2 ".ai-rules/**/*.md" 2>&1 || true)
+    LINT_OUTPUT=$(yarn dlx markdownlint-cli2 "$RULES_DIR/**/*.md" 2>&1 || true)
     LINT_ERRORS=$(echo "$LINT_OUTPUT" | grep "error(s)" | grep -oE "[0-9]+" | head -1 || echo "0")
 
     if [ "$LINT_ERRORS" -gt 0 ]; then
       echo -e "${RED}❌ Markdown linting found $LINT_ERRORS error(s):${NC}"
-      echo "$LINT_OUTPUT" | grep -E "^\.ai-rules.*error"
+      echo "$LINT_OUTPUT" | grep -E "^packages/rules/\.ai-rules.*error"
       ERRORS=$((ERRORS + LINT_ERRORS))
     else
       echo -e "${GREEN}✅ All Markdown files pass linting${NC}"
