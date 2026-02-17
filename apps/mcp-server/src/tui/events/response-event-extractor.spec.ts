@@ -583,12 +583,21 @@ describe('extractEventsFromResponse', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('should return empty if progress is empty', () => {
+    it('should return empty if all task source fields are empty or missing', () => {
       const result = extractEventsFromResponse(
         'update_context',
         makeResponse({
           document: {
-            sections: [{ mode: 'ACT', primaryAgent: 'dev', progress: [] }],
+            sections: [
+              {
+                mode: 'ACT',
+                primaryAgent: 'dev',
+                progress: [],
+                decisions: [],
+                findings: [],
+                notes: [],
+              },
+            ],
           },
         }),
       );
@@ -620,6 +629,109 @@ describe('extractEventsFromResponse', () => {
         }),
       );
       expect(result[0].payload).toEqual(expect.objectContaining({ agentId: 'new' }));
+    });
+
+    it('should extract task:synced from PLAN mode decisions', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'PLAN',
+                primaryAgent: 'technical-planner',
+                status: 'in_progress',
+                decisions: ['Use JWT for auth', 'Add rate limiting'],
+              },
+            ],
+          },
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].event).toBe(TUI_EVENTS.TASK_SYNCED);
+      expect(result[0].payload).toEqual({
+        agentId: 'technical-planner',
+        tasks: [
+          { id: 'ctx-0', subject: 'Use JWT for auth', completed: false },
+          { id: 'ctx-1', subject: 'Add rate limiting', completed: false },
+        ],
+      });
+    });
+
+    it('should extract task:synced from EVAL mode findings', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'EVAL',
+                primaryAgent: 'code-reviewer',
+                status: 'in_progress',
+                findings: ['Missing error handling in auth', 'No input validation'],
+              },
+            ],
+          },
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].event).toBe(TUI_EVENTS.TASK_SYNCED);
+      expect(result[0].payload).toEqual({
+        agentId: 'code-reviewer',
+        tasks: [
+          { id: 'ctx-0', subject: 'Missing error handling in auth', completed: false },
+          { id: 'ctx-1', subject: 'No input validation', completed: false },
+        ],
+      });
+    });
+
+    it('should fall back to notes when no primary field is present', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'PLAN',
+                primaryAgent: 'planner',
+                status: 'in_progress',
+                notes: ['Reviewed existing codebase', 'Identified dependencies'],
+              },
+            ],
+          },
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].payload).toEqual({
+        agentId: 'planner',
+        tasks: [
+          { id: 'ctx-0', subject: 'Reviewed existing codebase', completed: false },
+          { id: 'ctx-1', subject: 'Identified dependencies', completed: false },
+        ],
+      });
+    });
+
+    it('should prioritize progress over decisions when both exist', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'ACT',
+                primaryAgent: 'dev',
+                status: 'in_progress',
+                progress: ['Implemented feature'],
+                decisions: ['Use pattern X'],
+              },
+            ],
+          },
+        }),
+      );
+      expect(result[0].payload).toEqual({
+        agentId: 'dev',
+        tasks: [{ id: 'ctx-0', subject: 'Implemented feature', completed: false }],
+      });
     });
   });
 

@@ -231,6 +231,21 @@ function extractFromDispatchAgents(json: Record<string, unknown>): ExtractedEven
 }
 
 /**
+ * Pick the first non-empty string array from the section's task-related fields.
+ * Priority: progress (ACT) > decisions (PLAN) > findings (EVAL) > notes (fallback).
+ */
+function pickTaskSource(section: Record<string, unknown>): string[] | null {
+  for (const field of ['progress', 'decisions', 'findings', 'notes']) {
+    const value = section[field];
+    if (Array.isArray(value) && value.length > 0) {
+      const strings = value.filter((v): v is string => typeof v === 'string');
+      if (strings.length > 0) return strings;
+    }
+  }
+  return null;
+}
+
+/**
  * Extract task sync events from update_context response.
  */
 function extractFromUpdateContext(json: Record<string, unknown>): ExtractedEvent[] {
@@ -241,22 +256,17 @@ function extractFromUpdateContext(json: Record<string, unknown>): ExtractedEvent
   const sections = document.sections;
   if (!Array.isArray(sections) || sections.length === 0) return [];
 
-  // Get the most recent section's progress items
   const lastSection = sections[sections.length - 1] as Record<string, unknown>;
-  const progress = lastSection?.progress;
-  if (!Array.isArray(progress) || progress.length === 0) return [];
+  const items = pickTaskSource(lastSection);
+  if (!items || items.length === 0) return [];
 
   const sectionCompleted = lastSection?.status === 'completed';
-  const tasks = progress
-    .filter((p): p is string => typeof p === 'string')
-    .map((p, idx) => ({
-      // Positional IDs are intentionally ephemeral; each TASK_SYNCED replaces all tasks.
-      id: `ctx-${idx}`,
-      subject: p,
-      completed: sectionCompleted,
-    }));
-
-  if (tasks.length === 0) return [];
+  const tasks = items.map((item, idx) => ({
+    // Positional IDs are intentionally ephemeral; each TASK_SYNCED replaces all tasks.
+    id: `ctx-${idx}`,
+    subject: item,
+    completed: sectionCompleted,
+  }));
 
   const agentId =
     typeof lastSection.primaryAgent === 'string' ? lastSection.primaryAgent : UNKNOWN_AGENT_ID;
