@@ -85,27 +85,27 @@ const DANGEROUS_PATH_PATTERNS: ReadonlyArray<RegExp> = [
   /^[A-Z]:\\Users\\[^\\]+\\AppData/i,
   /^[A-Z]:\\ProgramData/i,
   // User-sensitive directories (credentials, keys, configs)
-  /\/\.ssh\//, // SSH keys and config
-  /\/\.gnupg\//, // GPG keys
-  /\/\.aws\//, // AWS credentials
-  /\/\.kube\//, // Kubernetes config
-  /\/\.npmrc$/, // npm authentication tokens
-  /\/\.netrc$/, // FTP/HTTP credentials
-  /\/\.docker\//, // Docker config and credentials
+  /\/\.ssh\//i, // SSH keys and config
+  /\/\.gnupg\//i, // GPG keys
+  /\/\.aws\//i, // AWS credentials
+  /\/\.kube\//i, // Kubernetes config
+  /\/\.npmrc$/i, // npm authentication tokens
+  /\/\.netrc$/i, // FTP/HTTP credentials
+  /\/\.docker\//i, // Docker config and credentials
   // Additional user-sensitive paths
-  /\/\.config\//, // XDG config directory (contains many app secrets)
-  /\/\.password-store\//, // pass password manager
-  /\/\.bash_history$/, // Bash command history
-  /\/\.zsh_history$/, // Zsh command history
-  /\/\.gitconfig$/, // Git config (may contain credentials)
-  /\/\.git-credentials$/, // Git credential store
-  /\/\.env$/, // Environment variables (often contains secrets)
-  /\/\.env\.[^/]+$/, // .env.local, .env.production, etc.
-  /\/\.cargo\/credentials/, // Rust/Cargo credentials
-  /\/\.gem\/credentials/, // Ruby gem credentials
-  /\/\.pypirc$/, // Python PyPI credentials
-  /\/\.gcloud\//, // Google Cloud credentials
-  /\/\.azure\//, // Azure credentials
+  /\/\.config\//i, // XDG config directory (contains many app secrets)
+  /\/\.password-store\//i, // pass password manager
+  /\/\.bash_history$/i, // Bash command history
+  /\/\.zsh_history$/i, // Zsh command history
+  /\/\.gitconfig$/i, // Git config (may contain credentials)
+  /\/\.git-credentials$/i, // Git credential store
+  /\/\.env$/i, // Environment variables (often contains secrets)
+  /\/\.env\.[^/]+$/i, // .env.local, .env.production, etc.
+  /\/\.cargo\/credentials/i, // Rust/Cargo credentials
+  /\/\.gem\/credentials/i, // Ruby gem credentials
+  /\/\.pypirc$/i, // Python PyPI credentials
+  /\/\.gcloud\//i, // Google Cloud credentials
+  /\/\.azure\//i, // Azure credentials
 ];
 
 /**
@@ -192,12 +192,17 @@ export function validatePath(
  * Validates that a path doesn't contain path traversal sequences
  * Less strict than validatePath - just checks for obvious traversal
  *
+ * Normalizes the path before matching to prevent bypass via
+ * dot-segments (e.g., /./etc/passwd) or redundant separators.
+ * User-sensitive directory patterns use case-insensitive matching
+ * to prevent bypass on case-insensitive filesystems (macOS HFS+/APFS).
+ *
  * @param inputPath - The path to check
  * @returns true if path is safe, false if it contains traversal sequences
  */
 export function isPathSafe(inputPath: string): boolean {
-  // Use pre-compiled patterns for better performance
-  return !DANGEROUS_PATH_PATTERNS.some(pattern => pattern.test(inputPath));
+  const normalized = path.normalize(inputPath);
+  return !DANGEROUS_PATH_PATTERNS.some(pattern => pattern.test(normalized));
 }
 
 // ============================================================================

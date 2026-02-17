@@ -306,6 +306,49 @@ describe('utils', () => {
       expect(isPathSafe('/home/user/etcetera/file.txt')).toBe(true);
       expect(isPathSafe('/home/user/variable/file.txt')).toBe(true);
     });
+
+    it('rejects non-normalized paths that resolve to dangerous locations', () => {
+      // dot-segment bypass: /./etc/passwd -> /etc/passwd
+      expect(isPathSafe('/./etc/passwd')).toBe(false);
+      expect(isPathSafe('/./usr/bin/bash')).toBe(false);
+      expect(isPathSafe('/home/./user/.ssh/id_rsa')).toBe(false);
+
+      // multiple dot-segments
+      expect(isPathSafe('/tmp/safe/../../etc/passwd')).toBe(false);
+
+      // trailing dots
+      expect(isPathSafe('/etc/./passwd')).toBe(false);
+
+      // redundant separators (path.normalize handles these)
+      expect(isPathSafe('//etc//passwd')).toBe(false);
+    });
+
+    it('rejects mixed-case paths for user-sensitive directories', () => {
+      // SSH
+      expect(isPathSafe('/home/user/.SSH/id_rsa')).toBe(false);
+      expect(isPathSafe('/Users/dev/.Ssh/config')).toBe(false);
+      // AWS
+      expect(isPathSafe('/home/user/.AWS/credentials')).toBe(false);
+      // Config
+      expect(isPathSafe('/home/user/.Config/secrets')).toBe(false);
+      // Docker
+      expect(isPathSafe('/home/user/.Docker/config.json')).toBe(false);
+      // Environment files
+      expect(isPathSafe('/project/.ENV')).toBe(false);
+      expect(isPathSafe('/project/.Env.local')).toBe(false);
+      // Git credentials
+      expect(isPathSafe('/home/user/.GITCONFIG')).toBe(false);
+      expect(isPathSafe('/home/user/.Git-Credentials')).toBe(false);
+      // History
+      expect(isPathSafe('/home/user/.Bash_History')).toBe(false);
+      expect(isPathSafe('/home/user/.ZSH_HISTORY')).toBe(false);
+      // Other
+      expect(isPathSafe('/home/user/.NPMRC')).toBe(false);
+      expect(isPathSafe('/home/user/.Kube/config')).toBe(false);
+      expect(isPathSafe('/home/user/.Gnupg/private-keys-v1.d')).toBe(false);
+      expect(isPathSafe('/home/user/.Gcloud/credentials')).toBe(false);
+      expect(isPathSafe('/home/user/.Azure/config')).toBe(false);
+    });
   });
 
   // ============================================================================
