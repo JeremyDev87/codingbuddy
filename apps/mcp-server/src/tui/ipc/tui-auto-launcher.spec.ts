@@ -148,7 +148,7 @@ describe('TuiAutoLauncher', () => {
 
     it('should use custom codingbuddyBin in spawn args', async () => {
       process.env.TERM_PROGRAM = 'iTerm.app';
-      const mockChild = createMockChildProcess(1111);
+      createMockChildProcess(1111);
 
       const launcher = new TuiAutoLauncher({
         enabled: true,
@@ -206,7 +206,7 @@ describe('TuiAutoLauncher', () => {
         })
         .mockImplementationOnce(() => Buffer.from('/usr/bin/alacritty\n'));
 
-      const mockChild = createMockChildProcess(3333);
+      createMockChildProcess(3333);
 
       const launcher = new TuiAutoLauncher({ enabled: true, delayMs: 0 });
       const ipcServer = createMockIpcServer(0);
