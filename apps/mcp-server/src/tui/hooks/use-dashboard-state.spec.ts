@@ -299,6 +299,71 @@ describe('dashboardReducer', () => {
     expect(state).toEqual(initialDashboardState);
   });
 
+  it('should update running agents stage on MODE_CHANGED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'MODE_CHANGED',
+      payload: { from: null, to: 'PLAN' },
+    });
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'planner', role: 'primary', isPrimary: true },
+    });
+    expect(state.agents.get('a1')!.stage).toBe('PLAN');
+
+    state = dashboardReducer(state, {
+      type: 'MODE_CHANGED',
+      payload: { from: 'PLAN', to: 'ACT' },
+    });
+    expect(state.agents.get('a1')!.stage).toBe('ACT');
+  });
+
+  it('should only update running agents stage, preserving done/error/idle on MODE_CHANGED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'MODE_CHANGED',
+      payload: { from: null, to: 'PLAN' },
+    });
+    // running agent
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'r1', name: 'runner', role: 'primary', isPrimary: true },
+    });
+    // done agent
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'd1', name: 'done-agent', role: 'specialist', isPrimary: false },
+    });
+    state = dashboardReducer(state, {
+      type: 'AGENT_DEACTIVATED',
+      payload: { agentId: 'd1', reason: 'completed', durationMs: 100 },
+    });
+    // error agent
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'e1', name: 'error-agent', role: 'specialist', isPrimary: false },
+    });
+    state = dashboardReducer(state, {
+      type: 'AGENT_DEACTIVATED',
+      payload: { agentId: 'e1', reason: 'error', durationMs: 50 },
+    });
+    // idle agent (pre-registered specialist)
+    state = dashboardReducer(state, {
+      type: 'PARALLEL_STARTED',
+      payload: { specialists: ['idle-spec'], mode: 'PLAN' },
+    });
+
+    state = dashboardReducer(state, {
+      type: 'MODE_CHANGED',
+      payload: { from: 'PLAN', to: 'ACT' },
+    });
+
+    expect(state.agents.get('r1')!.stage).toBe('ACT');
+    expect(state.agents.get('d1')!.stage).toBe('PLAN');
+    expect(state.agents.get('e1')!.stage).toBe('PLAN');
+    expect(state.agents.get('specialist:idle-spec')!.stage).toBe('PLAN');
+  });
+
   it('does not mutate original agents map', () => {
     const originalAgents = initialDashboardState.agents;
     dashboardReducer(initialDashboardState, {

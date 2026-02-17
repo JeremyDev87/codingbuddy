@@ -109,8 +109,26 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       return { ...state, agents, globalState, focusedAgentId };
     }
 
-    case 'MODE_CHANGED':
-      return { ...state, currentMode: action.payload.to, activeSkills: [] };
+    case 'MODE_CHANGED': {
+      const newMode = action.payload.to;
+      let agents = state.agents;
+      let needsClone = false;
+      for (const a of state.agents.values()) {
+        if (a.status === 'running') {
+          needsClone = true;
+          break;
+        }
+      }
+      if (needsClone) {
+        agents = cloneAgents(state.agents);
+        for (const [id, a] of agents) {
+          if (a.status === 'running') {
+            agents.set(id, { ...a, stage: newMode });
+          }
+        }
+      }
+      return { ...state, currentMode: newMode, agents, activeSkills: [] };
+    }
 
     case 'AGENT_RELATIONSHIP': {
       const edge: Edge = {
