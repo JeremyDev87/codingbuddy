@@ -10,6 +10,9 @@ import {
   SECTION_DIVIDER_STYLE,
   LEGEND_STYLE,
   PROGRESS_BAR_STYLES,
+  GLOW_STYLE,
+  PIPELINE_STYLES,
+  PROGRESS_BAR_CHARS,
   GLOBAL_STATE_ICONS,
   GLOBAL_STATE_COLORS,
   getStatusStyle,
@@ -206,6 +209,27 @@ describe('theme', () => {
 
     it('returns cyan for unknown mode', () => {
       expect(getModeColor('UNKNOWN' as never)).toBe('cyan');
+    });
+  });
+
+  describe('GLOW_STYLE', () => {
+    it('should have green dim style for glow effect', () => {
+      expect(GLOW_STYLE).toEqual({ fg: 'green', dim: true });
+    });
+  });
+
+  describe('PIPELINE_STYLES', () => {
+    it('should have arrow and connector styles', () => {
+      expect(PIPELINE_STYLES.arrow).toBeDefined();
+      expect(PIPELINE_STYLES.arrow.fg).toBe('magenta');
+      expect(PIPELINE_STYLES.connector).toBeDefined();
+    });
+  });
+
+  describe('PROGRESS_BAR_CHARS', () => {
+    it('should have filled and empty characters', () => {
+      expect(PROGRESS_BAR_CHARS.filled).toBe('█');
+      expect(PROGRESS_BAR_CHARS.empty).toBe('░');
     });
   });
 

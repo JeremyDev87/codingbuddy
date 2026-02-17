@@ -137,6 +137,56 @@ describe('ColorBuffer', () => {
     });
   });
 
+  describe('drawRoundBox', () => {
+    it('draws box with rounded corners ╭╮╰╯', () => {
+      const buf = new ColorBuffer(7, 4);
+      const style: CellStyle = { fg: 'cyan' };
+      buf.drawRoundBox(0, 0, 7, 4, style);
+
+      expect(buf.getCell(0, 0)).toEqual({ char: '╭', style });
+      expect(buf.getCell(6, 0)).toEqual({ char: '╮', style });
+      expect(buf.getCell(0, 3)).toEqual({ char: '╰', style });
+      expect(buf.getCell(6, 3)).toEqual({ char: '╯', style });
+      expect(buf.getCell(3, 0)).toEqual({ char: '─', style });
+      expect(buf.getCell(0, 1)).toEqual({ char: '│', style });
+      expect(buf.getCell(3, 1).char).toBe(' ');
+    });
+
+    it('draws minimum 2x2 round box', () => {
+      const buf = new ColorBuffer(2, 2);
+      buf.drawRoundBox(0, 0, 2, 2);
+      expect(buf.getCell(0, 0).char).toBe('╭');
+      expect(buf.getCell(1, 0).char).toBe('╮');
+      expect(buf.getCell(0, 1).char).toBe('╰');
+      expect(buf.getCell(1, 1).char).toBe('╯');
+    });
+  });
+
+  describe('drawDoubleBox', () => {
+    it('draws box with double-line borders ╔═╗║╚═╝', () => {
+      const buf = new ColorBuffer(7, 4);
+      const style: CellStyle = { fg: 'green', bold: true };
+      buf.drawDoubleBox(0, 0, 7, 4, style);
+
+      expect(buf.getCell(0, 0)).toEqual({ char: '╔', style });
+      expect(buf.getCell(6, 0)).toEqual({ char: '╗', style });
+      expect(buf.getCell(0, 3)).toEqual({ char: '╚', style });
+      expect(buf.getCell(6, 3)).toEqual({ char: '╝', style });
+      expect(buf.getCell(3, 0)).toEqual({ char: '═', style });
+      expect(buf.getCell(0, 1)).toEqual({ char: '║', style });
+      expect(buf.getCell(3, 1).char).toBe(' ');
+    });
+
+    it('draws minimum 2x2 double box', () => {
+      const buf = new ColorBuffer(2, 2);
+      buf.drawDoubleBox(0, 0, 2, 2);
+      expect(buf.getCell(0, 0).char).toBe('╔');
+      expect(buf.getCell(1, 0).char).toBe('╗');
+      expect(buf.getCell(0, 1).char).toBe('╚');
+      expect(buf.getCell(1, 1).char).toBe('╝');
+    });
+  });
+
   describe('toLines', () => {
     it('returns row-major ColorCell[][] array', () => {
       const buf = new ColorBuffer(3, 2);

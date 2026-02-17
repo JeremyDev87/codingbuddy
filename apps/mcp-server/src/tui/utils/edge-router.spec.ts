@@ -31,13 +31,13 @@ describe('computeEdgePath', () => {
     it('has right arrow at endpoint when going right', () => {
       const path = computeEdgePath({ x: 0, y: 0 }, { x: 3, y: 0 });
       const last = path[path.length - 1];
-      expect(last).toEqual({ x: 3, y: 0, char: '>' });
+      expect(last).toEqual({ x: 3, y: 0, char: '▸' });
     });
 
     it('has left arrow at endpoint when going left', () => {
       const path = computeEdgePath({ x: 5, y: 0 }, { x: 1, y: 0 });
       const last = path[path.length - 1];
-      expect(last).toEqual({ x: 1, y: 0, char: '<' });
+      expect(last).toEqual({ x: 1, y: 0, char: '◂' });
     });
   });
 
@@ -46,7 +46,7 @@ describe('computeEdgePath', () => {
       const path = computeEdgePath({ x: 2, y: 1 }, { x: 10, y: 5 });
 
       for (const seg of path) {
-        expect(['─', '│', '┐', '┘', '└', '┌', '>', '<']).toContain(seg.char);
+        expect(['─', '│', '╮', '╯', '╰', '╭', '▸', '◂']).toContain(seg.char);
       }
     });
 
@@ -82,7 +82,7 @@ describe('computeEdgePath', () => {
       const last = path[path.length - 1];
       expect(last.x).toBe(10);
       expect(last.y).toBe(5);
-      expect(last.char).toBe('>');
+      expect(last.char).toBe('▸');
     });
 
     it('has arrow at endpoint going up-left', () => {
@@ -90,57 +90,57 @@ describe('computeEdgePath', () => {
       const last = path[path.length - 1];
       expect(last.x).toBe(0);
       expect(last.y).toBe(0);
-      expect(last.char).toBe('<');
+      expect(last.char).toBe('◂');
     });
   });
 
   describe('box-drawing characters for corners', () => {
-    it('uses ┐ for top-right corner (going right then down)', () => {
+    it('uses ╮ for top-right corner (going right then down)', () => {
       const path = computeEdgePath({ x: 0, y: 0 }, { x: 6, y: 4 });
-      const corners = path.filter(s => s.char === '┐');
+      const corners = path.filter(s => s.char === '╮');
       expect(corners.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('uses └ for bottom-left corner (going down then right)', () => {
+    it('uses ╰ for bottom-left corner (going down then right)', () => {
       const path = computeEdgePath({ x: 0, y: 0 }, { x: 6, y: 4 });
-      const corners = path.filter(s => s.char === '└');
+      const corners = path.filter(s => s.char === '╰');
       expect(corners.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('uses ┘ for corner going up', () => {
+    it('uses ╯ for corner going up', () => {
       const path = computeEdgePath({ x: 0, y: 4 }, { x: 6, y: 0 });
-      const corners = path.filter(s => s.char === '┘');
+      const corners = path.filter(s => s.char === '╯');
       expect(corners.length).toBeGreaterThanOrEqual(1);
     });
 
     it('contains exactly two corner characters for a multi-row path', () => {
       const path = computeEdgePath({ x: 0, y: 0 }, { x: 10, y: 6 });
       const corners = path.filter(
-        s => s.char === '┐' || s.char === '┘' || s.char === '└' || s.char === '┌',
+        s => s.char === '╮' || s.char === '╯' || s.char === '╰' || s.char === '╭',
       );
       expect(corners).toHaveLength(2);
     });
   });
 
   describe('arrow char at endpoint', () => {
-    it('uses > for rightward endpoint (same row)', () => {
+    it('uses ▸ for rightward endpoint (same row)', () => {
       const path = computeEdgePath({ x: 0, y: 0 }, { x: 5, y: 0 });
-      expect(path[path.length - 1].char).toBe('>');
+      expect(path[path.length - 1].char).toBe('▸');
     });
 
-    it('uses < for leftward endpoint (same row)', () => {
+    it('uses ◂ for leftward endpoint (same row)', () => {
       const path = computeEdgePath({ x: 5, y: 0 }, { x: 0, y: 0 });
-      expect(path[path.length - 1].char).toBe('<');
+      expect(path[path.length - 1].char).toBe('◂');
     });
 
-    it('uses > for rightward endpoint (different rows)', () => {
+    it('uses ▸ for rightward endpoint (different rows)', () => {
       const path = computeEdgePath({ x: 0, y: 0 }, { x: 10, y: 5 });
-      expect(path[path.length - 1].char).toBe('>');
+      expect(path[path.length - 1].char).toBe('▸');
     });
 
-    it('uses < for leftward endpoint (different rows)', () => {
+    it('uses ◂ for leftward endpoint (different rows)', () => {
       const path = computeEdgePath({ x: 10, y: 5 }, { x: 0, y: 0 });
-      expect(path[path.length - 1].char).toBe('<');
+      expect(path[path.length - 1].char).toBe('◂');
     });
   });
 });
@@ -152,7 +152,7 @@ describe('computeLabelPosition', () => {
     for (let x = 0; x < 10; x++) {
       path.push({ x, y: 5, char: '─' });
     }
-    path.push({ x: 10, y: 5, char: '>' });
+    path.push({ x: 10, y: 5, char: '▸' });
 
     const label = 'test'; // length 4
     const pos = computeLabelPosition(path, label);
@@ -168,7 +168,7 @@ describe('computeLabelPosition', () => {
     const path: PathSegment[] = [
       { x: 0, y: 0, char: '─' },
       { x: 1, y: 0, char: '─' },
-      { x: 2, y: 0, char: '>' },
+      { x: 2, y: 0, char: '▸' },
     ];
 
     const pos = computeLabelPosition(path, 'hello');
@@ -177,11 +177,11 @@ describe('computeLabelPosition', () => {
 
   it('returns null when path has no horizontal segments', () => {
     const path: PathSegment[] = [
-      { x: 5, y: 0, char: '┐' },
+      { x: 5, y: 0, char: '╮' },
       { x: 5, y: 1, char: '│' },
       { x: 5, y: 2, char: '│' },
-      { x: 5, y: 3, char: '└' },
-      { x: 6, y: 3, char: '>' },
+      { x: 5, y: 3, char: '╰' },
+      { x: 6, y: 3, char: '▸' },
     ];
 
     const pos = computeLabelPosition(path, 'hi');
@@ -194,7 +194,7 @@ describe('computeLabelPosition', () => {
       { x: 0, y: 0, char: '─' },
       { x: 1, y: 0, char: '─' },
       { x: 2, y: 0, char: '─' },
-      { x: 3, y: 0, char: '>' },
+      { x: 3, y: 0, char: '▸' },
     ];
 
     // Only 3 horizontal segments, need 4
@@ -209,7 +209,7 @@ describe('computeLabelPosition', () => {
       { x: 1, y: 2, char: '─' },
       { x: 2, y: 2, char: '─' },
       { x: 3, y: 2, char: '─' },
-      { x: 4, y: 2, char: '>' },
+      { x: 4, y: 2, char: '▸' },
     ];
 
     const pos = computeLabelPosition(path, 'ab');
@@ -217,5 +217,80 @@ describe('computeLabelPosition', () => {
     // 4 hSegments, label length 2, start = floor((4-2)/2) = 1
     expect(pos!.x).toBe(1);
     expect(pos!.y).toBe(2);
+  });
+});
+
+describe('smooth corners (round box-drawing characters)', () => {
+  it('uses ╮ for top-right corner (going right then down)', () => {
+    const path = computeEdgePath({ x: 0, y: 0 }, { x: 6, y: 4 });
+    const corners = path.filter(s => s.char === '╮');
+    expect(corners.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('uses ╰ for bottom-left corner (going down then right)', () => {
+    const path = computeEdgePath({ x: 0, y: 0 }, { x: 6, y: 4 });
+    const corners = path.filter(s => s.char === '╰');
+    expect(corners.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('uses ╯ for bottom-right corner', () => {
+    const path = computeEdgePath({ x: 0, y: 4 }, { x: 6, y: 0 });
+    const corners = path.filter(s => s.char === '╯');
+    expect(corners.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('contains exactly two smooth corner characters for multi-row path', () => {
+    const path = computeEdgePath({ x: 0, y: 0 }, { x: 10, y: 6 });
+    const corners = path.filter(
+      s => s.char === '╮' || s.char === '╯' || s.char === '╰' || s.char === '╭',
+    );
+    expect(corners).toHaveLength(2);
+  });
+});
+
+describe('triangle arrow tips', () => {
+  it('uses ▸ for rightward endpoint (same row)', () => {
+    const path = computeEdgePath({ x: 0, y: 0 }, { x: 5, y: 0 });
+    expect(path[path.length - 1].char).toBe('▸');
+  });
+
+  it('uses ◂ for leftward endpoint (same row)', () => {
+    const path = computeEdgePath({ x: 5, y: 0 }, { x: 0, y: 0 });
+    expect(path[path.length - 1].char).toBe('◂');
+  });
+
+  it('uses ▸ for rightward endpoint (different rows)', () => {
+    const path = computeEdgePath({ x: 0, y: 0 }, { x: 10, y: 5 });
+    expect(path[path.length - 1].char).toBe('▸');
+  });
+
+  it('uses ◂ for leftward endpoint (different rows)', () => {
+    const path = computeEdgePath({ x: 10, y: 5 }, { x: 0, y: 0 });
+    expect(path[path.length - 1].char).toBe('◂');
+  });
+
+  it('merges arrow with corner when to.x === midX (x differ by 1, going down)', () => {
+    // from=(1,0) to=(0,4): midX = floor((1+0)/2) = 0 === to.x
+    const path = computeEdgePath({ x: 1, y: 0 }, { x: 0, y: 4 });
+    const last = path[path.length - 1];
+    expect(last.x).toBe(0);
+    expect(last.y).toBe(4);
+    // Path arrives vertically, so use down arrow
+    expect(last.char).toBe('▾');
+    // No duplicate position — corner and arrow merged into one segment
+    const atTarget = path.filter(s => s.x === 0 && s.y === 4);
+    expect(atTarget).toHaveLength(1);
+  });
+
+  it('merges arrow with corner when to.x === midX (x differ by 1, going up)', () => {
+    // from=(1,4) to=(0,0): midX = floor((1+0)/2) = 0 === to.x
+    const path = computeEdgePath({ x: 1, y: 4 }, { x: 0, y: 0 });
+    const last = path[path.length - 1];
+    expect(last.x).toBe(0);
+    expect(last.y).toBe(0);
+    // Path arrives vertically, so use up arrow
+    expect(last.char).toBe('▴');
+    const atTarget = path.filter(s => s.x === 0 && s.y === 0);
+    expect(atTarget).toHaveLength(1);
   });
 });

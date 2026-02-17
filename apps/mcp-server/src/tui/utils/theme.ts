@@ -82,6 +82,27 @@ export const PROGRESS_BAR_STYLES = Object.freeze({
 });
 
 /**
+ * Style for glow effect around active/running agents.
+ */
+export const GLOW_STYLE: CellStyle = Object.freeze({ fg: 'green', dim: true });
+
+/**
+ * Styles for pipeline header (▸ PLAN ═══▸ ACT ═══▸ EVAL).
+ */
+export const PIPELINE_STYLES = Object.freeze({
+  arrow: { fg: 'magenta', bold: true } as CellStyle,
+  connector: { fg: 'gray', dim: true } as CellStyle,
+});
+
+/**
+ * Characters for progress bar rendering inside agent nodes.
+ */
+export const PROGRESS_BAR_CHARS = Object.freeze({
+  filled: '█',
+  empty: '░',
+});
+
+/**
  * Icons for agent/node status indicators.
  */
 export const STATUS_ICONS: Readonly<Record<DashboardNodeStatus, string>> = Object.freeze({

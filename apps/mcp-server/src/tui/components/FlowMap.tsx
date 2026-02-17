@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Box, Text } from 'ink';
 import type { LayoutMode, DashboardNode, Edge } from '../dashboard-types';
+import type { Mode } from '../types';
 import { groupByStyle, type ColorCell } from '../utils/color-buffer';
 import { renderFlowMap, renderFlowMapSimplified, renderFlowMapCompact } from './flow-map.pure';
 
@@ -18,6 +19,7 @@ export interface FlowMapProps {
   layoutMode: LayoutMode;
   width: number;
   height: number;
+  activeStage?: Mode | null;
 }
 
 /**
@@ -62,24 +64,29 @@ export function FlowMap({
   layoutMode,
   width,
   height,
+  activeStage = null,
 }: FlowMapProps): React.ReactElement {
+  const compactContent = useMemo(() => {
+    if (layoutMode !== 'narrow') return null;
+    return renderFlowMapCompact(agents);
+  }, [agents, layoutMode]);
+
   const lines = useMemo(() => {
     if (layoutMode === 'narrow') return null;
     const buf =
       layoutMode === 'wide'
-        ? renderFlowMap(agents, edges, width, height)
+        ? renderFlowMap(agents, edges, width, height, activeStage)
         : renderFlowMapSimplified(agents, width, height);
     return buf.toLinesDirect();
-  }, [agents, edges, width, height, layoutMode]);
+  }, [agents, edges, width, height, layoutMode, activeStage]);
 
   if (layoutMode === 'narrow') {
-    const content = renderFlowMapCompact(agents);
     return (
       <Box flexDirection="column">
         <Text bold color="cyan">
           FLOW MAP
         </Text>
-        <Text>{content}</Text>
+        <Text>{compactContent}</Text>
       </Box>
     );
   }

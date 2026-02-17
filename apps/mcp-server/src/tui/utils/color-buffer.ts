@@ -61,7 +61,7 @@ export class ColorBuffer {
     this.width = width;
     this.height = height;
     this.grid = Array.from({ length: height }, () =>
-      Array.from({ length: width }, () => ({ char: ' ', style: {} })),
+      Array.from({ length: width }, () => ({ char: ' ', style: DEFAULT_CELL.style })),
     );
   }
 
@@ -95,15 +95,39 @@ export class ColorBuffer {
     }
   }
 
+  private drawBoxWithChars(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    style: CellStyle,
+    tl: string,
+    tr: string,
+    bl: string,
+    br: string,
+    hz: string,
+    vt: string,
+  ): void {
+    this.setChar(x, y, tl, style);
+    this.setChar(x + w - 1, y, tr, style);
+    this.setChar(x, y + h - 1, bl, style);
+    this.setChar(x + w - 1, y + h - 1, br, style);
+    this.drawHLine(x + 1, y, w - 2, hz, style);
+    this.drawHLine(x + 1, y + h - 1, w - 2, hz, style);
+    this.drawVLine(x, y + 1, h - 2, vt, style);
+    this.drawVLine(x + w - 1, y + 1, h - 2, vt, style);
+  }
+
   drawBox(x: number, y: number, w: number, h: number, style: CellStyle = {}): void {
-    this.setChar(x, y, '┌', style);
-    this.setChar(x + w - 1, y, '┐', style);
-    this.setChar(x, y + h - 1, '└', style);
-    this.setChar(x + w - 1, y + h - 1, '┘', style);
-    this.drawHLine(x + 1, y, w - 2, '─', style);
-    this.drawHLine(x + 1, y + h - 1, w - 2, '─', style);
-    this.drawVLine(x, y + 1, h - 2, '│', style);
-    this.drawVLine(x + w - 1, y + 1, h - 2, '│', style);
+    this.drawBoxWithChars(x, y, w, h, style, '┌', '┐', '└', '┘', '─', '│');
+  }
+
+  drawRoundBox(x: number, y: number, w: number, h: number, style: CellStyle = {}): void {
+    this.drawBoxWithChars(x, y, w, h, style, '╭', '╮', '╰', '╯', '─', '│');
+  }
+
+  drawDoubleBox(x: number, y: number, w: number, h: number, style: CellStyle = {}): void {
+    this.drawBoxWithChars(x, y, w, h, style, '╔', '╗', '╚', '╝', '═', '║');
   }
 
   /**

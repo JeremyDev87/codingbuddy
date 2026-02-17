@@ -29,7 +29,14 @@ export function computeEdgePath(from: Point, to: Point): PathSegment[] {
     for (let x = from.x; x !== to.x; x += dir) {
       path.push({ x, y: from.y, char: '─' });
     }
-    path.push({ x: to.x, y: to.y, char: dir > 0 ? '>' : '<' });
+    path.push({ x: to.x, y: to.y, char: dir > 0 ? '▸' : '◂' });
+  } else if (from.x === to.x) {
+    // Same column: simple vertical line
+    const dir = to.y > from.y ? 1 : -1;
+    for (let y = from.y; y !== to.y; y += dir) {
+      path.push({ x: from.x, y, char: '│' });
+    }
+    path.push({ x: to.x, y: to.y, char: dir > 0 ? '▾' : '▴' });
   } else {
     // Horizontal to midpoint
     const dirX = midX > from.x ? 1 : midX < from.x ? -1 : 0;
@@ -38,23 +45,23 @@ export function computeEdgePath(from: Point, to: Point): PathSegment[] {
         path.push({ x, y: from.y, char: '─' });
       }
     }
-    // Corner: horizontal to vertical
+    // Corner: horizontal to vertical (smooth rounded)
     const dirY = to.y > from.y ? 1 : -1;
     path.push({
       x: midX,
       y: from.y,
-      char: dirX >= 0 && dirY > 0 ? '┐' : dirX >= 0 && dirY < 0 ? '┘' : dirY > 0 ? '┐' : '┘',
+      char: dirX >= 0 ? (dirY > 0 ? '╮' : '╯') : dirY > 0 ? '╭' : '╰',
     });
     // Vertical segment
     for (let y = from.y + dirY; y !== to.y; y += dirY) {
       path.push({ x: midX, y, char: '│' });
     }
-    // Corner: vertical to horizontal
+    // Corner: vertical to horizontal (smooth rounded)
     const dirX2 = to.x > midX ? 1 : to.x < midX ? -1 : 0;
     path.push({
       x: midX,
       y: to.y,
-      char: dirX2 >= 0 ? '└' : '┘',
+      char: dirY > 0 ? (dirX2 >= 0 ? '╰' : '╯') : dirX2 >= 0 ? '╭' : '╮',
     });
     // Horizontal to target
     if (dirX2 !== 0) {
@@ -62,8 +69,13 @@ export function computeEdgePath(from: Point, to: Point): PathSegment[] {
         path.push({ x, y: to.y, char: '─' });
       }
     }
-    // Arrow tip
-    path.push({ x: to.x, y: to.y, char: dirX2 >= 0 ? '>' : '<' });
+    // Arrow tip — merge with corner when positions coincide
+    if (to.x !== midX) {
+      path.push({ x: to.x, y: to.y, char: dirX2 >= 0 ? '▸' : '◂' });
+    } else {
+      // No horizontal segment after corner; path arrives vertically
+      path[path.length - 1].char = dirY > 0 ? '▾' : '▴';
+    }
   }
 
   return path;
