@@ -165,6 +165,7 @@ describe('tui/dashboard-types', () => {
         eventLog: [],
         objectives: [],
         activeSkills: [],
+        toolCalls: [],
         tokenUsage: 0,
         outputStats: { files: 0, commits: 0 },
       };

@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   dashboardReducer,
   createInitialDashboardState,
-  TOOL_CALLS_MAX,
   type DashboardAction,
 } from './use-dashboard-state';
 
