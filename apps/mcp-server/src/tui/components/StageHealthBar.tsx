@@ -86,12 +86,13 @@ export function StageHealthBar({
 
   return (
     <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="column">
-      <Box justifyContent="space-between">
+      <Box>
         <Box gap={2}>
           {(['PLAN', 'ACT', 'EVAL'] as const).map(mode => (
             <StageStatDisplay key={mode} mode={mode} stats={stageHealth[mode]} />
           ))}
         </Box>
+        <Box flexGrow={1} />
         <Box gap={2}>
           {bottlenecks.length > 0 && (
             <Text color="red" bold>

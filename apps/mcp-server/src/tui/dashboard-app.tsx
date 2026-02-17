@@ -8,6 +8,11 @@ import { FlowMap } from './components/FlowMap';
 import { FocusedAgentPanel } from './components/FocusedAgentPanel';
 import { StageHealthBar } from './components/StageHealthBar';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
+import { computeGridLayout } from './components/grid-layout.pure';
+
+const EMPTY_OBJECTIVES: string[] = [];
+const EMPTY_INPUTS: string[] = [];
+const EMPTY_OUTPUTS = { files: 0, commits: 0 } as const;
 
 export interface DashboardAppProps {
   eventBus?: TuiEventBus;
@@ -32,66 +37,69 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
 
   const bottlenecks = useMemo(() => detectBottlenecks(state.eventLog), [state.eventLog]);
 
-  const mainHeight = Math.max(rows - 6, 10);
-  const flowMapWidth =
-    layoutMode === 'wide'
-      ? Math.floor(columns * 0.45)
-      : layoutMode === 'medium'
-        ? Math.floor(columns * 0.4)
-        : columns;
-
-  const focusedAgentPanel = (
-    <FocusedAgentPanel
-      agent={focusedAgent}
-      objectives={[]}
-      tasks={state.tasks}
-      tools={tools}
-      inputs={[]}
-      outputs={{ files: 0, commits: 0 }}
-      eventLog={state.eventLog}
-    />
+  const grid = useMemo(
+    () => computeGridLayout(columns, rows, layoutMode),
+    [columns, rows, layoutMode],
   );
 
   return (
-    <Box flexDirection="column" width={columns}>
+    <Box flexDirection="column" width={grid.total.width} height={grid.total.height}>
       <HeaderBar
         workspace={state.workspace}
         sessionId={state.sessionId}
         currentMode={state.currentMode}
         globalState={state.globalState}
         layoutMode={layoutMode}
-        width={columns}
+        width={grid.header.width}
       />
       {layoutMode === 'narrow' ? (
         <Box flexDirection="column">
-          {focusedAgentPanel}
+          <FocusedAgentPanel
+            agent={focusedAgent}
+            objectives={EMPTY_OBJECTIVES}
+            tasks={state.tasks}
+            tools={tools}
+            inputs={EMPTY_INPUTS}
+            outputs={EMPTY_OUTPUTS}
+            eventLog={state.eventLog}
+            width={grid.focusedAgent.width}
+            height={grid.focusedAgent.height}
+          />
           <FlowMap
             agents={state.agents}
             edges={state.edges}
             layoutMode={layoutMode}
-            width={columns}
-            height={5}
+            width={grid.flowMap.width}
+            height={grid.flowMap.height}
           />
         </Box>
       ) : (
-        <Box flexDirection="row" height={mainHeight}>
-          <Box width={flowMapWidth}>
-            <FlowMap
-              agents={state.agents}
-              edges={state.edges}
-              layoutMode={layoutMode}
-              width={flowMapWidth}
-              height={mainHeight}
-            />
-          </Box>
-          <Box flexGrow={1}>{focusedAgentPanel}</Box>
+        <Box flexDirection="row" width={grid.total.width} height={grid.flowMap.height}>
+          <FlowMap
+            agents={state.agents}
+            edges={state.edges}
+            layoutMode={layoutMode}
+            width={grid.flowMap.width}
+            height={grid.flowMap.height}
+          />
+          <FocusedAgentPanel
+            agent={focusedAgent}
+            objectives={EMPTY_OBJECTIVES}
+            tasks={state.tasks}
+            tools={tools}
+            inputs={EMPTY_INPUTS}
+            outputs={EMPTY_OUTPUTS}
+            eventLog={state.eventLog}
+            width={grid.focusedAgent.width}
+            height={grid.focusedAgent.height}
+          />
         </Box>
       )}
       <StageHealthBar
         stageHealth={stageHealth}
         bottlenecks={bottlenecks}
         tokenCount={0}
-        width={columns}
+        width={grid.stageHealth.width}
       />
     </Box>
   );

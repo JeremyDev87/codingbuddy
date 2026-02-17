@@ -15,6 +15,9 @@ export interface HeaderBarProps {
 
 const ALL_MODES: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
 
+/** Characters reserved for border (4), title (~32), mode flow (~30), state (~8), gaps (~8). */
+const HEADER_RESERVED_CHARS = 82;
+
 function ModeFlow({ currentMode }: { currentMode: Mode | null }): React.ReactElement {
   return (
     <Box>
@@ -67,36 +70,25 @@ export function HeaderBar({
 }: HeaderBarProps): React.ReactElement {
   if (layoutMode === 'narrow') {
     return (
-      <Box
-        borderStyle="double"
-        borderColor="cyan"
-        width={width}
-        flexDirection="row"
-        justifyContent="space-between"
-      >
+      <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="row">
         <Text color="cyan" bold>
           ⟨⟩ CODINGBUDDY
         </Text>
+        <Box flexGrow={1} />
         <ModeFlow currentMode={currentMode} />
+        <Box flexGrow={1} />
         <StateIndicator globalState={globalState} />
       </Box>
     );
   }
 
-  // Reserve space for border (4), title (~32), mode flow (~30), state (~8), gaps (~8)
-  const reservedChars = 82;
+  const reservedChars = HEADER_RESERVED_CHARS;
   const maxWsLen = Math.max(8, width - reservedChars - 16);
   const displayWs = truncateWorkspace(workspace, maxWsLen);
   const sessDisplay = sessionId.length > 8 ? sessionId.slice(0, 8) : sessionId;
 
   return (
-    <Box
-      borderStyle="double"
-      borderColor="cyan"
-      width={width}
-      flexDirection="row"
-      justifyContent="space-between"
-    >
+    <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="row">
       <Box gap={2}>
         <Text color="cyan" bold>
           ⟨⟩ CODINGBUDDY AGENT DASHBOARD
@@ -104,6 +96,7 @@ export function HeaderBar({
         <ModeFlow currentMode={currentMode} />
         <StateIndicator globalState={globalState} />
       </Box>
+      <Box flexGrow={1} />
       <Box gap={2}>
         <Text dimColor>{displayWs}</Text>
         <Text dimColor>sess:{sessDisplay}</Text>

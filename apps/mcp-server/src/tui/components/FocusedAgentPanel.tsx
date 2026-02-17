@@ -20,6 +20,8 @@ export interface FocusedAgentPanelProps {
   inputs: string[];
   outputs: ToolIOData;
   eventLog: EventLogEntry[];
+  width?: number;
+  height?: number;
 }
 
 function SectionDivider({ title }: { title: string }): React.ReactElement {
@@ -63,10 +65,18 @@ export function FocusedAgentPanel({
   inputs,
   outputs,
   eventLog,
+  width,
+  height,
 }: FocusedAgentPanelProps): React.ReactElement {
   if (!agent) {
     return (
-      <Box borderStyle="single" borderColor="cyan" flexDirection="column">
+      <Box
+        borderStyle="single"
+        borderColor="cyan"
+        flexDirection="column"
+        width={width}
+        height={height}
+      >
         <Text dimColor>No agent focused</Text>
       </Box>
     );
@@ -82,7 +92,13 @@ export function FocusedAgentPanel({
   const logs = formatLogTail(eventLog);
 
   return (
-    <Box borderStyle="single" borderColor="cyan" flexDirection="column">
+    <Box
+      borderStyle="single"
+      borderColor="cyan"
+      flexDirection="column"
+      width={width}
+      height={height}
+    >
       {/* Agent Header */}
       <Box gap={2}>
         <Text color={statusColor} bold>

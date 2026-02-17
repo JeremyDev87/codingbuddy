@@ -6,6 +6,8 @@ import {
   getLayoutMode,
   type DashboardNode,
   type StageStats,
+  type GridRegion,
+  type DashboardGrid,
 } from './dashboard-types';
 
 describe('tui/dashboard-types', () => {
@@ -115,6 +117,31 @@ describe('tui/dashboard-types', () => {
 
       expect(stats1).not.toBe(stats2);
       expect(stats1).toEqual(stats2);
+    });
+  });
+
+  describe('GridRegion / DashboardGrid types', () => {
+    it('GridRegion has required fields', () => {
+      const region: GridRegion = { x: 0, y: 0, width: 120, height: 3 };
+      expect(region.x).toBe(0);
+      expect(region.y).toBe(0);
+      expect(region.width).toBe(120);
+      expect(region.height).toBe(3);
+    });
+
+    it('DashboardGrid has all required sections', () => {
+      const grid: DashboardGrid = {
+        header: { x: 0, y: 0, width: 120, height: 3 },
+        flowMap: { x: 0, y: 3, width: 54, height: 34 },
+        focusedAgent: { x: 54, y: 3, width: 66, height: 34 },
+        stageHealth: { x: 0, y: 37, width: 120, height: 3 },
+        total: { width: 120, height: 40 },
+      };
+      expect(grid.header).toBeDefined();
+      expect(grid.flowMap).toBeDefined();
+      expect(grid.focusedAgent).toBeDefined();
+      expect(grid.stageHealth).toBeDefined();
+      expect(grid.total).toBeDefined();
     });
   });
 });

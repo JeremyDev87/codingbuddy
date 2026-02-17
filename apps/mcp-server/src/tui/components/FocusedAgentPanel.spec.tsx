@@ -154,6 +154,40 @@ describe('tui/components/FocusedAgentPanel', () => {
     expect(lastFrame()).toContain('No agent focused');
   });
 
+  it('accepts and applies width and height props', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+        width={60}
+        height={20}
+      />,
+    );
+    expect(lastFrame()).toContain('BackendDev');
+  });
+
+  it('accepts width and height props with no agent', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={null}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+        width={60}
+        height={20}
+      />,
+    );
+    expect(lastFrame()).toContain('No agent focused');
+  });
+
   it('should render single border with cyan color', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel

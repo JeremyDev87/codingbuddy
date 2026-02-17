@@ -25,3 +25,4 @@ export { StageHealthBar, type StageHealthBarProps } from './StageHealthBar';
 /** @deprecated formatStageHealthBar is no longer used by StageHealthBar (now Ink-native). Kept for backward compatibility. */
 export { formatStageHealthBar } from './stage-health.pure';
 export { computeStageHealth, detectBottlenecks } from './stage-health.pure';
+export { computeGridLayout } from './grid-layout.pure';

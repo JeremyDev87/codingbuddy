@@ -136,3 +136,26 @@ export interface DashboardState {
   tasks: TaskItem[];
   eventLog: EventLogEntry[];
 }
+
+/**
+ * A rectangular region in the terminal grid.
+ * All values are in character units (columns/rows), 0-based.
+ */
+export interface GridRegion {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Pre-computed layout for all dashboard sections.
+ * Every section has deterministic (x, y, width, height).
+ */
+export interface DashboardGrid {
+  header: GridRegion;
+  flowMap: GridRegion;
+  focusedAgent: GridRegion;
+  stageHealth: GridRegion;
+  total: Pick<GridRegion, 'width' | 'height'>;
+}
