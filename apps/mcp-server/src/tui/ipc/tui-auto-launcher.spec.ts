@@ -169,6 +169,31 @@ describe('TuiAutoLauncher', () => {
         { detached: true, stdio: 'ignore' },
       );
     });
+
+    it('should use npx-style absolute path in spawn args', async () => {
+      process.env.TERM_PROGRAM = 'iTerm.app';
+      createMockChildProcess(7777);
+
+      const npxPath = '/Users/x/.npm/_npx/abc123/node_modules/.bin/codingbuddy';
+      const launcher = new TuiAutoLauncher({
+        enabled: true,
+        delayMs: 0,
+        codingbuddyBin: npxPath,
+      });
+      const ipcServer = createMockIpcServer(0);
+
+      const result = await launcher.launch(ipcServer);
+
+      expect(result.launched).toBe(true);
+      expect(mockSpawn).toHaveBeenCalledWith(
+        'osascript',
+        [
+          '-e',
+          `tell application "iTerm2" to create window with default profile command "${npxPath} tui"`,
+        ],
+        { detached: true, stdio: 'ignore' },
+      );
+    });
   });
 
   describe('Linux', () => {

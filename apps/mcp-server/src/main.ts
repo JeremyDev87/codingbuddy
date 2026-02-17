@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as path from 'path';
 import { NestFactory } from '@nestjs/core';
 import type { INestApplicationContext } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -109,8 +110,10 @@ async function initTui(
  */
 async function launchAutoTui(ipcServer: { clientCount(): number }): Promise<void> {
   const { TuiAutoLauncher } = await import('./tui/ipc');
+  const codingbuddyBin = path.resolve(process.argv[1]);
   const launcher = new TuiAutoLauncher({
     enabled: process.env.CODINGBUDDY_AUTO_TUI === '1',
+    codingbuddyBin,
   });
   const result = await launcher.launch(ipcServer);
   debugLog(`TUI auto-launch: ${result.reason}${result.pid ? ` (PID: ${result.pid})` : ''}`);
