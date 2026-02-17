@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render } from 'ink-testing-library';
 import { DashboardApp } from './dashboard-app';
 import { TuiEventBus, TUI_EVENTS } from './events';
+import { createInitialDashboardState } from './hooks/use-dashboard-state';
 
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
@@ -142,5 +143,20 @@ describe('DashboardApp', () => {
     // FocusedAgentPanel should show the primary agent details
     expect(frame).toContain('solution-arch');
     expect(frame).toContain('Objective');
+  });
+
+  it('should use externalState when provided (multi-session mode)', () => {
+    const mockState = createInitialDashboardState();
+    // Modify some fields to verify they propagate
+    mockState.workspace = '/ext';
+    mockState.globalState = 'RUNNING';
+    mockState.currentMode = 'ACT';
+
+    const { lastFrame } = render(<DashboardApp externalState={mockState} />);
+    const frame = lastFrame() ?? '';
+    // Verify externalState fields are rendered (workspace, globalState, currentMode)
+    expect(frame).toContain('/ext');
+    expect(frame).toContain('RUNNING');
+    expect(frame).toContain('ACT');
   });
 });

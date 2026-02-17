@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Box } from 'ink';
 import type { TuiEventBus } from './events';
+import type { DashboardState } from './dashboard-types';
 import { useTerminalSize } from './hooks/use-terminal-size';
 import { useDashboardState } from './hooks/use-dashboard-state';
 import { HeaderBar } from './components/HeaderBar';
@@ -13,11 +14,13 @@ import { computeGridLayout } from './components/grid-layout.pure';
 
 export interface DashboardAppProps {
   eventBus?: TuiEventBus;
+  externalState?: DashboardState;
 }
 
-export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElement {
+export function DashboardApp({ eventBus, externalState }: DashboardAppProps): React.ReactElement {
   const { columns, rows, layoutMode } = useTerminalSize();
-  const state = useDashboardState(eventBus);
+  const internalState = useDashboardState(externalState ? undefined : eventBus);
+  const state = externalState ?? internalState;
   const focusedAgent = state.focusedAgentId
     ? (state.agents.get(state.focusedAgentId) ?? null)
     : null;

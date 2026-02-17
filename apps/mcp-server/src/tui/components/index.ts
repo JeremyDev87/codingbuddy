@@ -34,3 +34,5 @@ export {
   renderBubbles,
   type HeatmapData,
 } from './activity-visualizer.pure';
+export { SessionTabBar } from './SessionTabBar';
+export type { SessionTabBarProps } from './SessionTabBar';

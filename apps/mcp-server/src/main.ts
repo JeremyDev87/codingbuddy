@@ -104,10 +104,28 @@ async function initTui(
 }
 
 /**
+ * Auto-launch TUI client in a new terminal window (non-blocking helper).
+ * Extracted to avoid duplication between SSE and stdio modes.
+ */
+async function launchAutoTui(ipcServer: { clientCount(): number }): Promise<void> {
+  const { TuiAutoLauncher } = await import('./tui/ipc');
+  const launcher = new TuiAutoLauncher({
+    enabled: process.env.CODINGBUDDY_AUTO_TUI === '1',
+  });
+  const result = await launcher.launch(ipcServer);
+  debugLog(`TUI auto-launch: ${result.reason}${result.pid ? ` (PID: ${result.pid})` : ''}`);
+}
+
+interface InitIpcResult {
+  cleanup: () => Promise<void>;
+  ipcServer: { clientCount(): number };
+}
+
+/**
  * Initialize IPC server for remote TUI clients.
  * Graceful degradation: IPC failure does not block MCP server.
  */
-async function initIpc(app: INestApplicationContext): Promise<() => Promise<void>> {
+async function initIpc(app: INestApplicationContext): Promise<InitIpcResult> {
   const { ensureTuiReady } = await import('./tui/ensure-tui-ready');
   await ensureTuiReady(app);
 
@@ -161,12 +179,15 @@ async function initIpc(app: INestApplicationContext): Promise<() => Promise<void
 
   debugLog(`IPC server listening on ${socketPath}`);
 
-  // Return cleanup function
-  return async () => {
-    stateCache.destroy();
-    bridge.destroy();
-    await ipcServer.close();
-    registry.unregister(pid);
+  // Return cleanup function and ipcServer reference
+  return {
+    cleanup: async () => {
+      stateCache.destroy();
+      bridge.destroy();
+      await ipcServer.close();
+      registry.unregister(pid);
+    },
+    ipcServer,
   };
 }
 
@@ -224,8 +245,13 @@ export async function bootstrap(): Promise<void> {
 
     // Always start IPC server for remote TUI clients (SSE mode, graceful degradation)
     try {
-      const cleanupIpc = await initIpc(app);
-      sseShutdownManager.register(cleanupIpc);
+      const ipcResult = await initIpc(app);
+      sseShutdownManager.register(ipcResult.cleanup);
+
+      // Auto-launch TUI client in a new terminal window (non-blocking)
+      launchAutoTui(ipcResult.ipcServer).catch(err => {
+        debugLog(`TUI auto-launch failed (non-blocking): ${err}`);
+      });
     } catch (error) {
       logger.warn(`IPC server failed to start (non-blocking): ${error}`);
     }
@@ -259,8 +285,13 @@ export async function bootstrap(): Promise<void> {
 
     // Always start IPC server for remote TUI clients (graceful degradation)
     try {
-      const cleanupIpc = await initIpc(app);
-      shutdownManager.register(cleanupIpc);
+      const ipcResult = await initIpc(app);
+      shutdownManager.register(ipcResult.cleanup);
+
+      // Auto-launch TUI client in a new terminal window (non-blocking)
+      launchAutoTui(ipcResult.ipcServer).catch(err => {
+        debugLog(`TUI auto-launch failed (non-blocking): ${err}`);
+      });
     } catch (error) {
       debugLog(`IPC server failed to start (non-blocking): ${error}`);
     }
