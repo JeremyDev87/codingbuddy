@@ -57,6 +57,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
           <FocusedAgentPanel
             agent={focusedAgent}
             objectives={state.objectives}
+            activeSkills={state.activeSkills}
             tasks={state.tasks}
             tools={tools}
             inputs={EMPTY_INPUTS}
@@ -94,6 +95,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
           <FocusedAgentPanel
             agent={focusedAgent}
             objectives={state.objectives}
+            activeSkills={state.activeSkills}
             tasks={state.tasks}
             tools={tools}
             inputs={EMPTY_INPUTS}

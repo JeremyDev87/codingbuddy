@@ -18,6 +18,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={['Add /users endpoints']}
         tasks={[{ id: '1', subject: 'routes added', completed: true }]}
         tools={['file_edit']}
@@ -36,6 +37,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={[]}
@@ -54,6 +56,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={['Design auth']}
         tasks={[]}
         tools={[]}
@@ -73,6 +76,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={['Add /users endpoints', 'Update DTO']}
         tasks={[]}
         tools={[]}
@@ -88,6 +92,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={[]}
         tasks={[
           { id: '1', subject: 'routes added', completed: true },
@@ -108,6 +113,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={['file_edit', 'test_run']}
@@ -125,6 +131,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={[]}
@@ -143,6 +150,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={null}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={[]}
@@ -158,6 +166,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={[]}
@@ -175,6 +184,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={null}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={[]}
@@ -192,6 +202,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
+        activeSkills={[]}
         objectives={[]}
         tasks={[]}
         tools={[]}
@@ -204,5 +215,40 @@ describe('tui/components/FocusedAgentPanel', () => {
     // Single border uses ┌ ┐ └ ┘
     expect(frame).toContain('┌');
     expect(frame).toContain('┘');
+  });
+
+  it('should render Skills section with active skills', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        activeSkills={['tdd', 'debugging']}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('─── Skills');
+    expect(frame).toContain('tdd');
+    expect(frame).toContain('debugging');
+  });
+
+  it('should render "No skills" when activeSkills is empty', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        activeSkills={[]}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+      />,
+    );
+    expect(lastFrame()).toContain('No skills');
   });
 });

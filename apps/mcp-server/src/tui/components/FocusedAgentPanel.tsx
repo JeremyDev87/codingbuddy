@@ -15,6 +15,7 @@ import {
 export interface FocusedAgentPanelProps {
   agent: DashboardNode | null;
   objectives: string[];
+  activeSkills: string[];
   tasks: TaskItem[];
   tools: string[];
   inputs: string[];
@@ -60,6 +61,7 @@ function LogSection({
 export function FocusedAgentPanel({
   agent,
   objectives,
+  activeSkills,
   tasks,
   tools,
   inputs,
@@ -119,6 +121,14 @@ export function FocusedAgentPanel({
       {/* Objective Section */}
       <SectionDivider title="Objective" />
       {objective ? <Text>{objective}</Text> : <Text dimColor>No objectives</Text>}
+
+      {/* Skills Section */}
+      <SectionDivider title="Skills" />
+      {activeSkills.length > 0 ? (
+        activeSkills.map((s, i) => <Text key={i}>  {s}</Text>)
+      ) : (
+        <Text dimColor>No skills</Text>
+      )}
 
       {/* Checklist Section */}
       <SectionDivider title="Checklist" />

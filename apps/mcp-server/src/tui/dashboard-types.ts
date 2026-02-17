@@ -136,6 +136,7 @@ export interface DashboardState {
   tasks: TaskItem[];
   eventLog: EventLogEntry[];
   objectives: string[];
+  activeSkills: string[];
 }
 
 /**

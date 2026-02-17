@@ -199,12 +199,39 @@ describe('dashboardReducer', () => {
     expect(state.eventLog[state.eventLog.length - 1].message).toBe('tool_149');
   });
 
-  it('handles SKILL_RECOMMENDED as no-op', () => {
-    const state = dashboardReducer(initialDashboardState, {
+  it('should accumulate activeSkills on SKILL_RECOMMENDED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
       type: 'SKILL_RECOMMENDED',
-      payload: { skillName: 'test', reason: 'reason' },
+      payload: { skillName: 'tdd', reason: 'matched' },
     });
-    expect(state).toEqual(initialDashboardState);
+    expect(state.activeSkills).toEqual(['tdd']);
+  });
+
+  it('should deduplicate activeSkills', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'SKILL_RECOMMENDED',
+      payload: { skillName: 'tdd', reason: 'matched' },
+    });
+    state = dashboardReducer(state, {
+      type: 'SKILL_RECOMMENDED',
+      payload: { skillName: 'tdd', reason: 'matched again' },
+    });
+    expect(state.activeSkills).toEqual(['tdd']);
+  });
+
+  it('should reset activeSkills on MODE_CHANGED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'SKILL_RECOMMENDED',
+      payload: { skillName: 'tdd', reason: 'matched' },
+    });
+    state = dashboardReducer(state, {
+      type: 'MODE_CHANGED',
+      payload: { from: 'PLAN', to: 'ACT' },
+    });
+    expect(state.activeSkills).toEqual([]);
   });
 
   it('handles PARALLEL_STARTED as no-op', () => {

@@ -42,6 +42,7 @@ export function createInitialDashboardState(): DashboardState {
     tasks: [],
     eventLog: [],
     objectives: [],
+    activeSkills: [],
   };
 }
 
@@ -109,7 +110,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     }
 
     case 'MODE_CHANGED':
-      return { ...state, currentMode: action.payload.to };
+      return { ...state, currentMode: action.payload.to, activeSkills: [] };
 
     case 'AGENT_RELATIONSHIP': {
       const edge: Edge = {
@@ -164,7 +165,12 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     case 'OBJECTIVE_SET':
       return { ...state, objectives: [action.payload.objective] };
 
-    case 'SKILL_RECOMMENDED':
+    case 'SKILL_RECOMMENDED': {
+      const { skillName } = action.payload;
+      if (state.activeSkills.includes(skillName)) return state;
+      return { ...state, activeSkills: [...state.activeSkills, skillName] };
+    }
+
     case 'PARALLEL_STARTED':
     // falls through — Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
     case 'PARALLEL_COMPLETED':
