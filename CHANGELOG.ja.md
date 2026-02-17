@@ -5,6 +5,67 @@
 このドキュメントは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) の形式に基づいており、
 [セマンティック バージョニング](https://semver.org/lang/ja/spec/v2.0.0.html) に準拠しています。
 
+## [4.1.0] - 2026-02-17
+
+### 追加
+
+- **TUI ダッシュボード**: Ink ベースのターミナル UI（Header、AgentCard、AgentTree、AgentGrid、StatusBar、ProgressBar コンポーネント）
+- **TUI EventBus**: EventEmitter2 ベースのイベントシステム、`useEventBus` および `useAgentState` React フック
+- **TUI IPC**: Unix Domain Socket ベースのスタンドアロンプロセス間通信
+- **TUI コンパクトデザイン**: 24行ターミナルに最適化されたシングルラインレイアウト
+- **TUI Interceptor**: リアルタイム UI 更新のための MCP ツールディスパッチレイヤー
+- **ランディングページ**: Next.js 16 ベースの多言語（5言語）ランディングページ
+  - Widget Slot アーキテクチャ（AgentsShowcase、CodeExample、QuickStart ウィジェット）
+  - shadcn/ui コンポーネントライブラリ、テーマおよびクッキー同意
+  - `next/font` によるセルフホスティングフォント
+  - next-intl i18n 設定、パラレルルートおよびロケールスロットレイアウト
+  - 静的セクション: Hero、Problem、Solution、FAQ
+  - ヘッダー（言語セレクター、テーマトグル）、Footer およびアクセシビリティ改善
+  - Vercel デプロイ設定およびアナリティクス統合
+  - SEO のための JSON-LD 構造化データ (#424)
+  - WCAG 2.1 AA アクセシビリティ声明
+- **MCP Server**: SSE エンドポイントの Bearer トークン認証 (#416)
+- **Agent システム**: `dispatch_agents` ツールおよび `parse_mode` 自動ディスパッチ (#328)
+- **Intent パターン**: `frontend-developer`、`devops-engineer` インテントパターン追加
+- **EVAL モード**: EVAL モードでの `recommendedActAgent` サポート (#361)
+
+### 変更
+
+- **Prettier**: `printWidth: 100` でコードベース全体をリフォーマット (#423)
+- **MCP Server**: `rules-core`、`keyword-core` 共有モジュール分離 (#415)
+- **Plugin**: build スクリプトから重複する `syncVersion` を削除 (#418)
+
+### 修正
+
+- plugin `isPathSafe()` パス正規化および大文字小文字を無視するマッチング (#419)
+- MCP server `appendContext` `findLastIndex` マージロジック (#410)
+- MCP server `bootstrap()` 未処理の Promise rejection ハンドラー
+- MCP server unsafe type assertion ランタイム検証 (#411)
+- ランディングページ `html lang` 属性をサーバーレンダー時にロケールから設定 (#412)
+- ランディングページ radix-ui メタパッケージを削除、`@radix-ui/react-dialog` を直接使用 (#413)
+- `validate-rules.sh` `.ai-rules` パス参照を修正 (#422)
+- keyword intent ベース解決で推奨モード時に project config をスキップ
+- plugin タイポ `codebuddy` → `codingbuddy` 修正
+- CI release-drafter を SHA に固定し、setup action バージョンを整合
+
+### ドキュメント
+
+- TUI ユーザーガイド、アーキテクチャ、トラブルシューティングドキュメント
+- ランディングページ README にデプロイガイドとプロジェクト構成を追加
+- ドキュメント全体のエージェント数の不一致を修正 (#421)
+- MCP_SSE_TOKEN 環境変数のドキュメント (#416)
+- JSON-LD 実装計画 (#424)
+
+### テスト
+
+- context-document handler テスト追加 (#417)
+- TUI EventBus-UI、App root、transport 統合テスト
+- TUI パフォーマンスおよび安定性検証テスト
+- ランディングページ root layout および CSP headers テスト
+- ランディングページ async server component テスト
+
+---
+
 ## [4.0.1] - 2026-02-04
 
 ### 追加

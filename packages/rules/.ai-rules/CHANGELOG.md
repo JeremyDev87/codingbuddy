@@ -5,6 +5,48 @@ All notable changes to the Multi-AI Coding Assistant Common Rules System will be
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-02-17
+
+### Added
+
+- **TUI Dashboard System**
+  - Ink-based terminal UI with Header, AgentCard, AgentTree, AgentGrid, StatusBar, ProgressBar
+  - EventEmitter2-based EventBus with `useEventBus` and `useAgentState` React hooks
+  - Unix Domain Socket IPC for standalone TUI process
+  - Compact single-line design for 24-line terminals
+  - TuiInterceptor MCP tool dispatch layer
+  - Agent Metadata Lookup Service
+
+- **Landing Page**
+  - Next.js 16 multilingual (5 languages) landing page
+  - Widget Slot architecture (AgentsShowcase, CodeExample, QuickStart)
+  - shadcn/ui, self-hosted fonts, next-intl i18n
+  - Vercel deployment with analytics, JSON-LD structured data
+
+- **MCP Server Enhancements**
+  - Bearer token authentication for SSE endpoints (#416)
+  - `dispatch_agents` tool and auto-dispatch in `parse_mode`
+  - `recommendedActAgent` support in EVAL mode (#361)
+  - `frontend-developer` and `devops-engineer` intent patterns
+
+- **Skills**
+  - `widget-slot-architecture` skill for Next.js App Router
+
+### Changed
+
+- Prettier `printWidth: 100` applied to entire codebase (#423)
+- MCP Server: extracted shared `rules-core` and `keyword-core` modules (#415)
+
+### Fixed
+
+- Plugin `isPathSafe()` path normalization and case-insensitive matching (#419)
+- MCP Server `appendContext` `findLastIndex` merge logic (#410)
+- MCP Server unsafe type assertion runtime validation (#411)
+- `validate-rules.sh` `.ai-rules` path reference (#422)
+- Agent count mismatch across documentation (#421)
+
+---
+
 ## [3.1.0] - 2026-01-22
 
 ### Added

@@ -5,6 +5,67 @@
 이 문서는 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/) 형식을 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/spec/v2.0.0.html)을 준수합니다.
 
+## [4.1.0] - 2026-02-17
+
+### 추가됨
+
+- **TUI 대시보드**: Ink 기반 터미널 UI (Header, AgentCard, AgentTree, AgentGrid, StatusBar, ProgressBar 컴포넌트)
+- **TUI EventBus**: EventEmitter2 기반 이벤트 시스템, `useEventBus` 및 `useAgentState` React 훅
+- **TUI IPC**: Unix Domain Socket 기반 독립 프로세스 통신
+- **TUI 컴팩트 디자인**: 24줄 터미널에 최적화된 단일 라인 레이아웃
+- **TUI Interceptor**: 실시간 UI 업데이트를 위한 MCP 도구 디스패치 레이어
+- **Landing Page**: Next.js 16 기반 다국어(5개국어) 랜딩 페이지
+  - Widget Slot 아키텍처 (AgentsShowcase, CodeExample, QuickStart 위젯)
+  - shadcn/ui 컴포넌트 라이브러리, 테마 및 쿠키 동의
+  - `next/font`를 통한 셀프호스팅 폰트
+  - next-intl i18n 설정, 병렬 라우트 및 로케일 슬롯 레이아웃
+  - 정적 섹션: Hero, Problem, Solution, FAQ
+  - 헤더 (언어 선택기, 테마 토글), Footer 및 접근성 개선
+  - Vercel 배포 설정 및 애널리틱스 통합
+  - SEO를 위한 JSON-LD 구조화 데이터 (#424)
+  - WCAG 2.1 AA 접근성 명세
+- **MCP Server**: SSE 엔드포인트 Bearer token 인증 (#416)
+- **Agent 시스템**: `dispatch_agents` 도구 및 `parse_mode` 자동 디스패치 (#328)
+- **Intent 패턴**: `frontend-developer`, `devops-engineer` 인텐트 패턴 추가
+- **EVAL 모드**: EVAL 모드에서 `recommendedActAgent` 지원 (#361)
+
+### 변경됨
+
+- **Prettier**: `printWidth: 100`으로 전체 코드베이스 리포맷 (#423)
+- **MCP Server**: `rules-core`, `keyword-core` 공유 모듈 분리 (#415)
+- **Plugin**: build 스크립트에서 중복 `syncVersion` 제거 (#418)
+
+### 수정됨
+
+- plugin `isPathSafe()` 경로 정규화 및 대소문자 무시 매칭 (#419)
+- MCP server `appendContext` `findLastIndex` 병합 로직 (#410)
+- MCP server `bootstrap()` 미처리 Promise rejection 핸들러
+- MCP server unsafe type assertion 런타임 검증 (#411)
+- Landing Page `html lang` 속성 서버 렌더 시 로케일에서 설정 (#412)
+- Landing Page radix-ui 메타패키지 제거, `@radix-ui/react-dialog` 직접 사용 (#413)
+- `validate-rules.sh` `.ai-rules` 경로 참조 수정 (#422)
+- keyword intent 기반 해상도에서 추천 모드 시 project config 스킵
+- plugin 타이포 `codebuddy` → `codingbuddy` 수정
+- CI release-drafter SHA 고정 및 setup action 버전 정렬
+
+### 문서
+
+- TUI 사용자 가이드, 아키텍처, 트러블슈팅 문서
+- Landing Page README에 배포 가이드 및 프로젝트 구조 추가
+- 문서 전체의 에이전트 수 불일치 수정 (#421)
+- MCP_SSE_TOKEN 환경 변수 문서화 (#416)
+- JSON-LD 구현 계획 (#424)
+
+### 테스트
+
+- context-document handler 테스트 추가 (#417)
+- TUI EventBus-UI, App root, transport 통합 테스트
+- TUI 성능 및 안정성 검증 테스트
+- Landing Page root layout 및 CSP headers 테스트
+- Landing Page async server component 테스트
+
+---
+
 ## [4.0.1] - 2026-02-04
 
 ### 추가됨

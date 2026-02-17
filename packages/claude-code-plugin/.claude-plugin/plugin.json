@@ -1,6 +1,6 @@
 {
   "name": "codingbuddy",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "PLAN/ACT/EVAL workflow with auto-detection, specialist agents, and reusable skills for systematic TDD development",
   "author": {
     "name": "JeremyDev87",

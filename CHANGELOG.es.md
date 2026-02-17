@@ -5,6 +5,67 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-02-17
+
+### Agregado
+
+- **Panel TUI**: UI de terminal basada en Ink (componentes Header, AgentCard, AgentTree, AgentGrid, StatusBar, ProgressBar)
+- **TUI EventBus**: Sistema de eventos basado en EventEmitter2 con hooks React `useEventBus` y `useAgentState`
+- **TUI IPC**: Proceso independiente con comunicación interprocesos via Unix Domain Socket
+- **Diseño TUI Compacto**: Diseño de línea única optimizado para terminales de 24 líneas
+- **TUI Interceptor**: Capa de despacho de herramientas MCP para actualizaciones de UI en tiempo real
+- **Página de Destino**: Página de destino multilingüe (5 idiomas) basada en Next.js 16
+  - Arquitectura Widget Slot (widgets AgentsShowcase, CodeExample, QuickStart)
+  - Biblioteca de componentes shadcn/ui con temas y consentimiento de cookies
+  - Fuentes auto-hospedadas via `next/font`
+  - Configuración i18n next-intl con rutas paralelas y diseño de slot de localización
+  - Secciones estáticas: Hero, Problem, Solution, FAQ
+  - Encabezado (selector de idioma, alternador de tema), Footer y mejoras de accesibilidad
+  - Configuración de despliegue en Vercel con integración de analíticas
+  - Datos estructurados JSON-LD para SEO (#424)
+  - Declaración de accesibilidad WCAG 2.1 AA
+- **MCP Server**: Autenticación Bearer token para endpoints SSE (#416)
+- **Sistema de Agentes**: Herramienta `dispatch_agents` y auto-despacho en respuesta `parse_mode` (#328)
+- **Patrones de Intent**: Patrones de intent `frontend-developer` y `devops-engineer` añadidos
+- **Modo EVAL**: Soporte de `recommendedActAgent` en modo EVAL (#361)
+
+### Cambiado
+
+- **Prettier**: Reformateo de toda la base de código con `printWidth: 100` (#423)
+- **MCP Server**: Extracción de módulos compartidos `rules-core` y `keyword-core` (#415)
+- **Plugin**: Eliminación de `syncVersion` duplicado del script de build (#418)
+
+### Corregido
+
+- plugin `isPathSafe()` normalización de rutas y coincidencia insensible a mayúsculas (#419)
+- MCP server lógica de fusión `findLastIndex` en `appendContext` (#410)
+- MCP server manejador de rechazo de Promise no capturada en `bootstrap()`
+- MCP server validación en tiempo de ejecución de type assertion inseguras (#411)
+- Página de destino atributo `html lang` establecido desde locale en renderizado del servidor (#412)
+- Página de destino eliminación del meta-paquete radix-ui, uso directo de `@radix-ui/react-dialog` (#413)
+- `validate-rules.sh` referencia de ruta `.ai-rules` actualizada (#422)
+- Resolución basada en intent de keyword omite project config en modo recomendación
+- plugin corrección de typo `codebuddy` → `codingbuddy`
+- CI release-drafter fijado a SHA y versiones de setup action alineadas
+
+### Documentación
+
+- Guía de usuario TUI, arquitectura y documentación de resolución de problemas
+- README de página de destino con guía de despliegue y estructura del proyecto
+- Corrección de desajuste en conteo de agentes en la documentación (#421)
+- Documentación de variable de entorno MCP_SSE_TOKEN (#416)
+- Plan de implementación JSON-LD (#424)
+
+### Pruebas
+
+- Pruebas de context-document handler (#417)
+- Pruebas de integración TUI EventBus-UI, App root y transport
+- Pruebas de verificación de rendimiento y estabilidad TUI
+- Pruebas de root layout y CSP headers de página de destino
+- Pruebas de async server component de página de destino
+
+---
+
 ## [4.0.1] - 2026-02-04
 
 ### Agregado
