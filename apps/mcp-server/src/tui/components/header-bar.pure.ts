@@ -36,10 +36,13 @@ export function formatHeaderBar(
   layoutMode: LayoutMode,
 ): string {
   const title = 'Codingbuddy TUI / Agent Dashboard';
-  const ALL_MODES: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
-  const modeStr = data.currentMode
-    ? ALL_MODES.map(m => (m === data.currentMode ? `[${m}]` : m)).join(' → ')
-    : ALL_MODES.slice(0, 3).join(' → ');
+  const PROCESS_MODES: Mode[] = ['PLAN', 'ACT', 'EVAL'];
+  const isAutoMode = data.currentMode === 'AUTO';
+
+  const processFlow = PROCESS_MODES.map(m =>
+    !isAutoMode && m === data.currentMode ? `[${m}]` : m,
+  ).join(' → ');
+  const modeStr = isAutoMode ? `${processFlow} [AUTO]` : processFlow;
   const stateStr = `${data.globalState} ${STATE_ICONS[data.globalState]}`;
 
   if (layoutMode === 'narrow') {
@@ -51,25 +54,34 @@ export function formatHeaderBar(
   // Wide/Medium: two lines
   const line1 = title;
 
-  const workspacePart = `Workspace: ${data.workspace}`;
   const sessionPart = `Session: ${data.sessionId}`;
   const modePart = `Mode: ${modeStr}`;
   const statePart = `State: ${stateStr}`;
 
-  let line2 = `${workspacePart}   ${sessionPart}   ${modePart}   ${statePart}`;
+  const separator = '   ';
+  const fixedParts = `${sessionPart}${separator}${modePart}${separator}${statePart}`;
+  const wsPrefix = 'Workspace: ';
+  const fullLine2 = `${wsPrefix}${data.workspace}${separator}${fixedParts}`;
 
-  // Truncate workspace if line2 exceeds width
-  if (line2.length > width) {
-    const maxWorkspace = width - sessionPart.length - modePart.length - statePart.length - 15;
-    if (maxWorkspace > 10) {
+  let line2: string;
+  if (fullLine2.length <= width) {
+    line2 = fullLine2;
+  } else {
+    const maxWsLen = width - wsPrefix.length - separator.length - fixedParts.length;
+    if (maxWsLen > 10) {
       const truncatedWs =
-        data.workspace.length > maxWorkspace
-          ? data.workspace.slice(0, maxWorkspace - 3) + '...'
+        data.workspace.length > maxWsLen
+          ? data.workspace.slice(0, maxWsLen - 3) + '...'
           : data.workspace;
-      line2 = `Workspace: ${truncatedWs}   ${sessionPart}   ${modePart}   ${statePart}`;
+      line2 = `${wsPrefix}${truncatedWs}${separator}${fixedParts}`;
     } else {
-      line2 = `${modePart}   ${statePart}`;
+      line2 = `${modePart}${separator}${statePart}`;
     }
+  }
+
+  // Final safety: hard truncate
+  if (line2.length > width) {
+    line2 = line2.slice(0, width);
   }
 
   return `${line1}\n${line2}`;

@@ -39,7 +39,7 @@ export const STATUS_STYLES: Readonly<Record<DashboardNodeStatus, CellStyle>> = O
 });
 
 /**
- * Styles for mode labels in header pipeline (PLAN → ACT → EVAL → AUTO).
+ * Styles for mode labels in header pipeline (PLAN → ACT → EVAL, AUTO separate).
  */
 export const MODE_LABEL_STYLES: Readonly<Record<Mode, CellStyle>> = Object.freeze({
   PLAN: { fg: 'cyan', bold: true },

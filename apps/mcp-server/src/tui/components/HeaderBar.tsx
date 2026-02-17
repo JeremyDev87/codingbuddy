@@ -13,16 +13,22 @@ export interface HeaderBarProps {
   width: number;
 }
 
-const ALL_MODES: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
-
-/** Characters reserved for border (4), title (~32), mode flow (~30), state (~8), gaps (~8). */
-const HEADER_RESERVED_CHARS = 82;
+const PROCESS_MODES: Mode[] = ['PLAN', 'ACT', 'EVAL'];
 
 function ModeFlow({ currentMode }: { currentMode: Mode | null }): React.ReactElement {
+  const isAutoMode = currentMode === 'AUTO';
   return (
     <Box>
-      {ALL_MODES.map((mode, i) => {
-        const isActive = mode === currentMode;
+      {isAutoMode && (
+        <>
+          <Text color={getModeColor('AUTO')} bold>
+            [AUTO]
+          </Text>
+          <Text dimColor> </Text>
+        </>
+      )}
+      {PROCESS_MODES.map((mode, i) => {
+        const isActive = !isAutoMode && mode === currentMode;
         const color = getModeColor(mode);
         return (
           <React.Fragment key={mode}>
@@ -51,15 +57,6 @@ function StateIndicator({ globalState }: { globalState: GlobalRunState }): React
   );
 }
 
-function truncateWorkspace(ws: string, maxLen: number): string {
-  if (ws.length <= maxLen) return ws;
-  const segments = ws.split('/').filter(Boolean);
-  if (segments.length <= 1) return '…' + ws.slice(-(maxLen - 1));
-  // Show last 2 path segments
-  const short = segments.slice(-2).join('/');
-  return short.length <= maxLen ? short : '…' + ws.slice(-(maxLen - 1));
-}
-
 export function HeaderBar({
   workspace,
   sessionId,
@@ -70,7 +67,13 @@ export function HeaderBar({
 }: HeaderBarProps): React.ReactElement {
   if (layoutMode === 'narrow') {
     return (
-      <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="row">
+      <Box
+        borderStyle="double"
+        borderColor="cyan"
+        width={width}
+        overflowX="hidden"
+        flexDirection="row"
+      >
         <Text color="cyan" bold>
           ⟨⟩ CODINGBUDDY
         </Text>
@@ -82,14 +85,17 @@ export function HeaderBar({
     );
   }
 
-  const reservedChars = HEADER_RESERVED_CHARS;
-  const maxWsLen = Math.max(8, width - reservedChars - 16);
-  const displayWs = truncateWorkspace(workspace, maxWsLen);
   const sessDisplay = sessionId.length > 8 ? sessionId.slice(0, 8) : sessionId;
 
   return (
-    <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="row">
-      <Box gap={2}>
+    <Box
+      borderStyle="double"
+      borderColor="cyan"
+      width={width}
+      overflowX="hidden"
+      flexDirection="row"
+    >
+      <Box gap={2} flexShrink={0}>
         <Text color="cyan" bold>
           ⟨⟩ CODINGBUDDY AGENT DASHBOARD
         </Text>
@@ -97,9 +103,10 @@ export function HeaderBar({
         <StateIndicator globalState={globalState} />
       </Box>
       <Box flexGrow={1} />
-      <Box gap={2}>
-        <Text dimColor>{displayWs}</Text>
-        <Text dimColor>sess:{sessDisplay}</Text>
+      <Box flexShrink={1} overflowX="hidden">
+        <Text dimColor wrap="truncate">
+          {workspace} sess:{sessDisplay}
+        </Text>
       </Box>
     </Box>
   );

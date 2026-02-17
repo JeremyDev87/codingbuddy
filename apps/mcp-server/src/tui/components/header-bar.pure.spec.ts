@@ -112,5 +112,52 @@ describe('tui/components/header-bar.pure', () => {
       const result = formatHeaderBar(baseData, 40, 'narrow');
       expect(result.length).toBeLessThanOrEqual(40);
     });
+
+    // --- Bug #488: AUTO mode display fix ---
+
+    it('should not include AUTO in process flow arrows', () => {
+      const result = formatHeaderBar(baseData, 120, 'wide');
+      expect(result).toContain('[PLAN]');
+      expect(result).not.toMatch(/EVAL → AUTO/);
+    });
+
+    it('should show AUTO mode as separate indicator when active', () => {
+      const autoData: HeaderBarData = { ...baseData, currentMode: 'AUTO' };
+      const result = formatHeaderBar(autoData, 120, 'wide');
+      expect(result).toContain('[AUTO]');
+      expect(result).not.toMatch(/EVAL → AUTO/);
+      expect(result).not.toMatch(/→ \[AUTO\]/);
+    });
+
+    it('should show process flow without highlighting when AUTO is active', () => {
+      const autoData: HeaderBarData = { ...baseData, currentMode: 'AUTO' };
+      const result = formatHeaderBar(autoData, 120, 'wide');
+      expect(result).toMatch(/PLAN → ACT → EVAL/);
+    });
+
+    // --- Bug #488: Overflow fix ---
+
+    it('should never produce line2 exceeding width in wide mode', () => {
+      const longData: HeaderBarData = {
+        ...baseData,
+        workspace: '/very/long/path/to/some/deeply/nested/workspace/directory/that/goes/on',
+        sessionId: 'sess-very-long-session-id-that-is-quite-lengthy',
+      };
+      const result = formatHeaderBar(longData, 80, 'wide');
+      const lines = result.split('\n');
+      for (const line of lines) {
+        expect(line.length).toBeLessThanOrEqual(80);
+      }
+    });
+
+    it('should never produce output exceeding width in narrow mode', () => {
+      const longData: HeaderBarData = {
+        ...baseData,
+        workspace: '/very/long/workspace',
+        sessionId: 'very-long-session-id',
+      };
+      const result = formatHeaderBar(longData, 50, 'narrow');
+      expect(result.length).toBeLessThanOrEqual(50);
+    });
   });
 });

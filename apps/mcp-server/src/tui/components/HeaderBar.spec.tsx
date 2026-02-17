@@ -128,6 +128,46 @@ describe('tui/components/HeaderBar', () => {
     expect(lastFrame()).toBeTruthy();
   });
 
+  // --- Bug #488: AUTO mode display fix ---
+
+  it('should not render AUTO in process flow arrows for non-AUTO modes', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        sessionId="s"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('PLAN');
+    expect(frame).toContain('ACT');
+    expect(frame).toContain('EVAL');
+    expect(frame).not.toMatch(/EVAL[^]*AUTO/);
+  });
+
+  it('should render AUTO as separate badge when AUTO mode is active', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        sessionId="s"
+        currentMode="AUTO"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('AUTO');
+    expect(frame).toContain('PLAN');
+    expect(frame).toContain('ACT');
+    expect(frame).toContain('EVAL');
+    // AUTO should not be connected by arrow to EVAL
+    expect(frame).not.toMatch(/EVAL[^A]*→[^A]*AUTO/);
+  });
+
   it('should render double border (Ink box rendering)', () => {
     const { lastFrame } = render(
       <HeaderBar
