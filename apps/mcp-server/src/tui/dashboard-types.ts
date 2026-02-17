@@ -137,6 +137,8 @@ export interface DashboardState {
   eventLog: EventLogEntry[];
   objectives: string[];
   activeSkills: string[];
+  tokenUsage: number;
+  outputStats: { files: number; commits: number };
 }
 
 /**

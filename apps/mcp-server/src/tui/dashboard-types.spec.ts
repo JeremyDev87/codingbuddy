@@ -5,6 +5,7 @@ import {
   createEmptyStageStats,
   getLayoutMode,
   type DashboardNode,
+  type DashboardState,
   type StageStats,
   type GridRegion,
   type DashboardGrid,
@@ -127,6 +128,26 @@ describe('tui/dashboard-types', () => {
       expect(region.y).toBe(0);
       expect(region.width).toBe(120);
       expect(region.height).toBe(3);
+    });
+
+    it('DashboardState includes tokenUsage and outputStats fields', () => {
+      const state: DashboardState = {
+        workspace: '/tmp',
+        sessionId: 'test',
+        currentMode: null,
+        globalState: 'IDLE',
+        agents: new Map(),
+        edges: [],
+        focusedAgentId: null,
+        tasks: [],
+        eventLog: [],
+        objectives: [],
+        activeSkills: [],
+        tokenUsage: 0,
+        outputStats: { files: 0, commits: 0 },
+      };
+      expect(state.tokenUsage).toBe(0);
+      expect(state.outputStats).toEqual({ files: 0, commits: 0 });
     });
 
     it('DashboardGrid has all required sections', () => {

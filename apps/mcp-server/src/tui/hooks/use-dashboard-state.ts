@@ -43,6 +43,8 @@ export function createInitialDashboardState(): DashboardState {
     eventLog: [],
     objectives: [],
     activeSkills: [],
+    tokenUsage: 0,
+    outputStats: { files: 0, commits: 0 },
   };
 }
 

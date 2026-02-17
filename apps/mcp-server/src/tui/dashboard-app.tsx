@@ -11,8 +11,6 @@ import { MonitorPanel } from './components/MonitorPanel';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
 import { computeGridLayout } from './components/grid-layout.pure';
 
-const EMPTY_OUTPUTS = { files: 0, commits: 0 } as const;
-
 export interface DashboardAppProps {
   eventBus?: TuiEventBus;
 }
@@ -60,7 +58,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
             tasks={state.tasks}
             tools={tools}
             inputs={tools}
-            outputs={EMPTY_OUTPUTS}
+            outputs={state.outputStats}
             eventLog={state.eventLog}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
@@ -98,7 +96,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
             tasks={state.tasks}
             tools={tools}
             inputs={tools}
-            outputs={EMPTY_OUTPUTS}
+            outputs={state.outputStats}
             eventLog={state.eventLog}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
@@ -108,7 +106,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
       <StageHealthBar
         stageHealth={stageHealth}
         bottlenecks={bottlenecks}
-        tokenCount={0}
+        tokenCount={state.tokenUsage}
         width={grid.stageHealth.width}
       />
     </Box>

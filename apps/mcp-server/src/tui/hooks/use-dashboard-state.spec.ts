@@ -8,6 +8,12 @@ import {
 describe('dashboardReducer', () => {
   const initialDashboardState = createInitialDashboardState();
 
+  it('initializes tokenUsage to 0 and outputStats to zero counts', () => {
+    const state = createInitialDashboardState();
+    expect(state.tokenUsage).toBe(0);
+    expect(state.outputStats).toEqual({ files: 0, commits: 0 });
+  });
+
   it('handles AGENT_ACTIVATED by adding node', () => {
     const action: DashboardAction = {
       type: 'AGENT_ACTIVATED',
