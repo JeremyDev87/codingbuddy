@@ -53,6 +53,35 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 
 See [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md) for details.
 
+## 🔴 MANDATORY: TDD Execution Continuity
+
+<TDD_CONTINUITY_RULE>
+
+**TDD RED phase test failures are expected results and are NOT a reason to halt implementation.**
+
+### Test Failure Classification
+
+| Type | Description | Action |
+|------|-------------|--------|
+| **Expected RED** | Intentional test failure in TDD RED phase | Proceed to GREEN phase immediately |
+| **Unexpected Failure** | Test that should pass but doesn't | Stop and analyze root cause |
+
+### RED-GREEN-REFACTOR is an Atomic Operation
+
+1. **RED**: Write failing test -> Run to confirm failure -> **DO NOT STOP**
+2. **GREEN**: Write minimal implementation -> Run to confirm pass
+3. **REFACTOR**: Refactor -> Confirm tests still pass
+
+**Do not wait for user input until all three phases are complete.**
+
+### TDD Step Handling During Plan Execution
+
+Even if plan separates TDD into individual steps (e.g., Step 1: Write test, Step 2: Verify fails, Step 3: Implement):
+- When a step containing **"Expected: FAIL" or "verify it fails"** results in test failure -> Proceed to next step immediately
+- This **takes precedence** over the executing-plans skill's "STOP on test fail" rule
+
+</TDD_CONTINUITY_RULE>
+
 ## 🔴 MANDATORY: Keyword Mode Detection
 
 <CODINGBUDDY_CRITICAL_RULE>

@@ -111,7 +111,9 @@ export function getDefaultModeConfig(): KeywordModesConfig {
       ACT: {
         description: 'Actual task execution phase',
         instructions:
-          'Follow Red-Green-Refactor cycle. Implement minimally then improve incrementally. Verify quality standards.',
+          'Follow Red-Green-Refactor cycle. RED phase test failures are expected — do not stop, proceed to GREEN immediately. ' +
+          'Treat RED→GREEN→REFACTOR as one atomic operation. ' +
+          'Implement minimally then improve incrementally. Verify quality standards.',
         rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       },
       EVAL: {

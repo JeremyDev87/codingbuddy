@@ -410,8 +410,12 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 1. **Execute TDD Cycle** (via Primary Developer Agent)
    - 🔴 For core logic: Red → Green → Refactor cycle
    - Write failing test first
+   - Run test to confirm it fails (this is **expected** — do NOT stop here)
    - Implement minimal code to pass
+   - Run test to confirm it passes
    - Refactor only after tests pass
+   - 🔴 **Required**: Treat RED→GREEN→REFACTOR as ONE atomic operation
+   - 🔴 **Required**: Only stop on UNEXPECTED test failures (GREEN phase failures)
    - 🔴 **Required**: Follow Primary Developer Agent's TDD cycle
 
 2. **Implement Components** (via Primary Developer Agent)

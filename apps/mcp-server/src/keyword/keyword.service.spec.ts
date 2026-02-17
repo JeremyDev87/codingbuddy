@@ -1169,6 +1169,20 @@ describe('KeywordService', () => {
       // activation_message.formatted에 포함된 agent 이름이 instructions에도 포함
       expect(result.instructions).toContain(result.activation_message!.formatted);
     });
+
+    it('ACT mode default instructions include TDD continuity rule', async () => {
+      // Use default config fallback (loadConfigFn fails → DEFAULT_CONFIG with enriched instructions)
+      const fallbackService = new KeywordService(
+        vi.fn().mockRejectedValue(new Error('Config not found')),
+        mockLoadRule,
+        mockLoadAgentInfo,
+      );
+      const result = await fallbackService.parseMode('ACT implement feature');
+
+      expect(result.instructions).toContain('RED phase test failures are EXPECTED');
+      expect(result.instructions).toContain('do NOT stop');
+      expect(result.instructions).toContain('atomic operation');
+    });
   });
 
   describe('recommendedActAgent parameter (ACT mode agent override)', () => {

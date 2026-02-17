@@ -150,7 +150,11 @@ const DEFAULT_CONFIG: KeywordModesConfig = {
       // Enriched instructions: context prefix + ACT-specific guidance + mandatory action suffix
       instructions:
         '🔴 CONTEXT: contextDocument contains PLAN decisions and recommendedActAgent. Use this context! ' +
-        'Follow Red-Green-Refactor cycle. Use recommended agent from PLAN. ' +
+        'Follow Red-Green-Refactor cycle. ' +
+        '⚠️ TDD CONTINUITY: RED phase test failures are EXPECTED — do NOT stop or wait for user input. ' +
+        'Proceed to GREEN phase immediately. Treat RED→GREEN→REFACTOR as ONE atomic operation. ' +
+        "Only stop on UNEXPECTED failures (tests that should pass but don't). " +
+        'Use recommended agent from PLAN. ' +
         '📝 MANDATORY BEFORE COMPLETION: Call update_context with mode=ACT, task (what was done), decisions, and notes. ' +
         'Decisions and notes will be APPENDED to existing content.',
       agent: MODE_AGENTS[1],

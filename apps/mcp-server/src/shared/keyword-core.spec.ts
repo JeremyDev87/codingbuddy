@@ -357,6 +357,15 @@ describe('getDefaultModeConfig', () => {
       expect(config.modes[mode]).not.toHaveProperty('defaultSpecialists');
     }
   });
+
+  it('ACT mode instructions include TDD continuity guidance', () => {
+    const config = getDefaultModeConfig();
+    const actInstructions = config.modes.ACT.instructions;
+
+    expect(actInstructions).toContain('RED phase test failures are expected');
+    expect(actInstructions).toContain('do not stop');
+    expect(actInstructions).toContain('atomic operation');
+  });
 });
 
 // ============================================================================
