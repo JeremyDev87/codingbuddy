@@ -11,7 +11,6 @@ import { MonitorPanel } from './components/MonitorPanel';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
 import { computeGridLayout } from './components/grid-layout.pure';
 
-const EMPTY_INPUTS: string[] = [];
 const EMPTY_OUTPUTS = { files: 0, commits: 0 } as const;
 
 export interface DashboardAppProps {
@@ -60,7 +59,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
             activeSkills={state.activeSkills}
             tasks={state.tasks}
             tools={tools}
-            inputs={EMPTY_INPUTS}
+            inputs={tools}
             outputs={EMPTY_OUTPUTS}
             eventLog={state.eventLog}
             width={grid.focusedAgent.width}
@@ -98,7 +97,7 @@ export function DashboardApp({ eventBus }: DashboardAppProps): React.ReactElemen
             activeSkills={state.activeSkills}
             tasks={state.tasks}
             tools={tools}
-            inputs={EMPTY_INPUTS}
+            inputs={tools}
             outputs={EMPTY_OUTPUTS}
             eventLog={state.eventLog}
             width={grid.focusedAgent.width}

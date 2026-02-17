@@ -99,6 +99,32 @@ describe('DashboardApp', () => {
     expect(frame).toContain('security-');
   });
 
+  it('passes tool names as inputs to FocusedAgentPanel', async () => {
+    const eventBus = new TuiEventBus();
+    const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+    await tick();
+
+    eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
+      agentId: 'a1',
+      name: 'test-agent',
+      role: 'primary',
+      isPrimary: true,
+    });
+    await tick();
+
+    eventBus.emit(TUI_EVENTS.TOOL_INVOKED, {
+      toolName: 'file_edit',
+      agentId: 'a1',
+      timestamp: Date.now(),
+    });
+    await tick();
+
+    const frame = lastFrame() ?? '';
+    // IN line should show tool name, not "none"
+    expect(frame).toContain('IN :');
+    expect(frame).not.toMatch(/IN\s*:\s*none/);
+  });
+
   it('focuses on primary running agent', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
