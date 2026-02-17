@@ -34,7 +34,7 @@ describe('DashboardApp', () => {
 
     const frame = lastFrame() ?? '';
     expect(frame).toContain('RUNNING');
-    expect(frame).toContain('solution-architect');
+    expect(frame).toContain('solution-arch');
   });
 
   it('shows IDLE after all agents deactivated', async () => {
@@ -94,7 +94,7 @@ describe('DashboardApp', () => {
 
     const frame = lastFrame() ?? '';
     expect(frame).toContain('RUNNING');
-    expect(frame).toContain('solution-architect');
+    expect(frame).toContain('solution-arch');
     // FlowMap truncates non-focused agent names in 17-char-wide boxes
     expect(frame).toContain('security-');
   });
@@ -114,7 +114,7 @@ describe('DashboardApp', () => {
 
     const frame = lastFrame() ?? '';
     // FocusedAgentPanel should show the primary agent details
-    expect(frame).toContain('solution-architect');
+    expect(frame).toContain('solution-arch');
     expect(frame).toContain('Objective');
   });
 });

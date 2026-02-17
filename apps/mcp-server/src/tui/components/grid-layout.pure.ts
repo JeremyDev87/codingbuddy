@@ -11,10 +11,10 @@ const NARROW_FLOW_MAP_HEIGHT = 5;
 const MIN_ROWS = HEADER_HEIGHT + STAGE_HEALTH_HEIGHT + 2;
 const MIN_COLUMNS = 20;
 
-/** FlowMap width ratio per layout mode. */
-const FLOW_MAP_WIDTH_RATIO: Record<Exclude<LayoutMode, 'narrow'>, number> = {
-  wide: 0.45,
-  medium: 0.4,
+/** Fixed width for focusedAgent panel per layout mode (content-first right panel). */
+const FOCUSED_AGENT_WIDTH: Record<Exclude<LayoutMode, 'narrow'>, number> = {
+  wide: 35,
+  medium: 32,
 };
 
 /**
@@ -58,8 +58,8 @@ export function computeGridLayout(
     };
   }
 
-  const flowMapWidth = Math.floor(cols * FLOW_MAP_WIDTH_RATIO[layoutMode]);
-  const focusedWidth = cols - flowMapWidth;
+  const focusedWidth = Math.min(FOCUSED_AGENT_WIDTH[layoutMode], cols - MIN_COLUMNS);
+  const flowMapWidth = cols - focusedWidth;
 
   return {
     header,

@@ -27,12 +27,16 @@ describe('computeGridLayout', () => {
       expect(grid.stageHealth.y + grid.stageHealth.height).toBe(40);
     });
 
-    it('flowMap takes 45% of columns in wide mode', () => {
-      expect(grid.flowMap.width).toBe(Math.floor(120 * 0.45));
+    it('focusedAgent has fixed width 35 in wide mode', () => {
+      expect(grid.focusedAgent.width).toBe(35);
     });
 
-    it('focusedAgent takes remaining columns', () => {
-      expect(grid.focusedAgent.width).toBe(120 - Math.floor(120 * 0.45));
+    it('flowMap takes all remaining width after focusedAgent', () => {
+      expect(grid.flowMap.width).toBe(120 - 35);
+    });
+
+    it('focusedAgent is right-aligned', () => {
+      expect(grid.focusedAgent.x + grid.focusedAgent.width).toBe(120);
     });
 
     it('flowMap and focusedAgent fill the main area height', () => {
@@ -59,12 +63,16 @@ describe('computeGridLayout', () => {
   describe('medium layout (100x30)', () => {
     const grid = computeGridLayout(100, 30, 'medium');
 
-    it('flowMap takes 40% of columns in medium mode', () => {
-      expect(grid.flowMap.width).toBe(Math.floor(100 * 0.4));
+    it('focusedAgent has fixed width 32 in medium mode', () => {
+      expect(grid.focusedAgent.width).toBe(32);
     });
 
-    it('focusedAgent takes remaining columns', () => {
-      expect(grid.focusedAgent.width).toBe(100 - Math.floor(100 * 0.4));
+    it('flowMap takes all remaining width after focusedAgent', () => {
+      expect(grid.flowMap.width).toBe(100 - 32);
+    });
+
+    it('focusedAgent is right-aligned', () => {
+      expect(grid.focusedAgent.x + grid.focusedAgent.width).toBe(100);
     });
 
     it('main area height is total - header(3) - stageHealth(3)', () => {
@@ -158,7 +166,9 @@ describe('computeGridLayout', () => {
       mode: 'wide' | 'medium' | 'narrow';
     }> = [
       { name: 'wide 120x40', cols: 120, rows: 40, mode: 'wide' },
+      { name: 'wide 200x50', cols: 200, rows: 50, mode: 'wide' },
       { name: 'medium 100x30', cols: 100, rows: 30, mode: 'medium' },
+      { name: 'medium-clamped 60x30', cols: 60, rows: 30, mode: 'medium' },
       { name: 'narrow 60x20', cols: 60, rows: 20, mode: 'narrow' },
       { name: 'minimum 40x10', cols: 40, rows: 10, mode: 'narrow' },
     ];
@@ -252,6 +262,39 @@ describe('computeGridLayout', () => {
       const totalArea = grid.total.width * grid.total.height;
       const sumArea = regions.reduce((s, r) => s + regionArea(r), 0);
       expect(sumArea).toBe(totalArea);
+    });
+  });
+
+  describe('edge case: terminal narrower than focused width + MIN_COLUMNS', () => {
+    // medium mode but only 60 columns (< 45 + 20 = 65, but clamp ensures flowMap >= MIN_COLUMNS)
+    const grid = computeGridLayout(60, 30, 'medium');
+
+    it('focusedAgent width is clamped so flowMap gets at least MIN_COLUMNS', () => {
+      expect(grid.flowMap.width).toBeGreaterThanOrEqual(20);
+      expect(grid.focusedAgent.width).toBeLessThanOrEqual(60 - 20);
+    });
+
+    it('focusedAgent is still right-aligned', () => {
+      expect(grid.focusedAgent.x + grid.focusedAgent.width).toBe(60);
+    });
+
+    it('no overlap between flowMap and focusedAgent', () => {
+      expect(grid.flowMap.x + grid.flowMap.width).toBe(grid.focusedAgent.x);
+    });
+  });
+
+  describe('wide layout scales flowMap with terminal width', () => {
+    it('flowMap grows when terminal is wider, focusedAgent stays fixed', () => {
+      const grid150 = computeGridLayout(150, 40, 'wide');
+      const grid200 = computeGridLayout(200, 40, 'wide');
+
+      // focusedAgent stays at 35 in both
+      expect(grid150.focusedAgent.width).toBe(35);
+      expect(grid200.focusedAgent.width).toBe(35);
+
+      // flowMap grows with terminal width
+      expect(grid150.flowMap.width).toBe(115);
+      expect(grid200.flowMap.width).toBe(165);
     });
   });
 

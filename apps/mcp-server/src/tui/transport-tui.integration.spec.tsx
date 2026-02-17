@@ -143,7 +143,7 @@ describe('Transport-TUI Integration', () => {
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
-      expect(frame).toContain('frontend-developer');
+      expect(frame).toContain('frontend-dev');
     });
 
     it('should NOT conflict with SSE event stream protocol', () => {

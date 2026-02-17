@@ -86,7 +86,7 @@ export function FlowMap({
 
   if (!lines) {
     return (
-      <Box flexDirection="column">
+      <Box flexDirection="column" width={width}>
         <Text bold color="cyan">
           FLOW MAP
         </Text>
@@ -95,7 +95,7 @@ export function FlowMap({
   }
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" width={width}>
       <Text bold color="cyan">
         FLOW MAP
       </Text>

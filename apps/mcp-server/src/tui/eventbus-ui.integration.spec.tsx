@@ -29,7 +29,7 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       const frame = lastFrame() ?? '';
-      expect(frame).toContain('solution-architect');
+      expect(frame).toContain('solution-arch');
       expect(frame).toContain('RUNNING');
     });
 
@@ -150,7 +150,7 @@ describe('EventBus ↔ UI Integration', () => {
         isPrimary: true,
       });
       await tick();
-      expect(lastFrame()).toContain('solution-architect');
+      expect(lastFrame()).toContain('solution-arch');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
         agentId: 'p1',
@@ -400,7 +400,7 @@ describe('EventBus ↔ UI Integration', () => {
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
-      expect(frame).toContain('security-specialist');
+      expect(frame).toContain('security-spec');
     });
   });
 
@@ -422,7 +422,7 @@ describe('EventBus ↔ UI Integration', () => {
       // Agent should NOT be reflected because listener wasn't registered yet
       const frame = lastFrame() ?? '';
       expect(frame).toContain('IDLE');
-      expect(frame).not.toContain('security-specialist');
+      expect(frame).not.toContain('security-spec');
     });
 
     it('should sync state via re-emitting events after DashboardApp mount', async () => {
@@ -445,7 +445,7 @@ describe('EventBus ↔ UI Integration', () => {
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
-      expect(frame).toContain('solution-architect');
+      expect(frame).toContain('solution-arch');
     });
   });
 
@@ -511,7 +511,7 @@ describe('EventBus ↔ UI Integration', () => {
       const frame = lastFrame() ?? '';
       // Primary still running
       expect(frame).toContain('RUNNING');
-      expect(frame).toContain('architecture-specialist');
+      expect(frame).toContain('architect');
     });
 
     it('should handle error scenario: activate → error deactivation → re-activate', async () => {
