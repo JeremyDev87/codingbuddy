@@ -22,6 +22,7 @@ describe('DashboardApp', () => {
   it('shows RUNNING state when agent is activated', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+    await tick(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'arch-1',
@@ -39,6 +40,7 @@ describe('DashboardApp', () => {
   it('shows IDLE after all agents deactivated', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+    await tick(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'a1',
@@ -61,6 +63,7 @@ describe('DashboardApp', () => {
   it('handles mode change events', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+    await tick(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
     await tick();
@@ -73,6 +76,7 @@ describe('DashboardApp', () => {
   it('shows multiple agents in FlowMap', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+    await tick(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'p1',
@@ -98,6 +102,7 @@ describe('DashboardApp', () => {
   it('focuses on primary running agent', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+    await tick(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'p1',
