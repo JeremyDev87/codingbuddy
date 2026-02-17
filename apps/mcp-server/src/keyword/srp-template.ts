@@ -62,8 +62,3 @@ export function renderSrpTemplate(
     classification.reason,
   );
 }
-
-/**
- * Export the raw template for testing purposes.
- */
-export { SRP_TEMPLATE };

@@ -67,7 +67,7 @@ export const TestStrategyConfigSchema = z.object({
   mockingStrategy: z.enum(['minimal', 'extensive', 'no-mocks']).optional(),
 });
 
-export const AIConfigSchema = z.object({
+const AIConfigSchema = z.object({
   defaultModel: z.string().optional(),
   primaryAgent: z.string().optional(),
   /**
@@ -98,7 +98,7 @@ export const AIConfigSchema = z.object({
   maxIncludedSkills: z.number().int().min(0).max(10).optional(),
 });
 
-export const AutoConfigSchema = z.object({
+const AutoConfigSchema = z.object({
   maxIterations: z.number().int().min(1).max(10).default(3),
 });
 
@@ -106,7 +106,7 @@ export const AutoConfigSchema = z.object({
  * Context document configuration for DoS prevention limits.
  * Limits array sizes and string lengths to prevent memory exhaustion.
  */
-export const ContextConfigSchema = z.object({
+const ContextConfigSchema = z.object({
   /** Maximum items per array (decisions, notes, etc.). Default: 100 */
   maxArrayItems: z.number().int().min(10).max(1000).default(100),
   /** Maximum characters per array item string. Default: 2000 */
@@ -156,9 +156,6 @@ export type TechStackConfig = z.infer<typeof TechStackConfigSchema>;
 export type ArchitectureConfig = z.infer<typeof ArchitectureConfigSchema>;
 export type ConventionsConfig = z.infer<typeof ConventionsConfigSchema>;
 export type TestStrategyConfig = z.infer<typeof TestStrategyConfigSchema>;
-export type AIConfig = z.infer<typeof AIConfigSchema>;
-export type AutoConfig = z.infer<typeof AutoConfigSchema>;
-export type ContextConfig = z.infer<typeof ContextConfigSchema>;
 export type CodingBuddyConfig = z.infer<typeof CodingBuddyConfigSchema>;
 
 // ============================================================================

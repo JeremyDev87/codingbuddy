@@ -19,7 +19,7 @@ import { parseToolResponseJson } from './parse-tool-response';
 import type { Mode } from '../types';
 
 const VALID_MODES: ReadonlySet<string> = new Set<Mode>(['PLAN', 'ACT', 'EVAL', 'AUTO']);
-export const UNKNOWN_AGENT_ID = 'unknown-agent';
+const UNKNOWN_AGENT_ID = 'unknown-agent';
 
 export type ExtractedEvent =
   | { event: typeof TUI_EVENTS.MODE_CHANGED; payload: ModeChangedEvent }

@@ -62,13 +62,13 @@ export const MAX_AGENT_NAME_LENGTH = 100;
  * Only allows lowercase letters, numbers, and hyphens
  * Examples: "frontend-developer", "code-reviewer", "devops-engineer"
  */
-export const AGENT_NAME_PATTERN = /^[a-z0-9-]+$/;
+const AGENT_NAME_PATTERN = /^[a-z0-9-]+$/;
 
 // ============================================================================
 // Validation Functions
 // ============================================================================
 
-export interface ValidationResult {
+interface ValidationResult {
   valid: boolean;
   error?: string;
 }
@@ -77,7 +77,7 @@ export interface ValidationResult {
  * Result of parsing operations
  * CQ-002: Standardized API to align with ValidationResult pattern
  */
-export interface ParseResult<T> {
+interface ParseResult<T> {
   success: boolean;
   value?: T;
   error?: string;

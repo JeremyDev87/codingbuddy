@@ -1,16 +1,9 @@
-import { type VerbosityLevel } from '../shared/verbosity.types';
-
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
-
-// Re-export VerbosityLevel for convenience
-export type { VerbosityLevel };
 
 export type Mode = (typeof KEYWORDS)[number];
 
 /** Mode Agent names in priority order */
 export const MODE_AGENTS = ['plan-mode', 'act-mode', 'eval-mode', 'auto-mode'] as const;
-
-export type ModeAgent = (typeof MODE_AGENTS)[number];
 
 /** Primary Agents for PLAN mode - centralized definition */
 export const PLAN_PRIMARY_AGENTS = ['solution-architect', 'technical-planner'] as const;
@@ -49,7 +42,6 @@ export const ALL_PRIMARY_AGENTS = [
   EVAL_PRIMARY_AGENT,
 ] as const;
 
-export type PlanPrimaryAgent = (typeof PLAN_PRIMARY_AGENTS)[number];
 export type ActPrimaryAgent = (typeof ACT_PRIMARY_AGENTS)[number];
 export type PrimaryAgent = (typeof ALL_PRIMARY_AGENTS)[number];
 

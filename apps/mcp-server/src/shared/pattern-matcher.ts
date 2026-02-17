@@ -12,7 +12,7 @@ export interface CompiledPattern {
 /**
  * Options for pattern matching (same as minimatch options)
  */
-export type PatternMatcherOptions = MinimatchOptions;
+type PatternMatcherOptions = MinimatchOptions;
 
 const DEFAULT_OPTIONS: PatternMatcherOptions = {
   matchBase: true,

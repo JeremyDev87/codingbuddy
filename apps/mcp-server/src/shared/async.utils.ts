@@ -7,7 +7,7 @@ import { Logger } from '@nestjs/common';
 /**
  * Options for asyncWithFallback utility
  */
-export interface AsyncWithFallbackOptions<T> {
+interface AsyncWithFallbackOptions<T> {
   /** Function to execute */
   fn: () => Promise<T>;
   /** Fallback value to return on error */
@@ -125,7 +125,7 @@ export class TimeoutError extends Error {
 /**
  * Options for withTimeout utility
  */
-export interface WithTimeoutOptions {
+interface WithTimeoutOptions {
   /** Timeout in milliseconds */
   timeoutMs?: number;
   /** Description of the operation for error messages */

@@ -3,13 +3,13 @@
  * PERF-003: Cache config parsing results to avoid redundant file I/O
  */
 
-export interface CacheEntry<T> {
+interface CacheEntry<T> {
   value: T;
   timestamp: number;
   mtimes?: Map<string, number>; // File modification times for cache invalidation
 }
 
-export interface LRUCacheOptions {
+interface LRUCacheOptions {
   maxSize?: number; // Maximum number of entries (default: 10)
   ttl?: number; // Time to live in milliseconds (default: 5 minutes)
 }

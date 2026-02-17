@@ -1,12 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import {
-  writeConfig,
-  findExistingConfig,
-  formatConfigAsJson,
-  CONFIG_FILE_NAMES,
-} from './config.writer';
+import { writeConfig, findExistingConfig, CONFIG_FILE_NAMES } from './config.writer';
 import type { CodingBuddyConfig } from '../../config';
 
 // Mock fs/promises
@@ -37,37 +32,6 @@ describe('config.writer', () => {
     it('should only support JSON format', () => {
       expect(CONFIG_FILE_NAMES).toContain('codingbuddy.config.json');
       expect(CONFIG_FILE_NAMES).toHaveLength(1);
-    });
-  });
-
-  describe('formatConfigAsJson', () => {
-    it('should format config as JSON with indentation', () => {
-      const result = formatConfigAsJson(mockConfig);
-
-      expect(result).toContain('"projectName"');
-      expect(result).toContain('"test-app"');
-      // Should be formatted with indentation
-      expect(result).toContain('\n');
-    });
-
-    it('should produce valid JSON', () => {
-      const result = formatConfigAsJson(mockConfig);
-
-      expect(() => JSON.parse(result)).not.toThrow();
-    });
-
-    it('should handle empty config', () => {
-      const result = formatConfigAsJson({});
-
-      expect(result).toBe('{}\n');
-    });
-
-    it('should format nested objects correctly', () => {
-      const result = formatConfigAsJson(mockConfig);
-
-      expect(result).toContain('"techStack"');
-      expect(result).toContain('"frontend"');
-      expect(result).toContain('"React"');
     });
   });
 

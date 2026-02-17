@@ -17,7 +17,7 @@ export type VerbosityLevel = 'minimal' | 'standard' | 'full';
 /**
  * Configuration for verbosity level behavior
  */
-export interface VerbosityConfig {
+interface VerbosityConfig {
   /** Verbosity level identifier */
   level: VerbosityLevel;
 

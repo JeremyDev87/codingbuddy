@@ -8,7 +8,7 @@ export const MAX_SKILL_CONTENT_LENGTH = 3000;
  * Standard truncation notice appended when skill content is truncated.
  * Guides users to use the `get_skill` tool for full content.
  */
-export const SKILL_TRUNCATION_NOTICE = '[Content truncated. Use `get_skill` tool for full content]';
+const SKILL_TRUNCATION_NOTICE = '[Content truncated. Use `get_skill` tool for full content]';
 
 /**
  * Intelligently truncate skill content to stay within token limits

@@ -23,29 +23,3 @@ export interface IFileSystem {
  * Token for FileSystem dependency injection
  */
 export const FILE_SYSTEM = 'FILE_SYSTEM';
-
-/**
- * Path validation error thrown when path validation fails
- */
-export class PathValidationError extends Error {
-  constructor(
-    message: string,
-    public readonly path: string,
-    public readonly basePath?: string,
-  ) {
-    super(message);
-    this.name = 'PathValidationError';
-  }
-}
-
-/**
- * Options for path validation
- */
-export interface PathValidationOptions {
-  /** Base directory that paths must be contained within */
-  basePath: string;
-  /** Whether to allow absolute paths (default: false) */
-  allowAbsolute?: boolean;
-  /** File extensions to allow (if specified, only these extensions are allowed) */
-  allowedExtensions?: string[];
-}

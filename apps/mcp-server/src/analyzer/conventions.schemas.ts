@@ -34,8 +34,6 @@ export const TypeScriptConfigSchema = z.object({
   exclude: z.array(z.string()).optional(),
 });
 
-export type TypeScriptConfig = z.infer<typeof TypeScriptConfigSchema>;
-
 // ============================================================================
 // ESLint Configuration Schema
 // ============================================================================
@@ -63,8 +61,6 @@ export const ESLintConfigSchema = z.object({
   env: z.record(z.string(), z.boolean()).optional(),
 });
 
-export type ESLintConfig = z.infer<typeof ESLintConfigSchema>;
-
 // ============================================================================
 // Prettier Configuration Schema
 // ============================================================================
@@ -84,8 +80,6 @@ export const PrettierConfigSchema = z.object({
   endOfLine: z.enum(['lf', 'crlf', 'cr', 'auto']).optional(),
 });
 
-export type PrettierConfig = z.infer<typeof PrettierConfigSchema>;
-
 // ============================================================================
 // MarkdownLint Configuration Schema
 // ============================================================================
@@ -101,5 +95,3 @@ export const MarkdownLintConfigSchema = z.record(
       .passthrough(),
   ]),
 );
-
-export type MarkdownLintConfig = z.infer<typeof MarkdownLintConfigSchema>;

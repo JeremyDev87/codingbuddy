@@ -1,4 +1,3 @@
-export { createIpcDebugLogger } from './ipc-debug';
 export { TuiIpcServer } from './ipc-server';
 export type { TuiIpcServerOptions } from './ipc-server';
 export { TuiIpcBridge } from './ipc-bridge';
@@ -17,6 +16,4 @@ export {
   getSocketDir,
   getSocketPath,
   getInstancesFilePath,
-  serializeIpcMessage,
-  deserializeIpcMessage,
 } from './ipc.types';

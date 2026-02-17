@@ -20,13 +20,13 @@ const STAGE_ORDER: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
 const STAGE_SLOT_WIDTH = 8; // arrow + space + max label length
 const PIPELINE_RIGHT_MARGIN = 10;
 
-export interface StageColumn {
+interface StageColumn {
   startX: number;
   width: number;
   label: Mode;
 }
 
-export interface NodePosition {
+interface NodePosition {
   x: number;
   y: number;
   width: number;

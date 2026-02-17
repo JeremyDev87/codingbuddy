@@ -276,7 +276,7 @@ export function findProjectRoot(startDir?: string): string {
 /**
  * Load a JSON config file
  */
-export async function loadJsonConfig(filePath: string): Promise<unknown> {
+async function loadJsonConfig(filePath: string): Promise<unknown> {
   try {
     const content = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(content);
@@ -297,7 +297,7 @@ export async function loadJsonConfig(filePath: string): Promise<unknown> {
  *
  * Only JSON format is supported.
  */
-export async function loadConfigFromFile(filePath: string): Promise<unknown> {
+async function loadConfigFromFile(filePath: string): Promise<unknown> {
   const ext = path.extname(filePath).toLowerCase();
 
   if (ext === '.json') {

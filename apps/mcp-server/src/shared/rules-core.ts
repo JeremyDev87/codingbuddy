@@ -16,13 +16,13 @@ import type { Skill } from '../rules/skill.schema';
 // Types
 // ============================================================================
 
-export interface ResolveRulesDirOptions {
+interface ResolveRulesDirOptions {
   envRulesDir?: string;
   packageRulesPath?: string;
   existsSync?: (path: string) => boolean;
 }
 
-export interface DirentLike {
+interface DirentLike {
   name: string;
   isDirectory: () => boolean;
 }

@@ -161,24 +161,3 @@ declare module 'ink-testing-library' {
 
   export function render(tree: ReactElement): RenderResult;
 }
-
-declare module 'ink-spinner' {
-  import type { ReactElement } from 'react';
-
-  export interface SpinnerProps {
-    readonly type?: string;
-  }
-
-  export default function Spinner(props?: SpinnerProps): ReactElement;
-}
-
-declare module 'ink-gradient' {
-  import type { ReactElement, ReactNode } from 'react';
-
-  export interface GradientProps {
-    readonly name?: string;
-    readonly children?: ReactNode;
-  }
-
-  export default function Gradient(props: GradientProps): ReactElement;
-}

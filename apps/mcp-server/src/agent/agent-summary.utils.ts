@@ -11,7 +11,7 @@ export const MAX_PRIMARY_FOCUS_LENGTH = 100;
 /**
  * Agent summary for token-optimized responses
  */
-export interface AgentSummary {
+interface AgentSummary {
   name: string;
   displayName: string;
   expertise: string[];

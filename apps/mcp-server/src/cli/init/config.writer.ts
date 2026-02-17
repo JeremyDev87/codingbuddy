@@ -22,7 +22,7 @@ export interface WriteConfigOptions {
 /**
  * Format config as JSON
  */
-export function formatConfigAsJson(config: CodingBuddyConfig): string {
+function formatConfigAsJson(config: CodingBuddyConfig): string {
   return JSON.stringify(config, null, 2) + '\n';
 }
 

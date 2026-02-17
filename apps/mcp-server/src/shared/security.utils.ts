@@ -99,7 +99,7 @@ export function isPathSafe(basePath: string, relativePath: string): boolean {
 /**
  * Result of path validation
  */
-export interface PathValidationResult {
+interface PathValidationResult {
   /** Whether the path is valid */
   valid: boolean;
   /** Error message if validation failed */
@@ -111,7 +111,7 @@ export interface PathValidationResult {
 /**
  * Options for comprehensive path validation
  */
-export interface ValidatePathOptions {
+interface ValidatePathOptions {
   /** Base directory that paths must be contained within */
   basePath: string;
   /** Whether to allow absolute paths (default: false) */
@@ -216,7 +216,7 @@ export function assertPathSafe(targetPath: string, options: ValidatePathOptions)
 /**
  * Result of handler argument validation
  */
-export interface HandlerArgsSanitizeResult {
+interface HandlerArgsSanitizeResult {
   /** Whether args are safe to process */
   safe: boolean;
   /** Error message if validation failed */

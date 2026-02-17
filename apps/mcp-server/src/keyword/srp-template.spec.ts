@@ -1,32 +1,6 @@
-import { renderSrpTemplate, SRP_TEMPLATE } from './srp-template';
+import { renderSrpTemplate } from './srp-template';
 
 describe('srp-template', () => {
-  describe('SRP_TEMPLATE', () => {
-    it('should contain all 5 SRP steps', () => {
-      expect(SRP_TEMPLATE).toContain('DECOMPOSE');
-      expect(SRP_TEMPLATE).toContain('SOLVE');
-      expect(SRP_TEMPLATE).toContain('VERIFY');
-      expect(SRP_TEMPLATE).toContain('SYNTHESIZE');
-      expect(SRP_TEMPLATE).toContain('REFLECT');
-    });
-
-    it('should contain placeholders for dynamic content', () => {
-      expect(SRP_TEMPLATE).toContain('{{COMPLEXITY}}');
-      expect(SRP_TEMPLATE).toContain('{{REASON}}');
-    });
-
-    it('should include confidence level descriptions', () => {
-      expect(SRP_TEMPLATE).toContain('🟢 High');
-      expect(SRP_TEMPLATE).toContain('🟡 Medium');
-      expect(SRP_TEMPLATE).toContain('🔴 Low');
-    });
-
-    it('should include min() synthesis rule', () => {
-      expect(SRP_TEMPLATE).toContain('min()');
-      expect(SRP_TEMPLATE).toContain('Overall Confidence');
-    });
-  });
-
   describe('renderSrpTemplate', () => {
     it('should replace complexity placeholder', () => {
       const result = renderSrpTemplate({

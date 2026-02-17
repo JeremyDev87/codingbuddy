@@ -26,7 +26,7 @@ import { selectFocusedAgent } from './use-focus-agent';
 
 const EVENT_LOG_MAX = 100;
 const EDGE_MAX = 200;
-export const TOOL_CALLS_MAX = 200;
+const TOOL_CALLS_MAX = 200;
 
 /**
  * Creates fresh initial dashboard state.

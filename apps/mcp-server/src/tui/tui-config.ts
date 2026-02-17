@@ -1,10 +1,10 @@
-export interface TuiConfigInput {
+interface TuiConfigInput {
   readonly transportMode: 'stdio' | 'sse';
   readonly tuiEnabled: boolean;
   readonly stderrIsTTY: boolean;
 }
 
-export interface TuiConfig {
+interface TuiConfig {
   readonly shouldRender: boolean;
   readonly target: 'stdout' | 'stderr' | null;
   readonly reason: string;

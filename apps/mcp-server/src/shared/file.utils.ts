@@ -7,14 +7,14 @@ import { formatBytes } from './format.utils';
  * Minimal logger interface for structured logging
  * Compatible with NestJS Logger and similar logging frameworks
  */
-export interface Logger {
+interface Logger {
   warn(message: string, context?: Record<string, unknown>): void;
 }
 
 /**
  * Options for file reading operations
  */
-export interface FileReadOptions {
+interface FileReadOptions {
   /**
    * Maximum file size in bytes (default: undefined = no limit)
    * DoS Protection: Recommended 1MB (1024 * 1024) for config files

@@ -60,7 +60,7 @@ export const ARCHITECTURE_PATTERNS: PatternDefinition[] = [
 /**
  * Directory category type
  */
-export type DirectoryCategory =
+type DirectoryCategory =
   | 'source'
   | 'test'
   | 'config'

@@ -35,7 +35,7 @@ export class ChecklistSchemaError extends Error {
 /**
  * Validation result
  */
-export interface ValidationResult {
+interface ValidationResult {
   valid: boolean;
   errors: string[];
 }

@@ -3,7 +3,7 @@
  * Ensures consistent path handling across platforms.
  * @internal Primarily used within this module by pathContainsSegment
  */
-export function normalizePath(filePath: string): string {
+function normalizePath(filePath: string): string {
   return filePath.replace(/\\/g, '/');
 }
 

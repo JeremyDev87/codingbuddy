@@ -33,7 +33,7 @@ const DEFAULT_MAX_TOKENS = 4096;
 /**
  * Extract JSON from AI response that may contain markdown or extra text
  */
-export function extractJsonFromResponse(response: string): string | null {
+function extractJsonFromResponse(response: string): string | null {
   // Try to extract from markdown code block first
   const codeBlockMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlockMatch) {
@@ -52,7 +52,7 @@ export function extractJsonFromResponse(response: string): string | null {
 /**
  * Parse and validate JSON response from AI
  */
-export function parseJsonResponse(response: string): CodingBuddyConfig {
+function parseJsonResponse(response: string): CodingBuddyConfig {
   const jsonString = extractJsonFromResponse(response);
 
   if (!jsonString) {

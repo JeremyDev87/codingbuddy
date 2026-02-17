@@ -1,10 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  ConfigGenerator,
-  ConfigGeneratorOptions,
-  parseJsonResponse,
-  extractJsonFromResponse,
-} from './config.generator';
+import { ConfigGenerator, ConfigGeneratorOptions } from './config.generator';
 import type { ProjectAnalysis } from '../../analyzer';
 import { DEFAULT_MODEL } from '../../model';
 
@@ -44,108 +39,6 @@ describe('config.generator', () => {
     codeSamples: [],
     detectedPatterns: ['React Project'],
   };
-
-  describe('extractJsonFromResponse', () => {
-    it('should extract JSON from plain JSON response', () => {
-      const response = '{"projectName": "test"}';
-
-      const result = extractJsonFromResponse(response);
-
-      expect(result).toBe('{"projectName": "test"}');
-    });
-
-    it('should extract JSON from markdown code block', () => {
-      const response = '```json\n{"projectName": "test"}\n```';
-
-      const result = extractJsonFromResponse(response);
-
-      expect(result).toBe('{"projectName": "test"}');
-    });
-
-    it('should extract JSON from response with surrounding text', () => {
-      const response = 'Here is the config:\n```json\n{"projectName": "test"}\n```\nEnjoy!';
-
-      const result = extractJsonFromResponse(response);
-
-      expect(result).toBe('{"projectName": "test"}');
-    });
-
-    it('should handle response without code block markers', () => {
-      const response = 'Some text {"projectName": "test"} more text';
-
-      const result = extractJsonFromResponse(response);
-
-      expect(result).toBe('{"projectName": "test"}');
-    });
-
-    it('should return null for invalid response', () => {
-      const response = 'No JSON here';
-
-      const result = extractJsonFromResponse(response);
-
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('parseJsonResponse', () => {
-    it('should parse valid JSON response', () => {
-      const response = '{"projectName": "test", "language": "ko"}';
-
-      const result = parseJsonResponse(response);
-
-      expect(result).toEqual({ projectName: 'test', language: 'ko' });
-    });
-
-    it('should parse JSON from markdown code block', () => {
-      const response = '```json\n{"projectName": "test"}\n```';
-
-      const result = parseJsonResponse(response);
-
-      expect(result).toEqual({ projectName: 'test' });
-    });
-
-    it('should parse complex nested config', () => {
-      const response = JSON.stringify({
-        projectName: 'my-app',
-        techStack: {
-          frontend: ['React', 'TypeScript'],
-        },
-        conventions: {
-          naming: {
-            files: 'kebab-case',
-          },
-        },
-      });
-
-      const result = parseJsonResponse(response);
-
-      expect(result.projectName).toBe('my-app');
-      expect(result.techStack?.frontend).toContain('React');
-      expect(result.conventions?.naming?.files).toBe('kebab-case');
-    });
-
-    it('should throw on invalid JSON', () => {
-      const response = 'not valid json';
-
-      expect(() => parseJsonResponse(response)).toThrow();
-    });
-
-    it('should validate against schema and filter invalid fields', () => {
-      const response = JSON.stringify({
-        projectName: 'test',
-        invalidField: 'should be ignored',
-        techStack: {
-          frontend: ['React'],
-        },
-      });
-
-      const result = parseJsonResponse(response);
-
-      expect(result.projectName).toBe('test');
-      expect(result.techStack?.frontend).toContain('React');
-      // Invalid field should be stripped by schema validation
-    });
-  });
 
   describe('ConfigGenerator', () => {
     let generator: ConfigGenerator;

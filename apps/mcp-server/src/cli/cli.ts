@@ -119,7 +119,7 @@ export function printVersion(): void {
 /**
  * Print security warning for API key in CLI arguments
  */
-export function printApiKeyWarning(): void {
+function printApiKeyWarning(): void {
   const warning = `
 ⚠️  Security Warning: API key passed via command line argument.
     This may expose your key in shell history and process lists.

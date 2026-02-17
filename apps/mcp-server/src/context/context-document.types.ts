@@ -15,13 +15,13 @@ export const CONTEXT_FILE_TIMEOUT_MS = 5000;
  * Maximum items per array (decisions, notes, etc.) for DoS prevention.
  * SEC: Prevents memory exhaustion from malicious input.
  */
-export const MAX_CONTEXT_ARRAY_ITEMS = 100;
+const MAX_CONTEXT_ARRAY_ITEMS = 100;
 
 /**
  * Maximum length per array item string for DoS prevention.
  * SEC: Prevents memory exhaustion from malicious input.
  */
-export const MAX_CONTEXT_ITEM_LENGTH = 2000;
+const MAX_CONTEXT_ITEM_LENGTH = 2000;
 
 /**
  * Context document metadata stored in the header.
@@ -206,8 +206,8 @@ export const CONTEXT_SECTION_HEADER_PATTERN = /^## (PLAN|ACT|EVAL|AUTO) \((.+)\)
 /**
  * Valid context status values.
  */
-export const VALID_CONTEXT_STATUSES = ['active', 'completed'] as const;
-export const VALID_SECTION_STATUSES = ['in_progress', 'completed', 'blocked'] as const;
+const VALID_CONTEXT_STATUSES = ['active', 'completed'] as const;
+const VALID_SECTION_STATUSES = ['in_progress', 'completed', 'blocked'] as const;
 
 /**
  * Type guard for context status.
@@ -273,13 +273,3 @@ export const CONTEXT_SIZE_THRESHOLDS = {
   /** Hard limit - force cleanup */
   CLEANUP: 100_000,
 } as const;
-
-/**
- * Configuration for automatic context cleanup.
- */
-export interface ContextCleanupConfig {
-  /** Maximum number of items to keep in arrays for old sections */
-  keepRecentItems: number;
-  /** Number of most recent sections to keep full (no summarization) */
-  keepRecentSectionsFull: number;
-}

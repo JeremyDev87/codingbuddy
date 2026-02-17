@@ -54,7 +54,7 @@ export interface WizardData {
 /**
  * Options for wizard with detected defaults
  */
-export interface WizardOptions {
+interface WizardOptions {
   /** Use detected defaults without prompting */
   useDefaults?: boolean;
   /** Skip all prompts (CI mode) */

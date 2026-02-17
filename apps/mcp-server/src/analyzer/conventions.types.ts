@@ -34,18 +34,18 @@ export interface TypeScriptConventions {
 /**
  * ESLint rule severity levels
  */
-export type ESLintRuleSeverity = 'off' | 'warn' | 'error' | 0 | 1 | 2;
+type ESLintRuleSeverity = 'off' | 'warn' | 'error' | 0 | 1 | 2;
 
 /**
  * ESLint rule configuration
  * Can be severity level or [severity, ...options]
  */
-export type ESLintRuleConfig = ESLintRuleSeverity | [ESLintRuleSeverity, ...unknown[]];
+type ESLintRuleConfig = ESLintRuleSeverity | [ESLintRuleSeverity, ...unknown[]];
 
 /**
  * ESLint parser options (common fields)
  */
-export interface ESLintParserOptions {
+interface ESLintParserOptions {
   ecmaVersion?: number | 'latest';
   sourceType?: 'script' | 'module';
   ecmaFeatures?: {
@@ -89,7 +89,7 @@ export interface PrettierConventions {
  * Markdownlint rule configuration
  * Can be boolean or object with rule-specific options
  */
-export type MarkdownLintRuleConfig = boolean | { style?: string; [key: string]: unknown };
+type MarkdownLintRuleConfig = boolean | { style?: string; [key: string]: unknown };
 
 /**
  * Markdownlint configuration
@@ -109,13 +109,6 @@ export interface ProjectConventions {
   prettier: PrettierConventions;
   editorconfig: EditorConfigConventions;
   markdownlint: MarkdownLintConventions;
-}
-
-/**
- * Parameters for get_code_conventions MCP tool
- */
-export interface GetCodeConventionsParams {
-  projectRoot?: string;
 }
 
 /**

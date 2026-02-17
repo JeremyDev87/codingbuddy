@@ -1,6 +1,6 @@
-export type RuleSource = 'custom' | 'default';
+type RuleSource = 'custom' | 'default';
 
-export interface AgentCommunication {
+interface AgentCommunication {
   language?: string;
   style?: string;
   approach?: string[];

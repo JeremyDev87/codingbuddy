@@ -24,7 +24,7 @@ import {
 /**
  * Result of extracting a mode keyword from a user prompt.
  */
-export interface ExtractModeResult {
+interface ExtractModeResult {
   mode: Mode;
   originalPrompt: string;
   warnings: string[];

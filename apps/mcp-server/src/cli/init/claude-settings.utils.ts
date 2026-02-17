@@ -31,7 +31,7 @@ export class ClaudeSettingsWriteError extends Error {
   }
 }
 
-export interface EnsureClaudeSettingsResult {
+interface EnsureClaudeSettingsResult {
   /** Env keys that were added */
   added: string[];
   /** Env keys that already existed */

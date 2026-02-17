@@ -35,7 +35,7 @@ export class SkillSchemaError extends Error {
  * - name: lowercase with hyphens only (a-z0-9-)
  * - description: 1-500 characters
  */
-export const SkillFrontmatterSchema = z.object({
+const SkillFrontmatterSchema = z.object({
   name: z
     .string()
     .min(1)
@@ -53,8 +53,6 @@ export interface Skill {
   content: string;
   path: string;
 }
-
-export type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>;
 
 // ============================================================================
 // Frontmatter Parsing
