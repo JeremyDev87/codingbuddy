@@ -55,9 +55,7 @@ export function serializeIpcMessage(msg: IpcMessage): string {
 }
 
 /** Known event names for validation */
-const VALID_EVENT_NAMES: ReadonlySet<string> = new Set(
-  Object.values(TUI_EVENTS),
-);
+const VALID_EVENT_NAMES: ReadonlySet<string> = new Set(Object.values(TUI_EVENTS));
 
 /**
  * Type guard: validates that a parsed object has the required IpcMessage shape
@@ -71,11 +69,7 @@ const VALID_EVENT_NAMES: ReadonlySet<string> = new Set(
 function isIpcMessage(value: unknown): value is IpcMessage {
   if (typeof value !== 'object' || value === null) return false;
   const obj = value as Record<string, unknown>;
-  return (
-    typeof obj.type === 'string' &&
-    VALID_EVENT_NAMES.has(obj.type) &&
-    'payload' in obj
-  );
+  return typeof obj.type === 'string' && VALID_EVENT_NAMES.has(obj.type) && 'payload' in obj;
 }
 
 /** Maximum allowed line length (64KB) to prevent excessive memory/CPU during JSON.parse */

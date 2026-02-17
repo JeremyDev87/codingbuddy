@@ -8,20 +8,12 @@ export type { VerbosityLevel };
 export type Mode = (typeof KEYWORDS)[number];
 
 /** Mode Agent names in priority order */
-export const MODE_AGENTS = [
-  'plan-mode',
-  'act-mode',
-  'eval-mode',
-  'auto-mode',
-] as const;
+export const MODE_AGENTS = ['plan-mode', 'act-mode', 'eval-mode', 'auto-mode'] as const;
 
 export type ModeAgent = (typeof MODE_AGENTS)[number];
 
 /** Primary Agents for PLAN mode - centralized definition */
-export const PLAN_PRIMARY_AGENTS = [
-  'solution-architect',
-  'technical-planner',
-] as const;
+export const PLAN_PRIMARY_AGENTS = ['solution-architect', 'technical-planner'] as const;
 
 /** Primary Agents for ACT mode - centralized definition */
 export const ACT_PRIMARY_AGENTS = [
@@ -80,41 +72,40 @@ export interface AgentDisplayInfo {
  * This provides human-readable names and short descriptions for each ACT Primary Agent.
  * The data should match the 'name' and 'description' fields in agent JSON files.
  */
-export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
-  {
-    'tooling-engineer': {
-      name: 'Tooling Engineer',
-      description: 'Config, build tools, bundlers (webpack, vite, eslint)',
-    },
-    'platform-engineer': {
-      name: 'Platform Engineer',
-      description: 'Terraform, Kubernetes, Helm, multi-cloud, GitOps',
-    },
-    'data-engineer': {
-      name: 'Data Engineer',
-      description: 'Database, schema design, migrations, analytics',
-    },
-    'mobile-developer': {
-      name: 'Mobile Developer',
-      description: 'React Native, Flutter, iOS, Android',
-    },
-    'frontend-developer': {
-      name: 'Frontend Developer',
-      description: 'React, Vue, Angular, Web UI development',
-    },
-    'backend-developer': {
-      name: 'Backend Developer',
-      description: 'Node.js, NestJS, Express, API development',
-    },
-    'devops-engineer': {
-      name: 'DevOps Engineer',
-      description: 'CI/CD, Docker, Kubernetes, infrastructure',
-    },
-    'agent-architect': {
-      name: 'Agent Architect',
-      description: 'AI agent systems, MCP servers, LLM integration',
-    },
-  };
+export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> = {
+  'tooling-engineer': {
+    name: 'Tooling Engineer',
+    description: 'Config, build tools, bundlers (webpack, vite, eslint)',
+  },
+  'platform-engineer': {
+    name: 'Platform Engineer',
+    description: 'Terraform, Kubernetes, Helm, multi-cloud, GitOps',
+  },
+  'data-engineer': {
+    name: 'Data Engineer',
+    description: 'Database, schema design, migrations, analytics',
+  },
+  'mobile-developer': {
+    name: 'Mobile Developer',
+    description: 'React Native, Flutter, iOS, Android',
+  },
+  'frontend-developer': {
+    name: 'Frontend Developer',
+    description: 'React, Vue, Angular, Web UI development',
+  },
+  'backend-developer': {
+    name: 'Backend Developer',
+    description: 'Node.js, NestJS, Express, API development',
+  },
+  'devops-engineer': {
+    name: 'DevOps Engineer',
+    description: 'CI/CD, Docker, Kubernetes, infrastructure',
+  },
+  'agent-architect': {
+    name: 'Agent Architect',
+    description: 'AI agent systems, MCP servers, LLM integration',
+  },
+};
 
 /** Localized keywords mapped to their English equivalents */
 export const LOCALIZED_KEYWORD_MAP: Record<string, Mode> = {
@@ -225,9 +216,7 @@ export const SUPPORTED_LANGUAGE_CODES: SupportedLanguageCode[] = Object.keys(
  * }
  * ```
  */
-export const isValidLanguageCode = (
-  code: string,
-): code is SupportedLanguageCode => {
+export const isValidLanguageCode = (code: string): code is SupportedLanguageCode => {
   return code in SUPPORTED_LANGUAGES;
 };
 
@@ -281,12 +270,7 @@ export interface IncludedAgent {
 }
 
 /** Source of Primary Agent selection */
-export type PrimaryAgentSource =
-  | 'explicit'
-  | 'config'
-  | 'intent'
-  | 'context'
-  | 'default';
+export type PrimaryAgentSource = 'explicit' | 'config' | 'intent' | 'context' | 'default';
 
 /** Result of Primary Agent resolution */
 export interface PrimaryAgentResolutionResult {

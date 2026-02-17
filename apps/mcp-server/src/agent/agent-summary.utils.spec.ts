@@ -45,17 +45,14 @@ describe('AgentSummaryUtils', () => {
 
       const summary = createAgentSummary(profile);
 
-      expect(summary.primaryFocus.length).toBeLessThanOrEqual(
-        MAX_PRIMARY_FOCUS_LENGTH,
-      );
+      expect(summary.primaryFocus.length).toBeLessThanOrEqual(MAX_PRIMARY_FOCUS_LENGTH);
       expect(summary.primaryFocus).toMatch(/\.\.\.$/); // Ends with ellipsis
     });
 
     it('should extract first sentence when shorter than 100 chars', () => {
       const profile = {
         name: 'test-agent',
-        systemPrompt:
-          'You are a test specialist. This is more detail that should not appear.',
+        systemPrompt: 'You are a test specialist. This is more detail that should not appear.',
       };
 
       const summary = createAgentSummary(profile);
@@ -193,13 +190,7 @@ describe('AgentSummaryUtils', () => {
       const summary = createAgentSummary(profile);
 
       expect(summary.expertise).toHaveLength(5);
-      expect(summary.expertise).toEqual([
-        'Item1',
-        'Item2',
-        'Item3',
-        'Item4',
-        'Item5',
-      ]);
+      expect(summary.expertise).toEqual(['Item1', 'Item2', 'Item3', 'Item4', 'Item5']);
     });
 
     it('should handle expertise with less than 5 items', () => {

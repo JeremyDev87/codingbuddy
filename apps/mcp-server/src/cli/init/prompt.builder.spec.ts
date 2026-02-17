@@ -77,16 +77,14 @@ describe('prompt.builder', () => {
         path: 'app/page.tsx',
         language: 'typescript',
         category: 'page',
-        preview:
-          'export default function Home() {\n  return <div>Hello</div>;\n}',
+        preview: 'export default function Home() {\n  return <div>Hello</div>;\n}',
         lineCount: 10,
       },
       {
         path: 'components/Button.tsx',
         language: 'typescript',
         category: 'component',
-        preview:
-          'export function Button({ children }) {\n  return <button>{children}</button>;\n}',
+        preview: 'export function Button({ children }) {\n  return <button>{children}</button>;\n}',
         lineCount: 5,
       },
     ],

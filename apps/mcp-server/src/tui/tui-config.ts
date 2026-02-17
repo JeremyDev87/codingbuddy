@@ -39,7 +39,6 @@ export function resolveTuiConfig(input: TuiConfigInput): TuiConfig {
   return {
     shouldRender: true,
     target: 'stderr',
-    reason:
-      'stdio mode: TUI renders to stderr to protect stdout for MCP JSON-RPC',
+    reason: 'stdio mode: TUI renders to stderr to protect stdout for MCP JSON-RPC',
   };
 }

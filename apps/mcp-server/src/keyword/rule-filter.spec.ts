@@ -197,9 +197,7 @@ This is not core.md format.`;
       expect(coreRule?.content).not.toContain('### Act Mode');
 
       // augmented-coding.md should be unchanged
-      const augmentedRule = result.find(
-        r => r.name === 'rules/augmented-coding.md',
-      );
+      const augmentedRule = result.find(r => r.name === 'rules/augmented-coding.md');
       expect(augmentedRule?.content).toBe('Augmented coding content');
     });
 
@@ -224,9 +222,7 @@ This is not core.md format.`;
     });
 
     it('should handle rules without core.md', () => {
-      const rules: RuleContent[] = [
-        { name: 'rules/project.md', content: 'Project content' },
-      ];
+      const rules: RuleContent[] = [{ name: 'rules/project.md', content: 'Project content' }];
 
       const result = filterRulesByMode(rules, 'EVAL');
 

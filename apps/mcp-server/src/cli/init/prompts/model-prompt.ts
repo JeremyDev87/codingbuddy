@@ -5,12 +5,7 @@
  */
 
 import { select } from '@inquirer/prompts';
-import {
-  CLAUDE_OPUS_4,
-  CLAUDE_SONNET_4,
-  CLAUDE_HAIKU_35,
-  DEFAULT_MODEL,
-} from '../../../model';
+import { CLAUDE_OPUS_4, CLAUDE_SONNET_4, CLAUDE_HAIKU_35, DEFAULT_MODEL } from '../../../model';
 
 /**
  * Model choice option for the CLI prompt
@@ -44,8 +39,7 @@ export function getModelChoices(): ModelChoice[] {
     {
       name: 'Claude Haiku 3.5 (Not recommended)',
       value: CLAUDE_HAIKU_35,
-      description:
-        'Fastest but least capable - not recommended for coding tasks',
+      description: 'Fastest but least capable - not recommended for coding tasks',
     },
   ];
 }
@@ -55,9 +49,7 @@ export function getModelChoices(): ModelChoice[] {
  * @param message - Custom message for the prompt
  * @returns Selected model ID
  */
-export async function promptModelSelection(
-  message = 'Select default AI model:',
-): Promise<string> {
+export async function promptModelSelection(message = 'Select default AI model:'): Promise<string> {
   const choices = getModelChoices();
 
   return select({

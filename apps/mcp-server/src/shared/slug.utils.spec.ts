@@ -20,9 +20,7 @@ describe('slug.utils', () => {
     });
 
     it('should replace multiple spaces with single hyphen', () => {
-      expect(generateSlug('Multiple   Spaces   Here')).toBe(
-        'multiple-spaces-here',
-      );
+      expect(generateSlug('Multiple   Spaces   Here')).toBe('multiple-spaces-here');
     });
 
     it('should trim leading and trailing spaces', () => {
@@ -78,9 +76,7 @@ describe('slug.utils', () => {
     });
 
     it('should handle mixed CJK scripts', () => {
-      expect(generateSlug('Hello 世界 ワールド 세계')).toBe(
-        'hello-世界-ワールド-세계',
-      );
+      expect(generateSlug('Hello 世界 ワールド 세계')).toBe('hello-世界-ワールド-세계');
     });
   });
 

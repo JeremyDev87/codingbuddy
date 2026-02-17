@@ -64,9 +64,7 @@ export class IpcStateCache {
       this.latestState.delete(`${activateEvent}:${keyFn(payload)}`);
     };
     this.eventBus.on(deactivateEvent, deactivateHandler);
-    this.removers.push(() =>
-      this.eventBus.off(deactivateEvent, deactivateHandler),
-    );
+    this.removers.push(() => this.eventBus.off(deactivateEvent, deactivateHandler));
   }
 
   /**

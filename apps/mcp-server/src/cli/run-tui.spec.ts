@@ -131,8 +131,6 @@ describe('runTui', () => {
     await runTui();
 
     expect(process.exitCode).toBe(1);
-    expect(stderrSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to connect'),
-    );
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to connect'));
   });
 });

@@ -133,11 +133,7 @@
 
 @layer utilities {
   .brand-gradient {
-    background: linear-gradient(
-      135deg,
-      var(--primary),
-      var(--secondary-foreground)
-    );
+    background: linear-gradient(135deg, var(--primary), var(--secondary-foreground));
   }
 
   .brand-glow {

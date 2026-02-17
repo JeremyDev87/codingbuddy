@@ -14,22 +14,8 @@
           "**/signin/**",
           "**/signup/**"
         ],
-        "imports": [
-          "bcrypt",
-          "argon2",
-          "jsonwebtoken",
-          "passport",
-          "next-auth",
-          "@auth/*",
-          "jose"
-        ],
-        "patterns": [
-          "password",
-          "token",
-          "credential",
-          "session",
-          "authenticate"
-        ]
+        "imports": ["bcrypt", "argon2", "jsonwebtoken", "passport", "next-auth", "@auth/*", "jose"],
+        "patterns": ["password", "token", "credential", "session", "authenticate"]
       },
       "items": [
         {

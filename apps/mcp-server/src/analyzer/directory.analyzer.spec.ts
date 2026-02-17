@@ -58,12 +58,7 @@ describe('directory.analyzer', () => {
     });
 
     it('should detect Feature-Sliced Design', () => {
-      const dirs = [
-        'src/features',
-        'src/entities',
-        'src/shared',
-        'src/widgets',
-      ];
+      const dirs = ['src/features', 'src/entities', 'src/shared', 'src/widgets'];
 
       const result = detectArchitecturePatterns(dirs);
 
@@ -108,24 +103,15 @@ describe('directory.analyzer', () => {
 
     it('should calculate confidence based on matching indicators', () => {
       // All indicators match (4/4 = 1.0)
-      const fullMatch = detectArchitecturePatterns([
-        'app',
-        'components',
-        'lib',
-        'public',
-      ]);
-      const appRouterPattern = fullMatch.find(
-        p => p.name === 'Next.js App Router',
-      );
+      const fullMatch = detectArchitecturePatterns(['app', 'components', 'lib', 'public']);
+      const appRouterPattern = fullMatch.find(p => p.name === 'Next.js App Router');
 
       expect(appRouterPattern?.confidence).toBe(1);
       expect(appRouterPattern?.indicators).toHaveLength(4);
 
       // Partial match (2/4 = 0.5)
       const partialMatch = detectArchitecturePatterns(['app', 'components']);
-      const partialPattern = partialMatch.find(
-        p => p.name === 'Next.js App Router',
-      );
+      const partialPattern = partialMatch.find(p => p.name === 'Next.js App Router');
 
       expect(partialPattern?.confidence).toBe(0.5);
       expect(partialPattern?.indicators).toHaveLength(2);
@@ -137,9 +123,7 @@ describe('directory.analyzer', () => {
       const result = detectArchitecturePatterns(dirs);
 
       for (let i = 1; i < result.length; i++) {
-        expect(result[i - 1].confidence).toBeGreaterThanOrEqual(
-          result[i].confidence,
-        );
+        expect(result[i - 1].confidence).toBeGreaterThanOrEqual(result[i].confidence);
       }
     });
   });

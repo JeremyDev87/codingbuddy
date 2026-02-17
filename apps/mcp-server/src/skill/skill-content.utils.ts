@@ -8,8 +8,7 @@ export const MAX_SKILL_CONTENT_LENGTH = 3000;
  * Standard truncation notice appended when skill content is truncated.
  * Guides users to use the `get_skill` tool for full content.
  */
-export const SKILL_TRUNCATION_NOTICE =
-  '[Content truncated. Use `get_skill` tool for full content]';
+export const SKILL_TRUNCATION_NOTICE = '[Content truncated. Use `get_skill` tool for full content]';
 
 /**
  * Intelligently truncate skill content to stay within token limits
@@ -43,9 +42,7 @@ export function truncateSkillContent(content: string): string {
   const truncated = content.slice(0, MAX_SKILL_CONTENT_LENGTH);
   const lastNewline = truncated.lastIndexOf('\n');
   const cutPoint =
-    lastNewline > MAX_SKILL_CONTENT_LENGTH * 0.8
-      ? lastNewline
-      : MAX_SKILL_CONTENT_LENGTH;
+    lastNewline > MAX_SKILL_CONTENT_LENGTH * 0.8 ? lastNewline : MAX_SKILL_CONTENT_LENGTH;
 
   return truncated.slice(0, cutPoint) + '\n\n---\n' + SKILL_TRUNCATION_NOTICE;
 }

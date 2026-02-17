@@ -9,9 +9,7 @@ describe('ChecklistContextHandler', () => {
   let mockContextService: ContextService;
 
   const mockChecklistResult = {
-    checklists: [
-      { domain: 'security', items: [], priority: 'high', icon: '🔒' },
-    ],
+    checklists: [{ domain: 'security', items: [], priority: 'high', icon: '🔒' }],
     summary: { total: 1, critical: 0, high: 1, medium: 0, low: 0 },
     matchedTriggers: [],
   };
@@ -49,10 +47,7 @@ describe('ChecklistContextHandler', () => {
       analyzeTask: vi.fn().mockResolvedValue(mockAnalysisResult),
     } as unknown as ContextService;
 
-    handler = new ChecklistContextHandler(
-      mockChecklistService,
-      mockContextService,
-    );
+    handler = new ChecklistContextHandler(mockChecklistService, mockContextService);
   });
 
   describe('handle', () => {
@@ -185,9 +180,7 @@ describe('ChecklistContextHandler', () => {
       });
 
       it('should return error when service fails', async () => {
-        mockContextService.analyzeTask = vi
-          .fn()
-          .mockRejectedValue(new Error('Analysis error'));
+        mockContextService.analyzeTask = vi.fn().mockRejectedValue(new Error('Analysis error'));
 
         const result = await handler.handle('analyze_task', {
           prompt: 'test',
@@ -207,18 +200,13 @@ describe('ChecklistContextHandler', () => {
       const definitions = handler.getToolDefinitions();
 
       expect(definitions).toHaveLength(2);
-      expect(definitions.map(d => d.name)).toEqual([
-        'generate_checklist',
-        'analyze_task',
-      ]);
+      expect(definitions.map(d => d.name)).toEqual(['generate_checklist', 'analyze_task']);
     });
 
     it('should have correct required parameters', () => {
       const definitions = handler.getToolDefinitions();
 
-      const generateChecklist = definitions.find(
-        d => d.name === 'generate_checklist',
-      );
+      const generateChecklist = definitions.find(d => d.name === 'generate_checklist');
       expect(generateChecklist?.inputSchema.required).toEqual([]);
 
       const analyzeTask = definitions.find(d => d.name === 'analyze_task');

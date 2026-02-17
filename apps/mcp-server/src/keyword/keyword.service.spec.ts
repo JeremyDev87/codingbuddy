@@ -22,10 +22,7 @@ const mockConfig: KeywordModesConfig = {
       rules: ['rules/core.md'],
       agent: 'plan-mode',
       delegates_to: 'frontend-developer',
-      defaultSpecialists: [
-        'architecture-specialist',
-        'test-strategy-specialist',
-      ],
+      defaultSpecialists: ['architecture-specialist', 'test-strategy-specialist'],
     },
     ACT: {
       description: 'Actual task execution phase',
@@ -33,10 +30,7 @@ const mockConfig: KeywordModesConfig = {
       rules: ['rules/core.md', 'rules/project.md'],
       agent: 'act-mode',
       delegates_to: 'frontend-developer',
-      defaultSpecialists: [
-        'code-quality-specialist',
-        'test-strategy-specialist',
-      ],
+      defaultSpecialists: ['code-quality-specialist', 'test-strategy-specialist'],
     },
     EVAL: {
       description: 'Result review and assessment phase',
@@ -59,10 +53,7 @@ const mockConfig: KeywordModesConfig = {
       instructions: 'Execute PLAN → ACT → EVAL cycle automatically.',
       rules: ['rules/core.md'],
       agent: 'auto-mode',
-      defaultSpecialists: [
-        'architecture-specialist',
-        'test-strategy-specialist',
-      ],
+      defaultSpecialists: ['architecture-specialist', 'test-strategy-specialist'],
     },
   },
   defaultMode: 'PLAN',
@@ -76,23 +67,16 @@ const mockRulesContent: Record<string, string> = {
 const mockAgentData: Record<string, unknown> = {
   'frontend-developer': {
     name: 'Frontend Developer',
-    description:
-      'React/Next.js specialist with TDD and design system experience',
+    description: 'React/Next.js specialist with TDD and design system experience',
     role: {
       expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
     },
   },
   'code-reviewer': {
     name: 'Code Reviewer',
-    description:
-      'Code quality evaluation and improvement suggestion specialist',
+    description: 'Code quality evaluation and improvement suggestion specialist',
     role: {
-      expertise: [
-        'Code Quality',
-        'SOLID Principles',
-        'Performance',
-        'Security',
-      ],
+      expertise: ['Code Quality', 'SOLID Principles', 'Performance', 'Security'],
     },
   },
 };
@@ -115,11 +99,7 @@ describe('KeywordService', () => {
       if (agentData) return Promise.resolve(agentData);
       return Promise.reject(new Error(`Agent not found: ${agentName}`));
     });
-    service = new KeywordService(
-      mockLoadConfig,
-      mockLoadRule,
-      mockLoadAgentInfo,
-    );
+    service = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
   });
 
   describe('parseMode', () => {
@@ -138,8 +118,7 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('frontend-developer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Frontend Developer',
-          description:
-            'React/Next.js specialist with TDD and design system experience',
+          description: 'React/Next.js specialist with TDD and design system experience',
           expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
         });
       });
@@ -155,8 +134,7 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('frontend-developer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Frontend Developer',
-          description:
-            'React/Next.js specialist with TDD and design system experience',
+          description: 'React/Next.js specialist with TDD and design system experience',
           expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
         });
       });
@@ -171,14 +149,8 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('code-reviewer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Code Reviewer',
-          description:
-            'Code quality evaluation and improvement suggestion specialist',
-          expertise: [
-            'Code Quality',
-            'SOLID Principles',
-            'Performance',
-            'Security',
-          ],
+          description: 'Code quality evaluation and improvement suggestion specialist',
+          expertise: ['Code Quality', 'SOLID Principles', 'Performance', 'Security'],
         });
       });
 
@@ -230,9 +202,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('design auth feature');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
       });
 
       it('defaults to PLAN with warning for empty string', async () => {
@@ -240,9 +210,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
       });
 
       it('defaults to PLAN with warning for whitespace only', async () => {
@@ -250,9 +218,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
       });
     });
 
@@ -262,9 +228,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('ACT implement feature');
-        expect(result.warnings).toContain(
-          'Multiple keywords found, using first',
-        );
+        expect(result.warnings).toContain('Multiple keywords found, using first');
       });
 
       it('warns when no content after keyword', async () => {
@@ -288,9 +252,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('계획 some task');
-        expect(result.warnings).toContain(
-          'Multiple keywords found, using first',
-        );
+        expect(result.warnings).toContain('Multiple keywords found, using first');
       });
 
       it('warns for localized + English multi-keyword (계획 PLAN)', async () => {
@@ -298,9 +260,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('PLAN some task');
-        expect(result.warnings).toContain(
-          'Multiple keywords found, using first',
-        );
+        expect(result.warnings).toContain('Multiple keywords found, using first');
       });
 
       it('warns for localized + localized multi-keyword (계획 실행)', async () => {
@@ -308,9 +268,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('실행 some task');
-        expect(result.warnings).toContain(
-          'Multiple keywords found, using first',
-        );
+        expect(result.warnings).toContain('Multiple keywords found, using first');
       });
 
       it('warns for Japanese multi-keyword (計画 実行)', async () => {
@@ -318,9 +276,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('実行 some task');
-        expect(result.warnings).toContain(
-          'Multiple keywords found, using first',
-        );
+        expect(result.warnings).toContain('Multiple keywords found, using first');
       });
 
       it('warns for Spanish multi-keyword (PLANIFICAR ACTUAR)', async () => {
@@ -328,9 +284,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('ACTUAR some task');
-        expect(result.warnings).toContain(
-          'Multiple keywords found, using first',
-        );
+        expect(result.warnings).toContain('Multiple keywords found, using first');
       });
     });
 
@@ -439,9 +393,7 @@ describe('KeywordService', () => {
 
     describe('Spanish keywords', () => {
       it('parses PLANIFICAR as PLAN (uppercase)', async () => {
-        const result = await service.parseMode(
-          'PLANIFICAR diseño de autenticación',
-        );
+        const result = await service.parseMode('PLANIFICAR diseño de autenticación');
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('diseño de autenticación');
@@ -449,9 +401,7 @@ describe('KeywordService', () => {
       });
 
       it('parses planificar as PLAN (lowercase)', async () => {
-        const result = await service.parseMode(
-          'planificar diseño de autenticación',
-        );
+        const result = await service.parseMode('planificar diseño de autenticación');
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('diseño de autenticación');
@@ -494,9 +444,7 @@ describe('KeywordService', () => {
       });
 
       it('parses AUTOMÁTICO as AUTO (Spanish)', async () => {
-        const result = await service.parseMode(
-          'AUTOMÁTICO implementar feature',
-        );
+        const result = await service.parseMode('AUTOMÁTICO implementar feature');
 
         expect(result.mode).toBe('AUTO');
         expect(result.originalPrompt).toBe('implementar feature');
@@ -551,9 +499,7 @@ describe('KeywordService', () => {
           { loadAutoConfigFn: mockLoadAutoConfig },
         );
 
-        const result = await serviceWithAutoConfig.parseMode(
-          'AUTO Add login feature',
-        );
+        const result = await serviceWithAutoConfig.parseMode('AUTO Add login feature');
 
         expect(result.autoConfig).toBeDefined();
         expect(result.autoConfig?.maxIterations).toBe(5);
@@ -569,18 +515,14 @@ describe('KeywordService', () => {
           { loadAutoConfigFn: mockLoadAutoConfig },
         );
 
-        const result = await serviceWithAutoConfig.parseMode(
-          'AUTO Add login feature',
-        );
+        const result = await serviceWithAutoConfig.parseMode('AUTO Add login feature');
 
         expect(result.autoConfig).toBeDefined();
         expect(result.autoConfig?.maxIterations).toBe(3);
       });
 
       it('should fallback to default maxIterations when loadAutoConfigFn throws', async () => {
-        const mockLoadAutoConfig = vi
-          .fn()
-          .mockRejectedValue(new Error('Config error'));
+        const mockLoadAutoConfig = vi.fn().mockRejectedValue(new Error('Config error'));
         const serviceWithAutoConfig = new KeywordService(
           mockLoadConfig,
           mockLoadRule,
@@ -588,9 +530,7 @@ describe('KeywordService', () => {
           { loadAutoConfigFn: mockLoadAutoConfig },
         );
 
-        const result = await serviceWithAutoConfig.parseMode(
-          'AUTO Add login feature',
-        );
+        const result = await serviceWithAutoConfig.parseMode('AUTO Add login feature');
 
         expect(result.autoConfig).toBeDefined();
         expect(result.autoConfig?.maxIterations).toBe(3);
@@ -621,9 +561,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('Please PLAN this feature');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
       });
 
       it('distinguishes from similar words (PLANNING)', async () => {
@@ -631,9 +569,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('PLANNING session today');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
       });
 
       it('distinguishes from similar words (ACTION)', async () => {
@@ -641,9 +577,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('ACTION items for today');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
       });
 
       it('handles special characters in prompt', async () => {
@@ -654,9 +588,7 @@ describe('KeywordService', () => {
       });
 
       it('handles newlines in prompt', async () => {
-        const result = await service.parseMode(
-          'PLAN design feature\nwith auth',
-        );
+        const result = await service.parseMode('PLAN design feature\nwith auth');
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('design feature\nwith auth');
@@ -692,9 +624,7 @@ describe('KeywordService', () => {
     });
 
     it('uses default config with warning for invalid JSON', async () => {
-      mockLoadConfig = vi
-        .fn()
-        .mockRejectedValue(new SyntaxError('Invalid JSON'));
+      mockLoadConfig = vi.fn().mockRejectedValue(new SyntaxError('Invalid JSON'));
       service = new KeywordService(mockLoadConfig, mockLoadRule);
 
       const config = await service.loadModeConfig();
@@ -770,11 +700,7 @@ describe('KeywordService', () => {
           defaultMode: 'PLAN',
         };
         mockLoadConfig = vi.fn().mockResolvedValue(configWithoutAgent);
-        service = new KeywordService(
-          mockLoadConfig,
-          mockLoadRule,
-          mockLoadAgentInfo,
-        );
+        service = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
         const result = await service.parseMode('PLAN design feature');
 
@@ -793,8 +719,7 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('frontend-developer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Frontend Developer',
-          description:
-            'React/Next.js specialist with TDD and design system experience',
+          description: 'React/Next.js specialist with TDD and design system experience',
           expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
         });
         expect(mockLoadAgentInfo).toHaveBeenCalledWith('frontend-developer');
@@ -806,27 +731,15 @@ describe('KeywordService', () => {
         expect(result.delegates_to).toBe('code-reviewer');
         expect(result.delegate_agent_info).toEqual({
           name: 'Code Reviewer',
-          description:
-            'Code quality evaluation and improvement suggestion specialist',
-          expertise: [
-            'Code Quality',
-            'SOLID Principles',
-            'Performance',
-            'Security',
-          ],
+          description: 'Code quality evaluation and improvement suggestion specialist',
+          expertise: ['Code Quality', 'SOLID Principles', 'Performance', 'Security'],
         });
         expect(mockLoadAgentInfo).toHaveBeenCalledWith('code-reviewer');
       });
 
       it('handles missing delegate agent gracefully', async () => {
-        mockLoadAgentInfo = vi
-          .fn()
-          .mockRejectedValue(new Error('Agent not found'));
-        service = new KeywordService(
-          mockLoadConfig,
-          mockLoadRule,
-          mockLoadAgentInfo,
-        );
+        mockLoadAgentInfo = vi.fn().mockRejectedValue(new Error('Agent not found'));
+        service = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
         const result = await service.parseMode('PLAN design feature');
 
@@ -847,11 +760,7 @@ describe('KeywordService', () => {
         mockLoadAgentInfo = vi.fn().mockResolvedValue({
           name: 'Incomplete Agent',
         });
-        service = new KeywordService(
-          mockLoadConfig,
-          mockLoadRule,
-          mockLoadAgentInfo,
-        );
+        service = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
         const result = await service.parseMode('PLAN design feature');
 
@@ -867,11 +776,7 @@ describe('KeywordService', () => {
           description: 'Test description',
           role: { expertise: ['test'] },
         });
-        service = new KeywordService(
-          mockLoadConfig,
-          mockLoadRule,
-          mockLoadAgentInfo,
-        );
+        service = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
         const result = await service.parseMode('PLAN design feature');
 
@@ -910,9 +815,7 @@ describe('KeywordService', () => {
 
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('design auth feature');
-        expect(result.warnings).toContain(
-          'No keyword found, defaulting to PLAN',
-        );
+        expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
         expect(result.agent).toBe('plan-mode');
         expect(result.delegates_to).toBe('frontend-developer');
       });
@@ -951,9 +854,7 @@ describe('KeywordService', () => {
     });
 
     it('respects --no-srp override flag for COMPLEX tasks', async () => {
-      const result = await service.parseMode(
-        'PLAN How should we design the auth? --no-srp',
-      );
+      const result = await service.parseMode('PLAN How should we design the auth? --no-srp');
 
       expect(result.complexity?.complexity).toBe('COMPLEX');
       expect(result.complexity?.applySrp).toBe(false);
@@ -988,25 +889,19 @@ describe('KeywordService', () => {
       const result = await service.parseMode('PLAN design auth feature');
 
       expect(result.parallelAgentsRecommendation).toBeDefined();
-      expect(result.parallelAgentsRecommendation?.specialists).toContain(
-        'architecture-specialist',
-      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain('architecture-specialist');
       expect(result.parallelAgentsRecommendation?.specialists).toContain(
         'test-strategy-specialist',
       );
       expect(result.parallelAgentsRecommendation?.hint).toContain('Task tool');
-      expect(result.parallelAgentsRecommendation?.hint).toContain(
-        'prepare_parallel_agents',
-      );
+      expect(result.parallelAgentsRecommendation?.hint).toContain('prepare_parallel_agents');
     });
 
     it('returns parallel agents recommendation for ACT mode', async () => {
       const result = await service.parseMode('ACT implement auth feature');
 
       expect(result.parallelAgentsRecommendation).toBeDefined();
-      expect(result.parallelAgentsRecommendation?.specialists).toContain(
-        'code-quality-specialist',
-      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain('code-quality-specialist');
       expect(result.parallelAgentsRecommendation?.specialists).toContain(
         'test-strategy-specialist',
       );
@@ -1016,21 +911,13 @@ describe('KeywordService', () => {
       const result = await service.parseMode('EVAL review auth feature');
 
       expect(result.parallelAgentsRecommendation).toBeDefined();
-      expect(result.parallelAgentsRecommendation?.specialists).toContain(
-        'security-specialist',
-      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain('security-specialist');
       expect(result.parallelAgentsRecommendation?.specialists).toContain(
         'accessibility-specialist',
       );
-      expect(result.parallelAgentsRecommendation?.specialists).toContain(
-        'performance-specialist',
-      );
-      expect(result.parallelAgentsRecommendation?.specialists).toContain(
-        'code-quality-specialist',
-      );
-      expect(result.parallelAgentsRecommendation?.specialists).toContain(
-        'migration-specialist',
-      );
+      expect(result.parallelAgentsRecommendation?.specialists).toContain('performance-specialist');
+      expect(result.parallelAgentsRecommendation?.specialists).toContain('code-quality-specialist');
+      expect(result.parallelAgentsRecommendation?.specialists).toContain('migration-specialist');
     });
 
     it('returns specialists as a copy (not reference)', async () => {
@@ -1039,9 +926,7 @@ describe('KeywordService', () => {
 
       // Modifying one should not affect the other
       result1.parallelAgentsRecommendation?.specialists.push('test-specialist');
-      expect(result2.parallelAgentsRecommendation?.specialists).not.toContain(
-        'test-specialist',
-      );
+      expect(result2.parallelAgentsRecommendation?.specialists).not.toContain('test-specialist');
     });
 
     it('includes hint with Task tool usage instructions', async () => {
@@ -1050,9 +935,7 @@ describe('KeywordService', () => {
       expect(result.parallelAgentsRecommendation?.hint).toContain(
         'subagent_type="general-purpose"',
       );
-      expect(result.parallelAgentsRecommendation?.hint).toContain(
-        'run_in_background=true',
-      );
+      expect(result.parallelAgentsRecommendation?.hint).toContain('run_in_background=true');
     });
   });
 
@@ -1080,9 +963,7 @@ describe('KeywordService', () => {
       expect(result.recommended_act_agent).toBeDefined();
       expect(result.recommended_act_agent?.agentName).toBe('backend-developer');
       expect(result.recommended_act_agent?.confidence).toBe(0.9);
-      expect(result.recommended_act_agent?.reason).toBe(
-        'API implementation detected',
-      );
+      expect(result.recommended_act_agent?.reason).toBe('API implementation detected');
     });
 
     it('returns available_act_agents in PLAN mode when resolver is provided', async () => {
@@ -1240,18 +1121,14 @@ describe('KeywordService', () => {
       const result = await service.parseMode('PLAN design feature');
 
       expect(result.activation_message?.activations[0].timestamp).toBeDefined();
-      expect(
-        new Date(result.activation_message!.activations[0].timestamp).getTime(),
-      ).not.toBeNaN();
+      expect(new Date(result.activation_message!.activations[0].timestamp).getTime()).not.toBeNaN();
     });
 
     it('includes activation_message with Korean keywords', async () => {
       const result = await service.parseMode('계획 인증 기능 설계');
 
       expect(result.activation_message).toBeDefined();
-      expect(result.activation_message?.activations[0].name).toBe(
-        'frontend-developer',
-      );
+      expect(result.activation_message?.activations[0].name).toBe('frontend-developer');
     });
 
     it('includes activation_message even without keyword (default mode)', async () => {
@@ -1290,9 +1167,7 @@ describe('KeywordService', () => {
     it('includes resolved agent name in display instruction', async () => {
       const result = await service.parseMode('PLAN design feature');
       // activation_message.formatted에 포함된 agent 이름이 instructions에도 포함
-      expect(result.instructions).toContain(
-        result.activation_message!.formatted,
-      );
+      expect(result.instructions).toContain(result.activation_message!.formatted);
     });
   });
 
@@ -1315,10 +1190,9 @@ describe('KeywordService', () => {
         },
       );
 
-      const result = await serviceWithResolver.parseMode(
-        'ACT implement login API',
-        { recommendedActAgent: 'backend-developer' },
-      );
+      const result = await serviceWithResolver.parseMode('ACT implement login API', {
+        recommendedActAgent: 'backend-developer',
+      });
 
       expect(result.mode).toBe('ACT');
       expect(result.delegates_to).toBe('backend-developer');
@@ -1355,12 +1229,7 @@ describe('KeywordService', () => {
       expect(result.mode).toBe('PLAN');
       expect(result.delegates_to).toBe('solution-architect');
       // Should not pass recommendedActAgent for PLAN mode
-      expect(mockResolver.resolve).toHaveBeenCalledWith(
-        'PLAN',
-        'design API',
-        undefined,
-        undefined,
-      );
+      expect(mockResolver.resolve).toHaveBeenCalledWith('PLAN', 'design API', undefined, undefined);
     });
 
     it('ignores recommendedActAgent in EVAL mode', async () => {
@@ -1407,9 +1276,7 @@ describe('KeywordService', () => {
         },
       );
 
-      const result = await serviceWithResolver.parseMode(
-        'ACT implement feature',
-      );
+      const result = await serviceWithResolver.parseMode('ACT implement feature');
 
       expect(result.delegates_to).toBe('frontend-developer');
       expect(mockResolver.resolve).toHaveBeenCalledWith(
@@ -1486,15 +1353,10 @@ describe('KeywordService', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
-      const productionService = new KeywordService(
-        mockLoadConfig,
-        mockLoadRule,
-        mockLoadAgentInfo,
-      );
+      const productionService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
       // Access private cacheTTL via type assertion for testing
-      const ttl = (productionService as unknown as { cacheTTL: number })
-        .cacheTTL;
+      const ttl = (productionService as unknown as { cacheTTL: number }).cacheTTL;
       expect(ttl).toBe(3600000); // 1 hour
 
       process.env.NODE_ENV = originalEnv;
@@ -1504,11 +1366,7 @@ describe('KeywordService', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
 
-      const devService = new KeywordService(
-        mockLoadConfig,
-        mockLoadRule,
-        mockLoadAgentInfo,
-      );
+      const devService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
       const ttl = (devService as unknown as { cacheTTL: number }).cacheTTL;
       expect(ttl).toBe(300000); // 5 minutes
@@ -1520,11 +1378,7 @@ describe('KeywordService', () => {
       const originalEnv = process.env.NODE_ENV;
       delete process.env.NODE_ENV;
 
-      const defaultService = new KeywordService(
-        mockLoadConfig,
-        mockLoadRule,
-        mockLoadAgentInfo,
-      );
+      const defaultService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
       const ttl = (defaultService as unknown as { cacheTTL: number }).cacheTTL;
       expect(ttl).toBe(300000); // 5 minutes (development default)
@@ -1643,11 +1497,7 @@ describe('KeywordService', () => {
 
     it('calculates 0% hit rate when only misses occur', async () => {
       // Create service and immediately invalidate before any loads
-      const newService = new KeywordService(
-        mockLoadConfig,
-        mockLoadRule,
-        mockLoadAgentInfo,
-      );
+      const newService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo);
 
       // Load and invalidate repeatedly (only misses)
       await newService.loadModeConfig();
@@ -1886,9 +1736,7 @@ describe('KeywordService', () => {
         expect(result.parallelAgentsRecommendation?.specialists).toContain(
           'integration-specialist',
         );
-        expect(result.parallelAgentsRecommendation?.specialists).toContain(
-          'security-specialist',
-        );
+        expect(result.parallelAgentsRecommendation?.specialists).toContain('security-specialist');
       });
     });
 
@@ -1952,15 +1800,12 @@ describe('KeywordService', () => {
         'event sourcing implementation',
         'real-time data synchronization',
         'async messaging between services',
-      ])(
-        'detects event-architecture-specialist for English: %s',
-        async prompt => {
-          const result = await service.parseMode(`PLAN ${prompt}`);
-          expect(result.parallelAgentsRecommendation?.specialists).toContain(
-            'event-architecture-specialist',
-          );
-        },
-      );
+      ])('detects event-architecture-specialist for English: %s', async prompt => {
+        const result = await service.parseMode(`PLAN ${prompt}`);
+        expect(result.parallelAgentsRecommendation?.specialists).toContain(
+          'event-architecture-specialist',
+        );
+      });
 
       it.each([
         '이벤트 기반 아키텍처 설계',
@@ -1968,15 +1813,12 @@ describe('KeywordService', () => {
         '분산 트랜잭션 처리',
         '실시간 데이터 동기화',
         '비동기 통신 구현',
-      ])(
-        'detects event-architecture-specialist for Korean: %s',
-        async prompt => {
-          const result = await service.parseMode(`PLAN ${prompt}`);
-          expect(result.parallelAgentsRecommendation?.specialists).toContain(
-            'event-architecture-specialist',
-          );
-        },
-      );
+      ])('detects event-architecture-specialist for Korean: %s', async prompt => {
+        const result = await service.parseMode(`PLAN ${prompt}`);
+        expect(result.parallelAgentsRecommendation?.specialists).toContain(
+          'event-architecture-specialist',
+        );
+      });
 
       it('does not detect event-architecture-specialist for unrelated prompts', async () => {
         const result = await service.parseMode('PLAN create login form');
@@ -2007,9 +1849,7 @@ describe('KeywordService', () => {
         'cutover strategy for new system',
       ])('detects migration-specialist for English: %s', async prompt => {
         const result = await service.parseMode(`PLAN ${prompt}`);
-        expect(result.parallelAgentsRecommendation?.specialists).toContain(
-          'migration-specialist',
-        );
+        expect(result.parallelAgentsRecommendation?.specialists).toContain('migration-specialist');
       });
 
       it.each([
@@ -2023,9 +1863,7 @@ describe('KeywordService', () => {
         '시스템 전환 전략',
       ])('detects migration-specialist for Korean: %s', async prompt => {
         const result = await service.parseMode(`PLAN ${prompt}`);
-        expect(result.parallelAgentsRecommendation?.specialists).toContain(
-          'migration-specialist',
-        );
+        expect(result.parallelAgentsRecommendation?.specialists).toContain('migration-specialist');
       });
 
       it('does not detect migration-specialist for unrelated prompts', async () => {
@@ -2044,9 +1882,7 @@ describe('KeywordService', () => {
           'architecture-specialist',
         );
         // Context-aware specialists
-        expect(result.parallelAgentsRecommendation?.specialists).toContain(
-          'migration-specialist',
-        );
+        expect(result.parallelAgentsRecommendation?.specialists).toContain('migration-specialist');
         expect(result.parallelAgentsRecommendation?.specialists).toContain(
           'observability-specialist',
         );
@@ -2057,21 +1893,19 @@ describe('KeywordService', () => {
   describe('auto-included skills and agents (MCP mode enhancement)', () => {
     describe('included_skills', () => {
       it('auto-includes skills when skill functions are provided', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (prompt: string): SkillRecommendationInfo[] => {
-            if (prompt.includes('debug')) {
-              return [
-                {
-                  skillName: 'systematic-debugging',
-                  confidence: 'high',
-                  matchedPatterns: ['debug'],
-                  description: 'Debug systematically',
-                },
-              ];
-            }
-            return [];
-          },
-        );
+        const mockSkillRecommendations = vi.fn((prompt: string): SkillRecommendationInfo[] => {
+          if (prompt.includes('debug')) {
+            return [
+              {
+                skillName: 'systematic-debugging',
+                confidence: 'high',
+                matchedPatterns: ['debug'],
+                description: 'Debug systematically',
+              },
+            ];
+          }
+          return [];
+        });
 
         const mockLoadSkillContent = vi.fn(
           async (skillName: string): Promise<SkillContentInfo | null> => {
@@ -2109,40 +1943,38 @@ describe('KeywordService', () => {
       });
 
       it('limits included skills to 3 maximum (default)', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [
-            {
-              skillName: 'skill-1',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 1',
-            },
-            {
-              skillName: 'skill-2',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 2',
-            },
-            {
-              skillName: 'skill-3',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 3',
-            },
-            {
-              skillName: 'skill-4',
-              confidence: 'medium',
-              matchedPatterns: [],
-              description: 'Skill 4',
-            },
-            {
-              skillName: 'skill-5',
-              confidence: 'low',
-              matchedPatterns: [],
-              description: 'Skill 5',
-            },
-          ],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => [
+          {
+            skillName: 'skill-1',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 1',
+          },
+          {
+            skillName: 'skill-2',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 2',
+          },
+          {
+            skillName: 'skill-3',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 3',
+          },
+          {
+            skillName: 'skill-4',
+            confidence: 'medium',
+            matchedPatterns: [],
+            description: 'Skill 4',
+          },
+          {
+            skillName: 'skill-5',
+            confidence: 'low',
+            matchedPatterns: [],
+            description: 'Skill 5',
+          },
+        ]);
 
         const mockLoadSkillContent = vi.fn(
           async (skillName: string): Promise<SkillContentInfo | null> => ({
@@ -2166,36 +1998,30 @@ describe('KeywordService', () => {
 
         expect(result.included_skills).toBeDefined();
         expect(result.included_skills).toHaveLength(3);
-        expect(result.included_skills!.map(s => s.name)).toEqual([
-          'skill-1',
-          'skill-2',
-          'skill-3',
-        ]);
+        expect(result.included_skills!.map(s => s.name)).toEqual(['skill-1', 'skill-2', 'skill-3']);
       });
 
       it('respects runtime config for max included skills', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [
-            {
-              skillName: 'skill-1',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 1',
-            },
-            {
-              skillName: 'skill-2',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 2',
-            },
-            {
-              skillName: 'skill-3',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 3',
-            },
-          ],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => [
+          {
+            skillName: 'skill-1',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 1',
+          },
+          {
+            skillName: 'skill-2',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 2',
+          },
+          {
+            skillName: 'skill-3',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 3',
+          },
+        ]);
 
         const mockLoadSkillContent = vi.fn(
           async (skillName: string): Promise<SkillContentInfo | null> => ({
@@ -2219,47 +2045,41 @@ describe('KeywordService', () => {
           },
         );
 
-        const result =
-          await serviceWithConfiguredSkills.parseMode('PLAN complex task');
+        const result = await serviceWithConfiguredSkills.parseMode('PLAN complex task');
 
         expect(result.included_skills).toBeDefined();
         expect(result.included_skills).toHaveLength(2);
-        expect(result.included_skills!.map(s => s.name)).toEqual([
-          'skill-1',
-          'skill-2',
-        ]);
+        expect(result.included_skills!.map(s => s.name)).toEqual(['skill-1', 'skill-2']);
         expect(mockGetMaxIncludedSkills).toHaveBeenCalled();
       });
 
       it('falls back to default when getMaxIncludedSkillsFn returns null', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [
-            {
-              skillName: 'skill-1',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 1',
-            },
-            {
-              skillName: 'skill-2',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 2',
-            },
-            {
-              skillName: 'skill-3',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 3',
-            },
-            {
-              skillName: 'skill-4',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 4',
-            },
-          ],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => [
+          {
+            skillName: 'skill-1',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 1',
+          },
+          {
+            skillName: 'skill-2',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 2',
+          },
+          {
+            skillName: 'skill-3',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 3',
+          },
+          {
+            skillName: 'skill-4',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 4',
+          },
+        ]);
 
         const mockLoadSkillContent = vi.fn(
           async (skillName: string): Promise<SkillContentInfo | null> => ({
@@ -2290,34 +2110,32 @@ describe('KeywordService', () => {
       });
 
       it('falls back to default when getMaxIncludedSkillsFn throws', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [
-            {
-              skillName: 'skill-1',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 1',
-            },
-            {
-              skillName: 'skill-2',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 2',
-            },
-            {
-              skillName: 'skill-3',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 3',
-            },
-            {
-              skillName: 'skill-4',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Skill 4',
-            },
-          ],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => [
+          {
+            skillName: 'skill-1',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 1',
+          },
+          {
+            skillName: 'skill-2',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 2',
+          },
+          {
+            skillName: 'skill-3',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 3',
+          },
+          {
+            skillName: 'skill-4',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Skill 4',
+          },
+        ]);
 
         const mockLoadSkillContent = vi.fn(
           async (skillName: string): Promise<SkillContentInfo | null> => ({
@@ -2328,9 +2146,7 @@ describe('KeywordService', () => {
         );
 
         // Config throws error - should use default (3)
-        const mockGetMaxIncludedSkills = vi
-          .fn()
-          .mockRejectedValue(new Error('Config error'));
+        const mockGetMaxIncludedSkills = vi.fn().mockRejectedValue(new Error('Config error'));
 
         const serviceWithErrorConfig = new KeywordService(
           mockLoadConfig,
@@ -2350,9 +2166,7 @@ describe('KeywordService', () => {
       });
 
       it('does not include skills when no matches found', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => []);
         const mockLoadSkillContent = vi.fn();
 
         const serviceWithSkills = new KeywordService(
@@ -2372,22 +2186,20 @@ describe('KeywordService', () => {
       });
 
       it('skips skills that fail to load', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [
-            {
-              skillName: 'working-skill',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Working',
-            },
-            {
-              skillName: 'failing-skill',
-              confidence: 'high',
-              matchedPatterns: [],
-              description: 'Failing',
-            },
-          ],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => [
+          {
+            skillName: 'working-skill',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Working',
+          },
+          {
+            skillName: 'failing-skill',
+            confidence: 'high',
+            matchedPatterns: [],
+            description: 'Failing',
+          },
+        ]);
 
         const mockLoadSkillContent = vi.fn(
           async (skillName: string): Promise<SkillContentInfo | null> => {
@@ -2453,10 +2265,7 @@ describe('KeywordService', () => {
     describe('included_agent', () => {
       it('auto-includes agent system prompt when function is provided', async () => {
         const mockLoadAgentSystemPrompt = vi.fn(
-          async (
-            agentName: string,
-            mode: Mode,
-          ): Promise<AgentSystemPromptInfo | null> => ({
+          async (agentName: string, mode: Mode): Promise<AgentSystemPromptInfo | null> => ({
             agentName,
             displayName: 'Frontend Developer',
             systemPrompt: `You are a ${agentName} in ${mode} mode. Follow TDD.`,
@@ -2471,9 +2280,7 @@ describe('KeywordService', () => {
           { loadAgentSystemPromptFn: mockLoadAgentSystemPrompt },
         );
 
-        const result = await serviceWithAgentPrompt.parseMode(
-          'PLAN design feature',
-        );
+        const result = await serviceWithAgentPrompt.parseMode('PLAN design feature');
 
         expect(result.included_agent).toBeDefined();
         expect(result.included_agent).toMatchObject({
@@ -2485,10 +2292,7 @@ describe('KeywordService', () => {
 
       it('still includes agent when delegates_to falls back to default', async () => {
         const mockLoadAgentSystemPrompt = vi.fn(
-          async (
-            agentName: string,
-            mode: Mode,
-          ): Promise<AgentSystemPromptInfo | null> => ({
+          async (agentName: string, mode: Mode): Promise<AgentSystemPromptInfo | null> => ({
             agentName,
             displayName: 'Default Agent',
             systemPrompt: `You are ${agentName} in ${mode} mode.`,
@@ -2520,18 +2324,13 @@ describe('KeywordService', () => {
           { loadAgentSystemPromptFn: mockLoadAgentSystemPrompt },
         );
 
-        const result = await serviceWithAgentPrompt.parseMode(
-          'PLAN design feature',
-        );
+        const result = await serviceWithAgentPrompt.parseMode('PLAN design feature');
 
         // Since no PrimaryAgentResolver is provided and no delegates_to in config,
         // it will use default 'frontend-developer' (fallback behavior)
         expect(result.delegates_to).toBe('frontend-developer');
         // Agent system prompt function SHOULD be called with the fallback agent
-        expect(mockLoadAgentSystemPrompt).toHaveBeenCalledWith(
-          'frontend-developer',
-          'PLAN',
-        );
+        expect(mockLoadAgentSystemPrompt).toHaveBeenCalledWith('frontend-developer', 'PLAN');
         expect(result.included_agent).toBeDefined();
         expect(result.included_agent?.name).toBe('Default Agent');
       });
@@ -2548,9 +2347,7 @@ describe('KeywordService', () => {
           { loadAgentSystemPromptFn: mockLoadAgentSystemPrompt },
         );
 
-        const result = await serviceWithAgentPrompt.parseMode(
-          'PLAN design feature',
-        );
+        const result = await serviceWithAgentPrompt.parseMode('PLAN design feature');
 
         // Should not throw, just skip agent inclusion
         expect(result.mode).toBe('PLAN');
@@ -2567,13 +2364,9 @@ describe('KeywordService', () => {
 
       it('includes agent for ACT mode with different delegate', async () => {
         const mockLoadAgentSystemPrompt = vi.fn(
-          async (
-            agentName: string,
-            mode: Mode,
-          ): Promise<AgentSystemPromptInfo | null> => ({
+          async (agentName: string, mode: Mode): Promise<AgentSystemPromptInfo | null> => ({
             agentName,
-            displayName:
-              agentName === 'code-reviewer' ? 'Code Reviewer' : 'Dev',
+            displayName: agentName === 'code-reviewer' ? 'Code Reviewer' : 'Dev',
             systemPrompt: `You are ${agentName} in ${mode} mode.`,
             description: 'Specialist agent',
           }),
@@ -2586,8 +2379,7 @@ describe('KeywordService', () => {
           { loadAgentSystemPromptFn: mockLoadAgentSystemPrompt },
         );
 
-        const result =
-          await serviceWithAgentPrompt.parseMode('EVAL review code');
+        const result = await serviceWithAgentPrompt.parseMode('EVAL review code');
 
         expect(result.included_agent).toBeDefined();
         expect(result.included_agent?.name).toBe('Code Reviewer');
@@ -2597,16 +2389,14 @@ describe('KeywordService', () => {
 
     describe('combined skills and agent inclusion', () => {
       it('includes both skills and agent in response', async () => {
-        const mockSkillRecommendations = vi.fn(
-          (): SkillRecommendationInfo[] => [
-            {
-              skillName: 'test-skill',
-              confidence: 'high',
-              matchedPatterns: ['test'],
-              description: 'Test skill',
-            },
-          ],
-        );
+        const mockSkillRecommendations = vi.fn((): SkillRecommendationInfo[] => [
+          {
+            skillName: 'test-skill',
+            confidence: 'high',
+            matchedPatterns: ['test'],
+            description: 'Test skill',
+          },
+        ]);
 
         const mockLoadSkillContent = vi.fn(
           async (): Promise<SkillContentInfo | null> => ({
@@ -2617,10 +2407,7 @@ describe('KeywordService', () => {
         );
 
         const mockLoadAgentSystemPrompt = vi.fn(
-          async (
-            agentName: string,
-            mode: Mode,
-          ): Promise<AgentSystemPromptInfo | null> => ({
+          async (agentName: string, mode: Mode): Promise<AgentSystemPromptInfo | null> => ({
             agentName,
             displayName: 'Test Agent',
             systemPrompt: `Agent prompt for ${mode}`,
@@ -2667,9 +2454,7 @@ describe('KeywordService', () => {
       });
 
       it('returns undefined when loadAgentInfoFn returns non-object', async () => {
-        const mockLoadAgentInfoString = vi
-          .fn()
-          .mockResolvedValue('not an object');
+        const mockLoadAgentInfoString = vi.fn().mockResolvedValue('not an object');
         const serviceWithStringAgent = new KeywordService(
           mockLoadConfig,
           mockLoadRule,
@@ -2709,8 +2494,7 @@ describe('KeywordService', () => {
           // No PrimaryAgentResolver
         );
 
-        const result =
-          await serviceWithoutEvalDelegate.parseMode('EVAL review code');
+        const result = await serviceWithoutEvalDelegate.parseMode('EVAL review code');
 
         // Since no resolver and no delegates_to for EVAL, should have no delegate
         expect(result.mode).toBe('EVAL');
@@ -2747,14 +2531,12 @@ ${'Even more content.\n'.repeat(150)}`;
       },
     };
 
-    const mockLoadLongRule = vi
-      .fn()
-      .mockImplementation(async (path: string) => {
-        if (path === 'rules/long-core.md') {
-          return longRuleContent;
-        }
-        return mockRulesContent[path] ?? '';
-      });
+    const mockLoadLongRule = vi.fn().mockImplementation(async (path: string) => {
+      if (path === 'rules/long-core.md') {
+        return longRuleContent;
+      }
+      return mockRulesContent[path] ?? '';
+    });
 
     it('should include full content with "full" verbosity', async () => {
       const service = new KeywordService(
@@ -2784,9 +2566,7 @@ ${'Even more content.\n'.repeat(150)}`;
       });
 
       expect(result.rules).toHaveLength(1);
-      expect(result.rules[0].content.length).toBeLessThan(
-        longRuleContent.length,
-      );
+      expect(result.rules[0].content.length).toBeLessThan(longRuleContent.length);
       expect(result.rules[0].content).toContain('[Content truncated');
     });
 
@@ -2817,9 +2597,7 @@ ${'Even more content.\n'.repeat(150)}`;
 
       expect(result.rules).toHaveLength(1);
       // Long content should be truncated with default standard verbosity
-      expect(result.rules[0].content.length).toBeLessThan(
-        longRuleContent.length,
-      );
+      expect(result.rules[0].content.length).toBeLessThan(longRuleContent.length);
       expect(result.rules[0].content).toContain('[Content truncated');
     });
 

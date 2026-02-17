@@ -74,10 +74,7 @@ export interface ToolHandler {
    * }
    * ```
    */
-  handle(
-    toolName: string,
-    args: Record<string, unknown> | undefined,
-  ): Promise<ToolResponse | null>;
+  handle(toolName: string, args: Record<string, unknown> | undefined): Promise<ToolResponse | null>;
 
   /**
    * Get the tool definitions that this handler provides.

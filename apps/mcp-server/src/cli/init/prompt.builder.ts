@@ -132,9 +132,7 @@ export function buildAnalysisPrompt(analysis: ProjectAnalysis): string {
   }
 
   sections.push('\n\n---\n');
-  sections.push(
-    'Based on this analysis, generate a CodingBuddyConfig JSON object.',
-  );
+  sections.push('Based on this analysis, generate a CodingBuddyConfig JSON object.');
 
   return sections.join('');
 }
@@ -226,9 +224,7 @@ export function formatConfigFiles(config: ConfigFilesSummary): string {
     lines.push('### TypeScript Configuration');
     lines.push(`- Path: \`${config.typescript.path}\``);
     if (config.typescript.strict !== undefined) {
-      lines.push(
-        `- Strict mode: ${config.typescript.strict ? 'enabled' : 'disabled'}`,
-      );
+      lines.push(`- Strict mode: ${config.typescript.strict ? 'enabled' : 'disabled'}`);
     }
     if (config.typescript.target) {
       lines.push(`- Target: ${config.typescript.target}`);
@@ -265,9 +261,7 @@ export function formatConfigFiles(config: ConfigFilesSummary): string {
       lines.push(`- Semicolons: ${config.prettier.semi ? 'yes' : 'no'}`);
     }
     if (config.prettier.singleQuote !== undefined) {
-      lines.push(
-        `- Quotes: ${config.prettier.singleQuote ? 'single' : 'double'}`,
-      );
+      lines.push(`- Quotes: ${config.prettier.singleQuote ? 'single' : 'double'}`);
     }
     if (config.prettier.trailingComma) {
       lines.push(`- Trailing comma: ${config.prettier.trailingComma}`);

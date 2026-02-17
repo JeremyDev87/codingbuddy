@@ -19,9 +19,7 @@ describe('AgentHandler', () => {
   beforeEach(() => {
     mockAgentService = {
       getAgentSystemPrompt: vi.fn().mockResolvedValue(mockSystemPromptResult),
-      prepareParallelAgents: vi
-        .fn()
-        .mockResolvedValue(mockParallelAgentsResult),
+      prepareParallelAgents: vi.fn().mockResolvedValue(mockParallelAgentsResult),
     } as unknown as AgentService;
 
     handler = new AgentHandler(mockAgentService);
@@ -55,9 +53,7 @@ describe('AgentHandler', () => {
         expect(result?.isError).toBe(true);
         expect(result?.content[0]).toMatchObject({
           type: 'text',
-          text: expect.stringContaining(
-            'Missing required parameter: agentName',
-          ),
+          text: expect.stringContaining('Missing required parameter: agentName'),
         });
       });
 
@@ -79,9 +75,7 @@ describe('AgentHandler', () => {
         expect(result?.isError).toBe(true);
         expect(result?.content[0]).toMatchObject({
           type: 'text',
-          text: expect.stringContaining(
-            'Missing required parameter: context.mode',
-          ),
+          text: expect.stringContaining('Missing required parameter: context.mode'),
         });
       });
 
@@ -223,9 +217,7 @@ describe('AgentHandler', () => {
         expect(result?.isError).toBe(true);
         expect(result?.content[0]).toMatchObject({
           type: 'text',
-          text: expect.stringContaining(
-            'Missing required parameter: specialists',
-          ),
+          text: expect.stringContaining('Missing required parameter: specialists'),
         });
       });
 
@@ -359,9 +351,7 @@ describe('AgentHandler', () => {
       };
 
       beforeEach(() => {
-        mockAgentService.dispatchAgents = vi
-          .fn()
-          .mockResolvedValue(mockDispatchResult);
+        mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(mockDispatchResult);
       });
 
       it('should dispatch agents with valid args', async () => {
@@ -430,9 +420,7 @@ describe('AgentHandler', () => {
       });
 
       it('should return error when service fails', async () => {
-        mockAgentService.dispatchAgents = vi
-          .fn()
-          .mockRejectedValue(new Error('Dispatch failed'));
+        mockAgentService.dispatchAgents = vi.fn().mockRejectedValue(new Error('Dispatch failed'));
 
         const result = await handler.handle('dispatch_agents', {
           mode: 'EVAL',
@@ -463,25 +451,13 @@ describe('AgentHandler', () => {
     it('should have correct required parameters', () => {
       const definitions = handler.getToolDefinitions();
 
-      const getAgentSystemPrompt = definitions.find(
-        d => d.name === 'get_agent_system_prompt',
-      );
-      expect(getAgentSystemPrompt?.inputSchema.required).toEqual([
-        'agentName',
-        'context',
-      ]);
+      const getAgentSystemPrompt = definitions.find(d => d.name === 'get_agent_system_prompt');
+      expect(getAgentSystemPrompt?.inputSchema.required).toEqual(['agentName', 'context']);
 
-      const prepareParallelAgents = definitions.find(
-        d => d.name === 'prepare_parallel_agents',
-      );
-      expect(prepareParallelAgents?.inputSchema.required).toEqual([
-        'mode',
-        'specialists',
-      ]);
+      const prepareParallelAgents = definitions.find(d => d.name === 'prepare_parallel_agents');
+      expect(prepareParallelAgents?.inputSchema.required).toEqual(['mode', 'specialists']);
 
-      const dispatchAgents = definitions.find(
-        d => d.name === 'dispatch_agents',
-      );
+      const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
       expect(dispatchAgents?.inputSchema.required).toEqual(['mode']);
     });
   });

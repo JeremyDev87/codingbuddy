@@ -2,11 +2,7 @@
  * Pure serialization functions for context documents.
  * These functions are stateless and have no side effects.
  */
-import type {
-  ContextDocument,
-  ContextMetadata,
-  ContextSection,
-} from './context-document.types';
+import type { ContextDocument, ContextMetadata, ContextSection } from './context-document.types';
 import { CONTEXT_MARKDOWN } from './context-document.types';
 
 /**
@@ -66,11 +62,7 @@ export function serializeMetadata(metadata: ContextMetadata): string[] {
  * @param header - Header line (e.g., "### Decisions")
  * @param items - Optional array of items to serialize
  */
-function serializeList(
-  lines: string[],
-  header: string,
-  items: string[] | undefined,
-): void {
+function serializeList(lines: string[], header: string, items: string[] | undefined): void {
   if (items && items.length > 0) {
     lines.push(header);
     for (const item of items) {
@@ -115,9 +107,7 @@ export function serializeSection(section: ContextSection): string[] {
     const confidence = section.recommendedActAgentConfidence
       ? ` (confidence: ${section.recommendedActAgentConfidence})`
       : '';
-    lines.push(
-      `${RECOMMENDED_ACT_AGENT_PREFIX} ${section.recommendedActAgent}${confidence}`,
-    );
+    lines.push(`${RECOMMENDED_ACT_AGENT_PREFIX} ${section.recommendedActAgent}${confidence}`);
   }
 
   if (section.status) {
@@ -240,19 +230,14 @@ export function mergeSection(
     timestamp,
     task: newData.task || existing.task,
     primaryAgent: newData.primaryAgent || existing.primaryAgent,
-    recommendedActAgent:
-      newData.recommendedActAgent || existing.recommendedActAgent,
+    recommendedActAgent: newData.recommendedActAgent || existing.recommendedActAgent,
     recommendedActAgentConfidence:
-      newData.recommendedActAgentConfidence ??
-      existing.recommendedActAgentConfidence,
+      newData.recommendedActAgentConfidence ?? existing.recommendedActAgentConfidence,
     decisions: mergeArraysUnique(existing.decisions, newData.decisions),
     notes: mergeArraysUnique(existing.notes, newData.notes),
     progress: mergeArraysUnique(existing.progress, newData.progress),
     findings: mergeArraysUnique(existing.findings, newData.findings),
-    recommendations: mergeArraysUnique(
-      existing.recommendations,
-      newData.recommendations,
-    ),
+    recommendations: mergeArraysUnique(existing.recommendations, newData.recommendations),
     status: newData.status || existing.status,
   };
 }

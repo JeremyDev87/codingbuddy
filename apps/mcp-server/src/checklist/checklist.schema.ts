@@ -13,9 +13,7 @@ import {
 } from './checklist.types';
 
 /** Valid priority values (derived from shared constants) */
-const VALID_PRIORITIES: ReadonlySet<ChecklistPriority> = new Set(
-  CHECKLIST_PRIORITIES,
-);
+const VALID_PRIORITIES: ReadonlySet<ChecklistPriority> = new Set(CHECKLIST_PRIORITIES);
 
 /** Valid domain values (derived from shared constants) */
 const VALID_DOMAINS: ReadonlySet<ChecklistDomain> = new Set(CHECKLIST_DOMAINS);
@@ -81,9 +79,7 @@ function validateItem(item: unknown, path: string): string[] {
 
   // Optional: reference (string if present)
   if (obj.reference !== undefined && typeof obj.reference !== 'string') {
-    errors.push(
-      `${path}.reference: Expected string, got ${typeof obj.reference}`,
-    );
+    errors.push(`${path}.reference: Expected string, got ${typeof obj.reference}`);
   }
 
   return errors;
@@ -120,9 +116,7 @@ function validateTriggers(triggers: unknown, path: string): string[] {
     } else {
       obj.imports.forEach((imp, i) => {
         if (typeof imp !== 'string') {
-          errors.push(
-            `${path}.imports[${i}]: Expected string, got ${typeof imp}`,
-          );
+          errors.push(`${path}.imports[${i}]: Expected string, got ${typeof imp}`);
         }
       });
     }
@@ -135,9 +129,7 @@ function validateTriggers(triggers: unknown, path: string): string[] {
     } else {
       obj.patterns.forEach((pattern, i) => {
         if (typeof pattern !== 'string') {
-          errors.push(
-            `${path}.patterns[${i}]: Expected string, got ${typeof pattern}`,
-          );
+          errors.push(`${path}.patterns[${i}]: Expected string, got ${typeof pattern}`);
         }
       });
     }
@@ -246,9 +238,7 @@ export function validateChecklistSchema(data: unknown): ValidationResult {
  * @returns Validated ChecklistDefinition
  * @throws ChecklistSchemaError if validation fails
  */
-export function parseAndValidateChecklist(
-  jsonContent: string,
-): ChecklistDefinition {
+export function parseAndValidateChecklist(jsonContent: string): ChecklistDefinition {
   let data: unknown;
 
   try {
@@ -291,9 +281,7 @@ export function isValidChecklistItem(item: unknown): item is ChecklistItem {
 /**
  * Type guard for ChecklistCategory
  */
-export function isValidChecklistCategory(
-  category: unknown,
-): category is ChecklistCategory {
+export function isValidChecklistCategory(category: unknown): category is ChecklistCategory {
   if (!category || typeof category !== 'object') return false;
   const obj = category as Record<string, unknown>;
   return (

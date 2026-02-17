@@ -30,10 +30,7 @@ export class AgentService {
   /**
    * Get complete system prompt for a single agent to be executed as subagent
    */
-  async getAgentSystemPrompt(
-    agentName: string,
-    context: AgentContext,
-  ): Promise<AgentSystemPrompt> {
+  async getAgentSystemPrompt(agentName: string, context: AgentContext): Promise<AgentSystemPrompt> {
     const agentProfile = await this.rulesService.getAgent(agentName);
 
     const systemPrompt = buildAgentSystemPrompt(agentProfile, context);
@@ -87,9 +84,7 @@ export class AgentService {
     includeFullPrompt: boolean,
   ): Promise<{ agents: PreparedAgent[]; failedAgents: FailedAgent[] }> {
     const results = await Promise.all(
-      specialists.map(name =>
-        this.tryLoadAgent(name, context, includeFullPrompt),
-      ),
+      specialists.map(name => this.tryLoadAgent(name, context, includeFullPrompt)),
     );
 
     const agents: PreparedAgent[] = [];
@@ -119,10 +114,7 @@ export class AgentService {
     specialistName: string,
     context: AgentContext,
     includeFullPrompt: boolean,
-  ): Promise<
-    | { success: true; agent: PreparedAgent }
-    | { success: false; error: FailedAgent }
-  > {
+  ): Promise<{ success: true; agent: PreparedAgent } | { success: false; error: FailedAgent }> {
     try {
       const profile = await this.rulesService.getAgent(specialistName);
       const agent: PreparedAgent = {
@@ -180,16 +172,11 @@ export class AgentService {
    */
   getRecommendedAgents(modeDefaults: string[], files: string[]): string[] {
     const recommended = new Set<string>(modeDefaults);
-    files.forEach(file =>
-      this.addFilePatternAgents(file.toLowerCase(), recommended),
-    );
+    files.forEach(file => this.addFilePatternAgents(file.toLowerCase(), recommended));
     return Array.from(recommended);
   }
 
-  private addFilePatternAgents(
-    fileLower: string,
-    recommended: Set<string>,
-  ): void {
+  private addFilePatternAgents(fileLower: string, recommended: Set<string>): void {
     for (const [pattern, agents] of Object.entries(FILE_PATTERN_SPECIALISTS)) {
       if (fileLower.includes(pattern)) {
         agents.forEach(agent => recommended.add(agent));
@@ -217,10 +204,7 @@ export class AgentService {
     // Dispatch primary agent
     if (input.primaryAgent) {
       try {
-        const agentPrompt = await this.getAgentSystemPrompt(
-          input.primaryAgent,
-          context,
-        );
+        const agentPrompt = await this.getAgentSystemPrompt(input.primaryAgent, context);
         result.primaryAgent = {
           name: input.primaryAgent,
           displayName: agentPrompt.displayName,
@@ -233,13 +217,8 @@ export class AgentService {
         };
       } catch (error) {
         const reason = error instanceof Error ? error.message : 'Unknown error';
-        this.logger.warn(
-          `Failed to dispatch primary agent '${input.primaryAgent}': ${reason}`,
-        );
-        result.failedAgents = [
-          ...(result.failedAgents || []),
-          { id: input.primaryAgent, reason },
-        ];
+        this.logger.warn(`Failed to dispatch primary agent '${input.primaryAgent}': ${reason}`);
+        result.failedAgents = [...(result.failedAgents || []), { id: input.primaryAgent, reason }];
       }
     }
 
@@ -260,8 +239,7 @@ export class AgentService {
           dispatchParams: {
             subagent_type: 'general-purpose',
             prompt:
-              agent.taskPrompt ||
-              `Perform ${agent.displayName} analysis in ${input.mode} mode`,
+              agent.taskPrompt || `Perform ${agent.displayName} analysis in ${input.mode} mode`,
             description: agent.description,
             run_in_background: true,
           },

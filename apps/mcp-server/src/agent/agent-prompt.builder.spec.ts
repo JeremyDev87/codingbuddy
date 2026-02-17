@@ -10,16 +10,10 @@ import type { AgentContext } from './agent.types';
 describe('agent-prompt.builder', () => {
   const mockAgentProfile: AgentProfile = {
     name: 'Security Specialist',
-    description:
-      'OAuth 2.0/OIDC, JWT security, web security vulnerabilities specialist',
+    description: 'OAuth 2.0/OIDC, JWT security, web security vulnerabilities specialist',
     role: {
       title: 'Security Specialist',
-      expertise: [
-        'OAuth 2.0/OIDC',
-        'JWT security',
-        'XSS/CSRF protection',
-        'OWASP compliance',
-      ],
+      expertise: ['OAuth 2.0/OIDC', 'JWT security', 'XSS/CSRF protection', 'OWASP compliance'],
       responsibilities: [
         'Review authentication and authorization code',
         'Identify security vulnerabilities',
@@ -95,19 +89,14 @@ describe('agent-prompt.builder', () => {
     it('should include task description', () => {
       const result = buildAgentSystemPrompt(mockAgentProfile, mockContext);
 
-      expect(result).toContain(
-        'Review OAuth implementation for security vulnerabilities',
-      );
+      expect(result).toContain('Review OAuth implementation for security vulnerabilities');
     });
 
     it('should handle missing target files gracefully', () => {
       const contextWithoutFiles: AgentContext = {
         mode: 'EVAL',
       };
-      const result = buildAgentSystemPrompt(
-        mockAgentProfile,
-        contextWithoutFiles,
-      );
+      const result = buildAgentSystemPrompt(mockAgentProfile, contextWithoutFiles);
 
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
@@ -118,10 +107,7 @@ describe('agent-prompt.builder', () => {
         mode: 'EVAL',
         targetFiles: ['src/file.ts'],
       };
-      const result = buildAgentSystemPrompt(
-        mockAgentProfile,
-        contextWithoutTask,
-      );
+      const result = buildAgentSystemPrompt(mockAgentProfile, contextWithoutTask);
 
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);

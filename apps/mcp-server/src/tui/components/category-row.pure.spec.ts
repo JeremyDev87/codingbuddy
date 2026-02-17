@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  buildCategoryLabel,
-  buildCompactCategoryRow,
-} from './category-row.pure';
+import { buildCategoryLabel, buildCompactCategoryRow } from './category-row.pure';
 import { estimateDisplayWidth } from '../utils/display-width';
 
 describe('category-row.pure', () => {

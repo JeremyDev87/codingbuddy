@@ -16,13 +16,7 @@
     ],
     "supported_databases": {
       "note": "This agent supports multiple database systems. See project.md 'Tech Stack' for your project's specific database.",
-      "relational": [
-        "PostgreSQL",
-        "MySQL/MariaDB",
-        "SQLite",
-        "SQL Server",
-        "Oracle"
-      ],
+      "relational": ["PostgreSQL", "MySQL/MariaDB", "SQLite", "SQL Server", "Oracle"],
       "nosql": ["MongoDB", "Redis", "Elasticsearch", "DynamoDB", "Cassandra"],
       "analytical": ["BigQuery", "Snowflake", "Redshift", "ClickHouse"]
     },
@@ -166,11 +160,7 @@
   "workflow": {
     "schema_design": {
       "approach": "Design-First with TDD",
-      "applies_to": [
-        "New table/entity creation",
-        "Schema modifications",
-        "Relationship changes"
-      ],
+      "applies_to": ["New table/entity creation", "Schema modifications", "Relationship changes"],
       "steps": [
         "1. Analyze business requirements",
         "2. Create ERD/data model",
@@ -195,11 +185,7 @@
     },
     "analytics_data": {
       "approach": "Dimensional Modeling",
-      "applies_to": [
-        "Reporting tables",
-        "Dashboard data",
-        "Aggregated metrics"
-      ],
+      "applies_to": ["Reporting tables", "Dashboard data", "Aggregated metrics"],
       "steps": [
         "1. Identify business questions",
         "2. Design fact and dimension tables",

@@ -75,9 +75,7 @@ export class McpService implements OnModuleInit {
   private async updateProjectRootFromClient(): Promise<void> {
     // Skip if CODINGBUDDY_PROJECT_ROOT is already set
     if (process.env.CODINGBUDDY_PROJECT_ROOT) {
-      this.logger.debug(
-        'CODINGBUDDY_PROJECT_ROOT already set, skipping roots/list request',
-      );
+      this.logger.debug('CODINGBUDDY_PROJECT_ROOT already set, skipping roots/list request');
       return;
     }
 
@@ -178,11 +176,7 @@ export class McpService implements OnModuleInit {
   private registerResourcesOn(server: Server) {
     server.setRequestHandler(ListResourcesRequestSchema, async () => {
       const agents = await this.rulesService.listAgents();
-      const coreRules = [
-        'rules/core.md',
-        'rules/project.md',
-        'rules/augmented-coding.md',
-      ];
+      const coreRules = ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'];
 
       return {
         resources: [
@@ -227,10 +221,7 @@ export class McpService implements OnModuleInit {
             ],
           };
         } catch {
-          throw new McpError(
-            ErrorCode.InternalError,
-            'Failed to load project configuration',
-          );
+          throw new McpError(ErrorCode.InternalError, 'Failed to load project configuration');
         }
       }
 
@@ -246,18 +237,13 @@ export class McpService implements OnModuleInit {
           contents: [
             {
               uri: uri,
-              mimeType: relativePath.endsWith('.json')
-                ? 'application/json'
-                : 'text/markdown',
+              mimeType: relativePath.endsWith('.json') ? 'application/json' : 'text/markdown',
               text: content,
             },
           ],
         };
       } catch {
-        throw new McpError(
-          ErrorCode.InvalidRequest,
-          `Resource not found: ${uri}`,
-        );
+        throw new McpError(ErrorCode.InvalidRequest, `Resource not found: ${uri}`);
       }
     });
   }
@@ -269,9 +255,7 @@ export class McpService implements OnModuleInit {
   private registerToolsOn(server: Server) {
     // Collect tool definitions from all handlers
     server.setRequestHandler(ListToolsRequestSchema, async () => {
-      const tools = this.toolHandlers.flatMap(handler =>
-        handler.getToolDefinitions(),
-      );
+      const tools = this.toolHandlers.flatMap(handler => handler.getToolDefinitions());
       return { tools };
     });
 
@@ -302,8 +286,7 @@ export class McpService implements OnModuleInit {
         prompts: [
           {
             name: 'activate_agent',
-            description:
-              'Activate a specific specialist agent with project context',
+            description: 'Activate a specific specialist agent with project context',
             arguments: [
               {
                 name: 'role',
@@ -321,14 +304,12 @@ export class McpService implements OnModuleInit {
         const role = String(request.params.arguments?.role);
         try {
           const agent = await this.rulesService.getAgent(role);
-          const coreRules =
-            await this.rulesService.getRuleContent('rules/core.md');
+          const coreRules = await this.rulesService.getRuleContent('rules/core.md');
           const settings = await this.configService.getSettings();
           const projectContext = this.formatProjectContext(settings);
 
           const expertise = agent.role.expertise.join(', ');
-          const responsibilities =
-            agent.role.responsibilities?.join('\n- ') ?? '';
+          const responsibilities = agent.role.responsibilities?.join('\n- ') ?? '';
 
           return {
             messages: [
@@ -342,10 +323,7 @@ export class McpService implements OnModuleInit {
             ],
           };
         } catch {
-          throw new McpError(
-            ErrorCode.InvalidRequest,
-            `Agent '${role}' not found.`,
-          );
+          throw new McpError(ErrorCode.InvalidRequest, `Agent '${role}' not found.`);
         }
       }
       throw new McpError(ErrorCode.MethodNotFound, 'Prompt not found');

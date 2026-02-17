@@ -423,10 +423,7 @@
         "conditional_branches": {
           "description": "if/else, 삼항연산자, switch 각 분기 추적",
           "question": "각 분기가 의도대로 동작하는가?",
-          "common_bugs": [
-            "조건 누락으로 특정 케이스만 처리",
-            "else 분기 미구현"
-          ]
+          "common_bugs": ["조건 누락으로 특정 케이스만 처리", "else 분기 미구현"]
         },
         "data_transformations": {
           "description": "타입 변환 함수의 입출력 필드 매핑 확인",
@@ -446,11 +443,7 @@
         "edge_cases": {
           "description": "null, undefined, 빈 배열, 경계값 처리",
           "question": "경계 조건이 올바르게 처리되는가?",
-          "common_bugs": [
-            "빈 배열 처리 누락",
-            "null 참조 에러",
-            "경계값 off-by-one"
-          ]
+          "common_bugs": ["빈 배열 처리 누락", "null 참조 에러", "경계값 off-by-one"]
         }
       },
       "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],

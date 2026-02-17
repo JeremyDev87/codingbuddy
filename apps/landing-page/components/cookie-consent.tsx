@@ -19,9 +19,7 @@ export const CookieConsent = () => {
   const [consent, setConsent] = useState<string | null>(null);
   const declineRef = useRef<HTMLButtonElement>(null);
 
-  const effectiveConsent = isClient
-    ? (consent ?? localStorage.getItem(CONSENT_KEY))
-    : null;
+  const effectiveConsent = isClient ? (consent ?? localStorage.getItem(CONSENT_KEY)) : null;
 
   useEffect(() => {
     if (isClient && effectiveConsent === null) {
@@ -64,12 +62,7 @@ export const CookieConsent = () => {
                 <p className="text-muted-foreground text-sm">{t('message')}</p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  ref={declineRef}
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDecline}
-                >
+                <Button ref={declineRef} variant="outline" size="sm" onClick={handleDecline}>
                   {t('decline')}
                 </Button>
                 <Button size="sm" onClick={handleAccept}>

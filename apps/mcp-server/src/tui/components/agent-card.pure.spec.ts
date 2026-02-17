@@ -114,12 +114,7 @@ describe('tui/components/agent-card.pure', () => {
 
   describe('buildInlineCard', () => {
     it('should build single-line format with icon, name, progress bar, percentage, and status', () => {
-      const result = buildInlineCard(
-        '\ud83e\udd16',
-        'solution-architect',
-        50,
-        'Running',
-      );
+      const result = buildInlineCard('\ud83e\udd16', 'solution-architect', 50, 'Running');
       expect(result).toBe(
         '\ud83e\udd16 solution-architect     \u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591  50%  Running',
       );
@@ -147,9 +142,7 @@ describe('tui/components/agent-card.pure', () => {
       expect(result).toContain('100%');
       expect(result).toContain('Done');
       // All filled
-      expect(result).toContain(
-        '\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593',
-      );
+      expect(result).toContain('\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593');
     });
   });
 });

@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import {
-  extractModeFromPrompt,
-  getDefaultModeConfig,
-  loadRulesForMode,
-} from './keyword-core';
+import { extractModeFromPrompt, getDefaultModeConfig, loadRulesForMode } from './keyword-core';
 import type { KeywordModesConfig } from '../keyword/keyword.types';
 
 // ============================================================================
@@ -122,9 +118,7 @@ describe('extractModeFromPrompt', () => {
       );
 
       expect(result.mode).toBe('PLAN');
-      expect(result.originalPrompt).toBe(
-        '\uc778\uc99d \uae30\ub2a5 \uc124\uacc4',
-      );
+      expect(result.originalPrompt).toBe('\uc778\uc99d \uae30\ub2a5 \uc124\uacc4');
     });
 
     it('recognises Japanese keyword \u5b9f\u884c (ACT)', () => {
@@ -134,16 +128,11 @@ describe('extractModeFromPrompt', () => {
       );
 
       expect(result.mode).toBe('ACT');
-      expect(result.originalPrompt).toBe(
-        '\u30ed\u30b0\u30a4\u30f3\u5b9f\u88c5',
-      );
+      expect(result.originalPrompt).toBe('\u30ed\u30b0\u30a4\u30f3\u5b9f\u88c5');
     });
 
     it('recognises Chinese keyword \u8bc4\u4f30 (EVAL)', () => {
-      const result = extractModeFromPrompt(
-        '\u8bc4\u4f30 \u4ee3\u7801\u8d28\u91cf',
-        'PLAN',
-      );
+      const result = extractModeFromPrompt('\u8bc4\u4f30 \u4ee3\u7801\u8d28\u91cf', 'PLAN');
 
       expect(result.mode).toBe('EVAL');
       expect(result.originalPrompt).toBe('\u4ee3\u7801\u8d28\u91cf');
@@ -171,10 +160,7 @@ describe('extractModeFromPrompt', () => {
     });
 
     it('warns when a localized keyword follows an English keyword', () => {
-      const result = extractModeFromPrompt(
-        'PLAN \uacc4\ud68d something',
-        'PLAN',
-      );
+      const result = extractModeFromPrompt('PLAN \uacc4\ud68d something', 'PLAN');
 
       expect(result.mode).toBe('PLAN');
       expect(result.warnings).toContain('Multiple keywords found, using first');
@@ -183,9 +169,7 @@ describe('extractModeFromPrompt', () => {
     it('does not warn when only a single keyword is present', () => {
       const result = extractModeFromPrompt('PLAN do work', 'PLAN');
 
-      expect(result.warnings).not.toContain(
-        'Multiple keywords found, using first',
-      );
+      expect(result.warnings).not.toContain('Multiple keywords found, using first');
     });
   });
 
@@ -390,11 +374,7 @@ describe('loadRulesForMode', () => {
       ACT: {
         description: 'Act',
         instructions: 'Act instructions',
-        rules: [
-          'rules/core.md',
-          'rules/project.md',
-          'rules/augmented-coding.md',
-        ],
+        rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       },
       EVAL: {
         description: 'Eval',
@@ -404,11 +384,7 @@ describe('loadRulesForMode', () => {
       AUTO: {
         description: 'Auto',
         instructions: 'Auto instructions',
-        rules: [
-          'rules/core.md',
-          'rules/project.md',
-          'rules/augmented-coding.md',
-        ],
+        rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       },
     },
     defaultMode: 'PLAN',
@@ -436,9 +412,7 @@ describe('loadRulesForMode', () => {
   it('loads all rules successfully for ACT mode (3 rules)', async () => {
     const readRuleFn = vi
       .fn()
-      .mockImplementation((path: string) =>
-        Promise.resolve(`content of ${path}`),
-      );
+      .mockImplementation((path: string) => Promise.resolve(`content of ${path}`));
 
     const rules = await loadRulesForMode('ACT', config, readRuleFn);
 
@@ -489,18 +463,13 @@ describe('loadRulesForMode', () => {
     const rules = await loadRulesForMode('ACT', config, readRuleFn);
 
     expect(rules).toHaveLength(2);
-    expect(rules.map(r => r.name)).toEqual([
-      'rules/core.md',
-      'rules/augmented-coding.md',
-    ]);
+    expect(rules.map(r => r.name)).toEqual(['rules/core.md', 'rules/augmented-coding.md']);
   });
 
   it('calls readRuleFn with the exact paths from config', async () => {
     const readRuleFn = vi
       .fn()
-      .mockImplementation((path: string) =>
-        Promise.resolve(`content of ${path}`),
-      );
+      .mockImplementation((path: string) => Promise.resolve(`content of ${path}`));
 
     await loadRulesForMode('AUTO', config, readRuleFn);
 
@@ -548,9 +517,7 @@ describe('loadRulesForMode', () => {
     const readRuleFn = vi.fn().mockImplementation((path: string) => {
       // Simulate varying response times — order should still match config
       const delay = path.includes('project') ? 50 : 0;
-      return new Promise<string>(resolve =>
-        setTimeout(() => resolve(`content of ${path}`), delay),
-      );
+      return new Promise<string>(resolve => setTimeout(() => resolve(`content of ${path}`), delay));
     });
 
     const rules = await loadRulesForMode('ACT', config, readRuleFn);

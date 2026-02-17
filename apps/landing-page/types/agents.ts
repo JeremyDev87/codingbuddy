@@ -4,12 +4,7 @@
  */
 
 /** 에이전트 카테고리 분류 */
-export type AgentCategory =
-  | 'Planning'
-  | 'Development'
-  | 'Review'
-  | 'Security'
-  | 'UX';
+export type AgentCategory = 'Planning' | 'Development' | 'Review' | 'Security' | 'UX';
 
 /** AI 에이전트 인터페이스 */
 export interface Agent {

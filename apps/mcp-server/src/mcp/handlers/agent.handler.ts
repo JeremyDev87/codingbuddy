@@ -27,11 +27,7 @@ export class AgentHandler extends AbstractHandler {
   }
 
   protected getHandledTools(): string[] {
-    return [
-      'get_agent_system_prompt',
-      'prepare_parallel_agents',
-      'dispatch_agents',
-    ];
+    return ['get_agent_system_prompt', 'prepare_parallel_agents', 'dispatch_agents'];
   }
 
   protected async handleTool(
@@ -160,8 +156,7 @@ export class AgentHandler extends AbstractHandler {
             },
             includeParallel: {
               type: 'boolean',
-              description:
-                'Whether to include parallel specialist agents (default: false)',
+              description: 'Whether to include parallel specialist agents (default: false)',
             },
           },
           required: ['mode'],
@@ -261,9 +256,7 @@ export class AgentHandler extends AbstractHandler {
 
     const specialists = extractStringArray(args, 'specialists');
     if (!specialists || specialists.length === 0) {
-      return createErrorResponse(
-        'Missing required parameter: specialists (array of agent names)',
-      );
+      return createErrorResponse('Missing required parameter: specialists (array of agent names)');
     }
 
     const targetFiles = extractStringArray(args, 'targetFiles');

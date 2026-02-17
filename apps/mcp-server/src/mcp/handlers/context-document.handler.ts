@@ -4,16 +4,10 @@ import type { ToolResponse } from '../response.utils';
 import { AbstractHandler } from './abstract-handler';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
-import {
-  extractRequiredString,
-  extractOptionalString,
-} from '../../shared/validation.constants';
+import { extractRequiredString, extractOptionalString } from '../../shared/validation.constants';
 import { CONTEXT_FILE_PATH } from '../../context/context-document.types';
 import type { Mode } from '../../keyword/keyword.types';
-import {
-  isValidVerbosity,
-  getVerbosityConfig,
-} from '../../shared/verbosity.types';
+import { isValidVerbosity, getVerbosityConfig } from '../../shared/verbosity.types';
 
 /**
  * Handler for context document tools.
@@ -82,13 +76,11 @@ Call this at the end of each mode to persist decisions and notes.`,
             mode: {
               type: 'string',
               enum: ['PLAN', 'ACT', 'EVAL', 'AUTO'],
-              description:
-                'Current workflow mode. PLAN resets document, others append.',
+              description: 'Current workflow mode. PLAN resets document, others append.',
             },
             title: {
               type: 'string',
-              description:
-                'Task title (required for PLAN mode, ignored for others)',
+              description: 'Task title (required for PLAN mode, ignored for others)',
             },
             task: {
               type: 'string',
@@ -148,8 +140,7 @@ Call this at the end of each mode to persist decisions and notes.`,
           properties: {
             keepRecentSectionsFull: {
               type: 'number',
-              description:
-                'Number of recent sections to keep full (default: 2)',
+              description: 'Number of recent sections to keep full (default: 2)',
             },
             keepRecentItems: {
               type: 'number',
@@ -168,9 +159,7 @@ Call this at the end of each mode to persist decisions and notes.`,
   ): Promise<ToolResponse> {
     // Extract verbosity level (defaults to 'standard')
     const verbosityStr = extractOptionalString(args, 'verbosity') || 'standard';
-    const verbosity = isValidVerbosity(verbosityStr)
-      ? verbosityStr
-      : 'standard';
+    const verbosity = isValidVerbosity(verbosityStr) ? verbosityStr : 'standard';
     const verbosityConfig = getVerbosityConfig(verbosity);
 
     // Apply verbosity settings to read options
@@ -237,9 +226,7 @@ Call this at the end of each mode to persist decisions and notes.`,
     }
 
     if (!['PLAN', 'ACT', 'EVAL', 'AUTO'].includes(mode)) {
-      return createErrorResponse(
-        `Invalid mode: ${mode}. Must be PLAN, ACT, EVAL, or AUTO`,
-      );
+      return createErrorResponse(`Invalid mode: ${mode}. Must be PLAN, ACT, EVAL, or AUTO`);
     }
 
     const typedMode = mode as Mode;
@@ -251,18 +238,13 @@ Call this at the end of each mode to persist decisions and notes.`,
         title,
         task: extractOptionalString(args, 'task') ?? undefined,
         primaryAgent: extractOptionalString(args, 'primaryAgent') ?? undefined,
-        recommendedActAgent:
-          extractOptionalString(args, 'recommendedActAgent') ?? undefined,
+        recommendedActAgent: extractOptionalString(args, 'recommendedActAgent') ?? undefined,
         recommendedActAgentConfidence:
           typeof args?.recommendedActAgentConfidence === 'number'
             ? args.recommendedActAgentConfidence
             : undefined,
-        decisions: Array.isArray(args?.decisions)
-          ? (args.decisions as string[])
-          : undefined,
-        notes: Array.isArray(args?.notes)
-          ? (args.notes as string[])
-          : undefined,
+        decisions: Array.isArray(args?.decisions) ? (args.decisions as string[]) : undefined,
+        notes: Array.isArray(args?.notes) ? (args.notes as string[]) : undefined,
       });
 
       if (!result.success) {
@@ -282,30 +264,21 @@ Call this at the end of each mode to persist decisions and notes.`,
       mode: typedMode,
       task: extractOptionalString(args, 'task') ?? undefined,
       primaryAgent: extractOptionalString(args, 'primaryAgent') ?? undefined,
-      recommendedActAgent:
-        extractOptionalString(args, 'recommendedActAgent') ?? undefined,
+      recommendedActAgent: extractOptionalString(args, 'recommendedActAgent') ?? undefined,
       recommendedActAgentConfidence:
         typeof args?.recommendedActAgentConfidence === 'number'
           ? args.recommendedActAgentConfidence
           : undefined,
-      decisions: Array.isArray(args?.decisions)
-        ? (args.decisions as string[])
-        : undefined,
+      decisions: Array.isArray(args?.decisions) ? (args.decisions as string[]) : undefined,
       notes: Array.isArray(args?.notes) ? (args.notes as string[]) : undefined,
-      progress: Array.isArray(args?.progress)
-        ? (args.progress as string[])
-        : undefined,
-      findings: Array.isArray(args?.findings)
-        ? (args.findings as string[])
-        : undefined,
+      progress: Array.isArray(args?.progress) ? (args.progress as string[]) : undefined,
+      findings: Array.isArray(args?.findings) ? (args.findings as string[]) : undefined,
       recommendations: Array.isArray(args?.recommendations)
         ? (args.recommendations as string[])
         : undefined,
       status:
-        (extractOptionalString(args, 'status') as
-          | 'in_progress'
-          | 'completed'
-          | 'blocked') ?? undefined,
+        (extractOptionalString(args, 'status') as 'in_progress' | 'completed' | 'blocked') ??
+        undefined,
     });
 
     if (!result.success) {
@@ -325,11 +298,8 @@ Call this at the end of each mode to persist decisions and notes.`,
   ): Promise<ToolResponse> {
     // Extract optional parameters
     const keepRecentSectionsFull =
-      typeof args?.keepRecentSectionsFull === 'number'
-        ? args.keepRecentSectionsFull
-        : 2;
-    const keepRecentItems =
-      typeof args?.keepRecentItems === 'number' ? args.keepRecentItems : 5;
+      typeof args?.keepRecentSectionsFull === 'number' ? args.keepRecentSectionsFull : 2;
+    const keepRecentItems = typeof args?.keepRecentItems === 'number' ? args.keepRecentItems : 5;
 
     // Validate parameters
     if (keepRecentSectionsFull < 0) {

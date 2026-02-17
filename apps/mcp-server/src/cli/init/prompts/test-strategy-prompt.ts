@@ -45,36 +45,33 @@ export function validateCoverage(value: string): true | string {
 /**
  * Test approach choices
  */
-export const APPROACH_CHOICES: TestChoice<TestStrategySettings['approach']>[] =
-  [
-    {
-      name: 'TDD (Test-Driven Development)',
-      value: 'tdd',
-      description: 'Write tests first, then implement',
-    },
-    {
-      name: 'BDD (Behavior-Driven Development)',
-      value: 'bdd',
-      description: 'Focus on behavior specifications',
-    },
-    {
-      name: 'Test-After',
-      value: 'test-after',
-      description: 'Write tests after implementation',
-    },
-    {
-      name: 'Mixed',
-      value: 'mixed',
-      description: 'TDD for core logic, test-after for UI',
-    },
-  ];
+export const APPROACH_CHOICES: TestChoice<TestStrategySettings['approach']>[] = [
+  {
+    name: 'TDD (Test-Driven Development)',
+    value: 'tdd',
+    description: 'Write tests first, then implement',
+  },
+  {
+    name: 'BDD (Behavior-Driven Development)',
+    value: 'bdd',
+    description: 'Focus on behavior specifications',
+  },
+  {
+    name: 'Test-After',
+    value: 'test-after',
+    description: 'Write tests after implementation',
+  },
+  {
+    name: 'Mixed',
+    value: 'mixed',
+    description: 'TDD for core logic, test-after for UI',
+  },
+];
 
 /**
  * Mocking strategy choices
  */
-export const MOCKING_STRATEGY_CHOICES: TestChoice<
-  TestStrategySettings['mockingStrategy']
->[] = [
+export const MOCKING_STRATEGY_CHOICES: TestChoice<TestStrategySettings['mockingStrategy']>[] = [
   {
     name: 'Minimal',
     value: 'minimal',

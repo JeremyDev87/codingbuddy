@@ -5,10 +5,7 @@
  * Each mode (PLAN, ACT, EVAL) has its own strategy implementation.
  */
 
-import type {
-  PrimaryAgentResolutionResult,
-  ResolutionContext,
-} from '../keyword.types';
+import type { PrimaryAgentResolutionResult, ResolutionContext } from '../keyword.types';
 
 /**
  * Project config interface for Primary Agent configuration.

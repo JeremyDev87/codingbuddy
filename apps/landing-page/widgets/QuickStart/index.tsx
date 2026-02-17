@@ -23,10 +23,7 @@ export const QuickStart = ({ locale }: WidgetProps) => {
       className="mx-auto w-full max-w-4xl px-4 py-16"
     >
       <div className="mb-8 text-center">
-        <h2
-          id="quick-start-heading"
-          className="text-3xl font-bold tracking-tight"
-        >
+        <h2 id="quick-start-heading" className="text-3xl font-bold tracking-tight">
           {t('title')}
         </h2>
         <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
@@ -45,9 +42,7 @@ export const QuickStart = ({ locale }: WidgetProps) => {
             </AccordionTrigger>
             <AccordionContent>
               <div className="pt-2 pl-8">
-                <p className="text-muted-foreground mb-3 text-sm">
-                  {t(`${step.title}Desc`)}
-                </p>
+                <p className="text-muted-foreground mb-3 text-sm">{t(`${step.title}Desc`)}</p>
                 <CodeSnippet
                   code={step.code}
                   copyLabel={t('copy')}

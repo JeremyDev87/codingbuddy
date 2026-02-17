@@ -201,25 +201,18 @@ export const CONTEXT_MARKDOWN = {
 /**
  * Pattern to match section headers: ## MODE (timestamp)
  */
-export const CONTEXT_SECTION_HEADER_PATTERN =
-  /^## (PLAN|ACT|EVAL|AUTO) \((.+)\)$/;
+export const CONTEXT_SECTION_HEADER_PATTERN = /^## (PLAN|ACT|EVAL|AUTO) \((.+)\)$/;
 
 /**
  * Valid context status values.
  */
 export const VALID_CONTEXT_STATUSES = ['active', 'completed'] as const;
-export const VALID_SECTION_STATUSES = [
-  'in_progress',
-  'completed',
-  'blocked',
-] as const;
+export const VALID_SECTION_STATUSES = ['in_progress', 'completed', 'blocked'] as const;
 
 /**
  * Type guard for context status.
  */
-export function isValidContextStatus(
-  value: string,
-): value is ContextMetadata['status'] {
+export function isValidContextStatus(value: string): value is ContextMetadata['status'] {
   return VALID_CONTEXT_STATUSES.includes(value as ContextMetadata['status']);
 }
 
@@ -229,9 +222,7 @@ export function isValidContextStatus(
 export function isValidSectionStatus(
   value: string,
 ): value is NonNullable<ContextSection['status']> {
-  return VALID_SECTION_STATUSES.includes(
-    value as NonNullable<ContextSection['status']>,
-  );
+  return VALID_SECTION_STATUSES.includes(value as NonNullable<ContextSection['status']>);
 }
 
 /**
@@ -268,9 +259,7 @@ export function truncateArray(
   return items
     .slice(0, limits.maxArrayItems)
     .map(item =>
-      item.length > limits.maxItemLength
-        ? item.substring(0, limits.maxItemLength)
-        : item,
+      item.length > limits.maxItemLength ? item.substring(0, limits.maxItemLength) : item,
     );
 }
 

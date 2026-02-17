@@ -346,9 +346,7 @@ describe('useEventBus', () => {
   it('should cleanup listeners on unmount', () => {
     const { unmount } = render(<TestComponent eventBus={eventBus} />);
 
-    expect(eventBus.listenerCount(TUI_EVENTS.AGENT_ACTIVATED)).toBeGreaterThan(
-      0,
-    );
+    expect(eventBus.listenerCount(TUI_EVENTS.AGENT_ACTIVATED)).toBeGreaterThan(0);
     expect(eventBus.listenerCount(TUI_EVENTS.MODE_CHANGED)).toBeGreaterThan(0);
 
     unmount();

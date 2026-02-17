@@ -107,9 +107,7 @@ describe('CustomService', () => {
 
     it('skips invalid JSON files', async () => {
       mockFs.access.mockResolvedValue(undefined);
-      mockFs.readdir.mockResolvedValue([
-        createMockDirent('invalid.json', true),
-      ]);
+      mockFs.readdir.mockResolvedValue([createMockDirent('invalid.json', true)]);
       mockFs.readFile.mockResolvedValue('not valid json');
 
       const result = await service.listCustomAgents('/project');
@@ -134,9 +132,7 @@ describe('CustomService', () => {
   describe('listCustomSkills', () => {
     it('returns skills from .codingbuddy/skills/*/SKILL.md', async () => {
       mockFs.access.mockResolvedValue(undefined);
-      mockFs.readdir.mockResolvedValue([
-        createMockDirent('my-workflow', false),
-      ]);
+      mockFs.readdir.mockResolvedValue([createMockDirent('my-workflow', false)]);
       mockFs.readFile.mockResolvedValue('# Skill content');
 
       const result = await service.listCustomSkills('/project');

@@ -29,8 +29,7 @@ export function renderConfigAsJson(
   }
 
   // Add ai config if any options are provided
-  const configWithAi =
-    Object.keys(aiConfig).length > 0 ? { ...config, ai: aiConfig } : config;
+  const configWithAi = Object.keys(aiConfig).length > 0 ? { ...config, ai: aiConfig } : config;
 
   return JSON.stringify(configWithAi, null, 2);
 }

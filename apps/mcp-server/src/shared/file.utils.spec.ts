@@ -53,9 +53,9 @@ describe('file.utils', () => {
       const largeContent = 'A'.repeat(2 * 1024 * 1024);
       await fs.writeFile(testFile, largeContent, 'utf-8');
 
-      await expect(
-        safeReadFile(testFile, { maxSize: 1024 * 1024 }),
-      ).rejects.toThrow('File too large (2 MB). Maximum size is 1 MB.');
+      await expect(safeReadFile(testFile, { maxSize: 1024 * 1024 })).rejects.toThrow(
+        'File too large (2 MB). Maximum size is 1 MB.',
+      );
     });
 
     it('should read file when within size limit', async () => {
@@ -100,9 +100,7 @@ describe('file.utils', () => {
       const content = 'A'.repeat(1024 * 1024 + 1);
       await fs.writeFile(testFile, content, 'utf-8');
 
-      await expect(
-        safeReadFile(testFile, { maxSize: 1024 * 1024 }),
-      ).rejects.toThrow(FileSizeError);
+      await expect(safeReadFile(testFile, { maxSize: 1024 * 1024 })).rejects.toThrow(FileSizeError);
     });
 
     it('should read file when within allowed base path', async () => {
@@ -122,17 +120,17 @@ describe('file.utils', () => {
       // Try to read with path traversal
       const maliciousPath = join(tempDir, '..', 'test.txt');
 
-      await expect(
-        safeReadFile(maliciousPath, { allowedBasePath: tempDir }),
-      ).rejects.toThrow(PathTraversalError);
+      await expect(safeReadFile(maliciousPath, { allowedBasePath: tempDir })).rejects.toThrow(
+        PathTraversalError,
+      );
     });
 
     it('should throw PathTraversalError for null byte', async () => {
       const maliciousPath = join(tempDir, 'test\0.txt');
 
-      await expect(
-        safeReadFile(maliciousPath, { allowedBasePath: tempDir }),
-      ).rejects.toThrow(PathTraversalError);
+      await expect(safeReadFile(maliciousPath, { allowedBasePath: tempDir })).rejects.toThrow(
+        PathTraversalError,
+      );
     });
 
     it('should throw PathTraversalError when path escapes base directory', async () => {
@@ -143,9 +141,9 @@ describe('file.utils', () => {
       const restrictedBase = join(tempDir, 'restricted');
       await fs.mkdir(restrictedBase, { recursive: true });
 
-      await expect(
-        safeReadFile(testFile, { allowedBasePath: restrictedBase }),
-      ).rejects.toThrow(PathTraversalError);
+      await expect(safeReadFile(testFile, { allowedBasePath: restrictedBase })).rejects.toThrow(
+        PathTraversalError,
+      );
     });
   });
 
@@ -219,9 +217,7 @@ describe('file.utils', () => {
           filePath: testFile,
           userMessage: expect.stringContaining('2 MB'),
           technicalMessage: expect.stringContaining('2097152 bytes'),
-          suggestions: expect.arrayContaining([
-            expect.stringContaining('Use a smaller file'),
-          ]),
+          suggestions: expect.arrayContaining([expect.stringContaining('Use a smaller file')]),
         }),
       );
     });
@@ -295,12 +291,8 @@ describe('file.utils', () => {
       const result = await safeReadDirWithTypes(testDir);
 
       expect(result).toHaveLength(2);
-      expect(
-        result.some(entry => entry.name === 'file.txt' && entry.isFile()),
-      ).toBe(true);
-      expect(
-        result.some(entry => entry.name === 'subdir' && entry.isDirectory()),
-      ).toBe(true);
+      expect(result.some(entry => entry.name === 'file.txt' && entry.isFile())).toBe(true);
+      expect(result.some(entry => entry.name === 'subdir' && entry.isDirectory())).toBe(true);
     });
 
     it('should return empty array when directory does not exist (ENOENT)', async () => {
@@ -429,33 +421,19 @@ describe('file.utils', () => {
       });
 
       it('should reject paths with .. traversal (Unix style)', () => {
-        expect(() => validateFilePath('../etc/passwd')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('/safe/../evil.txt')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('../../etc/passwd')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('../etc/passwd')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('/safe/../evil.txt')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('../../etc/passwd')).toThrow(PathTraversalError);
       });
 
       it('should reject paths with .. traversal (Windows style)', () => {
-        expect(() => validateFilePath('..\\windows\\system32')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('C:\\safe\\..\\evil.txt')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('..\\windows\\system32')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('C:\\safe\\..\\evil.txt')).toThrow(PathTraversalError);
       });
 
       it('should reject paths with null bytes', () => {
-        expect(() => validateFilePath('/safe/path\0/evil.txt')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('file.txt\0')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('/safe/path\0/evil.txt')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('file.txt\0')).toThrow(PathTraversalError);
       });
 
       it('should provide descriptive error messages', () => {
@@ -464,12 +442,8 @@ describe('file.utils', () => {
           expect.fail('Should have thrown');
         } catch (error) {
           expect(error).toBeInstanceOf(PathTraversalError);
-          expect((error as PathTraversalError).code).toBe(
-            'PATH_TRAVERSAL_DETECTED',
-          );
-          expect((error as PathTraversalError).message).toContain(
-            '../evil.txt',
-          );
+          expect((error as PathTraversalError).code).toBe('PATH_TRAVERSAL_DETECTED');
+          expect((error as PathTraversalError).message).toContain('../evil.txt');
           expect((error as PathTraversalError).message).toContain(
             'Path traversal pattern detected',
           );
@@ -480,9 +454,7 @@ describe('file.utils', () => {
           expect.fail('Should have thrown');
         } catch (error) {
           expect(error).toBeInstanceOf(PathTraversalError);
-          expect((error as PathTraversalError).message).toContain(
-            'Null byte detected',
-          );
+          expect((error as PathTraversalError).message).toContain('Null byte detected');
         }
       });
     });
@@ -496,9 +468,7 @@ describe('file.utils', () => {
 
         // The segment check won't catch URL-encoded .., but resolve() + base path check will
         // For comprehensive protection, test with allowedBasePath
-        expect(() =>
-          validateFilePath(urlEncodedPath, { allowedBasePath: '/safe' }),
-        ).not.toThrow(); // URL-encoded dots are literal characters, not traversal
+        expect(() => validateFilePath(urlEncodedPath, { allowedBasePath: '/safe' })).not.toThrow(); // URL-encoded dots are literal characters, not traversal
 
         // However, if decoded first (security vulnerability in some frameworks),
         // our segment check would catch it
@@ -517,40 +487,24 @@ describe('file.utils', () => {
 
         // After single decode: %2e%2e/ (still encoded)
         const singleDecode = decodeURIComponent(doubleEncodedPath);
-        expect(() =>
-          validateFilePath(singleDecode, { allowedBasePath: '/safe' }),
-        ).not.toThrow();
+        expect(() => validateFilePath(singleDecode, { allowedBasePath: '/safe' })).not.toThrow();
 
         // After double decode: ../
         const doubleDecode = decodeURIComponent(singleDecode);
-        expect(() => validateFilePath(doubleDecode)).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath(doubleDecode)).toThrow(PathTraversalError);
       });
 
       it('should handle mixed separator styles', () => {
         // Unix and Windows separators mixed
-        expect(() => validateFilePath('../..\\etc\\passwd')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('..\\../evil.txt')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('/safe\\..\\..../etc/passwd')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('../..\\etc\\passwd')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('..\\../evil.txt')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('/safe\\..\\..../etc/passwd')).toThrow(PathTraversalError);
       });
 
       it('should handle trailing separators after ..', () => {
-        expect(() => validateFilePath('..//evil.txt')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('..\\\\evil.txt')).toThrow(
-          PathTraversalError,
-        );
-        expect(() => validateFilePath('..\\/evil.txt')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('..//evil.txt')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('..\\\\evil.txt')).toThrow(PathTraversalError);
+        expect(() => validateFilePath('..\\/evil.txt')).toThrow(PathTraversalError);
       });
 
       it('should verify defense-in-depth for normalized attacks', () => {
@@ -606,9 +560,7 @@ describe('file.utils', () => {
         // but resolve() + base path check provides defense-in-depth
 
         // Without base path: fullwidth dots pass segment validation (not literal '..')
-        expect(() =>
-          validateFilePath('/safe/\uff0e\uff0e/evil.txt'),
-        ).not.toThrow();
+        expect(() => validateFilePath('/safe/\uff0e\uff0e/evil.txt')).not.toThrow();
 
         // WITH base path: resolve() handles Unicode normalization on supporting filesystems
         // This provides defense-in-depth even if segment check doesn't catch it
@@ -623,14 +575,10 @@ describe('file.utils', () => {
         expect(() => validateFilePath('/safe/.\uff0e/file.txt')).not.toThrow();
 
         // Regular ASCII '..' is still caught by segment validation
-        expect(() => validateFilePath('/safe/../evil.txt')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('/safe/../evil.txt')).toThrow(PathTraversalError);
 
         // Regular ASCII '..' is caught even in complex paths
-        expect(() => validateFilePath('/safe/\uff0e/../evil.txt')).toThrow(
-          PathTraversalError,
-        );
+        expect(() => validateFilePath('/safe/\uff0e/../evil.txt')).toThrow(PathTraversalError);
 
         // Note: This test documents that fullwidth Unicode dots are NOT treated as path traversal
         // by Node.js path.resolve(). Filesystems that perform Unicode normalization differently
@@ -654,9 +602,9 @@ describe('file.utils', () => {
       });
 
       it('should reject paths outside allowed base directory', () => {
-        expect(() =>
-          validateFilePath('/etc/passwd', { allowedBasePath: '/project' }),
-        ).toThrow(PathTraversalError);
+        expect(() => validateFilePath('/etc/passwd', { allowedBasePath: '/project' })).toThrow(
+          PathTraversalError,
+        );
 
         expect(() =>
           validateFilePath('/other/directory/file.txt', {
@@ -674,9 +622,7 @@ describe('file.utils', () => {
       });
 
       it('should allow accessing the base directory itself', () => {
-        expect(() =>
-          validateFilePath('/project', { allowedBasePath: '/project' }),
-        ).not.toThrow();
+        expect(() => validateFilePath('/project', { allowedBasePath: '/project' })).not.toThrow();
       });
 
       it('should provide descriptive error for base path violations', () => {
@@ -685,12 +631,8 @@ describe('file.utils', () => {
           expect.fail('Should have thrown');
         } catch (error) {
           expect(error).toBeInstanceOf(PathTraversalError);
-          expect((error as PathTraversalError).message).toContain(
-            '/etc/passwd',
-          );
-          expect((error as PathTraversalError).message).toContain(
-            'escapes allowed base directory',
-          );
+          expect((error as PathTraversalError).message).toContain('/etc/passwd');
+          expect((error as PathTraversalError).message).toContain('escapes allowed base directory');
           expect((error as PathTraversalError).message).toContain('/project');
         }
       });
@@ -722,13 +664,9 @@ describe('file.utils', () => {
         );
 
         expect(error.code).toBe('PATH_TRAVERSAL_DETECTED');
-        expect(error.userMessage).toBe(
-          'Invalid file path: path traversal attempt detected',
-        );
+        expect(error.userMessage).toBe('Invalid file path: path traversal attempt detected');
         expect(error.technicalMessage).toContain('../../etc/passwd');
-        expect(error.technicalMessage).toContain(
-          'Path traversal pattern detected (..)',
-        );
+        expect(error.technicalMessage).toContain('Path traversal pattern detected (..)');
         expect(error.accessibilityHints.role).toBe('alert');
         expect(error.accessibilityHints.live).toBe('assertive');
         expect(error.accessibilityHints.announce).toBe(true);
@@ -739,12 +677,8 @@ describe('file.utils', () => {
       it('should provide actionable suggestions', () => {
         const error = new PathTraversalError('/bad/path', 'test reason');
 
-        expect(error.suggestions).toContain(
-          'Use file paths without .. components',
-        );
-        expect(error.suggestions).toContain(
-          'Use absolute paths within allowed directories',
-        );
+        expect(error.suggestions).toContain('Use file paths without .. components');
+        expect(error.suggestions).toContain('Use absolute paths within allowed directories');
         expect(error.suggestions).toContain(
           'Avoid null bytes and special characters in file paths',
         );
@@ -757,16 +691,12 @@ describe('file.utils', () => {
         );
 
         // User message should be simple and non-technical
-        expect(error.userMessage).toBe(
-          'Invalid file path: path traversal attempt detected',
-        );
+        expect(error.userMessage).toBe('Invalid file path: path traversal attempt detected');
         expect(error.userMessage).not.toContain('/etc/passwd');
 
         // Technical message should include full details
         expect(error.technicalMessage).toContain('/project/../etc/passwd');
-        expect(error.technicalMessage).toContain(
-          'Path escapes allowed base directory',
-        );
+        expect(error.technicalMessage).toContain('Path escapes allowed base directory');
       });
     });
   });
@@ -796,10 +726,7 @@ describe('file.utils', () => {
       if (results.validated !== undefined) {
         console.log(`  With validation: ${results.validated.toFixed(2)}ms`);
       }
-      if (
-        results.overhead !== undefined &&
-        results.overheadPercent !== undefined
-      ) {
+      if (results.overhead !== undefined && results.overheadPercent !== undefined) {
         console.log(
           `  Overhead: ${results.overhead.toFixed(2)}ms (${results.overheadPercent.toFixed(1)}%)`,
         );
@@ -808,14 +735,10 @@ describe('file.utils', () => {
         console.log(`  Total time: ${results.totalTime.toFixed(2)}ms`);
       }
       if (results.avgPerOperation !== undefined) {
-        console.log(
-          `  Average per path: ${results.avgPerOperation.toFixed(2)}μs`,
-        );
+        console.log(`  Average per path: ${results.avgPerOperation.toFixed(2)}μs`);
       }
       if (results.avgRejectionTime !== undefined) {
-        console.log(
-          `  Average rejection time: ${results.avgRejectionTime.toFixed(2)}ms`,
-        );
+        console.log(`  Average rejection time: ${results.avgRejectionTime.toFixed(2)}ms`);
       }
     };
 
@@ -960,12 +883,9 @@ describe('file.utils', () => {
         const endTime = performance.now();
         const avgRejectionTime = (endTime - startTime) / 50;
 
-        logBenchmarkResults(
-          'Early rejection (2MB file, 1MB limit, 50 attempts)',
-          {
-            avgRejectionTime,
-          },
-        );
+        logBenchmarkResults('Early rejection (2MB file, 1MB limit, 50 attempts)', {
+          avgRejectionTime,
+        });
 
         // Early rejection should be fast (<5ms) - stat() without reading file
         expect(avgRejectionTime).toBeLessThan(5);

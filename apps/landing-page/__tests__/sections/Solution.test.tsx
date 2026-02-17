@@ -16,9 +16,7 @@ describe('Solution', () => {
 
   it('should display section heading', async () => {
     render(await Solution({ locale: 'en' }));
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      'One Ruleset. All Tools.',
-    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('One Ruleset. All Tools.');
   });
 
   it('should have id attribute for anchor navigation', async () => {
@@ -34,9 +32,7 @@ describe('Solution', () => {
 
   it('should display subtitle', async () => {
     render(await Solution({ locale: 'en' }));
-    expect(
-      screen.getByText(/Codingbuddy gives your AI assistants/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Codingbuddy gives your AI assistants/)).toBeInTheDocument();
   });
 
   it('should render 4 benefit cards', async () => {
@@ -49,8 +45,6 @@ describe('Solution', () => {
 
   it('should render benefit descriptions', async () => {
     render(await Solution({ locale: 'en' }));
-    expect(
-      screen.getByText(/One ruleset automatically applied/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/One ruleset automatically applied/)).toBeInTheDocument();
   });
 });

@@ -75,9 +75,7 @@ export function createStrategyContext(
  * Create a StrategyContext for ACT mode testing.
  * Uses ACT_MODE_AGENTS as default available agents.
  */
-export function createActContext(
-  overrides: Partial<StrategyContext> = {},
-): StrategyContext {
+export function createActContext(overrides: Partial<StrategyContext> = {}): StrategyContext {
   return createStrategyContext(overrides, ACT_MODE_AGENTS);
 }
 
@@ -85,9 +83,7 @@ export function createActContext(
  * Create a StrategyContext for PLAN mode testing.
  * Uses PLAN_MODE_AGENTS as default available agents.
  */
-export function createPlanContext(
-  overrides: Partial<StrategyContext> = {},
-): StrategyContext {
+export function createPlanContext(overrides: Partial<StrategyContext> = {}): StrategyContext {
   return createStrategyContext(overrides, PLAN_MODE_AGENTS);
 }
 
@@ -95,8 +91,6 @@ export function createPlanContext(
  * Create a StrategyContext for EVAL mode testing.
  * Uses EVAL_MODE_AGENTS as default available agents.
  */
-export function createEvalContext(
-  overrides: Partial<StrategyContext> = {},
-): StrategyContext {
+export function createEvalContext(overrides: Partial<StrategyContext> = {}): StrategyContext {
   return createStrategyContext(overrides, EVAL_MODE_AGENTS);
 }

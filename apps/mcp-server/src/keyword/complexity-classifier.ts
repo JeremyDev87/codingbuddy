@@ -7,11 +7,7 @@
  * @module complexity-classifier
  */
 
-import {
-  ComplexityClassification,
-  SrpOverride,
-  TaskComplexity,
-} from './keyword.types';
+import { ComplexityClassification, SrpOverride, TaskComplexity } from './keyword.types';
 import { renderSrpTemplate } from './srp-template';
 import {
   COMPLEX_INDICATORS,
@@ -256,38 +252,23 @@ function calculateScores(prompt: string): ScoreResults {
  * @param config - Configuration thresholds
  * @returns Complexity determination result
  */
-function determineComplexity(
-  scores: ScoreResults,
-  config: ComplexityConfig,
-): ComplexityResult {
+function determineComplexity(scores: ScoreResults, config: ComplexityConfig): ComplexityResult {
   const { complexResult, simpleResult } = scores;
 
-  if (
-    complexResult.score > config.complexThreshold &&
-    complexResult.score > simpleResult.score
-  ) {
+  if (complexResult.score > config.complexThreshold && complexResult.score > simpleResult.score) {
     return {
       complexity: 'COMPLEX',
       reason: `Task requires structured reasoning: ${complexResult.matched.slice(0, 3).join(', ')}`,
-      confidence: Math.min(
-        config.maxConfidence,
-        0.5 + complexResult.score * 0.5,
-      ),
+      confidence: Math.min(config.maxConfidence, 0.5 + complexResult.score * 0.5),
       matchedIndicators: complexResult.matched,
     };
   }
 
-  if (
-    simpleResult.score > config.simpleThreshold &&
-    simpleResult.score > complexResult.score
-  ) {
+  if (simpleResult.score > config.simpleThreshold && simpleResult.score > complexResult.score) {
     return {
       complexity: 'SIMPLE',
       reason: `Task is straightforward: ${simpleResult.matched.slice(0, 3).join(', ')}`,
-      confidence: Math.min(
-        config.maxConfidence,
-        0.5 + simpleResult.score * 0.5,
-      ),
+      confidence: Math.min(config.maxConfidence, 0.5 + simpleResult.score * 0.5),
       matchedIndicators: simpleResult.matched,
     };
   }
@@ -377,9 +358,7 @@ export function classifyComplexity(
 ): ComplexityClassification {
   // Support both old signature (config only) and new signature (options object)
   const resolvedOptions: ClassifyOptions =
-    options && 'complexThreshold' in options
-      ? { config: options }
-      : (options ?? {});
+    options && 'complexThreshold' in options ? { config: options } : (options ?? {});
 
   const config = resolvedOptions.config ?? DEFAULT_COMPLEXITY_CONFIG;
   const onTelemetry = resolvedOptions.onTelemetry;

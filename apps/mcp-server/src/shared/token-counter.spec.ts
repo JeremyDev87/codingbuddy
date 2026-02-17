@@ -248,9 +248,7 @@ describe('token-counter', () => {
       expect(total.total).toBeGreaterThan(0);
       expect(total.breakdown.rules).toBe(rulesMetrics.estimatedTokens);
       expect(total.breakdown.agents).toBe(agentsMetrics.estimatedTokens);
-      expect(total.total).toBe(
-        rulesMetrics.estimatedTokens + agentsMetrics.estimatedTokens,
-      );
+      expect(total.total).toBe(rulesMetrics.estimatedTokens + agentsMetrics.estimatedTokens);
     });
   });
 });

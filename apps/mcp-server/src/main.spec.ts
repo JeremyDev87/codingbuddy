@@ -4,9 +4,7 @@ import { describe, it, expect, vi } from 'vitest';
  * Parse CORS origin configuration from environment variable
  * (Duplicated for testing - extracted from main.ts)
  */
-function parseCorsOrigin(
-  corsOrigin: string | undefined,
-): string | string[] | boolean {
+function parseCorsOrigin(corsOrigin: string | undefined): string | string[] | boolean {
   if (!corsOrigin) {
     return false;
   }
@@ -41,27 +39,18 @@ describe('parseCorsOrigin', () => {
 
   describe('single origin configuration', () => {
     it('should return single origin string', () => {
-      expect(parseCorsOrigin('https://example.com')).toBe(
-        'https://example.com',
-      );
+      expect(parseCorsOrigin('https://example.com')).toBe('https://example.com');
     });
 
     it('should handle localhost', () => {
-      expect(parseCorsOrigin('http://localhost:3000')).toBe(
-        'http://localhost:3000',
-      );
+      expect(parseCorsOrigin('http://localhost:3000')).toBe('http://localhost:3000');
     });
   });
 
   describe('multiple origins configuration', () => {
     it('should return array for comma-separated origins', () => {
-      const result = parseCorsOrigin(
-        'https://example.com,https://api.example.com',
-      );
-      expect(result).toEqual([
-        'https://example.com',
-        'https://api.example.com',
-      ]);
+      const result = parseCorsOrigin('https://example.com,https://api.example.com');
+      expect(result).toEqual(['https://example.com', 'https://api.example.com']);
     });
 
     it('should trim whitespace from origins', () => {
@@ -88,15 +77,11 @@ describe('bootstrap error handler', () => {
 
   it('should format Error instance using .message', () => {
     const error = new Error('Port 3000 already in use');
-    expect(formatBootstrapError(error)).toBe(
-      'Fatal: Port 3000 already in use\n',
-    );
+    expect(formatBootstrapError(error)).toBe('Fatal: Port 3000 already in use\n');
   });
 
   it('should format non-Error value directly', () => {
-    expect(formatBootstrapError('module init failed')).toBe(
-      'Fatal: module init failed\n',
-    );
+    expect(formatBootstrapError('module init failed')).toBe('Fatal: module init failed\n');
   });
 
   it('should handle undefined error', () => {
@@ -105,19 +90,13 @@ describe('bootstrap error handler', () => {
 
   describe('integration: bootstrap().catch() writes to stderr and exits', () => {
     it('should write formatted error to stderr and exit with code 1', async () => {
-      const stderrSpy = vi
-        .spyOn(process.stderr, 'write')
-        .mockImplementation(() => true);
-      const exitSpy = vi
-        .spyOn(process, 'exit')
-        .mockImplementation(() => undefined as never);
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
       // Simulate what the catch handler does
       const error = new Error('EADDRINUSE: Port 3000');
       const catchHandler = (err: unknown): void => {
-        process.stderr.write(
-          `Fatal: ${err instanceof Error ? err.message : err}\n`,
-        );
+        process.stderr.write(`Fatal: ${err instanceof Error ? err.message : err}\n`);
         process.exit(1);
       };
       catchHandler(error);

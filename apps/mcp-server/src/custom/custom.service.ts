@@ -79,9 +79,7 @@ export class CustomService {
 
           // Validate required fields (compatible with AgentProfile)
           if (!parsed.name || !parsed.description || !parsed.role) {
-            this.logger.warn(
-              `Invalid agent file (missing required fields): ${filePath}`,
-            );
+            this.logger.warn(`Invalid agent file (missing required fields): ${filePath}`);
             continue;
           }
 

@@ -28,9 +28,7 @@ describe('config.generator', () => {
       dependencies: { react: '^18.0.0' },
       devDependencies: { typescript: '^5.0.0' },
       scripts: { dev: 'next dev' },
-      detectedFrameworks: [
-        { name: 'React', category: 'frontend', version: '^18.0.0' },
-      ],
+      detectedFrameworks: [{ name: 'React', category: 'frontend', version: '^18.0.0' }],
     },
     directoryStructure: {
       rootDirs: ['src', 'components'],
@@ -65,8 +63,7 @@ describe('config.generator', () => {
     });
 
     it('should extract JSON from response with surrounding text', () => {
-      const response =
-        'Here is the config:\n```json\n{"projectName": "test"}\n```\nEnjoy!';
+      const response = 'Here is the config:\n```json\n{"projectName": "test"}\n```\nEnjoy!';
 
       const result = extractJsonFromResponse(response);
 
@@ -209,9 +206,7 @@ describe('config.generator', () => {
     it('should throw on API error', async () => {
       mockCreate.mockRejectedValue(new Error('API Error'));
 
-      await expect(generator.generate(mockAnalysis)).rejects.toThrow(
-        'API Error',
-      );
+      await expect(generator.generate(mockAnalysis)).rejects.toThrow('API Error');
     });
 
     it('should throw on empty response', async () => {
@@ -252,9 +247,7 @@ describe('config.generator', () => {
           model: 'explicit-model',
         };
         const gen = new ConfigGenerator(options);
-        expect((gen as unknown as { model: string }).model).toBe(
-          'explicit-model',
-        );
+        expect((gen as unknown as { model: string }).model).toBe('explicit-model');
       });
 
       it('should use model from global config when options.model is not provided', () => {
@@ -265,9 +258,7 @@ describe('config.generator', () => {
           },
         };
         const gen = new ConfigGenerator(options);
-        expect((gen as unknown as { model: string }).model).toBe(
-          'config-model',
-        );
+        expect((gen as unknown as { model: string }).model).toBe('config-model');
       });
 
       it('should use system default when no model is configured', () => {
@@ -287,9 +278,7 @@ describe('config.generator', () => {
           },
         };
         const gen = new ConfigGenerator(options);
-        expect((gen as unknown as { model: string }).model).toBe(
-          'explicit-model',
-        );
+        expect((gen as unknown as { model: string }).model).toBe('explicit-model');
       });
     });
   });

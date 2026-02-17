@@ -61,10 +61,7 @@ export function compileCategoryPatterns(
 /**
  * Checks if a file matches any of the compiled patterns
  */
-export function matchesAnyPattern(
-  file: string,
-  compiledPatterns: CompiledPattern[],
-): boolean {
+export function matchesAnyPattern(file: string, compiledPatterns: CompiledPattern[]): boolean {
   return compiledPatterns.some(cp => cp.matcher.match(file));
 }
 

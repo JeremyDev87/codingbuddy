@@ -30,12 +30,7 @@ export const CodeSnippet = ({
   });
 
   return (
-    <div
-      className={cn(
-        'bg-muted/50 relative rounded-md border font-mono text-sm',
-        className,
-      )}
-    >
+    <div className={cn('bg-muted/50 relative rounded-md border font-mono text-sm', className)}>
       <div className="flex items-start justify-between gap-2 p-3">
         <pre className="overflow-x-auto whitespace-pre-wrap break-words">
           <code>{code}</code>

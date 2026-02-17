@@ -40,10 +40,7 @@ describe('Footer', () => {
       name: /github.*codingbuddy/i,
     });
     expect(githubLink).toBeInTheDocument();
-    expect(githubLink).toHaveAttribute(
-      'href',
-      'https://github.com/JeremyDev87/codingbuddy',
-    );
+    expect(githubLink).toHaveAttribute('href', 'https://github.com/JeremyDev87/codingbuddy');
     expect(githubLink).toHaveAttribute('target', '_blank');
     expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
   });

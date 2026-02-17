@@ -39,10 +39,7 @@ export const SkillFrontmatterSchema = z.object({
   name: z
     .string()
     .min(1)
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Skill name must be lowercase alphanumeric with hyphens only',
-    ),
+    .regex(/^[a-z0-9-]+$/, 'Skill name must be lowercase alphanumeric with hyphens only'),
   description: z.string().min(1).max(500),
 });
 
@@ -72,9 +69,7 @@ function parseFrontmatter(content: string): {
   const match = content.match(FRONTMATTER_REGEX);
 
   if (!match) {
-    throw new SkillSchemaError(
-      'Invalid skill file: Missing or malformed YAML frontmatter',
-    );
+    throw new SkillSchemaError('Invalid skill file: Missing or malformed YAML frontmatter');
   }
 
   const [, yamlStr, body] = match;
@@ -108,9 +103,7 @@ export function parseSkill(content: string, filePath: string): Skill {
   // Check for prototype pollution
   const dangerousKey = containsDangerousKeys(frontmatter);
   if (dangerousKey) {
-    throw new SkillSchemaError(
-      `Invalid skill: Dangerous key "${dangerousKey}" detected`,
-    );
+    throw new SkillSchemaError(`Invalid skill: Dangerous key "${dangerousKey}" detected`);
   }
 
   // Validate frontmatter with Zod
@@ -123,17 +116,12 @@ export function parseSkill(content: string, filePath: string): Skill {
         return `${pathStr}: ${issue.message}`;
       })
       .join(', ');
-    throw new SkillSchemaError(
-      `Invalid skill frontmatter: ${errorMessage}`,
-      result.error,
-    );
+    throw new SkillSchemaError(`Invalid skill frontmatter: ${errorMessage}`, result.error);
   }
 
   // Validate content is not empty
   if (!body || body.trim().length === 0) {
-    throw new SkillSchemaError(
-      'Invalid skill: Content after frontmatter is empty',
-    );
+    throw new SkillSchemaError('Invalid skill: Content after frontmatter is empty');
   }
 
   return {

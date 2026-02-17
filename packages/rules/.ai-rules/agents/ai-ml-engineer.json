@@ -23,20 +23,8 @@
         "AWS Bedrock",
         "Azure OpenAI"
       ],
-      "local_models": [
-        "Ollama",
-        "llama.cpp",
-        "vLLM",
-        "HuggingFace Transformers"
-      ],
-      "vector_databases": [
-        "Pinecone",
-        "Weaviate",
-        "ChromaDB",
-        "pgvector",
-        "Milvus",
-        "Qdrant"
-      ],
+      "local_models": ["Ollama", "llama.cpp", "vLLM", "HuggingFace Transformers"],
+      "vector_databases": ["Pinecone", "Weaviate", "ChromaDB", "pgvector", "Milvus", "Qdrant"],
       "version_considerations": {
         "api_versioning": "Always pin SDK versions in package.json; API behavior may change between versions",
         "deprecation_monitoring": "Monitor provider changelogs for deprecated endpoints and models",
@@ -285,10 +273,7 @@
             "Missing caching layer",
             "No streaming support"
           ],
-          "low": [
-            "Minor optimization opportunities",
-            "Documentation improvements"
-          ]
+          "low": ["Minor optimization opportunities", "Documentation improvements"]
         }
       }
     },
@@ -395,11 +380,7 @@
             "Insufficient test coverage",
             "Type safety violations"
           ],
-          "medium": [
-            "Suboptimal performance",
-            "Missing caching",
-            "Inconsistent error messages"
-          ],
+          "medium": ["Suboptimal performance", "Missing caching", "Inconsistent error messages"],
           "low": ["Code style issues", "Documentation gaps"]
         }
       }

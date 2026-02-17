@@ -13,10 +13,7 @@ import {
  * - EN, ES: Use word boundaries (\b) for accurate matching
  * - KO, JA, ZH: No word boundaries (agglutinative/isolating languages)
  */
-export function buildPatternForLanguage(
-  keywords: string[],
-  language: SupportedLanguage,
-): RegExp {
+export function buildPatternForLanguage(keywords: string[], language: SupportedLanguage): RegExp {
   const { useWordBoundary } = LANGUAGE_OPTIONS[language];
 
   // Escape special regex characters in keywords
@@ -36,18 +33,14 @@ export function buildPatternForLanguage(
 /**
  * Converts skill keyword configurations to SkillTrigger[] with RegExp patterns
  */
-export function buildTriggersFromKeywords(
-  config: SkillKeywordConfig[],
-): SkillTrigger[] {
+export function buildTriggersFromKeywords(config: SkillKeywordConfig[]): SkillTrigger[] {
   return config.map(skill => {
     const patterns: RegExp[] = [];
 
     for (const conceptKeywords of Object.values(skill.concepts)) {
       for (const [lang, keywords] of Object.entries(conceptKeywords)) {
         if (Array.isArray(keywords) && keywords.length > 0) {
-          patterns.push(
-            buildPatternForLanguage(keywords, lang as SupportedLanguage),
-          );
+          patterns.push(buildPatternForLanguage(keywords, lang as SupportedLanguage));
         }
       }
     }

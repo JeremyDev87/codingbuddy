@@ -16,14 +16,8 @@ import {
 } from './checklist.types';
 import type { IFileSystem } from '../shared/filesystem.interface';
 import { FILE_SYSTEM } from '../shared/filesystem.interface';
-import {
-  compilePatterns,
-  type CompiledPattern,
-} from '../shared/pattern-matcher';
-import {
-  parseAndValidateChecklist,
-  ChecklistSchemaError,
-} from './checklist.schema';
+import { compilePatterns, type CompiledPattern } from '../shared/pattern-matcher';
+import { parseAndValidateChecklist, ChecklistSchemaError } from './checklist.schema';
 import { validatePath } from '../shared/security.utils';
 
 /** Cache TTL in milliseconds (5 minutes) */
@@ -60,10 +54,7 @@ export class ChecklistService {
   private findChecklistsDir(): string {
     // Find packages/rules/.ai-rules/checklists directory
     const candidates = [
-      path.resolve(
-        __dirname,
-        '../../../../packages/rules/.ai-rules/checklists',
-      ),
+      path.resolve(__dirname, '../../../../packages/rules/.ai-rules/checklists'),
       path.resolve(__dirname, '../../../packages/rules/.ai-rules/checklists'),
       path.resolve(__dirname, '../../../../.ai-rules/checklists'),
       path.resolve(__dirname, '../../../.ai-rules/checklists'),
@@ -83,9 +74,7 @@ export class ChecklistService {
     return candidates[0];
   }
 
-  async generateChecklist(
-    input: GenerateChecklistInput,
-  ): Promise<GenerateChecklistOutput> {
+  async generateChecklist(input: GenerateChecklistInput): Promise<GenerateChecklistOutput> {
     const { files, domains } = input;
     const matchedTriggers: MatchedTrigger[] = [];
     const domainItems: Map<ChecklistDomain, ChecklistItem[]> = new Map();
@@ -206,9 +195,7 @@ export class ChecklistService {
     return null;
   }
 
-  private getAllItemsFromChecklist(
-    checklist: ChecklistDefinition,
-  ): ChecklistItem[] {
+  private getAllItemsFromChecklist(checklist: ChecklistDefinition): ChecklistItem[] {
     const items: ChecklistItem[] = [];
     for (const category of checklist.categories) {
       items.push(...category.items);
@@ -254,9 +241,7 @@ export class ChecklistService {
     }
 
     // Sort by priority using shared constant
-    return checklists.sort(
-      (a, b) => PRIORITY_VALUES[a.priority] - PRIORITY_VALUES[b.priority],
-    );
+    return checklists.sort((a, b) => PRIORITY_VALUES[a.priority] - PRIORITY_VALUES[b.priority]);
   }
 
   private getHighestPriority(items: ChecklistItem[]): ChecklistPriority {
@@ -302,9 +287,7 @@ export class ChecklistService {
     };
   }
 
-  private async loadChecklist(
-    domain: ChecklistDomain,
-  ): Promise<CacheEntry | null> {
+  private async loadChecklist(domain: ChecklistDomain): Promise<CacheEntry | null> {
     // Check cache with TTL
     const cached = this.checklistCache.get(domain);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
@@ -319,9 +302,7 @@ export class ChecklistService {
     });
 
     if (!pathValidation.valid) {
-      this.logger.warn(
-        `Path validation failed for domain '${domain}': ${pathValidation.error}`,
-      );
+      this.logger.warn(`Path validation failed for domain '${domain}': ${pathValidation.error}`);
       return null;
     }
 
@@ -334,13 +315,11 @@ export class ChecklistService {
       const checklist = parseAndValidateChecklist(content);
 
       // Pre-compile file patterns for each category
-      const compiledCategories: CompiledCategory[] = checklist.categories.map(
-        category => ({
-          name: category.name,
-          compiledFilePatterns: compilePatterns(category.triggers.files),
-          items: category.items,
-        }),
-      );
+      const compiledCategories: CompiledCategory[] = checklist.categories.map(category => ({
+        name: category.name,
+        compiledFilePatterns: compilePatterns(category.triggers.files),
+        items: category.items,
+      }));
 
       const cacheEntry: CacheEntry = {
         data: checklist,
@@ -351,14 +330,9 @@ export class ChecklistService {
       return cacheEntry;
     } catch (error) {
       if (error instanceof ChecklistSchemaError) {
-        this.logger.warn(
-          `Invalid checklist schema for domain '${domain}': ${error.message}`,
-        );
+        this.logger.warn(`Invalid checklist schema for domain '${domain}': ${error.message}`);
       } else {
-        this.logger.warn(
-          `Failed to load checklist for domain: ${domain}`,
-          error,
-        );
+        this.logger.warn(`Failed to load checklist for domain: ${domain}`, error);
       }
       return null;
     }

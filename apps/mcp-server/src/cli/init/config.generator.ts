@@ -63,9 +63,7 @@ export function parseJsonResponse(response: string): CodingBuddyConfig {
   try {
     parsed = JSON.parse(jsonString);
   } catch {
-    throw new Error(
-      `Invalid JSON in response: ${jsonString.substring(0, 100)}...`,
-    );
+    throw new Error(`Invalid JSON in response: ${jsonString.substring(0, 100)}...`);
   }
 
   // Validate against schema

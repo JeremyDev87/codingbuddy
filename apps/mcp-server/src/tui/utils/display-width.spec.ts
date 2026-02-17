@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  estimateDisplayWidth,
-  truncateToDisplayWidth,
-  padEndDisplayWidth,
-} from './display-width';
+import { estimateDisplayWidth, truncateToDisplayWidth, padEndDisplayWidth } from './display-width';
 
 describe('tui/utils/display-width', () => {
   describe('estimateDisplayWidth', () => {
@@ -69,8 +65,7 @@ describe('tui/utils/display-width', () => {
     it('should handle string with multiple emojis', () => {
       // "🤖 a │ 🎹 b │ ⚡ c" = 2+3+1+3+2+3+1+3+2+2 = ...
       const s = '🤖 a │ 🎹 b │ ⚡ c';
-      const expected =
-        2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1; // = 18
+      const expected = 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1; // = 18
       expect(estimateDisplayWidth(s)).toBe(expected);
     });
   });
@@ -152,8 +147,7 @@ describe('tui/utils/display-width', () => {
     it('should overestimate ZWJ emoji sequences (each emoji codepoint counted individually)', () => {
       // 👨‍👩‍👧‍👦 is a ZWJ sequence: 👨 + ZWJ + 👩 + ZWJ + 👧 + ZWJ + 👦
       // Renders as 2 columns in most terminals, but we count each emoji codepoint
-      const familyEmoji =
-        '\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}';
+      const familyEmoji = '\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}';
       const width = estimateDisplayWidth(familyEmoji);
       // ZWJ (U+200D) is now width 0, so: 4 emojis (2 each) + 3 ZWJ (0 each) = 8
       // Actual terminal width would be 2

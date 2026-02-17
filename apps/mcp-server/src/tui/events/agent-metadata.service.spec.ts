@@ -58,9 +58,7 @@ describe('AgentMetadataService', () => {
   beforeEach(() => {
     mockRulesService = createMockRulesService();
     service = new AgentMetadataService(
-      mockRulesService as unknown as ConstructorParameters<
-        typeof AgentMetadataService
-      >[0],
+      mockRulesService as unknown as ConstructorParameters<typeof AgentMetadataService>[0],
     );
   });
 
@@ -142,9 +140,7 @@ describe('AgentMetadataService', () => {
     });
 
     it('should handle listAgents failure gracefully', async () => {
-      mockRulesService.listAgents.mockRejectedValueOnce(
-        new Error('filesystem error'),
-      );
+      mockRulesService.listAgents.mockRejectedValueOnce(new Error('filesystem error'));
       await service.initialize();
       const all = service.getAllMetadata();
       expect(all).toHaveLength(0);

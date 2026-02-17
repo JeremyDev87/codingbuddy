@@ -21,9 +21,7 @@ describe('AgentCard', () => {
 
   it('should render agent description', () => {
     render(<AgentCard agent={mockAgent} />);
-    expect(
-      screen.getByText('Modern React/Next.js specialist'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Modern React/Next.js specialist')).toBeInTheDocument();
   });
 
   it('should render agent icon with aria-hidden', () => {

@@ -3,12 +3,7 @@ import { Text } from 'ink';
 import type { AgentState } from '../types';
 import { getAgentIcon } from '../utils/icons';
 import { getStatusColor } from '../utils/colors';
-import {
-  resolveProgress,
-  buildStatusLabel,
-  resolveIcon,
-  buildInlineCard,
-} from './agent-card.pure';
+import { resolveProgress, buildStatusLabel, resolveIcon, buildInlineCard } from './agent-card.pure';
 
 export interface AgentCardProps {
   agent: AgentState;

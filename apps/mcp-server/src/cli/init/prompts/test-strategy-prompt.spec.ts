@@ -59,16 +59,12 @@ describe('test-strategy-prompt', () => {
     });
 
     it('should include extensive', () => {
-      const extensive = MOCKING_STRATEGY_CHOICES.find(
-        c => c.value === 'extensive',
-      );
+      const extensive = MOCKING_STRATEGY_CHOICES.find(c => c.value === 'extensive');
       expect(extensive).toBeDefined();
     });
 
     it('should include no-mocks', () => {
-      const noMocks = MOCKING_STRATEGY_CHOICES.find(
-        c => c.value === 'no-mocks',
-      );
+      const noMocks = MOCKING_STRATEGY_CHOICES.find(c => c.value === 'no-mocks');
       expect(noMocks).toBeDefined();
     });
 
@@ -179,9 +175,7 @@ describe('test-strategy-prompt', () => {
       const mockSelect = vi.mocked(select);
       const mockInput = vi.mocked(input);
 
-      mockSelect
-        .mockResolvedValueOnce('bdd')
-        .mockResolvedValueOnce('extensive');
+      mockSelect.mockResolvedValueOnce('bdd').mockResolvedValueOnce('extensive');
       mockInput.mockResolvedValueOnce('80');
 
       const result = await promptTestStrategySettings();
@@ -198,9 +192,7 @@ describe('test-strategy-prompt', () => {
       const mockSelect = vi.mocked(select);
       const mockInput = vi.mocked(input);
 
-      mockSelect
-        .mockResolvedValueOnce('mixed')
-        .mockResolvedValueOnce('no-mocks');
+      mockSelect.mockResolvedValueOnce('mixed').mockResolvedValueOnce('no-mocks');
       mockInput.mockResolvedValueOnce('85');
 
       await promptTestStrategySettings({
@@ -251,9 +243,7 @@ describe('test-strategy-prompt', () => {
 
       for (const approach of approaches) {
         vi.clearAllMocks();
-        mockSelect
-          .mockResolvedValueOnce(approach)
-          .mockResolvedValueOnce('minimal');
+        mockSelect.mockResolvedValueOnce(approach).mockResolvedValueOnce('minimal');
         mockInput.mockResolvedValueOnce('90');
 
         const result = await promptTestStrategySettings();

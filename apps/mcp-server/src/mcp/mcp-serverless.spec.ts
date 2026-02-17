@@ -7,10 +7,7 @@ import { McpServerlessService } from './mcp-serverless';
 // Test Fixtures
 // ============================================================================
 
-const TEST_RULES_DIR = path.resolve(
-  __dirname,
-  '../../../../packages/rules/.ai-rules',
-);
+const TEST_RULES_DIR = path.resolve(__dirname, '../../../../packages/rules/.ai-rules');
 
 const TEST_PROJECT_ROOT = path.resolve(__dirname, '../../../../');
 
@@ -36,10 +33,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should accept custom rulesDir and projectRoot', () => {
-      const customService = new McpServerlessService(
-        '/custom/rules',
-        '/custom/project',
-      );
+      const customService = new McpServerlessService('/custom/rules', '/custom/project');
       expect(customService.getServer()).toBeDefined();
     });
 
@@ -88,11 +82,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should return empty array for non-matching query', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'searchRules',
-        'xyznonexistentquery123',
-      );
+      const result = await invokeToolHandler(service, 'searchRules', 'xyznonexistentquery123');
       const data = JSON.parse(result.content[0].text);
       expect(Array.isArray(data)).toBe(true);
       expect(data.length).toBe(0);
@@ -113,11 +103,7 @@ describe('McpServerlessService', () => {
 
   describe('get_agent_details tool', () => {
     it('should return agent details for valid agent', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        'frontend-developer',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', 'frontend-developer');
       expect(result.isError).toBeUndefined();
 
       const agent = JSON.parse(result.content[0].text);
@@ -130,11 +116,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should return error for non-existent agent', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        'nonexistent-agent',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', 'nonexistent-agent');
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('not found');
     });
@@ -168,11 +150,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should parse EVAL mode', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'parseMode',
-        'EVAL review the code quality',
-      );
+      const result = await invokeToolHandler(service, 'parseMode', 'EVAL review the code quality');
       const data = JSON.parse(result.content[0].text);
 
       expect(data.mode).toBe('EVAL');
@@ -180,11 +158,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should default to PLAN for no keyword', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'parseMode',
-        'do something without keyword',
-      );
+      const result = await invokeToolHandler(service, 'parseMode', 'do something without keyword');
       const data = JSON.parse(result.content[0].text);
 
       expect(data.mode).toBe('PLAN');
@@ -192,22 +166,14 @@ describe('McpServerlessService', () => {
     });
 
     it('should handle case-insensitive keywords', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'parseMode',
-        'plan lowercase keyword',
-      );
+      const result = await invokeToolHandler(service, 'parseMode', 'plan lowercase keyword');
       const data = JSON.parse(result.content[0].text);
 
       expect(data.mode).toBe('PLAN');
     });
 
     it('should warn about multiple keywords', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'parseMode',
-        'PLAN ACT something',
-      );
+      const result = await invokeToolHandler(service, 'parseMode', 'PLAN ACT something');
       const data = JSON.parse(result.content[0].text);
 
       expect(data.mode).toBe('PLAN');
@@ -236,11 +202,7 @@ describe('McpServerlessService', () => {
 
   describe('suggest_config_updates tool', () => {
     it('should analyze project and return suggestions', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'suggestConfigUpdates',
-        TEST_PROJECT_ROOT,
-      );
+      const result = await invokeToolHandler(service, 'suggestConfigUpdates', TEST_PROJECT_ROOT);
       expect(result.isError).toBeUndefined();
 
       const data = JSON.parse(result.content[0].text);
@@ -253,11 +215,7 @@ describe('McpServerlessService', () => {
     it('should detect common frameworks from package.json', async () => {
       // Use the mcp-server directory which has the actual package.json with NestJS
       const mcpServerRoot = path.resolve(__dirname, '../../');
-      const result = await invokeToolHandler(
-        service,
-        'suggestConfigUpdates',
-        mcpServerRoot,
-      );
+      const result = await invokeToolHandler(service, 'suggestConfigUpdates', mcpServerRoot);
       const data = JSON.parse(result.content[0].text);
 
       // The mcp-server project should have NestJS detected
@@ -265,11 +223,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should handle missing package.json gracefully', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'suggestConfigUpdates',
-        '/nonexistent/path',
-      );
+      const result = await invokeToolHandler(service, 'suggestConfigUpdates', '/nonexistent/path');
       const data = JSON.parse(result.content[0].text);
 
       expect(data.detectedStack).toEqual([]);
@@ -282,11 +236,7 @@ describe('McpServerlessService', () => {
 
   describe('path traversal protection', () => {
     it('should reject path traversal with ../', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        '../../../etc/passwd',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', '../../../etc/passwd');
       expect(result.isError).toBe(true);
       // Blocked by either input validation or path safety check
     });
@@ -302,21 +252,13 @@ describe('McpServerlessService', () => {
     });
 
     it('should reject absolute paths', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        '/etc/passwd',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', '/etc/passwd');
       expect(result.isError).toBe(true);
       // Blocked by either input validation or path safety check
     });
 
     it('should reject Windows-style path traversal', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        '..\\..\\etc\\passwd',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', '..\\..\\etc\\passwd');
       expect(result.isError).toBe(true);
       // Blocked by either input validation or path safety check
     });
@@ -332,11 +274,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should allow valid agent names', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        'frontend-developer',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', 'frontend-developer');
       expect(result.isError).toBeUndefined();
     });
   });
@@ -355,11 +293,7 @@ describe('McpServerlessService', () => {
 
       it('should reject query exceeding max length', async () => {
         const longQuery = 'a'.repeat(1001);
-        const result = await invokeToolHandler(
-          service,
-          'searchRules',
-          longQuery,
-        );
+        const result = await invokeToolHandler(service, 'searchRules', longQuery);
         expect(result.isError).toBe(true);
         expect(result.content[0].text).toContain('maximum length');
       });
@@ -367,21 +301,13 @@ describe('McpServerlessService', () => {
 
     describe('get_agent_details', () => {
       it('should reject agent name with uppercase', async () => {
-        const result = await invokeToolHandler(
-          service,
-          'getAgentDetails',
-          'Frontend-Developer',
-        );
+        const result = await invokeToolHandler(service, 'getAgentDetails', 'Frontend-Developer');
         expect(result.isError).toBe(true);
         expect(result.content[0].text).toContain('lowercase');
       });
 
       it('should reject agent name with special characters', async () => {
-        const result = await invokeToolHandler(
-          service,
-          'getAgentDetails',
-          'frontend_developer',
-        );
+        const result = await invokeToolHandler(service, 'getAgentDetails', 'frontend_developer');
         expect(result.isError).toBe(true);
         expect(result.content[0].text).toContain('lowercase');
       });
@@ -402,11 +328,7 @@ describe('McpServerlessService', () => {
 
       it('should reject prompt exceeding max length', async () => {
         const longPrompt = 'a'.repeat(10001);
-        const result = await invokeToolHandler(
-          service,
-          'parseMode',
-          longPrompt,
-        );
+        const result = await invokeToolHandler(service, 'parseMode', longPrompt);
         expect(result.isError).toBe(true);
         expect(result.content[0].text).toContain('maximum length');
       });
@@ -419,26 +341,15 @@ describe('McpServerlessService', () => {
 
   describe('error handling', () => {
     it('should return error response for invalid agent', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getAgentDetails',
-        'invalid-agent-name',
-      );
+      const result = await invokeToolHandler(service, 'getAgentDetails', 'invalid-agent-name');
       expect(result.isError).toBe(true);
     });
 
     it('should handle file system errors gracefully', async () => {
       // Create service with invalid rules directory
-      const invalidService = new McpServerlessService(
-        '/nonexistent/rules/dir',
-        TEST_PROJECT_ROOT,
-      );
+      const invalidService = new McpServerlessService('/nonexistent/rules/dir', TEST_PROJECT_ROOT);
 
-      const result = await invokeToolHandler(
-        invalidService,
-        'searchRules',
-        'test',
-      );
+      const result = await invokeToolHandler(invalidService, 'searchRules', 'test');
       // Should return empty results, not throw
       const data = JSON.parse(result.content[0].text);
       expect(Array.isArray(data)).toBe(true);
@@ -451,11 +362,7 @@ describe('McpServerlessService', () => {
         TEST_PROJECT_ROOT,
       );
 
-      const result = await invokeToolHandler(
-        invalidService,
-        'getAgentDetails',
-        'test-agent',
-      );
+      const result = await invokeToolHandler(invalidService, 'getAgentDetails', 'test-agent');
 
       // Error should be returned but not contain internal paths
       expect(result.isError).toBe(true);
@@ -469,11 +376,7 @@ describe('McpServerlessService', () => {
 
   describe('integration', () => {
     it('should load rules for parsed mode', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'parseMode',
-        'ACT implement feature',
-      );
+      const result = await invokeToolHandler(service, 'parseMode', 'ACT implement feature');
       const data = JSON.parse(result.content[0].text);
 
       // ACT mode should include all three rule files
@@ -488,11 +391,7 @@ describe('McpServerlessService', () => {
     });
 
     it('should search across all rule files and agents', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'searchRules',
-        'workflow',
-      );
+      const result = await invokeToolHandler(service, 'searchRules', 'workflow');
       const data = JSON.parse(result.content[0].text);
 
       // Should find matches in multiple files
@@ -543,19 +442,14 @@ This is test content.
       const data = JSON.parse(result.content[0].text);
 
       expect(Array.isArray(data)).toBe(true);
-      const testSkill = data.find(
-        (s: { name: string }) => s.name === 'test-skill',
-      );
+      const testSkill = data.find((s: { name: string }) => s.name === 'test-skill');
       expect(testSkill).toBeDefined();
       expect(testSkill.description).toBe('A test skill for testing');
     });
 
     it('should return empty array when no skills exist', async () => {
       // Use a service with empty skills directory
-      const emptyService = new McpServerlessService(
-        '/nonexistent/rules',
-        TEST_PROJECT_ROOT,
-      );
+      const emptyService = new McpServerlessService('/nonexistent/rules', TEST_PROJECT_ROOT);
 
       const result = await invokeToolHandler(emptyService, 'listSkills');
       const data = JSON.parse(result.content[0].text);
@@ -603,21 +497,13 @@ Detailed content here.
     });
 
     it('should throw for non-existent skill', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getSkill',
-        'non-existent-skill',
-      );
+      const result = await invokeToolHandler(service, 'getSkill', 'non-existent-skill');
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('not found');
     });
 
     it('should validate skill name format', async () => {
-      const result = await invokeToolHandler(
-        service,
-        'getSkill',
-        'Invalid Name!',
-      );
+      const result = await invokeToolHandler(service, 'getSkill', 'Invalid Name!');
       expect(result.isError).toBe(true);
     });
   });

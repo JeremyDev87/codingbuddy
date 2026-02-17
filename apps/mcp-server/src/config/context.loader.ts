@@ -89,10 +89,7 @@ export function isLoadableFile(filePath: string): boolean {
 /**
  * Recursively get all files in a directory
  */
-async function getAllFiles(
-  dirPath: string,
-  basePath: string = '',
-): Promise<string[]> {
+async function getAllFiles(dirPath: string, basePath: string = ''): Promise<string[]> {
   const files: string[] = [];
   const entries = await safeReadDirWithTypes(dirPath);
 
@@ -138,9 +135,7 @@ async function loadContextFile(
 /**
  * Load all context files from .codingbuddy/ directory
  */
-export async function loadContextFiles(
-  projectRoot: string,
-): Promise<ContextLoadResult> {
+export async function loadContextFiles(projectRoot: string): Promise<ContextLoadResult> {
   const contextDir = path.join(projectRoot, CONTEXT_DIR_NAME);
 
   if (!existsSync(contextDir)) {
@@ -177,10 +172,7 @@ export async function loadContextFiles(
 /**
  * Get context files by type (internal helper)
  */
-function getFilesByType(
-  files: ContextFile[],
-  type: ContextFileType,
-): ContextFile[] {
+function getFilesByType(files: ContextFile[], type: ContextFileType): ContextFile[] {
   return files.filter(f => f.type === type);
 }
 

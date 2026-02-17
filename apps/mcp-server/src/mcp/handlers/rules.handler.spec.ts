@@ -22,9 +22,7 @@ describe('RulesHandler', () => {
     mockRulesService = {
       searchRules: vi
         .fn()
-        .mockResolvedValue([
-          { file: 'test.md', content: 'test rule', relevance: 1 },
-        ]),
+        .mockResolvedValue([{ file: 'test.md', content: 'test rule', relevance: 1 }]),
       getAgent: vi.fn().mockResolvedValue(mockAgent),
     } as unknown as RulesService;
 
@@ -87,16 +85,12 @@ describe('RulesHandler', () => {
         expect(result?.isError).toBe(true);
         expect(result?.content[0]).toMatchObject({
           type: 'text',
-          text: expect.stringContaining(
-            'Missing required parameter: agentName',
-          ),
+          text: expect.stringContaining('Missing required parameter: agentName'),
         });
       });
 
       it('should return error when agent not found', async () => {
-        mockRulesService.getAgent = vi
-          .fn()
-          .mockRejectedValue(new Error('Not found'));
+        mockRulesService.getAgent = vi.fn().mockRejectedValue(new Error('Not found'));
 
         const result = await handler.handle('get_agent_details', {
           agentName: 'nonexistent',
@@ -133,10 +127,7 @@ describe('RulesHandler', () => {
       const definitions = handler.getToolDefinitions();
 
       expect(definitions).toHaveLength(2);
-      expect(definitions.map(d => d.name)).toEqual([
-        'search_rules',
-        'get_agent_details',
-      ]);
+      expect(definitions.map(d => d.name)).toEqual(['search_rules', 'get_agent_details']);
     });
 
     it('should have correct required parameters', () => {
@@ -145,9 +136,7 @@ describe('RulesHandler', () => {
       const searchRules = definitions.find(d => d.name === 'search_rules');
       expect(searchRules?.inputSchema.required).toContain('query');
 
-      const getAgentDetails = definitions.find(
-        d => d.name === 'get_agent_details',
-      );
+      const getAgentDetails = definitions.find(d => d.name === 'get_agent_details');
       expect(getAgentDetails?.inputSchema.required).toContain('agentName');
     });
   });

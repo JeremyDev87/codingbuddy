@@ -6,16 +6,11 @@ import * as AccordionPrimitive from '@radix-ui/react-accordion';
 
 import { cn } from '@/lib/utils';
 
-const Accordion = ({
-  ...props
-}: ComponentProps<typeof AccordionPrimitive.Root>) => {
+const Accordion = ({ ...props }: ComponentProps<typeof AccordionPrimitive.Root>) => {
   return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
 };
 
-const AccordionItem = ({
-  className,
-  ...props
-}: ComponentProps<typeof AccordionPrimitive.Item>) => {
+const AccordionItem = ({ className, ...props }: ComponentProps<typeof AccordionPrimitive.Item>) => {
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"

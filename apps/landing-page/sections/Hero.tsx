@@ -15,10 +15,7 @@ export const Hero = async ({ locale }: WidgetProps) => {
       className="relative overflow-hidden px-4 py-24 text-center sm:py-32"
     >
       {/* Background gradient effect */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-      >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="bg-primary/5 absolute top-0 left-1/2 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" />
         <div className="bg-primary/10 absolute bottom-0 right-0 size-[400px] translate-x-1/4 translate-y-1/4 rounded-full blur-3xl" />
       </div>

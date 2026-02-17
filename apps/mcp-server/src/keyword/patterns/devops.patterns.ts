@@ -47,8 +47,7 @@ export const DEVOPS_INTENT_PATTERNS: ReadonlyArray<IntentPattern> = [
     description: 'CI/CD Pipeline',
   },
   {
-    pattern:
-      /배포\s*(파이프라인|전략|자동화)|deploy\s*(pipeline|strateg|automat)/i,
+    pattern: /배포\s*(파이프라인|전략|자동화)|deploy\s*(pipeline|strateg|automat)/i,
     confidence: 0.9,
     description: 'Deployment',
   },

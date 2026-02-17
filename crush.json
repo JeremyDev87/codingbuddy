@@ -120,12 +120,7 @@
     },
     "filesystem": {
       "type": "stdio",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/Users/jeremy/workspace"
-      ]
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/Users/jeremy/workspace"]
     }
   },
 

@@ -56,9 +56,7 @@ describe('architecture-prompt', () => {
 
   describe('COMPONENT_STYLE_CHOICES', () => {
     it('should include feature-based', () => {
-      const feature = COMPONENT_STYLE_CHOICES.find(
-        c => c.value === 'feature-based',
-      );
+      const feature = COMPONENT_STYLE_CHOICES.find(c => c.value === 'feature-based');
       expect(feature).toBeDefined();
     });
 
@@ -97,9 +95,7 @@ describe('architecture-prompt', () => {
       const { select } = await import('@inquirer/prompts');
       const mockSelect = vi.mocked(select);
 
-      mockSelect
-        .mockResolvedValueOnce('modular')
-        .mockResolvedValueOnce('feature-based');
+      mockSelect.mockResolvedValueOnce('modular').mockResolvedValueOnce('feature-based');
 
       await promptArchitectureSettings();
 
@@ -110,9 +106,7 @@ describe('architecture-prompt', () => {
       const { select } = await import('@inquirer/prompts');
       const mockSelect = vi.mocked(select);
 
-      mockSelect
-        .mockResolvedValueOnce('monorepo')
-        .mockResolvedValueOnce('grouped');
+      mockSelect.mockResolvedValueOnce('monorepo').mockResolvedValueOnce('grouped');
 
       const result = await promptArchitectureSettings();
 
@@ -126,9 +120,7 @@ describe('architecture-prompt', () => {
       const { select } = await import('@inquirer/prompts');
       const mockSelect = vi.mocked(select);
 
-      mockSelect
-        .mockResolvedValueOnce('modular')
-        .mockResolvedValueOnce('feature-based');
+      mockSelect.mockResolvedValueOnce('modular').mockResolvedValueOnce('feature-based');
 
       await promptArchitectureSettings();
 
@@ -181,19 +173,11 @@ describe('architecture-prompt', () => {
       const { select } = await import('@inquirer/prompts');
       const mockSelect = vi.mocked(select);
 
-      const patterns = [
-        'monorepo',
-        'modular',
-        'layered',
-        'clean',
-        'microservices',
-      ];
+      const patterns = ['monorepo', 'modular', 'layered', 'clean', 'microservices'];
 
       for (const pattern of patterns) {
         vi.clearAllMocks();
-        mockSelect
-          .mockResolvedValueOnce(pattern)
-          .mockResolvedValueOnce('feature-based');
+        mockSelect.mockResolvedValueOnce(pattern).mockResolvedValueOnce('feature-based');
 
         const result = await promptArchitectureSettings();
         expect(result.pattern).toBe(pattern);
@@ -208,9 +192,7 @@ describe('architecture-prompt', () => {
 
       for (const style of styles) {
         vi.clearAllMocks();
-        mockSelect
-          .mockResolvedValueOnce('modular')
-          .mockResolvedValueOnce(style);
+        mockSelect.mockResolvedValueOnce('modular').mockResolvedValueOnce(style);
 
         const result = await promptArchitectureSettings();
         expect(result.componentStyle).toBe(style);

@@ -88,9 +88,7 @@ export const VERBOSITY_PRESETS: Record<VerbosityLevel, VerbosityConfig> = {
  * console.log(defaultConfig.level); // 'standard'
  * ```
  */
-export function getVerbosityConfig(
-  level: VerbosityLevel = 'standard',
-): VerbosityConfig {
+export function getVerbosityConfig(level: VerbosityLevel = 'standard'): VerbosityConfig {
   return VERBOSITY_PRESETS[level];
 }
 
@@ -131,8 +129,5 @@ const VALID_VERBOSITY_LEVELS = ['minimal', 'standard', 'full'] as const;
  * ```
  */
 export function isValidVerbosity(value: unknown): value is VerbosityLevel {
-  return (
-    typeof value === 'string' &&
-    VALID_VERBOSITY_LEVELS.includes(value as VerbosityLevel)
-  );
+  return typeof value === 'string' && VALID_VERBOSITY_LEVELS.includes(value as VerbosityLevel);
 }

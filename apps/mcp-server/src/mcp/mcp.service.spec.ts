@@ -4,16 +4,10 @@ import { KeywordService } from '../keyword/keyword.service';
 import { ConfigService, ProjectConfig } from '../config/config.service';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import type { ProjectAnalysis } from '../analyzer';
-import {
-  ConfigDiffService,
-  ConfigDiffResult,
-} from '../config/config-diff.service';
+import { ConfigDiffService, ConfigDiffResult } from '../config/config-diff.service';
 import { AnalyzerService } from '../analyzer/analyzer.service';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
-import type {
-  RecommendSkillsResult,
-  ListSkillsResult,
-} from '../skill/skill-recommendation.types';
+import type { RecommendSkillsResult, ListSkillsResult } from '../skill/skill-recommendation.types';
 import { LanguageService } from '../shared/language.service';
 import { AgentService } from '../agent/agent.service';
 import type { AgentSystemPrompt, ParallelAgentSet } from '../agent/agent.types';
@@ -81,9 +75,7 @@ const mockAnalysis: ProjectAnalysis = {
     dependencies: { react: '^18.0.0' },
     devDependencies: {},
     scripts: {},
-    detectedFrameworks: [
-      { name: 'React', category: 'frontend', version: '^18.0.0' },
-    ],
+    detectedFrameworks: [{ name: 'React', category: 'frontend', version: '^18.0.0' }],
   },
   directoryStructure: {
     rootDirs: ['src'],
@@ -105,9 +97,7 @@ const mockDiffResult: ConfigDiffResult = {
 
 // Mock dependencies
 const createMockRulesService = (): Partial<RulesService> => ({
-  listAgents: vi
-    .fn()
-    .mockResolvedValue(['frontend-developer', 'code-reviewer']),
+  listAgents: vi.fn().mockResolvedValue(['frontend-developer', 'code-reviewer']),
   getRuleContent: vi.fn().mockResolvedValue('# Core Rules\nSome content...'),
   getAgent: vi.fn().mockResolvedValue({
     name: 'Frontend Developer',
@@ -157,9 +147,7 @@ const createMockKeywordService = (): Partial<KeywordService> => ({
     } else {
       return {
         mode: 'PLAN',
-        originalPrompt: trimmed.startsWith('PLAN ')
-          ? trimmed.slice(5)
-          : trimmed,
+        originalPrompt: trimmed.startsWith('PLAN ') ? trimmed.slice(5) : trimmed,
         instructions: 'Plan the implementation',
         rules: [{ name: 'rules/core.md', content: 'Some rules' }],
         agent: 'plan-mode',
@@ -174,9 +162,7 @@ const createMockKeywordService = (): Partial<KeywordService> => ({
   }),
 });
 
-const createMockConfigService = (
-  config: CodingBuddyConfig = {},
-): Partial<ConfigService> => ({
+const createMockConfigService = (config: CodingBuddyConfig = {}): Partial<ConfigService> => ({
   getProjectConfig: vi.fn().mockResolvedValue({
     settings: config,
     ignorePatterns: ['node_modules', '.git'],
@@ -222,52 +208,49 @@ const createMockAnalyzerService = (): Partial<AnalyzerService> => ({
   analyzeProject: vi.fn().mockResolvedValue(mockAnalysis),
 });
 
-const createMockSkillRecommendationService =
-  (): Partial<SkillRecommendationService> => ({
-    recommendSkills: vi.fn().mockReturnValue({
-      recommendations: [
-        {
-          skillName: 'systematic-debugging',
-          confidence: 'high',
-          matchedPatterns: ['bug', 'debug'],
-          description: 'Systematic approach to debugging',
-        },
-      ],
-      originalPrompt: 'I have a bug in my code',
-    } as RecommendSkillsResult),
-    listSkills: vi.fn().mockReturnValue({
-      skills: [
-        {
-          name: 'systematic-debugging',
-          priority: 100,
-          description: 'Systematic approach to debugging',
-          concepts: ['bug', 'error', 'debug'],
-        },
-        {
-          name: 'test-driven-development',
-          priority: 90,
-          description: 'Test-driven development workflow',
-          concepts: ['test', 'tdd'],
-        },
-        {
-          name: 'brainstorming',
-          priority: 80,
-          description: 'Explore requirements before implementation',
-          concepts: ['design', 'feature'],
-        },
-      ],
-      total: 3,
-    } as ListSkillsResult),
-  });
+const createMockSkillRecommendationService = (): Partial<SkillRecommendationService> => ({
+  recommendSkills: vi.fn().mockReturnValue({
+    recommendations: [
+      {
+        skillName: 'systematic-debugging',
+        confidence: 'high',
+        matchedPatterns: ['bug', 'debug'],
+        description: 'Systematic approach to debugging',
+      },
+    ],
+    originalPrompt: 'I have a bug in my code',
+  } as RecommendSkillsResult),
+  listSkills: vi.fn().mockReturnValue({
+    skills: [
+      {
+        name: 'systematic-debugging',
+        priority: 100,
+        description: 'Systematic approach to debugging',
+        concepts: ['bug', 'error', 'debug'],
+      },
+      {
+        name: 'test-driven-development',
+        priority: 90,
+        description: 'Test-driven development workflow',
+        concepts: ['test', 'tdd'],
+      },
+      {
+        name: 'brainstorming',
+        priority: 80,
+        description: 'Explore requirements before implementation',
+        concepts: ['design', 'feature'],
+      },
+    ],
+    total: 3,
+  } as ListSkillsResult),
+});
 
 const createMockLanguageService = (): Partial<LanguageService> => ({
-  getLanguageInstruction: vi
-    .fn()
-    .mockImplementation((languageCode: string) => ({
-      language: languageCode || 'en',
-      instruction: 'Always respond in Korean (한국어).',
-      fallback: false,
-    })),
+  getLanguageInstruction: vi.fn().mockImplementation((languageCode: string) => ({
+    language: languageCode || 'en',
+    instruction: 'Always respond in Korean (한국어).',
+    fallback: false,
+  })),
   getSupportedLanguages: vi.fn().mockReturnValue([
     {
       code: 'ko',
@@ -284,8 +267,7 @@ const createMockAgentService = (): Partial<AgentService> => ({
   getAgentSystemPrompt: vi.fn().mockResolvedValue({
     agentName: 'security-specialist',
     displayName: 'Security Specialist',
-    systemPrompt:
-      'You are a Security Specialist. Focus on vulnerability detection.',
+    systemPrompt: 'You are a Security Specialist. Focus on vulnerability detection.',
     description: 'Security analysis for PLAN mode',
   } as AgentSystemPrompt),
   prepareParallelAgents: vi.fn().mockResolvedValue({
@@ -310,8 +292,7 @@ const createMockAgentService = (): Partial<AgentService> => ({
     .fn()
     .mockReturnValue(['security-specialist', 'accessibility-specialist']),
   dispatchAgents: vi.fn().mockResolvedValue({
-    executionHint:
-      'Use Claude Code Task tool with subagent_type: "general-purpose"',
+    executionHint: 'Use Claude Code Task tool with subagent_type: "general-purpose"',
   }),
 });
 
@@ -437,10 +418,7 @@ const createMockContextDocService = (): Partial<ContextDocumentService> => ({
 
 // Mock TuiInterceptor (pass-through by default)
 const mockTuiInterceptor = {
-  intercept: vi.fn(
-    (_name: string, _args: unknown, execute: () => Promise<unknown>) =>
-      execute(),
-  ),
+  intercept: vi.fn((_name: string, _args: unknown, execute: () => Promise<unknown>) => execute()),
   enable: vi.fn(),
   disable: vi.fn(),
   isEnabled: vi.fn(() => false),
@@ -546,8 +524,7 @@ describe('McpService', () => {
     handlers.clear();
     listRootsMock.mockReset();
     mockTuiInterceptor.intercept.mockImplementation(
-      (_name: string, _args: unknown, execute: () => Promise<unknown>) =>
-        execute(),
+      (_name: string, _args: unknown, execute: () => Promise<unknown>) => execute(),
     );
     // Default: client doesn't support roots
     listRootsMock.mockRejectedValue(new Error('Client does not support roots'));
@@ -603,9 +580,7 @@ describe('McpService', () => {
       const result = (await handler!({})) as {
         resources: { uri: string; name: string }[];
       };
-      const configResource = result.resources.find(
-        r => r.uri === 'config://project',
-      );
+      const configResource = result.resources.find(r => r.uri === 'config://project');
 
       expect(configResource).toBeDefined();
       expect(configResource!.name).toBe('Project Configuration');
@@ -649,9 +624,7 @@ describe('McpService', () => {
       const result = (await handler!({})) as {
         tools: { name: string; description: string }[];
       };
-      const configTool = result.tools.find(
-        t => t.name === 'get_project_config',
-      );
+      const configTool = result.tools.find(t => t.name === 'get_project_config');
 
       expect(configTool).toBeDefined();
       expect(configTool!.description).toContain('project configuration');
@@ -852,9 +825,7 @@ describe('McpService', () => {
       const result = (await handler!({})) as {
         tools: { name: string; description: string }[];
       };
-      const suggestTool = result.tools.find(
-        t => t.name === 'suggest_config_updates',
-      );
+      const suggestTool = result.tools.find(t => t.name === 'suggest_config_updates');
 
       expect(suggestTool).toBeDefined();
       expect(suggestTool!.description).toContain('config');
@@ -893,9 +864,7 @@ describe('McpService', () => {
       expect(result.content).toHaveLength(1);
       const parsedContent = JSON.parse(result.content[0].text);
       expect(parsedContent.language).toBe('ko');
-      expect(parsedContent.languageInstruction).toBe(
-        'Always respond in Korean (한국어).',
-      );
+      expect(parsedContent.languageInstruction).toBe('Always respond in Korean (한국어).');
       expect(parsedContent.mode).toBe('PLAN');
     });
 
@@ -1193,9 +1162,7 @@ describe('McpService', () => {
         const parseModeTool = result.tools.find(t => t.name === 'parse_mode');
 
         expect(parseModeTool).toBeDefined();
-        expect(parseModeTool!.description).toContain(
-          'MUST call this tool FIRST',
-        );
+        expect(parseModeTool!.description).toContain('MUST call this tool FIRST');
       });
 
       it('should mention PLAN, ACT, EVAL keywords', async () => {
@@ -1298,12 +1265,9 @@ describe('McpService', () => {
       // Clear handlers and recreate with empty config
       handlers.clear();
       const emptyConfigService = createMockConfigService({});
-      const serviceWithEmptyConfig = createMcpServiceWithHandlers(
-        defaultMocks,
-        {
-          configService: emptyConfigService,
-        },
-      );
+      const serviceWithEmptyConfig = createMcpServiceWithHandlers(defaultMocks, {
+        configService: emptyConfigService,
+      });
       serviceWithEmptyConfig.onModuleInit();
 
       const handler = handlers.get('prompts/get');
@@ -1379,22 +1343,20 @@ describe('McpService', () => {
         const handler = handlers.get('resources/read');
         expect(handler).toBeDefined();
 
-        await expect(
-          handler!({ params: { uri: 'invalid://something' } }),
-        ).rejects.toThrow('Invalid URI scheme');
+        await expect(handler!({ params: { uri: 'invalid://something' } })).rejects.toThrow(
+          'Invalid URI scheme',
+        );
       });
 
       it('should throw error when rules resource not found', async () => {
-        vi.mocked(mockRulesService.getRuleContent!).mockRejectedValue(
-          new Error('File not found'),
-        );
+        vi.mocked(mockRulesService.getRuleContent!).mockRejectedValue(new Error('File not found'));
 
         const handler = handlers.get('resources/read');
         expect(handler).toBeDefined();
 
-        await expect(
-          handler!({ params: { uri: 'rules://nonexistent.md' } }),
-        ).rejects.toThrow('Resource not found');
+        await expect(handler!({ params: { uri: 'rules://nonexistent.md' } })).rejects.toThrow(
+          'Resource not found',
+        );
       });
 
       it('should throw error when config://project fails to load', async () => {
@@ -1425,9 +1387,9 @@ describe('McpService', () => {
         const handler = handlers.get('resources/read');
         expect(handler).toBeDefined();
 
-        await expect(
-          handler!({ params: { uri: 'config://project' } }),
-        ).rejects.toThrow('Failed to load project configuration');
+        await expect(handler!({ params: { uri: 'config://project' } })).rejects.toThrow(
+          'Failed to load project configuration',
+        );
       });
     });
 
@@ -1436,15 +1398,13 @@ describe('McpService', () => {
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
 
-        await expect(
-          handler!({ params: { name: 'unknown_tool', arguments: {} } }),
-        ).rejects.toThrow('Tool not found: unknown_tool');
+        await expect(handler!({ params: { name: 'unknown_tool', arguments: {} } })).rejects.toThrow(
+          'Tool not found: unknown_tool',
+        );
       });
 
       it('should return error response when get_agent_details fails', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
-          new Error('Agent not found'),
-        );
+        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(new Error('Agent not found'));
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -1461,9 +1421,7 @@ describe('McpService', () => {
       });
 
       it('should return error response when parse_mode fails', async () => {
-        vi.mocked(mockKeywordService.parseMode!).mockRejectedValue(
-          new Error('Parse error'),
-        );
+        vi.mocked(mockKeywordService.parseMode!).mockRejectedValue(new Error('Parse error'));
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();
@@ -1479,9 +1437,7 @@ describe('McpService', () => {
       it('should return error response when get_project_config fails', async () => {
         handlers.clear();
         const failingConfigService = createMockConfigService({});
-        vi.mocked(failingConfigService.getSettings!).mockRejectedValue(
-          new Error('Settings error'),
-        );
+        vi.mocked(failingConfigService.getSettings!).mockRejectedValue(new Error('Settings error'));
 
         const service = createMcpServiceWithHandlers(defaultMocks, {
           configService: failingConfigService,
@@ -1496,9 +1452,7 @@ describe('McpService', () => {
         })) as { isError: boolean; content: { text: string }[] };
 
         expect(result.isError).toBe(true);
-        expect(result.content[0].text).toContain(
-          'Failed to get project config',
-        );
+        expect(result.content[0].text).toContain('Failed to get project config');
       });
 
       it('should use system default model when model resolution fails during parse_mode', async () => {
@@ -1553,17 +1507,13 @@ describe('McpService', () => {
         })) as { isError: boolean; content: { text: string }[] };
 
         expect(result.isError).toBe(true);
-        expect(result.content[0].text).toContain(
-          'Failed to suggest config updates',
-        );
+        expect(result.content[0].text).toContain('Failed to suggest config updates');
       });
     });
 
     describe('Prompts errors', () => {
       it('should throw error when agent not found in activate_agent', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
-          new Error('Agent not found'),
-        );
+        vi.mocked(mockRulesService.getAgent!).mockRejectedValue(new Error('Agent not found'));
 
         const handler = handlers.get('prompts/get');
         expect(handler).toBeDefined();
@@ -1681,9 +1631,7 @@ describe('McpService', () => {
         const service = createMcpServiceWithHandlers(defaultMocks);
         await service.startStdio();
 
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
 
       it('should ignore non-file:// URIs (https://)', async () => {
@@ -1694,9 +1642,7 @@ describe('McpService', () => {
         const service = createMcpServiceWithHandlers(defaultMocks);
         await service.startStdio();
 
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
 
       it('should ignore custom URI schemes', async () => {
@@ -1707,9 +1653,7 @@ describe('McpService', () => {
         const service = createMcpServiceWithHandlers(defaultMocks);
         await service.startStdio();
 
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
     });
 
@@ -1722,9 +1666,7 @@ describe('McpService', () => {
         const service = createMcpServiceWithHandlers(defaultMocks);
         await service.startStdio();
 
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
 
       it('should handle undefined roots gracefully', async () => {
@@ -1733,9 +1675,7 @@ describe('McpService', () => {
         const service = createMcpServiceWithHandlers(defaultMocks);
         await service.startStdio();
 
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
     });
 
@@ -1752,25 +1692,19 @@ describe('McpService', () => {
 
         // listRoots should not be called when env var is set
         expect(listRootsMock).not.toHaveBeenCalled();
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
     });
 
     describe('error handling', () => {
       it('should handle client not supporting roots capability gracefully', async () => {
-        listRootsMock.mockRejectedValue(
-          new Error('Client does not support roots'),
-        );
+        listRootsMock.mockRejectedValue(new Error('Client does not support roots'));
 
         const service = createMcpServiceWithHandlers(defaultMocks);
 
         // Should not throw
         await expect(service.startStdio()).resolves.not.toThrow();
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
 
       it('should handle network errors gracefully', async () => {
@@ -1780,9 +1714,7 @@ describe('McpService', () => {
 
         // Should not throw
         await expect(service.startStdio()).resolves.not.toThrow();
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       });
     });
 
@@ -1813,9 +1745,7 @@ describe('McpService', () => {
 
         // Should timeout within reasonable time (5s + small buffer)
         expect(elapsed).toBeLessThan(6000);
-        expect(
-          mockConfigService.setProjectRootAndReload,
-        ).not.toHaveBeenCalled();
+        expect(mockConfigService.setProjectRootAndReload).not.toHaveBeenCalled();
       }, 10000); // Increase test timeout
     });
   });
@@ -1833,9 +1763,7 @@ describe('McpService', () => {
         const result = (await handler!({})) as {
           tools: { name: string; description: string; inputSchema: object }[];
         };
-        const recommendTool = result.tools.find(
-          t => t.name === 'recommend_skills',
-        );
+        const recommendTool = result.tools.find(t => t.name === 'recommend_skills');
 
         expect(recommendTool).toBeDefined();
         expect(recommendTool!.description).toContain('skill');
@@ -1851,9 +1779,7 @@ describe('McpService', () => {
             inputSchema: { properties: object; required: string[] };
           }[];
         };
-        const recommendTool = result.tools.find(
-          t => t.name === 'recommend_skills',
-        );
+        const recommendTool = result.tools.find(t => t.name === 'recommend_skills');
 
         expect(recommendTool).toBeDefined();
         expect(recommendTool!.inputSchema.properties).toHaveProperty('prompt');
@@ -1879,18 +1805,14 @@ describe('McpService', () => {
         const parsed = JSON.parse(result.content[0].text);
         expect(parsed.recommendations).toBeDefined();
         expect(parsed.recommendations.length).toBeGreaterThan(0);
-        expect(parsed.recommendations[0].skillName).toBe(
-          'systematic-debugging',
+        expect(parsed.recommendations[0].skillName).toBe('systematic-debugging');
+        expect(mockSkillRecommendationService.recommendSkills).toHaveBeenCalledWith(
+          'I have a bug in my code',
         );
-        expect(
-          mockSkillRecommendationService.recommendSkills,
-        ).toHaveBeenCalledWith('I have a bug in my code');
       });
 
       it('should return empty recommendations for unrelated prompt', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.recommendSkills!,
-        ).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.recommendSkills!).mockReturnValue({
           recommendations: [],
           originalPrompt: 'What is the weather today?',
         });
@@ -1927,9 +1849,7 @@ describe('McpService', () => {
 
     describe('Multi-language Support', () => {
       it('should work with English prompt', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.recommendSkills!,
-        ).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.recommendSkills!).mockReturnValue({
           recommendations: [
             {
               skillName: 'systematic-debugging',
@@ -1953,15 +1873,11 @@ describe('McpService', () => {
 
         const parsed = JSON.parse(result.content[0].text);
         expect(parsed.recommendations).toHaveLength(1);
-        expect(parsed.recommendations[0].skillName).toBe(
-          'systematic-debugging',
-        );
+        expect(parsed.recommendations[0].skillName).toBe('systematic-debugging');
       });
 
       it('should work with Korean prompt', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.recommendSkills!,
-        ).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.recommendSkills!).mockReturnValue({
           recommendations: [
             {
               skillName: 'systematic-debugging',
@@ -1985,15 +1901,13 @@ describe('McpService', () => {
 
         const parsed = JSON.parse(result.content[0].text);
         expect(parsed.recommendations).toHaveLength(1);
-        expect(
-          mockSkillRecommendationService.recommendSkills,
-        ).toHaveBeenCalledWith('로그인에 버그가 있습니다');
+        expect(mockSkillRecommendationService.recommendSkills).toHaveBeenCalledWith(
+          '로그인에 버그가 있습니다',
+        );
       });
 
       it('should work with Japanese prompt', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.recommendSkills!,
-        ).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.recommendSkills!).mockReturnValue({
           recommendations: [
             {
               skillName: 'systematic-debugging',
@@ -2017,9 +1931,9 @@ describe('McpService', () => {
 
         const parsed = JSON.parse(result.content[0].text);
         expect(parsed.recommendations).toHaveLength(1);
-        expect(
-          mockSkillRecommendationService.recommendSkills,
-        ).toHaveBeenCalledWith('ログイン機能にバグがある');
+        expect(mockSkillRecommendationService.recommendSkills).toHaveBeenCalledWith(
+          'ログイン機能にバグがある',
+        );
       });
     });
 
@@ -2055,9 +1969,7 @@ describe('McpService', () => {
       });
 
       it('should return error when service throws', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.recommendSkills!,
-        ).mockImplementation(() => {
+        vi.mocked(mockSkillRecommendationService.recommendSkills!).mockImplementation(() => {
           throw new Error('Service error');
         });
 
@@ -2134,9 +2046,7 @@ describe('McpService', () => {
         expect(parsed.skills).toBeDefined();
         expect(parsed.skills.length).toBe(3);
         expect(parsed.total).toBe(3);
-        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
-          {},
-        );
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({});
       });
 
       it('should filter by minPriority', async () => {
@@ -2241,9 +2151,7 @@ describe('McpService', () => {
 
     describe('Error Handling', () => {
       it('should return error when service throws', async () => {
-        vi.mocked(
-          mockSkillRecommendationService.listSkills!,
-        ).mockImplementation(() => {
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockImplementation(() => {
           throw new Error('Service error');
         });
 
@@ -2273,9 +2181,7 @@ describe('McpService', () => {
         });
 
         // Should be called with empty options since non-number values are ignored
-        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
-          {},
-        );
+        expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({});
       });
     });
   });
@@ -2293,9 +2199,7 @@ describe('McpService', () => {
         const result = (await handler!({})) as {
           tools: { name: string; description: string; inputSchema: object }[];
         };
-        const agentPromptTool = result.tools.find(
-          t => t.name === 'get_agent_system_prompt',
-        );
+        const agentPromptTool = result.tools.find(t => t.name === 'get_agent_system_prompt');
 
         expect(agentPromptTool).toBeDefined();
         expect(agentPromptTool!.description).toContain('specialist agent');
@@ -2315,17 +2219,11 @@ describe('McpService', () => {
             };
           }[];
         };
-        const agentPromptTool = result.tools.find(
-          t => t.name === 'get_agent_system_prompt',
-        );
+        const agentPromptTool = result.tools.find(t => t.name === 'get_agent_system_prompt');
 
         expect(agentPromptTool).toBeDefined();
-        expect(agentPromptTool!.inputSchema.properties).toHaveProperty(
-          'agentName',
-        );
-        expect(agentPromptTool!.inputSchema.properties).toHaveProperty(
-          'context',
-        );
+        expect(agentPromptTool!.inputSchema.properties).toHaveProperty('agentName');
+        expect(agentPromptTool!.inputSchema.properties).toHaveProperty('context');
         expect(agentPromptTool!.inputSchema.required).toContain('agentName');
         expect(agentPromptTool!.inputSchema.required).toContain('context');
       });
@@ -2354,10 +2252,9 @@ describe('McpService', () => {
         expect(parsed.displayName).toBe('Security Specialist');
         expect(parsed.systemPrompt).toContain('Security Specialist');
         expect(parsed.description).toBeDefined();
-        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
-          'security-specialist',
-          { mode: 'PLAN' },
-        );
+        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith('security-specialist', {
+          mode: 'PLAN',
+        });
       });
 
       it('should pass targetFiles and taskDescription to service', async () => {
@@ -2462,9 +2359,7 @@ describe('McpService', () => {
         })) as { isError: boolean; content: { text: string }[] };
 
         expect(result.isError).toBe(true);
-        expect(result.content[0].text).toContain(
-          'Failed to get agent system prompt',
-        );
+        expect(result.content[0].text).toContain('Failed to get agent system prompt');
       });
     });
   });
@@ -2482,9 +2377,7 @@ describe('McpService', () => {
         const result = (await handler!({})) as {
           tools: { name: string; description: string; inputSchema: object }[];
         };
-        const parallelAgentsTool = result.tools.find(
-          t => t.name === 'prepare_parallel_agents',
-        );
+        const parallelAgentsTool = result.tools.find(t => t.name === 'prepare_parallel_agents');
 
         expect(parallelAgentsTool).toBeDefined();
         expect(parallelAgentsTool!.description).toContain('parallel');
@@ -2504,27 +2397,15 @@ describe('McpService', () => {
             };
           }[];
         };
-        const parallelAgentsTool = result.tools.find(
-          t => t.name === 'prepare_parallel_agents',
-        );
+        const parallelAgentsTool = result.tools.find(t => t.name === 'prepare_parallel_agents');
 
         expect(parallelAgentsTool).toBeDefined();
-        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
-          'mode',
-        );
-        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
-          'specialists',
-        );
-        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
-          'targetFiles',
-        );
-        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty(
-          'sharedContext',
-        );
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty('mode');
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty('specialists');
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty('targetFiles');
+        expect(parallelAgentsTool!.inputSchema.properties).toHaveProperty('sharedContext');
         expect(parallelAgentsTool!.inputSchema.required).toContain('mode');
-        expect(parallelAgentsTool!.inputSchema.required).toContain(
-          'specialists',
-        );
+        expect(parallelAgentsTool!.inputSchema.required).toContain('specialists');
       });
     });
 
@@ -2676,9 +2557,7 @@ describe('McpService', () => {
         })) as { isError: boolean; content: { text: string }[] };
 
         expect(result.isError).toBe(true);
-        expect(result.content[0].text).toContain(
-          'Failed to prepare parallel agents',
-        );
+        expect(result.content[0].text).toContain('Failed to prepare parallel agents');
       });
     });
   });

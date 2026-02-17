@@ -25,10 +25,7 @@ export interface SkillKeywordConfig {
 /**
  * Language-specific pattern options
  */
-export const LANGUAGE_OPTIONS: Record<
-  SupportedLanguage,
-  { useWordBoundary: boolean }
-> = {
+export const LANGUAGE_OPTIONS: Record<SupportedLanguage, { useWordBoundary: boolean }> = {
   en: { useWordBoundary: true },
   ko: { useWordBoundary: false }, // 교착어
   ja: { useWordBoundary: false }, // 교착어

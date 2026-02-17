@@ -182,12 +182,8 @@ async function main(): Promise<void> {
     console.log('  ├── .claude-plugin/  (plugin manifest)');
     console.log('  ├── .mcp.json        (MCP server configuration)');
     console.log('  └── README.md        (plugin documentation)');
-    console.log(
-      '\nNote: Agents, commands, and skills are provided by MCP server',
-    );
-    console.log(
-      '      from packages/rules/.ai-rules/ (single source of truth)',
-    );
+    console.log('\nNote: Agents, commands, and skills are provided by MCP server');
+    console.log('      from packages/rules/.ai-rules/ (single source of truth)');
   } else {
     console.log('❌ Build completed with errors');
     process.exit(1);

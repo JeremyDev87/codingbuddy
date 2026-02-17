@@ -83,10 +83,7 @@ export class AutoPromptBuilder {
       return originalPrompt;
     }
 
-    const issues = this.filterCriticalHighIssues(
-      lastIteration.evalSummary.issues,
-      false,
-    );
+    const issues = this.filterCriticalHighIssues(lastIteration.evalSummary.issues, false);
 
     return `${originalPrompt}\n\nPrevious issues to address:\n${issues}`;
   }
@@ -148,13 +145,8 @@ export class AutoPromptBuilder {
    * // Please propose a new approach.
    * ```
    */
-  buildFallbackPrompt(
-    originalPrompt: string,
-    history: IterationResult[],
-  ): string {
-    const attempts = history
-      .map(h => `- Iteration ${h.iteration}: ${h.approach}`)
-      .join('\n');
+  buildFallbackPrompt(originalPrompt: string, history: IterationResult[]): string {
+    const attempts = history.map(h => `- Iteration ${h.iteration}: ${h.approach}`).join('\n');
 
     const lastIteration = history[history.length - 1];
     const remainingIssues = lastIteration?.evalSummary?.issues
@@ -180,10 +172,7 @@ Please propose a new approach.`;
    * @returns Formatted string of critical/high issues, one per line
    * @private
    */
-  private filterCriticalHighIssues(
-    issues: EvalIssue[],
-    includeSeverityLabel: boolean,
-  ): string {
+  private filterCriticalHighIssues(issues: EvalIssue[], includeSeverityLabel: boolean): string {
     return issues
       .filter(i => i.severity === 'critical' || i.severity === 'high')
       .map(i =>

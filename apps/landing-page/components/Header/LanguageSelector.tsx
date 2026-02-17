@@ -33,10 +33,7 @@ export const LanguageSelector = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup
-          value={locale}
-          onValueChange={handleLocaleChange}
-        >
+        <DropdownMenuRadioGroup value={locale} onValueChange={handleLocaleChange}>
           {SUPPORTED_LOCALES.map(loc => (
             <DropdownMenuRadioItem key={loc} value={loc}>
               {t(`language.${loc}`)}

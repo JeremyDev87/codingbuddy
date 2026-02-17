@@ -8,12 +8,8 @@ import { createMockT } from './mock-translations';
  * Usage: import '@/__tests__/__helpers__/next-intl-server-mock';
  */
 vi.mock('next-intl/server', () => ({
-  getTranslations: async ({
-    namespace,
-  }: {
-    locale: string;
-    namespace: string;
-  }) => createMockT(namespace),
+  getTranslations: async ({ namespace }: { locale: string; namespace: string }) =>
+    createMockT(namespace),
   setRequestLocale: () => {},
   getMessages: async () => ({}),
 }));

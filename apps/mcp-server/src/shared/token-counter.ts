@@ -69,10 +69,7 @@ export function estimateTokens(content: string): number {
  * console.log(metrics.estimatedTokens); // ~150
  * ```
  */
-export function measureResponse<T>(
-  componentName: string,
-  data: T,
-): TokenMetrics {
+export function measureResponse<T>(componentName: string, data: T): TokenMetrics {
   const serialized = JSON.stringify(data);
   const byteSize = Buffer.byteLength(serialized, 'utf8');
   const estimatedTokens = estimateTokens(serialized);

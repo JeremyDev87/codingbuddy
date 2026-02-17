@@ -66,18 +66,13 @@ function cleanConfig(config: ConfigObject): ConfigObject {
 
   if (config.techStack) {
     const techStack: ConfigObject['techStack'] = {};
-    if (config.techStack.languages?.length)
-      techStack.languages = config.techStack.languages;
-    if (config.techStack.frontend?.length)
-      techStack.frontend = config.techStack.frontend;
-    if (config.techStack.backend?.length)
-      techStack.backend = config.techStack.backend;
-    if (config.techStack.database?.length)
-      techStack.database = config.techStack.database;
+    if (config.techStack.languages?.length) techStack.languages = config.techStack.languages;
+    if (config.techStack.frontend?.length) techStack.frontend = config.techStack.frontend;
+    if (config.techStack.backend?.length) techStack.backend = config.techStack.backend;
+    if (config.techStack.database?.length) techStack.database = config.techStack.database;
     if (config.techStack.infrastructure?.length)
       techStack.infrastructure = config.techStack.infrastructure;
-    if (config.techStack.tools?.length)
-      techStack.tools = config.techStack.tools;
+    if (config.techStack.tools?.length) techStack.tools = config.techStack.tools;
     if (hasProperties(techStack)) result.techStack = techStack;
   }
 
@@ -86,8 +81,7 @@ function cleanConfig(config: ConfigObject): ConfigObject {
     if (config.architecture.pattern) arch.pattern = config.architecture.pattern;
     if (config.architecture.componentStyle)
       arch.componentStyle = config.architecture.componentStyle;
-    if (config.architecture.structure?.length)
-      arch.structure = config.architecture.structure;
+    if (config.architecture.structure?.length) arch.structure = config.architecture.structure;
     if (hasProperties(arch)) result.architecture = arch;
   }
 
@@ -95,8 +89,7 @@ function cleanConfig(config: ConfigObject): ConfigObject {
     const conv: ConfigObject['conventions'] = {};
     if (config.conventions.naming && hasProperties(config.conventions.naming)) {
       conv.naming = {};
-      if (config.conventions.naming.files)
-        conv.naming.files = config.conventions.naming.files;
+      if (config.conventions.naming.files) conv.naming.files = config.conventions.naming.files;
       if (config.conventions.naming.components)
         conv.naming.components = config.conventions.naming.components;
       if (config.conventions.naming.functions)
@@ -112,14 +105,11 @@ function cleanConfig(config: ConfigObject): ConfigObject {
 
   if (config.testStrategy) {
     const test: ConfigObject['testStrategy'] = {};
-    if (config.testStrategy.approach)
-      test.approach = config.testStrategy.approach;
-    if (config.testStrategy.coverage !== undefined)
-      test.coverage = config.testStrategy.coverage;
+    if (config.testStrategy.approach) test.approach = config.testStrategy.approach;
+    if (config.testStrategy.coverage !== undefined) test.coverage = config.testStrategy.coverage;
     if (config.testStrategy.mockingStrategy)
       test.mockingStrategy = config.testStrategy.mockingStrategy;
-    if (config.testStrategy.frameworks?.length)
-      test.frameworks = config.testStrategy.frameworks;
+    if (config.testStrategy.frameworks?.length) test.frameworks = config.testStrategy.frameworks;
     if (hasProperties(test)) result.testStrategy = test;
   }
 

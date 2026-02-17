@@ -31,12 +31,8 @@ describe('Intent Patterns', () => {
 
     it('should detect refactoring intent', () => {
       expect(detectIntentFromPatterns('refactor the code')).toBe('refactoring');
-      expect(detectIntentFromPatterns('clean up this module')).toBe(
-        'refactoring',
-      );
-      expect(detectIntentFromPatterns('improve code quality')).toBe(
-        'refactoring',
-      );
+      expect(detectIntentFromPatterns('clean up this module')).toBe('refactoring');
+      expect(detectIntentFromPatterns('improve code quality')).toBe('refactoring');
     });
 
     it('should detect code_review intent', () => {
@@ -55,42 +51,24 @@ describe('Intent Patterns', () => {
     });
 
     it('should detect performance_optimization intent', () => {
-      expect(detectIntentFromPatterns('optimize this function')).toBe(
-        'performance_optimization',
-      );
+      expect(detectIntentFromPatterns('optimize this function')).toBe('performance_optimization');
       // Note: 'improve performance' matches 'refactoring' first due to 'improve' keyword
       // Note: 'performance issues' matches 'bug_fix' first due to 'issue' keyword
-      expect(detectIntentFromPatterns('slow performance')).toBe(
-        'performance_optimization',
-      );
-      expect(detectIntentFromPatterns('make it faster')).toBe(
-        'performance_optimization',
-      );
+      expect(detectIntentFromPatterns('slow performance')).toBe('performance_optimization');
+      expect(detectIntentFromPatterns('make it faster')).toBe('performance_optimization');
     });
 
     it('should detect security_hardening intent', () => {
       // Note: 'fix security vulnerability' matches 'bug_fix' first due to 'fix' keyword
-      expect(detectIntentFromPatterns('security vulnerability found')).toBe(
-        'security_hardening',
-      );
-      expect(detectIntentFromPatterns('add auth middleware')).toBe(
-        'security_hardening',
-      );
+      expect(detectIntentFromPatterns('security vulnerability found')).toBe('security_hardening');
+      expect(detectIntentFromPatterns('add auth middleware')).toBe('security_hardening');
     });
 
     it('should detect feature_development intent', () => {
-      expect(detectIntentFromPatterns('add a new feature')).toBe(
-        'feature_development',
-      );
-      expect(detectIntentFromPatterns('create user profile')).toBe(
-        'feature_development',
-      );
-      expect(detectIntentFromPatterns('implement login')).toBe(
-        'feature_development',
-      );
-      expect(detectIntentFromPatterns('build dashboard')).toBe(
-        'feature_development',
-      );
+      expect(detectIntentFromPatterns('add a new feature')).toBe('feature_development');
+      expect(detectIntentFromPatterns('create user profile')).toBe('feature_development');
+      expect(detectIntentFromPatterns('implement login')).toBe('feature_development');
+      expect(detectIntentFromPatterns('build dashboard')).toBe('feature_development');
     });
 
     it('should return unknown for unrecognized prompts', () => {
@@ -105,9 +83,7 @@ describe('Intent Patterns', () => {
 
     it('should detect first matching pattern (priority order)', () => {
       // 'fix' comes before 'feature' keywords
-      expect(detectIntentFromPatterns('fix and add new feature')).toBe(
-        'bug_fix',
-      );
+      expect(detectIntentFromPatterns('fix and add new feature')).toBe('bug_fix');
     });
   });
 });

@@ -10,9 +10,7 @@ describe('ActivationMessageBuilder', () => {
 
   describe('addAgentActivation', () => {
     it('adds a primary agent activation', () => {
-      const result = builder
-        .addAgentActivation('solution-architect', 'primary')
-        .build();
+      const result = builder.addAgentActivation('solution-architect', 'primary').build();
 
       expect(result).toBeDefined();
       expect(result!.activations).toHaveLength(1);
@@ -24,9 +22,7 @@ describe('ActivationMessageBuilder', () => {
     });
 
     it('adds a specialist agent activation', () => {
-      const result = builder
-        .addAgentActivation('security-specialist', 'specialist')
-        .build();
+      const result = builder.addAgentActivation('security-specialist', 'specialist').build();
 
       expect(result).toBeDefined();
       expect(result!.activations[0]).toMatchObject({
@@ -38,33 +34,23 @@ describe('ActivationMessageBuilder', () => {
 
     it('includes activatedBy when provided', () => {
       const result = builder
-        .addAgentActivation(
-          'security-specialist',
-          'specialist',
-          'solution-architect',
-        )
+        .addAgentActivation('security-specialist', 'specialist', 'solution-architect')
         .build();
 
       expect(result!.activations[0].activatedBy).toBe('solution-architect');
     });
 
     it('includes timestamp', () => {
-      const result = builder
-        .addAgentActivation('solution-architect', 'primary')
-        .build();
+      const result = builder.addAgentActivation('solution-architect', 'primary').build();
 
       expect(result!.activations[0].timestamp).toBeDefined();
-      expect(
-        new Date(result!.activations[0].timestamp).getTime(),
-      ).not.toBeNaN();
+      expect(new Date(result!.activations[0].timestamp).getTime()).not.toBeNaN();
     });
   });
 
   describe('addSkillActivation', () => {
     it('adds a skill activation', () => {
-      const result = builder
-        .addSkillActivation('test-driven-development')
-        .build();
+      const result = builder.addSkillActivation('test-driven-development').build();
 
       expect(result).toBeDefined();
       expect(result!.activations[0]).toMatchObject({
@@ -75,9 +61,7 @@ describe('ActivationMessageBuilder', () => {
     });
 
     it('includes activatedBy when provided', () => {
-      const result = builder
-        .addSkillActivation('brainstorming', 'technical-planner')
-        .build();
+      const result = builder.addSkillActivation('brainstorming', 'technical-planner').build();
 
       expect(result!.activations[0].activatedBy).toBe('technical-planner');
     });
@@ -91,9 +75,7 @@ describe('ActivationMessageBuilder', () => {
     });
 
     it('returns ActivationMessage with formatted string', () => {
-      const result = builder
-        .addAgentActivation('solution-architect', 'primary')
-        .build();
+      const result = builder.addAgentActivation('solution-architect', 'primary').build();
 
       expect(result!.formatted).toBeDefined();
       expect(typeof result!.formatted).toBe('string');
@@ -102,9 +84,7 @@ describe('ActivationMessageBuilder', () => {
 
   describe('formatted output', () => {
     it('formats primary agent with robot icon', () => {
-      const result = builder
-        .addAgentActivation('solution-architect', 'primary')
-        .build();
+      const result = builder.addAgentActivation('solution-architect', 'primary').build();
 
       expect(result!.formatted).toContain('🤖');
       expect(result!.formatted).toContain('solution-architect');
@@ -112,9 +92,7 @@ describe('ActivationMessageBuilder', () => {
     });
 
     it('formats specialist agent with person icon', () => {
-      const result = builder
-        .addAgentActivation('security-specialist', 'specialist')
-        .build();
+      const result = builder.addAgentActivation('security-specialist', 'specialist').build();
 
       expect(result!.formatted).toContain('👤');
       expect(result!.formatted).toContain('security-specialist');
@@ -122,9 +100,7 @@ describe('ActivationMessageBuilder', () => {
     });
 
     it('formats skill with lightning icon', () => {
-      const result = builder
-        .addSkillActivation('test-driven-development')
-        .build();
+      const result = builder.addSkillActivation('test-driven-development').build();
 
       expect(result!.formatted).toContain('⚡');
       expect(result!.formatted).toContain('test-driven-development');
@@ -132,11 +108,7 @@ describe('ActivationMessageBuilder', () => {
 
     it('includes activatedBy in formatted output', () => {
       const result = builder
-        .addAgentActivation(
-          'security-specialist',
-          'specialist',
-          'solution-architect',
-        )
+        .addAgentActivation('security-specialist', 'specialist', 'solution-architect')
         .build();
 
       expect(result!.formatted).toContain('(by solution-architect)');
@@ -145,11 +117,7 @@ describe('ActivationMessageBuilder', () => {
     it('formats multiple activations on separate lines', () => {
       const result = builder
         .addAgentActivation('solution-architect', 'primary')
-        .addAgentActivation(
-          'security-specialist',
-          'specialist',
-          'solution-architect',
-        )
+        .addAgentActivation('security-specialist', 'specialist', 'solution-architect')
         .addSkillActivation('brainstorming', 'solution-architect')
         .build();
 
@@ -171,8 +139,7 @@ describe('ActivationMessageBuilder', () => {
   describe('static helpers', () => {
     describe('forPrimaryAgent', () => {
       it('creates activation message for primary agent', () => {
-        const result =
-          ActivationMessageBuilder.forPrimaryAgent('solution-architect');
+        const result = ActivationMessageBuilder.forPrimaryAgent('solution-architect');
 
         expect(result.activations).toHaveLength(1);
         expect(result.activations[0].tier).toBe('primary');
@@ -196,10 +163,7 @@ describe('ActivationMessageBuilder', () => {
 
     describe('forSkill', () => {
       it('creates activation message for skill', () => {
-        const result = ActivationMessageBuilder.forSkill(
-          'brainstorming',
-          'technical-planner',
-        );
+        const result = ActivationMessageBuilder.forSkill('brainstorming', 'technical-planner');
 
         expect(result.activations).toHaveLength(1);
         expect(result.activations[0].type).toBe('skill');

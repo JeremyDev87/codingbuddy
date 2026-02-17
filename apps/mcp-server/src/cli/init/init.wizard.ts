@@ -72,17 +72,10 @@ function extractDetectedValues(analysis: ProjectAnalysis) {
 
   // Detect languages from file extensions and frameworks
   const detectedLanguages: string[] = [];
-  if (
-    packageInfo?.detectedFrameworks.some(f =>
-      f.name.toLowerCase().includes('typescript'),
-    )
-  ) {
+  if (packageInfo?.detectedFrameworks.some(f => f.name.toLowerCase().includes('typescript'))) {
     detectedLanguages.push('TypeScript');
   }
-  if (
-    packageInfo?.dependencies['typescript'] ||
-    packageInfo?.devDependencies['typescript']
-  ) {
+  if (packageInfo?.dependencies['typescript'] || packageInfo?.devDependencies['typescript']) {
     if (!detectedLanguages.includes('TypeScript')) {
       detectedLanguages.push('TypeScript');
     }
@@ -126,9 +119,7 @@ function extractDetectedValues(analysis: ProjectAnalysis) {
 
   // Detect conventions from prettier config
   const prettierConfig = configFiles.prettier;
-  const detectedQuotes: 'single' | 'double' = prettierConfig?.singleQuote
-    ? 'single'
-    : 'double';
+  const detectedQuotes: 'single' | 'double' = prettierConfig?.singleQuote ? 'single' : 'double';
   const detectedSemicolons = prettierConfig?.semi ?? true;
 
   return {
@@ -147,9 +138,7 @@ function extractDetectedValues(analysis: ProjectAnalysis) {
 /**
  * Create default wizard data from detected values
  */
-function createDefaultData(
-  detected: ReturnType<typeof extractDetectedValues>,
-): WizardData {
+function createDefaultData(detected: ReturnType<typeof extractDetectedValues>): WizardData {
   return {
     basic: {
       language: DEFAULT_LANGUAGE,
@@ -321,9 +310,7 @@ function toSummaryData(data: WizardData): ConfigSummaryData {
  *
  * @returns Collected wizard data or null if cancelled
  */
-export async function runInitWizard(
-  options: WizardOptions,
-): Promise<WizardData | null> {
+export async function runInitWizard(options: WizardOptions): Promise<WizardData | null> {
   const console = createConsoleUtils();
   const detected = extractDetectedValues(options.analysis);
 
@@ -377,12 +364,8 @@ export function wizardDataToConfig(data: WizardData): Record<string, unknown> {
     description: data.basic.description,
     techStack: {
       languages: data.techStack.languages,
-      frontend:
-        data.techStack.frontend.length > 0
-          ? data.techStack.frontend
-          : undefined,
-      backend:
-        data.techStack.backend.length > 0 ? data.techStack.backend : undefined,
+      frontend: data.techStack.frontend.length > 0 ? data.techStack.frontend : undefined,
+      backend: data.techStack.backend.length > 0 ? data.techStack.backend : undefined,
       tools: data.techStack.tools,
     },
     architecture: {

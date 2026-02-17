@@ -23,28 +23,16 @@ export const MobileMenu = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          aria-label={t('mobileMenu.open')}
-        >
+        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t('mobileMenu.open')}>
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-[300px]"
-        closeLabel={t('mobileMenu.close')}
-      >
+      <SheetContent side="right" className="w-[300px]" closeLabel={t('mobileMenu.close')}>
         <SheetHeader>
           <SheetTitle>{t('mobileMenu.title')}</SheetTitle>
           <SheetDescription>{t('mobileMenu.description')}</SheetDescription>
         </SheetHeader>
-        <nav
-          className="mt-6 flex flex-col gap-4"
-          aria-label={t('mobileMenu.title')}
-        >
+        <nav className="mt-6 flex flex-col gap-4" aria-label={t('mobileMenu.title')}>
           {NAV_ITEMS.map(({ key, href }) => (
             <a
               key={key}

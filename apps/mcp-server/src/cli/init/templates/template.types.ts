@@ -9,13 +9,7 @@ import type { CodingBuddyConfig } from '../../../config';
 /**
  * Supported framework templates
  */
-export type FrameworkType =
-  | 'nextjs'
-  | 'react'
-  | 'nestjs'
-  | 'express'
-  | 'node'
-  | 'default';
+export type FrameworkType = 'nextjs' | 'react' | 'nestjs' | 'express' | 'node' | 'default';
 
 /**
  * Template metadata

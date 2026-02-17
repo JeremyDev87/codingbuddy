@@ -2,12 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render } from 'ink-testing-library';
 import { App } from './app';
-import {
-  TuiEventBus,
-  TUI_EVENTS,
-  TuiInterceptor,
-  type AgentMetadata,
-} from './events';
+import { TuiEventBus, TUI_EVENTS, TuiInterceptor, type AgentMetadata } from './events';
 
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
@@ -292,11 +287,7 @@ describe('EventBus ↔ UI Integration', () => {
       expect(lastFrame()).toContain('1 active');
 
       eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
-        specialists: [
-          'security-specialist',
-          'accessibility-specialist',
-          'performance-specialist',
-        ],
+        specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
         mode: 'PLAN',
       });
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -336,11 +327,7 @@ describe('EventBus ↔ UI Integration', () => {
         durationMs: 900,
       });
       eventBus.emit(TUI_EVENTS.PARALLEL_COMPLETED, {
-        specialists: [
-          'security-specialist',
-          'accessibility-specialist',
-          'performance-specialist',
-        ],
+        specialists: ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
         results: {
           'security-specialist': 'done',
           'accessibility-specialist': 'done',
@@ -645,24 +632,20 @@ describe('EventBus ↔ UI Integration', () => {
       const { lastFrame } = render(<App eventBus={eventBus} />);
       await tick();
 
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'PLAN something' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                mode: 'PLAN',
-                included_skills: [
-                  { name: 'brainstorming', reason: 'creative work' },
-                  { name: 'writing-plans', reason: 'multi-step task' },
-                ],
-              }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN something' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'PLAN',
+              included_skills: [
+                { name: 'brainstorming', reason: 'creative work' },
+                { name: 'writing-plans', reason: 'multi-step task' },
+              ],
+            }),
+          },
+        ],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
       await tick();
@@ -681,13 +664,9 @@ describe('EventBus ↔ UI Integration', () => {
       const { lastFrame } = render(<App eventBus={eventBus} />);
       await tick();
 
-      await interceptor.intercept(
-        'search_rules',
-        { query: 'test' },
-        async () => ({
-          content: [{ type: 'text', text: '{"results":[]}' }],
-        }),
-      );
+      await interceptor.intercept('search_rules', { query: 'test' }, async () => ({
+        content: [{ type: 'text', text: '{"results":[]}' }],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
       await tick();
@@ -707,23 +686,17 @@ describe('EventBus ↔ UI Integration', () => {
       await tick();
 
       // 1. parse_mode call sets mode and skills
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'EVAL review code' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                mode: 'EVAL',
-                included_skills: [
-                  { name: 'systematic-debugging', reason: 'bug' },
-                ],
-              }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'EVAL review code' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'EVAL',
+              included_skills: [{ name: 'systematic-debugging', reason: 'bug' }],
+            }),
+          },
+        ],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
       await tick();

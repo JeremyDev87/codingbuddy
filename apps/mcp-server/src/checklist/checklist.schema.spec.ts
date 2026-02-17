@@ -150,9 +150,7 @@ describe('validateChecklistSchema', () => {
       const { categories: _categories, ...rest } = validChecklist;
       const result = validateChecklistSchema(rest);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('categories'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining('categories'));
     });
 
     it('rejects empty categories array', () => {
@@ -161,9 +159,7 @@ describe('validateChecklistSchema', () => {
         categories: [],
       });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('at least one'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining('at least one'));
     });
 
     it('rejects category without name', () => {
@@ -177,17 +173,13 @@ describe('validateChecklistSchema', () => {
         ],
       });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('categories[0].name'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining('categories[0].name'));
     });
 
     it('rejects category without triggers', () => {
       const result = validateChecklistSchema({
         ...validChecklist,
-        categories: [
-          { name: 'test', items: [validChecklist.categories[0].items[0]] },
-        ],
+        categories: [{ name: 'test', items: [validChecklist.categories[0].items[0]] }],
       });
       expect(result.valid).toBe(false);
       expect(result.errors).toContainEqual(expect.stringContaining('triggers'));
@@ -199,9 +191,7 @@ describe('validateChecklistSchema', () => {
         categories: [{ name: 'test', triggers: { files: [] }, items: [] }],
       });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('at least one item'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining('at least one item'));
     });
   });
 
@@ -258,9 +248,7 @@ describe('validateChecklistSchema', () => {
         ],
       });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('Invalid value'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining('Invalid value'));
     });
   });
 
@@ -276,9 +264,7 @@ describe('validateChecklistSchema', () => {
         ],
       });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('triggers.files'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining('triggers.files'));
     });
 
     it('rejects non-string file patterns', () => {
@@ -318,9 +304,7 @@ describe('parseAndValidateChecklist', () => {
   });
 
   it('throws ChecklistSchemaError for invalid JSON', () => {
-    expect(() => parseAndValidateChecklist('not json')).toThrow(
-      ChecklistSchemaError,
-    );
+    expect(() => parseAndValidateChecklist('not json')).toThrow(ChecklistSchemaError);
   });
 
   it('throws ChecklistSchemaError for invalid schema', () => {
@@ -339,9 +323,7 @@ describe('parseAndValidateChecklist', () => {
 
 describe('isValidChecklistItem', () => {
   it('returns true for valid item', () => {
-    expect(
-      isValidChecklistItem({ id: 'test', text: 'Test', priority: 'high' }),
-    ).toBe(true);
+    expect(isValidChecklistItem({ id: 'test', text: 'Test', priority: 'high' })).toBe(true);
   });
 
   it('returns false for null', () => {
@@ -349,15 +331,11 @@ describe('isValidChecklistItem', () => {
   });
 
   it('returns false for missing id', () => {
-    expect(isValidChecklistItem({ text: 'Test', priority: 'high' })).toBe(
-      false,
-    );
+    expect(isValidChecklistItem({ text: 'Test', priority: 'high' })).toBe(false);
   });
 
   it('returns false for invalid priority', () => {
-    expect(
-      isValidChecklistItem({ id: 'test', text: 'Test', priority: 'urgent' }),
-    ).toBe(false);
+    expect(isValidChecklistItem({ id: 'test', text: 'Test', priority: 'urgent' })).toBe(false);
   });
 });
 

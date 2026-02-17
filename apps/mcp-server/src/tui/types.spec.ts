@@ -1,21 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import type { AgentState, TuiEvent, AgentStatus } from './types';
 import type { Mode } from '../keyword/keyword.types';
-import {
-  AGENT_STATUSES,
-  TUI_EVENT_TYPES,
-  createDefaultAgentState,
-} from './types';
+import { AGENT_STATUSES, TUI_EVENT_TYPES, createDefaultAgentState } from './types';
 
 describe('tui/types', () => {
   describe('AGENT_STATUSES', () => {
     it('should contain all valid agent statuses', () => {
-      expect(AGENT_STATUSES).toEqual([
-        'idle',
-        'running',
-        'completed',
-        'failed',
-      ]);
+      expect(AGENT_STATUSES).toEqual(['idle', 'running', 'completed', 'failed']);
     });
 
     it('should be readonly', () => {

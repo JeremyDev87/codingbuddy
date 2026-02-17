@@ -14,12 +14,7 @@ import {
 import { parseToolResponseJson } from './parse-tool-response';
 import type { Mode } from '../../keyword/keyword.types';
 
-const VALID_MODES: ReadonlySet<string> = new Set<Mode>([
-  'PLAN',
-  'ACT',
-  'EVAL',
-  'AUTO',
-]);
+const VALID_MODES: ReadonlySet<string> = new Set<Mode>(['PLAN', 'ACT', 'EVAL', 'AUTO']);
 
 export type ExtractedEvent =
   | { event: typeof TUI_EVENTS.MODE_CHANGED; payload: ModeChangedEvent }
@@ -38,10 +33,7 @@ export type ExtractedEvent =
  * Inspects the JSON response from specific tools to derive events
  * that the interceptor cannot infer from tool name/args alone.
  */
-export function extractEventsFromResponse(
-  toolName: string,
-  result: unknown,
-): ExtractedEvent[] {
+export function extractEventsFromResponse(toolName: string, result: unknown): ExtractedEvent[] {
   const json = parseToolResponseJson(result);
   if (!json) return [];
 
@@ -86,9 +78,7 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
   return events;
 }
 
-function extractFromPrepareParallelAgents(
-  json: Record<string, unknown>,
-): ExtractedEvent[] {
+function extractFromPrepareParallelAgents(json: Record<string, unknown>): ExtractedEvent[] {
   const agents = json.agents;
   if (!Array.isArray(agents) || agents.length === 0) return [];
 
@@ -105,9 +95,7 @@ function extractFromPrepareParallelAgents(
   if (specialists.length === 0) return [];
 
   const mode: Mode =
-    typeof json.mode === 'string' && VALID_MODES.has(json.mode)
-      ? (json.mode as Mode)
-      : 'PLAN';
+    typeof json.mode === 'string' && VALID_MODES.has(json.mode) ? (json.mode as Mode) : 'PLAN';
 
   return [
     {

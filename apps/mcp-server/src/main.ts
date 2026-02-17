@@ -10,9 +10,7 @@ import { resolveTuiConfig } from './tui/tui-config';
  * Parse CORS origin configuration from environment variable
  * Supports: single origin, comma-separated list, or '*' for all origins
  */
-function parseCorsOrigin(
-  corsOrigin: string | undefined,
-): string | string[] | boolean {
+function parseCorsOrigin(corsOrigin: string | undefined): string | string[] | boolean {
   if (!corsOrigin) {
     // Default: no CORS (most restrictive)
     return false;
@@ -109,9 +107,7 @@ async function initTui(
  * Initialize IPC server for remote TUI clients.
  * Graceful degradation: IPC failure does not block MCP server.
  */
-async function initIpc(
-  app: INestApplicationContext,
-): Promise<() => Promise<void>> {
+async function initIpc(app: INestApplicationContext): Promise<() => Promise<void>> {
   const { ensureTuiReady } = await import('./tui/ensure-tui-ready');
   await ensureTuiReady(app);
 
@@ -133,14 +129,8 @@ async function initIpc(
   // Uses bound on/off to bypass TuiEventBus generic narrowing — safe because
   // event names come from TUI_EVENTS and handlers only cache payloads.
   const stateCache = new IpcStateCache({
-    on: eventBus.on.bind(eventBus) as (
-      e: string,
-      h: (p: unknown) => void,
-    ) => void,
-    off: eventBus.off.bind(eventBus) as (
-      e: string,
-      h: (p: unknown) => void,
-    ) => void,
+    on: eventBus.on.bind(eventBus) as (e: string, h: (p: unknown) => void) => void,
+    off: eventBus.off.bind(eventBus) as (e: string, h: (p: unknown) => void) => void,
   });
   stateCache.trackSimple(TUI_EVENTS.AGENTS_LOADED);
   stateCache.trackSimple(TUI_EVENTS.MODE_CHANGED);
@@ -149,10 +139,7 @@ async function initIpc(
     TUI_EVENTS.AGENT_DEACTIVATED,
     (p: unknown) => (p as { agentId: string }).agentId,
   );
-  stateCache.trackToggle(
-    TUI_EVENTS.PARALLEL_STARTED,
-    TUI_EVENTS.PARALLEL_COMPLETED,
-  );
+  stateCache.trackToggle(TUI_EVENTS.PARALLEL_STARTED, TUI_EVENTS.PARALLEL_COMPLETED);
 
   // Provide initial state snapshot for late-connecting TUI clients
   const ipcServer = new TuiIpcServer(socketPath, {
@@ -286,8 +273,7 @@ export async function bootstrap(): Promise<void> {
     });
     if (tuiConfig.shouldRender) {
       try {
-        const stdout =
-          tuiConfig.target === 'stderr' ? process.stderr : undefined;
+        const stdout = tuiConfig.target === 'stderr' ? process.stderr : undefined;
         const tuiInstance = await initTui(app, stdout);
         // Register TUI unmount in unified shutdown manager
         shutdownManager.register(async () => {
@@ -319,9 +305,7 @@ export async function bootstrap(): Promise<void> {
 // Run if executed directly
 if (require.main === module) {
   bootstrap().catch((error: unknown) => {
-    process.stderr.write(
-      `Fatal: ${error instanceof Error ? error.message : error}\n`,
-    );
+    process.stderr.write(`Fatal: ${error instanceof Error ? error.message : error}\n`);
     process.exit(1);
   });
 }

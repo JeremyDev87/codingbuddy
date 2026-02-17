@@ -13,10 +13,7 @@ import { generateSlug } from '../../shared/slug.utils';
 import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
-import {
-  CONTEXT_FILE_PATH,
-  type ContextDocument,
-} from '../../context/context-document.types';
+import { CONTEXT_FILE_PATH, type ContextDocument } from '../../context/context-document.types';
 import type {
   Mode,
   DispatchReady,
@@ -80,8 +77,7 @@ export class ModeHandler extends AbstractHandler {
           properties: {
             prompt: {
               type: 'string',
-              description:
-                'User prompt that may start with PLAN/ACT/EVAL keyword',
+              description: 'User prompt that may start with PLAN/ACT/EVAL keyword',
             },
             recommended_agent: {
               type: 'string',
@@ -111,14 +107,11 @@ export class ModeHandler extends AbstractHandler {
     }
 
     // Extract optional recommended_agent (extractRequiredString returns null if empty/whitespace)
-    const recommendedAgent =
-      extractRequiredString(args, 'recommended_agent') ?? undefined;
+    const recommendedAgent = extractRequiredString(args, 'recommended_agent') ?? undefined;
 
     // Extract and validate optional verbosity (defaults to 'standard')
     const rawVerbosity = extractRequiredString(args, 'verbosity') ?? 'standard';
-    const verbosity = isValidVerbosity(rawVerbosity)
-      ? rawVerbosity
-      : 'standard';
+    const verbosity = isValidVerbosity(rawVerbosity) ? rawVerbosity : 'standard';
 
     try {
       // Always reload config to ensure fresh language settings
@@ -153,17 +146,12 @@ export class ModeHandler extends AbstractHandler {
           `Language resolved from config: ${configLanguage} (project root: ${projectRoot})`,
         );
         // File-based diagnostic logging for successful config loading
-        await this.diagnosticLogService.logConfigLoading(
-          true,
-          projectRoot,
-          configLanguage,
-        );
+        await this.diagnosticLogService.logConfigLoading(true, projectRoot, configLanguage);
       }
 
       // Use config language, fallback to 'en' only if not configured
       const language = configLanguage || 'en';
-      const languageInstructionResult =
-        this.languageService.getLanguageInstruction(language);
+      const languageInstructionResult = this.languageService.getLanguageInstruction(language);
       const resolvedModel = await this.modelResolverService.resolve();
 
       // Handle context document (mandatory)
@@ -232,8 +220,7 @@ export class ModeHandler extends AbstractHandler {
           contextFilePath: CONTEXT_FILE_PATH,
           contextExists: false,
           contextWarning: `⚠️ Failed to create context document: ${result.error}`,
-          mandatoryAction:
-            '📝 Call update_context tool manually to create context document.',
+          mandatoryAction: '📝 Call update_context tool manually to create context document.',
         };
       }
 
@@ -255,10 +242,8 @@ export class ModeHandler extends AbstractHandler {
       return {
         contextFilePath: CONTEXT_FILE_PATH,
         contextExists: false,
-        contextWarning:
-          '⚠️ No context document found. Run PLAN mode first to create context.',
-        mandatoryAction:
-          '📝 Start with PLAN mode to initialize context, then switch to ACT/EVAL.',
+        contextWarning: '⚠️ No context document found. Run PLAN mode first to create context.',
+        mandatoryAction: '📝 Start with PLAN mode to initialize context, then switch to ACT/EVAL.',
       };
     }
 
@@ -364,9 +349,7 @@ export class ModeHandler extends AbstractHandler {
    */
   private async persistModeState(mode: string): Promise<void> {
     try {
-      await this.stateService.updateLastMode(
-        mode as 'PLAN' | 'ACT' | 'EVAL' | 'AUTO',
-      );
+      await this.stateService.updateLastMode(mode as 'PLAN' | 'ACT' | 'EVAL' | 'AUTO');
 
       this.logger.debug(`Persisted mode state: mode=${mode}`);
     } catch (error) {

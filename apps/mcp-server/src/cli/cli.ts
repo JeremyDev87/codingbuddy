@@ -134,9 +134,7 @@ export function printApiKeyWarning(): void {
 /**
  * Main CLI entry point
  */
-export async function main(
-  args: string[] = process.argv.slice(2),
-): Promise<void> {
+export async function main(args: string[] = process.argv.slice(2)): Promise<void> {
   const { command, options } = parseArgs(args);
 
   // Security warning for API key in CLI args

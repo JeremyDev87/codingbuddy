@@ -52,9 +52,7 @@ describe('tui/components/AgentCard', () => {
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
     const output = lastFrame() ?? '';
-    expect(output).toContain(
-      '\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591',
-    ); // 10 empty chars
+    expect(output).toContain('\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591'); // 10 empty chars
     expect(output).toContain('Idle');
     expect(output).toContain('0%');
   });
@@ -84,9 +82,7 @@ describe('tui/components/AgentCard', () => {
     });
     const { lastFrame } = render(<AgentCard agent={agent} />);
     const output = lastFrame() ?? '';
-    expect(output).toContain(
-      '\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593',
-    ); // 10 filled chars
+    expect(output).toContain('\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593'); // 10 filled chars
     expect(output).toContain('Done');
     expect(output).toContain('100%');
     expect(output).toContain('\u2713'); // checkmark
@@ -126,8 +122,6 @@ describe('tui/components/AgentCard', () => {
     const { lastFrame } = render(<AgentCard agent={agent} />);
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u2026'); // ellipsis
-    expect(frame).not.toContain(
-      'a-very-long-agent-name-that-exceeds-column-width',
-    );
+    expect(frame).not.toContain('a-very-long-agent-name-that-exceeds-column-width');
   });
 });

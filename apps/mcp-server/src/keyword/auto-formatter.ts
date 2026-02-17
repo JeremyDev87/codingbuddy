@@ -11,11 +11,7 @@ Max Iterations: ${maxIterations}
 ---`;
   }
 
-  static formatIterationPhase(
-    phase: AutoPhase,
-    iteration: number,
-    maxIterations: number,
-  ): string {
+  static formatIterationPhase(phase: AutoPhase, iteration: number, maxIterations: number): string {
     const phaseNames: Record<AutoPhase, string> = {
       starting: 'Starting',
       plan: 'PLAN Phase',
@@ -69,9 +65,8 @@ ${files}`;
         .join('\n') || '(none)';
 
     const attempts =
-      result.iterationHistory
-        .map(h => `- Iteration ${h.iteration}: ${h.approach}`)
-        .join('\n') || '(none)';
+      result.iterationHistory.map(h => `- Iteration ${h.iteration}: ${h.approach}`).join('\n') ||
+      '(none)';
 
     return `
 ---

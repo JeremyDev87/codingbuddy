@@ -6,29 +6,18 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 
 import { cn } from '@/lib/utils';
 
-const DropdownMenu = ({
-  ...props
-}: ComponentProps<typeof DropdownMenuPrimitive.Root>) => {
+const DropdownMenu = ({ ...props }: ComponentProps<typeof DropdownMenuPrimitive.Root>) => {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 };
 
-const DropdownMenuPortal = ({
-  ...props
-}: ComponentProps<typeof DropdownMenuPrimitive.Portal>) => {
-  return (
-    <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
-  );
+const DropdownMenuPortal = ({ ...props }: ComponentProps<typeof DropdownMenuPrimitive.Portal>) => {
+  return <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
 };
 
 const DropdownMenuTrigger = ({
   ...props
 }: ComponentProps<typeof DropdownMenuPrimitive.Trigger>) => {
-  return (
-    <DropdownMenuPrimitive.Trigger
-      data-slot="dropdown-menu-trigger"
-      {...props}
-    />
-  );
+  return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
 };
 
 const DropdownMenuContent = ({
@@ -51,12 +40,8 @@ const DropdownMenuContent = ({
   );
 };
 
-const DropdownMenuGroup = ({
-  ...props
-}: ComponentProps<typeof DropdownMenuPrimitive.Group>) => {
-  return (
-    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
-  );
+const DropdownMenuGroup = ({ ...props }: ComponentProps<typeof DropdownMenuPrimitive.Group>) => {
+  return <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
 };
 
 const DropdownMenuItem = ({
@@ -111,12 +96,7 @@ const DropdownMenuCheckboxItem = ({
 const DropdownMenuRadioGroup = ({
   ...props
 }: ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) => {
-  return (
-    <DropdownMenuPrimitive.RadioGroup
-      data-slot="dropdown-menu-radio-group"
-      {...props}
-    />
-  );
+  return <DropdownMenuPrimitive.RadioGroup data-slot="dropdown-menu-radio-group" {...props} />;
 };
 
 const DropdownMenuRadioItem = ({
@@ -154,10 +134,7 @@ const DropdownMenuLabel = ({
     <DropdownMenuPrimitive.Label
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn(
-        'px-2 py-1.5 text-sm font-medium data-[inset]:pl-8',
-        className,
-      )}
+      className={cn('px-2 py-1.5 text-sm font-medium data-[inset]:pl-8', className)}
       {...props}
     />
   );
@@ -176,25 +153,17 @@ const DropdownMenuSeparator = ({
   );
 };
 
-const DropdownMenuShortcut = ({
-  className,
-  ...props
-}: ComponentProps<'span'>) => {
+const DropdownMenuShortcut = ({ className, ...props }: ComponentProps<'span'>) => {
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn(
-        'text-muted-foreground ml-auto text-xs tracking-widest',
-        className,
-      )}
+      className={cn('text-muted-foreground ml-auto text-xs tracking-widest', className)}
       {...props}
     />
   );
 };
 
-const DropdownMenuSub = ({
-  ...props
-}: ComponentProps<typeof DropdownMenuPrimitive.Sub>) => {
+const DropdownMenuSub = ({ ...props }: ComponentProps<typeof DropdownMenuPrimitive.Sub>) => {
   return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />;
 };
 

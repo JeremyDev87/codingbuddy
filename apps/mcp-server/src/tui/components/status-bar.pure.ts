@@ -1,10 +1,7 @@
 import type { AgentState } from '../types';
 import type { SkillRecommendedEvent } from '../events';
 import { buildProgressBar } from './progress-bar.pure';
-import {
-  estimateDisplayWidth,
-  truncateToDisplayWidth,
-} from '../utils/display-width';
+import { estimateDisplayWidth, truncateToDisplayWidth } from '../utils/display-width';
 
 export function countActiveAgents(agents: AgentState[]): number {
   return agents.filter(a => a.status === 'running').length;

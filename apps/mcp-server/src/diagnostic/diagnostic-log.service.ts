@@ -115,8 +115,7 @@ export class DiagnosticLogService {
 
       return { success: true, filePath };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to write diagnostic log: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
@@ -176,9 +175,7 @@ export class DiagnosticLogService {
     error?: string,
   ): Promise<LogOperationResult> {
     const level = success ? 'info' : 'warn';
-    const message = success
-      ? `Config loaded successfully`
-      : `Config loading failed or incomplete`;
+    const message = success ? `Config loaded successfully` : `Config loading failed or incomplete`;
 
     return this.log(level, 'config', message, {
       projectRoot,
@@ -204,8 +201,7 @@ export class DiagnosticLogService {
 
       return logFile.entries;
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to read diagnostic logs: ${errorMessage}`);
       return [];
     }
@@ -225,8 +221,7 @@ export class DiagnosticLogService {
 
       return { success: true, filePath };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to clear diagnostic logs: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }

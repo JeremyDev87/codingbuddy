@@ -27,9 +27,7 @@ describe('tui/components/ProgressBar', () => {
 
   it('should apply color prop', () => {
     // ink-testing-library strips ANSI codes, so we verify render doesn't throw
-    expect(() =>
-      render(<ProgressBar value={50} width={10} color="cyan" />),
-    ).not.toThrow();
+    expect(() => render(<ProgressBar value={50} width={10} color="cyan" />)).not.toThrow();
   });
 
   it('should clamp value below 0', () => {

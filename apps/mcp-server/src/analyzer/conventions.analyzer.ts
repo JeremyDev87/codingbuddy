@@ -58,9 +58,7 @@ export class ConventionsAnalyzer {
    * Get modification times for config files
    * Used for cache invalidation when files change
    */
-  private async getConfigMtimes(
-    projectRoot: string,
-  ): Promise<Map<string, number>> {
+  private async getConfigMtimes(projectRoot: string): Promise<Map<string, number>> {
     const mtimes = new Map<string, number>();
     const configFiles = [
       'tsconfig.json',
@@ -94,11 +92,7 @@ export class ConventionsAnalyzer {
    * @param actualSize - Actual file size in bytes
    * @param maxSize - Maximum allowed size in bytes
    */
-  private trackSizeViolation(
-    filePath: string,
-    actualSize: number,
-    maxSize: number,
-  ): void {
+  private trackSizeViolation(filePath: string, actualSize: number, maxSize: number): void {
     const now = Date.now();
 
     // Get existing violations for this file
@@ -123,8 +117,7 @@ export class ConventionsAnalyzer {
           timeWindow: `${this.VIOLATION_WINDOW / 1000}s`,
           actualSize,
           maxSize,
-          recommendation:
-            'Review file sizes or increase limit if legitimate use case',
+          recommendation: 'Review file sizes or increase limit if legitimate use case',
         },
       );
 
@@ -200,8 +193,7 @@ export class ConventionsAnalyzer {
       return parsed;
     } catch (error) {
       // Log parse failure with structured information for debugging
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       const errorCode = (error as NodeJS.ErrnoException)?.code;
 
       // Only log if it's not a simple "file not found" case
@@ -213,13 +205,10 @@ export class ConventionsAnalyzer {
           errorMessage,
         });
       } else {
-        this.logger.debug(
-          `Config file not found, using defaults: ${filePath}`,
-          {
-            configType,
-            filePath,
-          },
-        );
+        this.logger.debug(`Config file not found, using defaults: ${filePath}`, {
+          configType,
+          filePath,
+        });
       }
 
       // File doesn't exist or can't be read/parsed, return defaults
@@ -387,9 +376,7 @@ export class ConventionsAnalyzer {
   /**
    * Parse tsconfig.json for TypeScript conventions
    */
-  async parseTypeScriptConfig(
-    filePath: string,
-  ): Promise<TypeScriptConventions> {
+  async parseTypeScriptConfig(filePath: string): Promise<TypeScriptConventions> {
     return this.parseConfigWithDefaults(
       filePath,
       (content, filePath) => {
@@ -453,16 +440,10 @@ export class ConventionsAnalyzer {
       filePath,
       (content, filePath) => {
         // Determine config type based on filename
-        const configType = filePath.includes('eslint.config.')
-          ? 'flat'
-          : 'legacy';
+        const configType = filePath.includes('eslint.config.') ? 'flat' : 'legacy';
 
         // For JSON configs, parse directly
-        if (
-          filePath.endsWith('.json') ||
-          filePath === '.eslintrc' ||
-          !filePath.includes('.')
-        ) {
+        if (filePath.endsWith('.json') || filePath === '.eslintrc' || !filePath.includes('.')) {
           const parsed = JSON.parse(content);
 
           // Check for prototype pollution before any processing
@@ -556,10 +537,7 @@ export class ConventionsAnalyzer {
   /**
    * Find config file in project root
    */
-  private async findConfigFile(
-    projectRoot: string,
-    patterns: string[],
-  ): Promise<string | null> {
+  private async findConfigFile(projectRoot: string, patterns: string[]): Promise<string | null> {
     for (const pattern of patterns) {
       const filePath = path.join(projectRoot, pattern);
       try {
@@ -577,9 +555,7 @@ export class ConventionsAnalyzer {
    * PERF-001: Parallelized config file parsing for better performance
    * PERF-003: Added LRU cache with mtime-based invalidation to avoid redundant file I/O
    */
-  async analyzeProjectConventions(
-    projectRoot: string,
-  ): Promise<ProjectConventions> {
+  async analyzeProjectConventions(projectRoot: string): Promise<ProjectConventions> {
     // Verify project root exists
     try {
       await fs.access(projectRoot);
@@ -596,44 +572,28 @@ export class ConventionsAnalyzer {
     }
 
     // Parallelize config file finding and parsing for better performance
-    const [typescript, eslint, prettier, editorconfig, markdownlint] =
-      await Promise.all([
-        // TypeScript config
-        this.findConfigFile(projectRoot, ['tsconfig.json'])
-          .then(
-            tsConfigPath =>
-              tsConfigPath || path.join(projectRoot, 'tsconfig.json'),
-          )
-          .then(tsConfigPath => this.parseTypeScriptConfig(tsConfigPath)),
+    const [typescript, eslint, prettier, editorconfig, markdownlint] = await Promise.all([
+      // TypeScript config
+      this.findConfigFile(projectRoot, ['tsconfig.json'])
+        .then(tsConfigPath => tsConfigPath || path.join(projectRoot, 'tsconfig.json'))
+        .then(tsConfigPath => this.parseTypeScriptConfig(tsConfigPath)),
 
-        // ESLint config
-        this.findConfigFile(projectRoot, [
-          'eslint.config.js',
-          '.eslintrc.json',
-          '.eslintrc',
-        ])
-          .then(
-            eslintConfigPath =>
-              eslintConfigPath || path.join(projectRoot, 'eslint.config.js'),
-          )
-          .then(eslintConfigPath => this.parseESLintConfig(eslintConfigPath)),
+      // ESLint config
+      this.findConfigFile(projectRoot, ['eslint.config.js', '.eslintrc.json', '.eslintrc'])
+        .then(eslintConfigPath => eslintConfigPath || path.join(projectRoot, 'eslint.config.js'))
+        .then(eslintConfigPath => this.parseESLintConfig(eslintConfigPath)),
 
-        // Prettier config
-        this.findConfigFile(projectRoot, ['.prettierrc', '.prettierrc.json'])
-          .then(
-            prettierConfigPath =>
-              prettierConfigPath || path.join(projectRoot, '.prettierrc'),
-          )
-          .then(prettierConfigPath =>
-            this.parsePrettierConfig(prettierConfigPath),
-          ),
+      // Prettier config
+      this.findConfigFile(projectRoot, ['.prettierrc', '.prettierrc.json'])
+        .then(prettierConfigPath => prettierConfigPath || path.join(projectRoot, '.prettierrc'))
+        .then(prettierConfigPath => this.parsePrettierConfig(prettierConfigPath)),
 
-        // EditorConfig
-        this.parseEditorConfig(path.join(projectRoot, '.editorconfig')),
+      // EditorConfig
+      this.parseEditorConfig(path.join(projectRoot, '.editorconfig')),
 
-        // MarkdownLint
-        this.parseMarkdownLint(path.join(projectRoot, '.markdownlint.json')),
-      ]);
+      // MarkdownLint
+      this.parseMarkdownLint(path.join(projectRoot, '.markdownlint.json')),
+    ]);
 
     const result: ProjectConventions = {
       projectRoot,

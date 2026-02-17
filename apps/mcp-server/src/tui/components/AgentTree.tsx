@@ -2,11 +2,7 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import type { AgentState } from '../types';
 import { getAgentIcon } from '../utils/icons';
-import {
-  resolveProgress,
-  buildStatusLabel,
-  resolveIcon,
-} from './agent-card.pure';
+import { resolveProgress, buildStatusLabel, resolveIcon } from './agent-card.pure';
 import { buildCompactTree, type CompactAgentLine } from './agent-tree.pure';
 
 export interface AgentTreeProps {
@@ -30,10 +26,7 @@ export function AgentTree({
 }: AgentTreeProps): React.ReactElement | null {
   if (primaryAgent === null) return null;
 
-  const lines = buildCompactTree(
-    toCompactLine(primaryAgent),
-    parallelAgents.map(toCompactLine),
-  );
+  const lines = buildCompactTree(toCompactLine(primaryAgent), parallelAgents.map(toCompactLine));
 
   return (
     <Box flexDirection="column">

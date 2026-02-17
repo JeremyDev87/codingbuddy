@@ -18,9 +18,7 @@ describe('parseAgentFromToolName', () => {
 
     it('should return null when get_agent_system_prompt has no agentName', () => {
       expect(parseAgentFromToolName('get_agent_system_prompt', {})).toBeNull();
-      expect(
-        parseAgentFromToolName('get_agent_system_prompt', undefined),
-      ).toBeNull();
+      expect(parseAgentFromToolName('get_agent_system_prompt', undefined)).toBeNull();
     });
   });
 
@@ -86,9 +84,7 @@ describe('parseAgentFromToolName', () => {
     });
 
     it('should return null if prompt does not start with a mode keyword', () => {
-      expect(
-        parseAgentFromToolName('parse_mode', { prompt: 'hello world' }),
-      ).toBeNull();
+      expect(parseAgentFromToolName('parse_mode', { prompt: 'hello world' })).toBeNull();
     });
 
     it('should return null if prompt is missing', () => {
@@ -121,9 +117,7 @@ describe('parseAgentFromToolName', () => {
     });
 
     it('should return null if specialists is missing', () => {
-      expect(
-        parseAgentFromToolName('prepare_parallel_agents', { mode: 'EVAL' }),
-      ).toBeNull();
+      expect(parseAgentFromToolName('prepare_parallel_agents', { mode: 'EVAL' })).toBeNull();
     });
   });
 
@@ -147,9 +141,7 @@ describe('parseAgentFromToolName', () => {
     });
 
     it('should return agent info for get_agent_details', () => {
-      expect(
-        parseAgentFromToolName('get_agent_details', { agentName: 'test' }),
-      ).toEqual({
+      expect(parseAgentFromToolName('get_agent_details', { agentName: 'test' })).toEqual({
         agentId: 'get_agent_details',
         name: 'get_agent_details',
         role: 'query',

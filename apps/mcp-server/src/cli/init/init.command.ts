@@ -14,10 +14,7 @@ import { renderConfigObjectAsJson } from './templates';
 import { runInitWizard, wizardDataToConfig } from './init.wizard';
 import { ensureGitignoreEntries } from './gitignore.utils';
 import { ensureClaudeSettingsEnv } from './claude-settings.utils';
-import {
-  CODINGBUDDY_GITIGNORE_ENTRIES,
-  CLAUDE_SETTINGS_ENV_ENTRIES,
-} from './init.constants';
+import { CODINGBUDDY_GITIGNORE_ENTRIES, CLAUDE_SETTINGS_ENV_ENTRIES } from './init.constants';
 import type { InitOptions, InitResult } from '../cli.types';
 
 /**
@@ -71,25 +68,14 @@ async function ensureWorkspaceSettings(
   projectRoot: string,
   console: ReturnType<typeof createConsoleUtils>,
 ): Promise<void> {
-  const gitignoreResult = await ensureGitignoreEntries(
-    projectRoot,
-    CODINGBUDDY_GITIGNORE_ENTRIES,
-  );
+  const gitignoreResult = await ensureGitignoreEntries(projectRoot, CODINGBUDDY_GITIGNORE_ENTRIES);
   if (gitignoreResult.added.length > 0) {
-    console.log.step(
-      '📝',
-      `Updated .gitignore: ${gitignoreResult.added.join(', ')}`,
-    );
+    console.log.step('📝', `Updated .gitignore: ${gitignoreResult.added.join(', ')}`);
   }
 
-  const claudeSettingsResult = await ensureClaudeSettingsEnv(
-    CLAUDE_SETTINGS_ENV_ENTRIES,
-  );
+  const claudeSettingsResult = await ensureClaudeSettingsEnv(CLAUDE_SETTINGS_ENV_ENTRIES);
   if (claudeSettingsResult.added.length > 0) {
-    console.log.step(
-      '⚙️',
-      `Updated Claude settings: ${claudeSettingsResult.added.join(', ')}`,
-    );
+    console.log.step('⚙️', `Updated Claude settings: ${claudeSettingsResult.added.join(', ')}`);
   }
 }
 
@@ -101,10 +87,7 @@ async function runTemplateInit(
   console: ReturnType<typeof createConsoleUtils>,
 ): Promise<InitResult> {
   // Step 1: Analyze project
-  const analysis = await analyzeProjectWithLogging(
-    options.projectRoot,
-    console,
-  );
+  const analysis = await analyzeProjectWithLogging(options.projectRoot, console);
 
   // Step 2: Run interactive wizard
   const wizardData = await runInitWizard({
@@ -167,26 +150,18 @@ async function runAiInit(
   const apiKey = getApiKey(options);
   if (!apiKey) {
     console.log.error('No API key provided for AI generation.');
-    console.log.info(
-      'Set ANTHROPIC_API_KEY environment variable or use --api-key option.',
-    );
+    console.log.info('Set ANTHROPIC_API_KEY environment variable or use --api-key option.');
     console.log.info('');
-    console.log.info(
-      '💡 TIP: Run without --ai flag to use template-based generation',
-    );
+    console.log.info('💡 TIP: Run without --ai flag to use template-based generation');
     console.log.info('   (no API key required)');
     return {
       success: false,
-      error:
-        'No API key provided. Set ANTHROPIC_API_KEY or remove --ai flag for template mode.',
+      error: 'No API key provided. Set ANTHROPIC_API_KEY or remove --ai flag for template mode.',
     };
   }
 
   // Step 1: Analyze project
-  const analysis = await analyzeProjectWithLogging(
-    options.projectRoot,
-    console,
-  );
+  const analysis = await analyzeProjectWithLogging(options.projectRoot, console);
 
   // Step 2: Generate config with AI
   console.log.step('🤖', 'AI is generating configuration...');

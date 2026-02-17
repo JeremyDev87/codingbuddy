@@ -58,9 +58,7 @@ export class StateService {
   /**
    * Save project metadata to file
    */
-  async saveProjectMetadata(
-    metadata: ProjectMetadata,
-  ): Promise<StateOperationResult> {
+  async saveProjectMetadata(metadata: ProjectMetadata): Promise<StateOperationResult> {
     try {
       this.ensureStateDir();
 
@@ -151,11 +149,7 @@ export class StateService {
         existing.updatedAt = new Date().toISOString();
 
         const filePath = this.getStateFilePath(STATE_FILES.PROJECT_METADATA);
-        await fs.writeFile(
-          filePath,
-          JSON.stringify(existing, null, 2),
-          'utf-8',
-        );
+        await fs.writeFile(filePath, JSON.stringify(existing, null, 2), 'utf-8');
 
         this.logger.debug(`Updated lastMode to ${mode}`);
         return { success: true, message: `Last mode updated to ${mode}` };
@@ -178,9 +172,7 @@ export class StateService {
   /**
    * Save mode configuration snapshot
    */
-  async saveModeConfigSnapshot(
-    snapshot: ModeConfigSnapshot,
-  ): Promise<StateOperationResult> {
+  async saveModeConfigSnapshot(snapshot: ModeConfigSnapshot): Promise<StateOperationResult> {
     try {
       this.ensureStateDir();
 

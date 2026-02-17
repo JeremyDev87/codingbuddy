@@ -15,10 +15,7 @@
 
 import { Logger } from '@nestjs/common';
 import { DEFAULT_ACT_AGENT, ACT_PRIMARY_AGENTS } from '../keyword.types';
-import type {
-  PrimaryAgentResolutionResult,
-  PrimaryAgentSource,
-} from '../keyword.types';
+import type { PrimaryAgentResolutionResult, PrimaryAgentSource } from '../keyword.types';
 import {
   EXPLICIT_PATTERNS,
   INTENT_PATTERN_CHECKS,
@@ -56,9 +53,7 @@ function parseExplicitRequest(
     if (match?.[1]) {
       const agentName = match[1].toLowerCase();
       const isAvailable = availableAgents.includes(agentName);
-      const isAllowed = (ACT_PRIMARY_AGENTS as readonly string[]).includes(
-        agentName,
-      );
+      const isAllowed = (ACT_PRIMARY_AGENTS as readonly string[]).includes(agentName);
       if (isAvailable && isAllowed) {
         return createResult(
           agentName,
@@ -119,12 +114,7 @@ function inferFromContext(
     for (const { pattern, agent, confidence } of CONTEXT_PATTERNS) {
       if (pattern.test(filePath)) {
         if (availableAgents.includes(agent)) {
-          return createResult(
-            agent,
-            'context',
-            confidence,
-            `Inferred from file path: ${filePath}`,
-          );
+          return createResult(agent, 'context', confidence, `Inferred from file path: ${filePath}`);
         }
       }
     }
@@ -155,13 +145,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
   constructor(private readonly getProjectConfig: GetProjectConfigFn) {}
 
   async resolve(ctx: StrategyContext): Promise<PrimaryAgentResolutionResult> {
-    const {
-      prompt,
-      availableAgents,
-      context,
-      recommendedActAgent,
-      isRecommendation,
-    } = ctx;
+    const { prompt, availableAgents, context, recommendedActAgent, isRecommendation } = ctx;
 
     // 1. Check explicit request in prompt
     const explicit = parseExplicitRequest(prompt, availableAgents);
@@ -172,9 +156,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
 
     // 2. Use recommended agent from PLAN mode if provided
     if (recommendedActAgent && availableAgents.includes(recommendedActAgent)) {
-      this.logger.debug(
-        `Using recommended agent from PLAN: ${recommendedActAgent}`,
-      );
+      this.logger.debug(`Using recommended agent from PLAN: ${recommendedActAgent}`);
       return createResult(
         recommendedActAgent,
         'config',
@@ -194,23 +176,13 @@ export class ActAgentStrategy implements ResolutionStrategy {
 
     // 4. Meta-discussion detection
     if (isMetaAgentDiscussion(prompt)) {
-      this.logger.debug(
-        'Meta-agent discussion detected, skipping intent patterns',
-      );
+      this.logger.debug('Meta-agent discussion detected, skipping intent patterns');
     } else {
       // 5-11. Check intent patterns in priority order
       for (const { agent, patterns, category } of INTENT_PATTERN_CHECKS) {
-        const result = inferFromIntentPatterns(
-          prompt,
-          availableAgents,
-          agent,
-          patterns,
-          category,
-        );
+        const result = inferFromIntentPatterns(prompt, availableAgents, agent, patterns, category);
         if (result) {
-          this.logger.debug(
-            `Intent pattern match: ${result.agentName} (${result.reason})`,
-          );
+          this.logger.debug(`Intent pattern match: ${result.agentName} (${result.reason})`);
           return result;
         }
       }
@@ -218,11 +190,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
 
     // 12. Check context-based suggestion
     if (context) {
-      const fromContext = inferFromContext(
-        context.filePath,
-        context.projectType,
-        availableAgents,
-      );
+      const fromContext = inferFromContext(context.filePath, context.projectType, availableAgents);
       if (fromContext && fromContext.confidence >= 0.8) {
         this.logger.debug(`Context-based agent: ${fromContext.agentName}`);
         return fromContext;
@@ -252,12 +220,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
       if (config?.primaryAgent) {
         const agentName = config.primaryAgent.toLowerCase();
         if (availableAgents.includes(agentName)) {
-          return createResult(
-            agentName,
-            'config',
-            1.0,
-            `Configured in project: ${agentName}`,
-          );
+          return createResult(agentName, 'config', 1.0, `Configured in project: ${agentName}`);
         }
         this.logger.warn(
           `Configured agent '${config.primaryAgent}' not found in registry. ` +
@@ -272,9 +235,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
     return null;
   }
 
-  private getDefaultFallback(
-    availableAgents: string[],
-  ): PrimaryAgentResolutionResult {
+  private getDefaultFallback(availableAgents: string[]): PrimaryAgentResolutionResult {
     if (availableAgents.includes(DEFAULT_ACT_AGENT)) {
       return createResult(
         DEFAULT_ACT_AGENT,

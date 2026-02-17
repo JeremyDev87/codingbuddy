@@ -54,10 +54,7 @@ export class ContextDocumentService {
    * @param operation - Operation name for logging
    * @returns Failure result with error message
    */
-  private handleContextError(
-    error: unknown,
-    operation: string,
-  ): ContextOperationResult {
+  private handleContextError(error: unknown, operation: string): ContextOperationResult {
     const message = error instanceof Error ? error.message : 'Unknown error';
     this.logger.error(`Failed to ${operation}: ${message}`);
     return {
@@ -153,8 +150,7 @@ export class ContextDocumentService {
       return {
         exists: true,
         document,
-        truncatedSections:
-          truncatedSections > 0 ? truncatedSections : undefined,
+        truncatedSections: truncatedSections > 0 ? truncatedSections : undefined,
       };
     } catch (error) {
       const result = this.handleContextError(error, 'read context');
@@ -191,11 +187,7 @@ export class ContextDocumentService {
 
       // Create new document with explicit timestamp (pure function)
       const isoTimestamp = new Date().toISOString();
-      const document = createNewContextDocument(
-        data.title,
-        planSection,
-        isoTimestamp,
-      );
+      const document = createNewContextDocument(data.title, planSection, isoTimestamp);
 
       // Serialize and write
       const content = serializeContextDocument(document);
@@ -221,17 +213,14 @@ export class ContextDocumentService {
    * Append to context document (ACT/EVAL modes).
    * Requires existing document (created by PLAN).
    */
-  async appendContext(
-    data: AppendContextData,
-  ): Promise<ContextOperationResult> {
+  async appendContext(data: AppendContextData): Promise<ContextOperationResult> {
     try {
       const readResult = await this.readContext();
 
       if (!readResult.exists || !readResult.document) {
         return {
           success: false,
-          error:
-            'No context document found. Run PLAN mode first to create context.',
+          error: 'No context document found. Run PLAN mode first to create context.',
         };
       }
 
@@ -241,9 +230,7 @@ export class ContextDocumentService {
       const limits = await this.getContextLimits();
 
       // Find existing section for this mode
-      const existingIndex = document.sections.findLastIndex(
-        s => s.mode === data.mode,
-      );
+      const existingIndex = document.sections.findLastIndex(s => s.mode === data.mode);
 
       // Build new section (with DoS protection via truncation)
       const newSection: ContextSection = {
@@ -344,9 +331,7 @@ export class ContextDocumentService {
       return null;
     }
 
-    const planSection = readResult.document.sections.find(
-      s => s.mode === 'PLAN',
-    );
+    const planSection = readResult.document.sections.find(s => s.mode === 'PLAN');
 
     if (planSection?.recommendedActAgent) {
       return {
@@ -439,11 +424,7 @@ export class ContextDocumentService {
         document: cleanedDocument,
         originalSize,
         newSize,
-      } = cleanupContextDocument(
-        readResult.document,
-        keepRecentSectionsFull,
-        keepRecentItems,
-      );
+      } = cleanupContextDocument(readResult.document, keepRecentSectionsFull, keepRecentItems);
 
       // Write cleaned document
       const contextPath = this.getContextPath();
@@ -485,9 +466,7 @@ export class ContextDocumentService {
     }
 
     if (check.needed) {
-      this.logger.log(
-        'Context document size exceeded threshold, performing automatic cleanup...',
-      );
+      this.logger.log('Context document size exceeded threshold, performing automatic cleanup...');
       await this.performCleanup();
     }
   }

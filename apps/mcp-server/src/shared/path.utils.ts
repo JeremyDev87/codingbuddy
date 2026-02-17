@@ -15,15 +15,9 @@ export function normalizePath(filePath: string): string {
  * @param segment - The directory segment to look for
  * @returns true if the segment exists in the path
  */
-export function pathContainsSegment(
-  filePath: string,
-  segment: string,
-): boolean {
+export function pathContainsSegment(filePath: string, segment: string): boolean {
   const normalized = normalizePath(filePath.toLowerCase());
   const lowerSegment = segment.toLowerCase();
 
-  return (
-    normalized.includes(`/${lowerSegment}/`) ||
-    normalized.startsWith(`${lowerSegment}/`)
-  );
+  return normalized.includes(`/${lowerSegment}/`) || normalized.startsWith(`${lowerSegment}/`);
 }

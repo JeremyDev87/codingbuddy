@@ -47,9 +47,7 @@ describe('ensureClaudeSettingsEnv', () => {
       expect(result.added).toEqual(['ENABLE_TOOL_SEARCH']);
       expect(result.alreadyExists).toEqual([]);
 
-      const content = JSON.parse(
-        vol.readFileSync(settingsPath, 'utf-8') as string,
-      );
+      const content = JSON.parse(vol.readFileSync(settingsPath, 'utf-8') as string);
       expect(content).toEqual({
         env: {
           ENABLE_TOOL_SEARCH: 'false',
@@ -67,9 +65,7 @@ describe('ensureClaudeSettingsEnv', () => {
 
       expect(result.added).toEqual(['ENABLE_TOOL_SEARCH']);
 
-      const content = JSON.parse(
-        vol.readFileSync(settingsPath, 'utf-8') as string,
-      );
+      const content = JSON.parse(vol.readFileSync(settingsPath, 'utf-8') as string);
       expect(content.env.ENABLE_TOOL_SEARCH).toBe('false');
     });
   });
@@ -97,9 +93,7 @@ describe('ensureClaudeSettingsEnv', () => {
 
       expect(result.added).toEqual(['ENABLE_TOOL_SEARCH']);
 
-      const content = JSON.parse(
-        vol.readFileSync(settingsPath, 'utf-8') as string,
-      );
+      const content = JSON.parse(vol.readFileSync(settingsPath, 'utf-8') as string);
       expect(content.env.EXISTING_VAR).toBe('keep-me');
       expect(content.env.ENABLE_TOOL_SEARCH).toBe('false');
       expect(content.language).toBe('ko');
@@ -129,9 +123,7 @@ describe('ensureClaudeSettingsEnv', () => {
       expect(result.added).toEqual([]);
       expect(result.alreadyExists).toEqual(['ENABLE_TOOL_SEARCH']);
 
-      const content = JSON.parse(
-        vol.readFileSync(settingsPath, 'utf-8') as string,
-      );
+      const content = JSON.parse(vol.readFileSync(settingsPath, 'utf-8') as string);
       // Should NOT be overwritten
       expect(content.env.ENABLE_TOOL_SEARCH).toBe('true');
     });
@@ -157,9 +149,7 @@ describe('ensureClaudeSettingsEnv', () => {
 
       expect(result.added).toEqual(['ENABLE_TOOL_SEARCH']);
 
-      const content = JSON.parse(
-        vol.readFileSync(settingsPath, 'utf-8') as string,
-      );
+      const content = JSON.parse(vol.readFileSync(settingsPath, 'utf-8') as string);
       expect(content.env.ENABLE_TOOL_SEARCH).toBe('false');
       expect(content.language).toBe('ko');
     });
@@ -176,9 +166,7 @@ describe('ensureClaudeSettingsEnv', () => {
 
       expect(result.added).toEqual(['ENABLE_TOOL_SEARCH', 'ANOTHER_SETTING']);
 
-      const content = JSON.parse(
-        vol.readFileSync(settingsPath, 'utf-8') as string,
-      );
+      const content = JSON.parse(vol.readFileSync(settingsPath, 'utf-8') as string);
       expect(content.env.ENABLE_TOOL_SEARCH).toBe('false');
       expect(content.env.ANOTHER_SETTING).toBe('value');
     });
@@ -213,9 +201,9 @@ describe('ensureClaudeSettingsEnv', () => {
       vol.mkdirSync(claudeDir, { recursive: true });
       vol.writeFileSync(settingsPath, 'not valid json{{{');
 
-      await expect(
-        ensureClaudeSettingsEnv({ ENABLE_TOOL_SEARCH: 'false' }),
-      ).rejects.toThrow(ClaudeSettingsReadError);
+      await expect(ensureClaudeSettingsEnv({ ENABLE_TOOL_SEARCH: 'false' })).rejects.toThrow(
+        ClaudeSettingsReadError,
+      );
     });
 
     it('throws ClaudeSettingsWriteError when directory cannot be created', async () => {
@@ -223,9 +211,9 @@ describe('ensureClaudeSettingsEnv', () => {
       vol.mkdirSync('/mock-home', { recursive: true });
       vol.writeFileSync('/mock-home/.claude', 'blocking file');
 
-      await expect(
-        ensureClaudeSettingsEnv({ ENABLE_TOOL_SEARCH: 'false' }),
-      ).rejects.toThrow(ClaudeSettingsWriteError);
+      await expect(ensureClaudeSettingsEnv({ ENABLE_TOOL_SEARCH: 'false' })).rejects.toThrow(
+        ClaudeSettingsWriteError,
+      );
     });
   });
 

@@ -14,21 +14,11 @@ describe('summary.prompt', () => {
     });
 
     it('should include edit actions for each section', () => {
-      const editBasic = SUMMARY_ACTION_CHOICES.find(
-        c => c.value === 'edit-basic',
-      );
-      const editTechStack = SUMMARY_ACTION_CHOICES.find(
-        c => c.value === 'edit-tech-stack',
-      );
-      const editArchitecture = SUMMARY_ACTION_CHOICES.find(
-        c => c.value === 'edit-architecture',
-      );
-      const editConventions = SUMMARY_ACTION_CHOICES.find(
-        c => c.value === 'edit-conventions',
-      );
-      const editTestStrategy = SUMMARY_ACTION_CHOICES.find(
-        c => c.value === 'edit-test-strategy',
-      );
+      const editBasic = SUMMARY_ACTION_CHOICES.find(c => c.value === 'edit-basic');
+      const editTechStack = SUMMARY_ACTION_CHOICES.find(c => c.value === 'edit-tech-stack');
+      const editArchitecture = SUMMARY_ACTION_CHOICES.find(c => c.value === 'edit-architecture');
+      const editConventions = SUMMARY_ACTION_CHOICES.find(c => c.value === 'edit-conventions');
+      const editTestStrategy = SUMMARY_ACTION_CHOICES.find(c => c.value === 'edit-test-strategy');
       const editAi = SUMMARY_ACTION_CHOICES.find(c => c.value === 'edit-ai');
 
       expect(editBasic).toBeDefined();
@@ -55,9 +45,7 @@ describe('summary.prompt', () => {
     it('should have specific edit prefixes for each section', () => {
       // Each edit option should have a specific prefix for better accessibility
       // e.g., "[Edit Basic]", "[Edit Tech]" instead of generic "[Edit]"
-      const editChoices = SUMMARY_ACTION_CHOICES.filter(c =>
-        c.value.startsWith('edit-'),
-      );
+      const editChoices = SUMMARY_ACTION_CHOICES.filter(c => c.value.startsWith('edit-'));
 
       const prefixes = editChoices.map(c => {
         const match = c.name.match(/^\[([^\]]+)\]/);

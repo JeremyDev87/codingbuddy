@@ -18,9 +18,7 @@ import { DEFAULT_ACT_AGENT } from '../keyword.types';
 import { createActContext } from './__tests__/strategy-test.utils';
 
 describe('ActAgentStrategy', () => {
-  const mockGetProjectConfig: GetProjectConfigFn = vi
-    .fn()
-    .mockResolvedValue(null);
+  const mockGetProjectConfig: GetProjectConfigFn = vi.fn().mockResolvedValue(null);
 
   let strategy: ActAgentStrategy;
 
@@ -132,9 +130,7 @@ describe('ActAgentStrategy', () => {
     });
 
     it('should handle config load failure gracefully', async () => {
-      vi.mocked(mockGetProjectConfig).mockRejectedValueOnce(
-        new Error('Config load failed'),
-      );
+      vi.mocked(mockGetProjectConfig).mockRejectedValueOnce(new Error('Config load failed'));
 
       const result = await strategy.resolve(createActContext());
 
@@ -157,16 +153,13 @@ describe('ActAgentStrategy', () => {
       'backend-developer가 선택되는 이유가 뭐야?', // matches /backend.?developer\s*가/i
     ];
 
-    it.each(metaPrompts)(
-      'should skip intent patterns for meta-discussion: "%s"',
-      async prompt => {
-        const result = await strategy.resolve(createActContext({ prompt }));
+    it.each(metaPrompts)('should skip intent patterns for meta-discussion: "%s"', async prompt => {
+      const result = await strategy.resolve(createActContext({ prompt }));
 
-        // Should fall through to default, not match intent patterns
-        // because meta-discussions shouldn't trigger intent patterns
-        expect(result.source).not.toBe('intent');
-      },
-    );
+      // Should fall through to default, not match intent patterns
+      // because meta-discussions shouldn't trigger intent patterns
+      expect(result.source).not.toBe('intent');
+    });
   });
 
   describe('intent pattern matching', () => {
@@ -179,15 +172,12 @@ describe('ActAgentStrategy', () => {
         '프론트엔드 개발해줘', // matches /프론트엔드\s*(개발)/i
       ];
 
-      it.each(frontendPrompts)(
-        'should detect frontend-developer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(frontendPrompts)('should detect frontend-developer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('frontend-developer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('frontend-developer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('devops-engineer patterns', () => {
@@ -199,15 +189,12 @@ describe('ActAgentStrategy', () => {
         '데브옵스 구축해줘', // matches /데브옵스/i
       ];
 
-      it.each(devopsPrompts)(
-        'should detect devops-engineer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(devopsPrompts)('should detect devops-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('devops-engineer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('devops-engineer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('agent-architect patterns', () => {
@@ -221,15 +208,12 @@ describe('ActAgentStrategy', () => {
         'Design a workflow automation', // matches /workflow\s*(automat|design|orchestrat)/i
       ];
 
-      it.each(agentPrompts)(
-        'should detect agent-architect intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(agentPrompts)('should detect agent-architect intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('agent-architect');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('agent-architect');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('backend-developer patterns', () => {
@@ -243,15 +227,12 @@ describe('ActAgentStrategy', () => {
         'Implement a GraphQL API', // matches /GraphQL\s*(API|서버|server|스키마|schema)/i
       ];
 
-      it.each(backendPrompts)(
-        'should detect backend-developer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(backendPrompts)('should detect backend-developer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('backend-developer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('backend-developer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('tooling-engineer patterns', () => {
@@ -265,15 +246,12 @@ describe('ActAgentStrategy', () => {
         'Fix vite.config.ts', // matches /vite\.config/i
       ];
 
-      it.each(toolingPrompts)(
-        'should detect tooling-engineer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(toolingPrompts)('should detect tooling-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('tooling-engineer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('tooling-engineer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('data-engineer patterns', () => {
@@ -287,15 +265,12 @@ describe('ActAgentStrategy', () => {
         '데이터베이스 스키마를 설계해줘', // matches /데이터베이스/i
       ];
 
-      it.each(dataPrompts)(
-        'should detect data-engineer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(dataPrompts)('should detect data-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('data-engineer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('platform-engineer patterns', () => {
@@ -306,15 +281,12 @@ describe('ActAgentStrategy', () => {
         'Create Helm charts', // Should match helm patterns
       ];
 
-      it.each(platformPrompts)(
-        'should detect platform-engineer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createActContext({ prompt }));
+      it.each(platformPrompts)('should detect platform-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createActContext({ prompt }));
 
-          expect(result.agentName).toBe('platform-engineer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('platform-engineer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('ai-ml-engineer patterns', () => {
@@ -334,24 +306,17 @@ describe('ActAgentStrategy', () => {
         'Fine-tune the LLM model', // matches /fine.?tun/i
       ];
 
-      it.each(aiMlPrompts)(
-        'should detect ai-ml-engineer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(
-            createActContext({
-              prompt,
-              availableAgents: [
-                'frontend-developer',
-                'backend-developer',
-                'ai-ml-engineer',
-              ],
-            }),
-          );
+      it.each(aiMlPrompts)('should detect ai-ml-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt,
+            availableAgents: ['frontend-developer', 'backend-developer', 'ai-ml-engineer'],
+          }),
+        );
 
-          expect(result.agentName).toBe('ai-ml-engineer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('ai-ml-engineer');
+        expect(result.source).toBe('intent');
+      });
     });
 
     describe('mobile-developer patterns', () => {
@@ -370,24 +335,17 @@ describe('ActAgentStrategy', () => {
         'iOS 앱 개발해줘', // matches /iOS\s*(앱|개발)/i (Korean)
       ];
 
-      it.each(mobilePrompts)(
-        'should detect mobile-developer intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(
-            createActContext({
-              prompt,
-              availableAgents: [
-                'frontend-developer',
-                'backend-developer',
-                'mobile-developer',
-              ],
-            }),
-          );
+      it.each(mobilePrompts)('should detect mobile-developer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt,
+            availableAgents: ['frontend-developer', 'backend-developer', 'mobile-developer'],
+          }),
+        );
 
-          expect(result.agentName).toBe('mobile-developer');
-          expect(result.source).toBe('intent');
-        },
-      );
+        expect(result.agentName).toBe('mobile-developer');
+        expect(result.source).toBe('intent');
+      });
     });
   });
 

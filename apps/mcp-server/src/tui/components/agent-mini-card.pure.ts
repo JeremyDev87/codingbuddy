@@ -1,7 +1,4 @@
-import {
-  estimateDisplayWidth,
-  truncateToDisplayWidth,
-} from '../utils/display-width';
+import { estimateDisplayWidth, truncateToDisplayWidth } from '../utils/display-width';
 
 const ELLIPSIS = '\u2026';
 

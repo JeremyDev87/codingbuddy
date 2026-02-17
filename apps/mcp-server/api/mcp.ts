@@ -55,10 +55,7 @@ async function parseBody(req: VercelRequest): Promise<unknown> {
   return JSON.parse(bodyStr);
 }
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse,
-): Promise<void> {
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', ALLOWED_METHODS.join(', '));
@@ -85,12 +82,7 @@ export default async function handler(
   if (req.method === 'POST') {
     const contentType = req.headers['content-type'] || '';
     if (!contentType.includes('application/json')) {
-      return jsonRpcError(
-        res,
-        -32700,
-        'Unsupported Media Type: expected application/json',
-        415,
-      );
+      return jsonRpcError(res, -32700, 'Unsupported Media Type: expected application/json', 415);
     }
   }
 
@@ -101,10 +93,7 @@ export default async function handler(
       try {
         body = await parseBody(req);
       } catch (parseError) {
-        if (
-          parseError instanceof Error &&
-          parseError.message === 'PAYLOAD_TOO_LARGE'
-        ) {
+        if (parseError instanceof Error && parseError.message === 'PAYLOAD_TOO_LARGE') {
           return jsonRpcError(res, -32700, 'Request entity too large', 413);
         }
         console.error('Body parse error:', parseError);
@@ -132,8 +121,7 @@ export default async function handler(
     );
   } catch (error) {
     console.error('MCP handler error:', error);
-    const message =
-      error instanceof Error ? error.message : 'Internal server error';
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return jsonRpcError(res, -32603, message);
   }
 }

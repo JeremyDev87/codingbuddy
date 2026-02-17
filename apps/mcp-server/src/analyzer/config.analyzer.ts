@@ -35,12 +35,7 @@ export const CONFIG_FILE_PATTERNS: Record<string, string[]> = {
     'prettier.config.mjs',
     'prettier.config.cjs',
   ],
-  vite: [
-    'vite.config.ts',
-    'vite.config.js',
-    'vite.config.mts',
-    'vite.config.mjs',
-  ],
+  vite: ['vite.config.ts', 'vite.config.js', 'vite.config.mts', 'vite.config.mjs'],
   webpack: ['webpack.config.js', 'webpack.config.ts'],
   tailwind: ['tailwind.config.js', 'tailwind.config.ts', 'tailwind.config.cjs'],
   jest: ['jest.config.js', 'jest.config.ts', 'jest.config.json'],
@@ -62,27 +57,20 @@ interface CompiledPattern {
   regex?: RegExp;
 }
 
-const COMPILED_PATTERNS: CompiledPattern[] = ALL_CONFIG_PATTERNS.map(
-  pattern => {
-    if (pattern.includes('*')) {
-      return {
-        pattern,
-        regex: new RegExp(
-          '^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$',
-        ),
-      };
-    }
-    return { pattern };
-  },
-);
+const COMPILED_PATTERNS: CompiledPattern[] = ALL_CONFIG_PATTERNS.map(pattern => {
+  if (pattern.includes('*')) {
+    return {
+      pattern,
+      regex: new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$'),
+    };
+  }
+  return { pattern };
+});
 
 /**
  * Parse tsconfig.json content
  */
-export function parseTsConfig(
-  content: string,
-  filePath: string,
-): TsConfigSummary | null {
+export function parseTsConfig(content: string, filePath: string): TsConfigSummary | null {
   try {
     const config = JSON.parse(content);
     const compilerOptions = config.compilerOptions ?? {};
@@ -92,9 +80,7 @@ export function parseTsConfig(
       strict: compilerOptions.strict,
       target: compilerOptions.target,
       module: compilerOptions.module,
-      hasPathAliases:
-        !!compilerOptions.paths &&
-        Object.keys(compilerOptions.paths).length > 0,
+      hasPathAliases: !!compilerOptions.paths && Object.keys(compilerOptions.paths).length > 0,
     };
   } catch {
     return null;
@@ -126,10 +112,7 @@ export function parseEslintConfig(
 /**
  * Parse Prettier config content
  */
-export function parsePrettierConfig(
-  content: string,
-  filePath: string,
-): PrettierSummary | null {
+export function parsePrettierConfig(content: string, filePath: string): PrettierSummary | null {
   try {
     const config = JSON.parse(content);
 
@@ -223,11 +206,7 @@ export async function analyzeConfigs(
     if (existsSync(filePath)) {
       const content = await tryReadFile(filePath);
       if (content !== undefined) {
-        const parsed = parseEslintConfig(
-          content,
-          fileName,
-          getEslintFormat(fileName),
-        );
+        const parsed = parseEslintConfig(content, fileName, getEslintFormat(fileName));
         if (parsed) {
           result.eslint = parsed;
           break;
@@ -237,11 +216,7 @@ export async function analyzeConfigs(
   }
 
   // Check for flat config (just record its presence)
-  for (const pattern of [
-    'eslint.config.js',
-    'eslint.config.mjs',
-    'eslint.config.cjs',
-  ]) {
+  for (const pattern of ['eslint.config.js', 'eslint.config.mjs', 'eslint.config.cjs']) {
     if (existsSync(path.join(projectRoot, pattern))) {
       if (!result.eslint) {
         result.eslint = {

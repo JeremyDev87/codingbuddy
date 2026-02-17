@@ -63,11 +63,7 @@ describe('config.loader', () => {
 
     it('should include cause when provided', () => {
       const cause = new Error('Original error');
-      const error = new ConfigLoadError(
-        'Wrapped error',
-        '/path/to/config.js',
-        cause,
-      );
+      const error = new ConfigLoadError('Wrapped error', '/path/to/config.js', cause);
 
       expect(error.cause).toBe(cause);
     });
@@ -110,9 +106,7 @@ describe('config.loader', () => {
         },
       };
 
-      expect(() => validateAndTransform(raw, '/path/config.json')).toThrow(
-        ConfigLoadError,
-      );
+      expect(() => validateAndTransform(raw, '/path/config.json')).toThrow(ConfigLoadError);
     });
 
     it('should include field path in error message', () => {
@@ -138,9 +132,7 @@ describe('config.loader', () => {
         repository: 'not-a-valid-url',
       };
 
-      expect(() => validateAndTransform(raw, '/path/config.json')).toThrow(
-        ConfigLoadError,
-      );
+      expect(() => validateAndTransform(raw, '/path/config.json')).toThrow(ConfigLoadError);
     });
   });
 
@@ -508,9 +500,7 @@ describe('config.loader', () => {
 
         const result = getDeprecatedConfigWarning(files);
 
-        expect(result).toContain(
-          'Deprecated JavaScript config file(s) detected',
-        );
+        expect(result).toContain('Deprecated JavaScript config file(s) detected');
         expect(result).toContain('codingbuddy.config.js');
         expect(result).toContain(`v${JS_CONFIG_DEPRECATION_VERSION}`);
         expect(result).toContain('codingbuddy.config.json');
@@ -520,10 +510,7 @@ describe('config.loader', () => {
 
     it('should list multiple files when provided', () => {
       withoutCI(() => {
-        const files = [
-          '/project/codingbuddy.config.js',
-          '/project/codingbuddy.config.mjs',
-        ];
+        const files = ['/project/codingbuddy.config.js', '/project/codingbuddy.config.mjs'];
 
         const result = getDeprecatedConfigWarning(files);
 
@@ -570,10 +557,7 @@ describe('config.loader', () => {
       process.env.CI = 'true';
 
       try {
-        const files = [
-          '/project/codingbuddy.config.js',
-          '/project/codingbuddy.config.mjs',
-        ];
+        const files = ['/project/codingbuddy.config.js', '/project/codingbuddy.config.mjs'];
         const result = getDeprecatedConfigWarning(files);
 
         expect(result).toContain('codingbuddy.config.js');
@@ -653,37 +637,28 @@ describe('config.loader', () => {
       // Check for common content in both CI and non-CI warning formats
       expect(result.warnings[0]).toContain('codingbuddy.config.js');
       expect(
-        result.warnings[0].includes('Deprecated') ||
-          result.warnings[0].includes('DEPRECATION'),
+        result.warnings[0].includes('Deprecated') || result.warnings[0].includes('DEPRECATION'),
       ).toBe(true);
       expect(result.source).toBeNull();
     });
 
     it('should include deprecation warning even when .json config exists', async () => {
       testTempDir = createTestDir('loadConfig-deprecated-test');
-      writeFileSync(
-        path.join(testTempDir, 'codingbuddy.config.json'),
-        '{"language": "en"}',
-      );
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.json'), '{"language": "en"}');
       writeFileSync(path.join(testTempDir, 'codingbuddy.config.js'), '');
 
       const result = await loadConfig(testTempDir);
 
-      expect(
-        result.warnings.some(
-          w => w.includes('Deprecated') || w.includes('DEPRECATION'),
-        ),
-      ).toBe(true);
+      expect(result.warnings.some(w => w.includes('Deprecated') || w.includes('DEPRECATION'))).toBe(
+        true,
+      );
       expect(result.source).toContain('codingbuddy.config.json');
       expect(result.config.language).toBe('en');
     });
 
     it('should have no warnings when only .json config exists', async () => {
       testTempDir = createTestDir('loadConfig-deprecated-test');
-      writeFileSync(
-        path.join(testTempDir, 'codingbuddy.config.json'),
-        '{"language": "ko"}',
-      );
+      writeFileSync(path.join(testTempDir, 'codingbuddy.config.json'), '{"language": "ko"}');
 
       const result = await loadConfig(testTempDir);
 

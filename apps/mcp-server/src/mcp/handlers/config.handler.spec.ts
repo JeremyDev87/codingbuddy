@@ -47,16 +47,10 @@ describe('ConfigHandler', () => {
       }),
     } as unknown as AnalyzerService;
 
-    handler = new ConfigHandler(
-      mockConfigService,
-      mockConfigDiffService,
-      mockAnalyzerService,
-    );
+    handler = new ConfigHandler(mockConfigService, mockConfigDiffService, mockAnalyzerService);
 
     // Reset mocks to default behavior
-    (assertPathSafe as ReturnType<typeof vi.fn>).mockImplementation(
-      (path: string) => path,
-    );
+    (assertPathSafe as ReturnType<typeof vi.fn>).mockImplementation((path: string) => path);
   });
 
   describe('handle', () => {
@@ -74,9 +68,7 @@ describe('ConfigHandler', () => {
       });
 
       it('should return error when config service fails', async () => {
-        mockConfigService.getSettings = vi
-          .fn()
-          .mockRejectedValue(new Error('Config error'));
+        mockConfigService.getSettings = vi.fn().mockRejectedValue(new Error('Config error'));
 
         const result = await handler.handle('get_project_config', {});
 
@@ -104,9 +96,7 @@ describe('ConfigHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockAnalyzerService.analyzeProject).toHaveBeenCalledWith(
-          '/custom/path',
-        );
+        expect(mockAnalyzerService.analyzeProject).toHaveBeenCalledWith('/custom/path');
       });
 
       it('should use cwd when projectRoot is not a string', async () => {
@@ -115,15 +105,11 @@ describe('ConfigHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockAnalyzerService.analyzeProject).toHaveBeenCalledWith(
-          expect.any(String),
-        );
+        expect(mockAnalyzerService.analyzeProject).toHaveBeenCalledWith(expect.any(String));
       });
 
       it('should return error when analysis fails', async () => {
-        mockAnalyzerService.analyzeProject = vi
-          .fn()
-          .mockRejectedValue(new Error('Analysis error'));
+        mockAnalyzerService.analyzeProject = vi.fn().mockRejectedValue(new Error('Analysis error'));
 
         const result = await handler.handle('suggest_config_updates', {});
 
@@ -142,9 +128,7 @@ describe('ConfigHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockConfigService.setProjectRootAndReload).toHaveBeenCalledWith(
-          '/new/project/path',
-        );
+        expect(mockConfigService.setProjectRootAndReload).toHaveBeenCalledWith('/new/project/path');
       });
 
       it('should return error when projectRoot is missing', async () => {
@@ -219,9 +203,7 @@ describe('ConfigHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        const content = JSON.parse(
-          (result?.content[0] as { text: string }).text,
-        );
+        const content = JSON.parse((result?.content[0] as { text: string }).text);
         expect(content).toHaveProperty('projectRoot');
       });
 
@@ -231,9 +213,7 @@ describe('ConfigHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        const content = JSON.parse(
-          (result?.content[0] as { text: string }).text,
-        );
+        const content = JSON.parse((result?.content[0] as { text: string }).text);
         expect(content).toHaveProperty('deprecationWarning');
         expect(content.deprecationWarning).toContain('DEPRECATED');
         expect(content.deprecationWarning).toContain('v2.0.0');
@@ -256,12 +236,8 @@ describe('ConfigHandler', () => {
     it('should have no required parameters for get and suggest tools', () => {
       const definitions = handler.getToolDefinitions();
 
-      const getConfigDef = definitions.find(
-        d => d.name === 'get_project_config',
-      );
-      const suggestDef = definitions.find(
-        d => d.name === 'suggest_config_updates',
-      );
+      const getConfigDef = definitions.find(d => d.name === 'get_project_config');
+      const suggestDef = definitions.find(d => d.name === 'suggest_config_updates');
 
       expect(getConfigDef?.inputSchema.required).toEqual([]);
       expect(suggestDef?.inputSchema.required).toEqual([]);

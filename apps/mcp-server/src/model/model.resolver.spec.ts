@@ -19,10 +19,7 @@ describe('formatUnknownModelWarning', () => {
   });
 
   it('should include additional prefixes in warning', () => {
-    const result = formatUnknownModelWarning('unknown-model', [
-      'gpt-4',
-      'gemini',
-    ]);
+    const result = formatUnknownModelWarning('unknown-model', ['gpt-4', 'gemini']);
 
     expect(result).toContain('gpt-4');
     expect(result).toContain('gemini');

@@ -109,22 +109,14 @@ export const FILE_PATTERN_SPECIALISTS: Record<string, string[]> = {
   jwt: ['security-specialist'],
 
   // UI component files
-  component: [
-    'accessibility-specialist',
-    'ui-ux-designer',
-    'performance-specialist',
-  ],
+  component: ['accessibility-specialist', 'ui-ux-designer', 'performance-specialist'],
   button: ['accessibility-specialist', 'ui-ux-designer'],
   form: ['accessibility-specialist', 'security-specialist'],
   input: ['accessibility-specialist'],
   modal: ['accessibility-specialist', 'ui-ux-designer'],
 
   // Page files
-  page: [
-    'seo-specialist',
-    'accessibility-specialist',
-    'performance-specialist',
-  ],
+  page: ['seo-specialist', 'accessibility-specialist', 'performance-specialist'],
   layout: ['seo-specialist', 'accessibility-specialist'],
 
   // Data/API files

@@ -86,12 +86,7 @@ describe('CategoryRow', () => {
 
   it('should handle empty agents list', () => {
     const { lastFrame } = render(
-      <CategoryRow
-        category="Architecture"
-        agents={[]}
-        activeAgentIds={new Set()}
-        icon="🏛️"
-      />,
+      <CategoryRow category="Architecture" agents={[]} activeAgentIds={new Set()} icon="🏛️" />,
     );
     const output = lastFrame() ?? '';
     expect(output).toContain('🏛️ Architecture');

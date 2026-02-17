@@ -134,18 +134,11 @@ export function validatePath(
   // Ensure the input path starts with the base path
   // Add path.sep to prevent matching partial directory names
   // e.g., /allowed/dir should not match /allowed/directory
-  const normalizedInput =
-    resolvedInput + (resolvedInput.endsWith(path.sep) ? '' : path.sep);
-  const normalizedBase =
-    resolvedBase + (resolvedBase.endsWith(path.sep) ? '' : path.sep);
+  const normalizedInput = resolvedInput + (resolvedInput.endsWith(path.sep) ? '' : path.sep);
+  const normalizedBase = resolvedBase + (resolvedBase.endsWith(path.sep) ? '' : path.sep);
 
-  if (
-    !normalizedInput.startsWith(normalizedBase) &&
-    resolvedInput !== resolvedBase
-  ) {
-    throw new Error(
-      `Path "${inputPath}" is outside allowed directory "${allowedBase}"`,
-    );
+  if (!normalizedInput.startsWith(normalizedBase) && resolvedInput !== resolvedBase) {
+    throw new Error(`Path "${inputPath}" is outside allowed directory "${allowedBase}"`);
   }
 
   // Symlink validation: if the path exists and is a symlink, validate its target
@@ -155,18 +148,11 @@ export function validatePath(
       if (stat.isSymbolicLink()) {
         const realPath = fs.realpathSync(resolvedInput);
         // Also resolve the base path to handle OS-level symlinks (e.g., /var -> /private/var on macOS)
-        const realBase = fs.existsSync(resolvedBase)
-          ? fs.realpathSync(resolvedBase)
-          : resolvedBase;
-        const normalizedRealPath =
-          realPath + (realPath.endsWith(path.sep) ? '' : path.sep);
-        const normalizedRealBase =
-          realBase + (realBase.endsWith(path.sep) ? '' : path.sep);
+        const realBase = fs.existsSync(resolvedBase) ? fs.realpathSync(resolvedBase) : resolvedBase;
+        const normalizedRealPath = realPath + (realPath.endsWith(path.sep) ? '' : path.sep);
+        const normalizedRealBase = realBase + (realBase.endsWith(path.sep) ? '' : path.sep);
 
-        if (
-          !normalizedRealPath.startsWith(normalizedRealBase) &&
-          realPath !== realBase
-        ) {
+        if (!normalizedRealPath.startsWith(normalizedRealBase) && realPath !== realBase) {
           throw new Error(
             `Symlink "${inputPath}" points to "${realPath}" which is outside allowed directory "${allowedBase}"`,
           );
@@ -174,10 +160,7 @@ export function validatePath(
       }
     } catch (error) {
       // Re-throw our own errors, ignore ENOENT for broken symlinks
-      if (
-        error instanceof Error &&
-        error.message.includes('outside allowed directory')
-      ) {
+      if (error instanceof Error && error.message.includes('outside allowed directory')) {
         throw error;
       }
       // For broken symlinks or permission issues, allow the path
@@ -228,10 +211,7 @@ export function ensureDirectory(dirPath: string): void {
  * @param allowedBase - The base directory that dirPath must be within
  * @throws Error if dirPath is outside allowedBase
  */
-export function safeRemoveDirectory(
-  dirPath: string,
-  allowedBase: string,
-): void {
+export function safeRemoveDirectory(dirPath: string, allowedBase: string): void {
   // Validate path is within allowed bounds
   validatePath(dirPath, allowedBase);
 
@@ -279,9 +259,7 @@ const VALID_BUILD_MODES: readonly BuildMode[] = ['development', 'production'];
  * @returns The validated BuildMode, or undefined if input is falsy
  * @throws Error if input is a non-empty string that isn't a valid BuildMode
  */
-export function parseBuildMode(
-  input: string | undefined,
-): BuildMode | undefined {
+export function parseBuildMode(input: string | undefined): BuildMode | undefined {
   if (!input) {
     return undefined;
   }
@@ -333,10 +311,7 @@ export interface CLIResult {
  * @param itemLabel - Label for items (e.g., 'agents', 'commands', 'skills')
  * @returns Array of formatted output lines
  */
-export function formatConversionResult(
-  result: ConversionResult,
-  itemLabel: string,
-): string[] {
+export function formatConversionResult(result: ConversionResult, itemLabel: string): string[] {
   const lines: string[] = [];
   const items = result.converted || result.generated || result.synced || [];
 

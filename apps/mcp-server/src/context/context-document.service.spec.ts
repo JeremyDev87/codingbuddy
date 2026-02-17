@@ -3,10 +3,7 @@ import { ContextDocumentService } from './context-document.service';
 import type { ConfigService } from '../config/config.service';
 import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
-import {
-  CONTEXT_FILE_PATH,
-  DEFAULT_CONTEXT_LIMITS,
-} from './context-document.types';
+import { CONTEXT_FILE_PATH, DEFAULT_CONTEXT_LIMITS } from './context-document.types';
 import type { ContextLimits } from './context-document.types';
 import { TimeoutError } from '../shared/async.utils';
 
@@ -260,9 +257,7 @@ describe('ContextDocumentService', () => {
       const result = await service.contextExists();
 
       expect(result).toBe(true);
-      expect(existsSync).toHaveBeenCalledWith(
-        `/test/project/${CONTEXT_FILE_PATH}`,
-      );
+      expect(existsSync).toHaveBeenCalledWith(`/test/project/${CONTEXT_FILE_PATH}`);
     });
 
     it('should return false when context file does not exist', async () => {
@@ -294,9 +289,7 @@ describe('ContextDocumentService', () => {
 
     it('should parse and return document when file exists', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.BASIC_PLAN_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.BASIC_PLAN_CONTEXT);
 
       const result = await service.readContext();
 
@@ -320,9 +313,7 @@ describe('ContextDocumentService', () => {
     it('should handle timeout errors', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(fs.readFile).mockImplementation(() => {
-        return Promise.reject(
-          new TimeoutError('Timed out', 'read context file', 5000),
-        );
+        return Promise.reject(new TimeoutError('Timed out', 'read context file', 5000));
       });
 
       const result = await service.readContext();
@@ -348,9 +339,7 @@ describe('ContextDocumentService', () => {
       expect(result.document?.sections).toHaveLength(1);
       expect(result.document?.sections[0].mode).toBe('PLAN');
       expect(result.document?.sections[0].task).toBe('Implement feature X');
-      expect(result.document?.sections[0].primaryAgent).toBe(
-        'frontend-developer',
-      );
+      expect(result.document?.sections[0].primaryAgent).toBe('frontend-developer');
     });
 
     it('should create docs directory if not exists', async () => {
@@ -378,12 +367,8 @@ describe('ContextDocumentService', () => {
         recommendedActAgentConfidence: 0.95,
       });
 
-      expect(result.document?.sections[0].recommendedActAgent).toBe(
-        'backend-developer',
-      );
-      expect(result.document?.sections[0].recommendedActAgentConfidence).toBe(
-        0.95,
-      );
+      expect(result.document?.sections[0].recommendedActAgent).toBe('backend-developer');
+      expect(result.document?.sections[0].recommendedActAgentConfidence).toBe(0.95);
     });
 
     it('should include decisions and notes when provided', async () => {
@@ -397,10 +382,7 @@ describe('ContextDocumentService', () => {
         notes: ['Note 1'],
       });
 
-      expect(result.document?.sections[0].decisions).toEqual([
-        'Decision 1',
-        'Decision 2',
-      ]);
+      expect(result.document?.sections[0].decisions).toEqual(['Decision 1', 'Decision 2']);
       expect(result.document?.sections[0].notes).toEqual(['Note 1']);
     });
 
@@ -438,18 +420,13 @@ describe('ContextDocumentService', () => {
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       // Create array larger than limit
-      const largeDecisions = Array.from(
-        { length: 150 },
-        (_, i) => `Decision ${i}`,
-      );
+      const largeDecisions = Array.from({ length: 150 }, (_, i) => `Decision ${i}`);
 
       const customLimits: ContextLimits = {
         maxArrayItems: 10,
         maxItemLength: 50,
       };
-      vi.mocked(mockConfigService.getContextLimits).mockResolvedValue(
-        customLimits,
-      );
+      vi.mocked(mockConfigService.getContextLimits).mockResolvedValue(customLimits);
 
       const result = await service.resetContext({
         title: 'Test',
@@ -464,9 +441,7 @@ describe('ContextDocumentService', () => {
   describe('appendContext', () => {
     it('should append ACT section to existing document', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.appendContext({
@@ -479,17 +454,12 @@ describe('ContextDocumentService', () => {
       expect(result.success).toBe(true);
       expect(result.document?.sections).toHaveLength(2);
       expect(result.document?.sections[1].mode).toBe('ACT');
-      expect(result.document?.sections[1].progress).toEqual([
-        'Step 1 done',
-        'Step 2 done',
-      ]);
+      expect(result.document?.sections[1].progress).toEqual(['Step 1 done', 'Step 2 done']);
     });
 
     it('should append EVAL section with findings and recommendations', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.appendContext({
@@ -502,13 +472,8 @@ describe('ContextDocumentService', () => {
 
       expect(result.success).toBe(true);
       expect(result.document?.sections[1].mode).toBe('EVAL');
-      expect(result.document?.sections[1].findings).toEqual([
-        'Finding 1',
-        'Finding 2',
-      ]);
-      expect(result.document?.sections[1].recommendations).toEqual([
-        'Fix issue 1',
-      ]);
+      expect(result.document?.sections[1].findings).toEqual(['Finding 1', 'Finding 2']);
+      expect(result.document?.sections[1].recommendations).toEqual(['Fix issue 1']);
     });
 
     it('should return error when no context exists', async () => {
@@ -525,9 +490,7 @@ describe('ContextDocumentService', () => {
 
     it('should merge with existing section of same mode', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.ACT_IN_PROGRESS_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.ACT_IN_PROGRESS_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.appendContext({
@@ -547,9 +510,7 @@ describe('ContextDocumentService', () => {
 
     it('should update metadata lastUpdatedAt and currentMode', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.appendContext({
@@ -563,9 +524,7 @@ describe('ContextDocumentService', () => {
 
     it('should handle write errors gracefully', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('Write failed'));
 
       const result = await service.appendContext({
@@ -579,9 +538,7 @@ describe('ContextDocumentService', () => {
 
     it('should merge with the latest section when multiple sections of same mode exist', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.MULTIPLE_ACT_SECTIONS_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.MULTIPLE_ACT_SECTIONS_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.appendContext({
@@ -607,9 +564,7 @@ describe('ContextDocumentService', () => {
 
     it('should include recommendedActAgent in EVAL section', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.appendContext({
@@ -622,9 +577,7 @@ describe('ContextDocumentService', () => {
       });
 
       expect(result.success).toBe(true);
-      const evalSection = result.document?.sections.find(
-        s => s.mode === 'EVAL',
-      );
+      const evalSection = result.document?.sections.find(s => s.mode === 'EVAL');
       expect(evalSection?.recommendedActAgent).toBe('backend-developer');
       expect(evalSection?.recommendedActAgentConfidence).toBe(0.95);
     });
@@ -647,9 +600,7 @@ describe('ContextDocumentService', () => {
 
     it('should call appendContext for ACT mode', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.MINIMAL_PLAN_COMPLETED,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.MINIMAL_PLAN_COMPLETED);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.updateContext('ACT', {
@@ -663,9 +614,7 @@ describe('ContextDocumentService', () => {
 
     it('should call appendContext for EVAL mode', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.MINIMAL_ACT_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.MINIMAL_ACT_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const result = await service.updateContext('EVAL', {
@@ -691,9 +640,7 @@ describe('ContextDocumentService', () => {
   describe('getRecommendedActAgent', () => {
     it('should extract agent from PLAN section', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_WITH_ACT_RECOMMENDATION,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_WITH_ACT_RECOMMENDATION);
 
       const result = await service.getRecommendedActAgent();
 
@@ -712,9 +659,7 @@ describe('ContextDocumentService', () => {
 
     it('should return null when PLAN section has no recommendation', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_WITHOUT_RECOMMENDATION,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_WITHOUT_RECOMMENDATION);
 
       const result = await service.getRecommendedActAgent();
 
@@ -764,9 +709,7 @@ describe('ContextDocumentService', () => {
     it('should handle getContextLimits failure with default fallback', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
-      vi.mocked(mockConfigService.getContextLimits).mockRejectedValue(
-        new Error('Config error'),
-      );
+      vi.mocked(mockConfigService.getContextLimits).mockRejectedValue(new Error('Config error'));
 
       const result = await service.resetContext({
         title: 'Test',
@@ -786,9 +729,7 @@ describe('ContextDocumentService', () => {
         maxArrayItems: 10,
         maxItemLength: 20,
       };
-      vi.mocked(mockConfigService.getContextLimits).mockResolvedValue(
-        customLimits,
-      );
+      vi.mocked(mockConfigService.getContextLimits).mockResolvedValue(customLimits);
 
       const longDecision = 'A'.repeat(100); // 100 chars
 
@@ -805,15 +746,11 @@ describe('ContextDocumentService', () => {
       const writeOrder: string[] = [];
 
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockImplementation(async (_path, content) => {
         // Simulate async delay to increase chance of race condition
         await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
-        writeOrder.push(
-          typeof content === 'string' ? content.slice(0, 20) : 'buffer',
-        );
+        writeOrder.push(typeof content === 'string' ? content.slice(0, 20) : 'buffer');
         return undefined;
       });
 
@@ -847,9 +784,7 @@ describe('ContextDocumentService', () => {
 
   describe('file path handling', () => {
     it('should use project root from config service', async () => {
-      vi.mocked(mockConfigService.getProjectRoot).mockReturnValue(
-        '/different/path',
-      );
+      vi.mocked(mockConfigService.getProjectRoot).mockReturnValue('/different/path');
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
@@ -953,9 +888,7 @@ Evaluation task
 
     it('should return none for small documents', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.BASIC_PLAN_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.BASIC_PLAN_CONTEXT);
 
       const result = await service.shouldCleanup();
 
@@ -1077,16 +1010,10 @@ ${Array.from({ length: 2000 }, (_, i) => `- Decision ${i}: ${'x'.repeat(50)}`).j
       expect(result.document).toBeDefined();
 
       // PLAN section should be summarized (kept last 3 items)
-      const planSection = result.document?.sections.find(
-        s => s.mode === 'PLAN',
-      );
+      const planSection = result.document?.sections.find(s => s.mode === 'PLAN');
       expect(planSection?.summarized).toBe(true);
       expect(planSection?.decisions).toHaveLength(3);
-      expect(planSection?.decisions).toEqual([
-        'Decision 6',
-        'Decision 7',
-        'Decision 8',
-      ]);
+      expect(planSection?.decisions).toEqual(['Decision 6', 'Decision 7', 'Decision 8']);
       expect(planSection?.originalCounts?.decisions).toBe(8);
 
       // ACT and EVAL sections should remain full (recent)
@@ -1094,9 +1021,7 @@ ${Array.from({ length: 2000 }, (_, i) => `- Decision ${i}: ${'x'.repeat(50)}`).j
       expect(actSection?.summarized).toBeUndefined();
       expect(actSection?.progress).toHaveLength(6);
 
-      const evalSection = result.document?.sections.find(
-        s => s.mode === 'EVAL',
-      );
+      const evalSection = result.document?.sections.find(s => s.mode === 'EVAL');
       expect(evalSection?.summarized).toBeUndefined();
       expect(evalSection?.findings).toHaveLength(2);
     });
@@ -1171,9 +1096,7 @@ ${Array.from({ length: 2000 }, (_, i) => `- Decision ${i}: ${'x'.repeat(50)}`).j
 
     it('should not trigger auto cleanup for small documents', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(
-        TEST_FIXTURES.PLAN_COMPLETED_CONTEXT,
-      );
+      vi.mocked(fs.readFile).mockResolvedValue(TEST_FIXTURES.PLAN_COMPLETED_CONTEXT);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
       const performCleanupSpy = vi.spyOn(service, 'performCleanup');

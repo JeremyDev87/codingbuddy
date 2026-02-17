@@ -20,13 +20,7 @@ describe('Agent types', () => {
   });
 
   test('AgentCategory is a valid union type', () => {
-    const categories: AgentCategory[] = [
-      'Planning',
-      'Development',
-      'Review',
-      'Security',
-      'UX',
-    ];
+    const categories: AgentCategory[] = ['Planning', 'Development', 'Review', 'Security', 'UX'];
 
     expect(categories).toHaveLength(5);
   });

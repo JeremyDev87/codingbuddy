@@ -105,11 +105,7 @@ export async function ensureClaudeSettingsEnv(
 
   // Write settings
   try {
-    await writeFile(
-      settingsPath,
-      JSON.stringify(settings, null, 2) + '\n',
-      'utf-8',
-    );
+    await writeFile(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
   } catch (error) {
     throw new ClaudeSettingsWriteError(settingsPath, error);
   }

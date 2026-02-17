@@ -20,9 +20,7 @@ describe('Loading States', () => {
 
     it('should have sr-only loading text for screen readers', () => {
       render(<AgentsLoading />);
-      expect(
-        screen.getByText('Loading agents, please wait...'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Loading agents, please wait...')).toBeInTheDocument();
     });
 
     it('should render skeleton placeholders', () => {
@@ -55,9 +53,7 @@ describe('Loading States', () => {
 
     it('should have sr-only loading text', () => {
       render(<CodeExampleLoading />);
-      expect(
-        screen.getByText('Loading code example, please wait...'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Loading code example, please wait...')).toBeInTheDocument();
     });
 
     it('should have aria-hidden on skeleton elements', () => {
@@ -79,17 +75,12 @@ describe('Loading States', () => {
     it('should have accessible label', () => {
       const { container } = render(<QuickStartLoading />);
       const section = container.querySelector('section');
-      expect(section).toHaveAttribute(
-        'aria-label',
-        'Loading quick start guide',
-      );
+      expect(section).toHaveAttribute('aria-label', 'Loading quick start guide');
     });
 
     it('should have sr-only loading text', () => {
       render(<QuickStartLoading />);
-      expect(
-        screen.getByText('Loading quick start guide, please wait...'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Loading quick start guide, please wait...')).toBeInTheDocument();
     });
 
     it('should have aria-hidden on skeleton elements', () => {

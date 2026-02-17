@@ -65,8 +65,7 @@ export class LanguageService {
     },
   };
 
-  private static readonly DEFAULT_LANGUAGE_INFO: LanguageInfo =
-    LanguageService.LANGUAGE_MAP.en;
+  private static readonly DEFAULT_LANGUAGE_INFO: LanguageInfo = LanguageService.LANGUAGE_MAP.en;
 
   getLanguageInstruction(languageCode?: string): LanguageInstructionResult {
     const code = String(languageCode ?? '');

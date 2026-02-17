@@ -5,9 +5,7 @@ describe('CSP Headers', () => {
   it('should include Vercel Analytics domains in CSP', async () => {
     const headers = await nextConfig.headers!();
     const globalHeaders = headers[0].headers;
-    const cspHeader = globalHeaders.find(
-      h => h.key === 'Content-Security-Policy',
-    );
+    const cspHeader = globalHeaders.find(h => h.key === 'Content-Security-Policy');
 
     expect(cspHeader).toBeDefined();
     const cspValue = cspHeader!.value;
@@ -20,9 +18,7 @@ describe('CSP Headers', () => {
 
   it('should have restrictive defaults', async () => {
     const headers = await nextConfig.headers!();
-    const cspHeader = headers[0].headers.find(
-      h => h.key === 'Content-Security-Policy',
-    );
+    const cspHeader = headers[0].headers.find(h => h.key === 'Content-Security-Policy');
     const cspValue = cspHeader!.value;
 
     expect(cspValue).toContain("default-src 'self'");

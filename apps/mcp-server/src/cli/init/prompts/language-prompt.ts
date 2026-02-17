@@ -34,10 +34,7 @@ export function getLanguageChoices(): LanguageChoice[] {
   return SUPPORTED_LANGUAGE_CODES.map(code => {
     const info = SUPPORTED_LANGUAGES[code];
     // Format: "한국어 (Korean)" or just "English" if names are the same
-    const name =
-      info.nativeName === info.name
-        ? info.name
-        : `${info.nativeName} (${info.name})`;
+    const name = info.nativeName === info.name ? info.name : `${info.nativeName} (${info.name})`;
     return {
       name,
       value: code,

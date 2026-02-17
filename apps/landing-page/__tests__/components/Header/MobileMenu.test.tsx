@@ -9,9 +9,7 @@ import { MobileMenu } from '@/components/Header/MobileMenu';
 describe('MobileMenu', () => {
   it('renders trigger button with accessible label', () => {
     render(<MobileMenu />);
-    expect(
-      screen.getByRole('button', { name: /open menu/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
   });
 
   it('opens sheet with navigation links', async () => {
@@ -20,25 +18,14 @@ describe('MobileMenu', () => {
     await user.click(screen.getByRole('button', { name: /open menu/i }));
 
     expect(screen.getByText('Navigation')).toBeInTheDocument();
-    expect(
-      screen.getByText('Site navigation and settings'),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute(
-      'href',
-      '#solution',
-    );
-    expect(screen.getByRole('link', { name: /agents/i })).toHaveAttribute(
-      'href',
-      '#agents',
-    );
+    expect(screen.getByText('Site navigation and settings')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '#solution');
+    expect(screen.getByRole('link', { name: /agents/i })).toHaveAttribute('href', '#agents');
     expect(screen.getByRole('link', { name: /quick start/i })).toHaveAttribute(
       'href',
       '#quick-start',
     );
-    expect(screen.getByRole('link', { name: /faq/i })).toHaveAttribute(
-      'href',
-      '#faq',
-    );
+    expect(screen.getByRole('link', { name: /faq/i })).toHaveAttribute('href', '#faq');
   });
 
   it('has accessible navigation region with aria-label', async () => {
@@ -46,9 +33,7 @@ describe('MobileMenu', () => {
     render(<MobileMenu />);
     await user.click(screen.getByRole('button', { name: /open menu/i }));
 
-    expect(
-      screen.getByRole('navigation', { name: /navigation/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: /navigation/i })).toBeInTheDocument();
   });
 
   it('has localized close button label', async () => {

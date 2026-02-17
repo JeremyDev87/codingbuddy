@@ -34,8 +34,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
         const logger = new Logger('KeywordModule');
 
         const loadConfig = async (): Promise<KeywordModesConfig> => {
-          const content =
-            await rulesService.getRuleContent('keyword-modes.json');
+          const content = await rulesService.getRuleContent('keyword-modes.json');
           return JSON.parse(content) as KeywordModesConfig;
         };
 
@@ -85,10 +84,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           return primaryAgents;
         };
 
-        const primaryAgentResolver = new PrimaryAgentResolver(
-          getProjectConfig,
-          listPrimaryAgents,
-        );
+        const primaryAgentResolver = new PrimaryAgentResolver(getProjectConfig, listPrimaryAgents);
 
         const loadAutoConfig = async () => {
           try {
@@ -103,9 +99,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
         };
 
         // NEW: Skill recommendation function for auto-inclusion
-        const getSkillRecommendations = (
-          prompt: string,
-        ): SkillRecommendationInfo[] => {
+        const getSkillRecommendations = (prompt: string): SkillRecommendationInfo[] => {
           try {
             const result = skillRecommendationService.recommendSkills(prompt);
             return result.recommendations.map(rec => ({
@@ -123,9 +117,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
         };
 
         // NEW: Skill content loading function for auto-inclusion
-        const loadSkillContent = async (
-          skillName: string,
-        ): Promise<SkillContentInfo | null> => {
+        const loadSkillContent = async (skillName: string): Promise<SkillContentInfo | null> => {
           try {
             const skill = await rulesService.getSkill(skillName);
             return {
@@ -189,12 +181,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
 
         return new KeywordService(loadConfig, loadRule, loadAgent, options);
       },
-      inject: [
-        RulesService,
-        ConfigService,
-        SkillRecommendationService,
-        AgentService,
-      ],
+      inject: [RulesService, ConfigService, SkillRecommendationService, AgentService],
     },
   ],
   exports: [KEYWORD_SERVICE],

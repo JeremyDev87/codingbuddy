@@ -48,8 +48,7 @@ export class ConventionsHandler extends AbstractHandler {
           properties: {
             projectRoot: {
               type: 'string',
-              description:
-                'Project root directory (defaults to current working directory)',
+              description: 'Project root directory (defaults to current working directory)',
             },
           },
           required: [],
@@ -66,8 +65,7 @@ export class ConventionsHandler extends AbstractHandler {
   ): Promise<ToolResponse> {
     try {
       const configProjectRoot = this.configService.getProjectRoot();
-      const projectRootInput =
-        extractOptionalString(args, 'projectRoot') ?? configProjectRoot;
+      const projectRootInput = extractOptionalString(args, 'projectRoot') ?? configProjectRoot;
 
       // Validate path to prevent path traversal attacks
       const projectRoot = assertPathSafe(projectRootInput, {
@@ -75,8 +73,7 @@ export class ConventionsHandler extends AbstractHandler {
         allowAbsolute: true,
       });
 
-      const conventions =
-        await this.conventionsAnalyzer.analyzeProjectConventions(projectRoot);
+      const conventions = await this.conventionsAnalyzer.analyzeProjectConventions(projectRoot);
 
       return createJsonResponse(conventions);
     } catch (error) {

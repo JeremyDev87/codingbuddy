@@ -11,16 +11,12 @@ describe('SlotError', () => {
 
   it('should render error message with slot name', () => {
     render(<SlotError {...defaultProps} />);
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      'Failed to load agents',
-    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Failed to load agents');
   });
 
   it('should display user-friendly error description', () => {
     render(<SlotError {...defaultProps} />);
-    expect(
-      screen.getByText('Something went wrong. Please try again.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong. Please try again.')).toBeInTheDocument();
   });
 
   it('should have role="alert" for screen readers', () => {

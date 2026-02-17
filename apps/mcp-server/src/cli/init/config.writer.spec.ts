@@ -114,9 +114,7 @@ describe('config.writer', () => {
     it('should throw on write error', async () => {
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('Permission denied'));
 
-      await expect(writeConfig('/project', mockConfig)).rejects.toThrow(
-        'Permission denied',
-      );
+      await expect(writeConfig('/project', mockConfig)).rejects.toThrow('Permission denied');
     });
 
     it('should use raw content when raw option is true', async () => {

@@ -28,8 +28,7 @@ export function formatBytes(bytes: number): string {
 
   // Round to 2 decimal places for KB and above, show exact for bytes
   // Remove trailing zeros and unnecessary decimal point
-  const formatted =
-    unitIndex === 0 ? size.toString() : size.toFixed(2).replace(/\.?0+$/, '');
+  const formatted = unitIndex === 0 ? size.toString() : size.toFixed(2).replace(/\.?0+$/, '');
 
   return `${formatted} ${units[unitIndex]}`;
 }

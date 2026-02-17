@@ -14,9 +14,7 @@ export interface StartTuiOptions {
  * Returns Ink instance for lifecycle management (e.g. unmount on shutdown)
  */
 export function startTui(options: StartTuiOptions): Instance {
-  const renderOptions: RenderOptions = options.stdout
-    ? { stdout: options.stdout }
-    : {};
+  const renderOptions: RenderOptions = options.stdout ? { stdout: options.stdout } : {};
   return render(<App eventBus={options.eventBus} />, renderOptions);
 }
 

@@ -9,15 +9,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const MCP_SERVER_PKG_PATH = path.resolve(
-  __dirname,
-  '../../../apps/mcp-server/package.json',
-);
+const MCP_SERVER_PKG_PATH = path.resolve(__dirname, '../../../apps/mcp-server/package.json');
 const PLUGIN_PKG_PATH = path.resolve(__dirname, '../package.json');
-const PLUGIN_MANIFEST_PATH = path.resolve(
-  __dirname,
-  '../.claude-plugin/plugin.json',
-);
+const PLUGIN_MANIFEST_PATH = path.resolve(__dirname, '../.claude-plugin/plugin.json');
 
 function syncVersion() {
   // Read MCP server version
@@ -47,10 +41,7 @@ function syncVersion() {
   }
 
   if (pkgChanged) {
-    fs.writeFileSync(
-      PLUGIN_PKG_PATH,
-      JSON.stringify(pluginPkg, null, 2) + '\n',
-    );
+    fs.writeFileSync(PLUGIN_PKG_PATH, JSON.stringify(pluginPkg, null, 2) + '\n');
   } else {
     console.log(`[sync-version] package.json already at ${version}`);
   }
@@ -59,10 +50,7 @@ function syncVersion() {
   const manifest = JSON.parse(fs.readFileSync(PLUGIN_MANIFEST_PATH, 'utf8'));
   if (manifest.version !== version) {
     manifest.version = version;
-    fs.writeFileSync(
-      PLUGIN_MANIFEST_PATH,
-      JSON.stringify(manifest, null, 2) + '\n',
-    );
+    fs.writeFileSync(PLUGIN_MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n');
     console.log(`[sync-version] Updated plugin.json to ${version}`);
   } else {
     console.log(`[sync-version] plugin.json already at ${version}`);

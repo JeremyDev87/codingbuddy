@@ -87,27 +87,17 @@ export function categorizeFile(filePath: string): CodeCategory {
   }
 
   // API/Route files (check before hooks to avoid false positives like 'users.ts')
-  if (
-    pathContainsSegment(filePath, 'api') ||
-    fileName === 'route.ts' ||
-    fileName === 'route.js'
-  ) {
+  if (pathContainsSegment(filePath, 'api') || fileName === 'route.ts' || fileName === 'route.js') {
     return 'api';
   }
 
   // Service files
-  if (
-    pathContainsSegment(filePath, 'services') ||
-    fileName.includes('.service.')
-  ) {
+  if (pathContainsSegment(filePath, 'services') || fileName.includes('.service.')) {
     return 'service';
   }
 
   // Model/Entity files
-  if (
-    pathContainsSegment(filePath, 'models') ||
-    pathContainsSegment(filePath, 'entities')
-  ) {
+  if (pathContainsSegment(filePath, 'models') || pathContainsSegment(filePath, 'entities')) {
     return 'model';
   }
 
@@ -122,10 +112,7 @@ export function categorizeFile(filePath: string): CodeCategory {
   }
 
   // Component files
-  if (
-    pathContainsSegment(filePath, 'components') ||
-    pathContainsSegment(filePath, 'ui')
-  ) {
+  if (pathContainsSegment(filePath, 'components') || pathContainsSegment(filePath, 'ui')) {
     return 'component';
   }
 
@@ -161,10 +148,7 @@ export function categorizeFile(filePath: string): CodeCategory {
  * Select representative sample files from a list
  * Prioritizes diversity across categories
  */
-export function selectSampleFiles(
-  files: string[],
-  maxSamples: number,
-): string[] {
+export function selectSampleFiles(files: string[], maxSamples: number): string[] {
   // Filter to code files only, excluding tests
   const codeFiles = files.filter(f => {
     if (!isCodeFile(f)) return false;

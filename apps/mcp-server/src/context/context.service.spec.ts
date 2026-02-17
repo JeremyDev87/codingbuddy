@@ -29,9 +29,7 @@ describe('ContextService', () => {
           },
         ],
       }),
-      getAvailableDomains: vi
-        .fn()
-        .mockReturnValue(['security', 'accessibility']),
+      getAvailableDomains: vi.fn().mockReturnValue(['security', 'accessibility']),
     } as unknown as ChecklistService;
 
     service = new ContextService(mockChecklistService);

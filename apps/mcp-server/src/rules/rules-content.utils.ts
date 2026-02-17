@@ -32,10 +32,7 @@ const CONTENT_LIMITS: Record<VerbosityLevel, number> = {
  * // Returns first ~2000 chars preserving markdown structure
  * ```
  */
-export function truncateRuleContent(
-  content: string,
-  verbosity: VerbosityLevel,
-): string {
+export function truncateRuleContent(content: string, verbosity: VerbosityLevel): string {
   const limit = CONTENT_LIMITS[verbosity];
 
   // minimal: return empty string (paths only)

@@ -35,9 +35,7 @@ describe('CodeExample', () => {
 
   it('should display section heading', () => {
     render(<CodeExample locale="en" />);
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      'See the Difference',
-    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('See the Difference');
   });
 
   it('should have aria-labelledby linking to heading', () => {

@@ -91,10 +91,7 @@ describe('utils', () => {
       const expectedBase = path.resolve(cwd, relativeBase);
 
       // This should work - relative path within relative base
-      const result = validatePath(
-        path.join(relativeBase, 'subdir'),
-        relativeBase,
-      );
+      const result = validatePath(path.join(relativeBase, 'subdir'), relativeBase);
       expect(result).toBe(path.join(expectedBase, 'subdir'));
     });
 
@@ -125,9 +122,7 @@ describe('utils', () => {
     let tempDir: string;
 
     beforeEach(async () => {
-      tempDir = await fs.promises.mkdtemp(
-        path.join(os.tmpdir(), 'symlink-test-'),
-      );
+      tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'symlink-test-'));
     });
 
     afterEach(async () => {
@@ -358,9 +353,7 @@ describe('utils', () => {
     let tempDir: string;
 
     beforeEach(async () => {
-      tempDir = await fs.promises.mkdtemp(
-        path.join(os.tmpdir(), 'utils-test-'),
-      );
+      tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'utils-test-'));
     });
 
     afterEach(async () => {
@@ -402,9 +395,7 @@ describe('utils', () => {
     let tempDir: string;
 
     beforeEach(async () => {
-      tempDir = await fs.promises.mkdtemp(
-        path.join(os.tmpdir(), 'utils-test-'),
-      );
+      tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'utils-test-'));
     });
 
     afterEach(async () => {
@@ -481,19 +472,13 @@ describe('utils', () => {
     });
 
     it('throws error for invalid build mode', () => {
-      expect(() => parseBuildMode('invalid')).toThrow(
-        'Invalid build mode: "invalid"',
-      );
+      expect(() => parseBuildMode('invalid')).toThrow('Invalid build mode: "invalid"');
       expect(() => parseBuildMode('dev')).toThrow('Invalid build mode: "dev"');
-      expect(() => parseBuildMode('prod')).toThrow(
-        'Invalid build mode: "prod"',
-      );
+      expect(() => parseBuildMode('prod')).toThrow('Invalid build mode: "prod"');
     });
 
     it('provides helpful error message with valid options', () => {
-      expect(() => parseBuildMode('test')).toThrow(
-        'Expected one of: development, production',
-      );
+      expect(() => parseBuildMode('test')).toThrow('Expected one of: development, production');
     });
   });
 

@@ -19,17 +19,12 @@ import {
   CATEGORY_SPECIALISTS,
 } from './context.types';
 import { detectIntentFromPatterns } from './intent-patterns';
-import {
-  compileCategoryPatterns,
-  findMatchingCategory,
-} from '../shared/pattern-matcher';
+import { compileCategoryPatterns, findMatchingCategory } from '../shared/pattern-matcher';
 
 /**
  * Pre-compiled file category patterns (initialized once at module load)
  */
-const COMPILED_CATEGORY_PATTERNS = compileCategoryPatterns(
-  FILE_CATEGORY_PATTERNS,
-);
+const COMPILED_CATEGORY_PATTERNS = compileCategoryPatterns(FILE_CATEGORY_PATTERNS);
 
 @Injectable()
 export class ContextService {
@@ -83,10 +78,7 @@ export class ContextService {
 
     // Check each file against pre-compiled category patterns
     for (const file of files) {
-      const matchedCategory = findMatchingCategory(
-        file,
-        COMPILED_CATEGORY_PATTERNS,
-      );
+      const matchedCategory = findMatchingCategory(file, COMPILED_CATEGORY_PATTERNS);
       if (matchedCategory) {
         return matchedCategory;
       }
@@ -95,11 +87,7 @@ export class ContextService {
     return 'general';
   }
 
-  private buildAnalysis(
-    prompt: string,
-    category: string,
-    files?: string[],
-  ): TaskAnalysis {
+  private buildAnalysis(prompt: string, category: string, files?: string[]): TaskAnalysis {
     const intent = this.detectIntent(prompt);
     const complexity = this.assessComplexity(files);
     const keywords = this.extractKeywords(prompt);
@@ -156,11 +144,7 @@ export class ContextService {
 
   private getAttentionAreas(category: string): string[] {
     const areas: Record<string, string[]> = {
-      authentication: [
-        'credential_handling',
-        'session_management',
-        'input_validation',
-      ],
+      authentication: ['credential_handling', 'session_management', 'input_validation'],
       payment: ['pci_compliance', 'transaction_integrity', 'error_handling'],
       api: ['input_validation', 'rate_limiting', 'error_handling'],
       ui: ['accessibility', 'responsive_design', 'user_feedback'],
@@ -203,9 +187,7 @@ export class ContextService {
   }
 
   private recommendSpecialists(category: string): RecommendedSpecialist[] {
-    const specialists = CATEGORY_SPECIALISTS[category] || [
-      'code-quality-specialist',
-    ];
+    const specialists = CATEGORY_SPECIALISTS[category] || ['code-quality-specialist'];
 
     return specialists.map((name, index) => ({
       name,
@@ -217,8 +199,7 @@ export class ContextService {
   private getSpecialistReason(specialist: string, category: string): string {
     const reasons: Record<string, Record<string, string>> = {
       'security-specialist': {
-        authentication:
-          'Review authentication security and credential handling',
+        authentication: 'Review authentication security and credential handling',
         payment: 'Ensure payment security and PCI compliance',
         api: 'Review API security and input validation',
         data: 'Review data protection and access controls',
@@ -257,11 +238,7 @@ export class ContextService {
     const specialistReasons = reasons[specialist];
     if (!specialistReasons) return 'Provide specialized review';
 
-    return (
-      specialistReasons[category] ||
-      specialistReasons.default ||
-      'Provide specialized review'
-    );
+    return specialistReasons[category] || specialistReasons.default || 'Provide specialized review';
   }
 
   private suggestWorkflow(intent: TaskIntent): SuggestedWorkflow {
@@ -312,11 +289,7 @@ export class ContextService {
         phases: [
           {
             phase: 'Review',
-            focus: [
-              'Check code quality',
-              'Security review',
-              'Performance check',
-            ],
+            focus: ['Check code quality', 'Security review', 'Performance check'],
           },
           {
             phase: 'Feedback',
@@ -329,10 +302,7 @@ export class ContextService {
     return { phases: basePhases };
   }
 
-  private buildContextHints(
-    category: string,
-    riskLevel: RiskLevel,
-  ): ContextHints {
+  private buildContextHints(category: string, riskLevel: RiskLevel): ContextHints {
     const mustConsider: string[] = [];
 
     // Add category-specific considerations

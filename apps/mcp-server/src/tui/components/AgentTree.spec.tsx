@@ -14,9 +14,7 @@ vi.mock('../utils/icons', async importOriginal => {
 
 describe('tui/components/AgentTree', () => {
   it('should render nothing when primaryAgent is null', () => {
-    const { lastFrame } = render(
-      <AgentTree primaryAgent={null} parallelAgents={[]} />,
-    );
+    const { lastFrame } = render(<AgentTree primaryAgent={null} parallelAgents={[]} />);
     expect(lastFrame()).toBe('');
   });
 
@@ -28,9 +26,7 @@ describe('tui/components/AgentTree', () => {
       isPrimary: true,
       status: 'running',
     });
-    const { lastFrame } = render(
-      <AgentTree primaryAgent={primary} parallelAgents={[]} />,
-    );
+    const { lastFrame } = render(<AgentTree primaryAgent={primary} parallelAgents={[]} />);
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u250c Primary');
     expect(frame).toContain('\u2514');
@@ -64,9 +60,7 @@ describe('tui/components/AgentTree', () => {
         status: 'idle',
       }),
     ];
-    const { lastFrame } = render(
-      <AgentTree primaryAgent={primary} parallelAgents={parallel} />,
-    );
+    const { lastFrame } = render(<AgentTree primaryAgent={primary} parallelAgents={parallel} />);
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u250c Primary');
     expect(frame).toContain('\u251c\u2500 Parallel');
@@ -89,9 +83,7 @@ describe('tui/components/AgentTree', () => {
       status: 'completed',
       progress: 100,
     });
-    const { lastFrame } = render(
-      <AgentTree primaryAgent={primary} parallelAgents={[]} />,
-    );
+    const { lastFrame } = render(<AgentTree primaryAgent={primary} parallelAgents={[]} />);
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u2713'); // checkmark
     expect(frame).toContain('Done');

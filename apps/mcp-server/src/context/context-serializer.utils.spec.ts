@@ -65,9 +65,7 @@ describe('context-serializer.utils', () => {
       const content = lines.join('\n');
 
       expect(content).toContain('**Primary Agent**: technical-planner');
-      expect(content).toContain(
-        '**Recommended ACT Agent**: frontend-developer (confidence: 0.9)',
-      );
+      expect(content).toContain('**Recommended ACT Agent**: frontend-developer (confidence: 0.9)');
     });
 
     it('serializes section with decisions and notes', () => {
@@ -166,11 +164,7 @@ describe('context-serializer.utils', () => {
       };
 
       const isoTimestamp = '2024-01-15T10:00:00.000Z';
-      const doc = createNewContextDocument(
-        'Test Title',
-        planSection,
-        isoTimestamp,
-      );
+      const doc = createNewContextDocument('Test Title', planSection, isoTimestamp);
 
       expect(doc.metadata.title).toBe('Test Title');
       expect(doc.metadata.createdAt).toBe(isoTimestamp);
@@ -493,10 +487,7 @@ describe('context-serializer.utils', () => {
           {
             mode: 'PLAN',
             timestamp: '10:00',
-            decisions: Array.from(
-              { length: 50 },
-              (_, i) => `Decision ${i}: ${'x'.repeat(100)}`,
-            ),
+            decisions: Array.from({ length: 50 }, (_, i) => `Decision ${i}: ${'x'.repeat(100)}`),
           },
           {
             mode: 'ACT',

@@ -249,11 +249,7 @@
             "Communication plan incomplete",
             "Resource constraints not addressed"
           ],
-          "low": [
-            "Documentation gaps",
-            "Training not scheduled",
-            "Minor dependency updates needed"
-          ]
+          "low": ["Documentation gaps", "Training not scheduled", "Minor dependency updates needed"]
         }
       }
     },
@@ -571,11 +567,7 @@
           "Load balancer",
           "Health checks"
         ],
-        "success_criteria": [
-          "Instant switch",
-          "Instant rollback",
-          "Zero downtime"
-        ]
+        "success_criteria": ["Instant switch", "Instant rollback", "Zero downtime"]
       },
       "canary": {
         "description": "Gradually route traffic to new version, monitoring for issues",
@@ -599,11 +591,7 @@
           "Deprecation notices",
           "Client migration tracking"
         ],
-        "success_criteria": [
-          "Old clients work",
-          "New clients work",
-          "Clear deprecation timeline"
-        ]
+        "success_criteria": ["Old clients work", "New clients work", "Clear deprecation timeline"]
       }
     },
     "sli_definitions": {

@@ -1,8 +1,6 @@
 import type { AgentMetadata, AgentCategory } from '../events';
 
-export function groupByCategory(
-  agents: AgentMetadata[],
-): Map<AgentCategory, AgentMetadata[]> {
+export function groupByCategory(agents: AgentMetadata[]): Map<AgentCategory, AgentMetadata[]> {
   const map = new Map<AgentCategory, AgentMetadata[]>();
   for (const agent of agents) {
     const list = map.get(agent.category);

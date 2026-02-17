@@ -4,17 +4,7 @@
  * Defines types for language instruction generation based on config language setting
  */
 
-export type SupportedLanguage =
-  | 'ko'
-  | 'en'
-  | 'ja'
-  | 'zh'
-  | 'es'
-  | 'de'
-  | 'fr'
-  | 'pt'
-  | 'ru'
-  | 'hi';
+export type SupportedLanguage = 'ko' | 'en' | 'ja' | 'zh' | 'es' | 'de' | 'fr' | 'pt' | 'ru' | 'hi';
 
 export interface LanguageInfo {
   /** Language code (ISO 639-1) */

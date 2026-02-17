@@ -103,15 +103,11 @@ describe('Verbosity Types', () => {
       const full = VERBOSITY_PRESETS.full;
 
       // Check expertise items progression (minimal < standard, full is unlimited)
-      expect(minimal.maxExpertiseItems).toBeLessThan(
-        standard.maxExpertiseItems,
-      );
+      expect(minimal.maxExpertiseItems).toBeLessThan(standard.maxExpertiseItems);
       expect(isUnlimited(full.maxExpertiseItems)).toBe(true);
 
       // Check context sections progression (minimal < standard, full is unlimited)
-      expect(minimal.maxContextSections).toBeLessThan(
-        standard.maxContextSections,
-      );
+      expect(minimal.maxContextSections).toBeLessThan(standard.maxContextSections);
       expect(isUnlimited(full.maxContextSections)).toBe(true);
 
       // Check content inclusion flags

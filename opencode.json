@@ -22,11 +22,7 @@
     },
     "sequential-thinking": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "playwright": {
       "type": "local",
@@ -34,13 +30,7 @@
     },
     "figma": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "figma-developer-mcp",
-        "--figma-api-key=${FIGMA_API_KEY}",
-        "--stdio"
-      ]
+      "command": ["npx", "-y", "figma-developer-mcp", "--figma-api-key=${FIGMA_API_KEY}", "--stdio"]
     },
     "github": {
       "type": "local",
@@ -62,12 +52,7 @@
     },
     "filesystem": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/Users/jeremy/workspace"
-      ]
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/Users/jeremy/workspace"]
     }
   },
 

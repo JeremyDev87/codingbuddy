@@ -99,11 +99,7 @@
       },
       "planning_framework": {
         "library_selection": {
-          "react": [
-            "react-intl (FormatJS)",
-            "i18next + react-i18next",
-            "next-intl"
-          ],
+          "react": ["react-intl (FormatJS)", "i18next + react-i18next", "next-intl"],
           "vue": ["vue-i18n", "nuxt-i18n"],
           "angular": ["@angular/localize", "ngx-translate"],
           "native_mobile": ["react-native-i18n", "flutter_localizations"],

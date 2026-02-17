@@ -186,10 +186,7 @@ export class FileSizeError extends Error implements AccessibleErrorResponse {
  * }
  * ```
  */
-export class PathTraversalError
-  extends Error
-  implements AccessibleErrorResponse
-{
+export class PathTraversalError extends Error implements AccessibleErrorResponse {
   readonly code = 'PATH_TRAVERSAL_DETECTED';
   readonly userMessage: string;
   readonly technicalMessage: string;
@@ -270,10 +267,7 @@ export class PathTraversalError
  * }
  * ```
  */
-export function validateFilePath(
-  filePath: string,
-  options?: { allowedBasePath?: string },
-): void {
+export function validateFilePath(filePath: string, options?: { allowedBasePath?: string }): void {
   // Check for null bytes (common in path traversal attacks)
   if (filePath.includes('\0')) {
     throw new PathTraversalError(filePath, 'Null byte detected');
@@ -284,10 +278,7 @@ export function validateFilePath(
   const segments = filePath.split(/[/\\]/);
   for (const segment of segments) {
     if (segment === '..') {
-      throw new PathTraversalError(
-        filePath,
-        'Path traversal pattern detected (..)',
-      );
+      throw new PathTraversalError(filePath, 'Path traversal pattern detected (..)');
     }
   }
 
@@ -302,10 +293,7 @@ export function validateFilePath(
 
     // Check if resolved path starts with base path
     // This prevents escaping via symlinks or absolute paths
-    if (
-      !normalizedPath.startsWith(normalizedBase + sep) &&
-      normalizedPath !== normalizedBase
-    ) {
+    if (!normalizedPath.startsWith(normalizedBase + sep) && normalizedPath !== normalizedBase) {
       throw new PathTraversalError(
         filePath,
         `Path escapes allowed base directory "${options.allowedBasePath}"`,
@@ -330,10 +318,7 @@ export function validateFilePath(
  * @param maxSize - Maximum allowed size in bytes
  * @throws FileSizeError if file exceeds maxSize
  */
-async function validateFileSize(
-  filePath: string,
-  maxSize: number,
-): Promise<void> {
+async function validateFileSize(filePath: string, maxSize: number): Promise<void> {
   const stats = await fs.stat(filePath);
   if (stats.size > maxSize) {
     throw new FileSizeError(stats.size, maxSize, filePath);
@@ -617,27 +602,21 @@ export async function tryReadFile(
     // ACC-002: Structured logging for silent failures
     // ACC-003: Log AccessibleErrorResponse metadata
     if (error instanceof FileSizeError) {
-      options?.logger?.warn(
-        'tryReadFile: File size violation (silent failure)',
-        {
-          code: error.code,
-          filePath,
-          userMessage: error.userMessage,
-          technicalMessage: error.technicalMessage,
-          suggestions: error.suggestions,
-        },
-      );
+      options?.logger?.warn('tryReadFile: File size violation (silent failure)', {
+        code: error.code,
+        filePath,
+        userMessage: error.userMessage,
+        technicalMessage: error.technicalMessage,
+        suggestions: error.suggestions,
+      });
     }
     // Log path traversal attempts for security monitoring
     if (error instanceof PathTraversalError) {
-      options?.logger?.warn(
-        'tryReadFile: Path traversal attempt (silent failure)',
-        {
-          code: error.code,
-          filePath,
-          message: error.message,
-        },
-      );
+      options?.logger?.warn('tryReadFile: Path traversal attempt (silent failure)', {
+        code: error.code,
+        filePath,
+        message: error.message,
+      });
     }
     return undefined; // Silent failure for all errors including size violations
   }

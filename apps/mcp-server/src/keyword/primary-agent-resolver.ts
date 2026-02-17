@@ -132,15 +132,11 @@ export class PrimaryAgentResolver {
     try {
       const config = await this.getProjectConfig();
       if (config?.excludeAgents && config.excludeAgents.length > 0) {
-        const excluded = new Set(
-          config.excludeAgents.map(a => a.toLowerCase()),
-        );
+        const excluded = new Set(config.excludeAgents.map(a => a.toLowerCase()));
         const filtered = agents.filter(agent => !excluded.has(agent));
 
         if (filtered.length < agents.length) {
-          this.logger.debug(
-            `Excluded agents from resolution: ${config.excludeAgents.join(', ')}`,
-          );
+          this.logger.debug(`Excluded agents from resolution: ${config.excludeAgents.join(', ')}`);
         }
 
         return filtered;
@@ -160,9 +156,7 @@ export class PrimaryAgentResolver {
     try {
       const agents = await this.listPrimaryAgents();
       if (agents.length === 0) {
-        this.logger.debug(
-          'No primary agents found in registry, using default fallback list',
-        );
+        this.logger.debug('No primary agents found in registry, using default fallback list');
         return [...ALL_PRIMARY_AGENTS];
       }
       return agents;

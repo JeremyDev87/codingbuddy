@@ -10,12 +10,9 @@ import {
 describe('keyword.types', () => {
   describe('isValidLanguageCode', () => {
     describe('valid language codes', () => {
-      it.each(['en', 'ko', 'ja', 'zh', 'es'] as const)(
-        'returns true for valid code: %s',
-        code => {
-          expect(isValidLanguageCode(code)).toBe(true);
-        },
-      );
+      it.each(['en', 'ko', 'ja', 'zh', 'es'] as const)('returns true for valid code: %s', code => {
+        expect(isValidLanguageCode(code)).toBe(true);
+      });
 
       it('returns true for all SUPPORTED_LANGUAGE_CODES', () => {
         for (const code of SUPPORTED_LANGUAGE_CODES) {
@@ -34,12 +31,9 @@ describe('keyword.types', () => {
     });
 
     describe('invalid language codes', () => {
-      it.each(['fr', 'de', 'pt', 'ru', 'it'])(
-        'returns false for unsupported code: %s',
-        code => {
-          expect(isValidLanguageCode(code)).toBe(false);
-        },
-      );
+      it.each(['fr', 'de', 'pt', 'ru', 'it'])('returns false for unsupported code: %s', code => {
+        expect(isValidLanguageCode(code)).toBe(false);
+      });
 
       it('returns false for empty string', () => {
         expect(isValidLanguageCode('')).toBe(false);

@@ -70,9 +70,10 @@ describe('IpcStateCache', () => {
 
       const snapshot = cache.getSnapshot();
       expect(snapshot).toHaveLength(2);
-      expect(
-        snapshot.map(m => (m.payload as { agentId: string }).agentId).sort(),
-      ).toEqual(['arch', 'sec']);
+      expect(snapshot.map(m => (m.payload as { agentId: string }).agentId).sort()).toEqual([
+        'arch',
+        'sec',
+      ]);
     });
 
     it('should remove entity on deactivate event', () => {
@@ -116,9 +117,10 @@ describe('IpcStateCache', () => {
 
       const snapshot = cache.getSnapshot();
       expect(snapshot).toHaveLength(1);
-      expect(
-        (snapshot[0].payload as { specialists: string[] }).specialists,
-      ).toEqual(['arch', 'sec']);
+      expect((snapshot[0].payload as { specialists: string[] }).specialists).toEqual([
+        'arch',
+        'sec',
+      ]);
     });
   });
 

@@ -53,10 +53,7 @@ describe('parseAgentProfile', () => {
 
       const result = parseAgentProfile(agentWithFullRole);
 
-      expect(result.role.responsibilities).toEqual([
-        'Write code',
-        'Review code',
-      ]);
+      expect(result.role.responsibilities).toEqual(['Write code', 'Review code']);
     });
 
     it('should accept valid role.type "primary"', () => {
@@ -232,9 +229,7 @@ describe('parseAgentProfile', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(AgentSchemaError);
-        expect((error as AgentSchemaError).message).toContain(
-          'Invalid agent profile',
-        );
+        expect((error as AgentSchemaError).message).toContain('Invalid agent profile');
       }
     });
   });
@@ -249,11 +244,7 @@ describe('parseAgentProfile', () => {
           role: {
             title: 'Solution Architect',
             type: 'primary',
-            expertise: [
-              'System Architecture',
-              'Technology Selection',
-              'Design Patterns',
-            ],
+            expertise: ['System Architecture', 'Technology Selection', 'Design Patterns'],
           },
           skills: {
             required: [{ name: 'superpowers:brainstorming', purpose: 'test' }],
@@ -290,9 +281,7 @@ describe('parseAgentProfile', () => {
           expertise: ['Coding'],
         },
         skills: {
-          required: [
-            { name: 'skill:one', purpose: 'Purpose one', when: 'always' },
-          ],
+          required: [{ name: 'skill:one', purpose: 'Purpose one', when: 'always' }],
           recommended: [{ name: 'skill:two', purpose: 'Purpose two' }],
         },
       };
@@ -328,8 +317,7 @@ describe('parseAgentProfile', () => {
       // Test the core structure of migration-specialist.json
       const migrationSpecialist = {
         name: 'Migration Specialist',
-        description:
-          'Cross-cutting migration coordinator for legacy system modernization',
+        description: 'Cross-cutting migration coordinator for legacy system modernization',
         role: {
           title: 'Migration Engineer',
           type: 'specialist',
@@ -344,9 +332,7 @@ describe('parseAgentProfile', () => {
             'Design and verify rollback procedures',
           ],
           delegation_rules: {
-            to_data_engineer: [
-              'When database schema migrations require up/down methods',
-            ],
+            to_data_engineer: ['When database schema migrations require up/down methods'],
             from_data_engineer: ['When migration orchestration is needed'],
           },
         },
@@ -393,10 +379,7 @@ describe('parseAgentProfile', () => {
 
       const result = parseAgentProfile(agentWithDelegation);
       expect(result.role.delegation_rules).toBeDefined();
-      const delegationRules = result.role.delegation_rules as Record<
-        string,
-        string[]
-      >;
+      const delegationRules = result.role.delegation_rules as Record<string, string[]>;
       expect(delegationRules.to_other_agent).toHaveLength(1);
       expect(delegationRules.from_other_agent).toHaveLength(1);
     });

@@ -34,10 +34,7 @@ const DEFAULT_MAX_LENGTH = 50;
  * generateSlug('') // 'untitled'
  * ```
  */
-export function generateSlug(
-  text: string,
-  maxLength: number = DEFAULT_MAX_LENGTH,
-): string {
+export function generateSlug(text: string, maxLength: number = DEFAULT_MAX_LENGTH): string {
   // Take first N chars and trim
   const truncated = text.slice(0, maxLength).trim();
 
@@ -70,10 +67,7 @@ export function generateSlug(
  * // '2026-01-11-implement-auth-feature'
  * ```
  */
-export function generateContextTitle(
-  text: string,
-  maxLength: number = DEFAULT_MAX_LENGTH,
-): string {
+export function generateContextTitle(text: string, maxLength: number = DEFAULT_MAX_LENGTH): string {
   const datePrefix = new Date().toISOString().slice(0, 10);
   const slug = generateSlug(text, maxLength);
   return `${datePrefix}-${slug}`;

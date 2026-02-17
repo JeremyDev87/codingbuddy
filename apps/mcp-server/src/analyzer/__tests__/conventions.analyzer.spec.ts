@@ -26,10 +26,7 @@ describe('ConventionsAnalyzer', () => {
     });
 
     it('returns default config when .editorconfig does not exist', async () => {
-      const nonExistentPath = path.join(
-        testProjectRoot,
-        '.editorconfig-missing',
-      );
+      const nonExistentPath = path.join(testProjectRoot, '.editorconfig-missing');
       const config = await analyzer.parseEditorConfig(nonExistentPath);
 
       expect(config).toBeDefined();
@@ -88,10 +85,7 @@ indent_size = 8
     });
 
     it('returns default config when .markdownlint.json does not exist', async () => {
-      const nonExistentPath = path.join(
-        testProjectRoot,
-        '.markdownlint-missing.json',
-      );
+      const nonExistentPath = path.join(testProjectRoot, '.markdownlint-missing.json');
       const config = await analyzer.parseMarkdownLint(nonExistentPath);
 
       expect(config).toBeDefined();
@@ -99,10 +93,7 @@ indent_size = 8
     });
 
     it('rejects config with __proto__ prototype pollution attempt', async () => {
-      const maliciousPath = path.join(
-        testProjectRoot,
-        '.markdownlint-malicious.json',
-      );
+      const maliciousPath = path.join(testProjectRoot, '.markdownlint-malicious.json');
       await fs.writeFile(
         maliciousPath,
         JSON.stringify({
@@ -138,10 +129,7 @@ indent_size = 8
     });
 
     it('returns default config when tsconfig.json does not exist', async () => {
-      const nonExistentPath = path.join(
-        testProjectRoot,
-        'tsconfig-missing.json',
-      );
+      const nonExistentPath = path.join(testProjectRoot, 'tsconfig-missing.json');
       const config = await analyzer.parseTypeScriptConfig(nonExistentPath);
 
       expect(config).toBeDefined();
@@ -170,10 +158,7 @@ indent_size = 8
     });
 
     it('rejects config with __proto__ prototype pollution attempt', async () => {
-      const maliciousPath = path.join(
-        testProjectRoot,
-        'tsconfig-malicious.json',
-      );
+      const maliciousPath = path.join(testProjectRoot, 'tsconfig-malicious.json');
       await fs.writeFile(
         maliciousPath,
         JSON.stringify({
@@ -212,10 +197,7 @@ indent_size = 8
     });
 
     it('returns default config when .eslintrc.json does not exist', async () => {
-      const nonExistentPath = path.join(
-        testProjectRoot,
-        '.eslintrc-missing.json',
-      );
+      const nonExistentPath = path.join(testProjectRoot, '.eslintrc-missing.json');
       const config = await analyzer.parseESLintConfig(nonExistentPath);
 
       expect(config).toBeDefined();
@@ -238,10 +220,7 @@ indent_size = 8
     });
 
     it('rejects config with __proto__ prototype pollution attempt', async () => {
-      const maliciousPath = path.join(
-        testProjectRoot,
-        '.eslintrc-malicious.json',
-      );
+      const maliciousPath = path.join(testProjectRoot, '.eslintrc-malicious.json');
       await fs.writeFile(
         maliciousPath,
         JSON.stringify({
@@ -330,8 +309,7 @@ indent_size = 8
 
   describe('analyzeProjectConventions', () => {
     it('analyzes all convention files and returns structured data', async () => {
-      const conventions =
-        await analyzer.analyzeProjectConventions(testProjectRoot);
+      const conventions = await analyzer.analyzeProjectConventions(testProjectRoot);
 
       expect(conventions).toBeDefined();
       expect(conventions.typescript).toBeDefined();
@@ -342,8 +320,7 @@ indent_size = 8
     });
 
     it('returns project root when projectRoot is valid', async () => {
-      const conventions =
-        await analyzer.analyzeProjectConventions(testProjectRoot);
+      const conventions = await analyzer.analyzeProjectConventions(testProjectRoot);
 
       expect(conventions.projectRoot).toBe(testProjectRoot);
     });
@@ -351,19 +328,15 @@ indent_size = 8
     it('throws error when projectRoot does not exist', async () => {
       const invalidPath = path.join(testProjectRoot, 'nonexistent');
 
-      await expect(
-        analyzer.analyzeProjectConventions(invalidPath),
-      ).rejects.toThrow();
+      await expect(analyzer.analyzeProjectConventions(invalidPath)).rejects.toThrow();
     });
 
     it('uses cache for subsequent calls', async () => {
       // First call - should parse files
-      const conventions1 =
-        await analyzer.analyzeProjectConventions(testProjectRoot);
+      const conventions1 = await analyzer.analyzeProjectConventions(testProjectRoot);
 
       // Second call - should return cached result
-      const conventions2 =
-        await analyzer.analyzeProjectConventions(testProjectRoot);
+      const conventions2 = await analyzer.analyzeProjectConventions(testProjectRoot);
 
       // Results should be identical (same object reference from cache)
       expect(conventions2).toBe(conventions1);
@@ -380,8 +353,7 @@ indent_size = 8
 
       try {
         // First call - should parse files
-        const conventions1 =
-          await freshAnalyzer.analyzeProjectConventions(testProjectRoot);
+        const conventions1 = await freshAnalyzer.analyzeProjectConventions(testProjectRoot);
 
         // Modify the tsconfig file (one of the tracked files)
         await fs.writeFile(
@@ -396,8 +368,7 @@ indent_size = 8
         await new Promise(resolve => setTimeout(resolve, 100));
 
         // Second call - should detect mtime change and re-parse
-        const conventions2 =
-          await freshAnalyzer.analyzeProjectConventions(testProjectRoot);
+        const conventions2 = await freshAnalyzer.analyzeProjectConventions(testProjectRoot);
 
         // Results should be different objects (cache was invalidated)
         expect(conventions2).not.toBe(conventions1);
@@ -410,21 +381,15 @@ indent_size = 8
 
     it('handles cache with different project roots', async () => {
       // Create a second test project directory
-      const secondProjectRoot = path.join(
-        __dirname,
-        '__fixtures__',
-        'second-project',
-      );
+      const secondProjectRoot = path.join(__dirname, '__fixtures__', 'second-project');
       await fs.mkdir(secondProjectRoot, { recursive: true });
 
       try {
         // Analyze first project
-        const conventions1 =
-          await analyzer.analyzeProjectConventions(testProjectRoot);
+        const conventions1 = await analyzer.analyzeProjectConventions(testProjectRoot);
 
         // Analyze second project
-        const conventions2 =
-          await analyzer.analyzeProjectConventions(secondProjectRoot);
+        const conventions2 = await analyzer.analyzeProjectConventions(secondProjectRoot);
 
         // Results should be different
         expect(conventions1.projectRoot).toBe(testProjectRoot);
@@ -432,8 +397,7 @@ indent_size = 8
         expect(conventions1).not.toBe(conventions2);
 
         // Re-analyze first project - should hit cache
-        const conventions1Cached =
-          await analyzer.analyzeProjectConventions(testProjectRoot);
+        const conventions1Cached = await analyzer.analyzeProjectConventions(testProjectRoot);
         expect(conventions1Cached).toBe(conventions1);
       } finally {
         // Cleanup
@@ -445,10 +409,7 @@ indent_size = 8
   describe('file size violation tracking (SEC-005)', () => {
     it('should detect frequent violations and log warning', async () => {
       // Create a large file that exceeds 1MB limit
-      const largeTsconfigPath = path.join(
-        testProjectRoot,
-        'tsconfig-huge.json',
-      );
+      const largeTsconfigPath = path.join(testProjectRoot, 'tsconfig-huge.json');
       const largeContent = JSON.stringify({
         compilerOptions: { strict: true },
         // Add padding to exceed 1MB
@@ -505,10 +466,7 @@ indent_size = 8
 
     it('should handle violations for different files independently', async () => {
       // Create two different large files
-      const largeTsconfigPath = path.join(
-        testProjectRoot,
-        'tsconfig-huge2.json',
-      );
+      const largeTsconfigPath = path.join(testProjectRoot, 'tsconfig-huge2.json');
       const largeEslintPath = path.join(testProjectRoot, '.eslintrc-huge.json');
 
       const largeContent = JSON.stringify({
@@ -541,10 +499,7 @@ indent_size = 8
     });
 
     it('should return default config when file exceeds size limit', async () => {
-      const largeMarkdownlintPath = path.join(
-        testProjectRoot,
-        '.markdownlint-huge.json',
-      );
+      const largeMarkdownlintPath = path.join(testProjectRoot, '.markdownlint-huge.json');
       const largeContent = JSON.stringify({
         default: true,
         _padding: 'x'.repeat(2 * 1024 * 1024),

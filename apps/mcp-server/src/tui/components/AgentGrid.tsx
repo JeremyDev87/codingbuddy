@@ -17,11 +17,7 @@ export function AgentGrid({
   const { sortedCategories, agentsByCategory } = useMemo(() => {
     const grouped = groupByCategory(allAgents);
     const categories = Array.from(grouped.keys());
-    const sorted = sortCategoriesByActivity(
-      categories,
-      activeAgentIds,
-      grouped,
-    );
+    const sorted = sortCategoriesByActivity(categories, activeAgentIds, grouped);
     return { sortedCategories: sorted, agentsByCategory: grouped };
   }, [allAgents, activeAgentIds]);
 

@@ -90,11 +90,9 @@ describe('TuiInterceptor', () => {
       eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
       eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, deactivatedHandler);
 
-      await interceptor.intercept(
-        'search_rules',
-        { query: 'test' },
-        async () => ({ content: [{ type: 'text', text: 'result' }] }),
-      );
+      await interceptor.intercept('search_rules', { query: 'test' }, async () => ({
+        content: [{ type: 'text', text: 'result' }],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
 
@@ -115,11 +113,9 @@ describe('TuiInterceptor', () => {
     it('should not emit events for unknown tools', async () => {
       const emitSpy = vi.spyOn(eventBus, 'emit');
 
-      await interceptor.intercept(
-        'completely_unknown_tool',
-        { query: 'test' },
-        async () => ({ content: [{ type: 'text', text: 'result' }] }),
-      );
+      await interceptor.intercept('completely_unknown_tool', { query: 'test' }, async () => ({
+        content: [{ type: 'text', text: 'result' }],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
 
@@ -130,21 +126,17 @@ describe('TuiInterceptor', () => {
       const modeHandler = vi.fn();
       eventBus.on(TUI_EVENTS.MODE_CHANGED, modeHandler);
 
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'PLAN design auth' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                mode: 'PLAN',
-                originalPrompt: 'design auth',
-              }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN design auth' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'PLAN',
+              originalPrompt: 'design auth',
+            }),
+          },
+        ],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
 
@@ -155,24 +147,20 @@ describe('TuiInterceptor', () => {
       const skillHandler = vi.fn();
       eventBus.on(TUI_EVENTS.SKILL_RECOMMENDED, skillHandler);
 
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'PLAN something' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                mode: 'PLAN',
-                included_skills: [
-                  { name: 'writing-plans', reason: 'matched' },
-                  { name: 'tdd', reason: 'test pattern' },
-                ],
-              }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN something' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              mode: 'PLAN',
+              included_skills: [
+                { name: 'writing-plans', reason: 'matched' },
+                { name: 'tdd', reason: 'test pattern' },
+              ],
+            }),
+          },
+        ],
+      }));
 
       await new Promise(resolve => setImmediate(resolve));
 
@@ -223,52 +211,40 @@ describe('TuiInterceptor', () => {
       eventBus.on(TUI_EVENTS.MODE_CHANGED, modeHandler);
 
       // First call: PLAN (from: null since no previous mode)
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'PLAN design auth' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({ mode: 'PLAN' }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN design auth' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ mode: 'PLAN' }),
+          },
+        ],
+      }));
       await new Promise(resolve => setImmediate(resolve));
 
       expect(modeHandler).toHaveBeenCalledWith({ from: null, to: 'PLAN' });
 
       // Second call: ACT (from: PLAN)
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'ACT implement feature' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({ mode: 'ACT' }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'ACT implement feature' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ mode: 'ACT' }),
+          },
+        ],
+      }));
       await new Promise(resolve => setImmediate(resolve));
 
       expect(modeHandler).toHaveBeenCalledWith({ from: 'PLAN', to: 'ACT' });
 
       // Third call: EVAL (from: ACT)
-      await interceptor.intercept(
-        'parse_mode',
-        { prompt: 'EVAL review code' },
-        async () => ({
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({ mode: 'EVAL' }),
-            },
-          ],
-        }),
-      );
+      await interceptor.intercept('parse_mode', { prompt: 'EVAL review code' }, async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ mode: 'EVAL' }),
+          },
+        ],
+      }));
       await new Promise(resolve => setImmediate(resolve));
 
       expect(modeHandler).toHaveBeenCalledWith({ from: 'ACT', to: 'EVAL' });
@@ -284,9 +260,7 @@ describe('TuiInterceptor', () => {
         'get_agent_system_prompt',
         { agentName: 'test', context: { mode: 'EVAL' } },
         async () => ({
-          content: [
-            { type: 'text', text: JSON.stringify({ systemPrompt: 'hi' }) },
-          ],
+          content: [{ type: 'text', text: JSON.stringify({ systemPrompt: 'hi' }) }],
         }),
       );
 

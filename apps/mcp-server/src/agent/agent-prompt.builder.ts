@@ -44,10 +44,7 @@ const MODE_TASK_PREFIXES: Record<Mode, string> = {
 /**
  * Build a complete system prompt for an agent to be executed as a subagent
  */
-export function buildAgentSystemPrompt(
-  agentProfile: AgentProfile,
-  context: AgentContext,
-): string {
+export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: AgentContext): string {
   const sections: string[] = [];
 
   // Agent identity
@@ -116,10 +113,7 @@ Ensure your output is valid JSON that can be parsed programmatically.`);
 /**
  * Build a short task description for Claude Code Task tool
  */
-export function buildTaskDescription(
-  agentProfile: AgentProfile,
-  context: AgentContext,
-): string {
+export function buildTaskDescription(agentProfile: AgentProfile, context: AgentContext): string {
   const agentShortName = agentProfile.name.split(' ')[0]; // e.g., "Security" from "Security Specialist"
   const modePrefix = MODE_TASK_PREFIXES[context.mode];
 

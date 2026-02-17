@@ -21,10 +21,7 @@ describe('extractEventsFromResponse', () => {
     });
 
     it('should extract ACT mode', () => {
-      const result = extractEventsFromResponse(
-        'parse_mode',
-        makeResponse({ mode: 'ACT' }),
-      );
+      const result = extractEventsFromResponse('parse_mode', makeResponse({ mode: 'ACT' }));
       expect(result).toContainEqual({
         event: TUI_EVENTS.MODE_CHANGED,
         payload: { from: null, to: 'ACT' },
@@ -36,20 +33,13 @@ describe('extractEventsFromResponse', () => {
         'parse_mode',
         makeResponse({ originalPrompt: 'hello' }),
       );
-      const modeEvents = result.filter(
-        e => e.event === TUI_EVENTS.MODE_CHANGED,
-      );
+      const modeEvents = result.filter(e => e.event === TUI_EVENTS.MODE_CHANGED);
       expect(modeEvents).toHaveLength(0);
     });
 
     it('should not emit mode:changed if mode is not a string', () => {
-      const result = extractEventsFromResponse(
-        'parse_mode',
-        makeResponse({ mode: 123 }),
-      );
-      const modeEvents = result.filter(
-        e => e.event === TUI_EVENTS.MODE_CHANGED,
-      );
+      const result = extractEventsFromResponse('parse_mode', makeResponse({ mode: 123 }));
+      const modeEvents = result.filter(e => e.event === TUI_EVENTS.MODE_CHANGED);
       expect(modeEvents).toHaveLength(0);
     });
 
@@ -58,9 +48,7 @@ describe('extractEventsFromResponse', () => {
         'parse_mode',
         makeResponse({ mode: 'INVALID_MODE' }),
       );
-      const modeEvents = result.filter(
-        e => e.event === TUI_EVENTS.MODE_CHANGED,
-      );
+      const modeEvents = result.filter(e => e.event === TUI_EVENTS.MODE_CHANGED);
       expect(modeEvents).toHaveLength(0);
     });
   });
@@ -77,9 +65,7 @@ describe('extractEventsFromResponse', () => {
           ],
         }),
       );
-      const skillEvents = result.filter(
-        e => e.event === TUI_EVENTS.SKILL_RECOMMENDED,
-      );
+      const skillEvents = result.filter(e => e.event === TUI_EVENTS.SKILL_RECOMMENDED);
       expect(skillEvents).toHaveLength(2);
       expect(skillEvents[0].payload).toEqual({
         skillName: 'writing-plans',
@@ -99,9 +85,7 @@ describe('extractEventsFromResponse', () => {
           included_skills: [{ name: 'tdd' }],
         }),
       );
-      const skillEvents = result.filter(
-        e => e.event === TUI_EVENTS.SKILL_RECOMMENDED,
-      );
+      const skillEvents = result.filter(e => e.event === TUI_EVENTS.SKILL_RECOMMENDED);
       expect(skillEvents).toHaveLength(1);
       expect(skillEvents[0].payload).toEqual({
         skillName: 'tdd',
@@ -117,9 +101,7 @@ describe('extractEventsFromResponse', () => {
           included_skills: [{ reason: 'no name' }, null, { name: 'valid' }],
         }),
       );
-      const skillEvents = result.filter(
-        e => e.event === TUI_EVENTS.SKILL_RECOMMENDED,
-      );
+      const skillEvents = result.filter(e => e.event === TUI_EVENTS.SKILL_RECOMMENDED);
       expect(skillEvents).toHaveLength(1);
       expect(skillEvents[0].payload).toEqual({
         skillName: 'valid',
@@ -128,13 +110,8 @@ describe('extractEventsFromResponse', () => {
     });
 
     it('should not emit skills if included_skills is missing', () => {
-      const result = extractEventsFromResponse(
-        'parse_mode',
-        makeResponse({ mode: 'PLAN' }),
-      );
-      const skillEvents = result.filter(
-        e => e.event === TUI_EVENTS.SKILL_RECOMMENDED,
-      );
+      const result = extractEventsFromResponse('parse_mode', makeResponse({ mode: 'PLAN' }));
+      const skillEvents = result.filter(e => e.event === TUI_EVENTS.SKILL_RECOMMENDED);
       expect(skillEvents).toHaveLength(0);
     });
 
@@ -157,10 +134,7 @@ describe('extractEventsFromResponse', () => {
       const result = extractEventsFromResponse(
         'prepare_parallel_agents',
         makeResponse({
-          agents: [
-            { agentName: 'security-specialist' },
-            { agentName: 'performance-specialist' },
-          ],
+          agents: [{ agentName: 'security-specialist' }, { agentName: 'performance-specialist' }],
           mode: 'EVAL',
         }),
       );
@@ -236,12 +210,7 @@ describe('extractEventsFromResponse', () => {
 
   describe('other tools', () => {
     it('should return empty array for non-semantic tools', () => {
-      expect(
-        extractEventsFromResponse(
-          'search_rules',
-          makeResponse({ results: [] }),
-        ),
-      ).toEqual([]);
+      expect(extractEventsFromResponse('search_rules', makeResponse({ results: [] }))).toEqual([]);
     });
 
     it('should return empty array for get_agent_system_prompt', () => {
@@ -269,9 +238,7 @@ describe('extractEventsFromResponse', () => {
     });
 
     it('should return empty array for empty content', () => {
-      expect(extractEventsFromResponse('parse_mode', { content: [] })).toEqual(
-        [],
-      );
+      expect(extractEventsFromResponse('parse_mode', { content: [] })).toEqual([]);
     });
   });
 });

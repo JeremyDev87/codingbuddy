@@ -33,11 +33,7 @@ describe('agent-grid.pure', () => {
 
   describe('sortCategoriesByActivity', () => {
     it('should place categories with active agents first', () => {
-      const categories: AgentCategory[] = [
-        'Security',
-        'Architecture',
-        'Testing',
-      ];
+      const categories: AgentCategory[] = ['Security', 'Architecture', 'Testing'];
       const activeIds = new Set(['solution-architect']);
       const agentsByCategory = new Map<AgentCategory, AgentMetadata[]>([
         ['Security', [makeAgent('security-specialist', 'Security')]],
@@ -45,21 +41,13 @@ describe('agent-grid.pure', () => {
         ['Testing', [makeAgent('test-strategy-specialist', 'Testing')]],
       ]);
 
-      const sorted = sortCategoriesByActivity(
-        categories,
-        activeIds,
-        agentsByCategory,
-      );
+      const sorted = sortCategoriesByActivity(categories, activeIds, agentsByCategory);
 
       expect(sorted[0]).toBe('Architecture');
     });
 
     it('should preserve original order for inactive categories', () => {
-      const categories: AgentCategory[] = [
-        'Security',
-        'Architecture',
-        'Testing',
-      ];
+      const categories: AgentCategory[] = ['Security', 'Architecture', 'Testing'];
       const activeIds = new Set<string>();
       const agentsByCategory = new Map<AgentCategory, AgentMetadata[]>([
         ['Security', [makeAgent('security-specialist', 'Security')]],
@@ -67,11 +55,7 @@ describe('agent-grid.pure', () => {
         ['Testing', [makeAgent('test-strategy-specialist', 'Testing')]],
       ]);
 
-      const sorted = sortCategoriesByActivity(
-        categories,
-        activeIds,
-        agentsByCategory,
-      );
+      const sorted = sortCategoriesByActivity(categories, activeIds, agentsByCategory);
 
       expect(sorted).toEqual(['Security', 'Architecture', 'Testing']);
     });

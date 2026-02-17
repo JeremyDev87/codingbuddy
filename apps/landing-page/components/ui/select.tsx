@@ -10,15 +10,11 @@ const Select = ({ ...props }: ComponentProps<typeof SelectPrimitive.Root>) => {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
 };
 
-const SelectGroup = ({
-  ...props
-}: ComponentProps<typeof SelectPrimitive.Group>) => {
+const SelectGroup = ({ ...props }: ComponentProps<typeof SelectPrimitive.Group>) => {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 };
 
-const SelectValue = ({
-  ...props
-}: ComponentProps<typeof SelectPrimitive.Value>) => {
+const SelectValue = ({ ...props }: ComponentProps<typeof SelectPrimitive.Value>) => {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 };
 
@@ -85,10 +81,7 @@ const SelectContent = ({
   );
 };
 
-const SelectLabel = ({
-  className,
-  ...props
-}: ComponentProps<typeof SelectPrimitive.Label>) => {
+const SelectLabel = ({ className, ...props }: ComponentProps<typeof SelectPrimitive.Label>) => {
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
@@ -145,10 +138,7 @@ const SelectScrollUpButton = ({
   return (
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
-      className={cn(
-        'flex cursor-default items-center justify-center py-1',
-        className,
-      )}
+      className={cn('flex cursor-default items-center justify-center py-1', className)}
       {...props}
     >
       <ChevronUpIcon className="size-4" />
@@ -163,10 +153,7 @@ const SelectScrollDownButton = ({
   return (
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
-      className={cn(
-        'flex cursor-default items-center justify-center py-1',
-        className,
-      )}
+      className={cn('flex cursor-default items-center justify-center py-1', className)}
       {...props}
     >
       <ChevronDownIcon className="size-4" />

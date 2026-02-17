@@ -51,9 +51,7 @@ describe('ModelResolverService', () => {
     });
 
     it('should handle config service failure gracefully', async () => {
-      mockConfigService.getSettings = vi
-        .fn()
-        .mockRejectedValue(new Error('Config error'));
+      mockConfigService.getSettings = vi.fn().mockRejectedValue(new Error('Config error'));
 
       const result = await service.resolve();
 

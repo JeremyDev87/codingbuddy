@@ -102,9 +102,7 @@ describe('package.analyzer', () => {
 
       const result = detectFrameworks(deps, {});
 
-      expect(result).toContainEqual(
-        expect.objectContaining({ name: 'Vue', category: 'frontend' }),
-      );
+      expect(result).toContainEqual(expect.objectContaining({ name: 'Vue', category: 'frontend' }));
     });
 
     it('should detect testing frameworks from devDependencies', () => {
@@ -115,9 +113,7 @@ describe('package.analyzer', () => {
       expect(result).toContainEqual(
         expect.objectContaining({ name: 'Vitest', category: 'testing' }),
       );
-      expect(result).toContainEqual(
-        expect.objectContaining({ name: 'Jest', category: 'testing' }),
-      );
+      expect(result).toContainEqual(expect.objectContaining({ name: 'Jest', category: 'testing' }));
     });
 
     it('should detect build tools', () => {
@@ -125,9 +121,7 @@ describe('package.analyzer', () => {
 
       const result = detectFrameworks({}, devDeps);
 
-      expect(result).toContainEqual(
-        expect.objectContaining({ name: 'Vite', category: 'build' }),
-      );
+      expect(result).toContainEqual(expect.objectContaining({ name: 'Vite', category: 'build' }));
     });
 
     it('should return empty array for no recognized frameworks', () => {

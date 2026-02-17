@@ -17,10 +17,7 @@ export const CodeExample = ({ locale }: CodeExampleProps) => {
       className="mx-auto w-full max-w-4xl px-4 py-16"
     >
       <div className="mb-8 text-center">
-        <h2
-          id="code-example-heading"
-          className="text-3xl font-bold tracking-tight"
-        >
+        <h2 id="code-example-heading" className="text-3xl font-bold tracking-tight">
           {t('title')}
         </h2>
         <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
@@ -29,10 +26,7 @@ export const CodeExample = ({ locale }: CodeExampleProps) => {
       <div className="flex flex-col gap-8">
         {codeExamples.map(example => (
           <Tabs key={example.id} defaultValue="before">
-            <TabsList
-              className="w-full justify-start"
-              aria-label={example.label}
-            >
+            <TabsList className="w-full justify-start" aria-label={example.label}>
               <TabsTrigger value="before">{t('before')}</TabsTrigger>
               <TabsTrigger value="after">{t('after')}</TabsTrigger>
             </TabsList>

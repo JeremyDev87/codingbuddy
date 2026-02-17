@@ -28,10 +28,7 @@ export const useCopyToClipboard = (
       clearTimeout(timerRef.current);
       setCopied(true);
       toast.success(copiedLabel);
-      timerRef.current = setTimeout(
-        () => setCopied(false),
-        COPY_FEEDBACK_DURATION_MS,
-      );
+      timerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
     } else {
       toast.error(failedLabel);
     }

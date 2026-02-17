@@ -271,11 +271,7 @@
             "No GitOps workflow",
             "Insufficient monitoring"
           ],
-          "medium": [
-            "Suboptimal module structure",
-            "Missing documentation",
-            "No drift detection"
-          ],
+          "medium": ["Suboptimal module structure", "Missing documentation", "No drift detection"],
           "low": ["Minor optimization opportunities", "Code style improvements"]
         }
       }
@@ -347,11 +343,7 @@
             "Missing health checks",
             "Insufficient testing"
           ],
-          "medium": [
-            "Suboptimal resource sizing",
-            "Missing cost tags",
-            "Incomplete documentation"
-          ],
+          "medium": ["Suboptimal resource sizing", "Missing cost tags", "Incomplete documentation"],
           "low": ["Code style issues", "Minor optimizations"]
         }
       }
@@ -909,9 +901,7 @@
                 },
                 "metadata_check": {
                   "command": "curl -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email",
-                  "success_indicators": [
-                    "Returns GSA email, not node service account"
-                  ]
+                  "success_indicators": ["Returns GSA email, not node service account"]
                 },
                 "failure_indicators": [
                   "Shows compute-developer.gserviceaccount.com (node SA)",

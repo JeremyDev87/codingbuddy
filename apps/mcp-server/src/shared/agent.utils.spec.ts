@@ -13,9 +13,7 @@ describe('normalizeAgentName', () => {
   });
 
   it('should handle multiple spaces', () => {
-    expect(normalizeAgentName('Code  Quality  Specialist')).toBe(
-      'code-quality-specialist',
-    );
+    expect(normalizeAgentName('Code  Quality  Specialist')).toBe('code-quality-specialist');
   });
 
   it('should handle single word names', () => {
@@ -45,9 +43,7 @@ describe('normalizeAgentName', () => {
     });
 
     it('should handle leading and trailing spaces', () => {
-      expect(normalizeAgentName('  Frontend Developer  ')).toBe(
-        'frontend-developer',
-      );
+      expect(normalizeAgentName('  Frontend Developer  ')).toBe('frontend-developer');
     });
 
     it('should handle names with numbers', () => {

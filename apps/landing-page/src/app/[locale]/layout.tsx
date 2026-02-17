@@ -4,11 +4,7 @@ import { notFound } from 'next/navigation';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import type { AbstractIntlMessages } from 'next-intl';
-import {
-  getMessages,
-  getTranslations,
-  setRequestLocale,
-} from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { isValidLocale, SUPPORTED_LOCALES } from '@/lib/locale';
@@ -41,18 +37,10 @@ const CLIENT_NAMESPACES = [
   'quickStart',
 ] as const;
 
-const pickClientMessages = (
-  messages: AbstractIntlMessages,
-): AbstractIntlMessages =>
-  Object.fromEntries(
-    CLIENT_NAMESPACES.filter(ns => ns in messages).map(ns => [
-      ns,
-      messages[ns],
-    ]),
-  );
+const pickClientMessages = (messages: AbstractIntlMessages): AbstractIntlMessages =>
+  Object.fromEntries(CLIENT_NAMESPACES.filter(ns => ns in messages).map(ns => [ns, messages[ns]]));
 
-export const generateStaticParams = () =>
-  SUPPORTED_LOCALES.map(locale => ({ locale }));
+export const generateStaticParams = () => SUPPORTED_LOCALES.map(locale => ({ locale }));
 
 export const generateMetadata = async ({
   params,
@@ -67,9 +55,7 @@ export const generateMetadata = async ({
 
   const t = await getTranslations({ locale, namespace: 'metadata' });
 
-  const languages = Object.fromEntries(
-    SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`]),
-  );
+  const languages = Object.fromEntries(SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`]));
 
   return {
     title: t('title'),
@@ -113,9 +99,7 @@ const LocaleLayout = async ({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -128,10 +112,7 @@ const LocaleLayout = async ({
           >
             Skip to main content
           </a>
-          <NextIntlClientProvider
-            locale={locale}
-            messages={pickClientMessages(messages)}
-          >
+          <NextIntlClientProvider locale={locale} messages={pickClientMessages(messages)}>
             <Header />
             <main id="main-content" className="flex min-h-screen flex-col">
               {children}

@@ -46,10 +46,7 @@ describe('Hero', () => {
   it('should render GitHub button with external link', async () => {
     render(await Hero({ locale: 'en' }));
     const githubLink = screen.getByRole('link', { name: /GitHub/i });
-    expect(githubLink).toHaveAttribute(
-      'href',
-      'https://github.com/JeremyDev87/codingbuddy',
-    );
+    expect(githubLink).toHaveAttribute('href', 'https://github.com/JeremyDev87/codingbuddy');
     expect(githubLink).toHaveAttribute('target', '_blank');
     expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
   });

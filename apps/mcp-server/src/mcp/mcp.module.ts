@@ -61,9 +61,8 @@ const handlers = [
     ...handlers,
     {
       provide: TOOL_HANDLERS,
-      useFactory: (
-        ...handlerInstances: InstanceType<(typeof handlers)[number]>[]
-      ) => handlerInstances,
+      useFactory: (...handlerInstances: InstanceType<(typeof handlers)[number]>[]) =>
+        handlerInstances,
       inject: handlers,
     },
   ],

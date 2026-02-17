@@ -1,10 +1,6 @@
 import { existsSync } from 'fs';
 import * as path from 'path';
-import type {
-  PackageInfo,
-  DetectedFramework,
-  FrameworkCategory,
-} from './analyzer.types';
+import type { PackageInfo, DetectedFramework, FrameworkCategory } from './analyzer.types';
 import { safeReadFile } from '../shared/file.utils';
 
 /**
@@ -122,9 +118,7 @@ interface RawPackageJson {
 /**
  * Parse package.json content into PackageInfo (without framework detection)
  */
-export function parsePackageJson(
-  content: string,
-): Omit<PackageInfo, 'detectedFrameworks'> {
+export function parsePackageJson(content: string): Omit<PackageInfo, 'detectedFrameworks'> {
   const raw: RawPackageJson = JSON.parse(content);
 
   return {
@@ -149,9 +143,7 @@ export function detectFrameworks(
   const detected: DetectedFramework[] = [];
 
   for (const def of FRAMEWORK_DEFINITIONS) {
-    const version = def.devOnly
-      ? devDependencies[def.packageName]
-      : allDeps[def.packageName];
+    const version = def.devOnly ? devDependencies[def.packageName] : allDeps[def.packageName];
 
     if (version) {
       detected.push({
@@ -171,9 +163,7 @@ export function detectFrameworks(
  * @param projectRoot - Project root directory
  * @returns PackageInfo or null if package.json not found
  */
-export async function analyzePackage(
-  projectRoot: string,
-): Promise<PackageInfo | null> {
+export async function analyzePackage(projectRoot: string): Promise<PackageInfo | null> {
   const packagePath = path.join(projectRoot, 'package.json');
 
   if (!existsSync(packagePath)) {
@@ -188,10 +178,7 @@ export async function analyzePackage(
 
   try {
     const parsed = parsePackageJson(content);
-    const frameworks = detectFrameworks(
-      parsed.dependencies,
-      parsed.devDependencies,
-    );
+    const frameworks = detectFrameworks(parsed.dependencies, parsed.devDependencies);
 
     return {
       ...parsed,

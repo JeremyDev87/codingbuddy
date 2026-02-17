@@ -1,9 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import type {
-  WidgetProps,
-  CodeExampleProps,
-  QuickStartStep,
-} from '../../types/widgets';
+import type { WidgetProps, CodeExampleProps, QuickStartStep } from '../../types/widgets';
 
 describe('Widget types', () => {
   test('WidgetProps has locale property', () => {

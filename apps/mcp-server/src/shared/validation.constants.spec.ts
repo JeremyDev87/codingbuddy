@@ -294,10 +294,7 @@ describe('extractOptionalString', () => {
 
 describe('extractStringArray', () => {
   it('extracts string array', () => {
-    expect(extractStringArray({ files: ['a', 'b'] }, 'files')).toEqual([
-      'a',
-      'b',
-    ]);
+    expect(extractStringArray({ files: ['a', 'b'] }, 'files')).toEqual(['a', 'b']);
     expect(extractStringArray({ files: [] }, 'files')).toEqual([]);
   });
 
@@ -505,28 +502,19 @@ describe('AccessibleErrorResponse', () => {
     const error: AccessibleErrorResponse = {
       code: 'FILE_SIZE_EXCEEDED',
       userMessage: 'The file is too large. Maximum size is 1 MB.',
-      technicalMessage:
-        'File size 2097152 bytes exceeds maximum of 1048576 bytes',
+      technicalMessage: 'File size 2097152 bytes exceeds maximum of 1048576 bytes',
       accessibilityHints: {
         role: 'alert',
         live: 'assertive',
         level: 1,
         announce: true,
       },
-      suggestions: [
-        'Use a smaller file',
-        'Compress the file',
-        'Split into multiple files',
-      ],
+      suggestions: ['Use a smaller file', 'Compress the file', 'Split into multiple files'],
     };
 
     expect(error.code).toBe('FILE_SIZE_EXCEEDED');
-    expect(error.userMessage).toBe(
-      'The file is too large. Maximum size is 1 MB.',
-    );
-    expect(error.technicalMessage).toBe(
-      'File size 2097152 bytes exceeds maximum of 1048576 bytes',
-    );
+    expect(error.userMessage).toBe('The file is too large. Maximum size is 1 MB.');
+    expect(error.technicalMessage).toBe('File size 2097152 bytes exceeds maximum of 1048576 bytes');
     expect(error.accessibilityHints).toBeDefined();
     expect(error.accessibilityHints?.role).toBe('alert');
     expect(error.accessibilityHints?.live).toBe('assertive');
@@ -544,9 +532,7 @@ describe('AccessibleErrorResponse', () => {
 
     expect(error.code).toBe('VALIDATION_FAILED');
     expect(error.userMessage).toBe('The input is invalid.');
-    expect(error.technicalMessage).toBe(
-      'Validation failed: email field is required',
-    );
+    expect(error.technicalMessage).toBe('Validation failed: email field is required');
     expect(error.accessibilityHints).toBeUndefined();
     expect(error.suggestions).toBeUndefined();
   });

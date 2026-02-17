@@ -1,7 +1,4 @@
-import {
-  truncateRuleContent,
-  shouldIncludeContent,
-} from './rules-content.utils';
+import { truncateRuleContent, shouldIncludeContent } from './rules-content.utils';
 
 describe('rules-content.utils', () => {
   describe('shouldIncludeContent', () => {
@@ -124,10 +121,7 @@ ${'y'.repeat(1900)}`;
         const result = truncateRuleContent(content, 'standard');
 
         // Should not end with whitespace before truncation notice
-        const withoutNotice = result.replace(
-          /\n\n_\[Content truncated.*\]_$/,
-          '',
-        );
+        const withoutNotice = result.replace(/\n\n_\[Content truncated.*\]_$/, '');
         expect(withoutNotice).not.toMatch(/\s$/);
       });
 

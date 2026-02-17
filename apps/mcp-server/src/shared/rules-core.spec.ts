@@ -17,10 +17,8 @@ import type { FileSystemDeps } from './rules-core';
 
 function makeDeps(overrides?: Partial<FileSystemDeps>): FileSystemDeps {
   return {
-    readFile:
-      overrides?.readFile ?? vi.fn().mockRejectedValue(new Error('not mocked')),
-    readdir:
-      overrides?.readdir ?? vi.fn().mockRejectedValue(new Error('not mocked')),
+    readFile: overrides?.readFile ?? vi.fn().mockRejectedValue(new Error('not mocked')),
+    readdir: overrides?.readdir ?? vi.fn().mockRejectedValue(new Error('not mocked')),
   };
 }
 
@@ -67,13 +65,8 @@ describe('resolveRulesDir', () => {
 
     it('searches dev fallback candidates when neither option is set', () => {
       // The second candidate is ../../../packages/rules/.ai-rules
-      const secondCandidate = path.resolve(
-        dirname,
-        '../../../packages/rules/.ai-rules',
-      );
-      const existsSync = vi
-        .fn()
-        .mockImplementation((p: string) => p === secondCandidate);
+      const secondCandidate = path.resolve(dirname, '../../../packages/rules/.ai-rules');
+      const existsSync = vi.fn().mockImplementation((p: string) => p === secondCandidate);
 
       const result = resolveRulesDir(dirname, { existsSync });
       expect(result).toBe(secondCandidate);
@@ -82,34 +75,26 @@ describe('resolveRulesDir', () => {
     it('returns first candidate as fallback when no candidate exists', () => {
       const existsSync = vi.fn().mockReturnValue(false);
       const result = resolveRulesDir(dirname, { existsSync });
-      expect(result).toBe(
-        path.resolve(dirname, '../../../../packages/rules/.ai-rules'),
-      );
+      expect(result).toBe(path.resolve(dirname, '../../../../packages/rules/.ai-rules'));
     });
   });
 
   describe('no options provided', () => {
     it('returns first candidate when no options given', () => {
       const result = resolveRulesDir(dirname);
-      expect(result).toBe(
-        path.resolve(dirname, '../../../../packages/rules/.ai-rules'),
-      );
+      expect(result).toBe(path.resolve(dirname, '../../../../packages/rules/.ai-rules'));
     });
 
     it('returns first candidate when empty options given', () => {
       const result = resolveRulesDir(dirname, {});
-      expect(result).toBe(
-        path.resolve(dirname, '../../../../packages/rules/.ai-rules'),
-      );
+      expect(result).toBe(path.resolve(dirname, '../../../../packages/rules/.ai-rules'));
     });
   });
 
   describe('existsSync behavior', () => {
     it('returns first existing candidate', () => {
       const thirdCandidate = path.resolve(dirname, '../../../../.ai-rules');
-      const existsSync = vi
-        .fn()
-        .mockImplementation((p: string) => p === thirdCandidate);
+      const existsSync = vi.fn().mockImplementation((p: string) => p === thirdCandidate);
 
       const result = resolveRulesDir(dirname, { existsSync });
       expect(result).toBe(thirdCandidate);
@@ -155,10 +140,7 @@ describe('readRuleContent', () => {
 
     const result = await readRuleContent(rulesDir, 'rules/core.md', deps);
     expect(result).toBe('file content');
-    expect(deps.readFile).toHaveBeenCalledWith(
-      path.join(rulesDir, 'rules/core.md'),
-      'utf-8',
-    );
+    expect(deps.readFile).toHaveBeenCalledWith(path.join(rulesDir, 'rules/core.md'), 'utf-8');
   });
 
   it('throws on path traversal attempt', async () => {
@@ -166,9 +148,9 @@ describe('readRuleContent', () => {
       readFile: vi.fn().mockResolvedValue('should not reach'),
     });
 
-    await expect(
-      readRuleContent(rulesDir, '../../../etc/passwd', deps),
-    ).rejects.toThrow('Access denied: Invalid path');
+    await expect(readRuleContent(rulesDir, '../../../etc/passwd', deps)).rejects.toThrow(
+      'Access denied: Invalid path',
+    );
 
     expect(deps.readFile).not.toHaveBeenCalled();
   });
@@ -178,9 +160,9 @@ describe('readRuleContent', () => {
       readFile: vi.fn().mockRejectedValue(new Error('ENOENT')),
     });
 
-    await expect(
-      readRuleContent(rulesDir, 'rules/missing.md', deps),
-    ).rejects.toThrow('Failed to read rule file: rules/missing.md');
+    await expect(readRuleContent(rulesDir, 'rules/missing.md', deps)).rejects.toThrow(
+      'Failed to read rule file: rules/missing.md',
+    );
   });
 
   it('rejects null byte injection', async () => {
@@ -188,9 +170,9 @@ describe('readRuleContent', () => {
       readFile: vi.fn().mockResolvedValue('content'),
     });
 
-    await expect(
-      readRuleContent(rulesDir, 'rules/test\x00.md', deps),
-    ).rejects.toThrow('Access denied: Invalid path');
+    await expect(readRuleContent(rulesDir, 'rules/test\x00.md', deps)).rejects.toThrow(
+      'Access denied: Invalid path',
+    );
   });
 
   it('accepts nested relative paths', async () => {
@@ -198,11 +180,7 @@ describe('readRuleContent', () => {
       readFile: vi.fn().mockResolvedValue('nested content'),
     });
 
-    const result = await readRuleContent(
-      rulesDir,
-      'agents/deep/file.json',
-      deps,
-    );
+    const result = await readRuleContent(rulesDir, 'agents/deep/file.json', deps);
     expect(result).toBe('nested content');
   });
 });
@@ -218,11 +196,7 @@ describe('listAgentNames', () => {
     const deps = makeDeps({
       readdir: vi
         .fn()
-        .mockResolvedValue([
-          'frontend-developer.json',
-          'security-specialist.json',
-          'README.md',
-        ]),
+        .mockResolvedValue(['frontend-developer.json', 'security-specialist.json', 'README.md']),
     });
 
     const result = await listAgentNames(rulesDir, deps);
@@ -240,14 +214,7 @@ describe('listAgentNames', () => {
 
   it('filters out non-json files', async () => {
     const deps = makeDeps({
-      readdir: vi
-        .fn()
-        .mockResolvedValue([
-          'agent.json',
-          'notes.txt',
-          'config.yaml',
-          '.gitkeep',
-        ]),
+      readdir: vi.fn().mockResolvedValue(['agent.json', 'notes.txt', 'config.yaml', '.gitkeep']),
     });
 
     const result = await listAgentNames(rulesDir, deps);
@@ -297,9 +264,7 @@ describe('loadAgentProfile', () => {
       readFile: vi.fn().mockResolvedValue('not valid json'),
     });
 
-    await expect(
-      loadAgentProfile(rulesDir, 'bad-agent', deps),
-    ).rejects.toThrow();
+    await expect(loadAgentProfile(rulesDir, 'bad-agent', deps)).rejects.toThrow();
   });
 
   it('throws "Invalid agent profile" on schema validation failure', async () => {
@@ -363,9 +328,7 @@ describe('searchInRuleFiles', () => {
     const deps = makeDeps({
       readFile: vi.fn().mockImplementation((filePath: string) => {
         if (filePath.includes('core.md')) {
-          return Promise.resolve(
-            '# Core Rules\nTDD approach\nSolid principles',
-          );
+          return Promise.resolve('# Core Rules\nTDD approach\nSolid principles');
         }
         if (filePath.includes('project.md')) {
           return Promise.resolve('# Project\nTDD is important\nArchitecture');
@@ -393,12 +356,7 @@ describe('searchInRuleFiles', () => {
       readFile: vi.fn().mockResolvedValue('UPPERCASE\nlowercase\nMiXeD'),
     });
 
-    const results = await searchInRuleFiles(
-      rulesDir,
-      'uppercase',
-      ['file.md'],
-      deps,
-    );
+    const results = await searchInRuleFiles(rulesDir, 'uppercase', ['file.md'], deps);
 
     expect(results).toHaveLength(1);
     expect(results[0].matches).toEqual(['Line 1: UPPERCASE']);
@@ -475,22 +433,12 @@ describe('searchInRuleFiles', () => {
 
   it('includes line numbers in matches', async () => {
     const deps = makeDeps({
-      readFile: vi
-        .fn()
-        .mockResolvedValue('line1\nfind me\nline3\nfind me again'),
+      readFile: vi.fn().mockResolvedValue('line1\nfind me\nline3\nfind me again'),
     });
 
-    const results = await searchInRuleFiles(
-      rulesDir,
-      'find me',
-      ['test.md'],
-      deps,
-    );
+    const results = await searchInRuleFiles(rulesDir, 'find me', ['test.md'], deps);
 
-    expect(results[0].matches).toEqual([
-      'Line 2: find me',
-      'Line 4: find me again',
-    ]);
+    expect(results[0].matches).toEqual(['Line 2: find me', 'Line 4: find me again']);
     expect(results[0].score).toBe(2);
   });
 });
@@ -552,9 +500,7 @@ description: Systematic debugging
 
   it('skips invalid skills', async () => {
     const deps = makeDeps({
-      readdir: vi
-        .fn()
-        .mockResolvedValue([{ name: 'bad-skill', isDirectory: () => true }]),
+      readdir: vi.fn().mockResolvedValue([{ name: 'bad-skill', isDirectory: () => true }]),
       readFile: vi.fn().mockResolvedValue('not valid skill md'),
     });
 
@@ -564,9 +510,7 @@ description: Systematic debugging
 
   it('skips skills with missing SKILL.md', async () => {
     const deps = makeDeps({
-      readdir: vi
-        .fn()
-        .mockResolvedValue([{ name: 'missing-file', isDirectory: () => true }]),
+      readdir: vi.fn().mockResolvedValue([{ name: 'missing-file', isDirectory: () => true }]),
       readFile: vi.fn().mockRejectedValue(new Error('ENOENT')),
     });
 
@@ -646,9 +590,7 @@ describe('loadSkill', () => {
 
   it('throws on empty name', async () => {
     const deps = makeDeps();
-    await expect(loadSkill(rulesDir, '', deps)).rejects.toThrow(
-      'Invalid skill name format: ',
-    );
+    await expect(loadSkill(rulesDir, '', deps)).rejects.toThrow('Invalid skill name format: ');
   });
 
   it('accepts valid hyphenated names', async () => {
@@ -706,8 +648,6 @@ describe('loadSkill', () => {
     // However, the regex /^[a-z0-9-]+$/ rejects paths with slashes and dots
     // So we verify that the regex is the first line of defense
     const deps = makeDeps();
-    await expect(loadSkill(rulesDir, '../etc', deps)).rejects.toThrow(
-      'Invalid skill name format',
-    );
+    await expect(loadSkill(rulesDir, '../etc', deps)).rejects.toThrow('Invalid skill name format');
   });
 });

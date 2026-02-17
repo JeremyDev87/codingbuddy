@@ -117,9 +117,7 @@ export class McpController implements OnModuleDestroy {
         'Failed to establish SSE connection',
         error instanceof Error ? error.stack : String(error),
       );
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send('Failed to establish SSE connection');
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Failed to establish SSE connection');
     }
   }
 
@@ -142,10 +140,7 @@ export class McpController implements OnModuleDestroy {
    * ```
    */
   @Post('/messages')
-  async handleMessages(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
+  async handleMessages(@Req() req: Request, @Res() res: Response): Promise<void> {
     if (!this.connection) {
       res.status(HttpStatus.BAD_REQUEST).send('No active SSE connection');
       return;

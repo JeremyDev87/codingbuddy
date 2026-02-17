@@ -45,10 +45,7 @@ export interface ExtractModeResult {
  * @param defaultMode - Mode to use when no keyword is detected
  * @returns The resolved mode, the prompt text after the keyword, and any warnings
  */
-export function extractModeFromPrompt(
-  prompt: string,
-  defaultMode: Mode,
-): ExtractModeResult {
+export function extractModeFromPrompt(prompt: string, defaultMode: Mode): ExtractModeResult {
   const warnings: string[] = [];
   const trimmed = prompt.trim();
 
@@ -70,8 +67,7 @@ export function extractModeFromPrompt(
   const isEnglishKeyword = KEYWORDS.includes(keywordUpper as Mode);
   // Check localized keywords (exact match for CJK, case-insensitive for Spanish)
   const localizedMode =
-    LOCALIZED_KEYWORD_MAP[keywordCandidate] ??
-    LOCALIZED_KEYWORD_MAP[keywordUpper];
+    LOCALIZED_KEYWORD_MAP[keywordCandidate] ?? LOCALIZED_KEYWORD_MAP[keywordUpper];
 
   if (isEnglishKeyword) {
     const mode = keywordUpper as Mode;
@@ -116,11 +112,7 @@ export function getDefaultModeConfig(): KeywordModesConfig {
         description: 'Actual task execution phase',
         instructions:
           'Follow Red-Green-Refactor cycle. Implement minimally then improve incrementally. Verify quality standards.',
-        rules: [
-          'rules/core.md',
-          'rules/project.md',
-          'rules/augmented-coding.md',
-        ],
+        rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       },
       EVAL: {
         description: 'Result review and assessment phase',
@@ -132,11 +124,7 @@ export function getDefaultModeConfig(): KeywordModesConfig {
         description: 'Autonomous PLAN → ACT → EVAL cycle',
         instructions:
           'Execute autonomous iteration cycle. Run PLAN → ACT → EVAL until quality achieved or max iterations reached. Self-correct based on EVAL feedback.',
-        rules: [
-          'rules/core.md',
-          'rules/project.md',
-          'rules/augmented-coding.md',
-        ],
+        rules: ['rules/core.md', 'rules/project.md', 'rules/augmented-coding.md'],
       },
     },
     defaultMode: 'PLAN',
@@ -186,10 +174,7 @@ export async function loadRulesForMode(
 /**
  * Check whether the first word of the remaining prompt is also a keyword.
  */
-function checkForMultipleKeywords(
-  originalPrompt: string,
-  warnings: string[],
-): void {
+function checkForMultipleKeywords(originalPrompt: string, warnings: string[]): void {
   if (!originalPrompt) return;
 
   const firstWordMatch = originalPrompt.match(/^([^\s:：]+)/);
@@ -211,10 +196,7 @@ function checkForMultipleKeywords(
 /**
  * Warn when the prompt body after the keyword is empty.
  */
-function checkForEmptyContent(
-  originalPrompt: string,
-  warnings: string[],
-): void {
+function checkForEmptyContent(originalPrompt: string, warnings: string[]): void {
   if (originalPrompt === '') {
     warnings.push('No prompt content after keyword');
   }

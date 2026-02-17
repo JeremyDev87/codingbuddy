@@ -8,17 +8,9 @@ import type { ParseModeResult } from '../keyword/keyword.types';
 import { loadConfig } from '../config/config.loader';
 import type { CodingBuddyConfig } from '../config/config.schema';
 import { getPackageVersion } from '../shared/version.utils';
-import {
-  validateQuery,
-  validatePrompt,
-  validateAgentName,
-} from '../shared/validation.constants';
+import { validateQuery, validatePrompt, validateAgentName } from '../shared/validation.constants';
 import { sanitizeError } from '../shared/error.utils';
-import {
-  createJsonResponse,
-  createErrorResponse,
-  type ToolResponse,
-} from './response.utils';
+import { createJsonResponse, createErrorResponse, type ToolResponse } from './response.utils';
 import {
   resolveRulesDir,
   readRuleContent,
@@ -144,9 +136,7 @@ export class McpServerlessService {
         description:
           'Parse workflow mode keyword from prompt and return mode-specific rules with project language setting',
         inputSchema: {
-          prompt: z
-            .string()
-            .describe('User prompt that may start with PLAN/ACT/EVAL keyword'),
+          prompt: z.string().describe('User prompt that may start with PLAN/ACT/EVAL keyword'),
         },
       },
       async ({ prompt }): Promise<ToolResponse> => {
@@ -179,9 +169,7 @@ export class McpServerlessService {
           projectRoot: z
             .string()
             .optional()
-            .describe(
-              'Project root directory (defaults to current working directory)',
-            ),
+            .describe('Project root directory (defaults to current working directory)'),
         },
       },
       async ({ projectRoot }): Promise<ToolResponse> => {
@@ -238,15 +226,11 @@ export class McpServerlessService {
       const results = await this.searchRules(query);
       return createJsonResponse(results);
     } catch (error) {
-      return createErrorResponse(
-        `Failed to search rules: ${sanitizeError(error)}`,
-      );
+      return createErrorResponse(`Failed to search rules: ${sanitizeError(error)}`);
     }
   }
 
-  private async handleGetAgentDetails(
-    agentName: string,
-  ): Promise<ToolResponse> {
+  private async handleGetAgentDetails(agentName: string): Promise<ToolResponse> {
     // Validate input
     const validation = validateAgentName(agentName);
     if (!validation.valid) {
@@ -277,9 +261,7 @@ export class McpServerlessService {
       };
       return createJsonResponse(response);
     } catch (error) {
-      return createErrorResponse(
-        `Failed to parse mode: ${sanitizeError(error)}`,
-      );
+      return createErrorResponse(`Failed to parse mode: ${sanitizeError(error)}`);
     }
   }
 
@@ -288,9 +270,7 @@ export class McpServerlessService {
       const settings = await this.loadProjectSettings();
       return createJsonResponse(settings);
     } catch (error) {
-      return createErrorResponse(
-        `Failed to get project config: ${sanitizeError(error)}`,
-      );
+      return createErrorResponse(`Failed to get project config: ${sanitizeError(error)}`);
     }
   }
 
@@ -299,9 +279,7 @@ export class McpServerlessService {
       const skills = await listSkillSummaries(this.rulesDir);
       return createJsonResponse(skills);
     } catch (error) {
-      return createErrorResponse(
-        `Failed to list skills: ${sanitizeError(error)}`,
-      );
+      return createErrorResponse(`Failed to list skills: ${sanitizeError(error)}`);
     }
   }
 
@@ -310,17 +288,12 @@ export class McpServerlessService {
       const skill = await loadSkill(this.rulesDir, skillName);
       return createJsonResponse(skill);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : `Skill '${skillName}' not found.`;
+      const message = error instanceof Error ? error.message : `Skill '${skillName}' not found.`;
       return createErrorResponse(message);
     }
   }
 
-  private async handleSuggestConfigUpdates(
-    projectRoot?: string,
-  ): Promise<ToolResponse> {
+  private async handleSuggestConfigUpdates(projectRoot?: string): Promise<ToolResponse> {
     try {
       const root = projectRoot ?? this.projectRoot;
 
@@ -330,9 +303,7 @@ export class McpServerlessService {
       const detectedStack: string[] = [];
 
       if (existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(
-          await fs.readFile(packageJsonPath, 'utf-8'),
-        );
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
         const allDeps = {
           ...packageJson.dependencies,
           ...packageJson.devDependencies,
@@ -368,22 +339,15 @@ export class McpServerlessService {
       const suggestions: string[] = [];
 
       // Check for missing tech stack
-      if (
-        !currentConfig.techStack ||
-        Object.keys(currentConfig.techStack).length === 0
-      ) {
+      if (!currentConfig.techStack || Object.keys(currentConfig.techStack).length === 0) {
         if (detectedStack.length > 0) {
-          suggestions.push(
-            `Add detected technologies to config: ${detectedStack.join(', ')}`,
-          );
+          suggestions.push(`Add detected technologies to config: ${detectedStack.join(', ')}`);
         }
       }
 
       // Check for missing language setting
       if (!currentConfig.language) {
-        suggestions.push(
-          'Consider adding a language setting (e.g., "ko" or "en")',
-        );
+        suggestions.push('Consider adding a language setting (e.g., "ko" or "en")');
       }
 
       return createJsonResponse({
@@ -393,9 +357,7 @@ export class McpServerlessService {
         needsUpdate: suggestions.length > 0,
       });
     } catch (error) {
-      return createErrorResponse(
-        `Failed to suggest config updates: ${sanitizeError(error)}`,
-      );
+      return createErrorResponse(`Failed to suggest config updates: ${sanitizeError(error)}`);
     }
   }
 
@@ -421,10 +383,7 @@ export class McpServerlessService {
 
   private async parseMode(prompt: string): Promise<ParseModeResult> {
     const config = getDefaultModeConfig();
-    const { mode, originalPrompt, warnings } = extractModeFromPrompt(
-      prompt,
-      config.defaultMode,
-    );
+    const { mode, originalPrompt, warnings } = extractModeFromPrompt(prompt, config.defaultMode);
 
     const modeConfig = config.modes[mode];
     const rules = await loadRulesForMode(mode, config, (rulePath: string) =>

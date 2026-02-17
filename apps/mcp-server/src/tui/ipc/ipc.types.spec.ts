@@ -40,16 +40,12 @@ describe('IpcMessage serialization', () => {
   });
 
   it('should return null for object missing type field', () => {
-    const result = deserializeIpcMessage(
-      JSON.stringify({ payload: {} }) + '\n',
-    );
+    const result = deserializeIpcMessage(JSON.stringify({ payload: {} }) + '\n');
     expect(result).toBeNull();
   });
 
   it('should return null for object missing payload field', () => {
-    const result = deserializeIpcMessage(
-      JSON.stringify({ type: 'agent:activated' }) + '\n',
-    );
+    const result = deserializeIpcMessage(JSON.stringify({ type: 'agent:activated' }) + '\n');
     expect(result).toBeNull();
   });
 
@@ -60,9 +56,7 @@ describe('IpcMessage serialization', () => {
 
   it('should generate socket path from PID', () => {
     const socketPath = getSocketPath(12345);
-    expect(socketPath).toBe(
-      path.join(getSocketDir(), 'codingbuddy-12345.sock'),
-    );
+    expect(socketPath).toBe(path.join(getSocketDir(), 'codingbuddy-12345.sock'));
   });
 
   it('should return instances file path under home dir', () => {

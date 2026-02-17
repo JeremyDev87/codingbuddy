@@ -404,9 +404,7 @@ describe('init.command', () => {
     });
 
     it('should fail if config exists and force is false', async () => {
-      mockFindExistingConfig.mockResolvedValue(
-        '/project/codingbuddy.config.json',
-      );
+      mockFindExistingConfig.mockResolvedValue('/project/codingbuddy.config.json');
 
       const options: InitOptions = {
         projectRoot: '/project',
@@ -420,9 +418,7 @@ describe('init.command', () => {
     });
 
     it('should overwrite if config exists and force is true', async () => {
-      mockFindExistingConfig.mockResolvedValue(
-        '/project/codingbuddy.config.json',
-      );
+      mockFindExistingConfig.mockResolvedValue('/project/codingbuddy.config.json');
 
       const options: InitOptions = {
         projectRoot: '/project',

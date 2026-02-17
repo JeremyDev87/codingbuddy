@@ -37,19 +37,13 @@ describe('PrimaryAgentResolver', () => {
         'ai-ml-engineer',
       ]);
 
-    resolver = new PrimaryAgentResolver(
-      mockGetProjectConfig,
-      mockListPrimaryAgents,
-    );
+    resolver = new PrimaryAgentResolver(mockGetProjectConfig, mockListPrimaryAgents);
   });
 
   describe('PLAN mode agent resolution', () => {
     describe('architecture-focused prompts', () => {
       it('returns solution-architect when prompt contains "아키텍처"', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          '인증 시스템 아키텍처를 설계해줘',
-        );
+        const result = await resolver.resolve('PLAN', '인증 시스템 아키텍처를 설계해줘');
 
         expect(result.agentName).toBe('solution-architect');
         expect(result.source).toBe('intent');
@@ -67,20 +61,14 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns solution-architect when prompt contains "시스템 설계"', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          '새로운 결제 시스템 설계가 필요해',
-        );
+        const result = await resolver.resolve('PLAN', '새로운 결제 시스템 설계가 필요해');
 
         expect(result.agentName).toBe('solution-architect');
         expect(result.source).toBe('intent');
       });
 
       it('returns solution-architect when prompt contains "API 설계"', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          'REST API 설계를 진행해줘',
-        );
+        const result = await resolver.resolve('PLAN', 'REST API 설계를 진행해줘');
 
         expect(result.agentName).toBe('solution-architect');
         expect(result.source).toBe('intent');
@@ -99,10 +87,7 @@ describe('PrimaryAgentResolver', () => {
 
     describe('planning-focused prompts', () => {
       it('returns technical-planner when prompt contains "구현 계획"', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          '로그인 기능 구현 계획을 작성해줘',
-        );
+        const result = await resolver.resolve('PLAN', '로그인 기능 구현 계획을 작성해줘');
 
         expect(result.agentName).toBe('technical-planner');
         expect(result.source).toBe('intent');
@@ -136,10 +121,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns technical-planner when prompt contains "개발 계획"', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          '새 기능 개발 계획을 세워줘',
-        );
+        const result = await resolver.resolve('PLAN', '새 기능 개발 계획을 세워줘');
 
         expect(result.agentName).toBe('technical-planner');
         expect(result.source).toBe('intent');
@@ -171,10 +153,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns solution-architect when both 아키텍처 and 계획 present', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          '시스템 아키텍처 설계 계획을 세워줘',
-        );
+        const result = await resolver.resolve('PLAN', '시스템 아키텍처 설계 계획을 세워줘');
 
         expect(result.agentName).toBe('solution-architect');
         expect(result.source).toBe('intent');
@@ -193,10 +172,7 @@ describe('PrimaryAgentResolver', () => {
 
     describe('explicit PLAN agent request', () => {
       it('returns solution-architect when explicitly requested', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          'solution-architect로 작업해 새 기능 설계',
-        );
+        const result = await resolver.resolve('PLAN', 'solution-architect로 작업해 새 기능 설계');
 
         expect(result.agentName).toBe('solution-architect');
         expect(result.source).toBe('explicit');
@@ -213,15 +189,10 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('ignores ACT agent explicit requests in PLAN mode', async () => {
-        const result = await resolver.resolve(
-          'PLAN',
-          'backend-developer로 작업해 새 API 만들어',
-        );
+        const result = await resolver.resolve('PLAN', 'backend-developer로 작업해 새 API 만들어');
 
         // Should use PLAN agent, not backend-developer
-        expect(['solution-architect', 'technical-planner']).toContain(
-          result.agentName,
-        );
+        expect(['solution-architect', 'technical-planner']).toContain(result.agentName);
         expect(result.source).not.toBe('explicit');
       });
     });
@@ -242,10 +213,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns technical-planner when solution-architect unavailable', async () => {
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'technical-planner',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'technical-planner']);
 
         const result = await resolver.resolve('PLAN', '새 기능 만들어');
 
@@ -271,10 +239,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns tooling-engineer for codingbuddy.config.json prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'codingbuddy.config.json 수정해',
-        );
+        const result = await resolver.resolve('ACT', 'codingbuddy.config.json 수정해');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.source).toBe('intent');
@@ -282,10 +247,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns tooling-engineer for tsconfig.json prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'tsconfig.json 설정 변경해줘',
-        );
+        const result = await resolver.resolve('ACT', 'tsconfig.json 설정 변경해줘');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.source).toBe('intent');
@@ -299,20 +261,14 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns tooling-engineer for package.json prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'package.json 의존성 업데이트해',
-        );
+        const result = await resolver.resolve('ACT', 'package.json 의존성 업데이트해');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.source).toBe('intent');
       });
 
       it('returns tooling-engineer for vite.config prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'vite.config.ts 최적화해줘',
-        );
+        const result = await resolver.resolve('ACT', 'vite.config.ts 최적화해줘');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.source).toBe('intent');
@@ -333,10 +289,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns tooling-engineer for next.config.js prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'next.config.js 설정 변경',
-        );
+        const result = await resolver.resolve('ACT', 'next.config.js 설정 변경');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.source).toBe('intent');
@@ -351,10 +304,7 @@ describe('PrimaryAgentResolver', () => {
 
       it('prioritizes tooling-engineer over frontend-developer for config files', async () => {
         // eslint.config.ts는 .ts 파일이지만 tooling이 처리해야 함
-        const result = await resolver.resolve(
-          'ACT',
-          'eslint.config.ts 수정해줘',
-        );
+        const result = await resolver.resolve('ACT', 'eslint.config.ts 수정해줘');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.agentName).not.toBe('frontend-developer');
@@ -393,10 +343,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns data-engineer for Korean "데이터베이스 설계" prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          '데이터베이스 스키마 설계해줘',
-        );
+        const result = await resolver.resolve('ACT', '데이터베이스 스키마 설계해줘');
 
         expect(result.agentName).toBe('data-engineer');
         expect(result.source).toBe('intent');
@@ -424,10 +371,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns null when data-engineer not available', async () => {
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'backend-developer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
         const result = await resolver.resolve('ACT', 'schema.prisma 수정해');
 
@@ -453,10 +397,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns mobile-developer for React Native prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'React Native 컴포넌트 만들어줘',
-        );
+        const result = await resolver.resolve('ACT', 'React Native 컴포넌트 만들어줘');
 
         expect(result.agentName).toBe('mobile-developer');
         expect(result.source).toBe('intent');
@@ -506,25 +447,16 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns mobile-developer for Jetpack Compose prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'Jetpack Compose UI 구현해',
-        );
+        const result = await resolver.resolve('ACT', 'Jetpack Compose UI 구현해');
 
         expect(result.agentName).toBe('mobile-developer');
         expect(result.source).toBe('intent');
       });
 
       it('returns null when mobile-developer not available', async () => {
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'backend-developer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
-        const result = await resolver.resolve(
-          'ACT',
-          'React Native 컴포넌트 만들어',
-        );
+        const result = await resolver.resolve('ACT', 'React Native 컴포넌트 만들어');
 
         expect(result.agentName).not.toBe('mobile-developer');
         expect(result.agentName).toBe('frontend-developer');
@@ -571,10 +503,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns platform-engineer for Kubernetes prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'kubernetes 매니페스트 수정',
-        );
+        const result = await resolver.resolve('ACT', 'kubernetes 매니페스트 수정');
 
         expect(result.agentName).toBe('platform-engineer');
         expect(result.source).toBe('intent');
@@ -644,20 +573,14 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns platform-engineer for disaster recovery prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'disaster recovery 계획 세워줘',
-        );
+        const result = await resolver.resolve('ACT', 'disaster recovery 계획 세워줘');
 
         expect(result.agentName).toBe('platform-engineer');
         expect(result.source).toBe('intent');
       });
 
       it('returns null when platform-engineer not available', async () => {
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'backend-developer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
         const result = await resolver.resolve('ACT', 'terraform 모듈 작성');
 
@@ -667,10 +590,7 @@ describe('PrimaryAgentResolver', () => {
 
       it('prioritizes tooling-engineer over platform-engineer for config files', async () => {
         // eslint.config.ts는 tooling이 처리해야 함
-        const result = await resolver.resolve(
-          'ACT',
-          'eslint.config.ts 수정해줘',
-        );
+        const result = await resolver.resolve('ACT', 'eslint.config.ts 수정해줘');
 
         expect(result.agentName).toBe('tooling-engineer');
         expect(result.agentName).not.toBe('platform-engineer');
@@ -774,10 +694,7 @@ describe('PrimaryAgentResolver', () => {
 
       it('falls back to default when context pattern matches but agent unavailable', async () => {
         // Simulate platform-engineer not being in available agents
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'backend-developer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
         const context: ResolutionContext = {
           filePath: '/project/infra/main.tf', // Matches platform-engineer pattern
@@ -792,10 +709,7 @@ describe('PrimaryAgentResolver', () => {
 
       it('continues to next pattern when matched agent is unavailable', async () => {
         // Simulate only devops-engineer available (not platform-engineer)
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'devops-engineer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'devops-engineer']);
 
         const context: ResolutionContext = {
           filePath: '/project/infra/main.tf', // Matches platform-engineer pattern
@@ -837,30 +751,21 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns ai-ml-engineer for TensorFlow prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'TensorFlow로 이미지 분류 모델 만들어',
-        );
+        const result = await resolver.resolve('ACT', 'TensorFlow로 이미지 분류 모델 만들어');
 
         expect(result.agentName).toBe('ai-ml-engineer');
         expect(result.source).toBe('intent');
       });
 
       it('returns ai-ml-engineer for HuggingFace prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'HuggingFace transformers 모델 파인튜닝해줘',
-        );
+        const result = await resolver.resolve('ACT', 'HuggingFace transformers 모델 파인튜닝해줘');
 
         expect(result.agentName).toBe('ai-ml-engineer');
         expect(result.source).toBe('intent');
       });
 
       it('returns ai-ml-engineer for LangChain prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'LangChain으로 RAG 파이프라인 구현해',
-        );
+        const result = await resolver.resolve('ACT', 'LangChain으로 RAG 파이프라인 구현해');
 
         expect(result.agentName).toBe('ai-ml-engineer');
         expect(result.source).toBe('intent');
@@ -881,30 +786,21 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns ai-ml-engineer for LLM development prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'LLM 개발 및 통합 작업해줘',
-        );
+        const result = await resolver.resolve('ACT', 'LLM 개발 및 통합 작업해줘');
 
         expect(result.agentName).toBe('ai-ml-engineer');
         expect(result.source).toBe('intent');
       });
 
       it('returns ai-ml-engineer for embedding prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          '임베딩 벡터 저장소 구현해',
-        );
+        const result = await resolver.resolve('ACT', '임베딩 벡터 저장소 구현해');
 
         expect(result.agentName).toBe('ai-ml-engineer');
         expect(result.source).toBe('intent');
       });
 
       it('returns ai-ml-engineer for prompt engineering prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          '프롬프트 엔지니어링 최적화해줘',
-        );
+        const result = await resolver.resolve('ACT', '프롬프트 엔지니어링 최적화해줘');
 
         expect(result.agentName).toBe('ai-ml-engineer');
         expect(result.source).toBe('intent');
@@ -918,10 +814,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns null when ai-ml-engineer not available', async () => {
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'backend-developer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
         const result = await resolver.resolve('ACT', 'PyTorch 모델 학습시켜');
 
@@ -964,10 +857,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns backend-developer for FastAPI prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'FastAPI 엔드포인트 추가해',
-        );
+        const result = await resolver.resolve('ACT', 'FastAPI 엔드포인트 추가해');
 
         expect(result.agentName).toBe('backend-developer');
         expect(result.source).toBe('intent');
@@ -981,10 +871,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns backend-developer for REST API prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'REST API 설계 및 구현해줘',
-        );
+        const result = await resolver.resolve('ACT', 'REST API 설계 및 구현해줘');
 
         expect(result.agentName).toBe('backend-developer');
         expect(result.source).toBe('intent');
@@ -1012,10 +899,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns backend-developer for Spring Boot prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'Spring Boot 컨트롤러 작성해',
-        );
+        const result = await resolver.resolve('ACT', 'Spring Boot 컨트롤러 작성해');
 
         expect(result.agentName).toBe('backend-developer');
         expect(result.source).toBe('intent');
@@ -1070,10 +954,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns agent-architect for Korean "에이전트 설계" prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          '에이전트 아키텍처 설계해줘',
-        );
+        const result = await resolver.resolve('ACT', '에이전트 아키텍처 설계해줘');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('intent');
@@ -1087,30 +968,21 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns agent-architect for Claude agent prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'Claude Code 에이전트 만들어줘',
-        );
+        const result = await resolver.resolve('ACT', 'Claude Code 에이전트 만들어줘');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('intent');
       });
 
       it('returns agent-architect for workflow automation prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          '워크플로우 자동화 시스템 구현해',
-        );
+        const result = await resolver.resolve('ACT', '워크플로우 자동화 시스템 구현해');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('intent');
       });
 
       it('returns agent-architect for LLM orchestration prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'LLM 오케스트레이션 구현해줘',
-        );
+        const result = await resolver.resolve('ACT', 'LLM 오케스트레이션 구현해줘');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('intent');
@@ -1124,30 +996,21 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns agent-architect for multi-agent prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          '멀티 에이전트 시스템 설계해',
-        );
+        const result = await resolver.resolve('ACT', '멀티 에이전트 시스템 설계해');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('intent');
       });
 
       it('returns agent-architect for Model Context Protocol prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'Model Context Protocol 구현해줘',
-        );
+        const result = await resolver.resolve('ACT', 'Model Context Protocol 구현해줘');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('intent');
       });
 
       it('returns null when agent-architect not available', async () => {
-        mockListPrimaryAgents.mockResolvedValue([
-          'frontend-developer',
-          'backend-developer',
-        ]);
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
         const result = await resolver.resolve('ACT', 'MCP 서버 만들어');
 
@@ -1158,10 +1021,7 @@ describe('PrimaryAgentResolver', () => {
 
     describe('explicit request parsing', () => {
       it('returns explicit agent when prompt contains "backend-developer로 작업해"', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'backend-developer로 작업해 새 API 만들어',
-        );
+        const result = await resolver.resolve('ACT', 'backend-developer로 작업해 새 API 만들어');
 
         expect(result.agentName).toBe('backend-developer');
         expect(result.source).toBe('explicit');
@@ -1179,39 +1039,27 @@ describe('PrimaryAgentResolver', () => {
       });
 
       it('returns explicit agent when prompt contains "agent-architect로 해줘"', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'agent-architect로 해줘 새 에이전트 만들어',
-        );
+        const result = await resolver.resolve('ACT', 'agent-architect로 해줘 새 에이전트 만들어');
 
         expect(result.agentName).toBe('agent-architect');
         expect(result.source).toBe('explicit');
       });
 
       it('returns explicit agent when prompt contains "as devops-engineer"', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'implement this feature as devops-engineer',
-        );
+        const result = await resolver.resolve('ACT', 'implement this feature as devops-engineer');
 
         expect(result.agentName).toBe('devops-engineer');
         expect(result.source).toBe('explicit');
       });
 
       it('ignores invalid explicit agent names not in registry', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'use invalid-agent agent to do something',
-        );
+        const result = await resolver.resolve('ACT', 'use invalid-agent agent to do something');
 
         expect(result.agentName).not.toBe('invalid-agent');
       });
 
       it('ignores PLAN agents in ACT mode explicit requests', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'solution-architect로 작업해',
-        );
+        const result = await resolver.resolve('ACT', 'solution-architect로 작업해');
 
         // Should fall through to default, not use solution-architect
         expect(result.agentName).toBe('frontend-developer');
@@ -1347,11 +1195,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/react-native.config.js',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1363,11 +1207,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/metro.config.js',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1378,11 +1218,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/pubspec.yaml',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1393,11 +1229,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/lib/main.dart',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1408,11 +1240,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/App.swift',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1423,11 +1251,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/ios/Podfile',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1438,11 +1262,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/android/app/src/main/AndroidManifest.xml',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1453,11 +1273,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/android/MainActivity.kt',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('mobile-developer');
           expect(result.source).toBe('context');
@@ -1470,11 +1286,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/migrations/001_init.sql',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('data-engineer');
           expect(result.source).toBe('context');
@@ -1485,11 +1297,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/prisma/schema.prisma',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('data-engineer');
           expect(result.source).toBe('context');
@@ -1500,11 +1308,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/migrations/20240101_add_users.ts',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('data-engineer');
           expect(result.source).toBe('context');
@@ -1515,11 +1319,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/src/user/user.entity.ts',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('data-engineer');
           expect(result.source).toBe('context');
@@ -1532,11 +1332,7 @@ describe('PrimaryAgentResolver', () => {
             projectType: 'infrastructure',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 프로젝트 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 프로젝트 수정해', context);
 
           expect(result.agentName).toBe('devops-engineer');
           expect(result.source).toBe('context');
@@ -1544,20 +1340,13 @@ describe('PrimaryAgentResolver', () => {
         });
 
         it('does not use project type if devops-engineer unavailable', async () => {
-          mockListPrimaryAgents.mockResolvedValue([
-            'frontend-developer',
-            'backend-developer',
-          ]);
+          mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
 
           const context: ResolutionContext = {
             projectType: 'infrastructure',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 프로젝트 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 프로젝트 수정해', context);
 
           expect(result.agentName).toBe('frontend-developer');
           expect(result.source).toBe('default');
@@ -1570,11 +1359,7 @@ describe('PrimaryAgentResolver', () => {
             filePath: '/project/.ai-rules/agents/frontend-developer.json',
           };
 
-          const result = await resolver.resolve(
-            'ACT',
-            '이 파일 수정해',
-            context,
-          );
+          const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
           expect(result.agentName).toBe('agent-architect');
           expect(result.source).toBe('context');
@@ -1601,10 +1386,7 @@ describe('PrimaryAgentResolver', () => {
 
   describe('EVAL mode behavior', () => {
     it('always returns code-reviewer for EVAL mode regardless of explicit request', async () => {
-      const result = await resolver.resolve(
-        'EVAL',
-        'backend-developer로 평가해',
-      );
+      const result = await resolver.resolve('EVAL', 'backend-developer로 평가해');
 
       expect(result.agentName).toBe('code-reviewer');
       expect(result.source).toBe('default');
@@ -1622,12 +1404,7 @@ describe('PrimaryAgentResolver', () => {
     });
 
     it('always returns code-reviewer for EVAL mode regardless of recommended agent', async () => {
-      const result = await resolver.resolve(
-        'EVAL',
-        '코드 리뷰해',
-        undefined,
-        'backend-developer',
-      );
+      const result = await resolver.resolve('EVAL', '코드 리뷰해', undefined, 'backend-developer');
 
       expect(result.agentName).toBe('code-reviewer');
     });
@@ -1639,10 +1416,7 @@ describe('PrimaryAgentResolver', () => {
         primaryAgent: 'backend-developer',
       });
 
-      const result = await resolver.resolve(
-        'ACT',
-        'frontend-developer로 작업해',
-      );
+      const result = await resolver.resolve('ACT', 'frontend-developer로 작업해');
 
       expect(result.agentName).toBe('frontend-developer');
       expect(result.source).toBe('explicit');
@@ -1695,10 +1469,7 @@ describe('PrimaryAgentResolver', () => {
 
   describe('parseExplicitRequest patterns', () => {
     it('extracts agent name from Korean pattern "~로 작업해"', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'backend-developer로 작업해줘',
-      );
+      const result = await resolver.resolve('ACT', 'backend-developer로 작업해줘');
       expect(result.agentName).toBe('backend-developer');
     });
 
@@ -1708,26 +1479,17 @@ describe('PrimaryAgentResolver', () => {
     });
 
     it('extracts agent name from English pattern "use ~ agent"', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'use frontend-developer agent',
-      );
+      const result = await resolver.resolve('ACT', 'use frontend-developer agent');
       expect(result.agentName).toBe('frontend-developer');
     });
 
     it('extracts agent name from English pattern "using ~"', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'using backend-developer create API',
-      );
+      const result = await resolver.resolve('ACT', 'using backend-developer create API');
       expect(result.agentName).toBe('backend-developer');
     });
 
     it('handles mixed language prompts', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'backend-developer agent로 API 만들어',
-      );
+      const result = await resolver.resolve('ACT', 'backend-developer agent로 API 만들어');
       expect(result.agentName).toBe('backend-developer');
     });
   });
@@ -1754,10 +1516,7 @@ describe('PrimaryAgentResolver', () => {
       mockListPrimaryAgents.mockRejectedValue(new Error('Network error'));
 
       // backend-developer is in fallback list, so it should be recognized
-      const result = await resolver.resolve(
-        'ACT',
-        'backend-developer로 작업해',
-      );
+      const result = await resolver.resolve('ACT', 'backend-developer로 작업해');
 
       expect(result.agentName).toBe('backend-developer');
       expect(result.source).toBe('explicit');
@@ -1794,50 +1553,35 @@ describe('PrimaryAgentResolver', () => {
 
       it('tooling-engineer wins over backend-developer for eslint config', async () => {
         // eslint matches tooling (priority 3) over backend patterns
-        const result = await resolver.resolve(
-          'ACT',
-          'eslint 설정 파일 수정해줘',
-        );
+        const result = await resolver.resolve('ACT', 'eslint 설정 파일 수정해줘');
 
         expect(result.agentName).toBe('tooling-engineer');
       });
 
       it('platform-engineer wins over backend-developer for Kubernetes manifest', async () => {
         // k8s manifest should go to platform-engineer (priority 4) not backend
-        const result = await resolver.resolve(
-          'ACT',
-          'kubernetes manifest 파일 작성해줘',
-        );
+        const result = await resolver.resolve('ACT', 'kubernetes manifest 파일 작성해줘');
 
         expect(result.agentName).toBe('platform-engineer');
       });
 
       it('data-engineer wins over backend-developer for schema.prisma', async () => {
         // schema.prisma is data-specific, should go to data-engineer (priority 5)
-        const result = await resolver.resolve(
-          'ACT',
-          'schema.prisma 모델 추가해줘',
-        );
+        const result = await resolver.resolve('ACT', 'schema.prisma 모델 추가해줘');
 
         expect(result.agentName).toBe('data-engineer');
       });
 
       it('ai-ml-engineer wins over backend-developer for PyTorch code', async () => {
         // PyTorch is AI/ML specific, should go to ai-ml-engineer (priority 7)
-        const result = await resolver.resolve(
-          'ACT',
-          'PyTorch 모델 학습 코드 작성해줘',
-        );
+        const result = await resolver.resolve('ACT', 'PyTorch 모델 학습 코드 작성해줘');
 
         expect(result.agentName).toBe('ai-ml-engineer');
       });
 
       it('agent-architect wins over backend-developer for MCP server', async () => {
         // MCP server is agent-specific, should go to agent-architect (priority 9)
-        const result = await resolver.resolve(
-          'ACT',
-          'MCP 서버 새로운 tool 추가해줘',
-        );
+        const result = await resolver.resolve('ACT', 'MCP 서버 새로운 tool 추가해줘');
 
         expect(result.agentName).toBe('agent-architect');
       });
@@ -1846,50 +1590,35 @@ describe('PrimaryAgentResolver', () => {
     describe('overlapping keyword scenarios', () => {
       it('prefers tooling for "vite.config" even with "server" keyword', async () => {
         // "vite.config server settings" - tooling should win
-        const result = await resolver.resolve(
-          'ACT',
-          'vite.config server 설정 변경',
-        );
+        const result = await resolver.resolve('ACT', 'vite.config server 설정 변경');
 
         expect(result.agentName).toBe('tooling-engineer');
       });
 
       it('prefers platform for "terraform" even with "config" keyword', async () => {
         // terraform config should go to platform-engineer
-        const result = await resolver.resolve(
-          'ACT',
-          'terraform config 파일 작성',
-        );
+        const result = await resolver.resolve('ACT', 'terraform config 파일 작성');
 
         expect(result.agentName).toBe('platform-engineer');
       });
 
       it('prefers ai-ml for "LangChain API" over backend API patterns', async () => {
         // LangChain API development is AI/ML, not generic backend
-        const result = await resolver.resolve(
-          'ACT',
-          'LangChain API 통합 구현해줘',
-        );
+        const result = await resolver.resolve('ACT', 'LangChain API 통합 구현해줘');
 
         expect(result.agentName).toBe('ai-ml-engineer');
       });
 
       it('prefers backend for generic "REST API" without ML context', async () => {
         // Generic REST API should go to backend-developer
-        const result = await resolver.resolve(
-          'ACT',
-          'REST API 엔드포인트 만들어줘',
-        );
+        const result = await resolver.resolve('ACT', 'REST API 엔드포인트 만들어줘');
 
         expect(result.agentName).toBe('backend-developer');
       });
 
       it('prefers mobile for "React Native" over frontend for "React"', async () => {
         // React Native should go to mobile-developer, not frontend
-        const result = await resolver.resolve(
-          'ACT',
-          'React Native 컴포넌트 만들어줘',
-        );
+        const result = await resolver.resolve('ACT', 'React Native 컴포넌트 만들어줘');
 
         expect(result.agentName).toBe('mobile-developer');
       });
@@ -1910,10 +1639,7 @@ describe('PrimaryAgentResolver', () => {
 
       it('explicit "frontend-developer로 개발해" overrides AI/ML patterns', async () => {
         // Pattern requires "로 작업해" or "로 개발해" or "로 해"
-        const result = await resolver.resolve(
-          'ACT',
-          'frontend-developer로 개발해 PyTorch 관련 UI',
-        );
+        const result = await resolver.resolve('ACT', 'frontend-developer로 개발해 PyTorch 관련 UI');
 
         expect(result.agentName).toBe('frontend-developer');
         expect(result.source).toBe('explicit');
@@ -1932,10 +1658,7 @@ describe('PrimaryAgentResolver', () => {
 
     describe('no pattern match falls back to default', () => {
       it('returns frontend-developer for unmatched generic prompt', async () => {
-        const result = await resolver.resolve(
-          'ACT',
-          'help me with this random task',
-        );
+        const result = await resolver.resolve('ACT', 'help me with this random task');
 
         expect(result.agentName).toBe('frontend-developer');
         expect(result.source).toBe('default');
@@ -2117,9 +1840,7 @@ describe('PrimaryAgentResolver', () => {
 
       it('handles mixed content large prompts efficiently', async () => {
         // Mixed Korean, English, and special characters
-        const mixedPrompt = ('안녕하세요 hello 你好 ' + 'a'.repeat(100)).repeat(
-          400,
-        );
+        const mixedPrompt = ('안녕하세요 hello 你好 ' + 'a'.repeat(100)).repeat(400);
 
         const start = performance.now();
         const result = await resolver.resolve('ACT', mixedPrompt);
@@ -2143,10 +1864,7 @@ describe('PrimaryAgentResolver', () => {
 
       // This prompt contains "mobile develop" which would trigger mobile-developer
       // But project config should take priority
-      const result = await resolver.resolve(
-        'ACT',
-        'mobile developer 관련 버그 수정해줘',
-      );
+      const result = await resolver.resolve('ACT', 'mobile developer 관련 버그 수정해줘');
 
       expect(result.agentName).toBe('agent-architect');
       expect(result.source).toBe('config');
@@ -2158,10 +1876,7 @@ describe('PrimaryAgentResolver', () => {
       });
 
       // This prompt would normally match backend-developer patterns
-      const result = await resolver.resolve(
-        'ACT',
-        'NestJS API 엔드포인트 추가해줘',
-      );
+      const result = await resolver.resolve('ACT', 'NestJS API 엔드포인트 추가해줘');
 
       expect(result.agentName).toBe('frontend-developer');
       expect(result.source).toBe('config');
@@ -2172,10 +1887,7 @@ describe('PrimaryAgentResolver', () => {
     it('skips intent patterns when discussing agent matching issues', async () => {
       // This prompt discusses "Mobile Developer가 매칭되었어" - meta-discussion
       // Should NOT trigger mobile-developer pattern
-      const result = await resolver.resolve(
-        'ACT',
-        'Mobile Developer가 잘못 매칭되는 버그가 있어',
-      );
+      const result = await resolver.resolve('ACT', 'Mobile Developer가 잘못 매칭되는 버그가 있어');
 
       // Should fall through to default since it's meta-discussion
       expect(result.agentName).toBe('frontend-developer');
@@ -2183,30 +1895,21 @@ describe('PrimaryAgentResolver', () => {
     });
 
     it('skips intent patterns when discussing Primary Agent system', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'Primary Agent 선택 로직을 점검해야해',
-      );
+      const result = await resolver.resolve('ACT', 'Primary Agent 선택 로직을 점검해야해');
 
       expect(result.agentName).toBe('frontend-developer');
       expect(result.source).toBe('default');
     });
 
     it('skips intent patterns when discussing agent activation issues', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        '에이전트 활성화 파이프라인에 문제가 있어',
-      );
+      const result = await resolver.resolve('ACT', '에이전트 활성화 파이프라인에 문제가 있어');
 
       expect(result.agentName).toBe('frontend-developer');
       expect(result.source).toBe('default');
     });
 
     it('skips intent patterns when debugging agent behavior', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'Frontend Developer 에이전트 버그 분석해줘',
-      );
+      const result = await resolver.resolve('ACT', 'Frontend Developer 에이전트 버그 분석해줘');
 
       expect(result.agentName).toBe('frontend-developer');
       expect(result.source).toBe('default');
@@ -2224,10 +1927,7 @@ describe('PrimaryAgentResolver', () => {
   describe('Bug Fix: Agent-architect patterns now checked first', () => {
     it('matches agent creation patterns before mobile patterns', async () => {
       // "Agent를 만드는" should match agent-architect, not mobile
-      const result = await resolver.resolve(
-        'ACT',
-        'Agent를 만드는 작업을 해야해',
-      );
+      const result = await resolver.resolve('ACT', 'Agent를 만드는 작업을 해야해');
 
       expect(result.agentName).toBe('agent-architect');
       expect(result.source).toBe('intent');
@@ -2248,10 +1948,7 @@ describe('PrimaryAgentResolver', () => {
     });
 
     it('matches specialist agent patterns', async () => {
-      const result = await resolver.resolve(
-        'ACT',
-        'specialist agent JSON 파일 수정해줘',
-      );
+      const result = await resolver.resolve('ACT', 'specialist agent JSON 파일 수정해줘');
 
       expect(result.agentName).toBe('agent-architect');
       expect(result.source).toBe('intent');
@@ -2259,10 +1956,7 @@ describe('PrimaryAgentResolver', () => {
 
     it('matches primary agent resolution patterns', async () => {
       // "primary agent resolver 코드" is implementation work, not meta-discussion
-      const result = await resolver.resolve(
-        'ACT',
-        'PrimaryAgentResolver 코드 개선해줘',
-      );
+      const result = await resolver.resolve('ACT', 'PrimaryAgentResolver 코드 개선해줘');
 
       expect(result.agentName).toBe('agent-architect');
       expect(result.source).toBe('intent');

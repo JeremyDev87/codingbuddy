@@ -165,10 +165,7 @@
             "Additional validation could help",
             "Minor security enhancements"
           ],
-          "low": [
-            "Minor security improvements",
-            "Optional security enhancements"
-          ]
+          "low": ["Minor security improvements", "Optional security enhancements"]
         }
       }
     },
@@ -285,10 +282,7 @@
             "Additional validation could help",
             "Minor security enhancements"
           ],
-          "low": [
-            "Minor security improvements",
-            "Optional security enhancements"
-          ]
+          "low": ["Minor security improvements", "Optional security enhancements"]
         }
       }
     },

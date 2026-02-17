@@ -27,9 +27,7 @@ describe('QuickStart', () => {
 
   it('should display section heading', () => {
     render(<QuickStart locale="en" />);
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      'Quick Start',
-    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Quick Start');
   });
 
   it('should have aria-labelledby linking to heading', () => {
@@ -40,9 +38,7 @@ describe('QuickStart', () => {
 
   it('should display subtitle', () => {
     render(<QuickStart locale="en" />);
-    expect(
-      screen.getByText('Get started in 3 simple steps'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Get started in 3 simple steps')).toBeInTheDocument();
   });
 
   it('should render 3 accordion items', () => {

@@ -33,11 +33,7 @@ describe('AgentService', () => {
     description: 'Performance optimization expert',
     role: {
       title: 'Performance Specialist',
-      expertise: [
-        'Bundle optimization',
-        'Core Web Vitals',
-        'Rendering performance',
-      ],
+      expertise: ['Bundle optimization', 'Core Web Vitals', 'Rendering performance'],
       responsibilities: ['Review performance', 'Optimize load times'],
     },
   };
@@ -58,14 +54,9 @@ describe('AgentService', () => {
     };
 
     it('should return complete prompt for valid agent', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
-      const result = await service.getAgentSystemPrompt(
-        'security-specialist',
-        mockContext,
-      );
+      const result = await service.getAgentSystemPrompt('security-specialist', mockContext);
 
       expect(result.agentName).toBe('security-specialist');
       expect(result.displayName).toBe('Security Specialist');
@@ -74,38 +65,24 @@ describe('AgentService', () => {
     });
 
     it('should include agent expertise in system prompt', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
-      const result = await service.getAgentSystemPrompt(
-        'security-specialist',
-        mockContext,
-      );
+      const result = await service.getAgentSystemPrompt('security-specialist', mockContext);
 
       expect(result.systemPrompt).toContain('OAuth 2.0');
       expect(result.systemPrompt).toContain('JWT security');
     });
 
     it('should throw error for unknown agent', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
-        new Error('Agent not found'),
-      );
+      vi.mocked(mockRulesService.getAgent!).mockRejectedValue(new Error('Agent not found'));
 
-      await expect(
-        service.getAgentSystemPrompt('unknown-agent', mockContext),
-      ).rejects.toThrow();
+      await expect(service.getAgentSystemPrompt('unknown-agent', mockContext)).rejects.toThrow();
     });
 
     it('should apply context to prompt', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
-      const result = await service.getAgentSystemPrompt(
-        'security-specialist',
-        mockContext,
-      );
+      const result = await service.getAgentSystemPrompt('security-specialist', mockContext);
 
       expect(result.systemPrompt).toContain('src/auth/login.ts');
       expect(result.systemPrompt).toContain('EVAL');
@@ -121,11 +98,7 @@ describe('AgentService', () => {
 
       const result = await service.prepareParallelAgents(
         'EVAL',
-        [
-          'security-specialist',
-          'accessibility-specialist',
-          'performance-specialist',
-        ],
+        ['security-specialist', 'accessibility-specialist', 'performance-specialist'],
         ['src/components/Form.tsx'],
         'Review form component',
       );
@@ -186,9 +159,7 @@ describe('AgentService', () => {
     });
 
     it('should handle unknown error type in failedAgents', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockRejectedValueOnce(
-        'string error',
-      );
+      vi.mocked(mockRulesService.getAgent!).mockRejectedValueOnce('string error');
 
       const result = await service.prepareParallelAgents(
         'EVAL',
@@ -201,9 +172,7 @@ describe('AgentService', () => {
     });
 
     it('should deduplicate specialist names', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.prepareParallelAgents(
         'EVAL',
@@ -216,9 +185,7 @@ describe('AgentService', () => {
     });
 
     it('should include parallel execution hint', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.prepareParallelAgents(
         'EVAL',
@@ -231,9 +198,7 @@ describe('AgentService', () => {
     });
 
     it('should include task prompt for each agent with full verbosity', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.prepareParallelAgents(
         'EVAL',
@@ -250,9 +215,7 @@ describe('AgentService', () => {
     });
 
     it('should include short description for Task tool', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.prepareParallelAgents(
         'EVAL',
@@ -266,9 +229,7 @@ describe('AgentService', () => {
 
     describe('verbosity control', () => {
       it('should include summary only with standard verbosity (default)', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-          mockSecurityAgent,
-        );
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
         const result = await service.prepareParallelAgents(
           'EVAL',
@@ -283,9 +244,7 @@ describe('AgentService', () => {
       });
 
       it('should include summary only with minimal verbosity', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-          mockSecurityAgent,
-        );
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
         const result = await service.prepareParallelAgents(
           'EVAL',
@@ -300,9 +259,7 @@ describe('AgentService', () => {
       });
 
       it('should include full taskPrompt with full verbosity', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-          mockSecurityAgent,
-        );
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
         const result = await service.prepareParallelAgents(
           'EVAL',
@@ -322,21 +279,11 @@ describe('AgentService', () => {
           ...mockSecurityAgent,
           role: {
             ...mockSecurityAgent.role,
-            expertise: [
-              'Item 1',
-              'Item 2',
-              'Item 3',
-              'Item 4',
-              'Item 5',
-              'Item 6',
-              'Item 7',
-            ],
+            expertise: ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6', 'Item 7'],
           },
         };
 
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-          agentWithManyExpertise,
-        );
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(agentWithManyExpertise);
 
         const result = await service.prepareParallelAgents(
           'EVAL',
@@ -350,9 +297,7 @@ describe('AgentService', () => {
       });
 
       it('should include primaryFocus in summary', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-          mockSecurityAgent,
-        );
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
         const result = await service.prepareParallelAgents(
           'EVAL',
@@ -367,9 +312,7 @@ describe('AgentService', () => {
       });
 
       it('should indicate fullPromptAvailable in summary', async () => {
-        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-          mockSecurityAgent,
-        );
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
         const result = await service.prepareParallelAgents(
           'EVAL',
@@ -392,10 +335,7 @@ describe('AgentService', () => {
       'performance-specialist',
       'code-quality-specialist',
     ];
-    const PLAN_DEFAULTS = [
-      'architecture-specialist',
-      'test-strategy-specialist',
-    ];
+    const PLAN_DEFAULTS = ['architecture-specialist', 'test-strategy-specialist'];
 
     it('should recommend security for auth files', () => {
       const result = service.getRecommendedAgents([], ['src/auth/login.ts']);
@@ -404,10 +344,7 @@ describe('AgentService', () => {
     });
 
     it('should recommend accessibility for UI components', () => {
-      const result = service.getRecommendedAgents(
-        [],
-        ['src/components/Button.tsx'],
-      );
+      const result = service.getRecommendedAgents([], ['src/components/Button.tsx']);
 
       expect(result).toContain('accessibility-specialist');
     });
@@ -419,9 +356,7 @@ describe('AgentService', () => {
     });
 
     it('should return mode defaults when no file patterns match', () => {
-      const result = service.getRecommendedAgents(EVAL_DEFAULTS, [
-        'src/random/file.ts',
-      ]);
+      const result = service.getRecommendedAgents(EVAL_DEFAULTS, ['src/random/file.ts']);
 
       // Returns the mode defaults passed in
       expect(result.length).toBeGreaterThan(0);
@@ -442,83 +377,57 @@ describe('AgentService', () => {
         'src/auth/oauth.ts',
       ]);
 
-      const securityCount = result.filter(
-        a => a === 'security-specialist',
-      ).length;
+      const securityCount = result.filter(a => a === 'security-specialist').length;
       expect(securityCount).toBe(1);
     });
 
     describe('migration file patterns', () => {
       it('should recommend migration-specialist for migration files', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['src/migrations/001_init.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['src/migrations/001_init.ts']);
 
         expect(result).toContain('migration-specialist');
       });
 
       it('should recommend migration-specialist and data-engineer for migration files', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['db/migration/add-users-table.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['db/migration/add-users-table.ts']);
 
         expect(result).toContain('migration-specialist');
         expect(result).toContain('data-engineer');
       });
 
       it('should recommend migration-specialist for legacy files', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['src/legacy/old-service.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['src/legacy/old-service.ts']);
 
         expect(result).toContain('migration-specialist');
         expect(result).toContain('architecture-specialist');
       });
 
       it('should recommend migration-specialist for upgrade scripts', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['scripts/upgrade-v2.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['scripts/upgrade-v2.ts']);
 
         expect(result).toContain('migration-specialist');
       });
 
       it('should recommend migration-specialist for deprecation files', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['src/deprecated/old-api.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['src/deprecated/old-api.ts']);
 
         expect(result).toContain('migration-specialist');
       });
 
       it('should recommend migration-specialist for rollback scripts', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['scripts/rollback-migration.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['scripts/rollback-migration.ts']);
 
         expect(result).toContain('migration-specialist');
       });
 
       it('should recommend migration-specialist for cutover files', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['scripts/cutover-to-new-system.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['scripts/cutover-to-new-system.ts']);
 
         expect(result).toContain('migration-specialist');
       });
 
       it('should recommend migration-specialist for versioning files', () => {
-        const result = service.getRecommendedAgents(
-          [],
-          ['src/api/versioning/v2-handler.ts'],
-        );
+        const result = service.getRecommendedAgents([], ['src/api/versioning/v2-handler.ts']);
 
         expect(result).toContain('migration-specialist');
         expect(result).toContain('integration-specialist');
@@ -528,9 +437,7 @@ describe('AgentService', () => {
 
   describe('dispatchAgents', () => {
     it('should dispatch primary agent with Task-tool-ready params', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result: DispatchResult = await service.dispatchAgents({
         mode: 'EVAL',
@@ -541,12 +448,8 @@ describe('AgentService', () => {
       expect(result.primaryAgent).toBeDefined();
       expect(result.primaryAgent!.name).toBe('security-specialist');
       expect(result.primaryAgent!.displayName).toBe('Security Specialist');
-      expect(result.primaryAgent!.dispatchParams.subagent_type).toBe(
-        'general-purpose',
-      );
-      expect(result.primaryAgent!.dispatchParams.prompt).toContain(
-        'Security Specialist',
-      );
+      expect(result.primaryAgent!.dispatchParams.subagent_type).toBe('general-purpose');
+      expect(result.primaryAgent!.dispatchParams.prompt).toContain('Security Specialist');
       expect(result.primaryAgent!.dispatchParams.description).toBeDefined();
     });
 
@@ -564,12 +467,8 @@ describe('AgentService', () => {
 
       expect(result.parallelAgents).toBeDefined();
       expect(result.parallelAgents).toHaveLength(2);
-      expect(result.parallelAgents![0].dispatchParams.run_in_background).toBe(
-        true,
-      );
-      expect(result.parallelAgents![1].dispatchParams.run_in_background).toBe(
-        true,
-      );
+      expect(result.parallelAgents![0].dispatchParams.run_in_background).toBe(true);
+      expect(result.parallelAgents![1].dispatchParams.run_in_background).toBe(true);
     });
 
     it('should dispatch both primary and parallel agents', async () => {
@@ -591,9 +490,7 @@ describe('AgentService', () => {
     });
 
     it('should include executionHint', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.dispatchAgents({
         mode: 'EVAL',
@@ -621,9 +518,7 @@ describe('AgentService', () => {
     });
 
     it('should pass targetFiles to agent context', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.dispatchAgents({
         mode: 'EVAL',
@@ -632,9 +527,7 @@ describe('AgentService', () => {
         taskDescription: 'Review auth',
       });
 
-      expect(result.primaryAgent!.dispatchParams.prompt).toContain(
-        'src/auth/login.ts',
-      );
+      expect(result.primaryAgent!.dispatchParams.prompt).toContain('src/auth/login.ts');
     });
 
     it('should return empty result when no agents specified', async () => {
@@ -648,24 +541,18 @@ describe('AgentService', () => {
     });
 
     it('should not include primary agent as run_in_background', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.dispatchAgents({
         mode: 'EVAL',
         primaryAgent: 'security-specialist',
       });
 
-      expect(
-        result.primaryAgent!.dispatchParams.run_in_background,
-      ).toBeUndefined();
+      expect(result.primaryAgent!.dispatchParams.run_in_background).toBeUndefined();
     });
 
     it('should track failed primary agent in failedAgents', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockRejectedValue(
-        new Error('Agent not found'),
-      );
+      vi.mocked(mockRulesService.getAgent!).mockRejectedValue(new Error('Agent not found'));
 
       const result = await service.dispatchAgents({
         mode: 'EVAL',
@@ -680,9 +567,7 @@ describe('AgentService', () => {
     });
 
     it('should deduplicate parallel specialists', async () => {
-      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(
-        mockSecurityAgent,
-      );
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValue(mockSecurityAgent);
 
       const result = await service.dispatchAgents({
         mode: 'EVAL',

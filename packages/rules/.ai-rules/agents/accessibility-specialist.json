@@ -114,10 +114,7 @@
             "Plan predictable navigation",
             "Plan input assistance (labels, errors, suggestions)"
           ],
-          "robust": [
-            "Plan compatible markup (assistive technologies)",
-            "Plan valid markup"
-          ]
+          "robust": ["Plan compatible markup (assistive technologies)", "Plan valid markup"]
         },
         "semantic_html_planning": {
           "elements": "Plan header, nav, main, article, section, aside, footer usage",
@@ -253,10 +250,7 @@
             "Verify predictable navigation",
             "Verify input assistance (labels, errors, suggestions)"
           ],
-          "robust": [
-            "Verify compatible markup (assistive technologies)",
-            "Verify valid markup"
-          ]
+          "robust": ["Verify compatible markup (assistive technologies)", "Verify valid markup"]
         },
         "semantic_html_verification": {
           "elements": "Verify header, nav, main, article, section, aside, footer usage",
@@ -423,11 +417,7 @@
           ]
         },
         "testing_tools": {
-          "automated": [
-            "axe DevTools",
-            "WAVE Browser Extension",
-            "Lighthouse Accessibility audit"
-          ],
+          "automated": ["axe DevTools", "WAVE Browser Extension", "Lighthouse Accessibility audit"],
           "manual": [
             "Keyboard-only navigation",
             "Screen reader testing (VoiceOver, NVDA)",

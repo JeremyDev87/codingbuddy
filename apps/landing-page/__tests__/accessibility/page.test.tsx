@@ -90,18 +90,9 @@ describe('Locale Page Accessibility', () => {
 
   test('all sections have aria-labelledby', async () => {
     await renderLocalePage();
-    expect(screen.getByTestId('hero')).toHaveAttribute(
-      'aria-labelledby',
-      'hero-heading',
-    );
-    expect(screen.getByTestId('problem')).toHaveAttribute(
-      'aria-labelledby',
-      'problem-heading',
-    );
-    expect(screen.getByTestId('solution')).toHaveAttribute(
-      'aria-labelledby',
-      'solution-heading',
-    );
+    expect(screen.getByTestId('hero')).toHaveAttribute('aria-labelledby', 'hero-heading');
+    expect(screen.getByTestId('problem')).toHaveAttribute('aria-labelledby', 'problem-heading');
+    expect(screen.getByTestId('solution')).toHaveAttribute('aria-labelledby', 'solution-heading');
     expect(screen.getByTestId('agents-showcase')).toHaveAttribute(
       'aria-labelledby',
       'agents-heading',
@@ -114,10 +105,7 @@ describe('Locale Page Accessibility', () => {
       'aria-labelledby',
       'quick-start-heading',
     );
-    expect(screen.getByTestId('faq')).toHaveAttribute(
-      'aria-labelledby',
-      'faq-heading',
-    );
+    expect(screen.getByTestId('faq')).toHaveAttribute('aria-labelledby', 'faq-heading');
   });
 
   test('Korean locale sets correct lang attributes', async () => {

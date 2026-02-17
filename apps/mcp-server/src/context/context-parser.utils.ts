@@ -3,11 +3,7 @@
  * These functions are stateless and have no side effects.
  */
 import type { Mode } from '../keyword/keyword.types';
-import type {
-  ContextDocument,
-  ContextMetadata,
-  ContextSection,
-} from './context-document.types';
+import type { ContextDocument, ContextMetadata, ContextSection } from './context-document.types';
 import {
   CONTEXT_MARKDOWN,
   CONTEXT_SECTION_HEADER_PATTERN,
@@ -52,12 +48,7 @@ function parseMode(value: string): Mode | null {
 /**
  * List types that can be parsed from sections.
  */
-type SectionListType =
-  | 'decisions'
-  | 'notes'
-  | 'progress'
-  | 'findings'
-  | 'recommendations';
+type SectionListType = 'decisions' | 'notes' | 'progress' | 'findings' | 'recommendations';
 
 /**
  * Add an item to a section's list, initializing if needed.
@@ -151,13 +142,8 @@ function parseLine(line: string, ctx: ParseContext): void {
  * @returns true if line was handled as metadata
  */
 function parseMetadataLine(line: string, ctx: ParseContext): boolean {
-  const {
-    CONTEXT_HEADER,
-    CREATED_PREFIX,
-    UPDATED_PREFIX,
-    MODE_PREFIX,
-    STATUS_PREFIX,
-  } = CONTEXT_MARKDOWN;
+  const { CONTEXT_HEADER, CREATED_PREFIX, UPDATED_PREFIX, MODE_PREFIX, STATUS_PREFIX } =
+    CONTEXT_MARKDOWN;
 
   if (line.startsWith(CONTEXT_HEADER)) {
     ctx.metadata.title = line.replace(CONTEXT_HEADER, '').trim();
@@ -250,23 +236,17 @@ function parseSectionContent(line: string, ctx: ParseContext): void {
 
   // Parse agent info
   if (line.startsWith(PRIMARY_AGENT_PREFIX)) {
-    ctx.currentSection.primaryAgent = line
-      .replace(PRIMARY_AGENT_PREFIX, '')
-      .trim();
+    ctx.currentSection.primaryAgent = line.replace(PRIMARY_AGENT_PREFIX, '').trim();
     return;
   }
 
   if (line.startsWith(RECOMMENDED_ACT_AGENT_PREFIX)) {
     const rest = line.replace(RECOMMENDED_ACT_AGENT_PREFIX, '').trim();
-    const confidenceMatch = rest.match(
-      /^([^\s(]+)(?:\s*\(confidence: ([\d.]+)\))?/,
-    );
+    const confidenceMatch = rest.match(/^([^\s(]+)(?:\s*\(confidence: ([\d.]+)\))?/);
     if (confidenceMatch) {
       ctx.currentSection.recommendedActAgent = confidenceMatch[1];
       if (confidenceMatch[2]) {
-        ctx.currentSection.recommendedActAgentConfidence = parseFloat(
-          confidenceMatch[2],
-        );
+        ctx.currentSection.recommendedActAgentConfidence = parseFloat(confidenceMatch[2]);
       }
     }
     return;

@@ -33,9 +33,7 @@ describe('CopyButton', () => {
 
   it('should have accessible name from visible text', () => {
     render(<CopyButton {...defaultProps} />);
-    expect(
-      screen.getByRole('button', { name: 'Copy code' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy code' })).toBeInTheDocument();
   });
 
   it('should show copied state on click', async () => {

@@ -31,9 +31,7 @@ describe('AnalyzerService', () => {
       expect(result.directoryStructure.totalFiles).toBeGreaterThan(0);
 
       // Should have allFiles populated
-      expect(result.directoryStructure.allFiles.length).toBe(
-        result.directoryStructure.totalFiles,
-      );
+      expect(result.directoryStructure.allFiles.length).toBe(result.directoryStructure.totalFiles);
     });
 
     it('should respect maxCodeSamples option', async () => {

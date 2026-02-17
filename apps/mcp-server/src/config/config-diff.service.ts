@@ -47,10 +47,7 @@ export class ConfigDiffService {
   /**
    * Compare project analysis with current config
    */
-  compareConfig(
-    analysis: ProjectAnalysis,
-    config: CodingBuddyConfig,
-  ): ConfigDiffResult {
+  compareConfig(analysis: ProjectAnalysis, config: CodingBuddyConfig): ConfigDiffResult {
     const suggestions: ConfigUpdateSuggestion[] = [];
 
     // Check project name
@@ -121,24 +118,19 @@ export class ConfigDiffService {
     const detectedFrameworks = analysis.packageInfo?.detectedFrameworks ?? [];
 
     // Group frameworks by category
-    const frontendFrameworks = this.getFrameworksByCategory(
-      detectedFrameworks,
-      ['frontend', 'fullstack'],
-    );
+    const frontendFrameworks = this.getFrameworksByCategory(detectedFrameworks, [
+      'frontend',
+      'fullstack',
+    ]);
     const backendFrameworks = this.getFrameworksByCategory(detectedFrameworks, [
       'backend',
       'fullstack',
     ]);
-    const databaseFrameworks = this.getFrameworksByCategory(
-      detectedFrameworks,
-      ['database'],
-    );
+    const databaseFrameworks = this.getFrameworksByCategory(detectedFrameworks, ['database']);
 
     // Check frontend
     const currentFrontend = config.techStack?.frontend ?? [];
-    const missingFrontend = frontendFrameworks.filter(
-      f => !currentFrontend.includes(f),
-    );
+    const missingFrontend = frontendFrameworks.filter(f => !currentFrontend.includes(f));
     if (missingFrontend.length > 0) {
       suggestions.push({
         field: 'techStack.frontend',
@@ -151,9 +143,7 @@ export class ConfigDiffService {
 
     // Check backend
     const currentBackend = config.techStack?.backend ?? [];
-    const missingBackend = backendFrameworks.filter(
-      f => !currentBackend.includes(f),
-    );
+    const missingBackend = backendFrameworks.filter(f => !currentBackend.includes(f));
     if (missingBackend.length > 0) {
       suggestions.push({
         field: 'techStack.backend',
@@ -166,9 +156,7 @@ export class ConfigDiffService {
 
     // Check database
     const currentDatabase = config.techStack?.database ?? [];
-    const missingDatabase = databaseFrameworks.filter(
-      f => !currentDatabase.includes(f),
-    );
+    const missingDatabase = databaseFrameworks.filter(f => !currentDatabase.includes(f));
     if (missingDatabase.length > 0) {
       suggestions.push({
         field: 'techStack.database',
@@ -234,14 +222,10 @@ export class ConfigDiffService {
   ): ConfigUpdateSuggestion[] {
     const suggestions: ConfigUpdateSuggestion[] = [];
     const detectedFrameworks = analysis.packageInfo?.detectedFrameworks ?? [];
-    const testFrameworks = this.getFrameworksByCategory(detectedFrameworks, [
-      'testing',
-    ]);
+    const testFrameworks = this.getFrameworksByCategory(detectedFrameworks, ['testing']);
 
     const currentTestFrameworks = config.testStrategy?.frameworks ?? [];
-    const missingTestFrameworks = testFrameworks.filter(
-      f => !currentTestFrameworks.includes(f),
-    );
+    const missingTestFrameworks = testFrameworks.filter(f => !currentTestFrameworks.includes(f));
 
     if (missingTestFrameworks.length > 0) {
       suggestions.push({
@@ -263,9 +247,7 @@ export class ConfigDiffService {
     frameworks: Array<{ name: string; category: FrameworkCategory }>,
     categories: FrameworkCategory[],
   ): string[] {
-    return frameworks
-      .filter(f => categories.includes(f.category))
-      .map(f => f.name);
+    return frameworks.filter(f => categories.includes(f.category)).map(f => f.name);
   }
 
   /**

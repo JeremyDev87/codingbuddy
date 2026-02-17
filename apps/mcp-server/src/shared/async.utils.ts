@@ -44,9 +44,7 @@ export interface AsyncWithFallbackOptions<T> {
  * });
  * ```
  */
-export async function asyncWithFallback<T>(
-  options: AsyncWithFallbackOptions<T>,
-): Promise<T> {
+export async function asyncWithFallback<T>(options: AsyncWithFallbackOptions<T>): Promise<T> {
   const { fn, fallback, errorMessage, logger } = options;
 
   try {
@@ -158,8 +156,7 @@ export async function withTimeout<T>(
   options: WithTimeoutOptions = {},
 ): Promise<T> {
   const configuredTimeout = getConfiguredTimeout();
-  const { timeoutMs = configuredTimeout, operationName = 'operation' } =
-    options;
+  const { timeoutMs = configuredTimeout, operationName = 'operation' } = options;
 
   let timeoutId: ReturnType<typeof setTimeout>;
 

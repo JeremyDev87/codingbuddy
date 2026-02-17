@@ -16,10 +16,7 @@ import { Logger } from '@nestjs/common';
 import { DEFAULT_ACT_AGENT, PLAN_PRIMARY_AGENTS } from '../keyword.types';
 import type { PrimaryAgentResolutionResult } from '../keyword.types';
 import { EXPLICIT_PATTERNS } from '../patterns';
-import type {
-  ResolutionStrategy,
-  StrategyContext,
-} from './resolution-strategy.interface';
+import type { ResolutionStrategy, StrategyContext } from './resolution-strategy.interface';
 
 /** Architecture-focused keywords (EN, KO, JA, ZH, ES) */
 const ARCHITECTURE_PATTERNS =
@@ -53,9 +50,7 @@ function parseExplicitRequest(
     if (match?.[1]) {
       const agentName = match[1].toLowerCase();
       const isAvailable = availableAgents.includes(agentName);
-      const isAllowed = (PLAN_PRIMARY_AGENTS as readonly string[]).includes(
-        agentName,
-      );
+      const isAllowed = (PLAN_PRIMARY_AGENTS as readonly string[]).includes(agentName);
       if (isAvailable && isAllowed) {
         return createResult(
           agentName,
@@ -72,10 +67,7 @@ function parseExplicitRequest(
 /**
  * Choose between solution-architect and technical-planner based on prompt.
  */
-function choosePlanAgent(
-  prompt: string,
-  availableAgents: string[],
-): PrimaryAgentResolutionResult {
+function choosePlanAgent(prompt: string, availableAgents: string[]): PrimaryAgentResolutionResult {
   const hasArchitectureIntent = ARCHITECTURE_PATTERNS.test(prompt);
   const hasPlanningIntent = PLANNING_PATTERNS.test(prompt);
 
@@ -150,9 +142,7 @@ export class PlanAgentStrategy implements ResolutionStrategy {
 
     // Analyze prompt to choose between solution-architect and technical-planner
     const result = choosePlanAgent(prompt, availableAgents);
-    this.logger.debug(
-      `PLAN agent resolved: ${result.agentName} (${result.reason})`,
-    );
+    this.logger.debug(`PLAN agent resolved: ${result.agentName} (${result.reason})`);
     return result;
   }
 }

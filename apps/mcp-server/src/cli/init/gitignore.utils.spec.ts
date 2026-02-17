@@ -44,10 +44,7 @@ describe('ensureGitignoreEntries', () => {
 
       const result = await ensureGitignoreEntries(projectRoot, entries);
 
-      expect(result.added).toEqual([
-        'docs/codingbuddy/context.md',
-        'docs/codingbuddy/sessions/',
-      ]);
+      expect(result.added).toEqual(['docs/codingbuddy/context.md', 'docs/codingbuddy/sessions/']);
       expect(result.alreadyExists).toEqual([]);
 
       const content = vol.readFileSync(`${projectRoot}/.gitignore`, 'utf-8');
@@ -59,10 +56,7 @@ describe('ensureGitignoreEntries', () => {
 
   describe('when .gitignore exists', () => {
     it('appends entries to existing content', async () => {
-      vol.writeFileSync(
-        `${projectRoot}/.gitignore`,
-        '# Existing content\nnode_modules/\n',
-      );
+      vol.writeFileSync(`${projectRoot}/.gitignore`, '# Existing content\nnode_modules/\n');
 
       const entries: GitignoreEntry[] = [
         {
@@ -98,10 +92,7 @@ describe('ensureGitignoreEntries', () => {
       expect(result.added).toEqual(['docs/codingbuddy/sessions/']);
       expect(result.alreadyExists).toEqual(['docs/codingbuddy/context.md']);
 
-      const content = vol.readFileSync(
-        `${projectRoot}/.gitignore`,
-        'utf-8',
-      ) as string;
+      const content = vol.readFileSync(`${projectRoot}/.gitignore`, 'utf-8') as string;
       // Should not have duplicate
       const matches = content.match(/docs\/codingbuddy\/context\.md/g);
       expect(matches?.length).toBe(1);
@@ -110,9 +101,7 @@ describe('ensureGitignoreEntries', () => {
     it('handles entries without trailing newline', async () => {
       vol.writeFileSync(`${projectRoot}/.gitignore`, 'node_modules/');
 
-      const entries: GitignoreEntry[] = [
-        { pattern: 'dist/', comment: '# Build output' },
-      ];
+      const entries: GitignoreEntry[] = [{ pattern: 'dist/', comment: '# Build output' }];
 
       const result = await ensureGitignoreEntries(projectRoot, entries);
 
@@ -155,9 +144,9 @@ describe('ensureGitignoreEntries', () => {
 
       const entries: GitignoreEntry[] = [{ pattern: 'new-entry/' }];
 
-      await expect(
-        ensureGitignoreEntries(invalidProjectRoot, entries),
-      ).rejects.toThrow('Failed to update .gitignore');
+      await expect(ensureGitignoreEntries(invalidProjectRoot, entries)).rejects.toThrow(
+        'Failed to update .gitignore',
+      );
     });
 
     it('includes original error message in GitignoreWriteError', async () => {
@@ -170,9 +159,7 @@ describe('ensureGitignoreEntries', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(GitignoreWriteError);
-        expect((error as GitignoreWriteError).message).toContain(
-          'Failed to update .gitignore',
-        );
+        expect((error as GitignoreWriteError).message).toContain('Failed to update .gitignore');
         expect((error as GitignoreWriteError).cause).toBeDefined();
       }
     });
@@ -183,9 +170,9 @@ describe('ensureGitignoreEntries', () => {
 
       const entries: GitignoreEntry[] = [{ pattern: 'new-entry/' }];
 
-      await expect(
-        ensureGitignoreEntries(projectRoot, entries),
-      ).rejects.toThrow('Failed to read .gitignore');
+      await expect(ensureGitignoreEntries(projectRoot, entries)).rejects.toThrow(
+        'Failed to read .gitignore',
+      );
     });
 
     it('includes original error in GitignoreReadError', async () => {
@@ -198,9 +185,7 @@ describe('ensureGitignoreEntries', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(GitignoreReadError);
-        expect((error as GitignoreReadError).message).toContain(
-          'Failed to read .gitignore',
-        );
+        expect((error as GitignoreReadError).message).toContain('Failed to read .gitignore');
         expect((error as GitignoreReadError).cause).toBeDefined();
       }
     });
@@ -218,22 +203,15 @@ describe('ensureGitignoreEntries', () => {
 
       await ensureGitignoreEntries(projectRoot, entries);
 
-      const content = vol.readFileSync(
-        `${projectRoot}/.gitignore`,
-        'utf-8',
-      ) as string;
-      const commentMatches = content.match(
-        /# Codingbuddy \(local workspace\)/g,
-      );
+      const content = vol.readFileSync(`${projectRoot}/.gitignore`, 'utf-8') as string;
+      const commentMatches = content.match(/# Codingbuddy \(local workspace\)/g);
       expect(commentMatches?.length).toBe(1);
     });
 
     it('adds blank line before comment section', async () => {
       vol.writeFileSync(`${projectRoot}/.gitignore`, 'node_modules/\n');
 
-      const entries: GitignoreEntry[] = [
-        { pattern: 'dist/', comment: '# Build' },
-      ];
+      const entries: GitignoreEntry[] = [{ pattern: 'dist/', comment: '# Build' }];
 
       await ensureGitignoreEntries(projectRoot, entries);
 

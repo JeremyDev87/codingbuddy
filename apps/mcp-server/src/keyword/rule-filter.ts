@@ -16,10 +16,7 @@ const CORE_RULES_PATH = 'rules/core.md';
  *
  * @see filterCoreRulesByMode - Returns original content when markers is null
  */
-const MODE_SECTION_MARKERS: Record<
-  Mode,
-  { start: RegExp; end: RegExp } | null
-> = {
+const MODE_SECTION_MARKERS: Record<Mode, { start: RegExp; end: RegExp } | null> = {
   PLAN: {
     start: /^### Plan Mode$/m,
     end: /^### Act Mode$/m,
@@ -67,11 +64,7 @@ export function filterCoreRulesByMode(content: string, mode: Mode): string {
   const result: string[] = [];
 
   // Extract common header (Work Modes section)
-  const commonHeader = extractSection(
-    lines,
-    COMMON_SECTION_START,
-    COMMON_SECTION_END,
-  );
+  const commonHeader = extractSection(lines, COMMON_SECTION_START, COMMON_SECTION_END);
   result.push(...commonHeader);
 
   // Extract mode-specific section
@@ -90,11 +83,7 @@ export function filterCoreRulesByMode(content: string, mode: Mode): string {
 /**
  * Extracts lines between start and end markers (exclusive of end).
  */
-function extractSection(
-  lines: string[],
-  startMarker: RegExp,
-  endMarker: RegExp,
-): string[] {
+function extractSection(lines: string[], startMarker: RegExp, endMarker: RegExp): string[] {
   const result: string[] = [];
   let inSection = false;
 
@@ -121,10 +110,7 @@ function extractSection(
  * @param mode - Current workflow mode
  * @returns Filtered rules with reduced token usage
  */
-export function filterRulesByMode(
-  rules: RuleContent[],
-  mode: Mode,
-): RuleContent[] {
+export function filterRulesByMode(rules: RuleContent[], mode: Mode): RuleContent[] {
   return rules.map(rule => {
     // Only filter core.md
     if (rule.name === CORE_RULES_PATH) {

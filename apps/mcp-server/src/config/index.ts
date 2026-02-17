@@ -34,11 +34,7 @@ export {
 
 export type { ValidationResult, ValidationError } from './config.schema';
 
-export {
-  validateConfig,
-  parseConfig,
-  isCodingBuddyConfig,
-} from './config.schema';
+export { validateConfig, parseConfig, isCodingBuddyConfig } from './config.schema';
 
 // ============================================================================
 // Config Loader
@@ -74,11 +70,7 @@ export {
 // Context Loader
 // ============================================================================
 
-export type {
-  ContextFile,
-  ContextFileType,
-  ContextLoadResult,
-} from './context.loader';
+export type { ContextFile, ContextFileType, ContextLoadResult } from './context.loader';
 
 export {
   CONTEXT_DIR_NAME,

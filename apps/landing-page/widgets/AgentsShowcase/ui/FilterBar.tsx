@@ -11,13 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const CATEGORIES: AgentCategory[] = [
-  'Planning',
-  'Development',
-  'Review',
-  'Security',
-  'UX',
-];
+const CATEGORIES: AgentCategory[] = ['Planning', 'Development', 'Review', 'Security', 'UX'];
 
 interface FilterBarProps {
   category: AgentCategory | 'all';

@@ -16,10 +16,7 @@ const Tabs = ({
       data-slot="tabs"
       data-orientation={orientation}
       orientation={orientation}
-      className={cn(
-        'group/tabs flex gap-2 data-[orientation=horizontal]:flex-col',
-        className,
-      )}
+      className={cn('group/tabs flex gap-2 data-[orientation=horizontal]:flex-col', className)}
       {...props}
     />
   );
@@ -44,8 +41,7 @@ const TabsList = ({
   className,
   variant = 'default',
   ...props
-}: ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) => {
+}: ComponentProps<typeof TabsPrimitive.List> & VariantProps<typeof tabsListVariants>) => {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -56,10 +52,7 @@ const TabsList = ({
   );
 };
 
-const TabsTrigger = ({
-  className,
-  ...props
-}: ComponentProps<typeof TabsPrimitive.Trigger>) => {
+const TabsTrigger = ({ className, ...props }: ComponentProps<typeof TabsPrimitive.Trigger>) => {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
@@ -75,10 +68,7 @@ const TabsTrigger = ({
   );
 };
 
-const TabsContent = ({
-  className,
-  ...props
-}: ComponentProps<typeof TabsPrimitive.Content>) => {
+const TabsContent = ({ className, ...props }: ComponentProps<typeof TabsPrimitive.Content>) => {
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"

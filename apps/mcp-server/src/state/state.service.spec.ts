@@ -201,9 +201,7 @@ describe('StateService', () => {
       const result = await service.clearState();
 
       expect(result.success).toBe(true);
-      expect(fs.unlink).toHaveBeenCalledWith(
-        path.join(stateDir, STATE_FILES.PROJECT_METADATA),
-      );
+      expect(fs.unlink).toHaveBeenCalledWith(path.join(stateDir, STATE_FILES.PROJECT_METADATA));
     });
 
     it('should handle missing files gracefully', async () => {

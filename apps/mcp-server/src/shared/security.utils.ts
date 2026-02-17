@@ -18,10 +18,7 @@ const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'] as const;
  * @param objPath - Current path in object (for error messages)
  * @returns The path to the dangerous key if found, null otherwise
  */
-export function containsDangerousKeys(
-  obj: unknown,
-  objPath = '',
-): string | null {
+export function containsDangerousKeys(obj: unknown, objPath = ''): string | null {
   if (obj === null || typeof obj !== 'object') {
     return null;
   }
@@ -166,8 +163,7 @@ export function validatePath(
 
   // Check path containment (prevent path traversal)
   const isContained =
-    resolvedTarget === resolvedBase ||
-    resolvedTarget.startsWith(resolvedBase + path.sep);
+    resolvedTarget === resolvedBase || resolvedTarget.startsWith(resolvedBase + path.sep);
 
   if (!isContained) {
     return {
@@ -205,10 +201,7 @@ export function validatePath(
  * @throws Error if path validation fails
  * @returns The resolved absolute path
  */
-export function assertPathSafe(
-  targetPath: string,
-  options: ValidatePathOptions,
-): string {
+export function assertPathSafe(targetPath: string, options: ValidatePathOptions): string {
   const result = validatePath(targetPath, options);
   if (!result.valid) {
     throw new Error(`Path validation failed: ${result.error}`);

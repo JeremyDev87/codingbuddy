@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  createJsonResponse,
-  createErrorResponse,
-  type ToolResponse,
-} from './response.utils';
+import { createJsonResponse, createErrorResponse, type ToolResponse } from './response.utils';
 
 describe('response.utils', () => {
   describe('createJsonResponse', () => {

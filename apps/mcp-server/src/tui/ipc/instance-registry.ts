@@ -71,9 +71,7 @@ export class InstanceRegistry {
     // Secondary check: verify socket file still exists to guard against
     // PID reuse where a different process was assigned the same PID.
     if (!fs.existsSync(instance.socketPath)) {
-      registryDebug(
-        `Process ${instance.pid} alive but socket missing: ${instance.socketPath}`,
-      );
+      registryDebug(`Process ${instance.pid} alive but socket missing: ${instance.socketPath}`);
       return false;
     }
     return true;
@@ -107,9 +105,7 @@ export class InstanceRegistry {
     // from redirecting writes to an arbitrary location via symlink on ~/.codingbuddy.
     const dirStat = fs.lstatSync(dir);
     if (!dirStat.isDirectory()) {
-      throw new Error(
-        `Instance registry directory is not a real directory: ${dir}`,
-      );
+      throw new Error(`Instance registry directory is not a real directory: ${dir}`);
     }
     const data: IpcInstancesFile = { instances };
     const tmpPath = this.filePath + `.tmp.${process.pid}`;

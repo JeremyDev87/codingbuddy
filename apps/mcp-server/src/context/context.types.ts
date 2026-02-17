@@ -118,18 +118,8 @@ export interface AnalyzeTaskOutput {
  * File pattern to category mapping
  */
 export const FILE_CATEGORY_PATTERNS: Record<string, string[]> = {
-  authentication: [
-    '**/auth/**',
-    '**/login/**',
-    '**/session/**',
-    '**/password/**',
-  ],
-  payment: [
-    '**/payment/**',
-    '**/checkout/**',
-    '**/billing/**',
-    '**/subscription/**',
-  ],
+  authentication: ['**/auth/**', '**/login/**', '**/session/**', '**/password/**'],
+  payment: ['**/payment/**', '**/checkout/**', '**/billing/**', '**/subscription/**'],
   api: ['**/api/**', '**/handler/**', '**/route/**', '**/endpoint/**'],
   ui: ['**/components/**', '**/features/**', '**/widgets/**', '**/page/**'],
   data: ['**/model/**', '**/entity/**', '**/schema/**', '**/database/**'],
@@ -154,11 +144,7 @@ export const CATEGORY_RISK_LEVELS: Record<string, RiskLevel> = {
 export const CATEGORY_SPECIALISTS: Record<string, string[]> = {
   authentication: ['security-specialist', 'test-strategy-specialist'],
   payment: ['security-specialist', 'test-strategy-specialist'],
-  api: [
-    'security-specialist',
-    'performance-specialist',
-    'test-strategy-specialist',
-  ],
+  api: ['security-specialist', 'performance-specialist', 'test-strategy-specialist'],
   ui: ['accessibility-specialist', 'ui-ux-designer', 'performance-specialist'],
   data: ['architecture-specialist', 'security-specialist'],
   testing: ['test-strategy-specialist', 'code-quality-specialist'],

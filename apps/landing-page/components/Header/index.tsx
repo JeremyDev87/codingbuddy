@@ -26,10 +26,7 @@ export const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav
-          className="hidden items-center gap-6 md:flex"
-          aria-label="Main navigation"
-        >
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
           {NAV_ITEMS.map(({ key, href }) => (
             <a
               key={key}

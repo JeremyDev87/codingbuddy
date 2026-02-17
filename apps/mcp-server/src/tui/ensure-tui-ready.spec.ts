@@ -5,9 +5,7 @@ function createMockApp() {
   const interceptor = { enable: vi.fn() };
   const metadataService = {
     initialize: vi.fn().mockResolvedValue(undefined),
-    getAllMetadata: vi
-      .fn()
-      .mockReturnValue([{ id: 'arch', name: 'architecture' }]),
+    getAllMetadata: vi.fn().mockReturnValue([{ id: 'arch', name: 'architecture' }]),
   };
   const eventBus = { emit: vi.fn() };
 

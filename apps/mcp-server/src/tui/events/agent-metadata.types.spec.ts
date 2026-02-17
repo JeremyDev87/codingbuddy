@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  type AgentCategory,
-  AGENT_CATEGORY_MAP,
-  AGENT_ICONS,
-} from './agent-metadata.types';
+import { type AgentCategory, AGENT_CATEGORY_MAP, AGENT_ICONS } from './agent-metadata.types';
 
 describe('AGENT_CATEGORY_MAP', () => {
   it('should have category for all known agents', () => {
@@ -39,10 +35,7 @@ describe('AGENT_CATEGORY_MAP', () => {
       'eval-mode',
     ];
     for (const agent of knownAgents) {
-      expect(
-        AGENT_CATEGORY_MAP[agent],
-        `Missing category for agent: ${agent}`,
-      ).toBeDefined();
+      expect(AGENT_CATEGORY_MAP[agent], `Missing category for agent: ${agent}`).toBeDefined();
     }
   });
 
@@ -102,19 +95,13 @@ describe('AGENT_ICONS', () => {
       'Mode',
     ];
     for (const cat of categories) {
-      expect(
-        AGENT_ICONS[cat],
-        `Missing icon for category: ${cat}`,
-      ).toBeDefined();
+      expect(AGENT_ICONS[cat], `Missing icon for category: ${cat}`).toBeDefined();
     }
   });
 
   it('should return non-empty string icons', () => {
     for (const [category, icon] of Object.entries(AGENT_ICONS)) {
-      expect(
-        icon.length,
-        `Empty icon for category: ${category}`,
-      ).toBeGreaterThan(0);
+      expect(icon.length, `Empty icon for category: ${category}`).toBeGreaterThan(0);
     }
   });
 });

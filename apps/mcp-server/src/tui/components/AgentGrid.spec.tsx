@@ -33,16 +33,12 @@ const mockAgents: AgentMetadata[] = [
 
 describe('AgentGrid', () => {
   it('should render nothing when no agents', () => {
-    const { lastFrame } = render(
-      <AgentGrid allAgents={[]} activeAgentIds={new Set()} />,
-    );
+    const { lastFrame } = render(<AgentGrid allAgents={[]} activeAgentIds={new Set()} />);
     expect(lastFrame()).toBe('');
   });
 
   it('should render category rows', () => {
-    const { lastFrame } = render(
-      <AgentGrid allAgents={mockAgents} activeAgentIds={new Set()} />,
-    );
+    const { lastFrame } = render(<AgentGrid allAgents={mockAgents} activeAgentIds={new Set()} />);
     expect(lastFrame()).toContain('Architecture');
     expect(lastFrame()).toContain('Security');
     expect(lastFrame()).toContain('Testing');
@@ -50,10 +46,7 @@ describe('AgentGrid', () => {
 
   it('should place active agent categories first', () => {
     const { lastFrame } = render(
-      <AgentGrid
-        allAgents={mockAgents}
-        activeAgentIds={new Set(['security-specialist'])}
-      />,
+      <AgentGrid allAgents={mockAgents} activeAgentIds={new Set(['security-specialist'])} />,
     );
     const output = lastFrame() ?? '';
     const securityIdx = output.indexOf('Security');

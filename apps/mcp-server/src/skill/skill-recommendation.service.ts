@@ -39,10 +39,7 @@ export class SkillRecommendationService {
     }
 
     const triggers = getSortedTriggers();
-    const skillMatches = new Map<
-      string,
-      { matchedPatterns: string[]; priority: number }
-    >();
+    const skillMatches = new Map<string, { matchedPatterns: string[]; priority: number }>();
 
     // Test each trigger's patterns against the prompt
     for (const trigger of triggers) {

@@ -224,11 +224,7 @@ export const NEGATION_PATTERNS: RegExp[] = [
  * @param matchEnd - End index of the match (optional, defaults to matchIndex + 10)
  * @returns true if the match is negated
  */
-export function isNegatedMatch(
-  prompt: string,
-  matchIndex: number,
-  matchEnd?: number,
-): boolean {
+export function isNegatedMatch(prompt: string, matchIndex: number, matchEnd?: number): boolean {
   // Get text before the match (up to 30 chars for context)
   const contextStart = Math.max(0, matchIndex - 30);
   const textBefore = prompt.slice(contextStart, matchIndex);

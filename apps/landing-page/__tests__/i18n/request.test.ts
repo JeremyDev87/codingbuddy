@@ -36,8 +36,7 @@ describe('i18n request config logic', () => {
   describe('message file loading', () => {
     test('all message files can be dynamically imported', async () => {
       for (const locale of SUPPORTED_LOCALES) {
-        const messages = (await import(`../../messages/${locale}.json`))
-          .default;
+        const messages = (await import(`../../messages/${locale}.json`)).default;
         expect(messages).toBeDefined();
         expect(messages.hero).toBeDefined();
         expect(messages.hero.title).toBeTruthy();
@@ -45,9 +44,7 @@ describe('i18n request config logic', () => {
     });
 
     test('default locale message file is always available as fallback', async () => {
-      const messages = (
-        await import(`../../messages/${routing.defaultLocale}.json`)
-      ).default;
+      const messages = (await import(`../../messages/${routing.defaultLocale}.json`)).default;
       expect(messages).toBeDefined();
       expect(Object.keys(messages)).toEqual([
         'hero',

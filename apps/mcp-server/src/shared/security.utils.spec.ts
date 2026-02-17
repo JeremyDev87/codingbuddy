@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  isPathSafe,
-  validatePath,
-  assertPathSafe,
-  sanitizeHandlerArgs,
-} from './security.utils';
+import { isPathSafe, validatePath, assertPathSafe, sanitizeHandlerArgs } from './security.utils';
 
 describe('isPathSafe', () => {
   const baseDir = '/app/rules';
@@ -215,9 +210,7 @@ describe('assertPathSafe', () => {
   });
 
   it('throws with descriptive error message', () => {
-    expect(() =>
-      assertPathSafe('test\x00.json', { basePath: baseDir }),
-    ).toThrow('null bytes');
+    expect(() => assertPathSafe('test\x00.json', { basePath: baseDir })).toThrow('null bytes');
   });
 
   it('throws for disallowed extension', () => {
@@ -291,27 +284,21 @@ describe('sanitizeHandlerArgs', () => {
     });
 
     it('rejects __proto__ in nested object', () => {
-      const args = JSON.parse(
-        '{"query": "test", "options": {"__proto__": {"polluted": true}}}',
-      );
+      const args = JSON.parse('{"query": "test", "options": {"__proto__": {"polluted": true}}}');
       const result = sanitizeHandlerArgs(args);
       expect(result.safe).toBe(false);
       expect(result.error).toContain('options.__proto__');
     });
 
     it('rejects dangerous keys in deeply nested objects', () => {
-      const args = JSON.parse(
-        '{"level1": {"level2": {"level3": {"__proto__": {}}}}}',
-      );
+      const args = JSON.parse('{"level1": {"level2": {"level3": {"__proto__": {}}}}}');
       const result = sanitizeHandlerArgs(args);
       expect(result.safe).toBe(false);
       expect(result.error).toContain('level1.level2.level3.__proto__');
     });
 
     it('rejects dangerous keys in arrays', () => {
-      const args = JSON.parse(
-        '{"items": [{"name": "safe"}, {"__proto__": {}}]}',
-      );
+      const args = JSON.parse('{"items": [{"name": "safe"}, {"__proto__": {}}]}');
       const result = sanitizeHandlerArgs(args);
       expect(result.safe).toBe(false);
       expect(result.error).toContain('items[1].__proto__');

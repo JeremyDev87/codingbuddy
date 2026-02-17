@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  renderConfigSummary,
-  type ConfigSummaryData,
-} from './summary.renderer';
+import { renderConfigSummary, type ConfigSummaryData } from './summary.renderer';
 
 describe('summary.renderer', () => {
   const sampleData: ConfigSummaryData = {

@@ -1,11 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { FileWarning, Copy, ShieldOff, Unplug } from 'lucide-react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { WidgetProps } from '@/types';
 
 const painPoints = [
@@ -27,10 +22,7 @@ export const Problem = async ({ locale }: WidgetProps) => {
     >
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
-          <h2
-            id="problem-heading"
-            className="text-3xl font-bold tracking-tight sm:text-4xl"
-          >
+          <h2 id="problem-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t('title')}
           </h2>
           <p className="text-muted-foreground mt-4 text-lg">{t('subtitle')}</p>

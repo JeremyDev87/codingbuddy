@@ -19,8 +19,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     pain1Desc:
       'Each tool needs its own config — .cursorrules, CLAUDE.md, .codex — with no shared standard.',
     pain2Title: 'Duplicated Effort',
-    pain2Desc:
-      'Copy-paste the same coding rules across multiple tools every time you update them.',
+    pain2Desc: 'Copy-paste the same coding rules across multiple tools every time you update them.',
     pain3Title: 'No Quality Standards',
     pain3Desc:
       'AI generates code without structured TDD, SOLID principles, or coverage requirements.',
@@ -42,8 +41,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     benefit3Desc:
       'PLAN → ACT → EVAL cycle ensures consistent quality across all your AI-assisted development.',
     benefit4Title: 'Quality Built-in',
-    benefit4Desc:
-      'TDD, SOLID principles, and 90%+ test coverage enforced as standard practice.',
+    benefit4Desc: 'TDD, SOLID principles, and 90%+ test coverage enforced as standard practice.',
   },
   agents: {
     title: 'AI Specialist Agents',
@@ -76,8 +74,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     step2: 'Configure Your AI Tool',
     step2Desc: "Add the MCP server config to your AI tool's settings file",
     step3: 'Start Coding',
-    step3Desc:
-      'Use PLAN, ACT, and EVAL modes with specialist agents across all your tools',
+    step3Desc: 'Use PLAN, ACT, and EVAL modes with specialist agents across all your tools',
     copy: 'Copy',
     copied: 'Copied!',
     copyFailed: 'Copy failed',
@@ -105,8 +102,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
   },
   cookieConsent: {
     label: 'Cookie consent',
-    message:
-      'We use cookies to enhance your experience and analyze site traffic.',
+    message: 'We use cookies to enhance your experience and analyze site traffic.',
     accept: 'Accept',
     decline: 'Decline',
   },
@@ -118,8 +114,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
   },
   metadata: {
     title: 'Codingbuddy - Multi-AI Rules for Consistent Coding',
-    description:
-      'One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.',
+    description: 'One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.',
   },
   faq: {
     title: 'Frequently Asked Questions',

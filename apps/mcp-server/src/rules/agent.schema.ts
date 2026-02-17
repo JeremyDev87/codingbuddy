@@ -97,9 +97,7 @@ export function parseAgentProfile(data: unknown): ValidatedAgentProfile {
     // Check for prototype pollution attempts
     const dangerousKey = containsDangerousKeys(data);
     if (dangerousKey) {
-      throw new AgentSchemaError(
-        `Invalid agent profile: Dangerous key "${dangerousKey}" detected`,
-      );
+      throw new AgentSchemaError(`Invalid agent profile: Dangerous key "${dangerousKey}" detected`);
     }
 
     // Validate with Zod
@@ -112,10 +110,7 @@ export function parseAgentProfile(data: unknown): ValidatedAgentProfile {
           return `${pathStr}: ${issue.message}`;
         })
         .join(', ');
-      throw new AgentSchemaError(
-        `Invalid agent profile: ${errorMessage}`,
-        result.error,
-      );
+      throw new AgentSchemaError(`Invalid agent profile: ${errorMessage}`, result.error);
     }
 
     return result.data as ValidatedAgentProfile;

@@ -147,10 +147,9 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
-          'PLAN test task',
-          { verbosity: 'standard' },
-        );
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('PLAN test task', {
+          verbosity: 'standard',
+        });
       });
 
       it('should return error for missing prompt', async () => {
@@ -176,10 +175,10 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
-          'ACT implement feature',
-          { recommendedActAgent: 'frontend-developer', verbosity: 'standard' },
-        );
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('ACT implement feature', {
+          recommendedActAgent: 'frontend-developer',
+          verbosity: 'standard',
+        });
       });
 
       it('should ignore empty recommended_agent', async () => {
@@ -189,10 +188,9 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
-          'ACT implement feature',
-          { verbosity: 'standard' },
-        );
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('ACT implement feature', {
+          verbosity: 'standard',
+        });
       });
 
       it('should ignore non-string recommended_agent', async () => {
@@ -202,10 +200,9 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
-          'ACT implement feature',
-          { verbosity: 'standard' },
-        );
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('ACT implement feature', {
+          verbosity: 'standard',
+        });
       });
 
       it('should pass verbosity when provided', async () => {
@@ -215,10 +212,9 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
-          'PLAN design feature',
-          { verbosity: 'minimal' },
-        );
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('PLAN design feature', {
+          verbosity: 'minimal',
+        });
       });
 
       it('should use standard verbosity as default', async () => {
@@ -227,10 +223,9 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockKeywordService.parseMode).toHaveBeenCalledWith(
-          'PLAN design feature',
-          { verbosity: 'standard' },
-        );
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('PLAN design feature', {
+          verbosity: 'standard',
+        });
       });
 
       it('should reload config before getting language to ensure fresh settings', async () => {
@@ -243,11 +238,10 @@ describe('ModeHandler', () => {
 
         // Verify reload is called before getLanguage
         const reloadCallOrder =
-          (mockConfigService.reload as ReturnType<typeof vi.fn>).mock
-            .invocationCallOrder[0] ?? 0;
+          (mockConfigService.reload as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0] ?? 0;
         const getLanguageCallOrder =
-          (mockConfigService.getLanguage as ReturnType<typeof vi.fn>).mock
-            .invocationCallOrder[0] ?? 0;
+          (mockConfigService.getLanguage as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0] ??
+          0;
         expect(reloadCallOrder).toBeLessThan(getLanguageCallOrder);
       });
 
@@ -275,9 +269,7 @@ describe('ModeHandler', () => {
       });
 
       it('should return error when keyword service fails', async () => {
-        mockKeywordService.parseMode = vi
-          .fn()
-          .mockRejectedValue(new Error('Parse error'));
+        mockKeywordService.parseMode = vi.fn().mockRejectedValue(new Error('Parse error'));
 
         const result = await handler.handle('parse_mode', {
           prompt: 'PLAN test',
@@ -305,20 +297,16 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        const parsed = JSON.parse(
-          (result?.content[0] as { text: string }).text,
-        );
+        const parsed = JSON.parse((result?.content[0] as { text: string }).text);
         expect(parsed.dispatchReady).toBeDefined();
         expect(parsed.dispatchReady.primaryAgent).toBeDefined();
-        expect(parsed.dispatchReady.primaryAgent.name).toBe(
-          'frontend-developer',
+        expect(parsed.dispatchReady.primaryAgent.name).toBe('frontend-developer');
+        expect(parsed.dispatchReady.primaryAgent.dispatchParams.subagent_type).toBe(
+          'general-purpose',
         );
-        expect(
-          parsed.dispatchReady.primaryAgent.dispatchParams.subagent_type,
-        ).toBe('general-purpose');
-        expect(
-          parsed.dispatchReady.primaryAgent.dispatchParams.prompt,
-        ).toContain('You are a frontend developer');
+        expect(parsed.dispatchReady.primaryAgent.dispatchParams.prompt).toContain(
+          'You are a frontend developer',
+        );
       });
 
       it('should not include dispatchReady when no agents are present', async () => {
@@ -328,9 +316,7 @@ describe('ModeHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        const parsed = JSON.parse(
-          (result?.content[0] as { text: string }).text,
-        );
+        const parsed = JSON.parse((result?.content[0] as { text: string }).text);
         expect(parsed.dispatchReady).toBeUndefined();
       });
     });
@@ -390,9 +376,7 @@ describe('ModeHandler', () => {
 
         const responseText = result?.content[0]?.text;
         const response = JSON.parse(responseText as string);
-        expect(response.contextWarning).toContain(
-          'Failed to create context document',
-        );
+        expect(response.contextWarning).toContain('Failed to create context document');
       });
     });
 
@@ -511,15 +495,11 @@ describe('ModeHandler', () => {
       const response = JSON.parse(result?.content[0]?.text as string);
       expect(response.dispatchReady).toBeDefined();
       expect(response.dispatchReady.primaryAgent).toBeDefined();
-      expect(response.dispatchReady.primaryAgent.name).toBe(
-        'solution-architect',
+      expect(response.dispatchReady.primaryAgent.name).toBe('solution-architect');
+      expect(response.dispatchReady.primaryAgent.displayName).toBe('Solution Architect');
+      expect(response.dispatchReady.primaryAgent.dispatchParams.subagent_type).toBe(
+        'general-purpose',
       );
-      expect(response.dispatchReady.primaryAgent.displayName).toBe(
-        'Solution Architect',
-      );
-      expect(
-        response.dispatchReady.primaryAgent.dispatchParams.subagent_type,
-      ).toBe('general-purpose');
     });
 
     it('should include parallel agents in dispatchReady when verbosity is full', async () => {
@@ -557,10 +537,7 @@ describe('ModeHandler', () => {
       const response = JSON.parse(result?.content[0]?.text as string);
       expect(response.dispatchReady).toBeDefined();
       expect(response.dispatchReady.parallelAgents).toHaveLength(1);
-      expect(
-        response.dispatchReady.parallelAgents[0].dispatchParams
-          .run_in_background,
-      ).toBe(true);
+      expect(response.dispatchReady.parallelAgents[0].dispatchParams.run_in_background).toBe(true);
     });
 
     it('should not include parallel agents when verbosity is not full', async () => {
@@ -608,9 +585,7 @@ describe('ModeHandler', () => {
         },
       });
 
-      mockAgentService.dispatchAgents = vi
-        .fn()
-        .mockRejectedValue(new Error('Agent load failed'));
+      mockAgentService.dispatchAgents = vi.fn().mockRejectedValue(new Error('Agent load failed'));
 
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design auth feature',

@@ -36,21 +36,11 @@ describe('FAQ', () => {
 
   it('should render 6 FAQ items', async () => {
     render(await FAQ({ locale: 'en' }));
-    expect(
-      screen.getByText('What AI tools does Codingbuddy support?'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('How does the PLAN/ACT/EVAL workflow work?'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Do I need to configure each AI tool separately?'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Is Codingbuddy free and open source?'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Can I customize the rules and agents?'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('What AI tools does Codingbuddy support?')).toBeInTheDocument();
+    expect(screen.getByText('How does the PLAN/ACT/EVAL workflow work?')).toBeInTheDocument();
+    expect(screen.getByText('Do I need to configure each AI tool separately?')).toBeInTheDocument();
+    expect(screen.getByText('Is Codingbuddy free and open source?')).toBeInTheDocument();
+    expect(screen.getByText('Can I customize the rules and agents?')).toBeInTheDocument();
     expect(screen.getByText('What are specialist agents?')).toBeInTheDocument();
   });
 
@@ -63,12 +53,8 @@ describe('FAQ', () => {
     const user = userEvent.setup();
     render(await FAQ({ locale: 'en' }));
 
-    await user.click(
-      screen.getByText('How does the PLAN/ACT/EVAL workflow work?'),
-    );
+    await user.click(screen.getByText('How does the PLAN/ACT/EVAL workflow work?'));
 
-    expect(
-      screen.getByText(/PLAN mode designs your implementation/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/PLAN mode designs your implementation/)).toBeInTheDocument();
   });
 });

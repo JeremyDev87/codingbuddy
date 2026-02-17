@@ -24,9 +24,7 @@ describe('SkillRecommendationService', () => {
 
       expect(result.recommendations.length).toBeGreaterThan(0);
       expect(result.recommendations[0].skillName).toBe('systematic-debugging');
-      expect(result.recommendations[0].matchedPatterns.length).toBeGreaterThan(
-        0,
-      );
+      expect(result.recommendations[0].matchedPatterns.length).toBeGreaterThan(0);
     });
 
     it('should include original prompt in result', () => {
@@ -42,17 +40,13 @@ describe('SkillRecommendationService', () => {
       it('"There is a bug in the login" -> systematic-debugging', () => {
         const result = service.recommendSkills('There is a bug in the login');
 
-        expect(result.recommendations[0].skillName).toBe(
-          'systematic-debugging',
-        );
+        expect(result.recommendations[0].skillName).toBe('systematic-debugging');
       });
 
       it('should recommend brainstorming for "build" keyword', () => {
         const result = service.recommendSkills('I want to build a new feature');
 
-        const hasExpectedSkill = result.recommendations.some(
-          r => r.skillName === 'brainstorming',
-        );
+        const hasExpectedSkill = result.recommendations.some(r => r.skillName === 'brainstorming');
         expect(hasExpectedSkill).toBe(true);
       });
     });
@@ -61,9 +55,7 @@ describe('SkillRecommendationService', () => {
       it('"로그인에 버그가 있어" -> systematic-debugging', () => {
         const result = service.recommendSkills('로그인에 버그가 있어');
 
-        expect(result.recommendations[0].skillName).toBe(
-          'systematic-debugging',
-        );
+        expect(result.recommendations[0].skillName).toBe('systematic-debugging');
       });
 
       it('"버튼 만들어줘" -> frontend-design', () => {
@@ -80,9 +72,7 @@ describe('SkillRecommendationService', () => {
       it('"ログインにバグがある" -> systematic-debugging', () => {
         const result = service.recommendSkills('ログインにバグがある');
 
-        expect(result.recommendations[0].skillName).toBe(
-          'systematic-debugging',
-        );
+        expect(result.recommendations[0].skillName).toBe('systematic-debugging');
       });
 
       it('"ボタンを作って" -> frontend-design', () => {
@@ -99,9 +89,7 @@ describe('SkillRecommendationService', () => {
       it('"登录有错误" -> systematic-debugging', () => {
         const result = service.recommendSkills('登录有错误');
 
-        expect(result.recommendations[0].skillName).toBe(
-          'systematic-debugging',
-        );
+        expect(result.recommendations[0].skillName).toBe('systematic-debugging');
       });
 
       it('"创建一个按钮" -> frontend-design', () => {
@@ -118,9 +106,7 @@ describe('SkillRecommendationService', () => {
       it('"Hay un error en el login" -> systematic-debugging', () => {
         const result = service.recommendSkills('Hay un error en el login');
 
-        expect(result.recommendations[0].skillName).toBe(
-          'systematic-debugging',
-        );
+        expect(result.recommendations[0].skillName).toBe('systematic-debugging');
       });
 
       it('"crear un botón" -> frontend-design', () => {
@@ -137,13 +123,9 @@ describe('SkillRecommendationService', () => {
   describe('confidence levels', () => {
     it('should return high confidence when multiple patterns match', () => {
       // "fix", "bug", "error" all match - 3 or more
-      const result = service.recommendSkills(
-        'I need to fix this bug error issue',
-      );
+      const result = service.recommendSkills('I need to fix this bug error issue');
 
-      const debugging = result.recommendations.find(
-        r => r.skillName === 'systematic-debugging',
-      );
+      const debugging = result.recommendations.find(r => r.skillName === 'systematic-debugging');
       expect(debugging?.confidence).toBe('high');
     });
 
@@ -151,9 +133,7 @@ describe('SkillRecommendationService', () => {
       // single keyword match only
       const result = service.recommendSkills('There is an error here');
 
-      const debugging = result.recommendations.find(
-        r => r.skillName === 'systematic-debugging',
-      );
+      const debugging = result.recommendations.find(r => r.skillName === 'systematic-debugging');
       expect(debugging?.confidence).toBe('medium');
     });
 
@@ -167,9 +147,7 @@ describe('SkillRecommendationService', () => {
   describe('priority sorting', () => {
     it('should return higher priority skills first', () => {
       // "error" -> debugging (25), "create" -> brainstorming (10)
-      const result = service.recommendSkills(
-        'I need to create something but there is an error',
-      );
+      const result = service.recommendSkills('I need to create something but there is an error');
 
       expect(result.recommendations.length).toBeGreaterThanOrEqual(2);
 
@@ -206,9 +184,7 @@ describe('SkillRecommendationService', () => {
       // refactoring should appear first due to higher priority
       const result = service.recommendSkills('I want to refactor this code');
 
-      const refactoringIdx = result.recommendations.findIndex(
-        r => r.skillName === 'refactoring',
-      );
+      const refactoringIdx = result.recommendations.findIndex(r => r.skillName === 'refactoring');
       const writingPlansIdx = result.recommendations.findIndex(
         r => r.skillName === 'writing-plans',
       );
@@ -225,12 +201,8 @@ describe('SkillRecommendationService', () => {
       // "code smell" is unique to refactoring skill
       const result = service.recommendSkills('this code has a code smell');
 
-      const hasRefactoring = result.recommendations.some(
-        r => r.skillName === 'refactoring',
-      );
-      const hasWritingPlans = result.recommendations.some(
-        r => r.skillName === 'writing-plans',
-      );
+      const hasRefactoring = result.recommendations.some(r => r.skillName === 'refactoring');
+      const hasWritingPlans = result.recommendations.some(r => r.skillName === 'writing-plans');
 
       expect(hasRefactoring).toBe(true);
       expect(hasWritingPlans).toBe(false);
@@ -238,16 +210,10 @@ describe('SkillRecommendationService', () => {
 
     it('should recommend only writing-plans for architecture planning (not refactoring)', () => {
       // "architecture plan" is unique to writing-plans skill
-      const result = service.recommendSkills(
-        'I need to plan the architecture for this project',
-      );
+      const result = service.recommendSkills('I need to plan the architecture for this project');
 
-      const hasWritingPlans = result.recommendations.some(
-        r => r.skillName === 'writing-plans',
-      );
-      const hasRefactoring = result.recommendations.some(
-        r => r.skillName === 'refactoring',
-      );
+      const hasWritingPlans = result.recommendations.some(r => r.skillName === 'writing-plans');
+      const hasRefactoring = result.recommendations.some(r => r.skillName === 'refactoring');
 
       expect(hasWritingPlans).toBe(true);
       expect(hasRefactoring).toBe(false);
@@ -264,58 +230,43 @@ describe('SkillRecommendationService', () => {
     it('"Let\'s implement using TDD" -> test-driven-development', () => {
       const result = service.recommendSkills("Let's implement using TDD");
 
-      const hasTdd = result.recommendations.some(
-        r => r.skillName === 'test-driven-development',
-      );
+      const hasTdd = result.recommendations.some(r => r.skillName === 'test-driven-development');
       expect(hasTdd).toBe(true);
     });
 
     it('"Design a new user profile feature" -> brainstorming', () => {
-      const result = service.recommendSkills(
-        'Design a new user profile feature',
-      );
+      const result = service.recommendSkills('Design a new user profile feature');
 
       // "new" and "design" keywords match brainstorming
-      const hasBrainstorming = result.recommendations.some(
-        r => r.skillName === 'brainstorming',
-      );
+      const hasBrainstorming = result.recommendations.some(r => r.skillName === 'brainstorming');
       expect(hasBrainstorming).toBe(true);
     });
 
     it('"Execute the plan step by step" -> executing-plans', () => {
       const result = service.recommendSkills('Execute the plan step by step');
 
-      const hasExecuting = result.recommendations.some(
-        r => r.skillName === 'executing-plans',
-      );
+      const hasExecuting = result.recommendations.some(r => r.skillName === 'executing-plans');
       expect(hasExecuting).toBe(true);
     });
 
     it('"Let\'s write an implementation plan" -> writing-plans', () => {
-      const result = service.recommendSkills(
-        "Let's write an implementation plan",
-      );
+      const result = service.recommendSkills("Let's write an implementation plan");
 
-      const hasWriting = result.recommendations.some(
-        r => r.skillName === 'writing-plans',
-      );
+      const hasWriting = result.recommendations.some(r => r.skillName === 'writing-plans');
       expect(hasWriting).toBe(true);
     });
 
     it('"Build a dashboard UI" -> frontend-design', () => {
       const result = service.recommendSkills('Build a dashboard UI');
 
-      const hasFrontend = result.recommendations.some(
-        r => r.skillName === 'frontend-design',
-      );
+      const hasFrontend = result.recommendations.some(r => r.skillName === 'frontend-design');
       expect(hasFrontend).toBe(true);
     });
   });
 
   describe('RecommendSkillsResult structure', () => {
     it('should have correct result object structure', () => {
-      const result: RecommendSkillsResult =
-        service.recommendSkills('fix the bug');
+      const result: RecommendSkillsResult = service.recommendSkills('fix the bug');
 
       expect(result).toHaveProperty('recommendations');
       expect(result).toHaveProperty('originalPrompt');
@@ -400,9 +351,7 @@ describe('SkillRecommendationService', () => {
 
       // Check sorted by priority descending
       for (let i = 1; i < result.skills.length; i++) {
-        expect(result.skills[i - 1].priority).toBeGreaterThanOrEqual(
-          result.skills[i].priority,
-        );
+        expect(result.skills[i - 1].priority).toBeGreaterThanOrEqual(result.skills[i].priority);
       }
     });
 

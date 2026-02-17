@@ -5,19 +5,11 @@
  */
 
 // Model prompt
-export {
-  getModelChoices,
-  promptModelSelection,
-  DEFAULT_MODEL_CHOICE,
-} from './model-prompt';
+export { getModelChoices, promptModelSelection, DEFAULT_MODEL_CHOICE } from './model-prompt';
 export type { ModelChoice } from './model-prompt';
 
 // Language prompt
-export {
-  getLanguageChoices,
-  promptLanguageSelection,
-  DEFAULT_LANGUAGE,
-} from './language-prompt';
+export { getLanguageChoices, promptLanguageSelection, DEFAULT_LANGUAGE } from './language-prompt';
 export type { LanguageChoice } from './language-prompt';
 
 // Agent prompt
@@ -47,11 +39,7 @@ export {
   BACKEND_CHOICES,
   TOOL_CHOICES,
 } from './tech-stack-prompt';
-export type {
-  TechStackSettings,
-  TechStackPromptOptions,
-  StackChoice,
-} from './tech-stack-prompt';
+export type { TechStackSettings, TechStackPromptOptions, StackChoice } from './tech-stack-prompt';
 
 // Architecture prompt
 export {

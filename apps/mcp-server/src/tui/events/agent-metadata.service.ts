@@ -1,10 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RulesService } from '../../rules/rules.service';
-import {
-  type AgentMetadata,
-  AGENT_CATEGORY_MAP,
-  AGENT_ICONS,
-} from './agent-metadata.types';
+import { type AgentMetadata, AGENT_CATEGORY_MAP, AGENT_ICONS } from './agent-metadata.types';
 
 @Injectable()
 export class AgentMetadataService {

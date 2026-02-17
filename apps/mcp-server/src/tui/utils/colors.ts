@@ -3,13 +3,12 @@ import type { AgentStatus } from '../types';
 
 export type ColorDepth = 'none' | 'basic' | '256' | 'truecolor';
 
-export const STATUS_COLORS: Readonly<Record<AgentStatus, string>> =
-  Object.freeze({
-    idle: 'gray',
-    running: 'cyan',
-    completed: 'green',
-    failed: 'red',
-  });
+export const STATUS_COLORS: Readonly<Record<AgentStatus, string>> = Object.freeze({
+  idle: 'gray',
+  running: 'cyan',
+  completed: 'green',
+  failed: 'red',
+});
 
 const DEFAULT_COLOR = 'gray';
 

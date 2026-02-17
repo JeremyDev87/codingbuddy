@@ -112,10 +112,7 @@ export async function promptTechStackSettings(
 ): Promise<TechStackSettings> {
   const languages = await checkbox({
     message: 'Select programming languages:',
-    choices: getChoicesWithDefaults(
-      LANGUAGE_CHOICES,
-      options.detectedLanguages,
-    ),
+    choices: getChoicesWithDefaults(LANGUAGE_CHOICES, options.detectedLanguages),
   });
 
   const frontend = await checkbox({

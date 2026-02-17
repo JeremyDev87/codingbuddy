@@ -40,8 +40,7 @@ const MAX_DESCRIPTION_LENGTH = 250;
  * - Cannot start with dot or underscore
  * - Scoped packages: @scope/name
  */
-const PROJECT_NAME_PATTERN =
-  /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9][a-z0-9-._~]*$/;
+const PROJECT_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9][a-z0-9-._~]*$/;
 
 /**
  * Validate project name follows npm package naming conventions

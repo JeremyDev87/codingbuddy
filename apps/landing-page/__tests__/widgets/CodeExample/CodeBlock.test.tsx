@@ -39,9 +39,7 @@ describe('CodeBlock', () => {
 
   it('should include copy button', () => {
     render(<CodeBlock {...defaultProps} />);
-    expect(
-      screen.getByRole('button', { name: 'Copy code' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy code' })).toBeInTheDocument();
   });
 
   it('should render multiline code with correct line numbers', () => {

@@ -15,15 +15,11 @@ vi.mock('../../shared/security.utils', () => ({
 // Mock validation constants module
 vi.mock('../../shared/validation.constants', () => ({
   extractOptionalString: vi.fn(
-    (args: Record<string, unknown> | undefined, key: string) =>
-      args?.[key] as string | undefined,
+    (args: Record<string, unknown> | undefined, key: string) => args?.[key] as string | undefined,
   ),
 }));
 
-import {
-  assertPathSafe,
-  sanitizeHandlerArgs,
-} from '../../shared/security.utils';
+import { assertPathSafe, sanitizeHandlerArgs } from '../../shared/security.utils';
 import { extractOptionalString } from '../../shared/validation.constants';
 
 describe('ConventionsHandler', () => {
@@ -76,23 +72,15 @@ describe('ConventionsHandler', () => {
       getProjectRoot: vi.fn().mockReturnValue(mockProjectRoot),
     } as unknown as ConfigService;
 
-    handler = new ConventionsHandler(
-      mockConventionsAnalyzer,
-      mockConfigService,
-    );
+    handler = new ConventionsHandler(mockConventionsAnalyzer, mockConfigService);
 
     // Reset mocks to default behavior
-    (assertPathSafe as ReturnType<typeof vi.fn>).mockImplementation(
-      (path: string) => path,
-    );
-    (sanitizeHandlerArgs as ReturnType<typeof vi.fn>).mockImplementation(
-      () => ({
-        safe: true,
-      }),
-    );
+    (assertPathSafe as ReturnType<typeof vi.fn>).mockImplementation((path: string) => path);
+    (sanitizeHandlerArgs as ReturnType<typeof vi.fn>).mockImplementation(() => ({
+      safe: true,
+    }));
     (extractOptionalString as ReturnType<typeof vi.fn>).mockImplementation(
-      (args: Record<string, unknown> | undefined, key: string) =>
-        args?.[key] as string | undefined,
+      (args: Record<string, unknown> | undefined, key: string) => args?.[key] as string | undefined,
     );
   });
 
@@ -113,9 +101,9 @@ describe('ConventionsHandler', () => {
           basePath: mockProjectRoot,
           allowAbsolute: true,
         });
-        expect(
-          mockConventionsAnalyzer.analyzeProjectConventions,
-        ).toHaveBeenCalledWith(mockProjectRoot);
+        expect(mockConventionsAnalyzer.analyzeProjectConventions).toHaveBeenCalledWith(
+          mockProjectRoot,
+        );
       });
 
       it('should use provided projectRoot when string', async () => {
@@ -133,9 +121,7 @@ describe('ConventionsHandler', () => {
           basePath: mockProjectRoot,
           allowAbsolute: true,
         });
-        expect(
-          mockConventionsAnalyzer.analyzeProjectConventions,
-        ).toHaveBeenCalledWith(customPath);
+        expect(mockConventionsAnalyzer.analyzeProjectConventions).toHaveBeenCalledWith(customPath);
       });
 
       it('should validate path to prevent path traversal attacks', async () => {

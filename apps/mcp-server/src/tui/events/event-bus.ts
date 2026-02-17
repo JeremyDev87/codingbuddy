@@ -20,24 +20,15 @@ export class TuiEventBus {
     this.emitter.emit(event, payload);
   }
 
-  on<K extends TuiEventName>(
-    event: K,
-    handler: EventHandler<TuiEventMap[K]>,
-  ): void {
+  on<K extends TuiEventName>(event: K, handler: EventHandler<TuiEventMap[K]>): void {
     this.emitter.on(event, handler as (...args: unknown[]) => void);
   }
 
-  off<K extends TuiEventName>(
-    event: K,
-    handler: EventHandler<TuiEventMap[K]>,
-  ): void {
+  off<K extends TuiEventName>(event: K, handler: EventHandler<TuiEventMap[K]>): void {
     this.emitter.off(event, handler as (...args: unknown[]) => void);
   }
 
-  once<K extends TuiEventName>(
-    event: K,
-    handler: EventHandler<TuiEventMap[K]>,
-  ): void {
+  once<K extends TuiEventName>(event: K, handler: EventHandler<TuiEventMap[K]>): void {
     this.emitter.once(event, handler as (...args: unknown[]) => void);
   }
 

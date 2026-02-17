@@ -2,21 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Response, Request } from 'express';
 
 // Hoist mock variables and class
-const { mockHandlePostMessage, mockServerClose, MockSSEServerTransport } =
-  vi.hoisted(() => {
-    const mockHandlePostMessage = vi.fn();
-    const mockServerClose = vi.fn().mockResolvedValue(undefined);
+const { mockHandlePostMessage, mockServerClose, MockSSEServerTransport } = vi.hoisted(() => {
+  const mockHandlePostMessage = vi.fn();
+  const mockServerClose = vi.fn().mockResolvedValue(undefined);
 
-    class MockSSEServerTransport {
-      constructor(
-        public endpoint: string,
-        public response: unknown,
-      ) {}
-      handlePostMessage = mockHandlePostMessage;
-    }
+  class MockSSEServerTransport {
+    constructor(
+      public endpoint: string,
+      public response: unknown,
+    ) {}
+    handlePostMessage = mockHandlePostMessage;
+  }
 
-    return { mockHandlePostMessage, mockServerClose, MockSSEServerTransport };
-  });
+  return { mockHandlePostMessage, mockServerClose, MockSSEServerTransport };
+});
 
 vi.mock('@modelcontextprotocol/sdk/server/sse.js', () => ({
   SSEServerTransport: MockSSEServerTransport,
@@ -147,9 +146,7 @@ describe('McpController', () => {
       const newMockResponse = createMockResponse();
 
       // Should not throw even if close fails
-      await expect(
-        controller.handleSse(newMockResponse as Response),
-      ).resolves.not.toThrow();
+      await expect(controller.handleSse(newMockResponse as Response)).resolves.not.toThrow();
 
       // New connection should still be established
       expect(mockMcpService.createServer).toHaveBeenCalledTimes(2);
@@ -157,18 +154,14 @@ describe('McpController', () => {
 
     it('should return 500 when server creation fails', async () => {
       // Make createServer throw an error
-      (
-        mockMcpService.createServer as ReturnType<typeof vi.fn>
-      ).mockImplementationOnce(() => {
+      (mockMcpService.createServer as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
         throw new Error('Server creation failed');
       });
 
       await controller.handleSse(mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.send).toHaveBeenCalledWith(
-        'Failed to establish SSE connection',
-      );
+      expect(mockResponse.send).toHaveBeenCalledWith('Failed to establish SSE connection');
     });
 
     it('should return 500 when server.connect fails', async () => {
@@ -178,24 +171,17 @@ describe('McpController', () => {
       await controller.handleSse(mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.send).toHaveBeenCalledWith(
-        'Failed to establish SSE connection',
-      );
+      expect(mockResponse.send).toHaveBeenCalledWith('Failed to establish SSE connection');
     });
   });
 
   describe('handleMessages', () => {
     it('should return 400 when no active SSE connection', async () => {
       // No SSE connection established
-      await controller.handleMessages(
-        mockRequest as Request,
-        mockResponse as Response,
-      );
+      await controller.handleMessages(mockRequest as Request, mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.send).toHaveBeenCalledWith(
-        'No active SSE connection',
-      );
+      expect(mockResponse.send).toHaveBeenCalledWith('No active SSE connection');
     });
 
     it('should forward message to transport when connection exists', async () => {
@@ -209,15 +195,9 @@ describe('McpController', () => {
       };
       const messageResponse = createMockResponse();
 
-      await controller.handleMessages(
-        messageRequest as Request,
-        messageResponse as Response,
-      );
+      await controller.handleMessages(messageRequest as Request, messageResponse as Response);
 
-      expect(mockHandlePostMessage).toHaveBeenCalledWith(
-        messageRequest,
-        messageResponse,
-      );
+      expect(mockHandlePostMessage).toHaveBeenCalledWith(messageRequest, messageResponse);
     });
 
     it('should use the latest transport after reconnection', async () => {
@@ -234,19 +214,13 @@ describe('McpController', () => {
         headers: {},
       };
 
-      await controller.handleMessages(
-        messageRequest as Request,
-        mockResponse as Response,
-      );
+      await controller.handleMessages(messageRequest as Request, mockResponse as Response);
 
       expect(mockHandlePostMessage).toHaveBeenCalled();
     });
 
     it('should not call handlePostMessage when transport is null', async () => {
-      await controller.handleMessages(
-        mockRequest as Request,
-        mockResponse as Response,
-      );
+      await controller.handleMessages(mockRequest as Request, mockResponse as Response);
 
       expect(mockHandlePostMessage).not.toHaveBeenCalled();
     });
@@ -258,16 +232,14 @@ describe('McpController', () => {
 
       // First connection
       await controller.handleSse(mockResponse as Response);
-      const firstServer = (
-        mockMcpService.createServer as ReturnType<typeof vi.fn>
-      ).mock.results[0].value;
+      const firstServer = (mockMcpService.createServer as ReturnType<typeof vi.fn>).mock.results[0]
+        .value;
 
       // Second connection
       const newMockResponse = createMockResponse();
       await controller.handleSse(newMockResponse as Response);
-      const secondServer = (
-        mockMcpService.createServer as ReturnType<typeof vi.fn>
-      ).mock.results[1].value;
+      const secondServer = (mockMcpService.createServer as ReturnType<typeof vi.fn>).mock.results[1]
+        .value;
 
       // After fix: servers should be DIFFERENT instances (per-connection)
       expect(secondServer).not.toBe(firstServer);

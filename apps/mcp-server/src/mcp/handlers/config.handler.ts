@@ -69,8 +69,7 @@ export class ConfigHandler extends AbstractHandler {
           properties: {
             projectRoot: {
               type: 'string',
-              description:
-                'Project root directory (defaults to current working directory)',
+              description: 'Project root directory (defaults to current working directory)',
             },
           },
           required: [],
@@ -110,8 +109,7 @@ export class ConfigHandler extends AbstractHandler {
   ): Promise<ToolResponse> {
     try {
       const configProjectRoot = this.configService.getProjectRoot();
-      const projectRootInput =
-        extractOptionalString(args, 'projectRoot') ?? configProjectRoot;
+      const projectRootInput = extractOptionalString(args, 'projectRoot') ?? configProjectRoot;
 
       // Security: Validate path to prevent path traversal attacks
       const projectRoot = assertPathSafe(projectRootInput, {
@@ -129,10 +127,7 @@ export class ConfigHandler extends AbstractHandler {
       const currentConfig = await this.configService.getSettings();
 
       // Compare and get suggestions
-      const result = this.configDiffService.compareConfig(
-        analysis,
-        currentConfig,
-      );
+      const result = this.configDiffService.compareConfig(analysis, currentConfig);
 
       return createJsonResponse(result);
     } catch (error) {
@@ -150,9 +145,7 @@ export class ConfigHandler extends AbstractHandler {
 
       // Validate projectRoot is provided and not empty/whitespace
       if (!projectRootInput || projectRootInput.trim() === '') {
-        return createErrorResponse(
-          'projectRoot is required and must be a non-empty string',
-        );
+        return createErrorResponse('projectRoot is required and must be a non-empty string');
       }
 
       // Security: Validate path to prevent path traversal attacks

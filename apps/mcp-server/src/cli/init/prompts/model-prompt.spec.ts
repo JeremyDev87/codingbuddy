@@ -52,9 +52,7 @@ describe('model-prompt', () => {
 
     it('should mark Haiku as not recommended', () => {
       const choices = getModelChoices();
-      const haikuChoice = choices.find((c: ModelChoice) =>
-        c.value.includes('haiku'),
-      );
+      const haikuChoice = choices.find((c: ModelChoice) => c.value.includes('haiku'));
 
       expect(haikuChoice).toBeDefined();
       expect(haikuChoice!.name).toContain('Not recommended');

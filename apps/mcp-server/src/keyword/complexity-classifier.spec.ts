@@ -82,17 +82,13 @@ describe('complexity-classifier', () => {
   describe('classifyComplexity', () => {
     describe('SIMPLE task classification', () => {
       it('should classify type/syntax questions as SIMPLE', () => {
-        const result = classifyComplexity(
-          'What is the return type of this function?',
-        );
+        const result = classifyComplexity('What is the return type of this function?');
         expect(result.complexity).toBe('SIMPLE');
         expect(result.applySrp).toBe(false);
       });
 
       it('should classify definition questions as SIMPLE', () => {
-        const result = classifyComplexity(
-          'How do I declare a readonly property in TypeScript?',
-        );
+        const result = classifyComplexity('How do I declare a readonly property in TypeScript?');
         expect(result.complexity).toBe('SIMPLE');
         expect(result.applySrp).toBe(false);
       });
@@ -104,9 +100,7 @@ describe('complexity-classifier', () => {
       });
 
       it('should classify rename operations as SIMPLE', () => {
-        const result = classifyComplexity(
-          'Rename this function to handleClick',
-        );
+        const result = classifyComplexity('Rename this function to handleClick');
         expect(result.complexity).toBe('SIMPLE');
         expect(result.applySrp).toBe(false);
       });
@@ -126,57 +120,43 @@ describe('complexity-classifier', () => {
 
     describe('COMPLEX task classification', () => {
       it('should classify architecture design as COMPLEX', () => {
-        const result = classifyComplexity(
-          'How should we design the authentication system?',
-        );
+        const result = classifyComplexity('How should we design the authentication system?');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should classify trade-off analysis as COMPLEX', () => {
-        const result = classifyComplexity(
-          'Compare the pros and cons of Redux vs Context API',
-        );
+        const result = classifyComplexity('Compare the pros and cons of Redux vs Context API');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should classify refactoring as COMPLEX', () => {
-        const result = classifyComplexity(
-          'Refactor the user service to improve maintainability',
-        );
+        const result = classifyComplexity('Refactor the user service to improve maintainability');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should classify multi-file changes as COMPLEX', () => {
-        const result = classifyComplexity(
-          'Update the error handling across multiple modules',
-        );
+        const result = classifyComplexity('Update the error handling across multiple modules');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should classify performance optimization as COMPLEX', () => {
-        const result = classifyComplexity(
-          'How can we optimize the performance of this feature?',
-        );
+        const result = classifyComplexity('How can we optimize the performance of this feature?');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should classify best approach questions as COMPLEX', () => {
-        const result = classifyComplexity(
-          "What's the best way to implement state management?",
-        );
+        const result = classifyComplexity("What's the best way to implement state management?");
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should classify integration tasks as COMPLEX', () => {
-        const result = classifyComplexity(
-          'Integrate the payment service with our API',
-        );
+        const result = classifyComplexity('Integrate the payment service with our API');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
@@ -192,9 +172,7 @@ describe('complexity-classifier', () => {
       });
 
       it('should skip SRP with --no-srp flag on COMPLEX task', () => {
-        const result = classifyComplexity(
-          'How should we design the architecture? --no-srp',
-        );
+        const result = classifyComplexity('How should we design the architecture? --no-srp');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(false);
         expect(result.override).toBe('skip');
@@ -210,9 +188,7 @@ describe('complexity-classifier', () => {
       });
 
       it('should provide matched indicators', () => {
-        const result = classifyComplexity(
-          'How should we design the authentication system?',
-        );
+        const result = classifyComplexity('How should we design the authentication system?');
         expect(result.matchedIndicators.length).toBeGreaterThan(0);
       });
     });
@@ -220,9 +196,7 @@ describe('complexity-classifier', () => {
     describe('borderline cases', () => {
       it('should lean towards COMPLEX for ambiguous prompts with both indicators', () => {
         // This prompt has both simple and complex indicators
-        const result = classifyComplexity(
-          'How to fix the architecture design issue?',
-        );
+        const result = classifyComplexity('How to fix the architecture design issue?');
         // Should lean towards COMPLEX for safety
         expect(result.applySrp).toBe(true);
       });
@@ -356,9 +330,7 @@ describe('complexity-classifier', () => {
 
     describe('Spanish (i18n) pattern support', () => {
       it('should classify Spanish design task as COMPLEX', () => {
-        const result = classifyComplexity(
-          'diseño del sistema de autenticación',
-        );
+        const result = classifyComplexity('diseño del sistema de autenticación');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
@@ -409,9 +381,7 @@ describe('complexity-classifier', () => {
         });
 
         it('should classify "no need to optimize" as SIMPLE', () => {
-          const result = classifyComplexity(
-            'no need to optimize this function',
-          );
+          const result = classifyComplexity('no need to optimize this function');
           expect(result.complexity).toBe('SIMPLE');
           expect(result.applySrp).toBe(false);
         });
@@ -506,17 +476,13 @@ describe('complexity-classifier', () => {
 
     describe('multi-language mixed prompts', () => {
       it('should handle English + Korean mixed prompt as COMPLEX', () => {
-        const result = classifyComplexity(
-          'Please 설계 the authentication system',
-        );
+        const result = classifyComplexity('Please 설계 the authentication system');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
 
       it('should handle English + Japanese mixed prompt as COMPLEX', () => {
-        const result = classifyComplexity(
-          'Need to リファクタリング this module',
-        );
+        const result = classifyComplexity('Need to リファクタリング this module');
         expect(result.complexity).toBe('COMPLEX');
         expect(result.applySrp).toBe(true);
       });
@@ -628,9 +594,7 @@ describe('complexity-classifier', () => {
           applySrp: true,
         });
         expect(telemetryData[0].timestamp).toBeGreaterThan(0);
-        expect(telemetryData[0].promptLength).toBe(
-          'Design the auth system'.length,
-        );
+        expect(telemetryData[0].promptLength).toBe('Design the auth system'.length);
         expect(telemetryData[0].complexScore).toBeGreaterThan(0);
         expect(telemetryData[0].complexMatches).toBeGreaterThan(0);
       });

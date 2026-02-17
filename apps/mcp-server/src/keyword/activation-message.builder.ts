@@ -10,11 +10,7 @@ export class ActivationMessageBuilder {
   /**
    * Add an agent activation record.
    */
-  addAgentActivation(
-    name: string,
-    tier: 'primary' | 'specialist',
-    activatedBy?: string,
-  ): this {
+  addAgentActivation(name: string, tier: 'primary' | 'specialist', activatedBy?: string): this {
     this.activations.push({
       type: 'agent',
       name,
@@ -63,9 +59,7 @@ export class ActivationMessageBuilder {
     for (const activation of this.activations) {
       const icon = this.getIcon(activation);
       const tierLabel = this.getTierLabel(activation.tier);
-      const activatedByText = activation.activatedBy
-        ? ` (by ${activation.activatedBy})`
-        : '';
+      const activatedByText = activation.activatedBy ? ` (by ${activation.activatedBy})` : '';
 
       lines.push(`${icon} ${activation.name} [${tierLabel}]${activatedByText}`);
     }
@@ -101,10 +95,7 @@ export class ActivationMessageBuilder {
   /**
    * Static helper to create activation message for a single primary agent.
    */
-  static forPrimaryAgent(
-    agentName: string,
-    activatedBy?: string,
-  ): ActivationMessage {
+  static forPrimaryAgent(agentName: string, activatedBy?: string): ActivationMessage {
     return new ActivationMessageBuilder()
       .addAgentActivation(agentName, 'primary', activatedBy)
       .build()!;
@@ -113,10 +104,7 @@ export class ActivationMessageBuilder {
   /**
    * Static helper to create activation message for a specialist agent.
    */
-  static forSpecialistAgent(
-    agentName: string,
-    activatedBy?: string,
-  ): ActivationMessage {
+  static forSpecialistAgent(agentName: string, activatedBy?: string): ActivationMessage {
     return new ActivationMessageBuilder()
       .addAgentActivation(agentName, 'specialist', activatedBy)
       .build()!;
@@ -126,8 +114,6 @@ export class ActivationMessageBuilder {
    * Static helper to create activation message for a skill.
    */
   static forSkill(skillName: string, activatedBy?: string): ActivationMessage {
-    return new ActivationMessageBuilder()
-      .addSkillActivation(skillName, activatedBy)
-      .build()!;
+    return new ActivationMessageBuilder().addSkillActivation(skillName, activatedBy).build()!;
   }
 }

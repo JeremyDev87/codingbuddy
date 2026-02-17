@@ -15,11 +15,7 @@ export type {
 } from './template.types';
 
 // Template selection
-export {
-  selectTemplate,
-  getTemplateById,
-  getAllTemplates,
-} from './template.selector';
+export { selectTemplate, getTemplateById, getAllTemplates } from './template.selector';
 
 // Template rendering
 export { renderConfigAsJson } from './template.renderer';

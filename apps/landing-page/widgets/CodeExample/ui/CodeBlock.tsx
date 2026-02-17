@@ -47,18 +47,9 @@ export const CodeBlock = ({
         />
       </div>
       <Highlight theme={theme} code={trimmedCode} language={language}>
-        {({
-          className: hlClassName,
-          style,
-          tokens,
-          getLineProps,
-          getTokenProps,
-        }) => (
+        {({ className: hlClassName, style, tokens, getLineProps, getTokenProps }) => (
           <pre
-            className={cn(
-              hlClassName,
-              'overflow-x-auto p-4 text-sm leading-relaxed font-mono',
-            )}
+            className={cn(hlClassName, 'overflow-x-auto p-4 text-sm leading-relaxed font-mono')}
             style={style}
             aria-label={`${language} code`}
           >
@@ -66,11 +57,7 @@ export const CodeBlock = ({
               {tokens.map((line, i) => {
                 const lineProps = getLineProps({ line });
                 return (
-                  <div
-                    key={i}
-                    {...lineProps}
-                    className={cn(lineProps.className, 'table-row')}
-                  >
+                  <div key={i} {...lineProps} className={cn(lineProps.className, 'table-row')}>
                     <span
                       className="text-muted-foreground table-cell select-none pr-4 text-right text-xs"
                       aria-hidden="true"

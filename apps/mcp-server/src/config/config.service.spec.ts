@@ -238,9 +238,9 @@ describe('ConfigService', () => {
       const service = new ConfigService();
       const nonExistentPath = '/nonexistent/path/xyz123456789';
 
-      await expect(
-        service.setProjectRootAndReload(nonExistentPath),
-      ).rejects.toThrow(/does not exist/);
+      await expect(service.setProjectRootAndReload(nonExistentPath)).rejects.toThrow(
+        /does not exist/,
+      );
     });
 
     it('should throw error when path is a file not directory', async () => {
@@ -250,9 +250,7 @@ describe('ConfigService', () => {
 
       const service = new ConfigService();
 
-      await expect(service.setProjectRootAndReload(filePath)).rejects.toThrow(
-        /not a directory/,
-      );
+      await expect(service.setProjectRootAndReload(filePath)).rejects.toThrow(/not a directory/);
     });
 
     it('should normalize relative paths to absolute paths', async () => {
@@ -285,9 +283,7 @@ describe('ConfigService', () => {
       const service = new ConfigService();
       const pathWithNullByte = '/tmp/test\x00/malicious';
 
-      await expect(
-        service.setProjectRootAndReload(pathWithNullByte),
-      ).rejects.toThrow(/null byte/i);
+      await expect(service.setProjectRootAndReload(pathWithNullByte)).rejects.toThrow(/null byte/i);
     });
 
     it('should resolve symlinks and use real path', async () => {
@@ -411,9 +407,7 @@ describe('ConfigService', () => {
       delete process.env.CODINGBUDDY_PROJECT_ROOT;
       const service = new ConfigService();
 
-      const shouldIgnore = await service.shouldIgnorePath(
-        'node_modules/package/index.js',
-      );
+      const shouldIgnore = await service.shouldIgnorePath('node_modules/package/index.js');
 
       expect(shouldIgnore).toBe(true);
     });
@@ -624,9 +618,7 @@ describe('ConfigService', () => {
 
       // Mock loadConfig to throw a generic Error (not ConfigLoadError)
       const configLoader = await import('./config.loader');
-      vi.spyOn(configLoader, 'loadConfig').mockRejectedValueOnce(
-        new Error('Generic error'),
-      );
+      vi.spyOn(configLoader, 'loadConfig').mockRejectedValueOnce(new Error('Generic error'));
 
       const config = await service.loadProjectConfig();
 
@@ -654,8 +646,7 @@ describe('ConfigService', () => {
       expect(warnSpy).toHaveBeenCalled();
       const warningCall = warnSpy.mock.calls.find(
         call =>
-          call[0].includes('Deprecated JavaScript config') ||
-          call[0].includes('[DEPRECATION]'),
+          call[0].includes('Deprecated JavaScript config') || call[0].includes('[DEPRECATION]'),
       );
       expect(warningCall).toBeDefined();
     });

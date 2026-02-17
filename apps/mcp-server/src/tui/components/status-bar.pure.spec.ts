@@ -53,9 +53,7 @@ describe('tui/components/status-bar.pure', () => {
     });
 
     it('should return 0 when no agents are running', () => {
-      const agents: AgentState[] = [
-        makeAgent({ id: 'a1', status: 'completed', progress: 100 }),
-      ];
+      const agents: AgentState[] = [makeAgent({ id: 'a1', status: 'completed', progress: 100 })];
       expect(calculateOverallProgress(agents)).toBe(0);
     });
 
@@ -123,9 +121,7 @@ describe('tui/components/status-bar.pure', () => {
     });
 
     it('should return single skill name', () => {
-      const skills: SkillRecommendedEvent[] = [
-        { skillName: 'brainstorming', reason: 'test' },
-      ];
+      const skills: SkillRecommendedEvent[] = [{ skillName: 'brainstorming', reason: 'test' }];
       expect(buildSkillsDisplay(skills)).toBe('brainstorming');
     });
 

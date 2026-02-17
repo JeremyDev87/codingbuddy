@@ -47,9 +47,7 @@ export class RulesService {
       this.logger.log(`Rules directory set from package: ${this.rulesDir}`);
     } catch {
       // Development fallback: when package is not found
-      this.logger.warn(
-        'codingbuddy-rules package not found, using development fallback',
-      );
+      this.logger.warn('codingbuddy-rules package not found, using development fallback');
       this.rulesDir = resolveRulesDir(__dirname, {
         existsSync: (pathStr: string) => {
           try {
@@ -92,9 +90,7 @@ export class RulesService {
     const foundModeAgents = agents.filter(agent => modeAgentSet.has(agent));
     const otherAgents = agents.filter(agent => !modeAgentSet.has(agent));
 
-    const sortedModeAgents = MODE_AGENTS.filter(agent =>
-      foundModeAgents.includes(agent),
-    );
+    const sortedModeAgents = MODE_AGENTS.filter(agent => foundModeAgents.includes(agent));
 
     return [...sortedModeAgents, ...otherAgents.sort()];
   }
@@ -129,10 +125,7 @@ export class RulesService {
 
       return agent;
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.startsWith('Invalid agent profile')
-      ) {
+      if (error instanceof Error && error.message.startsWith('Invalid agent profile')) {
         this.logger.warn(`Invalid agent profile: ${name}`, error.message);
       }
       throw error;
@@ -178,11 +171,7 @@ export class RulesService {
       ...agents.map(a => `agents/${a}.json`),
     ];
 
-    const defaultResults = await searchInRuleFiles(
-      this.rulesDir,
-      query,
-      filesToSearch,
-    );
+    const defaultResults = await searchInRuleFiles(this.rulesDir, query, filesToSearch);
 
     // Add source: 'default' to results from searchInRuleFiles
     for (const result of defaultResults) {
@@ -200,9 +189,7 @@ export class RulesService {
    * List all available skills from the skills directory
    * @returns Array of skill summaries with name and description
    */
-  async listSkillsFromDir(): Promise<
-    Array<{ name: string; description: string }>
-  > {
+  async listSkillsFromDir(): Promise<Array<{ name: string; description: string }>> {
     try {
       return await listSkillSummaries(this.rulesDir);
     } catch (error) {

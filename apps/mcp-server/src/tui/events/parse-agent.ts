@@ -68,9 +68,7 @@ function parseGetAgentSystemPrompt(
   };
 }
 
-function parseParseMode(
-  args: Record<string, unknown> | undefined,
-): AgentActivatedEvent | null {
+function parseParseMode(args: Record<string, unknown> | undefined): AgentActivatedEvent | null {
   const prompt = typeof args?.prompt === 'string' ? args.prompt : null;
   if (!prompt) return null;
 

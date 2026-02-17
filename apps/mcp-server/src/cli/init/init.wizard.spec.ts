@@ -90,9 +90,7 @@ describe('init.wizard', () => {
         prettier: '^3.0.0',
       },
       scripts: {},
-      detectedFrameworks: [
-        { name: 'TypeScript', category: 'other', version: '5.0.0' },
-      ],
+      detectedFrameworks: [{ name: 'TypeScript', category: 'other', version: '5.0.0' }],
     },
     directoryStructure: {
       rootDirs: ['src', 'tests'],
@@ -232,9 +230,7 @@ describe('init.wizard', () => {
 
     it('should allow editing sections after summary', async () => {
       // First return edit-basic, then confirm
-      mockPromptSummaryAction
-        .mockResolvedValueOnce('edit-basic')
-        .mockResolvedValueOnce('confirm');
+      mockPromptSummaryAction.mockResolvedValueOnce('edit-basic').mockResolvedValueOnce('confirm');
 
       await runInitWizard({ analysis: mockAnalysis });
 
@@ -340,9 +336,7 @@ describe('init.wizard', () => {
     it('should omit backend when array is empty', () => {
       const config = wizardDataToConfig(sampleWizardData);
 
-      expect(
-        (config.techStack as Record<string, unknown> | undefined)?.backend,
-      ).toBeUndefined();
+      expect((config.techStack as Record<string, unknown> | undefined)?.backend).toBeUndefined();
     });
   });
 

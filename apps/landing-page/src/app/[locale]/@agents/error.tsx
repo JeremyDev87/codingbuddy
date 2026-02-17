@@ -7,8 +7,6 @@ interface AgentsErrorProps {
   reset: () => void;
 }
 
-const AgentsError = ({ reset }: AgentsErrorProps) => (
-  <SlotError reset={reset} slotName="agents" />
-);
+const AgentsError = ({ reset }: AgentsErrorProps) => <SlotError reset={reset} slotName="agents" />;
 
 export default AgentsError;

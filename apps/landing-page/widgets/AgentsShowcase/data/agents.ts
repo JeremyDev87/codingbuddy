@@ -14,22 +14,16 @@ export const agents: Agent[] = [
   {
     id: 'technical-planner',
     name: 'Technical Planner',
-    description:
-      'Low-level implementation planning with TDD and bite-sized tasks',
+    description: 'Low-level implementation planning with TDD and bite-sized tasks',
     category: 'Planning',
     icon: '🗺️',
     tags: ['TDD', 'Task Decomposition'],
-    expertise: [
-      'Implementation Planning',
-      'TDD Strategy',
-      'Task Decomposition',
-    ],
+    expertise: ['Implementation Planning', 'TDD Strategy', 'Task Decomposition'],
   },
   {
     id: 'architecture-specialist',
     name: 'Architecture Specialist',
-    description:
-      'Architecture expert for Planning, Implementation, and Evaluation',
+    description: 'Architecture expert for Planning, Implementation, and Evaluation',
     category: 'Planning',
     icon: '🏛️',
     tags: ['Architecture', 'System Design'],
@@ -38,22 +32,16 @@ export const agents: Agent[] = [
   {
     id: 'solution-architect',
     name: 'Solution Architect',
-    description:
-      'High-level system design and architecture planning specialist',
+    description: 'High-level system design and architecture planning specialist',
     category: 'Planning',
     icon: '🔷',
     tags: ['System Design', 'Architecture'],
-    expertise: [
-      'Solution Design',
-      'Technical Strategy',
-      'Architecture Planning',
-    ],
+    expertise: ['Solution Design', 'Technical Strategy', 'Architecture Planning'],
   },
   {
     id: 'migration-specialist',
     name: 'Migration Specialist',
-    description:
-      'Cross-cutting migration coordinator for legacy system modernization',
+    description: 'Cross-cutting migration coordinator for legacy system modernization',
     category: 'Planning',
     icon: '🔄',
     tags: ['Migration', 'Modernization'],
@@ -73,8 +61,7 @@ export const agents: Agent[] = [
   {
     id: 'frontend-developer',
     name: 'Frontend Developer',
-    description:
-      'Modern React/Next.js specialist with Server Components, TDD, and accessibility',
+    description: 'Modern React/Next.js specialist with Server Components, TDD, and accessibility',
     category: 'Development',
     icon: '⚛️',
     tags: ['React', 'Next.js', 'TypeScript'],
@@ -83,8 +70,7 @@ export const agents: Agent[] = [
   {
     id: 'backend-developer',
     name: 'Backend Developer',
-    description:
-      'Language-agnostic backend specialist with Clean Architecture and TDD',
+    description: 'Language-agnostic backend specialist with Clean Architecture and TDD',
     category: 'Development',
     icon: '🖥️',
     tags: ['Backend', 'Clean Architecture'],
@@ -102,8 +88,7 @@ export const agents: Agent[] = [
   {
     id: 'data-engineer',
     name: 'Data Engineer',
-    description:
-      'Data specialist focused on database design, schema optimization, and migrations',
+    description: 'Data specialist focused on database design, schema optimization, and migrations',
     category: 'Development',
     icon: '🗄️',
     tags: ['Database', 'Schema', 'Migration'],
@@ -112,8 +97,7 @@ export const agents: Agent[] = [
   {
     id: 'devops-engineer',
     name: 'DevOps Engineer',
-    description:
-      'Docker, Datadog monitoring, and Next.js deployment specialist',
+    description: 'Docker, Datadog monitoring, and Next.js deployment specialist',
     category: 'Development',
     icon: '🚀',
     tags: ['Docker', 'CI/CD', 'Monitoring'],
@@ -122,8 +106,7 @@ export const agents: Agent[] = [
   {
     id: 'tooling-engineer',
     name: 'Tooling Engineer',
-    description:
-      'Project configuration, build tools, and development environment specialist',
+    description: 'Project configuration, build tools, and development environment specialist',
     category: 'Development',
     icon: '🔧',
     tags: ['Build Tools', 'Config', 'DX'],
@@ -132,8 +115,7 @@ export const agents: Agent[] = [
   {
     id: 'platform-engineer',
     name: 'Platform Engineer',
-    description:
-      'Cloud-native infrastructure expert for Planning, Implementation, and Evaluation',
+    description: 'Cloud-native infrastructure expert for Planning, Implementation, and Evaluation',
     category: 'Development',
     icon: '☁️',
     tags: ['Cloud', 'Infrastructure', 'K8s'],
@@ -142,8 +124,7 @@ export const agents: Agent[] = [
   {
     id: 'agent-architect',
     name: 'Agent Architect',
-    description:
-      'Primary Agent for creating, validating, and managing AI agent configurations',
+    description: 'Primary Agent for creating, validating, and managing AI agent configurations',
     category: 'Development',
     icon: '🤖',
     tags: ['AI Agents', 'Configuration'],
@@ -152,8 +133,7 @@ export const agents: Agent[] = [
   {
     id: 'ai-ml-engineer',
     name: 'AI/ML Engineer',
-    description:
-      'AI/ML expert for Planning, Implementation, and Evaluation modes',
+    description: 'AI/ML expert for Planning, Implementation, and Evaluation modes',
     category: 'Development',
     icon: '🧠',
     tags: ['AI', 'ML', 'Deep Learning'],
@@ -171,8 +151,7 @@ export const agents: Agent[] = [
   {
     id: 'integration-specialist',
     name: 'Integration Specialist',
-    description:
-      'External service integration specialist for APIs and third-party services',
+    description: 'External service integration specialist for APIs and third-party services',
     category: 'Development',
     icon: '🔗',
     tags: ['API', 'Integration', 'Third-Party'],
@@ -183,22 +162,16 @@ export const agents: Agent[] = [
   {
     id: 'eval-mode',
     name: 'Eval Mode Agent',
-    description:
-      'Specialized for code quality evaluation and improvement suggestions',
+    description: 'Specialized for code quality evaluation and improvement suggestions',
     category: 'Review',
     icon: '🔍',
     tags: ['Evaluation', 'Quality'],
-    expertise: [
-      'Code Evaluation',
-      'Quality Assessment',
-      'Improvement Suggestions',
-    ],
+    expertise: ['Code Evaluation', 'Quality Assessment', 'Improvement Suggestions'],
   },
   {
     id: 'code-reviewer',
     name: 'Code Reviewer',
-    description:
-      'Senior software engineer specializing in comprehensive code quality evaluation',
+    description: 'Senior software engineer specializing in comprehensive code quality evaluation',
     category: 'Review',
     icon: '👀',
     tags: ['Code Review', 'Quality'],
@@ -207,8 +180,7 @@ export const agents: Agent[] = [
   {
     id: 'code-quality-specialist',
     name: 'Code Quality Specialist',
-    description:
-      'Code quality expert for linting, formatting, and best practices',
+    description: 'Code quality expert for linting, formatting, and best practices',
     category: 'Review',
     icon: '📏',
     tags: ['Linting', 'Standards', 'SOLID'],
@@ -237,8 +209,7 @@ export const agents: Agent[] = [
   {
     id: 'security-specialist',
     name: 'Security Specialist',
-    description:
-      'Security expert for vulnerability assessment and secure coding',
+    description: 'Security expert for vulnerability assessment and secure coding',
     category: 'Security',
     icon: '🔒',
     tags: ['Security', 'OWASP', 'Audit'],
@@ -267,8 +238,7 @@ export const agents: Agent[] = [
   {
     id: 'accessibility-specialist',
     name: 'Accessibility Specialist',
-    description:
-      'Accessibility expert for WCAG compliance and inclusive design',
+    description: 'Accessibility expert for WCAG compliance and inclusive design',
     category: 'UX',
     icon: '♿',
     tags: ['A11y', 'WCAG', 'Inclusive Design'],

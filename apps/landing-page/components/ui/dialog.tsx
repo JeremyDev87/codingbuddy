@@ -11,28 +11,19 @@ const Dialog = ({ ...props }: ComponentProps<typeof DialogPrimitive.Root>) => {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 };
 
-const DialogTrigger = ({
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Trigger>) => {
+const DialogTrigger = ({ ...props }: ComponentProps<typeof DialogPrimitive.Trigger>) => {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 };
 
-const DialogPortal = ({
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Portal>) => {
+const DialogPortal = ({ ...props }: ComponentProps<typeof DialogPrimitive.Portal>) => {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 };
 
-const DialogClose = ({
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Close>) => {
+const DialogClose = ({ ...props }: ComponentProps<typeof DialogPrimitive.Close>) => {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 };
 
-const DialogOverlay = ({
-  className,
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Overlay>) => {
+const DialogOverlay = ({ className, ...props }: ComponentProps<typeof DialogPrimitive.Overlay>) => {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -100,10 +91,7 @@ const DialogFooter = ({
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end',
-        className,
-      )}
+      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
       {...props}
     >
       {children}
@@ -116,10 +104,7 @@ const DialogFooter = ({
   );
 };
 
-const DialogTitle = ({
-  className,
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Title>) => {
+const DialogTitle = ({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) => {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"

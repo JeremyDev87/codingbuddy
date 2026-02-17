@@ -98,15 +98,9 @@ describe('Pattern Matcher', () => {
         ui: ['**/components/**'],
       });
 
-      expect(findMatchingCategory('src/auth/login.ts', categoryPatterns)).toBe(
-        'auth',
-      );
-      expect(findMatchingCategory('src/api/users.ts', categoryPatterns)).toBe(
-        'api',
-      );
-      expect(
-        findMatchingCategory('src/components/Button.tsx', categoryPatterns),
-      ).toBe('ui');
+      expect(findMatchingCategory('src/auth/login.ts', categoryPatterns)).toBe('auth');
+      expect(findMatchingCategory('src/api/users.ts', categoryPatterns)).toBe('api');
+      expect(findMatchingCategory('src/components/Button.tsx', categoryPatterns)).toBe('ui');
     });
 
     it('should return null if no category matches', () => {
@@ -115,9 +109,7 @@ describe('Pattern Matcher', () => {
         api: ['**/api/**'],
       });
 
-      expect(
-        findMatchingCategory('src/utils/helper.ts', categoryPatterns),
-      ).toBe(null);
+      expect(findMatchingCategory('src/utils/helper.ts', categoryPatterns)).toBe(null);
     });
 
     it('should return null for empty category patterns', () => {

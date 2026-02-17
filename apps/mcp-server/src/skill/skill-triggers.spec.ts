@@ -87,9 +87,7 @@ describe('skill-triggers', () => {
       const triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
 
       for (const trigger of triggers) {
-        const originalSkill = SKILL_KEYWORDS.find(
-          s => s.skillName === trigger.skillName,
-        );
+        const originalSkill = SKILL_KEYWORDS.find(s => s.skillName === trigger.skillName);
         expect(trigger.priority).toBe(originalSkill?.priority);
       }
     });
@@ -147,39 +145,27 @@ describe('skill-triggers', () => {
 
     describe('English patterns (with word boundaries)', () => {
       it('should match "error" as a whole word', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
-        const matched = debuggingTrigger?.patterns.some(p =>
-          p.test('I have an error'),
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        const matched = debuggingTrigger?.patterns.some(p => p.test('I have an error'));
 
         expect(matched).toBe(true);
       });
 
       it('should not match "error" within another word', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
         // "terrorized" contains "error" but should not match with word boundaries
         const errorPatterns = debuggingTrigger?.patterns.filter(
           p => p.source.includes('error') && p.source.includes('\\b'),
         );
 
         // Word boundary patterns should not match
-        const matchesWithinWord = errorPatterns?.some(p =>
-          p.test('terrorized'),
-        );
+        const matchesWithinWord = errorPatterns?.some(p => p.test('terrorized'));
         expect(matchesWithinWord).toBe(false);
       });
 
       it('should match "button" in English', () => {
-        const frontendTrigger = triggers.find(
-          t => t.skillName === 'frontend-design',
-        );
-        const matched = frontendTrigger?.patterns.some(p =>
-          p.test('create a button component'),
-        );
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        const matched = frontendTrigger?.patterns.some(p => p.test('create a button component'));
 
         expect(matched).toBe(true);
       });
@@ -187,34 +173,22 @@ describe('skill-triggers', () => {
 
     describe('Korean patterns (without word boundaries)', () => {
       it('should match "에러" in Korean text', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
-        const matched = debuggingTrigger?.patterns.some(p =>
-          p.test('에러가 발생했습니다'),
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        const matched = debuggingTrigger?.patterns.some(p => p.test('에러가 발생했습니다'));
 
         expect(matched).toBe(true);
       });
 
       it('should match "버튼" in Korean text', () => {
-        const frontendTrigger = triggers.find(
-          t => t.skillName === 'frontend-design',
-        );
-        const matched = frontendTrigger?.patterns.some(p =>
-          p.test('버튼을 만들어주세요'),
-        );
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        const matched = frontendTrigger?.patterns.some(p => p.test('버튼을 만들어주세요'));
 
         expect(matched).toBe(true);
       });
 
       it('should match "계획" for writing-plans', () => {
-        const plansTrigger = triggers.find(
-          t => t.skillName === 'writing-plans',
-        );
-        const matched = plansTrigger?.patterns.some(p =>
-          p.test('계획을 세워주세요'),
-        );
+        const plansTrigger = triggers.find(t => t.skillName === 'writing-plans');
+        const matched = plansTrigger?.patterns.some(p => p.test('계획을 세워주세요'));
 
         expect(matched).toBe(true);
       });
@@ -222,23 +196,15 @@ describe('skill-triggers', () => {
 
     describe('Japanese patterns (without word boundaries)', () => {
       it('should match "エラー" in Japanese text', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
-        const matched = debuggingTrigger?.patterns.some(p =>
-          p.test('エラーが出ました'),
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        const matched = debuggingTrigger?.patterns.some(p => p.test('エラーが出ました'));
 
         expect(matched).toBe(true);
       });
 
       it('should match "ボタン" in Japanese text', () => {
-        const frontendTrigger = triggers.find(
-          t => t.skillName === 'frontend-design',
-        );
-        const matched = frontendTrigger?.patterns.some(p =>
-          p.test('ボタンを作成してください'),
-        );
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        const matched = frontendTrigger?.patterns.some(p => p.test('ボタンを作成してください'));
 
         expect(matched).toBe(true);
       });
@@ -246,23 +212,15 @@ describe('skill-triggers', () => {
 
     describe('Chinese patterns (without word boundaries)', () => {
       it('should match "错误" in Chinese text', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
-        const matched = debuggingTrigger?.patterns.some(p =>
-          p.test('出现了错误'),
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        const matched = debuggingTrigger?.patterns.some(p => p.test('出现了错误'));
 
         expect(matched).toBe(true);
       });
 
       it('should match "按钮" in Chinese text', () => {
-        const frontendTrigger = triggers.find(
-          t => t.skillName === 'frontend-design',
-        );
-        const matched = frontendTrigger?.patterns.some(p =>
-          p.test('创建一个按钮'),
-        );
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        const matched = frontendTrigger?.patterns.some(p => p.test('创建一个按钮'));
 
         expect(matched).toBe(true);
       });
@@ -270,23 +228,15 @@ describe('skill-triggers', () => {
 
     describe('Spanish patterns (with word boundaries)', () => {
       it('should match "error" in Spanish text', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
-        const matched = debuggingTrigger?.patterns.some(p =>
-          p.test('tengo un error'),
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        const matched = debuggingTrigger?.patterns.some(p => p.test('tengo un error'));
 
         expect(matched).toBe(true);
       });
 
       it('should match "botón" in Spanish text', () => {
-        const frontendTrigger = triggers.find(
-          t => t.skillName === 'frontend-design',
-        );
-        const matched = frontendTrigger?.patterns.some(p =>
-          p.test('crear un botón'),
-        );
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        const matched = frontendTrigger?.patterns.some(p => p.test('crear un botón'));
 
         expect(matched).toBe(true);
       });
@@ -294,12 +244,8 @@ describe('skill-triggers', () => {
 
     describe('multi-word patterns', () => {
       it('should match "not working" with flexible whitespace', () => {
-        const debuggingTrigger = triggers.find(
-          t => t.skillName === 'systematic-debugging',
-        );
-        const matchedNormal = debuggingTrigger?.patterns.some(p =>
-          p.test('it is not working'),
-        );
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        const matchedNormal = debuggingTrigger?.patterns.some(p => p.test('it is not working'));
         const matchedExtraSpace = debuggingTrigger?.patterns.some(p =>
           p.test('it is not  working'),
         );
@@ -309,12 +255,8 @@ describe('skill-triggers', () => {
       });
 
       it('should match "step by step" in executing-plans', () => {
-        const executingTrigger = triggers.find(
-          t => t.skillName === 'executing-plans',
-        );
-        const matched = executingTrigger?.patterns.some(p =>
-          p.test('do it step by step'),
-        );
+        const executingTrigger = triggers.find(t => t.skillName === 'executing-plans');
+        const matched = executingTrigger?.patterns.some(p => p.test('do it step by step'));
 
         expect(matched).toBe(true);
       });
@@ -343,9 +285,7 @@ describe('skill-triggers', () => {
       const sorted = getSortedTriggers();
 
       for (let i = 0; i < sorted.length - 1; i++) {
-        expect(sorted[i].priority).toBeGreaterThanOrEqual(
-          sorted[i + 1].priority,
-        );
+        expect(sorted[i].priority).toBeGreaterThanOrEqual(sorted[i + 1].priority);
       }
     });
 
@@ -384,30 +324,14 @@ describe('skill-triggers', () => {
       }));
 
       // Verify expected order
-      const debuggingPriority = priorities.find(
-        p => p.name === 'systematic-debugging',
-      )?.priority;
-      const executingPriority = priorities.find(
-        p => p.name === 'executing-plans',
-      )?.priority;
-      const prReviewPriority = priorities.find(
-        p => p.name === 'pr-review',
-      )?.priority;
-      const writingPriority = priorities.find(
-        p => p.name === 'writing-plans',
-      )?.priority;
-      const frontendPriority = priorities.find(
-        p => p.name === 'frontend-design',
-      )?.priority;
-      const refactoringPriority = priorities.find(
-        p => p.name === 'refactoring',
-      )?.priority;
-      const tddPriority = priorities.find(
-        p => p.name === 'test-driven-development',
-      )?.priority;
-      const brainstormingPriority = priorities.find(
-        p => p.name === 'brainstorming',
-      )?.priority;
+      const debuggingPriority = priorities.find(p => p.name === 'systematic-debugging')?.priority;
+      const executingPriority = priorities.find(p => p.name === 'executing-plans')?.priority;
+      const prReviewPriority = priorities.find(p => p.name === 'pr-review')?.priority;
+      const writingPriority = priorities.find(p => p.name === 'writing-plans')?.priority;
+      const frontendPriority = priorities.find(p => p.name === 'frontend-design')?.priority;
+      const refactoringPriority = priorities.find(p => p.name === 'refactoring')?.priority;
+      const tddPriority = priorities.find(p => p.name === 'test-driven-development')?.priority;
+      const brainstormingPriority = priorities.find(p => p.name === 'brainstorming')?.priority;
 
       expect(debuggingPriority).toBeGreaterThan(executingPriority!);
       expect(executingPriority).toBeGreaterThanOrEqual(prReviewPriority!);
@@ -479,9 +403,7 @@ describe('skill-triggers', () => {
       it.each(['PR审查一下', '代码审查请求', '合并请求审查', 'LGTM批准'])(
         'should match: %s',
         prompt => {
-          const prReviewTrigger = triggers.find(
-            t => t.skillName === 'pr-review',
-          );
+          const prReviewTrigger = triggers.find(t => t.skillName === 'pr-review');
           const matched = prReviewTrigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(true);
         },
@@ -526,9 +448,7 @@ describe('skill-triggers', () => {
     });
 
     it('should have refactoring skill registered', () => {
-      const refactoringTrigger = triggers.find(
-        t => t.skillName === 'refactoring',
-      );
+      const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
       expect(refactoringTrigger).toBeDefined();
       expect(refactoringTrigger?.priority).toBe(21);
     });
@@ -548,9 +468,7 @@ describe('skill-triggers', () => {
         'improve code structure',
         'restructure this class',
       ])('should match: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
         expect(matched).toBe(true);
       });
@@ -571,9 +489,7 @@ describe('skill-triggers', () => {
         '메서드 추출해줘',
         '함수 추출 부탁',
       ])('should match: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
         expect(matched).toBe(true);
       });
@@ -591,9 +507,7 @@ describe('skill-triggers', () => {
         '技術的負債を解消',
         'レガシーコード改善',
       ])('should match: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
         expect(matched).toBe(true);
       });
@@ -612,9 +526,7 @@ describe('skill-triggers', () => {
         '技术债务',
         '遗留代码',
       ])('should match: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
         expect(matched).toBe(true);
       });
@@ -632,9 +544,7 @@ describe('skill-triggers', () => {
         'deuda técnica',
         'código legacy',
       ])('should match: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
         expect(matched).toBe(true);
       });
@@ -642,40 +552,22 @@ describe('skill-triggers', () => {
 
     describe('priority order with related skills', () => {
       it('should have higher priority than writing-plans (20)', () => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
-        const writingPlansTrigger = triggers.find(
-          t => t.skillName === 'writing-plans',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+        const writingPlansTrigger = triggers.find(t => t.skillName === 'writing-plans');
         // Refactoring (21) should win over writing-plans (20) for "refactor" keyword
-        expect(refactoringTrigger?.priority).toBeGreaterThan(
-          writingPlansTrigger!.priority,
-        );
+        expect(refactoringTrigger?.priority).toBeGreaterThan(writingPlansTrigger!.priority);
       });
 
       it('should have higher priority than frontend-design (18)', () => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
-        const frontendTrigger = triggers.find(
-          t => t.skillName === 'frontend-design',
-        );
-        expect(refactoringTrigger?.priority).toBeGreaterThan(
-          frontendTrigger!.priority,
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        expect(refactoringTrigger?.priority).toBeGreaterThan(frontendTrigger!.priority);
       });
 
       it('should have higher priority than test-driven-development (15)', () => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
-        const tddTrigger = triggers.find(
-          t => t.skillName === 'test-driven-development',
-        );
-        expect(refactoringTrigger?.priority).toBeGreaterThan(
-          tddTrigger!.priority,
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+        const tddTrigger = triggers.find(t => t.skillName === 'test-driven-development');
+        expect(refactoringTrigger?.priority).toBeGreaterThan(tddTrigger!.priority);
       });
     });
 
@@ -686,9 +578,7 @@ describe('skill-triggers', () => {
         'do refactoring here',
         'perform refactoring on this class',
       ])('should match differentiating keyword: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
         expect(matched).toBe(true);
       });
@@ -696,12 +586,8 @@ describe('skill-triggers', () => {
       it.each(['리팩토링 실행해줘', '리팩토링 적용해'])(
         'should match Korean differentiating keyword: %s',
         prompt => {
-          const refactoringTrigger = triggers.find(
-            t => t.skillName === 'refactoring',
-          );
-          const matched = refactoringTrigger?.patterns.some(p =>
-            p.test(prompt),
-          );
+          const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+          const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(true);
         },
       );
@@ -709,12 +595,8 @@ describe('skill-triggers', () => {
       it.each(['リファクタリング実行してください', 'リファクタリング適用して'])(
         'should match Japanese differentiating keyword: %s',
         prompt => {
-          const refactoringTrigger = triggers.find(
-            t => t.skillName === 'refactoring',
-          );
-          const matched = refactoringTrigger?.patterns.some(p =>
-            p.test(prompt),
-          );
+          const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+          const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(true);
         },
       );
@@ -722,64 +604,43 @@ describe('skill-triggers', () => {
       it.each(['执行重构这段代码', '应用重构到这个方法'])(
         'should match Chinese differentiating keyword: %s',
         prompt => {
-          const refactoringTrigger = triggers.find(
-            t => t.skillName === 'refactoring',
-          );
-          const matched = refactoringTrigger?.patterns.some(p =>
-            p.test(prompt),
-          );
+          const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+          const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(true);
         },
       );
 
-      it.each([
-        'ejecutar refactorización en este código',
-        'aplicar refactorización aquí',
-      ])('should match Spanish differentiating keyword: %s', prompt => {
-        const refactoringTrigger = triggers.find(
-          t => t.skillName === 'refactoring',
-        );
-        const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
-        expect(matched).toBe(true);
-      });
+      it.each(['ejecutar refactorización en este código', 'aplicar refactorización aquí'])(
+        'should match Spanish differentiating keyword: %s',
+        prompt => {
+          const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+          const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
+          expect(matched).toBe(true);
+        },
+      );
     });
 
     describe('casual language variations', () => {
       it.each(['リファクタリングして', 'コード整理して', '整理してください'])(
         'should match casual Japanese: %s',
         prompt => {
-          const refactoringTrigger = triggers.find(
-            t => t.skillName === 'refactoring',
-          );
-          const matched = refactoringTrigger?.patterns.some(p =>
-            p.test(prompt),
-          );
+          const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+          const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(true);
         },
       );
 
-      it.each(['重构一下', '代码整理下', '整理代码'])(
-        'should match casual Chinese: %s',
-        prompt => {
-          const refactoringTrigger = triggers.find(
-            t => t.skillName === 'refactoring',
-          );
-          const matched = refactoringTrigger?.patterns.some(p =>
-            p.test(prompt),
-          );
-          expect(matched).toBe(true);
-        },
-      );
+      it.each(['重构一下', '代码整理下', '整理代码'])('should match casual Chinese: %s', prompt => {
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+        const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
 
       it.each(['refactorizar esto', 'limpiar código'])(
         'should match casual Spanish: %s',
         prompt => {
-          const refactoringTrigger = triggers.find(
-            t => t.skillName === 'refactoring',
-          );
-          const matched = refactoringTrigger?.patterns.some(p =>
-            p.test(prompt),
-          );
+          const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+          const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(true);
         },
       );

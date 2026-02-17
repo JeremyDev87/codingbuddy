@@ -20,10 +20,7 @@ import {
   type ComplexityClassification,
   type IncludedSkill,
 } from './keyword.types';
-import {
-  classifyComplexity,
-  generateSrpInstructions,
-} from './complexity-classifier';
+import { classifyComplexity, generateSrpInstructions } from './complexity-classifier';
 import { DEFAULT_AUTO_CONFIG } from './auto-executor.types';
 import { type VerbosityLevel } from '../shared/verbosity.types';
 import { MAX_PROMPT_LENGTH_REDOS_DEFENSE } from '../shared/validation.constants';
@@ -226,12 +223,8 @@ export class KeywordService {
 
   // Optional dependencies from options
   private readonly loadAutoConfigFn?: () => Promise<AutoConfig | null>;
-  private readonly getSkillRecommendationsFn?: (
-    prompt: string,
-  ) => SkillRecommendationInfo[];
-  private readonly loadSkillContentFn?: (
-    skillName: string,
-  ) => Promise<SkillContentInfo | null>;
+  private readonly getSkillRecommendationsFn?: (prompt: string) => SkillRecommendationInfo[];
+  private readonly loadSkillContentFn?: (skillName: string) => Promise<SkillContentInfo | null>;
   private readonly loadAgentSystemPromptFn?: (
     agentName: string,
     mode: Mode,
@@ -247,28 +240,23 @@ export class KeywordService {
     specialist: string;
   }> = [
     {
-      pattern:
-        /보안|security|auth|인증|JWT|OAuth|XSS|CSRF|취약점|vulnerability/i,
+      pattern: /보안|security|auth|인증|JWT|OAuth|XSS|CSRF|취약점|vulnerability/i,
       specialist: 'security-specialist',
     },
     {
-      pattern:
-        /접근성|accessibility|a11y|WCAG|aria|스크린\s*리더|screen\s*reader/i,
+      pattern: /접근성|accessibility|a11y|WCAG|aria|스크린\s*리더|screen\s*reader/i,
       specialist: 'accessibility-specialist',
     },
     {
-      pattern:
-        /성능|performance|최적화|optimiz|빠르게|느린|slow|fast|bundle\s*size|로딩/i,
+      pattern: /성능|performance|최적화|optimiz|빠르게|느린|slow|fast|bundle\s*size|로딩/i,
       specialist: 'performance-specialist',
     },
     {
-      pattern:
-        /다국어|i18n|internationalization|번역|locale|translation|localization/i,
+      pattern: /다국어|i18n|internationalization|번역|locale|translation|localization/i,
       specialist: 'i18n-specialist',
     },
     {
-      pattern:
-        /SEO|검색\s*엔진|search\s*engine|메타|meta\s*tag|sitemap|구조화\s*데이터/i,
+      pattern: /SEO|검색\s*엔진|search\s*engine|메타|meta\s*tag|sitemap|구조화\s*데이터/i,
       specialist: 'seo-specialist',
     },
     {
@@ -276,8 +264,7 @@ export class KeywordService {
       specialist: 'documentation-specialist',
     },
     {
-      pattern:
-        /UI|UX|디자인|design\s*system|사용자\s*경험|user\s*experience|인터랙션/i,
+      pattern: /UI|UX|디자인|design\s*system|사용자\s*경험|user\s*experience|인터랙션/i,
       specialist: 'ui-ux-designer',
     },
     {
@@ -328,10 +315,7 @@ export class KeywordService {
     this.cacheTTL = process.env.NODE_ENV === 'production' ? 3600000 : 300000;
   }
 
-  async parseMode(
-    prompt: string,
-    options?: ParseModeOptions,
-  ): Promise<ParseModeResult> {
+  async parseMode(prompt: string, options?: ParseModeOptions): Promise<ParseModeResult> {
     // Defense-in-depth: validate input length to prevent ReDoS attacks
     if (prompt.length > MAX_PROMPT_LENGTH_REDOS_DEFENSE) {
       this.logger.warn(
@@ -351,8 +335,7 @@ export class KeywordService {
     const rules = await this.getRulesForMode(mode, verbosity);
 
     // Only pass recommendedActAgent for ACT mode
-    const effectiveRecommendedAgent =
-      mode === 'ACT' ? options?.recommendedActAgent : undefined;
+    const effectiveRecommendedAgent = mode === 'ACT' ? options?.recommendedActAgent : undefined;
 
     return this.buildParseModeResult(
       mode,
@@ -401,8 +384,7 @@ export class KeywordService {
     const isEnglishKeyword = KEYWORDS.includes(keywordUpper as Mode);
     // Check localized keywords (exact match for CJK, case-insensitive for Spanish)
     const localizedMode =
-      LOCALIZED_KEYWORD_MAP[keywordCandidate] ??
-      LOCALIZED_KEYWORD_MAP[keywordUpper];
+      LOCALIZED_KEYWORD_MAP[keywordCandidate] ?? LOCALIZED_KEYWORD_MAP[keywordUpper];
 
     if (isEnglishKeyword) {
       const mode = keywordUpper as Mode;
@@ -425,10 +407,7 @@ export class KeywordService {
   /**
    * Check if first word of originalPrompt is also a keyword and add warning.
    */
-  private checkForMultipleKeywordsInPrompt(
-    originalPrompt: string,
-    warnings: string[],
-  ): void {
+  private checkForMultipleKeywordsInPrompt(originalPrompt: string, warnings: string[]): void {
     if (!originalPrompt) return;
 
     // Extract first word from originalPrompt (excluding colons)
@@ -451,10 +430,7 @@ export class KeywordService {
   /**
    * Check if prompt content is empty after keyword and add warning.
    */
-  private checkForEmptyContent(
-    originalPrompt: string,
-    warnings: string[],
-  ): void {
+  private checkForEmptyContent(originalPrompt: string, warnings: string[]): void {
     if (originalPrompt === '') {
       warnings.push('No prompt content after keyword');
     }
@@ -475,13 +451,7 @@ export class KeywordService {
     recommendedActAgent?: string,
   ): Promise<ParseModeResult> {
     // 1. Build base result object
-    const result = this.buildBaseResult(
-      mode,
-      originalPrompt,
-      warnings,
-      modeConfig,
-      rules,
-    );
+    const result = this.buildBaseResult(mode, originalPrompt, warnings, modeConfig, rules);
 
     // 2. Resolve and add Primary Agent information
     const resolvedAgent = await this.resolvePrimaryAgent(
@@ -576,11 +546,7 @@ export class KeywordService {
     config: KeywordModesConfig,
     originalPrompt: string,
   ): void {
-    const recommendation = this.getParallelAgentsRecommendation(
-      mode,
-      config,
-      originalPrompt,
-    );
+    const recommendation = this.getParallelAgentsRecommendation(mode, config, originalPrompt);
     if (recommendation) {
       result.parallelAgentsRecommendation = recommendation;
     }
@@ -598,8 +564,7 @@ export class KeywordService {
       return;
     }
 
-    const actRecommendation =
-      await this.getActAgentRecommendation(originalPrompt);
+    const actRecommendation = await this.getActAgentRecommendation(originalPrompt);
     if (actRecommendation) {
       result.recommended_act_agent = actRecommendation;
       result.available_act_agents = [...ACT_PRIMARY_AGENTS];
@@ -623,9 +588,7 @@ export class KeywordService {
         resolvedAgent.agentName,
       );
     } else {
-      result.activation_message = ActivationMessageBuilder.forPrimaryAgent(
-        resolvedAgent.agentName,
-      );
+      result.activation_message = ActivationMessageBuilder.forPrimaryAgent(resolvedAgent.agentName);
     }
   }
 
@@ -633,10 +596,7 @@ export class KeywordService {
    * Prepends a display instruction to result.instructions so AI clients
    * show the activation_message and mode indicator at response start.
    */
-  private addDisplayInstructionToResult(
-    result: ParseModeResult,
-    mode: Mode,
-  ): void {
+  private addDisplayInstructionToResult(result: ParseModeResult, mode: Mode): void {
     if (!result.activation_message?.formatted) {
       return;
     }
@@ -649,10 +609,7 @@ export class KeywordService {
   /**
    * Add AUTO config for AUTO mode.
    */
-  private async addAutoConfigToResult(
-    result: ParseModeResult,
-    mode: Mode,
-  ): Promise<void> {
+  private async addAutoConfigToResult(result: ParseModeResult, mode: Mode): Promise<void> {
     if (mode !== 'AUTO') {
       return;
     }
@@ -671,19 +628,14 @@ export class KeywordService {
    * @param mode - Current workflow mode
    * @param originalPrompt - User's original prompt
    */
-  private addComplexityToResult(
-    result: ParseModeResult,
-    mode: Mode,
-    originalPrompt: string,
-  ): void {
+  private addComplexityToResult(result: ParseModeResult, mode: Mode, originalPrompt: string): void {
     // Only apply complexity classification for PLAN mode or AUTO (which starts with PLAN)
     if (mode !== 'PLAN' && mode !== 'AUTO') {
       return;
     }
 
     // Classify the task complexity
-    const classification: ComplexityClassification =
-      classifyComplexity(originalPrompt);
+    const classification: ComplexityClassification = classifyComplexity(originalPrompt);
     result.complexity = classification;
 
     // Generate SRP instructions if complexity warrants it
@@ -725,8 +677,7 @@ export class KeywordService {
       if (recommendations.length === 0) return;
 
       // Use maxIncludedSkills from options if provided, otherwise use config value
-      const maxSkills =
-        options?.maxIncludedSkills ?? (await this.getMaxIncludedSkills());
+      const maxSkills = options?.maxIncludedSkills ?? (await this.getMaxIncludedSkills());
       const verbosity = options?.verbosity ?? 'standard';
       const skills = await this.loadSkillsInParallel(
         recommendations.slice(0, maxSkills),
@@ -852,9 +803,7 @@ export class KeywordService {
         };
       }
 
-      this.logger.log(
-        `Auto-included agent: ${agentPrompt.displayName} (verbosity: ${verbosity})`,
-      );
+      this.logger.log(`Auto-included agent: ${agentPrompt.displayName} (verbosity: ${verbosity})`);
     }
   }
 
@@ -863,9 +812,7 @@ export class KeywordService {
    */
   private getPrimaryAgentTier(agentName: string): 'primary' | 'specialist' {
     // Type assertion needed because ALL_PRIMARY_AGENTS is readonly tuple
-    return (ALL_PRIMARY_AGENTS as readonly string[]).includes(agentName)
-      ? 'primary'
-      : 'specialist';
+    return (ALL_PRIMARY_AGENTS as readonly string[]).includes(agentName) ? 'primary' : 'specialist';
   }
 
   /**
@@ -882,14 +829,10 @@ export class KeywordService {
     const baseSpecialists = modeConfig?.defaultSpecialists ?? [];
 
     // Get context-aware specialists based on prompt content
-    const contextSpecialists = prompt
-      ? this.getContextAwareSpecialists(prompt)
-      : [];
+    const contextSpecialists = prompt ? this.getContextAwareSpecialists(prompt) : [];
 
     // Merge base and context specialists (deduplicated)
-    const allSpecialists = [
-      ...new Set([...baseSpecialists, ...contextSpecialists]),
-    ];
+    const allSpecialists = [...new Set([...baseSpecialists, ...contextSpecialists])];
 
     if (allSpecialists.length === 0) {
       return undefined;
@@ -912,10 +855,7 @@ export class KeywordService {
   private getContextAwareSpecialists(prompt: string): string[] {
     const specialists: string[] = [];
 
-    for (const {
-      pattern,
-      specialist,
-    } of KeywordService.CONTEXT_SPECIALIST_PATTERNS) {
+    for (const { pattern, specialist } of KeywordService.CONTEXT_SPECIALIST_PATTERNS) {
       if (pattern.test(prompt)) {
         specialists.push(specialist);
       }
@@ -1051,9 +991,7 @@ export class KeywordService {
     return results.filter((rule): rule is RuleContent => rule !== null);
   }
 
-  private async getAgentInfo(
-    agentName: string,
-  ): Promise<AgentInfo | undefined> {
+  private async getAgentInfo(agentName: string): Promise<AgentInfo | undefined> {
     if (!this.loadAgentInfoFn) {
       return undefined;
     }
@@ -1072,8 +1010,7 @@ export class KeywordService {
 
         return {
           name: typeof agent.name === 'string' ? agent.name : agentName,
-          description:
-            typeof agent.description === 'string' ? agent.description : '',
+          description: typeof agent.description === 'string' ? agent.description : '',
           expertise: Array.isArray(role?.expertise) ? role.expertise : [],
         };
       },

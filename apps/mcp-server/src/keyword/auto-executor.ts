@@ -32,11 +32,7 @@ export class AutoExecutor {
     for (let i = 1; i <= options.maxIterations; i++) {
       this.progressCallback?.onPhaseStart('plan', i, options.maxIterations);
       const planResult = await this.deps.parsePlan(
-        this.promptBuilder.buildIterationPrompt(
-          options.prompt,
-          i,
-          iterationHistory,
-        ),
+        this.promptBuilder.buildIterationPrompt(options.prompt, i, iterationHistory),
       );
       this.progressCallback?.onPhaseComplete('plan', planResult);
 
@@ -86,8 +82,7 @@ export class AutoExecutor {
       success: false,
       iterations: options.maxIterations,
       maxIterations: options.maxIterations,
-      finalEvalSummary:
-        iterationHistory[iterationHistory.length - 1]?.evalSummary,
+      finalEvalSummary: iterationHistory[iterationHistory.length - 1]?.evalSummary,
       iterationHistory,
       modifiedFiles,
       fallbackToPlan: true,
@@ -111,12 +106,8 @@ export class AutoExecutor {
    * @returns Human-readable approach description
    * @private
    */
-  private extractApproach(
-    planResult: ParseModeResult,
-    iteration: number,
-  ): string {
-    const agent =
-      planResult.delegates_to || planResult.agent || 'default agent';
+  private extractApproach(planResult: ParseModeResult, iteration: number): string {
+    const agent = planResult.delegates_to || planResult.agent || 'default agent';
     const instructions = planResult.instructions;
 
     // Create concise approach description
@@ -124,9 +115,7 @@ export class AutoExecutor {
       // Take first sentence or first 60 characters of instructions
       const firstSentence = instructions.split('.')[0];
       const shortInstructions =
-        firstSentence.length > 60
-          ? firstSentence.substring(0, 60) + '...'
-          : firstSentence;
+        firstSentence.length > 60 ? firstSentence.substring(0, 60) + '...' : firstSentence;
       return `${agent}: ${shortInstructions}`;
     }
 

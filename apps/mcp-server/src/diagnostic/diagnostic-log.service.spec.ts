@@ -162,12 +162,7 @@ describe('DiagnosticLogService', () => {
     });
 
     it('should log failed config loading', async () => {
-      await service.logConfigLoading(
-        false,
-        '/project',
-        undefined,
-        'Config not found',
-      );
+      await service.logConfigLoading(false, '/project', undefined, 'Config not found');
 
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0];
       const writtenContent = JSON.parse(writeCall[1] as string);

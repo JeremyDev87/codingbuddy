@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { TuiEventBus } from './event-bus';
 import { TUI_EVENTS } from './types';
 import { parseAgentFromToolName } from './parse-agent';
-import {
-  extractEventsFromResponse,
-  type ExtractedEvent,
-} from './response-event-extractor';
+import { extractEventsFromResponse, type ExtractedEvent } from './response-event-extractor';
 import type { Mode } from '../../keyword/keyword.types';
 
 @Injectable()

@@ -12,9 +12,7 @@ import type { CodingBuddyConfig } from './config.schema';
 describe('ConfigDiffService', () => {
   const service = new ConfigDiffService();
 
-  const createMockAnalysis = (
-    overrides: Partial<ProjectAnalysis> = {},
-  ): ProjectAnalysis => ({
+  const createMockAnalysis = (overrides: Partial<ProjectAnalysis> = {}): ProjectAnalysis => ({
     packageInfo: {
       name: 'test-app',
       version: '1.0.0',
@@ -46,9 +44,7 @@ describe('ConfigDiffService', () => {
           dependencies: { react: '^18.0.0' },
           devDependencies: {},
           scripts: {},
-          detectedFrameworks: [
-            { name: 'React', category: 'frontend', version: '^18.0.0' },
-          ],
+          detectedFrameworks: [{ name: 'React', category: 'frontend', version: '^18.0.0' }],
         },
         configFiles: {
           detected: ['tsconfig.json'],
@@ -101,9 +97,7 @@ describe('ConfigDiffService', () => {
       expect(result.suggestions.length).toBeGreaterThan(0);
       expect(result.isUpToDate).toBe(false);
 
-      const frontendSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.frontend',
-      );
+      const frontendSuggestion = result.suggestions.find(s => s.field === 'techStack.frontend');
       expect(frontendSuggestion).toBeDefined();
       expect(frontendSuggestion?.suggestedValue).toContain('Next.js');
     });
@@ -116,9 +110,7 @@ describe('ConfigDiffService', () => {
           dependencies: { '@nestjs/core': '^10.0.0' },
           devDependencies: {},
           scripts: {},
-          detectedFrameworks: [
-            { name: 'NestJS', category: 'backend', version: '^10.0.0' },
-          ],
+          detectedFrameworks: [{ name: 'NestJS', category: 'backend', version: '^10.0.0' }],
         },
       });
 
@@ -128,9 +120,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const backendSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.backend',
-      );
+      const backendSuggestion = result.suggestions.find(s => s.field === 'techStack.backend');
       expect(backendSuggestion).toBeDefined();
       expect(backendSuggestion?.suggestedValue).toContain('NestJS');
     });
@@ -153,9 +143,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const nameSuggestion = result.suggestions.find(
-        s => s.field === 'projectName',
-      );
+      const nameSuggestion = result.suggestions.find(s => s.field === 'projectName');
       expect(nameSuggestion).toBeDefined();
       expect(nameSuggestion?.suggestedValue).toBe('new-project-name');
       expect(nameSuggestion?.currentValue).toBe('old-project-name');
@@ -189,9 +177,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const testSuggestion = result.suggestions.find(
-        s => s.field === 'testStrategy.frameworks',
-      );
+      const testSuggestion = result.suggestions.find(s => s.field === 'testStrategy.frameworks');
       expect(testSuggestion).toBeDefined();
       expect(testSuggestion?.suggestedValue).toContain('Vitest');
     });
@@ -204,9 +190,7 @@ describe('ConfigDiffService', () => {
           dependencies: { react: '^18.0.0' },
           devDependencies: {},
           scripts: {},
-          detectedFrameworks: [
-            { name: 'React', category: 'frontend', version: '^18.0.0' },
-          ],
+          detectedFrameworks: [{ name: 'React', category: 'frontend', version: '^18.0.0' }],
         },
       });
 
@@ -226,9 +210,7 @@ describe('ConfigDiffService', () => {
           dependencies: { prisma: '^5.0.0' },
           devDependencies: {},
           scripts: {},
-          detectedFrameworks: [
-            { name: 'Prisma', category: 'database', version: '^5.0.0' },
-          ],
+          detectedFrameworks: [{ name: 'Prisma', category: 'database', version: '^5.0.0' }],
         },
       });
 
@@ -238,9 +220,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const dbSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.database',
-      );
+      const dbSuggestion = result.suggestions.find(s => s.field === 'techStack.database');
       expect(dbSuggestion).toBeDefined();
       expect(dbSuggestion?.suggestedValue).toContain('Prisma');
     });
@@ -263,9 +243,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const langSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.languages',
-      );
+      const langSuggestion = result.suggestions.find(s => s.field === 'techStack.languages');
       expect(langSuggestion).toBeDefined();
       expect(langSuggestion?.suggestedValue).toContain('TypeScript');
     });
@@ -291,9 +269,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const langSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.languages',
-      );
+      const langSuggestion = result.suggestions.find(s => s.field === 'techStack.languages');
       expect(langSuggestion).toBeDefined();
       expect(langSuggestion?.suggestedValue).toContain('JavaScript');
     });
@@ -311,9 +287,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const langSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.languages',
-      );
+      const langSuggestion = result.suggestions.find(s => s.field === 'techStack.languages');
       expect(langSuggestion).toBeDefined();
       expect(langSuggestion?.suggestedValue).toContain('JavaScript');
     });
@@ -344,9 +318,7 @@ describe('ConfigDiffService', () => {
 
       const result = service.compareConfig(analysis, config);
 
-      const langSuggestion = result.suggestions.find(
-        s => s.field === 'techStack.languages',
-      );
+      const langSuggestion = result.suggestions.find(s => s.field === 'techStack.languages');
       expect(langSuggestion).toBeDefined();
       expect(langSuggestion?.suggestedValue).toContain('TypeScript');
       expect(langSuggestion?.suggestedValue).not.toContain('JavaScript');

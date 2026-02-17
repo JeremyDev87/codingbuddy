@@ -283,8 +283,7 @@ export function validateQuery(query: string): ValidationResult {
   if (!query || query.trim().length === 0) {
     return {
       valid: false,
-      error:
-        'Query cannot be empty. Please provide a search term. Example: "authentication flow"',
+      error: 'Query cannot be empty. Please provide a search term. Example: "authentication flow"',
     };
   }
   if (query.length > MAX_QUERY_LENGTH) {
@@ -385,9 +384,7 @@ export function isStringArray(value: unknown): value is string[] {
  * @param value - Value to check
  * @returns True if value is a non-null, non-array object
  */
-export function isRecordObject(
-  value: unknown,
-): value is Record<string, unknown> {
+export function isRecordObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
@@ -486,10 +483,7 @@ type Charset = (typeof VALID_CHARSETS)[number];
  * @returns True if value is 'space' or 'tab'
  */
 export function isIndentStyle(value: unknown): value is IndentStyle {
-  return (
-    typeof value === 'string' &&
-    VALID_INDENT_STYLES.includes(value as IndentStyle)
-  );
+  return typeof value === 'string' && VALID_INDENT_STYLES.includes(value as IndentStyle);
 }
 
 /**
@@ -498,9 +492,7 @@ export function isIndentStyle(value: unknown): value is IndentStyle {
  * @returns True if value is 'lf', 'cr', or 'crlf'
  */
 export function isEndOfLine(value: unknown): value is EndOfLine {
-  return (
-    typeof value === 'string' && VALID_END_OF_LINE.includes(value as EndOfLine)
-  );
+  return typeof value === 'string' && VALID_END_OF_LINE.includes(value as EndOfLine);
 }
 
 /**

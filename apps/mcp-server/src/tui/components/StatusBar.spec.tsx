@@ -63,9 +63,7 @@ describe('tui/components/StatusBar', () => {
   });
 
   it('should render progress bar with ▓░ characters', () => {
-    const agents: AgentState[] = [
-      makeAgent({ id: 'a1', status: 'running', progress: 70 }),
-    ];
+    const agents: AgentState[] = [makeAgent({ id: 'a1', status: 'running', progress: 70 })];
     const { lastFrame } = render(<StatusBar agents={agents} skills={[]} />);
     const output = lastFrame() ?? '';
     expect(output).toContain('▓');
@@ -73,9 +71,7 @@ describe('tui/components/StatusBar', () => {
   });
 
   it('should render progress percentage', () => {
-    const agents: AgentState[] = [
-      makeAgent({ id: 'a1', status: 'running', progress: 70 }),
-    ];
+    const agents: AgentState[] = [makeAgent({ id: 'a1', status: 'running', progress: 70 })];
     const { lastFrame } = render(<StatusBar agents={agents} skills={[]} />);
     expect(lastFrame()).toContain('70%');
   });

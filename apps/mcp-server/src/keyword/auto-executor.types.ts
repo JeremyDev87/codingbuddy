@@ -52,21 +52,11 @@ export interface AutoResult {
 }
 
 /** AUTO mode phase */
-export type AutoPhase =
-  | 'starting'
-  | 'plan'
-  | 'act'
-  | 'eval'
-  | 'completed'
-  | 'failed';
+export type AutoPhase = 'starting' | 'plan' | 'act' | 'eval' | 'completed' | 'failed';
 
 /** AUTO mode progress callback */
 export interface AutoProgressCallback {
-  onPhaseStart: (
-    phase: AutoPhase,
-    iteration: number,
-    maxIterations: number,
-  ) => void;
+  onPhaseStart: (phase: AutoPhase, iteration: number, maxIterations: number) => void;
   onPhaseComplete: (phase: AutoPhase, result: ParseModeResult) => void;
   onIterationComplete: (result: IterationResult) => void;
   onComplete: (result: AutoResult) => void;

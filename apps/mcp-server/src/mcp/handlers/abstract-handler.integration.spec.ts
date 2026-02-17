@@ -140,10 +140,7 @@ describe('Handler Security Integration', () => {
 
     // Initialize handlers
     agentHandler = new AgentHandler(mockAgentService);
-    checklistHandler = new ChecklistContextHandler(
-      mockChecklistService,
-      mockContextService,
-    );
+    checklistHandler = new ChecklistContextHandler(mockChecklistService, mockContextService);
     configHandler = new ConfigHandler(
       mockConfigService,
       mockConfigDiffService,
@@ -165,10 +162,7 @@ describe('Handler Security Integration', () => {
       mockAgentServiceForMode as AgentService,
     );
     rulesHandler = new RulesHandler(mockRulesService, mockModelResolverService);
-    skillHandler = new SkillHandler(
-      mockSkillRecommendationService,
-      mockRulesService,
-    );
+    skillHandler = new SkillHandler(mockSkillRecommendationService, mockRulesService);
   });
 
   describe('__proto__ pollution protection', () => {
@@ -179,10 +173,7 @@ describe('Handler Security Integration', () => {
         enumerable: true,
       });
 
-      const result = await agentHandler.handle(
-        'get_agent_system_prompt',
-        maliciousArgs,
-      );
+      const result = await agentHandler.handle('get_agent_system_prompt', maliciousArgs);
 
       expect(result).not.toBeNull();
       expect(result!.isError).toBe(true);
@@ -197,10 +188,7 @@ describe('Handler Security Integration', () => {
         enumerable: true,
       });
 
-      const result = await checklistHandler.handle(
-        'generate_checklist',
-        maliciousArgs,
-      );
+      const result = await checklistHandler.handle('generate_checklist', maliciousArgs);
 
       expect(result).not.toBeNull();
       expect(result!.isError).toBe(true);
@@ -214,10 +202,7 @@ describe('Handler Security Integration', () => {
         enumerable: true,
       });
 
-      const result = await configHandler.handle(
-        'get_project_config',
-        maliciousArgs,
-      );
+      const result = await configHandler.handle('get_project_config', maliciousArgs);
 
       expect(result).not.toBeNull();
       expect(result!.isError).toBe(true);
@@ -259,10 +244,7 @@ describe('Handler Security Integration', () => {
         enumerable: true,
       });
 
-      const result = await skillHandler.handle(
-        'recommend_skills',
-        maliciousArgs,
-      );
+      const result = await skillHandler.handle('recommend_skills', maliciousArgs);
 
       expect(result).not.toBeNull();
       expect(result!.isError).toBe(true);
@@ -356,9 +338,7 @@ describe('Handler Security Integration', () => {
         expect(result).not.toBeNull();
         expect(result!.isError).toBe(true);
         expect(result!.content[0].text).toContain('dangerous key detected');
-        expect(result!.content[0].text).toContain(
-          'nested.deepNested.__proto__',
-        );
+        expect(result!.content[0].text).toContain('nested.deepNested.__proto__');
       });
     });
   });
@@ -382,9 +362,7 @@ describe('Handler Security Integration', () => {
         expect(result).not.toBeNull();
         // If there's an error, it should not be about dangerous keys
         if (result!.isError) {
-          expect(result!.content[0].text).not.toContain(
-            'dangerous key detected',
-          );
+          expect(result!.content[0].text).not.toContain('dangerous key detected');
         }
       });
     });

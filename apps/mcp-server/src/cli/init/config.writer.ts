@@ -31,9 +31,7 @@ export function formatConfigAsJson(config: CodingBuddyConfig): string {
  *
  * @returns Path to existing config file, or null if none exists
  */
-export async function findExistingConfig(
-  projectRoot: string,
-): Promise<string | null> {
+export async function findExistingConfig(projectRoot: string): Promise<string | null> {
   for (const fileName of CONFIG_FILE_NAMES) {
     const filePath = path.join(projectRoot, fileName);
     try {
@@ -72,9 +70,7 @@ export async function writeConfig(
     // Format the config object as JSON
     content = formatConfigAsJson(config);
   } else {
-    throw new Error(
-      'Invalid config: expected object or string with raw option',
-    );
+    throw new Error('Invalid config: expected object or string with raw option');
   }
 
   const filePath = path.join(projectRoot, fileName);

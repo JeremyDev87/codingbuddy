@@ -16,23 +16,14 @@ export interface StatusBarProps {
   skills: SkillRecommendedEvent[];
 }
 
-export function StatusBar({
-  agents,
-  skills,
-}: StatusBarProps): React.ReactElement {
+export function StatusBar({ agents, skills }: StatusBarProps): React.ReactElement {
   const { stdout } = useStdout();
   const terminalWidth = stdout?.columns ?? 80;
   const activeCount = countActiveAgents(agents);
   const progress = calculateOverallProgress(agents);
   const phase = determinePhase(agents);
   const skillsText = buildSkillsDisplay(skills);
-  const parts = buildCompactStatusParts(
-    activeCount,
-    skillsText,
-    progress,
-    phase,
-    terminalWidth,
-  );
+  const parts = buildCompactStatusParts(activeCount, skillsText, progress, phase, terminalWidth);
   const phaseColor = getPhaseColor(phase);
 
   if (!parts.mainContent && !parts.phaseContent) {

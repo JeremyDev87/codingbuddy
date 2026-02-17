@@ -18,11 +18,7 @@
     "ACT": {
       "description": "Actual task execution phase",
       "instructions": "Red-Green-Refactor 사이클 준수. 최소 구현 후 점진적 개선. 품질 기준 충족 확인. 📝 완료 후 docs/codingbuddy/act/ 에 ACT 문서 작성 권장 (./docs/codingbuddy/scripts/new-doc.sh act <slug>).",
-      "rules": [
-        "rules/core.md",
-        "rules/project.md",
-        "rules/augmented-coding.md"
-      ],
+      "rules": ["rules/core.md", "rules/project.md", "rules/augmented-coding.md"],
       "agent": "act-mode",
       "delegates_to": "frontend-developer",
       "defaultSpecialists": [
@@ -52,11 +48,7 @@
     "AUTO": {
       "description": "Autonomous execution mode",
       "instructions": "PLAN → ACT → EVAL 사이클 자동 실행. Critical/High 이슈가 0이 될 때까지 반복. (세션 문서는 각 PLAN/ACT/EVAL 단계에서 작성됨)",
-      "rules": [
-        "rules/core.md",
-        "rules/project.md",
-        "rules/augmented-coding.md"
-      ],
+      "rules": ["rules/core.md", "rules/project.md", "rules/augmented-coding.md"],
       "agent": "auto-mode",
       "delegates_to": "frontend-developer",
       "defaultSpecialists": [

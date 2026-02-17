@@ -146,8 +146,7 @@ export async function runTui(): Promise<void> {
     process.removeListener('SIGINT', shutdown);
     process.removeListener('SIGTERM', shutdown);
     process.stderr.write(
-      `Failed to load TUI components: ${err}\n` +
-        'Ensure the TUI bundle is built (yarn build).\n',
+      `Failed to load TUI components: ${err}\n` + 'Ensure the TUI bundle is built (yarn build).\n',
     );
     client.disconnect();
     process.exitCode = 1;

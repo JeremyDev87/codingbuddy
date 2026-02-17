@@ -9,12 +9,8 @@ describe('Graceful Shutdown', () => {
   let sigtermListeners: NodeJS.SignalsListener[];
 
   beforeEach(() => {
-    sigintListeners = process
-      .listeners('SIGINT')
-      .slice() as NodeJS.SignalsListener[];
-    sigtermListeners = process
-      .listeners('SIGTERM')
-      .slice() as NodeJS.SignalsListener[];
+    sigintListeners = process.listeners('SIGINT').slice() as NodeJS.SignalsListener[];
+    sigtermListeners = process.listeners('SIGTERM').slice() as NodeJS.SignalsListener[];
     process.removeAllListeners('SIGINT');
     process.removeAllListeners('SIGTERM');
   });

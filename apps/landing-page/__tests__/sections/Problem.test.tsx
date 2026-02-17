@@ -29,9 +29,7 @@ describe('Problem', () => {
 
   it('should display subtitle', async () => {
     render(await Problem({ locale: 'en' }));
-    expect(
-      screen.getByText(/Every AI tool has its own rules format/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Every AI tool has its own rules format/)).toBeInTheDocument();
   });
 
   it('should render 4 pain points', async () => {
@@ -44,8 +42,6 @@ describe('Problem', () => {
 
   it('should render pain point descriptions', async () => {
     render(await Problem({ locale: 'en' }));
-    expect(
-      screen.getByText(/Each tool needs its own config/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Each tool needs its own config/)).toBeInTheDocument();
   });
 });

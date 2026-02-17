@@ -39,10 +39,7 @@ export interface FileSystemDeps {
 // Internal Helpers
 // ============================================================================
 
-async function defaultReadFile(
-  filePath: string,
-  encoding: string,
-): Promise<string> {
+async function defaultReadFile(filePath: string, encoding: string): Promise<string> {
   const fsModule = await import('fs/promises');
   return fsModule.readFile(filePath, encoding as BufferEncoding);
 }
@@ -65,10 +62,7 @@ function getReadFile(deps?: FileSystemDeps) {
 
 function getReaddir(
   deps?: FileSystemDeps,
-): (
-  path: string,
-  options?: { withFileTypes?: boolean },
-) => Promise<string[] | DirentLike[]> {
+): (path: string, options?: { withFileTypes?: boolean }) => Promise<string[] | DirentLike[]> {
   return deps?.readdir ?? defaultReaddir;
 }
 
@@ -86,10 +80,7 @@ function getReaddir(
  * @param options - Resolution options
  * @returns Resolved rules directory path
  */
-export function resolveRulesDir(
-  dirname: string,
-  options?: ResolveRulesDirOptions,
-): string {
+export function resolveRulesDir(dirname: string, options?: ResolveRulesDirOptions): string {
   // 1. Environment variable takes precedence
   if (options?.envRulesDir) {
     return options.envRulesDir;
@@ -157,18 +148,13 @@ export async function readRuleContent(
  * @param deps - Optional filesystem dependencies for testing
  * @returns Array of agent names (without .json extension)
  */
-export async function listAgentNames(
-  rulesDir: string,
-  deps?: FileSystemDeps,
-): Promise<string[]> {
+export async function listAgentNames(rulesDir: string, deps?: FileSystemDeps): Promise<string[]> {
   const agentsDir = path.join(rulesDir, 'agents');
   const readdir = getReaddir(deps);
 
   try {
     const files = await readdir(agentsDir);
-    return (files as string[])
-      .filter(f => f.endsWith('.json'))
-      .map(f => f.replace('.json', ''));
+    return (files as string[]).filter(f => f.endsWith('.json')).map(f => f.replace('.json', ''));
   } catch {
     return [];
   }

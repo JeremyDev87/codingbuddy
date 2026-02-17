@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  selectTemplate,
-  getTemplateById,
-  getAllTemplates,
-} from './template.selector';
+import { selectTemplate, getTemplateById, getAllTemplates } from './template.selector';
 import type { ProjectAnalysis, DetectedFramework } from '../../../analyzer';
 import type { FrameworkType } from './template.types';
 
@@ -149,14 +145,7 @@ describe('Template Selector', () => {
     });
 
     it('returns all standard templates', () => {
-      const types: FrameworkType[] = [
-        'nextjs',
-        'react',
-        'nestjs',
-        'express',
-        'node',
-        'default',
-      ];
+      const types: FrameworkType[] = ['nextjs', 'react', 'nestjs', 'express', 'node', 'default'];
 
       for (const type of types) {
         const template = getTemplateById(type);

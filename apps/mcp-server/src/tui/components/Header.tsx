@@ -18,9 +18,7 @@ export function Header({ mode }: HeaderProps): React.ReactElement {
         <Text bold>🤖 CODINGBUDDY</Text>
       </Box>
       <Box flexGrow={1} justifyContent="center">
-        {mode && (
-          <Text color={getModeColor(mode)}>{buildModeIndicator(mode)}</Text>
-        )}
+        {mode && <Text color={getModeColor(mode)}>{buildModeIndicator(mode)}</Text>}
       </Box>
       <Box>
         <Text>{time}</Text>

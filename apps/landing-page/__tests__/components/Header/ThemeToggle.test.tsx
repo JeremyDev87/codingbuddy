@@ -8,24 +8,16 @@ import { ThemeToggle } from '@/components/Header/ThemeToggle';
 describe('ThemeToggle', () => {
   it('renders trigger button with accessible label', () => {
     render(<ThemeToggle />);
-    expect(
-      screen.getByRole('button', { name: /toggle theme/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
   });
 
   it('opens dropdown with theme options as radio items', async () => {
     const user = userEvent.setup();
     render(<ThemeToggle />);
     await user.click(screen.getByRole('button', { name: /toggle theme/i }));
-    expect(
-      screen.getByRole('menuitemradio', { name: /light/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('menuitemradio', { name: /dark/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('menuitemradio', { name: /system/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /light/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /dark/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /system/i })).toBeInTheDocument();
   });
 
   it('indicates current theme via aria-checked', async () => {
@@ -33,12 +25,14 @@ describe('ThemeToggle', () => {
     render(<ThemeToggle />);
     await user.click(screen.getByRole('button', { name: /toggle theme/i }));
     // Default mock theme is 'system'
-    expect(
-      screen.getByRole('menuitemradio', { name: /system/i }),
-    ).toHaveAttribute('aria-checked', 'true');
-    expect(
-      screen.getByRole('menuitemradio', { name: /light/i }),
-    ).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByRole('menuitemradio', { name: /system/i })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    expect(screen.getByRole('menuitemradio', { name: /light/i })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
   });
 
   it('calls setTheme when option selected', async () => {

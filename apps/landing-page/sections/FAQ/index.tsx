@@ -15,10 +15,7 @@ export const FAQ = async ({ locale }: WidgetProps) => {
     >
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
-          <h2
-            id="faq-heading"
-            className="text-3xl font-bold tracking-tight sm:text-4xl"
-          >
+          <h2 id="faq-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t('title')}
           </h2>
           <p className="text-muted-foreground mt-4 text-lg">{t('subtitle')}</p>

@@ -10,22 +10,13 @@ declare module 'ink' {
   import type { ReactElement, ReactNode, Key } from 'react';
 
   export interface BoxProps {
-    readonly flexDirection?:
-      | 'row'
-      | 'column'
-      | 'row-reverse'
-      | 'column-reverse';
+    readonly flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
     readonly flexGrow?: number;
     readonly flexShrink?: number;
     readonly flexBasis?: string | number;
     readonly flexWrap?: 'wrap' | 'nowrap' | 'wrap-reverse';
     readonly alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch';
-    readonly alignSelf?:
-      | 'auto'
-      | 'flex-start'
-      | 'flex-end'
-      | 'center'
-      | 'stretch';
+    readonly alignSelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'stretch';
     readonly justifyContent?:
       | 'flex-start'
       | 'flex-end'
@@ -85,12 +76,7 @@ declare module 'ink' {
     readonly color?: string;
     readonly backgroundColor?: string;
     readonly inverse?: boolean;
-    readonly wrap?:
-      | 'wrap'
-      | 'truncate'
-      | 'truncate-start'
-      | 'truncate-middle'
-      | 'truncate-end';
+    readonly wrap?: 'wrap' | 'truncate' | 'truncate-start' | 'truncate-middle' | 'truncate-end';
     readonly children?: ReactNode;
   }
 

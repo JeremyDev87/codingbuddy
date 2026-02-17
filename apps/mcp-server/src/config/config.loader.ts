@@ -282,11 +282,7 @@ export async function loadJsonConfig(filePath: string): Promise<unknown> {
     return JSON.parse(content);
   } catch (error) {
     if (error instanceof SyntaxError) {
-      throw new ConfigLoadError(
-        `Invalid JSON in config file: ${error.message}`,
-        filePath,
-        error,
-      );
+      throw new ConfigLoadError(`Invalid JSON in config file: ${error.message}`, filePath, error);
     }
     throw new ConfigLoadError(
       `Failed to read config file: ${error instanceof Error ? error.message : String(error)}`,
@@ -324,14 +320,9 @@ export function validateAndTransform(
   const result = validateConfig(raw);
 
   if (!result.success) {
-    const errorMessages = result
-      .errors!.map(e => `  - ${e.path}: ${e.message}`)
-      .join('\n');
+    const errorMessages = result.errors!.map(e => `  - ${e.path}: ${e.message}`).join('\n');
 
-    throw new ConfigLoadError(
-      `Invalid configuration:\n${errorMessages}`,
-      filePath,
-    );
+    throw new ConfigLoadError(`Invalid configuration:\n${errorMessages}`, filePath);
   }
 
   return {
@@ -346,9 +337,7 @@ export function validateAndTransform(
  * @param projectRoot - Project root directory (defaults to process.cwd())
  * @returns Loaded configuration with metadata
  */
-export async function loadConfig(
-  projectRoot?: string,
-): Promise<ConfigLoadResult> {
+export async function loadConfig(projectRoot?: string): Promise<ConfigLoadResult> {
   const root = projectRoot ?? process.cwd();
   const configPath = findConfigFile(root);
   const deprecatedFiles = findDeprecatedConfigFiles(root);

@@ -87,9 +87,7 @@ export function parseIgnoreContent(content: string): string[] {
 /**
  * Load and parse the .codingignore file
  */
-export async function loadIgnoreFile(
-  projectRoot: string,
-): Promise<IgnoreParseResult> {
+export async function loadIgnoreFile(projectRoot: string): Promise<IgnoreParseResult> {
   const ignorePath = path.join(projectRoot, IGNORE_FILE_NAME);
 
   if (!existsSync(ignorePath)) {
@@ -192,10 +190,7 @@ export function patternToRegex(pattern: string): RegExp {
  * Check if a path should be ignored based on patterns
  * Uses cached regex patterns for performance
  */
-export function shouldIgnore(
-  relativePath: string,
-  patterns: string[],
-): boolean {
+export function shouldIgnore(relativePath: string, patterns: string[]): boolean {
   // Normalize path separators
   const normalizedPath = relativePath.replace(/\\/g, '/');
 

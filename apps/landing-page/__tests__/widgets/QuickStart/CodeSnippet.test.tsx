@@ -54,9 +54,7 @@ describe('CodeSnippet', () => {
     await user.click(screen.getByRole('button', { name: 'Copy' }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Copied!' }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Copied!' })).toBeInTheDocument();
     });
   });
 

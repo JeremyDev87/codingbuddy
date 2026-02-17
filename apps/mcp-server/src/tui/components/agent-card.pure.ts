@@ -70,12 +70,7 @@ export function buildInlineCard(
     abbreviateName(name, INLINE_NAME_COL_WIDTH),
     INLINE_NAME_COL_WIDTH,
   );
-  const bar = buildProgressBar(
-    progress,
-    INLINE_BAR_WIDTH,
-    INLINE_FILLED,
-    INLINE_EMPTY,
-  );
+  const bar = buildProgressBar(progress, INLINE_BAR_WIDTH, INLINE_FILLED, INLINE_EMPTY);
   const pct = `${progress}%`.padStart(4); // Safe: ASCII-only content
   return `${icon} ${displayName} ${bar} ${pct}  ${statusLabel}`;
 }

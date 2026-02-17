@@ -19,10 +19,7 @@
       "Ensure plans are context-complete for engineers"
     ]
   },
-  "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/augmented-coding.md"
-  ],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
   "skills": {
     "required": [
       {

@@ -46,9 +46,7 @@ describe('sanitizeError', () => {
     });
 
     it('should preserve validation error messages', () => {
-      const error = new Error(
-        'Query exceeds maximum length of 1000 characters',
-      );
+      const error = new Error('Query exceeds maximum length of 1000 characters');
       const result = sanitizeError(error);
       expect(result).toBe('Query exceeds maximum length of 1000 characters');
     });
@@ -69,18 +67,14 @@ describe('sanitizeError', () => {
     });
 
     it('should sanitize Windows-style paths', () => {
-      const error = new Error(
-        'Error reading C:\\Users\\jeremy\\Documents\\secret.txt',
-      );
+      const error = new Error('Error reading C:\\Users\\jeremy\\Documents\\secret.txt');
       const result = sanitizeError(error);
       expect(result).toBe('An internal error occurred');
       expect(result).not.toContain('C:\\');
     });
 
     it('should sanitize module paths', () => {
-      const error = new Error(
-        "Cannot find module '/app/node_modules/some-package'",
-      );
+      const error = new Error("Cannot find module '/app/node_modules/some-package'");
       const result = sanitizeError(error);
       expect(result).toBe('An internal error occurred');
       expect(result).not.toContain('node_modules');

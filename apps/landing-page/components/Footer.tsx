@@ -9,14 +9,9 @@ export const Footer = async ({ locale }: WidgetProps) => {
   const year = new Date().getFullYear();
 
   return (
-    <footer
-      aria-label={t('label')}
-      className="border-t border-border bg-muted/30 px-4 py-8"
-    >
+    <footer aria-label={t('label')} className="border-t border-border bg-muted/30 px-4 py-8">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <p className="text-sm text-muted-foreground">
-          {t('copyright', { year: String(year) })}
-        </p>
+        <p className="text-sm text-muted-foreground">{t('copyright', { year: String(year) })}</p>
         <div className="flex items-center gap-4">
           <span className="text-xs text-muted-foreground">{t('license')}</span>
           <a

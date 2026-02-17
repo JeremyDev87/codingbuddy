@@ -10,12 +10,7 @@ export type { Mode } from '../keyword/keyword.types';
 /**
  * Valid agent statuses
  */
-export const AGENT_STATUSES = Object.freeze([
-  'idle',
-  'running',
-  'completed',
-  'failed',
-] as const);
+export const AGENT_STATUSES = Object.freeze(['idle', 'running', 'completed', 'failed'] as const);
 
 export type AgentStatus = (typeof AGENT_STATUSES)[number];
 
@@ -73,15 +68,7 @@ type AgentStateOptional = Partial<Omit<AgentState, 'id' | 'name' | 'role'>>;
 export function createDefaultAgentState(
   params: AgentStateRequired & AgentStateOptional,
 ): AgentState {
-  const {
-    id,
-    name,
-    role,
-    status = 'idle',
-    progress = 0,
-    isPrimary = false,
-    childAgents,
-  } = params;
+  const { id, name, role, status = 'idle', progress = 0, isPrimary = false, childAgents } = params;
 
   const state: AgentState = {
     id,

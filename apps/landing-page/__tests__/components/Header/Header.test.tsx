@@ -8,25 +8,14 @@ import { Header } from '@/components/Header';
 describe('Header', () => {
   it('renders navigation with correct links', () => {
     render(<Header />);
-    expect(
-      screen.getByRole('navigation', { name: /main navigation/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute(
-      'href',
-      '#solution',
-    );
-    expect(screen.getByRole('link', { name: /agents/i })).toHaveAttribute(
-      'href',
-      '#agents',
-    );
+    expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '#solution');
+    expect(screen.getByRole('link', { name: /agents/i })).toHaveAttribute('href', '#agents');
     expect(screen.getByRole('link', { name: /quick start/i })).toHaveAttribute(
       'href',
       '#quick-start',
     );
-    expect(screen.getByRole('link', { name: /faq/i })).toHaveAttribute(
-      'href',
-      '#faq',
-    );
+    expect(screen.getByRole('link', { name: /faq/i })).toHaveAttribute('href', '#faq');
   });
 
   it('renders brand link pointing to home with accessible label', () => {
@@ -34,10 +23,7 @@ describe('Header', () => {
     const brandLink = screen.getByRole('link', { name: /codingbuddy/i });
     expect(brandLink).toBeInTheDocument();
     expect(brandLink).toHaveAttribute('href', '/');
-    expect(brandLink).toHaveAttribute(
-      'aria-label',
-      expect.stringMatching(/codingbuddy/i),
-    );
+    expect(brandLink).toHaveAttribute('aria-label', expect.stringMatching(/codingbuddy/i));
   });
 
   it('renders theme toggle and language selector', () => {

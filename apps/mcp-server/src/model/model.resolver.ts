@@ -44,9 +44,7 @@ const HAIKU_DEPRECATION_WARNING =
  * Get all prefixes including additional ones
  * @param additionalPrefixes - Optional additional prefixes to include
  */
-export function getAllPrefixes(
-  additionalPrefixes?: readonly string[],
-): readonly string[] {
+export function getAllPrefixes(additionalPrefixes?: readonly string[]): readonly string[] {
   if (!additionalPrefixes || additionalPrefixes.length === 0) {
     return KNOWN_MODEL_PREFIXES;
   }
@@ -70,13 +68,8 @@ export function formatUnknownModelWarning(
  * @param modelId - Model ID to check
  * @param additionalPrefixes - Optional additional prefixes to recognize
  */
-export function isKnownModel(
-  modelId: string,
-  additionalPrefixes?: readonly string[],
-): boolean {
-  return getAllPrefixes(additionalPrefixes).some(prefix =>
-    modelId.startsWith(prefix),
-  );
+export function isKnownModel(modelId: string, additionalPrefixes?: readonly string[]): boolean {
+  return getAllPrefixes(additionalPrefixes).some(prefix => modelId.startsWith(prefix));
 }
 
 /**
@@ -100,10 +93,7 @@ export function resolveModel(params: ResolveModelParams): ResolvedModel {
 
     // Add warning if model is not recognized (but still use it)
     if (!isKnownModel(globalDefaultModel, additionalPrefixes)) {
-      result.warning = formatUnknownModelWarning(
-        globalDefaultModel,
-        additionalPrefixes,
-      );
+      result.warning = formatUnknownModelWarning(globalDefaultModel, additionalPrefixes);
     }
     // Add deprecation warning for Haiku models (even though they're recognized)
     else if (isHaikuModel(globalDefaultModel)) {

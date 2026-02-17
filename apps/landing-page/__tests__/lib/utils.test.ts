@@ -28,20 +28,16 @@ describe('cn utility function', () => {
   });
 
   test('handles object syntax from clsx', () => {
-    expect(cn({ 'text-red-500': true, 'bg-blue-500': false })).toBe(
-      'text-red-500',
-    );
+    expect(cn({ 'text-red-500': true, 'bg-blue-500': false })).toBe('text-red-500');
   });
 
   test('handles array syntax from clsx', () => {
-    expect(cn(['text-red-500', 'bg-blue-500'])).toBe(
-      'text-red-500 bg-blue-500',
-    );
+    expect(cn(['text-red-500', 'bg-blue-500'])).toBe('text-red-500 bg-blue-500');
   });
 
   test('handles mixed types', () => {
-    expect(
-      cn('text-red-500', { 'bg-blue-500': true, hidden: false }, ['p-4', null]),
-    ).toBe('text-red-500 bg-blue-500 p-4');
+    expect(cn('text-red-500', { 'bg-blue-500': true, hidden: false }, ['p-4', null])).toBe(
+      'text-red-500 bg-blue-500 p-4',
+    );
   });
 });

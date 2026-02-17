@@ -84,9 +84,7 @@ describe('리스너 누적 방지', () => {
 
     for (const event of Object.values(TUI_EVENTS)) {
       const eventName = event as TuiEventName;
-      expect(eventBus.listenerCount(eventName)).toBe(
-        initialCounts.get(eventName),
-      );
+      expect(eventBus.listenerCount(eventName)).toBe(initialCounts.get(eventName));
     }
   });
 });

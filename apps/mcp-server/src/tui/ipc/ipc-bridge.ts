@@ -1,9 +1,5 @@
 import type { TuiEventBus } from '../events/event-bus';
-import {
-  TUI_EVENTS,
-  type TuiEventName,
-  type TuiEventMap,
-} from '../events/types';
+import { TUI_EVENTS, type TuiEventName, type TuiEventMap } from '../events/types';
 import type { TuiIpcServer } from './ipc-server';
 import type { IpcMessage } from './ipc.types';
 
@@ -44,16 +40,10 @@ export class TuiIpcBridge {
    * Safety: eventName and handler always match by construction.
    */
   private subscribe(event: TuiEventName, handler: AnyEventHandler): void {
-    (this.eventBus.on as (e: string, h: AnyEventHandler) => void)(
-      event,
-      handler,
-    );
+    (this.eventBus.on as (e: string, h: AnyEventHandler) => void)(event, handler);
   }
 
   private unsubscribe(event: TuiEventName, handler: AnyEventHandler): void {
-    (this.eventBus.off as (e: string, h: AnyEventHandler) => void)(
-      event,
-      handler,
-    );
+    (this.eventBus.off as (e: string, h: AnyEventHandler) => void)(event, handler);
   }
 }

@@ -51,12 +51,7 @@ export function buildCompactTree(
   });
   for (let i = 0; i < parallel.length; i++) {
     const agent = parallel[i];
-    const card = buildInlineCard(
-      agent.icon,
-      agent.name,
-      agent.progress,
-      agent.statusLabel,
-    );
+    const card = buildInlineCard(agent.icon, agent.name, agent.progress, agent.statusLabel);
     lines.push({
       key: `parallel-${agent.name}`,
       content: `${VERTICAL}  ${card}`,

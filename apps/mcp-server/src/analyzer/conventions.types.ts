@@ -40,9 +40,7 @@ export type ESLintRuleSeverity = 'off' | 'warn' | 'error' | 0 | 1 | 2;
  * ESLint rule configuration
  * Can be severity level or [severity, ...options]
  */
-export type ESLintRuleConfig =
-  | ESLintRuleSeverity
-  | [ESLintRuleSeverity, ...unknown[]];
+export type ESLintRuleConfig = ESLintRuleSeverity | [ESLintRuleSeverity, ...unknown[]];
 
 /**
  * ESLint parser options (common fields)
@@ -91,9 +89,7 @@ export interface PrettierConventions {
  * Markdownlint rule configuration
  * Can be boolean or object with rule-specific options
  */
-export type MarkdownLintRuleConfig =
-  | boolean
-  | { style?: string; [key: string]: unknown };
+export type MarkdownLintRuleConfig = boolean | { style?: string; [key: string]: unknown };
 
 /**
  * Markdownlint configuration

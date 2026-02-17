@@ -57,10 +57,10 @@ If overall confidence is Low or critical issues remain:
 export function renderSrpTemplate(
   classification: Pick<ComplexityClassification, 'complexity' | 'reason'>,
 ): string {
-  return SRP_TEMPLATE.replace(
-    '{{COMPLEXITY}}',
-    classification.complexity,
-  ).replace('{{REASON}}', classification.reason);
+  return SRP_TEMPLATE.replace('{{COMPLEXITY}}', classification.complexity).replace(
+    '{{REASON}}',
+    classification.reason,
+  );
 }
 
 /**

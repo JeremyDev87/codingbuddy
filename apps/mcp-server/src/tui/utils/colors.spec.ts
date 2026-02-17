@@ -15,12 +15,7 @@ describe('tui/utils/colors', () => {
 
   describe('STATUS_COLORS', () => {
     it('should define colors for all AgentStatus values', () => {
-      const expectedStatuses: AgentStatus[] = [
-        'idle',
-        'running',
-        'completed',
-        'failed',
-      ];
+      const expectedStatuses: AgentStatus[] = ['idle', 'running', 'completed', 'failed'];
       for (const status of expectedStatuses) {
         expect(STATUS_COLORS).toHaveProperty(status);
         expect(typeof STATUS_COLORS[status]).toBe('string');

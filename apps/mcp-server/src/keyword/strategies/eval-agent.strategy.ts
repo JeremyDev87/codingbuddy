@@ -7,10 +7,7 @@
 
 import { EVAL_PRIMARY_AGENT } from '../keyword.types';
 import type { PrimaryAgentResolutionResult } from '../keyword.types';
-import type {
-  ResolutionStrategy,
-  StrategyContext,
-} from './resolution-strategy.interface';
+import type { ResolutionStrategy, StrategyContext } from './resolution-strategy.interface';
 
 /**
  * Creates the EVAL mode resolution result.

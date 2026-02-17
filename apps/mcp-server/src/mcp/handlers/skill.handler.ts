@@ -47,8 +47,7 @@ export class SkillHandler extends AbstractHandler {
     return [
       {
         name: 'recommend_skills',
-        description:
-          'Recommend skills based on user prompt with multi-language support',
+        description: 'Recommend skills based on user prompt with multi-language support',
         inputSchema: {
           type: 'object',
           properties: {
@@ -97,9 +96,7 @@ export class SkillHandler extends AbstractHandler {
     ];
   }
 
-  private handleRecommendSkills(
-    args: Record<string, unknown> | undefined,
-  ): ToolResponse {
+  private handleRecommendSkills(args: Record<string, unknown> | undefined): ToolResponse {
     const prompt = extractRequiredString(args, 'prompt');
     if (prompt === null) {
       return createErrorResponse('Missing required parameter: prompt');
@@ -114,9 +111,7 @@ export class SkillHandler extends AbstractHandler {
     }
   }
 
-  private handleListSkills(
-    args: Record<string, unknown> | undefined,
-  ): ToolResponse {
+  private handleListSkills(args: Record<string, unknown> | undefined): ToolResponse {
     try {
       const options: ListSkillsOptions = {};
 
@@ -136,9 +131,7 @@ export class SkillHandler extends AbstractHandler {
     }
   }
 
-  private async handleGetSkill(
-    args: Record<string, unknown> | undefined,
-  ): Promise<ToolResponse> {
+  private async handleGetSkill(args: Record<string, unknown> | undefined): Promise<ToolResponse> {
     const skillName = extractRequiredString(args, 'skillName');
     if (skillName === null) {
       return createErrorResponse('Missing required parameter: skillName');
@@ -149,9 +142,7 @@ export class SkillHandler extends AbstractHandler {
       return createJsonResponse(skill);
     } catch (error) {
       return createErrorResponse(
-        error instanceof Error
-          ? error.message
-          : `Skill '${skillName}' not found.`,
+        error instanceof Error ? error.message : `Skill '${skillName}' not found.`,
       );
     }
   }

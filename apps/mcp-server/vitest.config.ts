@@ -9,12 +9,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       include: ['src/**/*.ts', 'src/**/*.tsx'],
-      exclude: [
-        'src/**/*.spec.ts',
-        'src/**/*.spec.tsx',
-        'src/**/*.module.ts',
-        'src/main.ts',
-      ],
+      exclude: ['src/**/*.spec.ts', 'src/**/*.spec.tsx', 'src/**/*.module.ts', 'src/main.ts'],
       thresholds: {
         statements: 80,
         branches: 70,

@@ -14,19 +14,12 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
  * project root to prevent arbitrary module loading via the
  * new Function() workaround.
  */
-export async function esmImport(
-  specifier: string,
-): Promise<Record<string, unknown>> {
+export async function esmImport(specifier: string): Promise<Record<string, unknown>> {
   if (!path.isAbsolute(specifier)) {
-    throw new Error(
-      `esmImport: only absolute paths are accepted, got: ${specifier}`,
-    );
+    throw new Error(`esmImport: only absolute paths are accepted, got: ${specifier}`);
   }
   const resolved = path.resolve(specifier);
-  if (
-    !resolved.startsWith(PROJECT_ROOT + path.sep) &&
-    resolved !== PROJECT_ROOT
-  ) {
+  if (!resolved.startsWith(PROJECT_ROOT + path.sep) && resolved !== PROJECT_ROOT) {
     throw new Error(
       `esmImport: path must be within project root (${PROJECT_ROOT}), got: ${resolved}`,
     );

@@ -82,10 +82,7 @@ Implement user authentication
         'Use JWT for auth tokens',
         'Store tokens in httpOnly cookies',
       ]);
-      expect(planSection.notes).toEqual([
-        'Consider refresh token strategy',
-        'Add rate limiting',
-      ]);
+      expect(planSection.notes).toEqual(['Consider refresh token strategy', 'Add rate limiting']);
     });
 
     it('parses multiple sections', () => {
@@ -123,10 +120,7 @@ Implement the feature
       expect(result.sections[0].task).toBe('Plan the feature');
       expect(result.sections[1].mode).toBe('ACT');
       expect(result.sections[1].task).toBe('Implement the feature');
-      expect(result.sections[1].progress).toEqual([
-        'Created types',
-        'Added service',
-      ]);
+      expect(result.sections[1].progress).toEqual(['Created types', 'Added service']);
     });
 
     it('parses EVAL section with findings and recommendations', () => {
@@ -155,14 +149,8 @@ Review implementation
 
       const evalSection = result.sections[0];
       expect(evalSection.mode).toBe('EVAL');
-      expect(evalSection.findings).toEqual([
-        'Missing error handling',
-        'No input validation',
-      ]);
-      expect(evalSection.recommendations).toEqual([
-        'Add try-catch blocks',
-        'Validate user input',
-      ]);
+      expect(evalSection.findings).toEqual(['Missing error handling', 'No input validation']);
+      expect(evalSection.recommendations).toEqual(['Add try-catch blocks', 'Validate user input']);
     });
 
     it('handles recommended ACT agent without confidence', () => {

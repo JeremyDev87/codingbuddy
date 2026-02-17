@@ -165,11 +165,7 @@ describe('code.sampler', () => {
     });
 
     it('should filter out test files from samples', () => {
-      const files = [
-        'src/utils/format.ts',
-        'src/utils/format.spec.ts',
-        'src/utils/format.test.ts',
-      ];
+      const files = ['src/utils/format.ts', 'src/utils/format.spec.ts', 'src/utils/format.test.ts'];
 
       const result = selectSampleFiles(files, 5);
 

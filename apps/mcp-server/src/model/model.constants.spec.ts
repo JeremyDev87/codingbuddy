@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  CLAUDE_OPUS_4,
-  CLAUDE_SONNET_4,
-  CLAUDE_HAIKU_35,
-  DEFAULT_MODEL,
-} from './model.constants';
+import { CLAUDE_OPUS_4, CLAUDE_SONNET_4, CLAUDE_HAIKU_35, DEFAULT_MODEL } from './model.constants';
 
 describe('model.constants', () => {
   describe('model IDs', () => {

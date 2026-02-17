@@ -47,10 +47,7 @@ function checkNoEmptyValues(obj: MessageMap, locale: string, prefix: string) {
 describe('message files', () => {
   test('all locales have identical top-level keys', () => {
     for (const [locale, messages] of Object.entries(allMessages)) {
-      expect(
-        Object.keys(messages),
-        `${locale} top-level keys mismatch`,
-      ).toEqual(referenceKeys);
+      expect(Object.keys(messages), `${locale} top-level keys mismatch`).toEqual(referenceKeys);
     }
   });
 
@@ -60,9 +57,7 @@ describe('message files', () => {
       const refNestedKeys = getKeysDeep(ref[section] as MessageMap);
       for (const [locale, messages] of Object.entries(allMessages)) {
         const nestedKeys = getKeysDeep(messages[section] as MessageMap);
-        expect(nestedKeys, `${locale}.${section} keys mismatch`).toEqual(
-          refNestedKeys,
-        );
+        expect(nestedKeys, `${locale}.${section} keys mismatch`).toEqual(refNestedKeys);
       }
     }
   });

@@ -71,10 +71,7 @@ describe('config.analyzer', () => {
   describe('parseEslintConfig', () => {
     it('should parse legacy eslintrc format', () => {
       const content = JSON.stringify({
-        extends: [
-          'eslint:recommended',
-          'plugin:@typescript-eslint/recommended',
-        ],
+        extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
         plugins: ['@typescript-eslint'],
       });
 

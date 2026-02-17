@@ -76,16 +76,13 @@ describe('PlanAgentStrategy', () => {
         'Define the system structure',
       ];
 
-      it.each(architecturePrompts)(
-        'should detect architecture intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(architecturePrompts)('should detect architecture intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('solution-architect');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('solution-architect');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
 
     describe('Japanese (日本語)', () => {
@@ -95,16 +92,13 @@ describe('PlanAgentStrategy', () => {
         'API設計をお願いします', // Please do API design
       ];
 
-      it.each(jaPrompts)(
-        'should detect architecture intent (JA): "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(jaPrompts)('should detect architecture intent (JA): "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('solution-architect');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('solution-architect');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
 
     describe('Chinese (中文)', () => {
@@ -114,16 +108,13 @@ describe('PlanAgentStrategy', () => {
         '分析一下设计方案', // Analyze the design solution
       ];
 
-      it.each(zhPrompts)(
-        'should detect architecture intent (ZH): "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(zhPrompts)('should detect architecture intent (ZH): "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('solution-architect');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('solution-architect');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
 
     describe('Spanish (Español)', () => {
@@ -133,16 +124,13 @@ describe('PlanAgentStrategy', () => {
         'Revisa el diseño de la API', // Review the API design
       ];
 
-      it.each(esPrompts)(
-        'should detect architecture intent (ES): "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(esPrompts)('should detect architecture intent (ES): "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('solution-architect');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('solution-architect');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
   });
 
@@ -156,16 +144,13 @@ describe('PlanAgentStrategy', () => {
         '태스크 분해를 해주세요',
       ];
 
-      it.each(planningPrompts)(
-        'should detect planning intent: "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(planningPrompts)('should detect planning intent: "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('technical-planner');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('technical-planner');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
 
     describe('Japanese (日本語)', () => {
@@ -175,16 +160,13 @@ describe('PlanAgentStrategy', () => {
         'リファクタリングの手順を決めてください', // Please decide the refactoring steps
       ];
 
-      it.each(jaPrompts)(
-        'should detect planning intent (JA): "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(jaPrompts)('should detect planning intent (JA): "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('technical-planner');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('technical-planner');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
 
     describe('Chinese (中文)', () => {
@@ -194,16 +176,13 @@ describe('PlanAgentStrategy', () => {
         '请进行代码重构', // Please do code refactoring
       ];
 
-      it.each(zhPrompts)(
-        'should detect planning intent (ZH): "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(zhPrompts)('should detect planning intent (ZH): "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('technical-planner');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('technical-planner');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
 
     describe('Spanish (Español)', () => {
@@ -213,16 +192,13 @@ describe('PlanAgentStrategy', () => {
         'Necesito refactorizar este módulo', // I need to refactor this module
       ];
 
-      it.each(esPrompts)(
-        'should detect planning intent (ES): "%s"',
-        async prompt => {
-          const result = await strategy.resolve(createPlanContext({ prompt }));
+      it.each(esPrompts)('should detect planning intent (ES): "%s"', async prompt => {
+        const result = await strategy.resolve(createPlanContext({ prompt }));
 
-          expect(result.agentName).toBe('technical-planner');
-          expect(result.source).toBe('intent');
-          expect(result.confidence).toBe(0.9);
-        },
-      );
+        expect(result.agentName).toBe('technical-planner');
+        expect(result.source).toBe('intent');
+        expect(result.confidence).toBe(0.9);
+      });
     });
   });
 

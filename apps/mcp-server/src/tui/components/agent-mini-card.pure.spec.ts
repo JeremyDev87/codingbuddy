@@ -22,9 +22,7 @@ describe('agent-mini-card.pure', () => {
 
   describe('joinAgentTags', () => {
     it('should join names with middle dot separator', () => {
-      expect(joinAgentTags(['agent-a', 'agent-b'])).toBe(
-        'agent-a \u00b7 agent-b',
-      );
+      expect(joinAgentTags(['agent-a', 'agent-b'])).toBe('agent-a \u00b7 agent-b');
     });
 
     it('should handle single agent', () => {
@@ -36,10 +34,7 @@ describe('agent-mini-card.pure', () => {
     });
 
     it('should truncate individual long names', () => {
-      const result = joinAgentTags([
-        'very-long-agent-specialist-name',
-        'short',
-      ]);
+      const result = joinAgentTags(['very-long-agent-specialist-name', 'short']);
       expect(result).toContain('\u2026');
       expect(result).toContain('short');
     });

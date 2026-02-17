@@ -46,22 +46,14 @@ describe('RulesService', () => {
     it('should use CODINGBUDDY_RULES_DIR env variable when set', () => {
       process.env.CODINGBUDDY_RULES_DIR = '/custom/rules/path';
 
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
 
       // Access private property via any cast for testing
-      expect((service as unknown as { rulesDir: string }).rulesDir).toBe(
-        '/custom/rules/path',
-      );
+      expect((service as unknown as { rulesDir: string }).rulesDir).toBe('/custom/rules/path');
     });
 
     it('should use codingbuddy-rules package or dev fallback', () => {
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       // Should resolve to .ai-rules path (either from package or dev fallback)
@@ -69,10 +61,7 @@ describe('RulesService', () => {
     });
 
     it('should find rules directory successfully', () => {
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       // Verify the path contains the expected structure
@@ -86,10 +75,7 @@ describe('RulesService', () => {
 
     beforeEach(() => {
       process.env.CODINGBUDDY_RULES_DIR = '/test/rules';
-      service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      service = new RulesService(createMockCustomService(), createMockConfigService());
     });
 
     it('should return file content when file exists', async () => {
@@ -99,10 +85,7 @@ describe('RulesService', () => {
       const result = await service.getRuleContent('rules/core.md');
 
       expect(result).toBe(mockContent);
-      expect(fs.readFile).toHaveBeenCalledWith(
-        '/test/rules/rules/core.md',
-        'utf-8',
-      );
+      expect(fs.readFile).toHaveBeenCalledWith('/test/rules/rules/core.md', 'utf-8');
     });
 
     it('should throw error when file does not exist', async () => {
@@ -125,15 +108,15 @@ describe('RulesService', () => {
 
     describe('path traversal protection', () => {
       it('should reject path traversal with ../', async () => {
-        await expect(
-          service.getRuleContent('../../../etc/passwd'),
-        ).rejects.toThrow('Access denied: Invalid path');
+        await expect(service.getRuleContent('../../../etc/passwd')).rejects.toThrow(
+          'Access denied: Invalid path',
+        );
       });
 
       it('should reject hidden path traversal', async () => {
-        await expect(
-          service.getRuleContent('agents/../../secret'),
-        ).rejects.toThrow('Access denied: Invalid path');
+        await expect(service.getRuleContent('agents/../../secret')).rejects.toThrow(
+          'Access denied: Invalid path',
+        );
       });
 
       it('should reject absolute paths', async () => {
@@ -143,15 +126,15 @@ describe('RulesService', () => {
       });
 
       it('should reject Windows-style path traversal', async () => {
-        await expect(
-          service.getRuleContent('..\\..\\etc\\passwd'),
-        ).rejects.toThrow('Access denied: Invalid path');
+        await expect(service.getRuleContent('..\\..\\etc\\passwd')).rejects.toThrow(
+          'Access denied: Invalid path',
+        );
       });
 
       it('should reject null byte injection', async () => {
-        await expect(
-          service.getRuleContent('agents/test.json\x00.txt'),
-        ).rejects.toThrow('Access denied: Invalid path');
+        await expect(service.getRuleContent('agents/test.json\x00.txt')).rejects.toThrow(
+          'Access denied: Invalid path',
+        );
       });
 
       it('should allow valid relative paths', async () => {
@@ -169,10 +152,7 @@ describe('RulesService', () => {
 
     beforeEach(() => {
       process.env.CODINGBUDDY_RULES_DIR = '/test/rules';
-      service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      service = new RulesService(createMockCustomService(), createMockConfigService());
     });
 
     it('should return agent names from directory', async () => {
@@ -184,11 +164,7 @@ describe('RulesService', () => {
 
       const result = await service.listAgents();
 
-      expect(result).toEqual([
-        'backend-developer',
-        'code-reviewer',
-        'frontend-developer',
-      ]);
+      expect(result).toEqual(['backend-developer', 'code-reviewer', 'frontend-developer']);
     });
 
     it('should filter only .json files', async () => {
@@ -228,10 +204,7 @@ describe('RulesService', () => {
 
     beforeEach(() => {
       process.env.CODINGBUDDY_RULES_DIR = '/test/rules';
-      service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      service = new RulesService(createMockCustomService(), createMockConfigService());
     });
 
     it('should return parsed AgentProfile', async () => {
@@ -280,9 +253,7 @@ describe('RulesService', () => {
       };
       vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(invalidAgent));
 
-      await expect(service.getAgent('invalid')).rejects.toThrow(
-        'Invalid agent profile',
-      );
+      await expect(service.getAgent('invalid')).rejects.toThrow('Invalid agent profile');
     });
 
     it('should reject agent with prototype pollution attempt', async () => {
@@ -290,9 +261,7 @@ describe('RulesService', () => {
         '{"name":"Agent","description":"Desc","role":{"title":"Title","expertise":[]},"__proto__":{"isAdmin":true}}';
       vi.mocked(fs.readFile).mockResolvedValue(maliciousJson);
 
-      await expect(service.getAgent('malicious')).rejects.toThrow(
-        'Invalid agent profile',
-      );
+      await expect(service.getAgent('malicious')).rejects.toThrow('Invalid agent profile');
     });
 
     it('should throw on invalid JSON', async () => {
@@ -304,9 +273,7 @@ describe('RulesService', () => {
     it('should throw when agent file does not exist', async () => {
       vi.mocked(fs.readFile).mockRejectedValue(new Error('File not found'));
 
-      await expect(service.getAgent('nonexistent')).rejects.toThrow(
-        'Failed to read rule file',
-      );
+      await expect(service.getAgent('nonexistent')).rejects.toThrow('Failed to read rule file');
     });
 
     describe('language override from config', () => {
@@ -431,10 +398,7 @@ describe('RulesService', () => {
           getLanguage: vi.fn().mockRejectedValue(new Error('Config error')),
         } as unknown as ConfigService;
 
-        const serviceWithError = new RulesService(
-          createMockCustomService(),
-          failingConfigService,
-        );
+        const serviceWithError = new RulesService(createMockCustomService(), failingConfigService);
 
         const result = await serviceWithError.getAgent('frontend-developer');
 
@@ -457,9 +421,9 @@ describe('RulesService', () => {
 
     it('should find matches across files', async () => {
       // Mock listAgents
-      vi.mocked(fs.readdir).mockResolvedValue([
-        'frontend-developer.json',
-      ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+      vi.mocked(fs.readdir).mockResolvedValue(['frontend-developer.json'] as unknown as Awaited<
+        ReturnType<typeof fs.readdir>
+      >);
 
       // Mock file reads
       vi.mocked(fs.readFile).mockImplementation(async (filePath: unknown) => {
@@ -573,9 +537,7 @@ describe('RulesService', () => {
         [] as unknown as Awaited<ReturnType<typeof fs.readdir>>,
       );
 
-      vi.mocked(fs.readFile).mockResolvedValue(
-        'Line 1\nLine 2 with keyword\nLine 3',
-      );
+      vi.mocked(fs.readFile).mockResolvedValue('Line 1\nLine 2 with keyword\nLine 3');
 
       const result = await service.searchRules('keyword');
 
@@ -585,10 +547,7 @@ describe('RulesService', () => {
 
   describe('checkExists (private method behavior)', () => {
     it('should resolve rules directory path', () => {
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       // Should have resolved to a valid .ai-rules path
@@ -602,11 +561,7 @@ describe('RulesService', () => {
 
       // Should not throw - either package provides path or fallback handles error
       expect(
-        () =>
-          new RulesService(
-            createMockCustomService(),
-            createMockConfigService(),
-          ),
+        () => new RulesService(createMockCustomService(), createMockConfigService()),
       ).not.toThrow();
     });
   });
@@ -620,10 +575,7 @@ describe('RulesService', () => {
 
     it('should use package path when available', () => {
       // In this test environment, codingbuddy-rules package is available
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       // Should resolve to package path or fallback
@@ -636,10 +588,7 @@ describe('RulesService', () => {
       // The actual implementation checks real filesystem paths
       // In development, package is available so fallback isn't triggered
       // This test verifies the constructor completes successfully
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       expect(rulesDir).toBeDefined();
@@ -649,11 +598,7 @@ describe('RulesService', () => {
     it('should handle directory resolution gracefully', () => {
       // Test that constructor doesn't throw even with filesystem variations
       expect(
-        () =>
-          new RulesService(
-            createMockCustomService(),
-            createMockConfigService(),
-          ),
+        () => new RulesService(createMockCustomService(), createMockConfigService()),
       ).not.toThrow();
     });
 
@@ -661,10 +606,7 @@ describe('RulesService', () => {
       // Mock existsSync to return false for all candidates
       vi.mocked(existsSync).mockReturnValue(false);
 
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       // Should still return a valid path (first candidate as fallback)
@@ -676,10 +618,7 @@ describe('RulesService', () => {
       // Mock existsSync to return true on first call
       vi.mocked(existsSync).mockReturnValueOnce(true);
 
-      const service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      const service = new RulesService(createMockCustomService(), createMockConfigService());
       const rulesDir = (service as unknown as { rulesDir: string }).rulesDir;
 
       // Should have found a valid directory
@@ -707,9 +646,7 @@ describe('RulesService', () => {
         content: '# API Conventions\nUse REST patterns.',
         source: 'custom',
       };
-      vi.mocked(mockCustomService.listCustomRules).mockResolvedValue([
-        customRule,
-      ]);
+      vi.mocked(mockCustomService.listCustomRules).mockResolvedValue([customRule]);
 
       // Mock default rules with no matches
       vi.mocked(fs.readdir).mockResolvedValue(
@@ -735,9 +672,7 @@ describe('RulesService', () => {
         content: '# Custom TDD\nTDD is important.',
         source: 'custom',
       };
-      vi.mocked(mockCustomService.listCustomRules).mockResolvedValue([
-        customRule,
-      ]);
+      vi.mocked(mockCustomService.listCustomRules).mockResolvedValue([customRule]);
 
       // Mock default rules with TDD matches
       vi.mocked(fs.readdir).mockResolvedValue(
@@ -778,9 +713,7 @@ describe('RulesService', () => {
         content: 'test\ntest\ntest',
         source: 'custom',
       };
-      vi.mocked(mockCustomService.listCustomRules).mockResolvedValue([
-        customRule,
-      ]);
+      vi.mocked(mockCustomService.listCustomRules).mockResolvedValue([customRule]);
 
       // Default rule with 1 match
       vi.mocked(fs.readdir).mockResolvedValue(
@@ -838,11 +771,7 @@ describe('RulesService', () => {
 
         const result = await service.listAgents();
 
-        expect(result).toEqual([
-          'plan-mode',
-          'backend-developer',
-          'frontend-developer',
-        ]);
+        expect(result).toEqual(['plan-mode', 'backend-developer', 'frontend-developer']);
       });
 
       it('should sort non-mode agents alphabetically', async () => {
@@ -912,10 +841,7 @@ describe('RulesService', () => {
 
     beforeEach(() => {
       process.env.CODINGBUDDY_RULES_DIR = '/test/rules';
-      service = new RulesService(
-        createMockCustomService(),
-        createMockConfigService(),
-      );
+      service = new RulesService(createMockCustomService(), createMockConfigService());
     });
 
     describe('listSkillsFromDir', () => {
@@ -956,13 +882,9 @@ API design skill with comprehensive guidelines.`;
 
         expect(result).toHaveLength(2);
         expect(result[0].name).toBe('parallel-execution');
-        expect(result[0].description).toBe(
-          'Execute tasks in parallel for improved performance',
-        );
+        expect(result[0].description).toBe('Execute tasks in parallel for improved performance');
         expect(result[1].name).toBe('api-design');
-        expect(result[1].description).toBe(
-          'Design RESTful APIs following best practices',
-        );
+        expect(result[1].description).toBe('Design RESTful APIs following best practices');
       });
 
       it('should return empty array when skills directory is empty', async () => {
@@ -1007,9 +929,7 @@ Valid skill content.`;
       });
 
       it('should handle readdir errors gracefully', async () => {
-        vi.mocked(fs.readdir).mockRejectedValue(
-          new Error('Directory not found'),
-        );
+        vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
 
         const result = await service.listSkillsFromDir();
 
@@ -1085,10 +1005,7 @@ Example usage here
         expect(result.name).toBe('test-skill');
         expect(result.description).toBe('A test skill for demonstration');
         expect(result.content).toBeDefined();
-        expect(fs.readFile).toHaveBeenCalledWith(
-          '/test/rules/skills/test-skill/SKILL.md',
-          'utf-8',
-        );
+        expect(fs.readFile).toHaveBeenCalledWith('/test/rules/skills/test-skill/SKILL.md', 'utf-8');
       });
 
       it('should throw error for invalid skill name format', async () => {
@@ -1133,30 +1050,22 @@ Content for my-skill.`;
           return '';
         });
 
-        await expect(
-          service.getSkill('valid-skill-123'),
-        ).resolves.toBeDefined();
+        await expect(service.getSkill('valid-skill-123')).resolves.toBeDefined();
         await expect(service.getSkill('skill123')).resolves.toBeDefined();
         await expect(service.getSkill('my-skill')).resolves.toBeDefined();
       });
 
       it('should throw error when skill file does not exist', async () => {
-        vi.mocked(fs.readFile).mockRejectedValue(
-          new Error('ENOENT: no such file or directory'),
-        );
+        vi.mocked(fs.readFile).mockRejectedValue(new Error('ENOENT: no such file or directory'));
 
-        await expect(service.getSkill('nonexistent-skill')).rejects.toThrow(
-          'Skill not found',
-        );
+        await expect(service.getSkill('nonexistent-skill')).rejects.toThrow('Skill not found');
       });
 
       it('should throw error for invalid skill schema', async () => {
         // Mock invalid SKILL.md content (missing required sections)
         vi.mocked(fs.readFile).mockResolvedValue('Invalid skill content');
 
-        await expect(service.getSkill('invalid-skill')).rejects.toThrow(
-          'Invalid skill',
-        );
+        await expect(service.getSkill('invalid-skill')).rejects.toThrow('Invalid skill');
       });
 
       it('should reject path traversal attempts with format validation', async () => {

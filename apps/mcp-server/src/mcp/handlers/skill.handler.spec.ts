@@ -29,10 +29,7 @@ describe('SkillHandler', () => {
       }),
     } as unknown as RulesService;
 
-    handler = new SkillHandler(
-      mockSkillRecommendationService,
-      mockRulesService,
-    );
+    handler = new SkillHandler(mockSkillRecommendationService, mockRulesService);
   });
 
   describe('handle', () => {
@@ -47,9 +44,7 @@ describe('SkillHandler', () => {
       });
 
       expect(result?.isError).toBeFalsy();
-      expect(
-        mockSkillRecommendationService.recommendSkills,
-      ).toHaveBeenCalledWith('test prompt');
+      expect(mockSkillRecommendationService.recommendSkills).toHaveBeenCalledWith('test prompt');
     });
 
     it('should return error for recommend_skills without prompt', async () => {
@@ -72,9 +67,7 @@ describe('SkillHandler', () => {
       const result = await handler.handle('list_skills', {});
 
       expect(result?.isError).toBeFalsy();
-      expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
-        {},
-      );
+      expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({});
     });
 
     it('should handle list_skills with priority filters', async () => {
@@ -97,9 +90,7 @@ describe('SkillHandler', () => {
       });
 
       expect(result?.isError).toBeFalsy();
-      expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith(
-        {},
-      );
+      expect(mockSkillRecommendationService.listSkills).toHaveBeenCalledWith({});
     });
   });
 
@@ -117,9 +108,7 @@ describe('SkillHandler', () => {
 
     it('should have correct schema for recommend_skills', () => {
       const definitions = handler.getToolDefinitions();
-      const recommendSkills = definitions.find(
-        d => d.name === 'recommend_skills',
-      );
+      const recommendSkills = definitions.find(d => d.name === 'recommend_skills');
 
       expect(recommendSkills?.inputSchema.required).toContain('prompt');
       expect(recommendSkills?.inputSchema.properties.prompt).toBeDefined();
@@ -173,11 +162,9 @@ describe('SkillHandler', () => {
 
   describe('error handling', () => {
     it('should return error response when service throws', async () => {
-      mockSkillRecommendationService.recommendSkills = vi
-        .fn()
-        .mockImplementation(() => {
-          throw new Error('Service error');
-        });
+      mockSkillRecommendationService.recommendSkills = vi.fn().mockImplementation(() => {
+        throw new Error('Service error');
+      });
 
       const result = await handler.handle('recommend_skills', {
         prompt: 'test',

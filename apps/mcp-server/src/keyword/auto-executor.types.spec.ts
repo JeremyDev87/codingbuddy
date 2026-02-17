@@ -32,12 +32,7 @@ describe('auto-executor.types', () => {
   describe('Type Guards and Utilities', () => {
     describe('IssueSeverity', () => {
       it('should accept valid severity values', () => {
-        const validSeverities: IssueSeverity[] = [
-          'critical',
-          'high',
-          'medium',
-          'low',
-        ];
+        const validSeverities: IssueSeverity[] = ['critical', 'high', 'medium', 'low'];
         validSeverities.forEach(severity => {
           expect(['critical', 'high', 'medium', 'low']).toContain(severity);
         });

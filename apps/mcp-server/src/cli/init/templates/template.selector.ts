@@ -5,11 +5,7 @@
  */
 
 import type { ProjectAnalysis } from '../../../analyzer';
-import type {
-  FrameworkType,
-  ConfigTemplate,
-  TemplateSelectionResult,
-} from './template.types';
+import type { FrameworkType, ConfigTemplate, TemplateSelectionResult } from './template.types';
 import { TEMPLATES } from './frameworks';
 
 /**
@@ -18,10 +14,7 @@ import { TEMPLATES } from './frameworks';
  * Supported templates: nextjs, react, nestjs, express, node, default
  * Frameworks without dedicated templates fall back to 'default'
  */
-const FRAMEWORK_PRIORITY: Record<
-  string,
-  { template: FrameworkType; priority: number }
-> = {
+const FRAMEWORK_PRIORITY: Record<string, { template: FrameworkType; priority: number }> = {
   // Fullstack frameworks (highest priority)
   next: { template: 'nextjs', priority: 100 },
   nuxt: { template: 'default', priority: 100 },
@@ -43,9 +36,7 @@ const FRAMEWORK_PRIORITY: Record<
 /**
  * Select the best template based on project analysis
  */
-export function selectTemplate(
-  analysis: ProjectAnalysis,
-): TemplateSelectionResult {
+export function selectTemplate(analysis: ProjectAnalysis): TemplateSelectionResult {
   const detectedFrameworks: string[] = [];
   let selectedTemplate: FrameworkType = 'default';
   let highestPriority = -1;

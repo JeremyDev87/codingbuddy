@@ -71,9 +71,7 @@ export class ConfigService implements OnModuleInit {
         try {
           const stat = statSync(normalizedPath);
           if (stat.isDirectory()) {
-            this.logger.log(
-              `Using project root from CODINGBUDDY_PROJECT_ROOT: ${normalizedPath}`,
-            );
+            this.logger.log(`Using project root from CODINGBUDDY_PROJECT_ROOT: ${normalizedPath}`);
             return normalizedPath;
           }
           this.logger.warn(
@@ -118,9 +116,7 @@ export class ConfigService implements OnModuleInit {
   async setProjectRootAndReload(root: string): Promise<void> {
     // Security: Reject null bytes (null byte injection attack)
     if (root.includes('\x00')) {
-      throw new Error(
-        'Path contains null bytes (possible null byte injection)',
-      );
+      throw new Error('Path contains null bytes (possible null byte injection)');
     }
 
     const normalizedPath = path.resolve(root);
@@ -147,9 +143,7 @@ export class ConfigService implements OnModuleInit {
       resolvedPath = await realpath(normalizedPath);
     } catch {
       // If realpath fails, use normalized path but log warning
-      this.logger.warn(
-        `Failed to resolve symlinks for ${normalizedPath}, using as-is`,
-      );
+      this.logger.warn(`Failed to resolve symlinks for ${normalizedPath}, using as-is`);
       resolvedPath = normalizedPath;
     }
 
@@ -206,30 +200,21 @@ export class ConfigService implements OnModuleInit {
     }
 
     // Load ignore patterns
-    const ignoreResult: IgnoreParseResult = await loadIgnoreFile(
-      this.projectRoot,
-    );
-    const allIgnorePatterns = [
-      ...getDefaultIgnorePatterns(),
-      ...ignoreResult.patterns,
-    ];
+    const ignoreResult: IgnoreParseResult = await loadIgnoreFile(this.projectRoot);
+    const allIgnorePatterns = [...getDefaultIgnorePatterns(), ...ignoreResult.patterns];
     if (ignoreResult.source) {
       this.logger.log(`Loaded ignore patterns from: ${ignoreResult.source}`);
     }
 
     // Load context files
-    const contextResult: ContextLoadResult = await loadContextFiles(
-      this.projectRoot,
-    );
+    const contextResult: ContextLoadResult = await loadContextFiles(this.projectRoot);
     if (contextResult.source) {
       this.logger.log(
         `Loaded ${contextResult.files.length} context files from: ${contextResult.source}`,
       );
     }
     if (contextResult.errors.length > 0) {
-      this.logger.warn(
-        `Context loading errors: ${contextResult.errors.join(', ')}`,
-      );
+      this.logger.warn(`Context loading errors: ${contextResult.errors.join(', ')}`);
     }
 
     this.projectConfig = {

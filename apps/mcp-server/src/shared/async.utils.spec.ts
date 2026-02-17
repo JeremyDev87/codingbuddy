@@ -52,9 +52,7 @@ describe('async.utils', () => {
         logger: mockLogger,
       });
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Failed to load config: Config not found',
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Failed to load config: Config not found');
     });
 
     it('should handle non-Error exceptions with "Unknown error" text', async () => {
@@ -68,9 +66,7 @@ describe('async.utils', () => {
         logger: mockLogger,
       });
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Operation failed: Unknown error',
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Operation failed: Unknown error');
     });
 
     it('should work without logger (silent mode)', async () => {
@@ -211,9 +207,7 @@ describe('async.utils', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(TimeoutError);
-        expect((error as Error).message).toBe(
-          'slow operation timed out after 100ms',
-        );
+        expect((error as Error).message).toBe('slow operation timed out after 100ms');
       }
     });
 
@@ -253,9 +247,7 @@ describe('async.utils', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(TimeoutError);
-        expect((error as Error).message).toBe(
-          'operation timed out after 100ms',
-        );
+        expect((error as Error).message).toBe('operation timed out after 100ms');
       }
     });
 
@@ -273,9 +265,7 @@ describe('async.utils', () => {
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       const promise = Promise.reject(new Error('original error'));
 
-      await expect(withTimeout(promise, { timeoutMs: 1000 })).rejects.toThrow(
-        'original error',
-      );
+      await expect(withTimeout(promise, { timeoutMs: 1000 })).rejects.toThrow('original error');
 
       expect(clearTimeoutSpy).toHaveBeenCalled();
       clearTimeoutSpy.mockRestore();
@@ -284,9 +274,7 @@ describe('async.utils', () => {
     it('should propagate original error when promise rejects before timeout', async () => {
       const promise = Promise.reject(new Error('original rejection'));
 
-      await expect(withTimeout(promise, { timeoutMs: 1000 })).rejects.toThrow(
-        'original rejection',
-      );
+      await expect(withTimeout(promise, { timeoutMs: 1000 })).rejects.toThrow('original rejection');
     });
 
     it('TimeoutError should have correct name property', () => {
@@ -297,11 +285,7 @@ describe('async.utils', () => {
     });
 
     it('TimeoutError should include operation context', () => {
-      const error = new TimeoutError(
-        'read file timed out after 3000ms',
-        'read file',
-        3000,
-      );
+      const error = new TimeoutError('read file timed out after 3000ms', 'read file', 3000);
       expect(error.operationName).toBe('read file');
       expect(error.timeoutMs).toBe(3000);
     });

@@ -60,9 +60,7 @@ describe('AbstractHandler', () => {
 
   beforeEach(() => {
     handler = new TestHandler(['test_tool', 'another_tool']);
-    handler.handleToolMock.mockResolvedValue(
-      createJsonResponse({ result: 'success' }),
-    );
+    handler.handleToolMock.mockResolvedValue(createJsonResponse({ result: 'success' }));
   });
 
   describe('Template Method - handle()', () => {
@@ -160,9 +158,7 @@ describe('AbstractHandler', () => {
         expect(result).not.toBeNull();
         expect(result!.isError).toBe(true);
         expect(result!.content[0].text).toContain('dangerous key detected');
-        expect(result!.content[0].text).toContain(
-          'nested.deepNested.__proto__',
-        );
+        expect(result!.content[0].text).toContain('nested.deepNested.__proto__');
         expect(handler.handleToolMock).not.toHaveBeenCalled();
       });
 
@@ -171,10 +167,7 @@ describe('AbstractHandler', () => {
 
         expect(result).not.toBeNull();
         expect(result!.isError).toBeUndefined();
-        expect(handler.handleToolMock).toHaveBeenCalledWith(
-          'test_tool',
-          undefined,
-        );
+        expect(handler.handleToolMock).toHaveBeenCalledWith('test_tool', undefined);
       });
 
       it('should accept safe args and proceed to handleTool', async () => {
@@ -188,10 +181,7 @@ describe('AbstractHandler', () => {
 
         expect(result).not.toBeNull();
         expect(result!.isError).toBeUndefined();
-        expect(handler.handleToolMock).toHaveBeenCalledWith(
-          'test_tool',
-          safeArgs,
-        );
+        expect(handler.handleToolMock).toHaveBeenCalledWith('test_tool', safeArgs);
       });
     });
 
@@ -218,9 +208,9 @@ describe('AbstractHandler', () => {
         const error = new Error('Handler implementation error');
         handler.handleToolMock.mockRejectedValue(error);
 
-        await expect(
-          handler.handle('test_tool', { param: 'value' }),
-        ).rejects.toThrow('Handler implementation error');
+        await expect(handler.handle('test_tool', { param: 'value' })).rejects.toThrow(
+          'Handler implementation error',
+        );
       });
     });
 
@@ -298,10 +288,7 @@ describe('AbstractHandler', () => {
     it('should require concrete handler to implement getHandledTools', () => {
       // This is verified by TypeScript compilation
       // If a concrete class doesn't implement getHandledTools, it won't compile
-      expect(handler.testGetHandledTools()).toEqual([
-        'test_tool',
-        'another_tool',
-      ]);
+      expect(handler.testGetHandledTools()).toEqual(['test_tool', 'another_tool']);
     });
 
     it('should require concrete handler to implement handleTool', () => {
@@ -352,10 +339,7 @@ describe('AbstractHandler', () => {
 
       expect(result).not.toBeNull();
       expect(result!.isError).toBeUndefined();
-      expect(handler.handleToolMock).toHaveBeenCalledWith(
-        'test_tool',
-        argsWithArray,
-      );
+      expect(handler.handleToolMock).toHaveBeenCalledWith('test_tool', argsWithArray);
     });
 
     it('should reject dangerous keys in array elements', async () => {

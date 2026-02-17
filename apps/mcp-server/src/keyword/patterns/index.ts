@@ -12,11 +12,7 @@
  */
 
 // Types
-export type {
-  IntentPattern,
-  IntentPatternCheck,
-  ContextPattern,
-} from './intent-patterns.types';
+export type { IntentPattern, IntentPatternCheck, ContextPattern } from './intent-patterns.types';
 
 // Explicit patterns
 export { EXPLICIT_PATTERNS } from './explicit.patterns';

@@ -23,16 +23,12 @@ describe('skill-content.utils', () => {
       expect(result.length).toBeLessThanOrEqual(
         MAX_SKILL_CONTENT_LENGTH + 100, // Allow for truncation notice
       );
-      expect(result).toContain(
-        '[Content truncated. Use `get_skill` tool for full content]',
-      );
+      expect(result).toContain('[Content truncated. Use `get_skill` tool for full content]');
     });
 
     it('should cut at last newline within 80% of limit when available', () => {
       // Create content with strategic newlines
-      const beforeNewline = 'a'.repeat(
-        Math.floor(MAX_SKILL_CONTENT_LENGTH * 0.85),
-      );
+      const beforeNewline = 'a'.repeat(Math.floor(MAX_SKILL_CONTENT_LENGTH * 0.85));
       const afterNewline = 'b'.repeat(500);
       const content = beforeNewline + '\n' + afterNewline;
 
@@ -41,9 +37,7 @@ describe('skill-content.utils', () => {
       // Should cut at the newline, not include the 'b' section
       expect(result).toContain('a');
       expect(result).not.toContain('b'.repeat(100));
-      expect(result).toContain(
-        '[Content truncated. Use `get_skill` tool for full content]',
-      );
+      expect(result).toContain('[Content truncated. Use `get_skill` tool for full content]');
     });
 
     it('should use hard cutoff when no newline within 80% threshold', () => {
@@ -54,9 +48,7 @@ describe('skill-content.utils', () => {
       expect(result.length).toBeLessThanOrEqual(
         MAX_SKILL_CONTENT_LENGTH + 100, // Allow for notice
       );
-      expect(result).toContain(
-        '[Content truncated. Use `get_skill` tool for full content]',
-      );
+      expect(result).toContain('[Content truncated. Use `get_skill` tool for full content]');
     });
 
     it('should handle content with multiple newlines', () => {
@@ -68,9 +60,7 @@ describe('skill-content.utils', () => {
 
       const result = truncateSkillContent(content);
 
-      expect(result).toContain(
-        '[Content truncated. Use `get_skill` tool for full content]',
-      );
+      expect(result).toContain('[Content truncated. Use `get_skill` tool for full content]');
       // Should preserve some of the early sections
       expect(result).toContain('a');
       expect(result).toContain('b');
@@ -88,9 +78,7 @@ describe('skill-content.utils', () => {
       // Should include header and some paragraphs
       expect(result).toContain('# Skill Title');
       expect(result).toContain('First paragraph');
-      expect(result).toContain(
-        '[Content truncated. Use `get_skill` tool for full content]',
-      );
+      expect(result).toContain('[Content truncated. Use `get_skill` tool for full content]');
     });
 
     it('should handle empty content', () => {

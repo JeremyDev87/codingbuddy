@@ -18,9 +18,7 @@ export const ArchitectureLayerSchema = z.object({
 });
 
 export const NamingConventionSchema = z.object({
-  files: z
-    .enum(['kebab-case', 'camelCase', 'PascalCase', 'snake_case'])
-    .optional(),
+  files: z.enum(['kebab-case', 'camelCase', 'PascalCase', 'snake_case']).optional(),
   components: z.enum(['PascalCase', 'kebab-case']).optional(),
   functions: z.enum(['camelCase', 'snake_case']).optional(),
   variables: z.enum(['camelCase', 'snake_case']).optional(),
@@ -212,8 +210,6 @@ export function parseConfig(config: unknown): CodingBuddyConfig {
 /**
  * Type guard using Zod validation
  */
-export function isCodingBuddyConfig(
-  value: unknown,
-): value is CodingBuddyConfig {
+export function isCodingBuddyConfig(value: unknown): value is CodingBuddyConfig {
   return CodingBuddyConfigSchema.safeParse(value).success;
 }

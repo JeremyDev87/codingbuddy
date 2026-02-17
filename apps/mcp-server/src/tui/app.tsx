@@ -13,9 +13,7 @@ export function App({ eventBus }: AppProps): React.ReactElement {
   const { mode, agents, skills, allAgents } = useEventBus(eventBus);
   const { primaryAgent, activeAgents } = useAgentState(agents);
   const parallelAgents = activeAgents.filter(a => !a.isPrimary);
-  const activeAgentIds = new Set(
-    agents.filter(a => a.status === 'running').map(a => a.id),
-  );
+  const activeAgentIds = new Set(agents.filter(a => a.status === 'running').map(a => a.id));
 
   return (
     <Box flexDirection="column">

@@ -1,11 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  parseArgs,
-  printUsage,
-  printVersion,
-  printApiKeyWarning,
-  main,
-} from './cli';
+import { parseArgs, printUsage, printVersion, printApiKeyWarning, main } from './cli';
 
 // Mock dependencies
 vi.mock('./init', () => ({
@@ -105,9 +99,7 @@ describe('cli', () => {
     let stdoutWrite: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      stdoutWrite = vi
-        .spyOn(process.stdout, 'write')
-        .mockImplementation(() => true);
+      stdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
     });
 
     afterEach(() => {
@@ -118,9 +110,7 @@ describe('cli', () => {
       printUsage();
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('codingbuddy');
       expect(output).toContain('init');
       expect(output).toContain('mcp');
@@ -132,9 +122,7 @@ describe('cli', () => {
     let stdoutWrite: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      stdoutWrite = vi
-        .spyOn(process.stdout, 'write')
-        .mockImplementation(() => true);
+      stdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
     });
 
     afterEach(() => {
@@ -145,9 +133,7 @@ describe('cli', () => {
       printVersion();
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toMatch(/\d+\.\d+\.\d+/);
     });
   });
@@ -156,9 +142,7 @@ describe('cli', () => {
     let stderrWrite: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      stderrWrite = vi
-        .spyOn(process.stderr, 'write')
-        .mockImplementation(() => true);
+      stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
     });
 
     afterEach(() => {
@@ -169,9 +153,7 @@ describe('cli', () => {
       printApiKeyWarning();
 
       expect(stderrWrite).toHaveBeenCalled();
-      const output = stderrWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stderrWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('Security Warning');
       expect(output).toContain('ANTHROPIC_API_KEY');
     });
@@ -179,9 +161,7 @@ describe('cli', () => {
     it('should recommend using environment variable', () => {
       printApiKeyWarning();
 
-      const output = stderrWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stderrWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('export ANTHROPIC_API_KEY');
     });
   });
@@ -200,12 +180,8 @@ describe('cli', () => {
       bootstrapMock = mainModule.bootstrap as ReturnType<typeof vi.fn>;
 
       // Setup spies
-      stdoutWrite = vi
-        .spyOn(process.stdout, 'write')
-        .mockImplementation(() => true);
-      stderrWrite = vi
-        .spyOn(process.stderr, 'write')
-        .mockImplementation(() => true);
+      stdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
 
       // Reset mocks
       vi.clearAllMocks();
@@ -221,9 +197,7 @@ describe('cli', () => {
       await main(['--help']);
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('codingbuddy');
       expect(output).toContain('Usage:');
     });
@@ -232,9 +206,7 @@ describe('cli', () => {
       await main(['--version']);
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toMatch(/\d+\.\d+\.\d+/);
     });
 
@@ -272,9 +244,7 @@ describe('cli', () => {
       await main(['init', '--api-key', 'test-key']);
 
       expect(stderrWrite).toHaveBeenCalled();
-      const output = stderrWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stderrWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('Security Warning');
     });
 
@@ -309,9 +279,7 @@ describe('cli', () => {
       await main(['-v']);
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toMatch(/\d+\.\d+\.\d+/);
     });
 
@@ -319,9 +287,7 @@ describe('cli', () => {
       await main(['-h']);
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('Usage:');
     });
 
@@ -329,9 +295,7 @@ describe('cli', () => {
       await main(['unknown-command']);
 
       expect(stdoutWrite).toHaveBeenCalled();
-      const output = stdoutWrite.mock.calls
-        .map((c: unknown[]) => c[0])
-        .join('');
+      const output = stdoutWrite.mock.calls.map((c: unknown[]) => c[0]).join('');
       expect(output).toContain('Usage:');
     });
   });

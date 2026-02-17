@@ -6,13 +6,7 @@
     {
       "name": "forms",
       "triggers": {
-        "files": [
-          "**/form/**",
-          "**/input/**",
-          "**/login/**",
-          "**/signup/**",
-          "**/contact/**"
-        ],
+        "files": ["**/form/**", "**/input/**", "**/login/**", "**/signup/**", "**/contact/**"],
         "imports": ["react-hook-form", "formik", "@radix-ui/react-form"],
         "patterns": ["<form", "<input", "<select", "<textarea", "onSubmit"]
       },
@@ -55,12 +49,7 @@
           "**/menu/**",
           "**/components/**"
         ],
-        "imports": [
-          "@radix-ui/*",
-          "@headlessui/*",
-          "react-aria",
-          "react-modal"
-        ],
+        "imports": ["@radix-ui/*", "@headlessui/*", "react-aria", "react-modal"],
         "patterns": ["onClick", "onKeyDown", "role=", "aria-", "<button", "<a "]
       },
       "items": [

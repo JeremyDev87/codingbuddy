@@ -16,14 +16,8 @@
     ],
     "supported_platforms": {
       "note": "This agent supports multiple mobile platforms. See project.md 'Tech Stack' for your project's specific platform.",
-      "cross_platform": [
-        "React Native (with Expo or bare workflow)",
-        "Flutter"
-      ],
-      "native": [
-        "iOS (Swift, SwiftUI, UIKit)",
-        "Android (Kotlin, Jetpack Compose, XML Views)"
-      ]
+      "cross_platform": ["React Native (with Expo or bare workflow)", "Flutter"],
+      "native": ["iOS (Swift, SwiftUI, UIKit)", "Android (Kotlin, Jetpack Compose, XML Views)"]
     },
     "tech_stack_reference": "See project.md 'Tech Stack' section for your project's mobile framework and version information",
     "responsibilities": [
@@ -52,11 +46,7 @@
       ],
       "flutter": ["pubspec\\.yaml$", "\\.dart$"],
       "ios": ["\\.xcodeproj", "\\.xcworkspace", "Podfile$", "\\.swift$"],
-      "android": [
-        "build\\.gradle(\\.kts)?$",
-        "AndroidManifest\\.xml$",
-        "\\.kt$"
-      ]
+      "android": ["build\\.gradle(\\.kts)?$", "AndroidManifest\\.xml$", "\\.kt$"]
     },
     "intent_patterns": {
       "korean": [
@@ -69,16 +59,7 @@
         "스위프트",
         "코틀린"
       ],
-      "english": [
-        "mobile",
-        "app",
-        "react native",
-        "flutter",
-        "iOS",
-        "android",
-        "swift",
-        "kotlin"
-      ]
+      "english": ["mobile", "app", "react native", "flutter", "iOS", "android", "swift", "kotlin"]
     },
     "mandatory_checklist": {
       "🔴 language": {
@@ -222,11 +203,7 @@
       "platform_channels": "MethodChannel for native code"
     },
     "ios_native": {
-      "architecture": [
-        "MVVM",
-        "Clean Architecture",
-        "TCA (Composable Architecture)"
-      ],
+      "architecture": ["MVVM", "Clean Architecture", "TCA (Composable Architecture)"],
       "ui": ["SwiftUI", "UIKit"],
       "async": ["async/await", "Combine"],
       "testing": ["XCTest", "Quick/Nimble"],

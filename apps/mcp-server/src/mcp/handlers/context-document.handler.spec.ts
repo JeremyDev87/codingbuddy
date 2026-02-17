@@ -80,9 +80,7 @@ describe('ContextDocumentHandler', () => {
 
         expect(result?.isError).toBeFalsy();
         // full verbosity has maxContextSections: -1, so readOptions should be undefined
-        expect(mockContextDocService.readContext).toHaveBeenCalledWith(
-          undefined,
-        );
+        expect(mockContextDocService.readContext).toHaveBeenCalledWith(undefined);
         const responseData = JSON.parse(result!.content[0].text);
         expect(responseData.summary.verbosityApplied).toBe('full');
       });
@@ -121,9 +119,7 @@ describe('ContextDocumentHandler', () => {
       });
 
       it('should return not-found message when context does not exist', async () => {
-        mockContextDocService.readContext = vi
-          .fn()
-          .mockResolvedValue({ exists: false });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({ exists: false });
 
         const result = await handler.handle('read_context', {});
 
@@ -151,9 +147,7 @@ describe('ContextDocumentHandler', () => {
       it('should return error when mode is missing', async () => {
         const result = await handler.handle('update_context', {});
         expect(result?.isError).toBe(true);
-        expect(result?.content[0].text).toContain(
-          'Missing required parameter: mode',
-        );
+        expect(result?.content[0].text).toContain('Missing required parameter: mode');
       });
 
       it('should return error when mode is invalid', async () => {
@@ -167,9 +161,7 @@ describe('ContextDocumentHandler', () => {
       it('should return error when args is undefined', async () => {
         const result = await handler.handle('update_context', undefined);
         expect(result?.isError).toBe(true);
-        expect(result?.content[0].text).toContain(
-          'Missing required parameter: mode',
-        );
+        expect(result?.content[0].text).toContain('Missing required parameter: mode');
       });
 
       it('should reset context in PLAN mode', async () => {
@@ -357,10 +349,7 @@ describe('ContextDocumentHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(
-          3,
-          10,
-        );
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(3, 10);
       });
 
       it('should cleanup with undefined args using defaults', async () => {
@@ -385,9 +374,7 @@ describe('ContextDocumentHandler', () => {
           keepRecentSectionsFull: -1,
         });
         expect(result?.isError).toBe(true);
-        expect(result?.content[0].text).toContain(
-          'keepRecentSectionsFull must be >= 0',
-        );
+        expect(result?.content[0].text).toContain('keepRecentSectionsFull must be >= 0');
       });
 
       it('should return error for keepRecentItems less than 1', async () => {
@@ -395,9 +382,7 @@ describe('ContextDocumentHandler', () => {
           keepRecentItems: 0,
         });
         expect(result?.isError).toBe(true);
-        expect(result?.content[0].text).toContain(
-          'keepRecentItems must be >= 1',
-        );
+        expect(result?.content[0].text).toContain('keepRecentItems must be >= 1');
       });
 
       it('should return error when performCleanup fails', async () => {

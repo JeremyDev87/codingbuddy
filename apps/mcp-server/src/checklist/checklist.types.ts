@@ -5,12 +5,7 @@
 /**
  * All valid checklist priority levels (ordered from highest to lowest)
  */
-export const CHECKLIST_PRIORITIES = [
-  'critical',
-  'high',
-  'medium',
-  'low',
-] as const;
+export const CHECKLIST_PRIORITIES = ['critical', 'high', 'medium', 'low'] as const;
 
 /**
  * All valid checklist domains

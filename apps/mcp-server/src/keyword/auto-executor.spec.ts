@@ -19,8 +19,7 @@ describe('AutoExecutor', () => {
   ): ParseModeResult => ({
     mode: mode as 'PLAN' | 'ACT' | 'EVAL',
     originalPrompt: 'test prompt',
-    instructions:
-      instructions !== undefined ? instructions : 'test instructions',
+    instructions: instructions !== undefined ? instructions : 'test instructions',
     rules: [],
     ...(delegatesTo && { delegates_to: delegatesTo }),
   });
@@ -78,9 +77,7 @@ describe('AutoExecutor', () => {
         issues: [],
       };
 
-      mockDeps.extractEvalSummary
-        .mockReturnValueOnce(badSummary)
-        .mockReturnValueOnce(goodSummary);
+      mockDeps.extractEvalSummary.mockReturnValueOnce(badSummary).mockReturnValueOnce(goodSummary);
 
       const options: AutoExecutorOptions = {
         maxIterations: 3,
@@ -102,9 +99,7 @@ describe('AutoExecutor', () => {
         highCount: 0,
         mediumCount: 0,
         lowCount: 0,
-        issues: [
-          { severity: 'critical', description: 'Security vulnerability' },
-        ],
+        issues: [{ severity: 'critical', description: 'Security vulnerability' }],
       };
       mockDeps.extractEvalSummary.mockReturnValue(badSummary);
 
@@ -185,12 +180,8 @@ describe('AutoExecutor', () => {
 
       const result = await executor.execute(options);
 
-      expect(result.iterationHistory[0].approach).toContain(
-        'frontend-developer',
-      );
-      expect(result.iterationHistory[0].approach).toContain(
-        'Design first approach',
-      );
+      expect(result.iterationHistory[0].approach).toContain('frontend-developer');
+      expect(result.iterationHistory[0].approach).toContain('Design first approach');
     });
 
     it('should truncate long instructions to 60 characters', async () => {
@@ -215,9 +206,7 @@ describe('AutoExecutor', () => {
 
       const result = await executor.execute(options);
 
-      expect(result.iterationHistory[0].approach).toContain(
-        'backend-developer',
-      );
+      expect(result.iterationHistory[0].approach).toContain('backend-developer');
       expect(result.iterationHistory[0].approach.length).toBeLessThan(85); // agent name + ": " + 60 chars + "..."
       expect(result.iterationHistory[0].approach).toContain('...');
     });
@@ -231,9 +220,7 @@ describe('AutoExecutor', () => {
         issues: [],
       };
       mockDeps.extractEvalSummary.mockReturnValue(goodSummary);
-      mockDeps.parsePlan.mockResolvedValue(
-        createMockParseResult('PLAN', '', 'test-agent'),
-      );
+      mockDeps.parsePlan.mockResolvedValue(createMockParseResult('PLAN', '', 'test-agent'));
 
       const options: AutoExecutorOptions = {
         maxIterations: 3,
@@ -242,9 +229,7 @@ describe('AutoExecutor', () => {
 
       const result = await executor.execute(options);
 
-      expect(result.iterationHistory[0].approach).toBe(
-        'test-agent iteration 1',
-      );
+      expect(result.iterationHistory[0].approach).toBe('test-agent iteration 1');
     });
   });
 });

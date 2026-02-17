@@ -36,10 +36,7 @@ export const initialState: EventBusState = {
   allAgents: [],
 };
 
-export function eventBusReducer(
-  state: EventBusState,
-  action: EventBusAction,
-): EventBusState {
+export function eventBusReducer(state: EventBusState, action: EventBusAction): EventBusState {
   switch (action.type) {
     case 'AGENT_ACTIVATED': {
       const { agentId, name, role, isPrimary } = action.payload;
@@ -95,8 +92,7 @@ export function useEventBus(eventBus: TuiEventBus | undefined): EventBusState {
       dispatch({ type: 'AGENT_ACTIVATED', payload: p });
     const onDeactivated = (p: AgentDeactivatedEvent) =>
       dispatch({ type: 'AGENT_DEACTIVATED', payload: p });
-    const onModeChanged = (p: ModeChangedEvent) =>
-      dispatch({ type: 'MODE_CHANGED', payload: p });
+    const onModeChanged = (p: ModeChangedEvent) => dispatch({ type: 'MODE_CHANGED', payload: p });
     const onSkill = (p: SkillRecommendedEvent) =>
       dispatch({ type: 'SKILL_RECOMMENDED', payload: p });
     const onParallelStarted = (p: ParallelStartedEvent) =>
