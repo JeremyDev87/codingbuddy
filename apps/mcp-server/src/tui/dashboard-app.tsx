@@ -86,6 +86,7 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
             />
             <ActivityVisualizer
               toolCalls={state.toolCalls}
+              currentMode={state.currentMode}
               width={grid.monitorPanel.width}
               height={grid.monitorPanel.height}
             />

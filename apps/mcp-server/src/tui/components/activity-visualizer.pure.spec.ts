@@ -3,10 +3,11 @@ import {
   aggregateToolCalls,
   getDensityChar,
   renderHeatmap,
-  renderBubbles,
+  renderLiveContext,
   type HeatmapData,
 } from './activity-visualizer.pure';
 import type { ToolCallRecord } from '../dashboard-types';
+import { estimateDisplayWidth } from '../utils/display-width';
 
 describe('aggregateToolCalls', () => {
   it('returns empty arrays for empty input', () => {
@@ -186,164 +187,163 @@ describe('renderHeatmap', () => {
   it('truncates lines to width', () => {
     const lines = renderHeatmap(sampleData, 20, 10);
     for (const line of lines) {
-      // estimateDisplayWidth handles wide chars; length check is a reasonable proxy for ASCII
-      expect(line.length).toBeLessThanOrEqual(25); // tightened allowance for multi-byte
+      expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(20);
     }
   });
 });
 
-describe('renderBubbles', () => {
+describe('renderLiveContext', () => {
   const NOW = 100_000;
 
   it('returns empty array for height <= 0', () => {
     const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'active' },
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'completed' },
     ];
-    expect(renderBubbles(calls, 40, 0, NOW)).toEqual([]);
+    expect(renderLiveContext(calls, null, 40, 0, NOW)).toEqual([]);
   });
 
   it('returns empty array for width <= 0', () => {
     const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'active' },
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'completed' },
     ];
-    expect(renderBubbles(calls, 0, 5, NOW)).toEqual([]);
-    expect(renderBubbles(calls, -1, 5, NOW)).toEqual([]);
+    expect(renderLiveContext(calls, null, 0, 5, NOW)).toEqual([]);
+    expect(renderLiveContext(calls, null, -1, 5, NOW)).toEqual([]);
   });
 
-  it('returns empty array when no active or recent calls', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: 1000, status: 'completed' },
-    ];
-    expect(renderBubbles(calls, 40, 5, NOW)).toEqual([]);
-  });
-
-  it('includes Live header when active calls exist', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'active' },
-    ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
+  it('returns Live header only when no calls', () => {
+    const lines = renderLiveContext([], null, 40, 5, NOW);
+    expect(lines).toHaveLength(1);
     expect(lines[0]).toContain('Live');
   });
 
-  it('shows active tools with filled circles', () => {
+  it('always includes Live header', () => {
     const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'active' },
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'completed' },
     ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines[0]).toContain('Live');
+  });
+
+  it('shows current mode when provided', () => {
+    const lines = renderLiveContext([], 'PLAN', 40, 5, NOW);
     expect(lines).toHaveLength(2);
-    expect(lines[1]).toContain('◉');
-    expect(lines[1]).toContain('Read');
+    expect(lines[1]).toContain('Mode');
+    expect(lines[1]).toContain('PLAN');
   });
 
-  it('shows multiple active calls with multiple circles', () => {
+  it('omits mode line when currentMode is null', () => {
     const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'active' },
-      { agentId: 'a2', toolName: 'Read', timestamp: NOW, status: 'active' },
-      { agentId: 'a3', toolName: 'Read', timestamp: NOW, status: 'active' },
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'completed' },
     ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines[1]).toContain('◉◉◉');
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    const modeLines = lines.filter(l => l.includes('Mode'));
+    expect(modeLines).toHaveLength(0);
   });
 
-  it('caps bubbles at MAX_BUBBLES (5)', () => {
-    const calls: ToolCallRecord[] = Array.from({ length: 8 }, (_, i) => ({
-      agentId: `a${i}`,
-      toolName: 'Read',
-      timestamp: NOW,
-      status: 'active' as const,
-    }));
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines[1]).toContain('◉◉◉◉◉');
-    expect(lines[1]).not.toContain('◉◉◉◉◉◉');
-  });
-
-  it('treats completed calls within 5s as active (hot window)', () => {
+  it('shows unique tools newest first', () => {
     const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 3_000, status: 'completed' },
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 10_000, status: 'completed' },
+      { agentId: 'a1', toolName: 'Bash', timestamp: NOW - 5_000, status: 'completed' },
+      { agentId: 'a1', toolName: 'Grep', timestamp: NOW, status: 'completed' },
     ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines).toHaveLength(2);
-    expect(lines[1]).toContain('◉');
-    expect(lines[1]).toContain('Read');
-  });
-
-  it('shows recently completed tools (5-30s) with open circle', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Bash', timestamp: NOW - 10_000, status: 'completed' },
-    ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines).toHaveLength(2);
-    expect(lines[1]).toContain('○');
-    expect(lines[1]).toContain('Bash');
-  });
-
-  it('treats exactly 5000ms as recent (not hot)', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 5_000, status: 'completed' },
-    ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines).toHaveLength(2);
-    expect(lines[1]).toContain('○');
-  });
-
-  it('treats exactly 30000ms as excluded', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 30_000, status: 'completed' },
-    ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines).toEqual([]);
-  });
-
-  it('excludes completed calls older than 30s', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Bash', timestamp: NOW - 31_000, status: 'completed' },
-    ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines).toEqual([]);
-  });
-
-  it('sorts tools by active count descending', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Bash', timestamp: NOW, status: 'active' },
-      { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'active' },
-      { agentId: 'a2', toolName: 'Read', timestamp: NOW, status: 'active' },
-    ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines[1]).toContain('Read');
+    const lines = renderLiveContext(calls, null, 40, 10, NOW);
+    expect(lines).toHaveLength(4);
+    expect(lines[1]).toContain('Grep');
     expect(lines[2]).toContain('Bash');
+    expect(lines[3]).toContain('Read');
   });
 
-  it('limits output to height lines', () => {
+  it('deduplicates tool names (keeps most recent)', () => {
     const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'tool1', timestamp: NOW, status: 'active' },
-      { agentId: 'a1', toolName: 'tool2', timestamp: NOW, status: 'active' },
-      { agentId: 'a1', toolName: 'tool3', timestamp: NOW, status: 'active' },
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 10_000, status: 'completed' },
+      { agentId: 'a2', toolName: 'Read', timestamp: NOW, status: 'completed' },
     ];
-    const lines = renderBubbles(calls, 40, 2, NOW);
-    expect(lines).toHaveLength(2);
+    const lines = renderLiveContext(calls, null, 40, 10, NOW);
+    const readLines = lines.filter(l => l.includes('Read'));
+    expect(readLines).toHaveLength(1);
+  });
+
+  it('shows hot indicator for calls < 5s old', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 2_000, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines[1]).toContain('◉');
+  });
+
+  it('shows recent indicator for calls 5-30s old', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 10_000, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines[1]).toContain('○');
+  });
+
+  it('shows older indicator for calls >= 30s old', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 60_000, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines[1]).toContain('·');
+  });
+
+  it('shows agent context when agentId is not unknown', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'architect', toolName: 'Read', timestamp: NOW, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines[1]).toContain('architect');
+    expect(lines[1]).toContain('Read');
+  });
+
+  it('omits agent context when agentId is unknown', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'unknown', toolName: 'Read', timestamp: NOW, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines[1]).not.toContain('unknown');
+    expect(lines[1]).toContain('Read');
+  });
+
+  it('respects height limit', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'tool1', timestamp: NOW, status: 'completed' },
+      { agentId: 'a1', toolName: 'tool2', timestamp: NOW - 1_000, status: 'completed' },
+      { agentId: 'a1', toolName: 'tool3', timestamp: NOW - 2_000, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, 'PLAN', 40, 3, NOW);
+    expect(lines).toHaveLength(3);
   });
 
   it('truncates lines to width', () => {
     const calls: ToolCallRecord[] = [
       {
-        agentId: 'a1',
+        agentId: 'very-long-agent-name',
         toolName: 'VeryLongToolNameThatExceedsWidth',
         timestamp: NOW,
-        status: 'active',
+        status: 'completed',
       },
     ];
-    const lines = renderBubbles(calls, 15, 5, NOW);
-    expect(lines).toHaveLength(2);
+    const lines = renderLiveContext(calls, null, 15, 5, NOW);
     for (const line of lines) {
-      expect(line.length).toBeLessThanOrEqual(15);
+      expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(15);
     }
+  });
+
+  it('does not filter by time window — old calls still visible', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: NOW - 120_000, status: 'completed' },
+    ];
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toContain('Read');
   });
 
   it('ignores error-status calls', () => {
     const calls: ToolCallRecord[] = [
       { agentId: 'a1', toolName: 'Read', timestamp: NOW, status: 'error' },
     ];
-    const lines = renderBubbles(calls, 40, 5, NOW);
-    expect(lines).toEqual([]);
+    const lines = renderLiveContext(calls, null, 40, 5, NOW);
+    expect(lines).toHaveLength(1);
   });
 });

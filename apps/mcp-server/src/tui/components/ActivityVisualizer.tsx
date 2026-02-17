@@ -1,16 +1,19 @@
 import React, { useMemo } from 'react';
 import { Box, Text } from 'ink';
 import type { ToolCallRecord } from '../dashboard-types';
-import { aggregateToolCalls, renderHeatmap, renderBubbles } from './activity-visualizer.pure';
+import type { Mode } from '../types';
+import { aggregateToolCalls, renderHeatmap, renderLiveContext } from './activity-visualizer.pure';
 
 export interface ActivityVisualizerProps {
   toolCalls: ToolCallRecord[];
+  currentMode: Mode | null;
   width: number;
   height: number;
 }
 
 export function ActivityVisualizer({
   toolCalls,
+  currentMode,
   width,
   height,
 }: ActivityVisualizerProps): React.ReactElement {
@@ -19,7 +22,7 @@ export function ActivityVisualizer({
   }
 
   const heatmapWidth = Math.floor(width * 0.6);
-  const bubblesWidth = width - heatmapWidth;
+  const livePanelWidth = width - heatmapWidth;
   const contentHeight = Math.max(1, height - 2);
 
   const heatmapData = useMemo(() => aggregateToolCalls(toolCalls), [toolCalls]);
@@ -27,9 +30,9 @@ export function ActivityVisualizer({
     () => renderHeatmap(heatmapData, Math.max(1, heatmapWidth - 2), contentHeight),
     [heatmapData, heatmapWidth, contentHeight],
   );
-  const bubbleLines = useMemo(
-    () => renderBubbles(toolCalls, Math.max(1, bubblesWidth - 2), contentHeight),
-    [toolCalls, bubblesWidth, contentHeight],
+  const liveLines = useMemo(
+    () => renderLiveContext(toolCalls, currentMode, Math.max(1, livePanelWidth - 2), contentHeight),
+    [toolCalls, currentMode, livePanelWidth, contentHeight],
   );
 
   return (
@@ -49,10 +52,10 @@ export function ActivityVisualizer({
         borderStyle="single"
         borderColor="gray"
         flexDirection="column"
-        width={bubblesWidth}
+        width={livePanelWidth}
         height={height}
       >
-        {bubbleLines.map((line, i) => (
+        {liveLines.map((line, i) => (
           <Text key={i}>{line}</Text>
         ))}
       </Box>

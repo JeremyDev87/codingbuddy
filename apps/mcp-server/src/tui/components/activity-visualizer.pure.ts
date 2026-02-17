@@ -1,4 +1,5 @@
 import type { ToolCallRecord } from '../dashboard-types';
+import type { Mode } from '../types';
 import { truncateToDisplayWidth, padEndDisplayWidth } from '../utils/display-width';
 
 export interface HeatmapData {
@@ -80,12 +81,14 @@ export function renderHeatmap(data: HeatmapData, width: number, height: number):
   return lines.slice(0, height);
 }
 
-const BUBBLE_ACTIVE_WINDOW_MS = 30_000;
-const BUBBLE_HOT_WINDOW_MS = 5_000;
-const MAX_BUBBLES = 5;
+const LIVE_HOT_WINDOW_MS = 5_000;
+const LIVE_RECENT_WINDOW_MS = 30_000;
+const LIVE_HOT_SEC = LIVE_HOT_WINDOW_MS / 1000;
+const LIVE_RECENT_SEC = LIVE_RECENT_WINDOW_MS / 1000;
 
-export function renderBubbles(
+export function renderLiveContext(
   calls: ToolCallRecord[],
+  currentMode: Mode | null,
   width: number,
   height: number,
   now?: number,
@@ -93,35 +96,28 @@ export function renderBubbles(
   const currentTime = now ?? Date.now();
   if (height <= 0 || width <= 0) return [];
 
-  const toolGroups = new Map<string, { active: number; recent: boolean }>();
-  for (const call of calls) {
-    const isActive = call.status === 'active';
-    // Treat recently completed calls (within 5s) as "hot" → shown like active
-    const isHot =
-      call.status === 'completed' && currentTime - call.timestamp < BUBBLE_HOT_WINDOW_MS;
-    const isRecent =
-      call.status === 'completed' &&
-      currentTime - call.timestamp >= BUBBLE_HOT_WINDOW_MS &&
-      currentTime - call.timestamp < BUBBLE_ACTIVE_WINDOW_MS;
-    if (!isActive && !isHot && !isRecent) continue;
+  const lines: string[] = [truncateToDisplayWidth('💬 Live', width)];
 
-    const existing = toolGroups.get(call.toolName) ?? { active: 0, recent: false };
-    if (isActive || isHot) existing.active++;
-    if (isRecent) existing.recent = true;
-    toolGroups.set(call.toolName, existing);
+  if (currentMode) {
+    lines.push(truncateToDisplayWidth(`⟫ Mode: ${currentMode}`, width));
   }
 
-  if (toolGroups.size === 0) return [];
+  const maxItems = height - lines.length;
+  const seen = new Set<string>();
 
-  const sorted = [...toolGroups.entries()].sort((a, b) => b[1].active - a[1].active);
+  for (let i = calls.length - 1; i >= 0 && seen.size < maxItems; i--) {
+    const call = calls[i];
+    if (call.status === 'error') continue;
+    if (seen.has(call.toolName)) continue;
+    seen.add(call.toolName);
 
-  const header = truncateToDisplayWidth('💬 Live', width);
-  const lines: string[] = [header];
-  for (const [toolName, info] of sorted) {
-    if (lines.length >= height) break;
-    const bubbleCount = Math.min(info.active, MAX_BUBBLES);
-    const indicator = bubbleCount > 0 ? '◉'.repeat(bubbleCount) : '○';
-    lines.push(truncateToDisplayWidth(`${indicator} ${toolName}`, width));
+    const ageSec = Math.floor((currentTime - call.timestamp) / 1000);
+    const ageIndicator = ageSec < LIVE_HOT_SEC ? '◉' : ageSec < LIVE_RECENT_SEC ? '○' : '·';
+    const agent =
+      call.agentId !== 'unknown'
+        ? truncateToDisplayWidth(call.agentId, AGENT_NAME_WIDTH) + ' '
+        : '';
+    lines.push(truncateToDisplayWidth(`${ageIndicator} ${agent}${call.toolName}`, width));
   }
 
   return lines.slice(0, height);

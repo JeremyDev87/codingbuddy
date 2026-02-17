@@ -31,7 +31,7 @@ export {
   aggregateToolCalls,
   getDensityChar,
   renderHeatmap,
-  renderBubbles,
+  renderLiveContext,
   type HeatmapData,
 } from './activity-visualizer.pure';
 export { SessionTabBar } from './SessionTabBar';
