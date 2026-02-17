@@ -20,7 +20,7 @@ codingbuddy/
 │   └── rules/           # AI coding rules package (codingbuddy-rules)
 │       └── .ai-rules/   # Shared AI coding rules (single source of truth)
 │           ├── rules/   # Core rules (workflow, project, augmented-coding)
-│           ├── agents/  # 12 specialist agent definitions (JSON)
+│           ├── agents/  # 30 agent definitions (JSON)
 │           └── adapters/# Tool-specific integration guides
 ├── .cursor/             # Cursor AI config
 ├── .claude/             # Claude Code config

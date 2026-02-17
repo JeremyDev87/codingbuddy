@@ -109,7 +109,7 @@ graph TB
 │   ├── frontend-developer.json
 │   ├── backend-developer.json
 │   ├── security-specialist.json
-│   └── ... (12+ agents)
+│   └── ... (30 agents)
 ├── skills/           # Reusable workflows (Markdown)
 │   ├── tdd.md
 │   ├── debugging.md

@@ -46,11 +46,10 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 
 **Source**: `packages/rules/.ai-rules/agents/`
 
-**Available Specialists** (12 agents):
-- Frontend Developer, Code Reviewer
-- Architecture, Test Strategy, Performance, Security
-- Accessibility, SEO, Design System, Documentation
-- Code Quality, DevOps Engineer
+**Available Agents** (26 agents + 4 mode agents):
+- **Primary**: Solution Architect, Technical Planner, Frontend Developer, Backend Developer, Mobile Developer, Data Engineer, Agent Architect, Platform Engineer, Tooling Engineer, AI/ML Engineer, DevOps Engineer
+- **Domain**: Architecture, Test Strategy, Performance, Security, Accessibility, SEO, UI/UX Design, Documentation, Integration, Event Architecture, Observability, Migration, i18n
+- **Core/Utility**: Code Reviewer, Code Quality
 
 See [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md) for details.
 
