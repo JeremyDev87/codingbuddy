@@ -13,8 +13,8 @@ const MIN_COLUMNS = 20;
 
 /** Fixed width for focusedAgent panel per layout mode (content-first right panel). */
 const FOCUSED_AGENT_WIDTH: Record<Exclude<LayoutMode, 'narrow'>, number> = {
-  wide: 35,
-  medium: 32,
+  wide: 70,
+  medium: 64,
 };
 
 /**

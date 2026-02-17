@@ -27,12 +27,12 @@ describe('computeGridLayout', () => {
       expect(grid.stageHealth.y + grid.stageHealth.height).toBe(40);
     });
 
-    it('focusedAgent has fixed width 35 in wide mode', () => {
-      expect(grid.focusedAgent.width).toBe(35);
+    it('focusedAgent has fixed width 70 in wide mode', () => {
+      expect(grid.focusedAgent.width).toBe(70);
     });
 
     it('flowMap takes all remaining width after focusedAgent', () => {
-      expect(grid.flowMap.width).toBe(120 - 35);
+      expect(grid.flowMap.width).toBe(120 - 70);
     });
 
     it('focusedAgent is right-aligned', () => {
@@ -63,12 +63,12 @@ describe('computeGridLayout', () => {
   describe('medium layout (100x30)', () => {
     const grid = computeGridLayout(100, 30, 'medium');
 
-    it('focusedAgent has fixed width 32 in medium mode', () => {
-      expect(grid.focusedAgent.width).toBe(32);
+    it('focusedAgent has fixed width 64 in medium mode', () => {
+      expect(grid.focusedAgent.width).toBe(64);
     });
 
     it('flowMap takes all remaining width after focusedAgent', () => {
-      expect(grid.flowMap.width).toBe(100 - 32);
+      expect(grid.flowMap.width).toBe(100 - 64);
     });
 
     it('focusedAgent is right-aligned', () => {
@@ -266,7 +266,7 @@ describe('computeGridLayout', () => {
   });
 
   describe('edge case: terminal narrower than focused width + MIN_COLUMNS', () => {
-    // medium mode but only 60 columns (< 45 + 20 = 65, but clamp ensures flowMap >= MIN_COLUMNS)
+    // medium mode but only 60 columns (< 64 + 20 = 84, but clamp ensures flowMap >= MIN_COLUMNS)
     const grid = computeGridLayout(60, 30, 'medium');
 
     it('focusedAgent width is clamped so flowMap gets at least MIN_COLUMNS', () => {
@@ -288,13 +288,13 @@ describe('computeGridLayout', () => {
       const grid150 = computeGridLayout(150, 40, 'wide');
       const grid200 = computeGridLayout(200, 40, 'wide');
 
-      // focusedAgent stays at 35 in both
-      expect(grid150.focusedAgent.width).toBe(35);
-      expect(grid200.focusedAgent.width).toBe(35);
+      // focusedAgent stays at 70 in both
+      expect(grid150.focusedAgent.width).toBe(70);
+      expect(grid200.focusedAgent.width).toBe(70);
 
       // flowMap grows with terminal width
-      expect(grid150.flowMap.width).toBe(115);
-      expect(grid200.flowMap.width).toBe(165);
+      expect(grid150.flowMap.width).toBe(80);
+      expect(grid200.flowMap.width).toBe(130);
     });
   });
 
