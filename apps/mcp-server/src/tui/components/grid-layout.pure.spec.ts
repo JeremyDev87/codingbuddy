@@ -27,12 +27,12 @@ describe('computeGridLayout', () => {
       expect(grid.stageHealth.y + grid.stageHealth.height).toBe(40);
     });
 
-    it('focusedAgent has fixed width 70 in wide mode', () => {
-      expect(grid.focusedAgent.width).toBe(70);
+    it('focusedAgent has fixed width 63 in wide mode', () => {
+      expect(grid.focusedAgent.width).toBe(63);
     });
 
     it('flowMap takes all remaining width after focusedAgent', () => {
-      expect(grid.flowMap.width).toBe(120 - 70);
+      expect(grid.flowMap.width).toBe(120 - 63);
     });
 
     it('focusedAgent is right-aligned', () => {
@@ -76,12 +76,12 @@ describe('computeGridLayout', () => {
   describe('medium layout (100x30)', () => {
     const grid = computeGridLayout(100, 30, 'medium');
 
-    it('focusedAgent has fixed width 64 in medium mode', () => {
-      expect(grid.focusedAgent.width).toBe(64);
+    it('focusedAgent has fixed width 58 in medium mode', () => {
+      expect(grid.focusedAgent.width).toBe(58);
     });
 
     it('flowMap takes all remaining width after focusedAgent', () => {
-      expect(grid.flowMap.width).toBe(100 - 64);
+      expect(grid.flowMap.width).toBe(100 - 58);
     });
 
     it('focusedAgent is right-aligned', () => {
@@ -340,13 +340,13 @@ describe('computeGridLayout', () => {
       const grid150 = computeGridLayout(150, 40, 'wide');
       const grid200 = computeGridLayout(200, 40, 'wide');
 
-      // focusedAgent stays at 70 in both
-      expect(grid150.focusedAgent.width).toBe(70);
-      expect(grid200.focusedAgent.width).toBe(70);
+      // focusedAgent stays at 63 in both
+      expect(grid150.focusedAgent.width).toBe(63);
+      expect(grid200.focusedAgent.width).toBe(63);
 
       // flowMap grows with terminal width
-      expect(grid150.flowMap.width).toBe(80);
-      expect(grid200.flowMap.width).toBe(130);
+      expect(grid150.flowMap.width).toBe(87);
+      expect(grid200.flowMap.width).toBe(137);
     });
   });
 

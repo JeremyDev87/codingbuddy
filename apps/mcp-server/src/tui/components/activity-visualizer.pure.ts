@@ -45,7 +45,7 @@ export function aggregateToolCalls(
   return { agents, tools, matrix };
 }
 
-const AGENT_NAME_WIDTH = 10;
+const AGENT_NAME_WIDTH = 15; // was 10 → agent names visible up to 15 chars
 
 export function getDensityChar(count: number): string {
   if (count <= 0) return '··';
