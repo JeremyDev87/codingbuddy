@@ -30,6 +30,15 @@ codingbuddy/
 └── .kiro/               # Kiro config
 ```
 
+## Tool Priority
+
+**Principle:** codingbuddy first, OMC for unique features only.
+
+- **codingbuddy FIRST**: `parse_mode`, `dispatch_agents`, `analyze_task`, `update_context`, `generate_checklist`, `search_rules`
+- **OMC only**: LSP tools, AST grep, Python REPL, state/notepad, git-master, build-fix, deepsearch, team/swarm
+
+See [`.claude/rules/tool-priority.md`](.claude/rules/tool-priority.md) for full details.
+
 ## Commands
 
 ### MCP Server (apps/mcp-server/)
