@@ -1,44 +1,38 @@
 import React, { useMemo } from 'react';
 import { Box, Text } from 'ink';
-import type { ToolCallRecord } from '../dashboard-types';
-import type { Mode } from '../types';
-import {
-  aggregateForBarChart,
-  renderBarChart,
-  renderLiveContext,
-} from './activity-visualizer.pure';
+import type { DashboardNode, EventLogEntry } from '../dashboard-types';
+import { renderAgentRoster, renderAgentEvents } from './activity-visualizer.pure';
 import { BORDER_COLORS } from '../utils/theme';
 
 export interface ActivityVisualizerProps {
-  toolCalls: ToolCallRecord[];
-  currentMode: Mode | null;
+  agents: Map<string, DashboardNode>;
+  eventLog: EventLogEntry[];
   width: number;
   height: number;
 }
 
 export function ActivityVisualizer({
-  toolCalls,
-  currentMode,
+  agents,
+  eventLog,
   width,
   height,
 }: ActivityVisualizerProps): React.ReactElement {
+  const rosterWidth = Math.floor(width * 0.6);
+  const eventsWidth = width - rosterWidth;
+  const contentHeight = Math.max(1, height - 2);
+
+  const rosterLines = useMemo(
+    () => renderAgentRoster(agents, Math.max(1, rosterWidth - 2), contentHeight),
+    [agents, rosterWidth, contentHeight],
+  );
+  const eventLines = useMemo(
+    () => renderAgentEvents(eventLog, Math.max(1, eventsWidth - 2), contentHeight),
+    [eventLog, eventsWidth, contentHeight],
+  );
+
   if (width <= 0 || height <= 0) {
     return <Box />;
   }
-
-  const barChartWidth = Math.floor(width * 0.6);
-  const livePanelWidth = width - barChartWidth;
-  const contentHeight = Math.max(1, height - 2);
-
-  const barChartData = useMemo(() => aggregateForBarChart(toolCalls), [toolCalls]);
-  const barChartLines = useMemo(
-    () => renderBarChart(barChartData, Math.max(1, barChartWidth - 2), contentHeight),
-    [barChartData, barChartWidth, contentHeight],
-  );
-  const liveLines = useMemo(
-    () => renderLiveContext(toolCalls, currentMode, Math.max(1, livePanelWidth - 2), contentHeight),
-    [toolCalls, currentMode, livePanelWidth, contentHeight],
-  );
 
   return (
     <Box flexDirection="row" width={width} height={height}>
@@ -46,10 +40,10 @@ export function ActivityVisualizer({
         borderStyle="single"
         borderColor={BORDER_COLORS.panel}
         flexDirection="column"
-        width={barChartWidth}
+        width={rosterWidth}
         height={height}
       >
-        {barChartLines.map((line, i) => (
+        {rosterLines.map((line, i) => (
           <Text key={i}>{line}</Text>
         ))}
       </Box>
@@ -57,10 +51,10 @@ export function ActivityVisualizer({
         borderStyle="single"
         borderColor={BORDER_COLORS.panel}
         flexDirection="column"
-        width={livePanelWidth}
+        width={eventsWidth}
         height={height}
       >
-        {liveLines.map((line, i) => (
+        {eventLines.map((line, i) => (
           <Text key={i}>{line}</Text>
         ))}
       </Box>

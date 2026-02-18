@@ -84,7 +84,7 @@ describe('TuiInterceptor', () => {
       );
     });
 
-    it('should emit events for mapped general tools like search_rules', async () => {
+    it('should NOT emit agent events for MCP tools like search_rules', async () => {
       const activatedHandler = vi.fn();
       const deactivatedHandler = vi.fn();
       eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, activatedHandler);
@@ -96,18 +96,8 @@ describe('TuiInterceptor', () => {
 
       await new Promise(resolve => setImmediate(resolve));
 
-      expect(activatedHandler).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: 'search_rules',
-          role: 'query',
-        }),
-      );
-      expect(deactivatedHandler).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: 'search_rules',
-          reason: 'completed',
-        }),
-      );
+      expect(activatedHandler).not.toHaveBeenCalled();
+      expect(deactivatedHandler).not.toHaveBeenCalled();
     });
 
     it('should not emit agent events for unknown tools', async () => {

@@ -33,14 +33,6 @@ export function DashboardApp({
 
   const stageHealth = useMemo(() => computeStageHealth(state.agents), [state.agents]);
 
-  const tools = useMemo(() => {
-    const seen = new Set<string>();
-    for (const e of state.eventLog) {
-      seen.add(e.message.split(' [')[0]);
-    }
-    return [...seen];
-  }, [state.eventLog]);
-
   const bottlenecks = useMemo(() => detectBottlenecks(state.eventLog), [state.eventLog]);
 
   const grid = useMemo(
@@ -72,11 +64,7 @@ export function DashboardApp({
             agent={focusedAgent}
             objectives={state.objectives}
             activeSkills={state.activeSkills}
-            tools={tools}
-            inputs={tools}
-            outputs={state.outputStats}
             eventLog={state.eventLog}
-            toolCalls={state.toolCalls}
             contextDecisions={state.contextDecisions}
             contextNotes={state.contextNotes}
             width={grid.focusedAgent.width}
@@ -105,8 +93,8 @@ export function DashboardApp({
               height={grid.flowMap.height}
             />
             <ActivityVisualizer
-              toolCalls={state.toolCalls}
-              currentMode={state.currentMode}
+              agents={state.agents}
+              eventLog={state.eventLog}
               width={grid.monitorPanel.width}
               height={grid.monitorPanel.height}
             />
@@ -123,11 +111,7 @@ export function DashboardApp({
               agent={focusedAgent}
               objectives={state.objectives}
               activeSkills={state.activeSkills}
-              tools={tools}
-              inputs={tools}
-              outputs={state.outputStats}
               eventLog={state.eventLog}
-              toolCalls={state.toolCalls}
               contextDecisions={state.contextDecisions}
               contextNotes={state.contextNotes}
               width={grid.focusedAgent.width}

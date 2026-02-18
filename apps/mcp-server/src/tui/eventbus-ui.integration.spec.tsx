@@ -518,6 +518,7 @@ describe('EventBus ↔ UI Integration', () => {
     it('should handle error scenario: activate → error deactivation → re-activate', async () => {
       const eventBus = new TuiEventBus();
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
+      await tick(); // ensure useEffect subscribes before emitting
 
       // 1. Activate agent
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {

@@ -1,15 +1,12 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import type { DashboardNode, EventLogEntry, ToolCallRecord } from '../dashboard-types';
+import type { DashboardNode, EventLogEntry } from '../dashboard-types';
 import { STATUS_ICONS, getNodeStatusColor, BORDER_COLORS, getAgentAvatar } from '../utils/theme';
 import {
   formatObjective,
-  formatToolIO,
   formatLogTail,
   formatSectionDivider,
   formatEnhancedProgressBar,
-  formatActivitySparkline,
-  type ToolIOData,
 } from './focused-agent.pure';
 import { ContextSection } from './ContextSection';
 
@@ -17,11 +14,7 @@ export interface FocusedAgentPanelProps {
   agent: DashboardNode | null;
   objectives: string[];
   activeSkills: string[];
-  tools: string[];
-  inputs: string[];
-  outputs: ToolIOData;
   eventLog: EventLogEntry[];
-  toolCalls: ToolCallRecord[];
   contextDecisions?: string[];
   contextNotes?: string[];
   width?: number;
@@ -65,11 +58,7 @@ export function FocusedAgentPanel({
   agent,
   objectives,
   activeSkills,
-  tools,
-  inputs,
-  outputs,
   eventLog,
-  toolCalls,
   contextDecisions = [],
   contextNotes = [],
   width,
@@ -95,10 +84,7 @@ export function FocusedAgentPanel({
   const statusLabel = agent.status.toUpperCase();
   const progressBar = formatEnhancedProgressBar(agent.progress);
   const objective = formatObjective(objectives);
-  const toolIO = formatToolIO(tools, inputs, outputs);
   const logs = formatLogTail(eventLog);
-  const agentToolCalls = toolCalls.filter(tc => tc.agentId === agent.id);
-  const sparkline = formatActivitySparkline(agentToolCalls);
 
   return (
     <Box
@@ -136,14 +122,6 @@ export function FocusedAgentPanel({
       ) : (
         <Text dimColor>No skills</Text>
       )}
-
-      {/* Activity Sparkline */}
-      <SectionDivider title="Activity" />
-      <Text>{sparkline}</Text>
-
-      {/* Tools / IO Section */}
-      <SectionDivider title="Tools / IO" />
-      <Text>{toolIO}</Text>
 
       {/* Context Section */}
       <SectionDivider title="Context" />

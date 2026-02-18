@@ -20,11 +20,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={['Add /users endpoints']}
-        tools={['file_edit']}
-        inputs={['spec.md']}
-        outputs={{ files: 3 }}
         eventLog={[]}
-        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -35,16 +31,7 @@ describe('tui/components/FocusedAgentPanel', () => {
 
   it('should render progress bar with braille chars and label', () => {
     const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
+      <FocusedAgentPanel agent={mockAgent} activeSkills={[]} objectives={[]} eventLog={[]} />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('⣿');
@@ -52,23 +39,19 @@ describe('tui/components/FocusedAgentPanel', () => {
     expect(frame).toContain('50%');
   });
 
-  it('should render section dividers including Activity', () => {
+  it('should render section dividers without Activity or Tools/IO', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
         activeSkills={[]}
         objectives={['Design auth']}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
         eventLog={[]}
-        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('─── Objective');
-    expect(frame).toContain('─── Activity');
-    expect(frame).toContain('─── Tools / IO');
+    expect(frame).not.toContain('─── Activity');
+    expect(frame).not.toContain('─── Tools / IO');
     expect(frame).toContain('─── Event Log');
   });
 
@@ -78,32 +61,10 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={['Add /users endpoints', 'Update DTO']}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
         eventLog={[]}
-        toolCalls={[]}
       />,
     );
     expect(lastFrame()).toContain('Add /users endpoints');
-  });
-
-  it('should render tool/IO section', () => {
-    const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={['file_edit', 'test_run']}
-        inputs={['spec.md']}
-        outputs={{ files: 12, commits: 3 }}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('file_edit');
-    expect(frame).toContain('spec.md');
   });
 
   it('should render logs', () => {
@@ -112,14 +73,10 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
         eventLog={[
           { timestamp: '10:12:01', message: 'ACT start', level: 'info' },
           { timestamp: '10:12:09', message: 'edited: users.controller.ts', level: 'info' },
         ]}
-        toolCalls={[]}
       />,
     );
     expect(lastFrame()).toContain('ACT start');
@@ -127,16 +84,7 @@ describe('tui/components/FocusedAgentPanel', () => {
 
   it('should render placeholder when no agent focused', () => {
     const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={null}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
+      <FocusedAgentPanel agent={null} activeSkills={[]} objectives={[]} eventLog={[]} />,
     );
     expect(lastFrame()).toContain('No agent focused');
   });
@@ -147,11 +95,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
         eventLog={[]}
-        toolCalls={[]}
         width={60}
         height={20}
       />,
@@ -165,11 +109,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={null}
         activeSkills={[]}
         objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
         eventLog={[]}
-        toolCalls={[]}
         width={60}
         height={20}
       />,
@@ -179,16 +119,7 @@ describe('tui/components/FocusedAgentPanel', () => {
 
   it('should render single border with cyan color', () => {
     const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
+      <FocusedAgentPanel agent={mockAgent} activeSkills={[]} objectives={[]} eventLog={[]} />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('┌');
@@ -201,11 +132,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={['tdd', 'debugging']}
         objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
         eventLog={[]}
-        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -216,76 +143,17 @@ describe('tui/components/FocusedAgentPanel', () => {
 
   it('should render "No skills" when activeSkills is empty', () => {
     const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
+      <FocusedAgentPanel agent={mockAgent} activeSkills={[]} objectives={[]} eventLog={[]} />,
     );
     expect(lastFrame()).toContain('No skills');
   });
 
   it('should render emoji avatar in agent header', () => {
     const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
+      <FocusedAgentPanel agent={mockAgent} activeSkills={[]} objectives={[]} eventLog={[]} />,
     );
     // BackendDev → backend 키워드 매칭 → ⚙️
     expect(lastFrame()).toContain('⚙️');
-  });
-
-  it('should render sparkline section', () => {
-    const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('─── Activity');
-    // 빈 toolCalls → 모두 ▁
-    expect(frame).toContain('▁');
-  });
-
-  it('should filter toolCalls by agentId for sparkline', () => {
-    const now = Date.now();
-    const toolCalls = [
-      { agentId: 'agent-1', toolName: 'bash', timestamp: now - 1000, status: 'completed' as const },
-      { agentId: 'agent-2', toolName: 'read', timestamp: now - 2000, status: 'completed' as const },
-    ];
-    // agent-1만 해당: sparkline에 activity가 있어야 함 (최소 ▁ 이상)
-    const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={toolCalls}
-      />,
-    );
-    expect(lastFrame()).toContain('─── Activity');
   });
 
   describe('Context section', () => {
@@ -295,11 +163,7 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tools={[]}
-          inputs={[]}
-          outputs={{}}
           eventLog={[]}
-          toolCalls={[]}
           contextDecisions={['Use JWT for auth', 'Add rate limiting']}
           contextNotes={[]}
         />,
@@ -316,11 +180,7 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tools={[]}
-          inputs={[]}
-          outputs={{}}
           eventLog={[]}
-          toolCalls={[]}
           contextDecisions={[]}
           contextNotes={['Review existing codebase']}
         />,
@@ -336,11 +196,7 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tools={[]}
-          inputs={[]}
-          outputs={{}}
           eventLog={[]}
-          toolCalls={[]}
           contextDecisions={[]}
           contextNotes={[]}
         />,
@@ -351,16 +207,7 @@ describe('tui/components/FocusedAgentPanel', () => {
 
     it('renders No context when props omitted', () => {
       const { lastFrame } = render(
-        <FocusedAgentPanel
-          agent={mockAgent}
-          activeSkills={[]}
-          objectives={[]}
-          tools={[]}
-          inputs={[]}
-          outputs={{}}
-          eventLog={[]}
-          toolCalls={[]}
-        />,
+        <FocusedAgentPanel agent={mockAgent} activeSkills={[]} objectives={[]} eventLog={[]} />,
       );
       const frame = lastFrame() ?? '';
       expect(frame).toContain('No context');

@@ -1,16 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatObjective,
-  formatChecklist,
-  formatToolIO,
   formatLogTail,
   formatSectionDivider,
-  formatProgressBar,
   formatEnhancedProgressBar,
-  formatActivitySparkline,
   formatEnhancedChecklist,
 } from './focused-agent.pure';
-import type { TaskItem, EventLogEntry } from '../dashboard-types';
+import type { EventLogEntry } from '../dashboard-types';
 
 describe('tui/components/focused-agent.pure', () => {
   describe('formatObjective', () => {
@@ -39,76 +35,6 @@ describe('tui/components/focused-agent.pure', () => {
     it('should return empty string for empty objectives', () => {
       const result = formatObjective([]);
       expect(result).toBe('');
-    });
-  });
-
-  describe('formatChecklist', () => {
-    it('should show completed tasks with [x] and pending with [ ]', () => {
-      const tasks: TaskItem[] = [
-        { id: '1', subject: 'Write tests', completed: true },
-        { id: '2', subject: 'Implement feature', completed: false },
-      ];
-
-      const result = formatChecklist(tasks);
-      expect(result).toContain('[x] Write tests');
-      expect(result).toContain('[ ] Implement feature');
-    });
-
-    it('should show overflow count when exceeding maxItems', () => {
-      const tasks: TaskItem[] = Array.from({ length: 10 }, (_, i) => ({
-        id: String(i),
-        subject: `Task ${i}`,
-        completed: false,
-      }));
-
-      const result = formatChecklist(tasks, 6);
-      const lines = result.split('\n');
-      expect(lines).toHaveLength(7); // 6 items + overflow
-      expect(lines[6]).toBe('(+4 more)');
-    });
-
-    it('should not show overflow when within maxItems', () => {
-      const tasks: TaskItem[] = [{ id: '1', subject: 'Only task', completed: false }];
-
-      const result = formatChecklist(tasks, 6);
-      expect(result).not.toContain('more');
-    });
-
-    it('should return empty string for empty tasks', () => {
-      const result = formatChecklist([]);
-      expect(result).toBe('');
-    });
-  });
-
-  describe('formatToolIO', () => {
-    it('should format tools, inputs, and outputs', () => {
-      const result = formatToolIO(['grep', 'read'], ['src/app.ts', 'src/main.ts'], {
-        files: 3,
-        commits: 1,
-      });
-
-      expect(result).toContain('Tools: grep / read');
-      expect(result).toContain('IN : src/app.ts, src/main.ts');
-      expect(result).toContain('OUT: files(3) / commits(1)');
-    });
-
-    it('should show "none" for empty tools', () => {
-      const result = formatToolIO([], [], {});
-      expect(result).toContain('Tools: none');
-      expect(result).toContain('IN : none');
-      expect(result).toContain('OUT: none');
-    });
-
-    it('should skip zero-value outputs', () => {
-      const result = formatToolIO(['read'], ['a.ts'], { files: 0, commits: 2 });
-      expect(result).not.toContain('files(0)');
-      expect(result).toContain('commits(2)');
-    });
-
-    it('should skip undefined outputs', () => {
-      const result = formatToolIO(['read'], ['a.ts'], { files: undefined, commits: 1 });
-      expect(result).not.toContain('files');
-      expect(result).toContain('commits(1)');
     });
   });
 
@@ -171,38 +97,6 @@ describe('tui/components/focused-agent.pure', () => {
     });
   });
 
-  describe('formatProgressBar', () => {
-    it('should return filled and empty segments', () => {
-      const { filled, empty } = formatProgressBar(50, 20);
-      expect(filled).toBe('██████████');
-      expect(empty).toBe('░░░░░░░░░░');
-    });
-
-    it('should handle 0% progress', () => {
-      const { filled, empty } = formatProgressBar(0, 10);
-      expect(filled).toBe('');
-      expect(empty).toBe('░░░░░░░░░░');
-    });
-
-    it('should handle 100% progress', () => {
-      const { filled, empty } = formatProgressBar(100, 10);
-      expect(filled).toBe('██████████');
-      expect(empty).toBe('');
-    });
-
-    it('should clamp values above 100', () => {
-      const { filled, empty } = formatProgressBar(150, 10);
-      expect(filled).toBe('██████████');
-      expect(empty).toBe('');
-    });
-
-    it('should clamp values below 0', () => {
-      const { filled, empty } = formatProgressBar(-10, 10);
-      expect(filled).toBe('');
-      expect(empty).toBe('░░░░░░░░░░');
-    });
-  });
-
   describe('formatEnhancedProgressBar', () => {
     it('0%: 전체 ░, label "0%"', () => {
       const result = formatEnhancedProgressBar(0, 20);
@@ -232,43 +126,6 @@ describe('tui/components/focused-agent.pure', () => {
       const result = formatEnhancedProgressBar(-10, 10);
       expect(result.bar).toBe('░'.repeat(10));
       expect(result.label).toBe('0%');
-    });
-  });
-
-  describe('formatActivitySparkline', () => {
-    const NOW = 1_000_000;
-
-    it('빈 배열 → 모두 ▁ (최소 높이)', () => {
-      const result = formatActivitySparkline([], 10, 60_000, NOW);
-      expect(result).toBe('▁'.repeat(10));
-      expect(result).toHaveLength(10);
-    });
-
-    it('단일 스파이크 → 마지막 버킷만 █', () => {
-      const calls = [{ timestamp: NOW - 1000 }];
-      const result = formatActivitySparkline(calls, 10, 60_000, NOW);
-      expect(result[result.length - 1]).toBe('█');
-      expect(result.slice(0, -1)).toBe('▁'.repeat(9));
-    });
-
-    it('윈도우 밖 호출 무시', () => {
-      const calls = [{ timestamp: NOW - 70_000 }];
-      const result = formatActivitySparkline(calls, 10, 60_000, NOW);
-      expect(result).toBe('▁'.repeat(10));
-    });
-
-    it('bucketCount만큼 문자 반환', () => {
-      const result = formatActivitySparkline([], 20, 60_000, NOW);
-      expect(result).toHaveLength(20);
-    });
-
-    it('균등 분포 → 모두 같은 높이 문자', () => {
-      const bucketSize = 60_000 / 5;
-      const calls = [0, 1, 2, 3, 4].map(i => ({
-        timestamp: NOW - (i * bucketSize + bucketSize / 2),
-      }));
-      const result = formatActivitySparkline(calls, 5, 60_000, NOW);
-      expect(new Set(result.split('')).size).toBe(1);
     });
   });
 

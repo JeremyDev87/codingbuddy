@@ -7,25 +7,6 @@ const MODE_KEYWORD_TO_AGENT: Record<string, string> = {
   AUTO: 'auto-mode',
 };
 
-/** Maps general codingbuddy tools to agent roles for TUI visibility */
-const TOOL_AGENT_MAP: Record<string, string> = {
-  search_rules: 'query',
-  get_agent_details: 'query',
-  get_project_config: 'config',
-  set_project_root: 'config',
-  suggest_config_updates: 'config',
-  recommend_skills: 'skill',
-  get_skill: 'skill',
-  list_skills: 'skill',
-  analyze_task: 'analysis',
-  generate_checklist: 'checklist',
-  read_context: 'context',
-  update_context: 'context',
-  cleanup_context: 'context',
-  get_code_conventions: 'conventions',
-  dispatch_agents: 'orchestrator',
-};
-
 export function parseAgentFromToolName(
   toolName: string,
   args: Record<string, unknown> | undefined,
@@ -40,16 +21,6 @@ export function parseAgentFromToolName(
 
   if (toolName === 'prepare_parallel_agents') {
     return parseParallelAgents(args);
-  }
-
-  const role = TOOL_AGENT_MAP[toolName];
-  if (role) {
-    return {
-      agentId: toolName,
-      name: toolName,
-      role,
-      isPrimary: false,
-    };
   }
 
   return null;

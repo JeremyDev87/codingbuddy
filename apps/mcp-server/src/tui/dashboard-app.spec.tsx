@@ -100,7 +100,7 @@ describe('DashboardApp', () => {
     expect(frame).toContain('security-');
   });
 
-  it('passes tool names as inputs to FocusedAgentPanel', async () => {
+  it('shows focused agent in FocusedAgentPanel without Tools/IO section', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
     await tick();
@@ -121,9 +121,9 @@ describe('DashboardApp', () => {
     await tick();
 
     const frame = lastFrame() ?? '';
-    // IN line should show tool name, not "none"
-    expect(frame).toContain('IN :');
-    expect(frame).not.toMatch(/IN\s*:\s*none/);
+    // Tools/IO section should not be visible
+    expect(frame).not.toContain('IN :');
+    expect(frame).not.toContain('─── Tools / IO');
   });
 
   it('focuses on primary running agent', async () => {
