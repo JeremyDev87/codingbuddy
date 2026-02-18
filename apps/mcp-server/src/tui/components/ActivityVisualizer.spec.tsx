@@ -37,7 +37,7 @@ describe('tui/components/ActivityVisualizer', () => {
     ).not.toThrow();
   });
 
-  it('contains heatmap content when calls exist', () => {
+  it('contains bar chart content when calls exist', () => {
     const { lastFrame } = render(
       <ActivityVisualizer toolCalls={makeCalls()} currentMode={null} width={80} height={10} />,
     );

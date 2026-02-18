@@ -2,7 +2,11 @@ import React, { useMemo } from 'react';
 import { Box, Text } from 'ink';
 import type { ToolCallRecord } from '../dashboard-types';
 import type { Mode } from '../types';
-import { aggregateToolCalls, renderHeatmap, renderLiveContext } from './activity-visualizer.pure';
+import {
+  aggregateForBarChart,
+  renderBarChart,
+  renderLiveContext,
+} from './activity-visualizer.pure';
 import { BORDER_COLORS } from '../utils/theme';
 
 export interface ActivityVisualizerProps {
@@ -22,14 +26,14 @@ export function ActivityVisualizer({
     return <Box />;
   }
 
-  const heatmapWidth = Math.floor(width * 0.6);
-  const livePanelWidth = width - heatmapWidth;
+  const barChartWidth = Math.floor(width * 0.6);
+  const livePanelWidth = width - barChartWidth;
   const contentHeight = Math.max(1, height - 2);
 
-  const heatmapData = useMemo(() => aggregateToolCalls(toolCalls), [toolCalls]);
-  const heatmapLines = useMemo(
-    () => renderHeatmap(heatmapData, Math.max(1, heatmapWidth - 2), contentHeight),
-    [heatmapData, heatmapWidth, contentHeight],
+  const barChartData = useMemo(() => aggregateForBarChart(toolCalls), [toolCalls]);
+  const barChartLines = useMemo(
+    () => renderBarChart(barChartData, Math.max(1, barChartWidth - 2), contentHeight),
+    [barChartData, barChartWidth, contentHeight],
   );
   const liveLines = useMemo(
     () => renderLiveContext(toolCalls, currentMode, Math.max(1, livePanelWidth - 2), contentHeight),
@@ -42,10 +46,10 @@ export function ActivityVisualizer({
         borderStyle="single"
         borderColor={BORDER_COLORS.panel}
         flexDirection="column"
-        width={heatmapWidth}
+        width={barChartWidth}
         height={height}
       >
-        {heatmapLines.map((line, i) => (
+        {barChartLines.map((line, i) => (
           <Text key={i}>{line}</Text>
         ))}
       </Box>

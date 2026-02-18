@@ -2,85 +2,55 @@ import type { ToolCallRecord } from '../dashboard-types';
 import type { Mode } from '../types';
 import { truncateToDisplayWidth, padEndDisplayWidth } from '../utils/display-width';
 
-export interface HeatmapData {
-  agents: string[];
-  tools: string[];
-  matrix: number[][];
+export interface BarChartItem {
+  tool: string;
+  count: number;
 }
 
-export function aggregateToolCalls(
-  calls: ToolCallRecord[],
-  maxAgents = 7,
-  maxTools = 8,
-): HeatmapData {
-  if (calls.length === 0) return { agents: [], tools: [], matrix: [] };
+export function aggregateForBarChart(calls: ToolCallRecord[], maxTools = 10): BarChartItem[] {
+  if (calls.length === 0) return [];
 
-  const agentToolMap = new Map<string, Map<string, number>>();
-  const toolTotals = new Map<string, number>();
-  const agentTotals = new Map<string, number>();
-
+  const toolCounts = new Map<string, number>();
   for (const call of calls) {
-    const agentMap = agentToolMap.get(call.agentId) ?? new Map<string, number>();
-    agentMap.set(call.toolName, (agentMap.get(call.toolName) ?? 0) + 1);
-    agentToolMap.set(call.agentId, agentMap);
-    toolTotals.set(call.toolName, (toolTotals.get(call.toolName) ?? 0) + 1);
-    agentTotals.set(call.agentId, (agentTotals.get(call.agentId) ?? 0) + 1);
+    toolCounts.set(call.toolName, (toolCounts.get(call.toolName) ?? 0) + 1);
   }
 
-  const agents = [...agentTotals.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, maxAgents)
-    .map(e => e[0]);
-
-  const tools = [...toolTotals.entries()]
+  return [...toolCounts.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, maxTools)
-    .map(e => e[0]);
-
-  const matrix = agents.map(agent => {
-    const agentMap = agentToolMap.get(agent)!;
-    return tools.map(tool => agentMap.get(tool) ?? 0);
-  });
-
-  return { agents, tools, matrix };
+    .map(([tool, count]) => ({ tool, count }));
 }
 
-const AGENT_NAME_WIDTH = 15; // was 10 → agent names visible up to 15 chars
+const TOOL_NAME_WIDTH = 12;
+const BAR_FIXED_OVERHEAD = TOOL_NAME_WIDTH + 2 + 2 + 4; // "name [bar] cnt"
 
-export function getDensityChar(count: number): string {
-  if (count <= 0) return '··';
-  if (count <= 2) return '░░';
-  if (count <= 5) return '▒▒';
-  if (count <= 9) return '▓▓';
-  return '██';
-}
+export function renderBarChart(data: BarChartItem[], width: number, height: number): string[] {
+  if (data.length === 0 || height <= 0 || width <= 0) return [];
 
-export function renderHeatmap(data: HeatmapData, width: number, height: number): string[] {
-  if (data.agents.length === 0 || height <= 0 || width <= 0) return [];
+  const lines: string[] = [truncateToDisplayWidth('📊 Activity', width)];
 
-  const header = truncateToDisplayWidth('🔥 Activity', width);
-  const lines: string[] = [header];
+  const barWidth = Math.max(1, width - BAR_FIXED_OVERHEAD);
+  const maxCount = data[0]?.count || 1;
 
-  // Tool header row - fixed agent name col + tool columns
-  const nameCol = padEndDisplayWidth('', AGENT_NAME_WIDTH);
-  const toolHeaders = data.tools
-    .map(t => padEndDisplayWidth(truncateToDisplayWidth(t, 6), 6))
-    .join(' ');
-  lines.push(truncateToDisplayWidth(`${nameCol} ${toolHeaders}`, width));
-
-  for (const [i, agent] of data.agents.entries()) {
+  for (const item of data) {
     if (lines.length >= height) break;
+
     const name = padEndDisplayWidth(
-      truncateToDisplayWidth(agent, AGENT_NAME_WIDTH),
-      AGENT_NAME_WIDTH,
+      truncateToDisplayWidth(item.tool, TOOL_NAME_WIDTH),
+      TOOL_NAME_WIDTH,
     );
-    const cells = data.matrix[i].map(c => getDensityChar(c)).join(' ');
-    lines.push(truncateToDisplayWidth(`${name} ${cells}`, width));
+    const filled = Math.round((item.count / maxCount) * barWidth);
+    const empty = barWidth - filled;
+    const bar = '█'.repeat(filled) + '░'.repeat(empty);
+    const countStr = String(item.count).padStart(4);
+
+    lines.push(truncateToDisplayWidth(`${name} [${bar}] ${countStr}`, width));
   }
 
   return lines.slice(0, height);
 }
 
+const LIVE_AGENT_NAME_WIDTH = 15;
 const LIVE_HOT_WINDOW_MS = 5_000;
 const LIVE_RECENT_WINDOW_MS = 30_000;
 const LIVE_HOT_SEC = LIVE_HOT_WINDOW_MS / 1000;
@@ -115,7 +85,7 @@ export function renderLiveContext(
     const ageIndicator = ageSec < LIVE_HOT_SEC ? '◉' : ageSec < LIVE_RECENT_SEC ? '○' : '·';
     const agent =
       call.agentId !== 'unknown'
-        ? truncateToDisplayWidth(call.agentId, AGENT_NAME_WIDTH) + ' '
+        ? truncateToDisplayWidth(call.agentId, LIVE_AGENT_NAME_WIDTH) + ' '
         : '';
     lines.push(truncateToDisplayWidth(`${ageIndicator} ${agent}${call.toolName}`, width));
   }

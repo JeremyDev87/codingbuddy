@@ -1,196 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
-  aggregateToolCalls,
-  getDensityChar,
-  renderHeatmap,
   renderLiveContext,
-  type HeatmapData,
+  aggregateForBarChart,
+  renderBarChart,
+  type BarChartItem,
 } from './activity-visualizer.pure';
 import type { ToolCallRecord } from '../dashboard-types';
 import { estimateDisplayWidth } from '../utils/display-width';
-
-describe('aggregateToolCalls', () => {
-  it('returns empty arrays for empty input', () => {
-    const result = aggregateToolCalls([]);
-    expect(result).toEqual({ agents: [], tools: [], matrix: [] });
-  });
-
-  it('generates correct matrix for simple input', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'Read', timestamp: 1, status: 'completed' },
-      { agentId: 'a1', toolName: 'Read', timestamp: 2, status: 'completed' },
-      { agentId: 'a1', toolName: 'Bash', timestamp: 3, status: 'completed' },
-      { agentId: 'a2', toolName: 'Read', timestamp: 4, status: 'completed' },
-    ];
-    const result = aggregateToolCalls(calls);
-    expect(result.agents).toEqual(['a1', 'a2']);
-    expect(result.tools).toEqual(['Read', 'Bash']);
-    // a1: Read=2, Bash=1; a2: Read=1, Bash=0
-    expect(result.matrix).toEqual([
-      [2, 1],
-      [1, 0],
-    ]);
-  });
-
-  it('sorts agents by total calls descending', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'low', toolName: 'Read', timestamp: 1, status: 'completed' },
-      { agentId: 'high', toolName: 'Read', timestamp: 2, status: 'completed' },
-      { agentId: 'high', toolName: 'Read', timestamp: 3, status: 'completed' },
-      { agentId: 'high', toolName: 'Read', timestamp: 4, status: 'completed' },
-    ];
-    const result = aggregateToolCalls(calls);
-    expect(result.agents[0]).toBe('high');
-    expect(result.agents[1]).toBe('low');
-  });
-
-  it('sorts tools by total calls descending', () => {
-    const calls: ToolCallRecord[] = [
-      { agentId: 'a1', toolName: 'rare', timestamp: 1, status: 'completed' },
-      { agentId: 'a1', toolName: 'common', timestamp: 2, status: 'completed' },
-      { agentId: 'a1', toolName: 'common', timestamp: 3, status: 'completed' },
-      { agentId: 'a1', toolName: 'common', timestamp: 4, status: 'completed' },
-    ];
-    const result = aggregateToolCalls(calls);
-    expect(result.tools[0]).toBe('common');
-    expect(result.tools[1]).toBe('rare');
-  });
-
-  it('limits agents to maxAgents (default 7)', () => {
-    const calls: ToolCallRecord[] = [];
-    for (let i = 0; i < 10; i++) {
-      calls.push({ agentId: `agent_${i}`, toolName: 'Read', timestamp: i, status: 'completed' });
-    }
-    const result = aggregateToolCalls(calls);
-    expect(result.agents).toHaveLength(7);
-    expect(result.matrix).toHaveLength(7);
-  });
-
-  it('limits tools to maxTools (default 8)', () => {
-    const calls: ToolCallRecord[] = [];
-    for (let i = 0; i < 12; i++) {
-      calls.push({ agentId: 'a1', toolName: `tool_${i}`, timestamp: i, status: 'completed' });
-    }
-    const result = aggregateToolCalls(calls);
-    expect(result.tools).toHaveLength(8);
-    expect(result.matrix[0]).toHaveLength(8);
-  });
-
-  it('respects custom maxAgents and maxTools', () => {
-    const calls: ToolCallRecord[] = [];
-    for (let i = 0; i < 5; i++) {
-      for (let j = 0; j < 5; j++) {
-        calls.push({
-          agentId: `a${i}`,
-          toolName: `t${j}`,
-          timestamp: i * 5 + j,
-          status: 'completed',
-        });
-      }
-    }
-    const result = aggregateToolCalls(calls, 3, 2);
-    expect(result.agents).toHaveLength(3);
-    expect(result.tools).toHaveLength(2);
-    expect(result.matrix).toHaveLength(3);
-    expect(result.matrix[0]).toHaveLength(2);
-  });
-});
-
-describe('getDensityChar', () => {
-  it('returns "··" for count 0', () => {
-    expect(getDensityChar(0)).toBe('··');
-  });
-
-  it('returns "··" for negative count', () => {
-    expect(getDensityChar(-1)).toBe('··');
-  });
-
-  it('returns "░░" for count 1-2', () => {
-    expect(getDensityChar(1)).toBe('░░');
-    expect(getDensityChar(2)).toBe('░░');
-  });
-
-  it('returns "▒▒" for count 3-5', () => {
-    expect(getDensityChar(3)).toBe('▒▒');
-    expect(getDensityChar(5)).toBe('▒▒');
-  });
-
-  it('returns "▓▓" for count 6-9', () => {
-    expect(getDensityChar(6)).toBe('▓▓');
-    expect(getDensityChar(9)).toBe('▓▓');
-  });
-
-  it('returns "██" for count >= 10', () => {
-    expect(getDensityChar(10)).toBe('██');
-    expect(getDensityChar(100)).toBe('██');
-  });
-});
-
-describe('renderHeatmap', () => {
-  const sampleData: HeatmapData = {
-    agents: ['agent-1', 'agent-2'],
-    tools: ['Read', 'Bash'],
-    matrix: [
-      [3, 1],
-      [0, 10],
-    ],
-  };
-
-  it('returns empty array for empty agents', () => {
-    expect(renderHeatmap({ agents: [], tools: [], matrix: [] }, 80, 10)).toEqual([]);
-  });
-
-  it('returns empty array for height <= 0', () => {
-    expect(renderHeatmap(sampleData, 80, 0)).toEqual([]);
-  });
-
-  it('returns empty array for width <= 0', () => {
-    expect(renderHeatmap(sampleData, 0, 10)).toEqual([]);
-    expect(renderHeatmap(sampleData, -1, 10)).toEqual([]);
-  });
-
-  it('includes Activity header as first line', () => {
-    const lines = renderHeatmap(sampleData, 80, 10);
-    expect(lines[0]).toContain('Activity');
-  });
-
-  it('includes tool names in header row', () => {
-    const lines = renderHeatmap(sampleData, 80, 10);
-    // Second line is the tool header row
-    expect(lines[1]).toContain('Read');
-    expect(lines[1]).toContain('Bash');
-  });
-
-  it('includes agent names in data rows', () => {
-    const lines = renderHeatmap(sampleData, 80, 10);
-    const content = lines.join('\n');
-    expect(content).toContain('agent-1');
-    expect(content).toContain('agent-2');
-  });
-
-  it('uses density chars in data rows', () => {
-    const lines = renderHeatmap(sampleData, 80, 10);
-    const content = lines.join('\n');
-    // agent-1: Read=3 -> ▒▒, Bash=1 -> ░░
-    expect(content).toContain('▒▒');
-    expect(content).toContain('░░');
-    // agent-2: Read=0 -> ··, Bash=10 -> ██
-    expect(content).toContain('··');
-    expect(content).toContain('██');
-  });
-
-  it('limits output to height lines', () => {
-    const lines = renderHeatmap(sampleData, 80, 3);
-    expect(lines.length).toBeLessThanOrEqual(3);
-  });
-
-  it('truncates lines to width', () => {
-    const lines = renderHeatmap(sampleData, 20, 10);
-    for (const line of lines) {
-      expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(20);
-    }
-  });
-});
 
 describe('renderLiveContext', () => {
   const NOW = 100_000;
@@ -345,5 +161,147 @@ describe('renderLiveContext', () => {
     ];
     const lines = renderLiveContext(calls, null, 40, 5, NOW);
     expect(lines).toHaveLength(1);
+  });
+});
+
+describe('aggregateForBarChart', () => {
+  it('returns empty array for empty input', () => {
+    expect(aggregateForBarChart([])).toEqual([]);
+  });
+
+  it('counts calls per tool and sorts descending', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: 1, status: 'completed' },
+      { agentId: 'a1', toolName: 'Read', timestamp: 2, status: 'completed' },
+      { agentId: 'a2', toolName: 'Bash', timestamp: 3, status: 'completed' },
+      { agentId: 'a1', toolName: 'Read', timestamp: 4, status: 'completed' },
+      { agentId: 'a2', toolName: 'Grep', timestamp: 5, status: 'completed' },
+      { agentId: 'a2', toolName: 'Grep', timestamp: 6, status: 'completed' },
+    ];
+    const result = aggregateForBarChart(calls);
+    expect(result).toEqual([
+      { tool: 'Read', count: 3 },
+      { tool: 'Grep', count: 2 },
+      { tool: 'Bash', count: 1 },
+    ]);
+  });
+
+  it('limits results to maxTools (default 10)', () => {
+    const calls: ToolCallRecord[] = [];
+    for (let i = 0; i < 15; i++) {
+      calls.push({ agentId: 'a1', toolName: `tool_${i}`, timestamp: i, status: 'completed' });
+    }
+    const result = aggregateForBarChart(calls);
+    expect(result).toHaveLength(10);
+  });
+
+  it('respects custom maxTools', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: 1, status: 'completed' },
+      { agentId: 'a1', toolName: 'Bash', timestamp: 2, status: 'completed' },
+      { agentId: 'a1', toolName: 'Grep', timestamp: 3, status: 'completed' },
+    ];
+    const result = aggregateForBarChart(calls, 2);
+    expect(result).toHaveLength(2);
+  });
+
+  it('returns single tool correctly', () => {
+    const calls: ToolCallRecord[] = [
+      { agentId: 'a1', toolName: 'Read', timestamp: 1, status: 'completed' },
+    ];
+    expect(aggregateForBarChart(calls)).toEqual([{ tool: 'Read', count: 1 }]);
+  });
+});
+
+describe('renderBarChart', () => {
+  const sampleData: BarChartItem[] = [
+    { tool: 'Read', count: 10 },
+    { tool: 'Bash', count: 5 },
+    { tool: 'Grep', count: 2 },
+  ];
+
+  it('returns empty array for empty data', () => {
+    expect(renderBarChart([], 80, 10)).toEqual([]);
+  });
+
+  it('returns empty array for height <= 0', () => {
+    expect(renderBarChart(sampleData, 80, 0)).toEqual([]);
+  });
+
+  it('returns empty array for width <= 0', () => {
+    expect(renderBarChart(sampleData, 0, 10)).toEqual([]);
+    expect(renderBarChart(sampleData, -1, 10)).toEqual([]);
+  });
+
+  it('includes Activity header as first line', () => {
+    const lines = renderBarChart(sampleData, 80, 10);
+    expect(lines[0]).toContain('Activity');
+  });
+
+  it('includes tool names in output', () => {
+    const lines = renderBarChart(sampleData, 80, 10);
+    const content = lines.join('\n');
+    expect(content).toContain('Read');
+    expect(content).toContain('Bash');
+    expect(content).toContain('Grep');
+  });
+
+  it('includes counts in output', () => {
+    const lines = renderBarChart(sampleData, 80, 10);
+    const content = lines.join('\n');
+    expect(content).toContain('10');
+    expect(content).toContain('5');
+    expect(content).toContain('2');
+  });
+
+  it('includes bar characters', () => {
+    const lines = renderBarChart(sampleData, 80, 10);
+    const content = lines.join('\n');
+    expect(content).toContain('█');
+    expect(content).toContain('░');
+  });
+
+  it('limits output to height lines', () => {
+    const lines = renderBarChart(sampleData, 80, 3);
+    expect(lines.length).toBeLessThanOrEqual(3);
+  });
+
+  it('truncates lines to width', () => {
+    const lines = renderBarChart(sampleData, 30, 10);
+    for (const line of lines) {
+      expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(30);
+    }
+  });
+
+  it('highest count tool has full bar (no empty chars)', () => {
+    const lines = renderBarChart(sampleData, 80, 10);
+    const readLine = lines.find(l => l.includes('Read'));
+    expect(readLine).toBeDefined();
+    expect(readLine).not.toContain('░');
+  });
+
+  it('renders single item correctly', () => {
+    const lines = renderBarChart([{ tool: 'Read', count: 5 }], 80, 5);
+    expect(lines).toHaveLength(2); // header + 1 row
+    expect(lines[1]).toContain('Read');
+    expect(lines[1]).toContain('5');
+  });
+
+  it('renders correctly with very narrow width (width < BAR_FIXED_OVERHEAD)', () => {
+    const lines = renderBarChart(sampleData, 15, 5);
+    // barWidth = max(1, 15-20) = 1, should still render without error
+    expect(lines.length).toBeGreaterThan(0);
+    for (const line of lines) {
+      expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(15);
+    }
+  });
+
+  it('renders safely when count is 0 (maxCount fallback to 1)', () => {
+    const data: BarChartItem[] = [{ tool: 'Read', count: 0 }];
+    const lines = renderBarChart(data, 80, 5);
+    expect(lines).toHaveLength(2);
+    // bar should be all empty (count=0, maxCount=1 → filled=0)
+    expect(lines[1]).toContain('░');
+    expect(lines[1]).not.toContain('█');
   });
 });

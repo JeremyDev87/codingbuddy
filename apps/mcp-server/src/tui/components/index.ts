@@ -28,11 +28,10 @@ export { computeStageHealth, detectBottlenecks } from './stage-health.pure';
 export { computeGridLayout } from './grid-layout.pure';
 export { ActivityVisualizer, type ActivityVisualizerProps } from './ActivityVisualizer';
 export {
-  aggregateToolCalls,
-  getDensityChar,
-  renderHeatmap,
+  aggregateForBarChart,
+  renderBarChart,
   renderLiveContext,
-  type HeatmapData,
+  type BarChartItem,
 } from './activity-visualizer.pure';
 export { SessionTabBar } from './SessionTabBar';
 export type { SessionTabBarProps } from './SessionTabBar';
