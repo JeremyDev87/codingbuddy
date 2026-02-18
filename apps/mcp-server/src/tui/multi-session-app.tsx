@@ -41,6 +41,11 @@ export function MultiSessionApp({ manager }: MultiSessionAppProps): React.ReactE
     return found?.eventBus;
   }, [manager, activeSessionPid]);
 
+  const activeProjectRoot = useMemo(() => {
+    if (activeSessionPid === null) return undefined;
+    return sessions.get(activeSessionPid)?.projectRoot;
+  }, [sessions, activeSessionPid]);
+
   const handleInput = useCallback(
     (input: string, key: KeyInput) => {
       if (key.rightArrow) {
@@ -68,7 +73,11 @@ export function MultiSessionApp({ manager }: MultiSessionAppProps): React.ReactE
       {/* key={pid} forces remount on session switch — intentional tradeoff:
           per-session widget state (scroll, focus) resets, but ensures clean isolation
           between sessions without cross-contamination of stale React state. */}
-      <DashboardApp key={activeSessionPid ?? 'none'} eventBus={activeEventBus} />
+      <DashboardApp
+        key={activeSessionPid ?? 'none'}
+        eventBus={activeEventBus}
+        workspace={activeProjectRoot}
+      />
     </Box>
   );
 }

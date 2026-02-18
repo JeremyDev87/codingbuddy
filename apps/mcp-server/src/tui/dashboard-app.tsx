@@ -15,9 +15,14 @@ import { computeGridLayout } from './components/grid-layout.pure';
 export interface DashboardAppProps {
   eventBus?: TuiEventBus;
   externalState?: DashboardState;
+  workspace?: string;
 }
 
-export function DashboardApp({ eventBus, externalState }: DashboardAppProps): React.ReactElement {
+export function DashboardApp({
+  eventBus,
+  externalState,
+  workspace: workspaceProp,
+}: DashboardAppProps): React.ReactElement {
   const { columns, rows, layoutMode } = useTerminalSize();
   const internalState = useDashboardState(externalState ? undefined : eventBus);
   const state = externalState ?? internalState;
@@ -45,8 +50,7 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
   return (
     <Box flexDirection="column" width={grid.total.width} height={grid.total.height}>
       <HeaderBar
-        workspace={state.workspace}
-        sessionId={state.sessionId}
+        workspace={workspaceProp ?? state.workspace}
         currentMode={state.currentMode}
         globalState={state.globalState}
         layoutMode={layoutMode}

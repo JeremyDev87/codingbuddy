@@ -145,6 +145,16 @@ describe('DashboardApp', () => {
     expect(frame).toContain('Objective');
   });
 
+  it('should use workspace prop over state.workspace when provided', () => {
+    const mockState = createInitialDashboardState();
+    mockState.workspace = '/from-state';
+
+    const { lastFrame } = render(<DashboardApp externalState={mockState} workspace="/from-prop" />);
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('/from-prop');
+    expect(frame).not.toContain('/from-state');
+  });
+
   it('should use externalState when provided (multi-session mode)', () => {
     const mockState = createInitialDashboardState();
     // Modify some fields to verify they propagate

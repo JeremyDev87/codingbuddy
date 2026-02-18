@@ -8,7 +8,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo/myapp"
-        sessionId="2026-01-01_14-30-00"
         currentMode="PLAN"
         globalState="RUNNING"
         layoutMode="wide"
@@ -22,7 +21,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo/myapp"
-        sessionId="sess-1"
         currentMode="ACT"
         globalState="RUNNING"
         layoutMode="wide"
@@ -39,7 +37,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode={null}
         globalState="IDLE"
         layoutMode="wide"
@@ -55,7 +52,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode="PLAN"
         globalState="RUNNING"
         layoutMode="wide"
@@ -71,7 +67,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode="PLAN"
         globalState="ERROR"
         layoutMode="wide"
@@ -87,7 +82,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/very/long/workspace/path"
-        sessionId="long-session-id"
         currentMode="PLAN"
         globalState="RUNNING"
         layoutMode="narrow"
@@ -98,11 +92,10 @@ describe('tui/components/HeaderBar', () => {
     expect(frame).toContain('CODINGBUDDY');
   });
 
-  it('should render workspace and session in wide mode', () => {
+  it('should render workspace path without sess: prefix in wide mode', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo/myapp"
-        sessionId="abc123def"
         currentMode="PLAN"
         globalState="RUNNING"
         layoutMode="wide"
@@ -111,14 +104,13 @@ describe('tui/components/HeaderBar', () => {
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('/repo/myapp');
-    expect(frame).toContain('sess:');
+    expect(frame).not.toContain('sess:');
   });
 
   it('should render with null mode', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode={null}
         globalState="IDLE"
         layoutMode="medium"
@@ -134,7 +126,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode="PLAN"
         globalState="RUNNING"
         layoutMode="wide"
@@ -152,7 +143,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode="AUTO"
         globalState="RUNNING"
         layoutMode="wide"
@@ -172,7 +162,6 @@ describe('tui/components/HeaderBar', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
-        sessionId="s"
         currentMode="PLAN"
         globalState="RUNNING"
         layoutMode="wide"

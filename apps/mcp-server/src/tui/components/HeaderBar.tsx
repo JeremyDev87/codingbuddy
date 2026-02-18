@@ -11,7 +11,6 @@ import {
 
 export interface HeaderBarProps {
   workspace: string;
-  sessionId: string;
   currentMode: Mode | null;
   globalState: GlobalRunState;
   layoutMode: LayoutMode;
@@ -64,7 +63,6 @@ function StateIndicator({ globalState }: { globalState: GlobalRunState }): React
 
 export function HeaderBar({
   workspace,
-  sessionId,
   currentMode,
   globalState,
   layoutMode,
@@ -90,8 +88,6 @@ export function HeaderBar({
     );
   }
 
-  const sessDisplay = sessionId.length > 8 ? sessionId.slice(0, 8) : sessionId;
-
   return (
     <Box
       borderStyle="double"
@@ -100,7 +96,11 @@ export function HeaderBar({
       overflowX="hidden"
       flexDirection="row"
     >
-      <Box gap={2} flexShrink={0}>
+      {/* flexShrink={1} prevents left content from overflowing the double-border in
+          narrow terminals. Note: this visual overflow only occurs in real terminals —
+          ink-testing-library clips content at the specified width, making unit test
+          reproduction impossible. */}
+      <Box gap={2} flexShrink={1} minWidth={0}>
         <Text color="cyan" bold>
           ⟨⟩ CODINGBUDDY AGENT DASHBOARD
         </Text>
@@ -110,7 +110,7 @@ export function HeaderBar({
       <Box flexGrow={1} />
       <Box flexShrink={1} overflowX="hidden">
         <Text dimColor wrap="truncate">
-          {workspace} sess:{sessDisplay}
+          {workspace}
         </Text>
       </Box>
     </Box>
