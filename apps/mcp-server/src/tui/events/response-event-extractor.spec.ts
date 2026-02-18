@@ -185,9 +185,9 @@ describe('extractEventsFromResponse', () => {
       );
       expect(result[0].event).toBe(TUI_EVENTS.MODE_CHANGED);
       expect(result[1].event).toBe(TUI_EVENTS.SKILL_RECOMMENDED);
-      expect(result[2].event).toBe(TUI_EVENTS.AGENT_ACTIVATED);
-      // TASK_SYNCED is also emitted for included_skills (initial checklist)
-      expect(result.some(e => e.event === TUI_EVENTS.TASK_SYNCED)).toBe(true);
+      // TASK_SYNCED follows immediately after skill:recommended (same included_skills pass)
+      expect(result[2].event).toBe(TUI_EVENTS.TASK_SYNCED);
+      expect(result[3].event).toBe(TUI_EVENTS.AGENT_ACTIVATED);
     });
   });
 
@@ -839,9 +839,7 @@ describe('extractEventsFromResponse', () => {
           'update_context',
           makeResponse({
             document: {
-              sections: [
-                { primaryAgent: 'agent-1', status: 'completed', progress: ['Impl auth'] },
-              ],
+              sections: [{ primaryAgent: 'agent-1', status: 'completed', progress: ['Impl auth'] }],
             },
           }),
         );

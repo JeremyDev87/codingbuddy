@@ -79,6 +79,7 @@ export function extractEventsFromResponse(toolName: string, result: unknown): Ex
 
 function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
   const events: ExtractedEvent[] = [];
+  const delegateName = typeof json.delegates_to === 'string' ? json.delegates_to : null;
 
   // mode:changed (validate against known Mode values)
   if (typeof json.mode === 'string' && VALID_MODES.has(json.mode)) {
@@ -88,9 +89,10 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
     });
   }
 
-  // skill:recommended
+  // skill:recommended + task:synced initial checklist (single pass over included_skills)
   if (Array.isArray(json.included_skills)) {
-    for (const skill of json.included_skills) {
+    const initialTasks: Array<{ id: string; subject: string; completed: boolean }> = [];
+    for (const [i, skill] of json.included_skills.entries()) {
       if (!skill || typeof skill !== 'object') continue;
       const s = skill as Record<string, unknown>;
       if (typeof s.name !== 'string') continue;
@@ -101,11 +103,15 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
           reason: typeof s.reason === 'string' ? s.reason : '',
         },
       });
+      initialTasks.push({ id: `skill-${i}`, subject: `Apply ${s.name}`, completed: false });
+    }
+    if (initialTasks.length > 0) {
+      const agentId = delegateName ? `primary:${delegateName}` : UNKNOWN_AGENT_ID;
+      events.push({ event: TUI_EVENTS.TASK_SYNCED, payload: { agentId, tasks: initialTasks } });
     }
   }
 
   // agent:activated (primary agent from delegates_to)
-  const delegateName = typeof json.delegates_to === 'string' ? json.delegates_to : null;
   if (delegateName) {
     events.push({
       event: TUI_EVENTS.AGENT_ACTIVATED,
@@ -162,21 +168,6 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
       event: TUI_EVENTS.OBJECTIVE_SET,
       payload: { objective: json.originalPrompt.trim() },
     });
-  }
-
-  // task:synced (initial checklist from included_skills)
-  if (Array.isArray(json.included_skills)) {
-    const initialTasks: Array<{ id: string; subject: string; completed: boolean }> = [];
-    for (const [i, skill] of json.included_skills.entries()) {
-      if (!skill || typeof skill !== 'object') continue;
-      const s = skill as Record<string, unknown>;
-      if (typeof s.name !== 'string') continue;
-      initialTasks.push({ id: `skill-${i}`, subject: `Apply ${s.name}`, completed: false });
-    }
-    if (initialTasks.length > 0) {
-      const agentId = delegateName ? `primary:${delegateName}` : UNKNOWN_AGENT_ID;
-      events.push({ event: TUI_EVENTS.TASK_SYNCED, payload: { agentId, tasks: initialTasks } });
-    }
   }
 
   return events;
@@ -246,8 +237,11 @@ function extractFromDispatchAgents(json: Record<string, unknown>): ExtractedEven
 }
 
 /**
- * Pick the first non-empty string array from the section's task-related fields.
- * Priority: progress (ACT) > decisions (PLAN) > findings (EVAL) > notes (fallback).
+ * Build task list from all section fields with source-aware completion status.
+ * - decisions: always completed (decided = done)
+ * - progress: completed based on section status
+ * - findings: always completed (observed = done)
+ * - notes: always incomplete (informational)
  */
 function buildTasksFromSection(
   section: Record<string, unknown>,
