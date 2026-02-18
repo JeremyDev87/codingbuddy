@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { computeStageHealth, detectBottlenecks, formatStageHealthBar } from './stage-health.pure';
-import type { DashboardNode, EventLogEntry, StageStats } from '../dashboard-types';
+import { computeStageHealth, detectBottlenecks } from './stage-health.pure';
+import type { DashboardNode, EventLogEntry } from '../dashboard-types';
 import { createEmptyStageStats } from '../dashboard-types';
 import type { Mode } from '../types';
 
@@ -111,78 +111,6 @@ describe('tui/components/stage-health.pure', () => {
 
       const result = detectBottlenecks(log);
       expect(result).toEqual([]);
-    });
-  });
-
-  describe('formatStageHealthBar', () => {
-    const emptyHealth: Record<Mode, StageStats> = {
-      PLAN: createEmptyStageStats(),
-      ACT: createEmptyStageStats(),
-      EVAL: createEmptyStageStats(),
-      AUTO: createEmptyStageStats(),
-    };
-
-    it('should format wide mode with all sections', () => {
-      const health: Record<Mode, StageStats> = {
-        ...emptyHealth,
-        PLAN: { running: 1, blocked: 0, waiting: 0, done: 0, error: 0 },
-        ACT: { running: 2, blocked: 1, waiting: 0, done: 0, error: 0 },
-        EVAL: { running: 0, blocked: 0, waiting: 0, done: 1, error: 0 },
-      };
-
-      const result = formatStageHealthBar(health, ['tests failing(3)'], 15000, 120, 'wide');
-
-      expect(result).toContain('PLAN: running 1');
-      expect(result).toContain('ACT: running 2 / blocked 1');
-      expect(result).toContain('EVAL: done 1');
-      expect(result).toContain('Bottlenecks: tests failing(3)');
-      expect(result).toContain('15k');
-    });
-
-    it('should show tool count', () => {
-      const result = formatStageHealthBar(emptyHealth, [], 500, 120, 'wide');
-      expect(result).toContain('500');
-    });
-
-    it('should format tool count as Nk for thousands', () => {
-      const result = formatStageHealthBar(emptyHealth, [], 2500, 120, 'wide');
-      expect(result).toContain('3k');
-    });
-
-    it('should truncate bottlenecks in narrow mode', () => {
-      const longBottlenecks = [
-        'tests failing(15)',
-        'lint(src/very/long/path/to/file.ts)',
-        'missing env(VERY_LONG_VARIABLE_NAME)',
-      ];
-      const result = formatStageHealthBar(emptyHealth, longBottlenecks, 1000, 50, 'narrow');
-
-      // In narrow mode, bottleneck line should be truncated
-      const lines = result.split('\n');
-      const bottleneckLine = lines.find(l => l.includes('Bottleneck'));
-      if (bottleneckLine) {
-        expect(bottleneckLine.length).toBeLessThanOrEqual(50);
-      }
-    });
-
-    it('should use compact format in narrow mode', () => {
-      const health: Record<Mode, StageStats> = {
-        ...emptyHealth,
-        PLAN: { running: 1, blocked: 2, waiting: 0, done: 3, error: 0 },
-      };
-
-      const result = formatStageHealthBar(health, [], 500, 60, 'narrow');
-      expect(result).toContain('PLAN: r1/b2/d3');
-    });
-
-    it('should show idle for stages with no activity in wide mode', () => {
-      const result = formatStageHealthBar(emptyHealth, [], 500, 120, 'wide');
-      expect(result).toContain('PLAN: idle');
-    });
-
-    it('should omit bottleneck line when none exist', () => {
-      const result = formatStageHealthBar(emptyHealth, [], 500, 120, 'wide');
-      expect(result).not.toContain('Bottleneck');
     });
   });
 });

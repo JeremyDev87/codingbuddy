@@ -1,24 +1,4 @@
-import type { DashboardNodeStatus, TaskItem, EventLogEntry } from '../dashboard-types';
-import type { Mode } from '../types';
-
-const STATUS_LABELS: Record<DashboardNodeStatus, string> = {
-  running: 'RUNNING ●',
-  idle: 'IDLE ○',
-  blocked: 'BLOCKED ⏸',
-  error: 'ERROR !',
-  done: 'DONE ✓',
-};
-
-export function formatAgentHeader(
-  name: string,
-  id: string,
-  status: DashboardNodeStatus,
-  stage: Mode,
-  progress: number,
-): string {
-  const statusLabel = STATUS_LABELS[status] ?? status.toUpperCase();
-  return `Agent: ${name} (${id})   ${statusLabel}   Stage: ${stage}   [${progress}%]`;
-}
+import type { TaskItem, EventLogEntry } from '../dashboard-types';
 
 export function formatObjective(objectives: string[], maxLines = 3): string {
   const lines = objectives.slice(0, maxLines).map(o => `- ${o}`);

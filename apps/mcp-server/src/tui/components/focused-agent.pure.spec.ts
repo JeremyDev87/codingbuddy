@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  formatAgentHeader,
   formatObjective,
   formatChecklist,
   formatToolIO,
@@ -14,36 +13,6 @@ import {
 import type { TaskItem, EventLogEntry } from '../dashboard-types';
 
 describe('tui/components/focused-agent.pure', () => {
-  describe('formatAgentHeader', () => {
-    it('should format name, id, status, stage, and progress', () => {
-      const result = formatAgentHeader('Architect', 'arch-1', 'running', 'PLAN', 45);
-      expect(result).toContain('Agent: Architect (arch-1)');
-      expect(result).toContain('RUNNING ●');
-      expect(result).toContain('Stage: PLAN');
-      expect(result).toContain('[45%]');
-    });
-
-    it('should display idle status with ○ icon', () => {
-      const result = formatAgentHeader('Dev', 'dev-1', 'idle', 'ACT', 0);
-      expect(result).toContain('IDLE ○');
-    });
-
-    it('should display blocked status with ⏸ icon', () => {
-      const result = formatAgentHeader('Dev', 'dev-1', 'blocked', 'ACT', 50);
-      expect(result).toContain('BLOCKED ⏸');
-    });
-
-    it('should display error status with ! icon', () => {
-      const result = formatAgentHeader('Dev', 'dev-1', 'error', 'EVAL', 80);
-      expect(result).toContain('ERROR !');
-    });
-
-    it('should display done status with ✓ icon', () => {
-      const result = formatAgentHeader('Dev', 'dev-1', 'done', 'EVAL', 100);
-      expect(result).toContain('DONE ✓');
-    });
-  });
-
   describe('formatObjective', () => {
     it('should format objectives as a bullet list', () => {
       const result = formatObjective(['Design auth', 'Plan API']);
