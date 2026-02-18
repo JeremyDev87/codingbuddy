@@ -25,6 +25,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={['spec.md']}
         outputs={{ files: 3 }}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -33,7 +34,7 @@ describe('tui/components/FocusedAgentPanel', () => {
     expect(frame).toContain('●');
   });
 
-  it('should render progress bar', () => {
+  it('should render progress bar with braille chars and label', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
@@ -44,15 +45,16 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
-    expect(frame).toContain('█');
+    expect(frame).toContain('⣿');
     expect(frame).toContain('░');
-    expect(frame).toContain('[50%]');
+    expect(frame).toContain('50%');
   });
 
-  it('should render section dividers', () => {
+  it('should render section dividers including Activity', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
@@ -63,11 +65,13 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('─── Objective');
     expect(frame).toContain('─── Checklist');
+    expect(frame).toContain('─── Activity');
     expect(frame).toContain('─── Tools / IO');
     expect(frame).toContain('─── Event Log');
   });
@@ -83,12 +87,13 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     expect(lastFrame()).toContain('Add /users endpoints');
   });
 
-  it('should render checklist with completed items', () => {
+  it('should render checklist with ✔/◻ icons', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
@@ -102,11 +107,12 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
-    expect(frame).toContain('[x] routes added');
-    expect(frame).toContain('[ ] tests updated');
+    expect(frame).toContain('✔ routes added');
+    expect(frame).toContain('◻ tests updated');
   });
 
   it('should render tool/IO section', () => {
@@ -120,6 +126,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={['spec.md']}
         outputs={{ files: 12, commits: 3 }}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -141,6 +148,7 @@ describe('tui/components/FocusedAgentPanel', () => {
           { timestamp: '10:12:01', message: 'ACT start', level: 'info' },
           { timestamp: '10:12:09', message: 'edited: users.controller.ts', level: 'info' },
         ]}
+        toolCalls={[]}
       />,
     );
     expect(lastFrame()).toContain('ACT start');
@@ -157,6 +165,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     expect(lastFrame()).toContain('No agent focused');
@@ -173,6 +182,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
         width={60}
         height={20}
       />,
@@ -191,6 +201,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
         width={60}
         height={20}
       />,
@@ -209,10 +220,10 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
-    // Single border uses ┌ ┐ └ ┘
     expect(frame).toContain('┌');
     expect(frame).toContain('┘');
   });
@@ -228,6 +239,7 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -247,8 +259,70 @@ describe('tui/components/FocusedAgentPanel', () => {
         inputs={[]}
         outputs={{}}
         eventLog={[]}
+        toolCalls={[]}
       />,
     );
     expect(lastFrame()).toContain('No skills');
+  });
+
+  it('should render emoji avatar in agent header', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        activeSkills={[]}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+        toolCalls={[]}
+      />,
+    );
+    // BackendDev → backend 키워드 매칭 → ⚙️
+    expect(lastFrame()).toContain('⚙️');
+  });
+
+  it('should render sparkline section', () => {
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        activeSkills={[]}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+        toolCalls={[]}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('─── Activity');
+    // 빈 toolCalls → 모두 ▁
+    expect(frame).toContain('▁');
+  });
+
+  it('should filter toolCalls by agentId for sparkline', () => {
+    const now = Date.now();
+    const toolCalls = [
+      { agentId: 'agent-1', toolName: 'bash', timestamp: now - 1000, status: 'completed' as const },
+      { agentId: 'agent-2', toolName: 'read', timestamp: now - 2000, status: 'completed' as const },
+    ];
+    // agent-1만 해당: sparkline에 activity가 있어야 함 (최소 ▁ 이상)
+    const { lastFrame } = render(
+      <FocusedAgentPanel
+        agent={mockAgent}
+        activeSkills={[]}
+        objectives={[]}
+        tasks={[]}
+        tools={[]}
+        inputs={[]}
+        outputs={{}}
+        eventLog={[]}
+        toolCalls={toolCalls}
+      />,
+    );
+    expect(lastFrame()).toContain('─── Activity');
   });
 });

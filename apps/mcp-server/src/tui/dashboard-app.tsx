@@ -63,6 +63,7 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
             inputs={tools}
             outputs={state.outputStats}
             eventLog={state.eventLog}
+            toolCalls={state.toolCalls}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
           />
@@ -100,6 +101,7 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
             inputs={tools}
             outputs={state.outputStats}
             eventLog={state.eventLog}
+            toolCalls={state.toolCalls}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
           />

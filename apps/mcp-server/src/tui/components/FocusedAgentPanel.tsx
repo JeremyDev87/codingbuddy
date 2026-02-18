@@ -1,14 +1,15 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import type { DashboardNode, TaskItem, EventLogEntry } from '../dashboard-types';
-import { STATUS_ICONS, getNodeStatusColor, BORDER_COLORS } from '../utils/theme';
+import type { DashboardNode, TaskItem, EventLogEntry, ToolCallRecord } from '../dashboard-types';
+import { STATUS_ICONS, getNodeStatusColor, BORDER_COLORS, getAgentAvatar } from '../utils/theme';
 import {
   formatObjective,
-  formatChecklist,
+  formatEnhancedChecklist,
   formatToolIO,
   formatLogTail,
   formatSectionDivider,
-  formatProgressBar,
+  formatEnhancedProgressBar,
+  formatActivitySparkline,
   type ToolIOData,
 } from './focused-agent.pure';
 
@@ -21,6 +22,7 @@ export interface FocusedAgentPanelProps {
   inputs: string[];
   outputs: ToolIOData;
   eventLog: EventLogEntry[];
+  toolCalls: ToolCallRecord[];
   width?: number;
   height?: number;
 }
@@ -67,6 +69,7 @@ export function FocusedAgentPanel({
   inputs,
   outputs,
   eventLog,
+  toolCalls,
   width,
   height,
 }: FocusedAgentPanelProps): React.ReactElement {
@@ -84,14 +87,17 @@ export function FocusedAgentPanel({
     );
   }
 
+  const avatar = getAgentAvatar(agent.name);
   const icon = STATUS_ICONS[agent.status] ?? '?';
   const statusColor = getNodeStatusColor(agent.status);
   const statusLabel = agent.status.toUpperCase();
-  const progressBar = formatProgressBar(agent.progress);
+  const progressBar = formatEnhancedProgressBar(agent.progress);
   const objective = formatObjective(objectives);
-  const checklist = formatChecklist(tasks);
+  const checklist = formatEnhancedChecklist(tasks);
   const toolIO = formatToolIO(tools, inputs, outputs);
   const logs = formatLogTail(eventLog);
+  const agentToolCalls = toolCalls.filter(tc => tc.agentId === agent.id);
+  const sparkline = formatActivitySparkline(agentToolCalls);
 
   return (
     <Box
@@ -103,19 +109,19 @@ export function FocusedAgentPanel({
     >
       {/* Agent Header */}
       <Box gap={2}>
+        <Text>{avatar}</Text>
+        <Text bold>{agent.name}</Text>
         <Text color={statusColor} bold>
           {icon}
         </Text>
-        <Text bold>{agent.name}</Text>
         <Text color={statusColor}>{statusLabel}</Text>
         <Text dimColor>{agent.stage}</Text>
-        <Text>[{agent.progress}%]</Text>
       </Box>
 
       {/* Progress Bar */}
-      <Box>
-        <Text color="magenta">{progressBar.filled}</Text>
-        <Text dimColor>{progressBar.empty}</Text>
+      <Box gap={1}>
+        <Text color="magenta">{progressBar.bar}</Text>
+        <Text dimColor>{progressBar.label}</Text>
       </Box>
 
       {/* Objective Section */}
@@ -134,7 +140,7 @@ export function FocusedAgentPanel({
       <SectionDivider title="Checklist" />
       {checklist ? (
         checklist.split('\n').map((line, i) => {
-          const isCompleted = line.startsWith('[x]');
+          const isCompleted = line.includes('✔');
           return (
             <Text key={i} color={isCompleted ? 'green' : undefined}>
               {line}
@@ -144,6 +150,10 @@ export function FocusedAgentPanel({
       ) : (
         <Text dimColor>No tasks</Text>
       )}
+
+      {/* Activity Sparkline */}
+      <SectionDivider title="Activity" />
+      <Text>{sparkline}</Text>
 
       {/* Tools / IO Section */}
       <SectionDivider title="Tools / IO" />

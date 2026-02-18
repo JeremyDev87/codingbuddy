@@ -180,3 +180,41 @@ export function getNodeStatusColor(status: DashboardNodeStatus): string {
 export function getModeColor(mode: Mode): string {
   return MODE_LABEL_STYLES[mode]?.fg ?? 'cyan';
 }
+
+/** Maps agent role/name keywords to emoji avatars for visual identification. */
+export const AGENT_AVATARS: Readonly<Record<string, string>> = Object.freeze({
+  'solution-architect': '🏛️',
+  architect: '🏗️',
+  frontend: '🎨',
+  backend: '⚙️',
+  security: '🔒',
+  test: '🧪',
+  performance: '⚡',
+  'code-quality': '📏',
+  devops: '🚀',
+  documentation: '📝',
+  accessibility: '♿',
+  seo: '🔍',
+  observability: '📊',
+  migration: '🔄',
+  integration: '🔗',
+  'event-architecture': '📨',
+  mobile: '📱',
+  data: '🗄️',
+  'ui-ux': '🎯',
+  i18n: '🌐',
+  'plan-mode': '📋',
+  'act-mode': '🔨',
+  'eval-mode': '🔬',
+  'auto-mode': '🤖',
+});
+
+/** Resolve emoji avatar for an agent by matching name keywords. */
+export function getAgentAvatar(agentName: string): string {
+  const lower = agentName.toLowerCase();
+  const sortedEntries = Object.entries(AGENT_AVATARS).sort(([a], [b]) => b.length - a.length);
+  for (const [keyword, avatar] of sortedEntries) {
+    if (lower.includes(keyword)) return avatar;
+  }
+  return '🤖';
+}

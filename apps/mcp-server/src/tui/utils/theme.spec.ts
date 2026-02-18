@@ -21,6 +21,8 @@ import {
   getModeLabelStyle,
   getModeColor,
   getStageLabelStyle,
+  AGENT_AVATARS,
+  getAgentAvatar,
 } from './theme';
 
 describe('theme', () => {
@@ -260,6 +262,46 @@ describe('theme', () => {
     it('accepts empty CellStyle', () => {
       const style: CellStyle = {};
       expect(style).toEqual({});
+    });
+  });
+
+  describe('AGENT_AVATARS', () => {
+    it('solution-architect 키에 🏛️ 매핑', () => {
+      expect(AGENT_AVATARS['solution-architect']).toBe('🏛️');
+    });
+
+    it('frontend 키에 🎨 매핑', () => {
+      expect(AGENT_AVATARS['frontend']).toBe('🎨');
+    });
+
+    it('plan-mode 키에 📋 매핑', () => {
+      expect(AGENT_AVATARS['plan-mode']).toBe('📋');
+    });
+  });
+
+  describe('getAgentAvatar', () => {
+    it('solution-architect 이름에 🏛️ 반환', () => {
+      expect(getAgentAvatar('solution-architect')).toBe('🏛️');
+    });
+
+    it('frontend 포함 이름에 🎨 반환', () => {
+      expect(getAgentAvatar('frontend-developer')).toBe('🎨');
+    });
+
+    it('알 수 없는 에이전트에 기본값 🤖 반환', () => {
+      expect(getAgentAvatar('unknown-agent')).toBe('🤖');
+    });
+
+    it('대소문자 구분 없이 매칭', () => {
+      expect(getAgentAvatar('Frontend-Developer')).toBe('🎨');
+    });
+
+    it('plan-mode 키워드에 📋 반환', () => {
+      expect(getAgentAvatar('plan-mode')).toBe('📋');
+    });
+
+    it('빈 문자열에 기본값 🤖 반환', () => {
+      expect(getAgentAvatar('')).toBe('🤖');
     });
   });
 });

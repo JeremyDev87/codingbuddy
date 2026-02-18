@@ -7,6 +7,9 @@ import {
   formatLogTail,
   formatSectionDivider,
   formatProgressBar,
+  formatEnhancedProgressBar,
+  formatActivitySparkline,
+  formatEnhancedChecklist,
 } from './focused-agent.pure';
 import type { TaskItem, EventLogEntry } from '../dashboard-types';
 
@@ -228,6 +231,107 @@ describe('tui/components/focused-agent.pure', () => {
       const { filled, empty } = formatProgressBar(-10, 10);
       expect(filled).toBe('');
       expect(empty).toBe('░░░░░░░░░░');
+    });
+  });
+
+  describe('formatEnhancedProgressBar', () => {
+    it('0%: 전체 ░, label "0%"', () => {
+      const result = formatEnhancedProgressBar(0, 20);
+      expect(result.bar).toBe('░'.repeat(20));
+      expect(result.label).toBe('0%');
+    });
+
+    it('50%: 절반 ⣿ + 절반 ░, label "50%"', () => {
+      const result = formatEnhancedProgressBar(50, 20);
+      expect(result.bar).toBe('⣿'.repeat(10) + '░'.repeat(10));
+      expect(result.label).toBe('50%');
+    });
+
+    it('100%: 전체 ⣿, label "100%"', () => {
+      const result = formatEnhancedProgressBar(100, 20);
+      expect(result.bar).toBe('⣿'.repeat(20));
+      expect(result.label).toBe('100%');
+    });
+
+    it('150 클램프 → 100%', () => {
+      const result = formatEnhancedProgressBar(150, 10);
+      expect(result.bar).toBe('⣿'.repeat(10));
+      expect(result.label).toBe('100%');
+    });
+
+    it('-10 클램프 → 0%', () => {
+      const result = formatEnhancedProgressBar(-10, 10);
+      expect(result.bar).toBe('░'.repeat(10));
+      expect(result.label).toBe('0%');
+    });
+  });
+
+  describe('formatActivitySparkline', () => {
+    const NOW = 1_000_000;
+
+    it('빈 배열 → 모두 ▁ (최소 높이)', () => {
+      const result = formatActivitySparkline([], 10, 60_000, NOW);
+      expect(result).toBe('▁'.repeat(10));
+      expect(result).toHaveLength(10);
+    });
+
+    it('단일 스파이크 → 마지막 버킷만 █', () => {
+      const calls = [{ timestamp: NOW - 1000 }];
+      const result = formatActivitySparkline(calls, 10, 60_000, NOW);
+      expect(result[result.length - 1]).toBe('█');
+      expect(result.slice(0, -1)).toBe('▁'.repeat(9));
+    });
+
+    it('윈도우 밖 호출 무시', () => {
+      const calls = [{ timestamp: NOW - 70_000 }];
+      const result = formatActivitySparkline(calls, 10, 60_000, NOW);
+      expect(result).toBe('▁'.repeat(10));
+    });
+
+    it('bucketCount만큼 문자 반환', () => {
+      const result = formatActivitySparkline([], 20, 60_000, NOW);
+      expect(result).toHaveLength(20);
+    });
+
+    it('균등 분포 → 모두 같은 높이 문자', () => {
+      const bucketSize = 60_000 / 5;
+      const calls = [0, 1, 2, 3, 4].map(i => ({
+        timestamp: NOW - (i * bucketSize + bucketSize / 2),
+      }));
+      const result = formatActivitySparkline(calls, 5, 60_000, NOW);
+      expect(new Set(result.split('')).size).toBe(1);
+    });
+  });
+
+  describe('formatEnhancedChecklist', () => {
+    it('완료 태스크에 ✔ 접두사', () => {
+      const tasks = [{ id: '1', subject: 'Apply TDD', completed: true }];
+      expect(formatEnhancedChecklist(tasks)).toContain('✔ Apply TDD');
+    });
+
+    it('미완료 태스크에 ◻ 접두사', () => {
+      const tasks = [{ id: '1', subject: 'Write tests', completed: false }];
+      expect(formatEnhancedChecklist(tasks)).toContain('◻ Write tests');
+    });
+
+    it('maxItems 초과 시 ⋯ (+N more) 추가', () => {
+      const tasks = Array.from({ length: 8 }, (_, i) => ({
+        id: String(i),
+        subject: `Task ${i}`,
+        completed: false,
+      }));
+      const result = formatEnhancedChecklist(tasks, 6);
+      expect(result).toContain('⋯ (+2 more)');
+    });
+
+    it('maxItems 이하이면 ⋯ 없음', () => {
+      const tasks = [{ id: '1', subject: 'Only task', completed: false }];
+      const result = formatEnhancedChecklist(tasks, 6);
+      expect(result).not.toContain('⋯');
+    });
+
+    it('빈 배열 → 빈 문자열', () => {
+      expect(formatEnhancedChecklist([])).toBe('');
     });
   });
 });
