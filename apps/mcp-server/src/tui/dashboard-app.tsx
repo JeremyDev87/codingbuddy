@@ -93,8 +93,12 @@ export function DashboardApp({
               height={grid.flowMap.height}
             />
             <ActivityVisualizer
+              currentMode={state.currentMode}
+              focusedAgent={focusedAgent}
               agents={state.agents}
-              eventLog={state.eventLog}
+              edges={state.edges}
+              activeSkills={state.activeSkills}
+              objectives={state.objectives}
               width={grid.monitorPanel.width}
               height={grid.monitorPanel.height}
             />

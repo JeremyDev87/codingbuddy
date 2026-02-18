@@ -15,6 +15,6 @@ export { StageHealthBar, type StageHealthBarProps } from './StageHealthBar';
 export { computeStageHealth, detectBottlenecks } from './stage-health.pure';
 export { computeGridLayout } from './grid-layout.pure';
 export { ActivityVisualizer, type ActivityVisualizerProps } from './ActivityVisualizer';
-export { renderAgentRoster, renderAgentEvents } from './activity-visualizer.pure';
+export { renderAgentTree, renderAgentStatusCard } from './activity-visualizer.pure';
 export { SessionTabBar } from './SessionTabBar';
 export type { SessionTabBarProps } from './SessionTabBar';

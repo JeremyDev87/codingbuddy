@@ -1,173 +1,290 @@
 import { describe, it, expect } from 'vitest';
-import { renderAgentRoster, renderAgentEvents } from './activity-visualizer.pure';
-import type { DashboardNode, EventLogEntry } from '../dashboard-types';
+import { renderAgentTree, renderAgentStatusCard } from './activity-visualizer.pure';
+import type { DashboardNode, Edge } from '../dashboard-types';
 import { createDefaultDashboardNode } from '../dashboard-types';
 import { estimateDisplayWidth } from '../utils/display-width';
 
 function makeAgents(): Map<string, DashboardNode> {
   const agents = new Map<string, DashboardNode>();
   agents.set(
-    'plan-mode',
+    'main-agent',
     createDefaultDashboardNode({
-      id: 'plan-mode',
-      name: 'plan-mode',
+      id: 'main-agent',
+      name: 'main-agent',
       stage: 'PLAN',
       status: 'running',
       isPrimary: true,
-      progress: 75,
+      progress: 50,
     }),
   );
   agents.set(
-    'security',
+    'sub-agent-2',
     createDefaultDashboardNode({
-      id: 'security',
-      name: 'security',
+      id: 'sub-agent-2',
+      name: 'sub-agent-2',
       stage: 'EVAL',
-      status: 'idle',
+      status: 'done',
       isPrimary: false,
-      progress: 0,
+      progress: 100,
+    }),
+  );
+  agents.set(
+    'solution-architect',
+    createDefaultDashboardNode({
+      id: 'solution-architect',
+      name: 'solution-architect',
+      stage: 'PLAN',
+      status: 'running',
+      isPrimary: false,
+      progress: 30,
     }),
   );
   return agents;
 }
 
-describe('renderAgentRoster', () => {
+const sampleEdges: Edge[] = [
+  { from: 'main-agent', to: 'solution-architect', label: 'delegates', type: 'delegation' },
+  { from: 'main-agent', to: 'sub-agent-2', label: 'output', type: 'output' },
+];
+
+describe('renderAgentTree', () => {
   it('returns empty array for height <= 0', () => {
-    expect(renderAgentRoster(new Map(), 40, 0)).toEqual([]);
+    expect(renderAgentTree(new Map(), [], [], 40, 0)).toEqual([]);
   });
 
   it('returns empty array for width <= 0', () => {
-    expect(renderAgentRoster(new Map(), 0, 5)).toEqual([]);
-    expect(renderAgentRoster(new Map(), -1, 5)).toEqual([]);
+    expect(renderAgentTree(new Map(), [], [], 0, 5)).toEqual([]);
+    expect(renderAgentTree(new Map(), [], [], -1, 5)).toEqual([]);
   });
 
-  it('includes Agents header as first line', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 10);
-    expect(lines[0]).toContain('Agents');
+  it('includes Activity header as first line', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 10);
+    expect(lines[0]).toContain('Activity');
   });
 
-  it('shows agent names', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 10);
+  it('shows primary agent as root node', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 10);
     const content = lines.join('\n');
-    expect(content).toContain('plan-mode');
-    expect(content).toContain('security');
+    expect(content).toContain('main-agent');
   });
 
-  it('shows running status icon', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 10);
+  it('shows child agents with tree connectors', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 10);
     const content = lines.join('\n');
-    expect(content).toContain('●');
+    expect(content).toContain('solution-architect');
+    expect(content).toContain('sub-agent-2');
   });
 
-  it('shows agent progress', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 10);
+  it('uses running icon ● for running agents', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 10);
+    expect(lines.join('\n')).toContain('●');
+  });
+
+  it('uses done icon ○ for done agents', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 10);
+    expect(lines.join('\n')).toContain('○');
+  });
+
+  it('shows activeSkills as leaf nodes with (skill) label', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, ['brainstorming'], 80, 10);
     const content = lines.join('\n');
-    expect(content).toContain('75%');
+    expect(content).toContain('brainstorming');
+    expect(content).toContain('skill');
+  });
+
+  it('uses ◉ icon for skill nodes', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, ['brainstorming'], 80, 10);
+    expect(lines.join('\n')).toContain('◉');
   });
 
   it('shows No agents when map is empty', () => {
-    const lines = renderAgentRoster(new Map(), 80, 5);
+    const lines = renderAgentTree(new Map(), [], [], 80, 5);
     expect(lines.join('\n')).toContain('No agents');
   });
 
   it('respects height limit', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 2);
-    expect(lines.length).toBeLessThanOrEqual(2);
+    const lines = renderAgentTree(makeAgents(), sampleEdges, ['skill1', 'skill2'], 80, 3);
+    expect(lines.length).toBeLessThanOrEqual(3);
   });
 
   it('truncates lines to width', () => {
-    const lines = renderAgentRoster(makeAgents(), 20, 10);
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 20, 10);
     for (const line of lines) {
       expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(20);
     }
   });
 
-  it('primary agents appear before non-primary', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 10);
-    const planIdx = lines.findIndex(l => l.includes('plan-mode'));
-    const secIdx = lines.findIndex(l => l.includes('security'));
-    expect(planIdx).toBeGreaterThan(-1);
-    expect(secIdx).toBeGreaterThan(-1);
-    expect(planIdx).toBeLessThan(secIdx);
+  it('returns only header when height is 1', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 1);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Activity');
   });
 
-  it('returns only header when height is 1', () => {
-    const lines = renderAgentRoster(makeAgents(), 80, 1);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain('Agents');
+  it('uses tree connector characters', () => {
+    const lines = renderAgentTree(makeAgents(), sampleEdges, [], 80, 10);
+    const content = lines.join('\n');
+    // ├ 또는 └ 트리 연결자가 있어야 함
+    expect(content.includes('├') || content.includes('└')).toBe(true);
+  });
+
+  it('does not show agents not connected to root via edges', () => {
+    const agentsWithDisconnected = new Map(makeAgents());
+    agentsWithDisconnected.set(
+      'disconnected-agent',
+      createDefaultDashboardNode({
+        id: 'disconnected-agent',
+        name: 'disconnected-agent',
+        stage: 'PLAN',
+        status: 'idle',
+        isPrimary: false,
+        progress: 0,
+      }),
+    );
+    const lines = renderAgentTree(agentsWithDisconnected, sampleEdges, [], 80, 15);
+    expect(lines.join('\n')).not.toContain('disconnected-agent');
+  });
+
+  it('uses ○ icon for idle agents (via ACTIVITY_STATUS_ICONS)', () => {
+    const idleAgents = new Map<string, DashboardNode>();
+    idleAgents.set(
+      'root',
+      createDefaultDashboardNode({
+        id: 'root',
+        name: 'root',
+        stage: 'PLAN',
+        status: 'running',
+        isPrimary: true,
+      }),
+    );
+    idleAgents.set(
+      'idle-child',
+      createDefaultDashboardNode({
+        id: 'idle-child',
+        name: 'idle-child',
+        stage: 'PLAN',
+        status: 'idle',
+      }),
+    );
+    const edges: Edge[] = [{ from: 'root', to: 'idle-child', label: '', type: 'delegation' }];
+    const lines = renderAgentTree(idleAgents, edges, [], 80, 10);
+    // idle 에이전트는 ○ 아이콘을 사용해야 함
+    const childLine = lines.find(l => l.includes('idle-child'));
+    expect(childLine).toContain('○');
   });
 });
 
-describe('renderAgentEvents', () => {
-  const eventLog: EventLogEntry[] = [
-    { timestamp: '10:00:01', message: 'agent: plan-mode activated', level: 'info' },
-    { timestamp: '10:00:05', message: 'agent: security started', level: 'info' },
-    { timestamp: '10:00:10', message: 'error: timeout', level: 'error' },
-  ];
+describe('renderAgentStatusCard', () => {
+  const focusedAgent = createDefaultDashboardNode({
+    id: 'solution-architect',
+    name: 'solution-architect',
+    stage: 'PLAN',
+    status: 'running',
+    isPrimary: false,
+    progress: 30,
+  });
 
   it('returns empty array for height <= 0', () => {
-    expect(renderAgentEvents(eventLog, 40, 0)).toEqual([]);
+    expect(renderAgentStatusCard(null, null, [], [], 40, 0)).toEqual([]);
   });
 
   it('returns empty array for width <= 0', () => {
-    expect(renderAgentEvents(eventLog, 0, 5)).toEqual([]);
-    expect(renderAgentEvents(eventLog, -1, 5)).toEqual([]);
+    expect(renderAgentStatusCard(null, null, [], [], 0, 5)).toEqual([]);
+    expect(renderAgentStatusCard(null, null, [], [], -1, 5)).toEqual([]);
   });
 
-  it('includes Events header as first line', () => {
-    const lines = renderAgentEvents(eventLog, 80, 10);
-    expect(lines[0]).toContain('Events');
+  it('includes Live header as first line', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], [], 80, 10);
+    expect(lines[0]).toContain('Live');
   });
 
-  it('shows event messages', () => {
-    const lines = renderAgentEvents(eventLog, 80, 10);
+  it('shows current mode', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], [], 80, 10);
+    expect(lines.join('\n')).toContain('PLAN');
+  });
+
+  it('shows focused agent name', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], [], 80, 10);
+    expect(lines.join('\n')).toContain('solution-architect');
+  });
+
+  it('shows agent running status', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], [], 80, 10);
+    expect(lines.join('\n')).toContain('running');
+  });
+
+  it('shows separator line with ─ character', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], [], 80, 10);
+    expect(lines.join('\n')).toContain('─');
+  });
+
+  it('shows first objective', () => {
+    const objectives = ['Design Activity/Live panels for TUI HUD', 'Another objective'];
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', objectives, [], 80, 10);
+    expect(lines.join('\n')).toContain('Design Activity');
+  });
+
+  it('does NOT show second objective', () => {
+    const objectives = ['First objective', 'Second objective'];
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', objectives, [], 80, 15);
+    expect(lines.join('\n')).not.toContain('Second objective');
+  });
+
+  it('shows active skills with ⚙ prefix', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], ['brainstorming'], 80, 10);
     const content = lines.join('\n');
-    expect(content).toContain('plan-mode activated');
+    expect(content).toContain('⚙');
+    expect(content).toContain('brainstorming');
   });
 
-  it('shows No events when log is empty', () => {
-    const lines = renderAgentEvents([], 80, 5);
-    expect(lines.join('\n')).toContain('No events');
+  it('shows No agent when focusedAgent is null', () => {
+    const lines = renderAgentStatusCard(null, 'PLAN', [], [], 80, 5);
+    expect(lines.join('\n')).toContain('No agent');
   });
 
   it('respects height limit', () => {
-    const lines = renderAgentEvents(eventLog, 80, 2);
-    expect(lines.length).toBeLessThanOrEqual(2);
+    const objectives = ['Long objective text here'];
+    const skills = ['skill1', 'skill2', 'skill3'];
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', objectives, skills, 80, 4);
+    expect(lines.length).toBeLessThanOrEqual(4);
   });
 
   it('truncates lines to width', () => {
-    const lines = renderAgentEvents(eventLog, 20, 10);
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', ['objective'], ['skill'], 20, 10);
     for (const line of lines) {
       expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(20);
     }
   });
 
-  it('shows events in chronological order (oldest first)', () => {
-    const lines = renderAgentEvents(eventLog, 80, 10);
-    const firstIdx = lines.findIndex(l => l.includes('plan-mode activated'));
-    const lastIdx = lines.findIndex(l => l.includes('timeout'));
-    expect(firstIdx).toBeGreaterThan(-1);
-    expect(lastIdx).toBeGreaterThan(-1);
-    expect(firstIdx).toBeLessThan(lastIdx);
+  it('handles null currentMode gracefully', () => {
+    const lines = renderAgentStatusCard(focusedAgent, null, [], [], 80, 5);
+    expect(lines).toBeDefined();
+    expect(lines.length).toBeGreaterThan(0);
+  });
+
+  it('word-wraps long objectives to width', () => {
+    const longObj = 'A'.repeat(30) + ' ' + 'B'.repeat(30);
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [longObj], [], 40, 10);
+    for (const line of lines) {
+      expect(estimateDisplayWidth(line)).toBeLessThanOrEqual(40);
+    }
   });
 
   it('returns only header when height is 1', () => {
-    const lines = renderAgentEvents(eventLog, 80, 1);
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], [], 80, 1);
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain('Events');
+    expect(lines[0]).toContain('Live');
   });
 
-  it('shows most recent events when log exceeds height', () => {
-    const manyEvents: EventLogEntry[] = Array.from({ length: 20 }, (_, i) => ({
-      timestamp: `10:00:${String(i).padStart(2, '0')}`,
-      message: `event-${i}`,
-      level: 'info' as const,
-    }));
-    const lines = renderAgentEvents(manyEvents, 80, 5);
-    const content = lines.join('\n');
-    // 최근 이벤트(event-16 ~ event-19)가 보여야 함
-    expect(content).toContain('event-19');
-    // 오래된 이벤트(event-0)는 보이지 않아야 함
-    expect(content).not.toContain('event-0');
+  it('does not show double separator when objectives are empty', () => {
+    const lines = renderAgentStatusCard(focusedAgent, 'PLAN', [], ['brainstorming'], 80, 15);
+    let prevWasSeparator = false;
+    for (const line of lines) {
+      const isSeparator = line.length > 0 && [...line].every(c => c === '─');
+      if (isSeparator && prevWasSeparator) {
+        // 연속 separator 금지
+        expect(isSeparator && prevWasSeparator).toBe(false);
+      }
+      prevWasSeparator = isSeparator;
+    }
   });
 });

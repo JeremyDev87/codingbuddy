@@ -1,33 +1,50 @@
 import React, { useMemo } from 'react';
 import { Box, Text } from 'ink';
-import type { DashboardNode, EventLogEntry } from '../dashboard-types';
-import { renderAgentRoster, renderAgentEvents } from './activity-visualizer.pure';
+import type { DashboardNode, Edge } from '../dashboard-types';
+import type { Mode } from '../types';
+import { renderAgentTree, renderAgentStatusCard } from './activity-visualizer.pure';
 import { BORDER_COLORS } from '../utils/theme';
 
 export interface ActivityVisualizerProps {
+  currentMode: Mode | null;
+  focusedAgent: DashboardNode | null;
   agents: Map<string, DashboardNode>;
-  eventLog: EventLogEntry[];
+  edges: Edge[];
+  activeSkills: string[];
+  objectives: string[];
   width: number;
   height: number;
 }
 
 export function ActivityVisualizer({
+  currentMode,
+  focusedAgent,
   agents,
-  eventLog,
+  edges,
+  activeSkills,
+  objectives,
   width,
   height,
 }: ActivityVisualizerProps): React.ReactElement {
-  const rosterWidth = Math.floor(width * 0.6);
-  const eventsWidth = width - rosterWidth;
+  const treeWidth = Math.floor(width * 0.6);
+  const cardWidth = width - treeWidth;
   const contentHeight = Math.max(1, height - 2);
 
-  const rosterLines = useMemo(
-    () => renderAgentRoster(agents, Math.max(1, rosterWidth - 2), contentHeight),
-    [agents, rosterWidth, contentHeight],
+  const treeLines = useMemo(
+    () => renderAgentTree(agents, edges, activeSkills, Math.max(1, treeWidth - 2), contentHeight),
+    [agents, edges, activeSkills, treeWidth, contentHeight],
   );
-  const eventLines = useMemo(
-    () => renderAgentEvents(eventLog, Math.max(1, eventsWidth - 2), contentHeight),
-    [eventLog, eventsWidth, contentHeight],
+  const cardLines = useMemo(
+    () =>
+      renderAgentStatusCard(
+        focusedAgent,
+        currentMode,
+        objectives,
+        activeSkills,
+        Math.max(1, cardWidth - 2),
+        contentHeight,
+      ),
+    [focusedAgent, currentMode, objectives, activeSkills, cardWidth, contentHeight],
   );
 
   if (width <= 0 || height <= 0) {
@@ -40,10 +57,10 @@ export function ActivityVisualizer({
         borderStyle="single"
         borderColor={BORDER_COLORS.panel}
         flexDirection="column"
-        width={rosterWidth}
+        width={treeWidth}
         height={height}
       >
-        {rosterLines.map((line, i) => (
+        {treeLines.map((line, i) => (
           <Text key={i}>{line}</Text>
         ))}
       </Box>
@@ -51,10 +68,10 @@ export function ActivityVisualizer({
         borderStyle="single"
         borderColor={BORDER_COLORS.panel}
         flexDirection="column"
-        width={eventsWidth}
+        width={cardWidth}
         height={height}
       >
-        {eventLines.map((line, i) => (
+        {cardLines.map((line, i) => (
           <Text key={i}>{line}</Text>
         ))}
       </Box>

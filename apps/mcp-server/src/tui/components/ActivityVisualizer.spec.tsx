@@ -3,15 +3,15 @@ import { describe, it, expect } from 'vitest';
 import { render } from 'ink-testing-library';
 import { ActivityVisualizer } from './ActivityVisualizer';
 import { createDefaultDashboardNode } from '../dashboard-types';
-import type { DashboardNode, EventLogEntry } from '../dashboard-types';
+import type { DashboardNode, Edge } from '../dashboard-types';
 
 function makeAgents(): Map<string, DashboardNode> {
   const agents = new Map<string, DashboardNode>();
   agents.set(
-    'plan-mode',
+    'main-agent',
     createDefaultDashboardNode({
-      id: 'plan-mode',
-      name: 'plan-mode',
+      id: 'main-agent',
+      name: 'main-agent',
       stage: 'PLAN',
       status: 'running',
       isPrimary: true,
@@ -19,96 +19,100 @@ function makeAgents(): Map<string, DashboardNode> {
     }),
   );
   agents.set(
-    'security',
+    'solution-architect',
     createDefaultDashboardNode({
-      id: 'security',
-      name: 'security',
-      stage: 'EVAL',
-      status: 'idle',
+      id: 'solution-architect',
+      name: 'solution-architect',
+      stage: 'PLAN',
+      status: 'running',
       isPrimary: false,
-      progress: 0,
+      progress: 30,
     }),
   );
   return agents;
 }
 
-const sampleEvents: EventLogEntry[] = [
-  { timestamp: '10:00:01', message: 'agent: plan-mode activated', level: 'info' },
-  { timestamp: '10:00:05', message: 'agent: security started', level: 'info' },
+const focusedAgent = createDefaultDashboardNode({
+  id: 'main-agent',
+  name: 'main-agent',
+  stage: 'PLAN',
+  status: 'running',
+  isPrimary: true,
+  progress: 50,
+});
+
+const sampleEdges: Edge[] = [
+  { from: 'main-agent', to: 'solution-architect', label: 'delegates', type: 'delegation' },
 ];
+
+const defaultProps = {
+  currentMode: 'PLAN' as const,
+  focusedAgent,
+  agents: makeAgents(),
+  edges: sampleEdges,
+  activeSkills: ['brainstorming'],
+  objectives: ['Design Activity panels'],
+  width: 80,
+  height: 10,
+};
 
 describe('tui/components/ActivityVisualizer', () => {
   it('renders without crashing with data', () => {
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={sampleEvents} width={80} height={10} />,
-    );
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
     expect(lastFrame()).toBeDefined();
   });
 
   it('renders without crashing with empty data', () => {
     const { lastFrame } = render(
-      <ActivityVisualizer agents={new Map()} eventLog={[]} width={80} height={10} />,
+      <ActivityVisualizer
+        {...defaultProps}
+        agents={new Map()}
+        edges={[]}
+        activeSkills={[]}
+        objectives={[]}
+        focusedAgent={null}
+      />,
     );
     expect(lastFrame()).toBeDefined();
   });
 
   it('renders without crashing when width=0 or height=0', () => {
-    expect(() =>
-      render(<ActivityVisualizer agents={new Map()} eventLog={[]} width={0} height={10} />),
-    ).not.toThrow();
-    expect(() =>
-      render(<ActivityVisualizer agents={new Map()} eventLog={[]} width={80} height={0} />),
-    ).not.toThrow();
+    expect(() => render(<ActivityVisualizer {...defaultProps} width={0} />)).not.toThrow();
+    expect(() => render(<ActivityVisualizer {...defaultProps} height={0} />)).not.toThrow();
   });
 
-  it('contains Agents header in left panel', () => {
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={sampleEvents} width={80} height={10} />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('Agents');
+  it('contains Activity header in left panel', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').toContain('Activity');
   });
 
-  it('contains Events header in right panel', () => {
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={sampleEvents} width={80} height={10} />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('Events');
+  it('contains Live header in right panel', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').toContain('Live');
   });
 
-  it('shows agent names in roster', () => {
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={sampleEvents} width={80} height={10} />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('plan-mode');
+  it('shows agent name in tree', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').toContain('main-agent');
   });
 
-  it('shows event messages', () => {
-    const shortEvents: EventLogEntry[] = [
-      { timestamp: '10:00:01', message: 'plan-mode ok', level: 'info' },
-    ];
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={shortEvents} width={80} height={10} />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('plan-mode ok');
+  it('shows current mode in status card', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').toContain('PLAN');
   });
 
-  it('does NOT contain old Activity bar chart header', () => {
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={sampleEvents} width={80} height={10} />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).not.toContain('📊 Activity');
+  it('shows focused agent name in status card', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').toContain('main-agent');
   });
 
-  it('does NOT contain old Live header', () => {
-    const { lastFrame } = render(
-      <ActivityVisualizer agents={makeAgents()} eventLog={sampleEvents} width={80} height={10} />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).not.toContain('💬 Live');
+  it('does NOT contain old Agents roster header', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').not.toContain('🤖 Agents');
+  });
+
+  it('does NOT contain old Events header', () => {
+    const { lastFrame } = render(<ActivityVisualizer {...defaultProps} />);
+    expect(lastFrame() ?? '').not.toContain('📋 Events');
   });
 });
