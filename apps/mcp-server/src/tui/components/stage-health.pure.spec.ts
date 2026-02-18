@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeStageHealth, detectBottlenecks } from './stage-health.pure';
+import { computeStageHealth, detectBottlenecks, formatCount } from './stage-health.pure';
 import type { DashboardNode, EventLogEntry } from '../dashboard-types';
 import { createEmptyStageStats } from '../dashboard-types';
 import type { Mode } from '../types';
@@ -54,6 +54,28 @@ describe('tui/components/stage-health.pure', () => {
 
       const result = computeStageHealth(agents);
       expect(result.PLAN.waiting).toBe(2);
+    });
+  });
+
+  describe('formatCount', () => {
+    it('returns string as-is for values below 1000', () => {
+      expect(formatCount(0)).toBe('0');
+      expect(formatCount(1)).toBe('1');
+      expect(formatCount(999)).toBe('999');
+    });
+
+    it('returns Nk for values >= 1000', () => {
+      expect(formatCount(1000)).toBe('1k');
+      expect(formatCount(1001)).toBe('1k');
+      expect(formatCount(1499)).toBe('1k');
+      expect(formatCount(1500)).toBe('2k'); // Math.round 반올림
+      expect(formatCount(2000)).toBe('2k');
+    });
+
+    it('rounds to nearest k', () => {
+      expect(formatCount(9499)).toBe('9k');
+      expect(formatCount(9500)).toBe('10k');
+      expect(formatCount(10000)).toBe('10k');
     });
   });
 

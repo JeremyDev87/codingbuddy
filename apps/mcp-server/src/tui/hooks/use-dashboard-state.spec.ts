@@ -14,6 +14,73 @@ describe('dashboardReducer', () => {
     expect(state.outputStats).toEqual({ files: 0, commits: 0 });
   });
 
+  it('initializes agentActivateCount and skillInvokeCount to 0', () => {
+    const state = createInitialDashboardState();
+    expect(state.agentActivateCount).toBe(0);
+    expect(state.skillInvokeCount).toBe(0);
+  });
+
+  it('increments agentActivateCount on same agentId re-activation (cumulative counter)', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'architect', role: 'primary', isPrimary: true },
+    });
+    // 동일 agentId 재활성화 — 누적 카운터이므로 +1 증가
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'architect', role: 'primary', isPrimary: true },
+    });
+    expect(state.agentActivateCount).toBe(2);
+  });
+
+  it('increments agentActivateCount on AGENT_ACTIVATED', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'architect', role: 'primary', isPrimary: true },
+    });
+    expect(state.agentActivateCount).toBe(1);
+
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a2', name: 'security', role: 'specialist', isPrimary: false },
+    });
+    expect(state.agentActivateCount).toBe(2);
+  });
+
+  it('increments skillInvokeCount on SKILL_RECOMMENDED (first time only)', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'SKILL_RECOMMENDED',
+      payload: { skillName: 'tdd', reason: 'writing tests' },
+    });
+    expect(state.skillInvokeCount).toBe(1);
+
+    // 중복 — 증가하지 않아야 함
+    state = dashboardReducer(state, {
+      type: 'SKILL_RECOMMENDED',
+      payload: { skillName: 'tdd', reason: 'still writing tests' },
+    });
+    expect(state.skillInvokeCount).toBe(1);
+  });
+
+  it('resets agentActivateCount and skillInvokeCount on SESSION_RESET', () => {
+    let state = createInitialDashboardState();
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'architect', role: 'primary', isPrimary: true },
+    });
+    state = dashboardReducer(state, {
+      type: 'SKILL_RECOMMENDED',
+      payload: { skillName: 'tdd', reason: 'test' },
+    });
+    state = dashboardReducer(state, { type: 'SESSION_RESET', payload: {} as any });
+    expect(state.agentActivateCount).toBe(0);
+    expect(state.skillInvokeCount).toBe(0);
+    expect(state.toolInvokeCount).toBe(0);
+  });
+
   it('handles AGENT_ACTIVATED by adding node', () => {
     const action: DashboardAction = {
       type: 'AGENT_ACTIVATED',

@@ -3,11 +3,14 @@ import { Box, Text } from 'ink';
 import type { StageStats } from '../dashboard-types';
 import type { Mode } from '../types';
 import { getModeColor, BORDER_COLORS } from '../utils/theme';
+import { formatCount } from './stage-health.pure';
 
 export interface StageHealthBarProps {
   stageHealth: Record<Mode, StageStats>;
   bottlenecks: string[];
   toolCount: number;
+  agentCount: number;
+  skillCount: number;
   width: number;
 }
 
@@ -80,10 +83,10 @@ export function StageHealthBar({
   stageHealth,
   bottlenecks,
   toolCount,
+  agentCount,
+  skillCount,
   width,
 }: StageHealthBarProps): React.ReactElement {
-  const countStr = toolCount >= 1000 ? `${Math.round(toolCount / 1000)}k` : String(toolCount);
-
   return (
     <Box
       borderStyle="double"
@@ -104,7 +107,9 @@ export function StageHealthBar({
               ⚡ Bottlenecks: {bottlenecks.join(' / ')}
             </Text>
           )}
-          <Text dimColor>tools: {countStr}</Text>
+          <Text dimColor>🤖 {formatCount(agentCount)}</Text>
+          <Text dimColor>⚙ {formatCount(skillCount)}</Text>
+          <Text dimColor>🔧 {formatCount(toolCount)}</Text>
         </Box>
       </Box>
     </Box>

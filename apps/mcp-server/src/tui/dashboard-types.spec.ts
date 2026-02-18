@@ -188,6 +188,8 @@ describe('tui/dashboard-types', () => {
         activeSkills: [],
         toolCalls: [],
         toolInvokeCount: 0,
+        agentActivateCount: 0,
+        skillInvokeCount: 0,
         outputStats: { files: 0, commits: 0 },
         contextDecisions: [],
         contextNotes: [],
@@ -196,6 +198,33 @@ describe('tui/dashboard-types', () => {
       };
       expect(state.toolInvokeCount).toBe(0);
       expect(state.outputStats).toEqual({ files: 0, commits: 0 });
+    });
+
+    it('DashboardState includes agentActivateCount and skillInvokeCount fields', () => {
+      const state: DashboardState = {
+        workspace: '/tmp',
+        sessionId: 'test',
+        currentMode: null,
+        globalState: 'IDLE',
+        agents: new Map(),
+        edges: [],
+        focusedAgentId: null,
+        tasks: [],
+        eventLog: [],
+        objectives: [],
+        activeSkills: [],
+        toolCalls: [],
+        toolInvokeCount: 0,
+        agentActivateCount: 0,
+        skillInvokeCount: 0,
+        outputStats: { files: 0, commits: 0 },
+        contextDecisions: [],
+        contextNotes: [],
+        contextMode: null,
+        contextStatus: null,
+      };
+      expect(state.agentActivateCount).toBe(0);
+      expect(state.skillInvokeCount).toBe(0);
     });
 
     it('DashboardGrid has all required sections', () => {

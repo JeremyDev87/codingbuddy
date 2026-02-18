@@ -3,6 +3,13 @@ import type { DashboardNode, StageStats, EventLogEntry } from '../dashboard-type
 import { createEmptyStageStats } from '../dashboard-types';
 
 /**
+ * Format a count for compact display: values >= 1000 are shown as Nk.
+ */
+export function formatCount(n: number): string {
+  return n >= 1000 ? `${Math.round(n / 1000)}k` : String(n);
+}
+
+/**
  * Count agents per stage and status.
  */
 export function computeStageHealth(agents: Map<string, DashboardNode>): Record<Mode, StageStats> {

@@ -128,6 +128,8 @@ export function DashboardApp({
         stageHealth={stageHealth}
         bottlenecks={bottlenecks}
         toolCount={state.toolInvokeCount}
+        agentCount={state.agentActivateCount}
+        skillCount={state.skillInvokeCount}
         width={grid.stageHealth.width}
       />
     </Box>

@@ -158,6 +158,8 @@ export interface DashboardState {
   objectives: string[];
   activeSkills: string[];
   toolInvokeCount: number;
+  agentActivateCount: number;
+  skillInvokeCount: number;
   outputStats: { files: number; commits: number };
   contextDecisions: string[];
   contextNotes: string[];

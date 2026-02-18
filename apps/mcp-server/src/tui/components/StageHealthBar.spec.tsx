@@ -16,7 +16,14 @@ function makeHealth() {
 describe('tui/components/StageHealthBar', () => {
   it('should render stage names with colors', () => {
     const { lastFrame } = render(
-      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} toolCount={128000} width={120} />,
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={128000}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+      />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('PLAN:');
@@ -26,7 +33,14 @@ describe('tui/components/StageHealthBar', () => {
 
   it('should render running/done/error stats', () => {
     const { lastFrame } = render(
-      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} toolCount={0} width={120} />,
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={0}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+      />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('running');
@@ -35,7 +49,14 @@ describe('tui/components/StageHealthBar', () => {
 
   it('should render tool count', () => {
     const { lastFrame } = render(
-      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} toolCount={64000} width={120} />,
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={64000}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+      />,
     );
     expect(lastFrame()).toContain('64k');
   });
@@ -46,6 +67,8 @@ describe('tui/components/StageHealthBar', () => {
         stageHealth={makeHealth()}
         bottlenecks={['tests failing(3)', 'lint errors']}
         toolCount={0}
+        agentCount={0}
+        skillCount={0}
         width={120}
       />,
     );
@@ -60,6 +83,8 @@ describe('tui/components/StageHealthBar', () => {
         stageHealth={makeHealth()}
         bottlenecks={['long bottleneck description']}
         toolCount={50000}
+        agentCount={0}
+        skillCount={0}
         width={60}
       />,
     );
@@ -74,7 +99,14 @@ describe('tui/components/StageHealthBar', () => {
       AUTO: createEmptyStageStats(),
     };
     const { lastFrame } = render(
-      <StageHealthBar stageHealth={empty} bottlenecks={[]} toolCount={0} width={120} />,
+      <StageHealthBar
+        stageHealth={empty}
+        bottlenecks={[]}
+        toolCount={0}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+      />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('PLAN:');
@@ -83,10 +115,51 @@ describe('tui/components/StageHealthBar', () => {
 
   it('should render double border', () => {
     const { lastFrame } = render(
-      <StageHealthBar stageHealth={makeHealth()} bottlenecks={[]} toolCount={0} width={120} />,
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={0}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+      />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('╔');
     expect(frame).toContain('╝');
+  });
+
+  it('shows agent, skill, and tool counts on right side', () => {
+    const { lastFrame } = render(
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={5}
+        agentCount={3}
+        skillCount={2}
+        width={120}
+      />,
+    );
+    const out = lastFrame() ?? '';
+    expect(out).toContain('🤖 3');
+    expect(out).toContain('⚙ 2');
+    expect(out).toContain('🔧 5');
+  });
+
+  it('formats counts >= 1000 as Nk', () => {
+    const { lastFrame } = render(
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={1500}
+        agentCount={2000}
+        skillCount={0}
+        width={120}
+      />,
+    );
+    const out = lastFrame() ?? '';
+    expect(out).toContain('🤖 2k');
+    expect(out).toContain('🔧 2k');
+    expect(out).toContain('⚙ 0');
   });
 });

@@ -49,6 +49,8 @@ export function createInitialDashboardState(): DashboardState {
     objectives: [],
     activeSkills: [],
     toolInvokeCount: 0,
+    agentActivateCount: 0,
+    skillInvokeCount: 0,
     outputStats: { files: 0, commits: 0 },
     contextDecisions: [],
     contextNotes: [],
@@ -92,7 +94,13 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       });
       const globalState = 'RUNNING' as const;
       const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
-      return { ...state, agents, globalState, focusedAgentId };
+      return {
+        ...state,
+        agents,
+        globalState,
+        focusedAgentId,
+        agentActivateCount: state.agentActivateCount + 1,
+      };
     }
 
     case 'AGENT_DEACTIVATED': {
@@ -221,7 +229,11 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     case 'SKILL_RECOMMENDED': {
       const { skillName } = action.payload;
       if (state.activeSkills.includes(skillName)) return state;
-      return { ...state, activeSkills: [...state.activeSkills, skillName] };
+      return {
+        ...state,
+        activeSkills: [...state.activeSkills, skillName],
+        skillInvokeCount: state.skillInvokeCount + 1,
+      };
     }
 
     case 'PARALLEL_STARTED': {
