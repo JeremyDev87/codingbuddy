@@ -5,3 +5,22 @@ dist/
 *.log
 *.md
 *.mdc
+
+# Build outputs
+.next/
+out/
+build/
+coverage/
+
+# Generated files
+*.tsbuildinfo
+next-env.d.ts
+
+# AI/Tool local state
+.omc/
+.serena/
+.codingbuddy/
+docs/codingbuddy/
+.mcp.json
+codingbuddy.config.js
+codingbuddy.config.json
