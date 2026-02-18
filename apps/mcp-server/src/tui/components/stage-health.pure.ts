@@ -73,16 +73,16 @@ export function detectBottlenecks(eventLog: EventLogEntry[]): string[] {
 }
 
 /**
- * Format stage health bar with stats, bottlenecks, and token count.
+ * Format stage health bar with stats, bottlenecks, and tool count.
  */
 export function formatStageHealthBar(
   health: Record<Mode, StageStats>,
   bottlenecks: string[],
-  tokenCount: number,
+  toolCount: number,
   width: number,
   layoutMode: LayoutMode,
 ): string {
-  const tokenStr = tokenCount >= 1000 ? `${Math.round(tokenCount / 1000)}k` : String(tokenCount);
+  const countStr = toolCount >= 1000 ? `${Math.round(toolCount / 1000)}k` : String(toolCount);
 
   const formatStats = (mode: Mode, stats: StageStats): string => {
     if (layoutMode === 'narrow') {
@@ -111,11 +111,11 @@ export function formatStageHealthBar(
 
   if (layoutMode === 'narrow') {
     const line1 = stages;
-    const line2Parts = [bottleneckStr, tokenStr].filter(Boolean);
+    const line2Parts = [bottleneckStr, countStr].filter(Boolean);
     return [line1, line2Parts.join('  ')].filter(Boolean).join('\n');
   }
 
-  const spacer = ' '.repeat(Math.max(1, width - stages.length - tokenStr.length - 2));
-  const line1 = `${stages}${spacer}${tokenStr}`;
+  const spacer = ' '.repeat(Math.max(1, width - stages.length - countStr.length - 2));
+  const line1 = `${stages}${spacer}${countStr}`;
   return bottleneckStr ? `${line1}\n${bottleneckStr}` : line1;
 }
