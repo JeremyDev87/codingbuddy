@@ -18,7 +18,7 @@ import {
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 12 event names', () => {
+    it('should define all 13 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -32,6 +32,7 @@ describe('tui/events/types', () => {
         TOOL_INVOKED: 'tool:invoked',
         OBJECTIVE_SET: 'objective:set',
         SESSION_RESET: 'session:reset',
+        CONTEXT_UPDATED: 'context:updated',
       });
     });
 
@@ -185,6 +186,7 @@ describe('tui/events/types', () => {
         'tool:invoked': { toolName: 'search_rules', agentId: null, timestamp: 0 },
         'objective:set': { objective: 'implement auth feature' },
         'session:reset': { reason: 'new-plan-session' },
+        'context:updated': { decisions: ['Use JWT'], notes: [], mode: null, status: null },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
     });

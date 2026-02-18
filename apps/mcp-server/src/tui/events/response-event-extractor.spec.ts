@@ -705,9 +705,10 @@ describe('extractEventsFromResponse', () => {
           },
         }),
       );
-      expect(result).toHaveLength(1);
-      expect(result[0].event).toBe(TUI_EVENTS.TASK_SYNCED);
-      expect(result[0].payload).toEqual({
+      // decisions also emit context:updated, so total is 2 events
+      const taskSynced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+      expect(taskSynced).toBeDefined();
+      expect(taskSynced!.payload).toEqual({
         agentId: 'technical-planner',
         tasks: [
           { id: 'ctx-d-0', subject: 'Use JWT for auth', completed: true },
@@ -759,8 +760,10 @@ describe('extractEventsFromResponse', () => {
           },
         }),
       );
-      expect(result).toHaveLength(1);
-      expect(result[0].payload).toEqual({
+      // notes also emit context:updated, so total is 2 events
+      const taskSynced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+      expect(taskSynced).toBeDefined();
+      expect(taskSynced!.payload).toEqual({
         agentId: 'planner',
         tasks: [
           { id: 'ctx-n-0', subject: 'Reviewed existing codebase', completed: false },
@@ -918,6 +921,160 @@ describe('extractEventsFromResponse', () => {
           { id: 'ctx-f-0', subject: 'No XSS', completed: true },
           { id: 'ctx-n-0', subject: 'Consider caching', completed: false },
         ]);
+      });
+    });
+  });
+
+  describe('update_context → context:updated', () => {
+    it('should emit context:updated with decisions and notes', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'PLAN',
+                primaryAgent: 'technical-planner',
+                status: 'in_progress',
+                decisions: ['Use JWT for auth', 'Add rate limiting'],
+                notes: ['Review existing codebase first'],
+              },
+            ],
+          },
+        }),
+      );
+      const contextEvent = result.find(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvent).toBeDefined();
+      expect(contextEvent!.payload).toEqual({
+        decisions: ['Use JWT for auth', 'Add rate limiting'],
+        notes: ['Review existing codebase first'],
+        mode: 'PLAN',
+        status: 'in_progress',
+      });
+    });
+
+    it('should not emit context:updated when both decisions and notes are empty', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              { mode: 'ACT', primaryAgent: 'dev', status: 'in_progress', progress: ['done'] },
+            ],
+          },
+        }),
+      );
+      const contextEvents = result.filter(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvents).toHaveLength(0);
+    });
+
+    it('should emit context:updated with only decisions when notes absent', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'ACT',
+                primaryAgent: 'dev',
+                status: 'completed',
+                decisions: ['Use X pattern'],
+              },
+            ],
+          },
+        }),
+      );
+      const contextEvent = result.find(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvent).toBeDefined();
+      expect(contextEvent!.payload).toEqual({
+        decisions: ['Use X pattern'],
+        notes: [],
+        mode: 'ACT',
+        status: 'completed',
+      });
+    });
+
+    it('should emit context:updated with only notes when decisions absent', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'EVAL',
+                primaryAgent: 'reviewer',
+                status: 'in_progress',
+                notes: ['Consider caching'],
+              },
+            ],
+          },
+        }),
+      );
+      const contextEvent = result.find(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvent).toBeDefined();
+      expect(contextEvent!.payload).toEqual({
+        decisions: [],
+        notes: ['Consider caching'],
+        mode: 'EVAL',
+        status: 'in_progress',
+      });
+    });
+
+    it('should not emit context:updated when document is missing', () => {
+      const result = extractEventsFromResponse('update_context', makeResponse({ success: true }));
+      const contextEvents = result.filter(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvents).toHaveLength(0);
+    });
+
+    it('should not emit context:updated when sections is empty', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({ document: { sections: [] } }),
+      );
+      const contextEvents = result.filter(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvents).toHaveLength(0);
+    });
+
+    it('should use null for mode and status when absent', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [{ primaryAgent: 'dev', decisions: ['Use X'] }],
+          },
+        }),
+      );
+      const contextEvent = result.find(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvent!.payload).toEqual({
+        decisions: ['Use X'],
+        notes: [],
+        mode: null,
+        status: null,
+      });
+    });
+
+    it('should filter out non-string decisions and notes', () => {
+      const result = extractEventsFromResponse(
+        'update_context',
+        makeResponse({
+          document: {
+            sections: [
+              {
+                mode: 'PLAN',
+                primaryAgent: 'dev',
+                decisions: ['Valid decision', 123, null, 'Another decision'],
+                notes: [42, 'Valid note'],
+              },
+            ],
+          },
+        }),
+      );
+      const contextEvent = result.find(e => e.event === TUI_EVENTS.CONTEXT_UPDATED);
+      expect(contextEvent!.payload).toEqual({
+        decisions: ['Valid decision', 'Another decision'],
+        notes: ['Valid note'],
+        mode: 'PLAN',
+        status: null,
       });
     });
   });

@@ -643,4 +643,64 @@ describe('dashboardReducer', () => {
       expect(typeof result.sessionId).toBe('string');
     });
   });
+
+  describe('CONTEXT_UPDATED', () => {
+    it('initializes contextDecisions and contextNotes as empty arrays', () => {
+      const state = createInitialDashboardState();
+      expect(state.contextDecisions).toEqual([]);
+      expect(state.contextNotes).toEqual([]);
+      expect(state.contextMode).toBeNull();
+      expect(state.contextStatus).toBeNull();
+    });
+
+    it('handles CONTEXT_UPDATED with decisions and notes', () => {
+      const action: DashboardAction = {
+        type: 'CONTEXT_UPDATED',
+        payload: {
+          decisions: ['Use JWT', 'Add rate limiting'],
+          notes: ['Review codebase first'],
+          mode: 'PLAN',
+          status: 'in_progress',
+        },
+      };
+      const state = dashboardReducer(initialDashboardState, action);
+      expect(state.contextDecisions).toEqual(['Use JWT', 'Add rate limiting']);
+      expect(state.contextNotes).toEqual(['Review codebase first']);
+      expect(state.contextMode).toBe('PLAN');
+      expect(state.contextStatus).toBe('in_progress');
+    });
+
+    it('handles CONTEXT_UPDATED with only decisions', () => {
+      const state = dashboardReducer(initialDashboardState, {
+        type: 'CONTEXT_UPDATED',
+        payload: { decisions: ['Use X pattern'], notes: [], mode: 'ACT', status: 'completed' },
+      });
+      expect(state.contextDecisions).toEqual(['Use X pattern']);
+      expect(state.contextNotes).toEqual([]);
+    });
+
+    it('handles CONTEXT_UPDATED with null mode and status', () => {
+      const state = dashboardReducer(initialDashboardState, {
+        type: 'CONTEXT_UPDATED',
+        payload: { decisions: ['decision'], notes: [], mode: null, status: null },
+      });
+      expect(state.contextMode).toBeNull();
+      expect(state.contextStatus).toBeNull();
+    });
+
+    it('SESSION_RESET clears context fields', () => {
+      const withContext = dashboardReducer(initialDashboardState, {
+        type: 'CONTEXT_UPDATED',
+        payload: { decisions: ['decision'], notes: ['note'], mode: 'PLAN', status: 'completed' },
+      });
+      const reset = dashboardReducer(withContext, {
+        type: 'SESSION_RESET',
+        payload: { reason: 'clear' },
+      });
+      expect(reset.contextDecisions).toEqual([]);
+      expect(reset.contextNotes).toEqual([]);
+      expect(reset.contextMode).toBeNull();
+      expect(reset.contextStatus).toBeNull();
+    });
+  });
 });

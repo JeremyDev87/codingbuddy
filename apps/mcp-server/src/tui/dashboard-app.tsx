@@ -64,6 +64,8 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
             outputs={state.outputStats}
             eventLog={state.eventLog}
             toolCalls={state.toolCalls}
+            contextDecisions={state.contextDecisions}
+            contextNotes={state.contextNotes}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
           />
@@ -102,6 +104,8 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
             outputs={state.outputStats}
             eventLog={state.eventLog}
             toolCalls={state.toolCalls}
+            contextDecisions={state.contextDecisions}
+            contextNotes={state.contextNotes}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
           />

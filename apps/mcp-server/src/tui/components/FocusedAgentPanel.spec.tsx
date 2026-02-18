@@ -325,4 +325,87 @@ describe('tui/components/FocusedAgentPanel', () => {
     );
     expect(lastFrame()).toContain('─── Activity');
   });
+
+  describe('Context section', () => {
+    it('renders context decisions when provided', () => {
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          tasks={[]}
+          tools={[]}
+          inputs={[]}
+          outputs={{}}
+          eventLog={[]}
+          toolCalls={[]}
+          contextDecisions={['Use JWT for auth', 'Add rate limiting']}
+          contextNotes={[]}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('Use JWT for auth');
+      expect(frame).toContain('Add rate limiting');
+      expect(frame).toContain('─── Context');
+    });
+
+    it('renders context notes when provided', () => {
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          tasks={[]}
+          tools={[]}
+          inputs={[]}
+          outputs={{}}
+          eventLog={[]}
+          toolCalls={[]}
+          contextDecisions={[]}
+          contextNotes={['Review existing codebase']}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('Review existing codebase');
+      expect(frame).toContain('─── Context');
+    });
+
+    it('renders No context when both empty', () => {
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          tasks={[]}
+          tools={[]}
+          inputs={[]}
+          outputs={{}}
+          eventLog={[]}
+          toolCalls={[]}
+          contextDecisions={[]}
+          contextNotes={[]}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('No context');
+    });
+
+    it('renders No context when props omitted', () => {
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          tasks={[]}
+          tools={[]}
+          inputs={[]}
+          outputs={{}}
+          eventLog={[]}
+          toolCalls={[]}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('No context');
+    });
+  });
 });

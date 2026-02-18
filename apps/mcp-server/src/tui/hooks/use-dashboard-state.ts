@@ -22,6 +22,7 @@ import {
   type ToolInvokedEvent,
   type ObjectiveSetEvent,
   type SessionResetEvent,
+  type ContextUpdatedEvent,
 } from '../events';
 import { selectFocusedAgent } from './use-focus-agent';
 
@@ -49,6 +50,10 @@ export function createInitialDashboardState(): DashboardState {
     activeSkills: [],
     toolInvokeCount: 0,
     outputStats: { files: 0, commits: 0 },
+    contextDecisions: [],
+    contextNotes: [],
+    contextMode: null,
+    contextStatus: null,
   };
 }
 
@@ -64,7 +69,8 @@ export type DashboardAction =
   | { type: 'TASK_SYNCED'; payload: TaskSyncedEvent }
   | { type: 'TOOL_INVOKED'; payload: ToolInvokedEvent }
   | { type: 'OBJECTIVE_SET'; payload: ObjectiveSetEvent }
-  | { type: 'SESSION_RESET'; payload: SessionResetEvent };
+  | { type: 'SESSION_RESET'; payload: SessionResetEvent }
+  | { type: 'CONTEXT_UPDATED'; payload: ContextUpdatedEvent };
 
 function cloneAgents(agents: Map<string, DashboardNode>): Map<string, DashboardNode> {
   return new Map(agents);
@@ -235,6 +241,17 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       return { ...state, agents };
     }
 
+    case 'CONTEXT_UPDATED': {
+      const { decisions, notes, mode, status } = action.payload;
+      return {
+        ...state,
+        contextDecisions: decisions,
+        contextNotes: notes,
+        contextMode: mode,
+        contextStatus: status,
+      };
+    }
+
     case 'SESSION_RESET':
       return createInitialDashboardState();
 
@@ -280,6 +297,8 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       dispatch({ type: 'OBJECTIVE_SET', payload: p });
     const onSessionReset = (p: SessionResetEvent) =>
       dispatch({ type: 'SESSION_RESET', payload: p });
+    const onContextUpdated = (p: ContextUpdatedEvent) =>
+      dispatch({ type: 'CONTEXT_UPDATED', payload: p });
 
     eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
     eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, onDeactivated);
@@ -293,6 +312,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
     eventBus.on(TUI_EVENTS.TOOL_INVOKED, onToolInvoked);
     eventBus.on(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
     eventBus.on(TUI_EVENTS.SESSION_RESET, onSessionReset);
+    eventBus.on(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
 
     return () => {
       eventBus.off(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
@@ -307,6 +327,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       eventBus.off(TUI_EVENTS.TOOL_INVOKED, onToolInvoked);
       eventBus.off(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
       eventBus.off(TUI_EVENTS.SESSION_RESET, onSessionReset);
+      eventBus.off(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
     };
   }, [eventBus]);
 

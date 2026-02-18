@@ -19,6 +19,7 @@ export {
   type ToolInvokedEvent,
   type ObjectiveSetEvent,
   type SessionResetEvent,
+  type ContextUpdatedEvent,
 } from './types';
 export {
   type AgentMetadata,

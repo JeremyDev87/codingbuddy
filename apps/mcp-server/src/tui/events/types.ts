@@ -25,6 +25,7 @@ export const TUI_EVENTS = Object.freeze({
   TOOL_INVOKED: 'tool:invoked',
   OBJECTIVE_SET: 'objective:set',
   SESSION_RESET: 'session:reset',
+  CONTEXT_UPDATED: 'context:updated',
 } as const);
 
 export type TuiEventName = (typeof TUI_EVENTS)[keyof typeof TUI_EVENTS];
@@ -104,6 +105,14 @@ export interface SessionResetEvent {
   reason: string;
 }
 
+/** Payload when context document is updated with decisions/notes */
+export interface ContextUpdatedEvent {
+  decisions: string[];
+  notes: string[];
+  mode: string | null;
+  status: string | null;
+}
+
 /**
  * Maps event names to their payload types for type-safe emit/subscribe.
  */
@@ -120,4 +129,5 @@ export interface TuiEventMap {
   [TUI_EVENTS.TOOL_INVOKED]: ToolInvokedEvent;
   [TUI_EVENTS.OBJECTIVE_SET]: ObjectiveSetEvent;
   [TUI_EVENTS.SESSION_RESET]: SessionResetEvent;
+  [TUI_EVENTS.CONTEXT_UPDATED]: ContextUpdatedEvent;
 }

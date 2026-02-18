@@ -162,6 +162,9 @@ export class TuiInterceptor {
       case TUI_EVENTS.OBJECTIVE_SET:
         this.eventBus.emit(TUI_EVENTS.OBJECTIVE_SET, evt.payload);
         break;
+      case TUI_EVENTS.CONTEXT_UPDATED:
+        this.eventBus.emit(TUI_EVENTS.CONTEXT_UPDATED, evt.payload);
+        break;
       default: {
         const _exhaustive: never = evt;
         this.logger.warn(`Unhandled semantic event: ${(_exhaustive as { event: string }).event}`);

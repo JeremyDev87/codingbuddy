@@ -14,6 +14,7 @@ import {
   type AgentRelationshipEvent,
   type TaskSyncedEvent,
   type ObjectiveSetEvent,
+  type ContextUpdatedEvent,
 } from './types';
 import { parseToolResponseJson } from './parse-tool-response';
 import type { Mode } from '../types';
@@ -46,6 +47,10 @@ export type ExtractedEvent =
   | {
       event: typeof TUI_EVENTS.OBJECTIVE_SET;
       payload: ObjectiveSetEvent;
+    }
+  | {
+      event: typeof TUI_EVENTS.CONTEXT_UPDATED;
+      payload: ContextUpdatedEvent;
     };
 
 /**
@@ -282,7 +287,7 @@ function buildTasksFromSection(
 }
 
 /**
- * Extract task sync events from update_context response.
+ * Extract task sync events and context updated events from update_context response.
  */
 function extractFromUpdateContext(json: Record<string, unknown>): ExtractedEvent[] {
   const doc = json.document;
@@ -293,11 +298,35 @@ function extractFromUpdateContext(json: Record<string, unknown>): ExtractedEvent
   if (!Array.isArray(sections) || sections.length === 0) return [];
 
   const lastSection = sections[sections.length - 1] as Record<string, unknown>;
+  const events: ExtractedEvent[] = [];
+
+  // task:synced — existing behavior
   const tasks = buildTasksFromSection(lastSection);
-  if (tasks.length === 0) return [];
+  if (tasks.length > 0) {
+    const agentId =
+      typeof lastSection.primaryAgent === 'string' ? lastSection.primaryAgent : UNKNOWN_AGENT_ID;
+    events.push({ event: TUI_EVENTS.TASK_SYNCED, payload: { agentId, tasks } });
+  }
 
-  const agentId =
-    typeof lastSection.primaryAgent === 'string' ? lastSection.primaryAgent : UNKNOWN_AGENT_ID;
+  // context:updated — emit when decisions or notes present
+  const decisions = Array.isArray(lastSection.decisions)
+    ? lastSection.decisions.filter((d): d is string => typeof d === 'string')
+    : [];
+  const notes = Array.isArray(lastSection.notes)
+    ? lastSection.notes.filter((n): n is string => typeof n === 'string')
+    : [];
 
-  return [{ event: TUI_EVENTS.TASK_SYNCED, payload: { agentId, tasks } }];
+  if (decisions.length > 0 || notes.length > 0) {
+    events.push({
+      event: TUI_EVENTS.CONTEXT_UPDATED,
+      payload: {
+        decisions,
+        notes,
+        mode: typeof lastSection.mode === 'string' ? lastSection.mode : null,
+        status: typeof lastSection.status === 'string' ? lastSection.status : null,
+      },
+    });
+  }
+
+  return events;
 }

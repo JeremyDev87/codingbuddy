@@ -397,6 +397,7 @@ describe('EventBus ↔ UI Integration', () => {
         reason: 'bug detected',
       });
       await tick();
+      await tick();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');

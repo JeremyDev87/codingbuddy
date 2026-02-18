@@ -168,6 +168,10 @@ describe('tui/dashboard-types', () => {
         toolCalls: [],
         toolInvokeCount: 0,
         outputStats: { files: 0, commits: 0 },
+        contextDecisions: [],
+        contextNotes: [],
+        contextMode: null,
+        contextStatus: null,
       };
       expect(state.toolInvokeCount).toBe(0);
       expect(state.outputStats).toEqual({ files: 0, commits: 0 });

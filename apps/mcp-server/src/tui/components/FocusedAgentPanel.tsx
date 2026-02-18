@@ -12,6 +12,7 @@ import {
   formatActivitySparkline,
   type ToolIOData,
 } from './focused-agent.pure';
+import { ContextSection } from './ContextSection';
 
 export interface FocusedAgentPanelProps {
   agent: DashboardNode | null;
@@ -23,6 +24,8 @@ export interface FocusedAgentPanelProps {
   outputs: ToolIOData;
   eventLog: EventLogEntry[];
   toolCalls: ToolCallRecord[];
+  contextDecisions?: string[];
+  contextNotes?: string[];
   width?: number;
   height?: number;
 }
@@ -70,6 +73,8 @@ export function FocusedAgentPanel({
   outputs,
   eventLog,
   toolCalls,
+  contextDecisions = [],
+  contextNotes = [],
   width,
   height,
 }: FocusedAgentPanelProps): React.ReactElement {
@@ -158,6 +163,14 @@ export function FocusedAgentPanel({
       {/* Tools / IO Section */}
       <SectionDivider title="Tools / IO" />
       <Text>{toolIO}</Text>
+
+      {/* Context Section */}
+      <SectionDivider title="Context" />
+      {contextDecisions.length > 0 || contextNotes.length > 0 ? (
+        <ContextSection decisions={contextDecisions} notes={contextNotes} width={width} />
+      ) : (
+        <Text dimColor>No context</Text>
+      )}
 
       {/* Event Log Section */}
       <SectionDivider title="Event Log" />

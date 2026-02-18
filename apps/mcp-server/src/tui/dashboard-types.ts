@@ -157,6 +157,10 @@ export interface DashboardState {
   activeSkills: string[];
   toolInvokeCount: number;
   outputStats: { files: number; commits: number };
+  contextDecisions: string[];
+  contextNotes: string[];
+  contextMode: string | null;
+  contextStatus: string | null;
 }
 
 /**
