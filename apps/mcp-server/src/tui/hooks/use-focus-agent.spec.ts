@@ -9,6 +9,7 @@ function makeNode(overrides: Partial<DashboardNode> & { id: string }): Dashboard
     status: 'idle',
     isPrimary: false,
     progress: 0,
+    isParallel: false,
     ...overrides,
   };
 }

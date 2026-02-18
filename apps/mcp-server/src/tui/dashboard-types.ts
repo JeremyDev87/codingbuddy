@@ -42,6 +42,7 @@ export interface DashboardNode {
   status: DashboardNodeStatus;
   isPrimary: boolean;
   progress: number;
+  isParallel: boolean; // true when agent runs as part of parallel dispatch
 }
 
 type DashboardNodeRequired = Pick<DashboardNode, 'id' | 'name' | 'stage'>;
@@ -57,6 +58,7 @@ export function createDefaultDashboardNode(
     status: 'idle',
     isPrimary: false,
     progress: 0,
+    isParallel: false,
     ...params,
   };
 }

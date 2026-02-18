@@ -153,16 +153,28 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
     if (Array.isArray(par.specialists) && par.specialists.length > 0) {
       const specialists = par.specialists.filter((s): s is string => typeof s === 'string');
       if (specialists.length > 0) {
+        const parallelMode =
+          typeof json.mode === 'string' && VALID_MODES.has(json.mode)
+            ? (json.mode as Mode)
+            : 'PLAN';
         events.push({
           event: TUI_EVENTS.PARALLEL_STARTED,
-          payload: {
-            specialists,
-            mode:
-              typeof json.mode === 'string' && VALID_MODES.has(json.mode)
-                ? (json.mode as Mode)
-                : 'PLAN',
-          },
+          payload: { specialists, mode: parallelMode },
         });
+        // Primary → Specialist 관계 엣지
+        if (delegateName) {
+          for (const name of specialists) {
+            events.push({
+              event: TUI_EVENTS.AGENT_RELATIONSHIP,
+              payload: {
+                from: `primary:${delegateName}`,
+                to: `specialist:${name}`,
+                label: 'parallel',
+                type: 'delegation',
+              },
+            });
+          }
+        }
       }
     }
   }
@@ -197,12 +209,31 @@ function extractFromPrepareParallelAgents(json: Record<string, unknown>): Extrac
   const mode: Mode =
     typeof json.mode === 'string' && VALID_MODES.has(json.mode) ? (json.mode as Mode) : 'PLAN';
 
-  return [
+  const primaryAgentId = typeof json.primaryAgentId === 'string' ? json.primaryAgentId : null;
+
+  const events: ExtractedEvent[] = [
     {
       event: TUI_EVENTS.PARALLEL_STARTED,
       payload: { specialists, mode },
     },
   ];
+
+  // Primary → Specialist AGENT_RELATIONSHIP 엣지 emit
+  if (primaryAgentId) {
+    for (const name of specialists) {
+      events.push({
+        event: TUI_EVENTS.AGENT_RELATIONSHIP,
+        payload: {
+          from: primaryAgentId,
+          to: `specialist:${name}`,
+          label: 'parallel',
+          type: 'delegation',
+        },
+      });
+    }
+  }
+
+  return events;
 }
 
 /**

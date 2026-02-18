@@ -88,6 +88,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         status: 'running',
         isPrimary,
         progress: 0,
+        isParallel: false, // AGENT_ACTIVATED는 항상 단일 에이전트
       });
       const globalState = 'RUNNING' as const;
       const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
@@ -236,6 +237,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
           status: 'idle',
           isPrimary: false,
           progress: 0,
+          isParallel: true, // parallel dispatch로 등록된 에이전트
         });
       }
       return { ...state, agents };

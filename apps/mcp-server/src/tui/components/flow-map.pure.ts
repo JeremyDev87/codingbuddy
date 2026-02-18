@@ -16,6 +16,11 @@ import type { Mode } from '../types';
 
 const NODE_WIDTH = 17;
 const NODE_HEIGHT = 4;
+
+const PARALLEL_STYLES = {
+  parallel: { fg: 'cyan' as const }, // 파랑 — 병렬 실행
+  single: { fg: 'gray' as const }, // 회색 — 단일 실행
+} as const;
 const STAGE_ORDER: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
 const STAGE_SLOT_WIDTH = 8; // arrow + space + max label length
 const PIPELINE_RIGHT_MARGIN = 10;
@@ -148,14 +153,23 @@ function drawAgentNode(
   buf.writeText(x + 2, y + 1, nameStr, getNodeTextStyle(agent.status));
   buf.writeText(x + 2 + nameStr.length + 1, y + 1, icon, STATUS_STYLES[agent.status]);
 
-  // Progress bar (row 2)
-  const barWidth = boxW - 4;
-  const bar = buildProgressBar(agent.progress, barWidth);
-  const filledStr = PROGRESS_BAR_CHARS.filled.repeat(bar.filled);
-  const emptyStr = PROGRESS_BAR_CHARS.empty.repeat(bar.empty);
-  buf.writeText(x + 2, y + 2, filledStr, PROGRESS_BAR_STYLES.filled);
-  if (bar.empty > 0) {
-    buf.writeText(x + 2 + bar.filled, y + 2, emptyStr, PROGRESS_BAR_STYLES.empty);
+  // Row 2: progress bar (Primary) OR execution mode indicator (Specialist)
+  if (agent.isPrimary) {
+    // Primary: progress bar 유지
+    const barWidth = boxW - 4;
+    const bar = buildProgressBar(agent.progress, barWidth);
+    const filledStr = PROGRESS_BAR_CHARS.filled.repeat(bar.filled);
+    const emptyStr = PROGRESS_BAR_CHARS.empty.repeat(bar.empty);
+    buf.writeText(x + 2, y + 2, filledStr, PROGRESS_BAR_STYLES.filled);
+    if (bar.empty > 0) {
+      buf.writeText(x + 2 + bar.filled, y + 2, emptyStr, PROGRESS_BAR_STYLES.empty);
+    }
+  } else if (agent.isParallel) {
+    // Parallel Specialist: ⫸ parallel 표시
+    buf.writeText(x + 2, y + 2, '⫸ parallel', PARALLEL_STYLES.parallel);
+  } else {
+    // Single Specialist: → single 표시
+    buf.writeText(x + 2, y + 2, '→ single', PARALLEL_STYLES.single);
   }
 }
 

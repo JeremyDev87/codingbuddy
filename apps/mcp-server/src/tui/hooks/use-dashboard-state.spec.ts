@@ -303,6 +303,32 @@ describe('dashboardReducer', () => {
     expect(state.agents.size).toBe(0);
   });
 
+  it('handles AGENT_ACTIVATED with isParallel defaulting to false', () => {
+    const action: DashboardAction = {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'Architect', role: 'architect', isPrimary: true },
+    };
+    const state = dashboardReducer(initialDashboardState, action);
+    expect(state.agents.get('a1')!.isParallel).toBe(false);
+  });
+
+  it('handles PARALLEL_STARTED — sets isParallel:true on all specialist nodes', () => {
+    const action: DashboardAction = {
+      type: 'PARALLEL_STARTED',
+      payload: {
+        specialists: ['security-specialist', 'performance-specialist'],
+        mode: 'EVAL',
+      },
+    };
+    const state = dashboardReducer(initialDashboardState, action);
+    const security = state.agents.get('specialist:security-specialist')!;
+    const perf = state.agents.get('specialist:performance-specialist')!;
+    expect(security.isParallel).toBe(true);
+    expect(perf.isParallel).toBe(true);
+    expect(security.isPrimary).toBe(false);
+    expect(perf.isPrimary).toBe(false);
+  });
+
   it('handles PARALLEL_COMPLETED as no-op', () => {
     const state = dashboardReducer(initialDashboardState, {
       type: 'PARALLEL_COMPLETED',

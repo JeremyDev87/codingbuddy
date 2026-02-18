@@ -1079,6 +1079,91 @@ describe('extractEventsFromResponse', () => {
     });
   });
 
+  describe('prepare_parallel_agents → agent:relationship edges', () => {
+    it('emits AGENT_RELATIONSHIP edges from primary to each specialist', () => {
+      const events = extractEventsFromResponse(
+        'prepare_parallel_agents',
+        makeResponse({
+          agents: [{ agentName: 'security-specialist' }, { agentName: 'performance-specialist' }],
+          mode: 'EVAL',
+          primaryAgentId: 'primary:technical-planner',
+        }),
+      );
+      const relEvents = events.filter(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      expect(relEvents).toHaveLength(2);
+      expect(relEvents[0].payload).toMatchObject({
+        from: 'primary:technical-planner',
+        to: 'specialist:security-specialist',
+        label: 'parallel',
+        type: 'delegation',
+      });
+      expect(relEvents[1].payload).toMatchObject({
+        from: 'primary:technical-planner',
+        to: 'specialist:performance-specialist',
+        label: 'parallel',
+        type: 'delegation',
+      });
+    });
+
+    it('does not emit AGENT_RELATIONSHIP edges when primaryAgentId is missing', () => {
+      const events = extractEventsFromResponse(
+        'prepare_parallel_agents',
+        makeResponse({
+          agents: [{ agentName: 'security-specialist' }],
+          mode: 'EVAL',
+        }),
+      );
+      const relEvents = events.filter(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      expect(relEvents).toHaveLength(0);
+    });
+  });
+
+  describe('parse_mode → parallelAgentsRecommendation → agent:relationship edges', () => {
+    it('emits AGENT_RELATIONSHIP parallel edges when parallelAgentsRecommendation present', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'technical-planner',
+          parallelAgentsRecommendation: {
+            specialists: ['architecture-specialist', 'test-strategy-specialist'],
+          },
+        }),
+      );
+      const relEvents = events.filter(e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP);
+      const parallelRels = relEvents.filter(e => e.payload.label === 'parallel');
+      expect(parallelRels).toHaveLength(2);
+      expect(parallelRels[0].payload).toMatchObject({
+        from: 'primary:technical-planner',
+        to: 'specialist:architecture-specialist',
+        label: 'parallel',
+        type: 'delegation',
+      });
+      expect(parallelRels[1].payload).toMatchObject({
+        from: 'primary:technical-planner',
+        to: 'specialist:test-strategy-specialist',
+        label: 'parallel',
+        type: 'delegation',
+      });
+    });
+
+    it('does not emit parallel AGENT_RELATIONSHIP when delegates_to is missing', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          parallelAgentsRecommendation: {
+            specialists: ['architecture-specialist'],
+          },
+        }),
+      );
+      const parallelRels = events.filter(
+        e => e.event === TUI_EVENTS.AGENT_RELATIONSHIP && e.payload.label === 'parallel',
+      );
+      expect(parallelRels).toHaveLength(0);
+    });
+  });
+
   describe('other tools', () => {
     it('should return empty array for non-semantic tools', () => {
       expect(extractEventsFromResponse('search_rules', makeResponse({ results: [] }))).toEqual([]);

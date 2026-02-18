@@ -11,6 +11,7 @@ function makeAgent(
     status: 'idle',
     isPrimary: false,
     progress: 0,
+    isParallel: false,
     ...overrides,
   };
 }

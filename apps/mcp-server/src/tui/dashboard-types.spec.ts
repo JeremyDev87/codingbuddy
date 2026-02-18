@@ -64,6 +64,7 @@ describe('tui/dashboard-types', () => {
         status: 'idle',
         isPrimary: false,
         progress: 0,
+        isParallel: false,
       });
     });
 
@@ -84,7 +85,27 @@ describe('tui/dashboard-types', () => {
         status: 'running',
         isPrimary: true,
         progress: 75,
+        isParallel: false,
       });
+    });
+
+    it('should default isParallel to false', () => {
+      const node: DashboardNode = createDefaultDashboardNode({
+        id: 'agent-1',
+        name: 'frontend-developer',
+        stage: 'ACT',
+      });
+      expect(node.isParallel).toBe(false);
+    });
+
+    it('should allow overriding isParallel to true', () => {
+      const node: DashboardNode = createDefaultDashboardNode({
+        id: 'agent-2',
+        name: 'security-specialist',
+        stage: 'EVAL',
+        isParallel: true,
+      });
+      expect(node.isParallel).toBe(true);
     });
 
     it('should allow partial overrides', () => {

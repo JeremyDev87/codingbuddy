@@ -27,6 +27,7 @@ function makeAgent(
     status: 'idle',
     isPrimary: false,
     progress: 0,
+    isParallel: false,
     ...overrides,
   };
 }
@@ -443,6 +444,61 @@ describe('tui/components/flow-map.pure', () => {
 
       expect(result).toContain('PLAN');
       expect(result).toContain('● 0 active');
+    });
+  });
+
+  describe('drawAgentNode — execution mode display', () => {
+    it('renders ⫸ parallel for isParallel:true specialist node', () => {
+      const agents = new Map([
+        [
+          'sec-1',
+          makeAgent({
+            id: 'sec-1',
+            name: 'security',
+            stage: 'EVAL',
+            isParallel: true,
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 20));
+      expect(result).toContain('⫸ parallel');
+      expect(result).not.toContain('░');
+    });
+
+    it('renders → single for isParallel:false specialist node (non-primary)', () => {
+      const agents = new Map([
+        [
+          'rev-1',
+          makeAgent({
+            id: 'rev-1',
+            name: 'code-reviewer',
+            stage: 'EVAL',
+            isPrimary: false,
+            isParallel: false,
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 20));
+      expect(result).toContain('→ single');
+    });
+
+    it('renders progress bar for isPrimary:true node regardless of isParallel', () => {
+      const agents = new Map([
+        [
+          'arch-1',
+          makeAgent({
+            id: 'arch-1',
+            name: 'Architect',
+            stage: 'PLAN',
+            isPrimary: true,
+            progress: 50,
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 20));
+      expect(result).not.toContain('⫸ parallel');
+      expect(result).not.toContain('→ single');
+      expect(result).toMatch(/[█░]/);
     });
   });
 
