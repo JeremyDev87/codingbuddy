@@ -28,6 +28,14 @@ export const NEON_COLORS = Object.freeze({
 } as const);
 
 /**
+ * Centralized border color constants for TUI panel components.
+ * Use BORDER_COLORS.panel instead of hardcoding 'cyan' or 'gray' in TSX components.
+ */
+export const BORDER_COLORS = Object.freeze({
+  panel: NEON_COLORS.primary, // 'cyan'
+} as const);
+
+/**
  * Styles for agent/node status indicators.
  */
 export const STATUS_STYLES: Readonly<Record<DashboardNodeStatus, CellStyle>> = Object.freeze({

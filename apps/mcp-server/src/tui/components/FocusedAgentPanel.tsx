@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { DashboardNode, TaskItem, EventLogEntry } from '../dashboard-types';
-import { STATUS_ICONS, getNodeStatusColor } from '../utils/theme';
+import { STATUS_ICONS, getNodeStatusColor, BORDER_COLORS } from '../utils/theme';
 import {
   formatObjective,
   formatChecklist,
@@ -74,7 +74,7 @@ export function FocusedAgentPanel({
     return (
       <Box
         borderStyle="single"
-        borderColor="cyan"
+        borderColor={BORDER_COLORS.panel}
         flexDirection="column"
         width={width}
         height={height}
@@ -96,7 +96,7 @@ export function FocusedAgentPanel({
   return (
     <Box
       borderStyle="single"
-      borderColor="cyan"
+      borderColor={BORDER_COLORS.panel}
       flexDirection="column"
       width={width}
       height={height}

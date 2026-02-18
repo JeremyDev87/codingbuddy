@@ -2,7 +2,12 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import type { LayoutMode, GlobalRunState } from '../dashboard-types';
 import type { Mode } from '../types';
-import { getModeColor, GLOBAL_STATE_ICONS, GLOBAL_STATE_COLORS } from '../utils/theme';
+import {
+  getModeColor,
+  GLOBAL_STATE_ICONS,
+  GLOBAL_STATE_COLORS,
+  BORDER_COLORS,
+} from '../utils/theme';
 
 export interface HeaderBarProps {
   workspace: string;
@@ -69,7 +74,7 @@ export function HeaderBar({
     return (
       <Box
         borderStyle="double"
-        borderColor="cyan"
+        borderColor={BORDER_COLORS.panel}
         width={width}
         overflowX="hidden"
         flexDirection="row"
@@ -90,7 +95,7 @@ export function HeaderBar({
   return (
     <Box
       borderStyle="double"
-      borderColor="cyan"
+      borderColor={BORDER_COLORS.panel}
       width={width}
       overflowX="hidden"
       flexDirection="row"

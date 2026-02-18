@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   type CellStyle,
   NEON_COLORS,
+  BORDER_COLORS,
   STATUS_STYLES,
   STATUS_ICONS,
   MODE_LABEL_STYLES,
@@ -33,6 +34,16 @@ describe('theme', () => {
       expect(NEON_COLORS.done).toBe('green');
       expect(NEON_COLORS.inactive).toBe('gray');
       expect(NEON_COLORS.content).toBe('white');
+    });
+  });
+
+  describe('BORDER_COLORS', () => {
+    it('defines panel border color as primary (cyan)', () => {
+      expect(BORDER_COLORS.panel).toBe('cyan');
+    });
+
+    it('is frozen (immutable)', () => {
+      expect(Object.isFrozen(BORDER_COLORS)).toBe(true);
     });
   });
 

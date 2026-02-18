@@ -3,6 +3,7 @@ import { Box, Text } from 'ink';
 import type { ToolCallRecord } from '../dashboard-types';
 import type { Mode } from '../types';
 import { aggregateToolCalls, renderHeatmap, renderLiveContext } from './activity-visualizer.pure';
+import { BORDER_COLORS } from '../utils/theme';
 
 export interface ActivityVisualizerProps {
   toolCalls: ToolCallRecord[];
@@ -39,7 +40,7 @@ export function ActivityVisualizer({
     <Box flexDirection="row" width={width} height={height}>
       <Box
         borderStyle="single"
-        borderColor="gray"
+        borderColor={BORDER_COLORS.panel}
         flexDirection="column"
         width={heatmapWidth}
         height={height}
@@ -50,7 +51,7 @@ export function ActivityVisualizer({
       </Box>
       <Box
         borderStyle="single"
-        borderColor="gray"
+        borderColor={BORDER_COLORS.panel}
         flexDirection="column"
         width={livePanelWidth}
         height={height}

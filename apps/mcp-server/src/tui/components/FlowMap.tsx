@@ -3,6 +3,7 @@ import { Box, Text } from 'ink';
 import type { LayoutMode, DashboardNode, Edge } from '../dashboard-types';
 import type { Mode } from '../types';
 import { groupByStyle, type ColorCell } from '../utils/color-buffer';
+import { BORDER_COLORS } from '../utils/theme';
 import { renderFlowMap, renderFlowMapSimplified, renderFlowMapCompact } from './flow-map.pure';
 
 /**
@@ -88,7 +89,7 @@ export function FlowMap({
     return (
       <Box
         borderStyle="single"
-        borderColor="gray"
+        borderColor={BORDER_COLORS.panel}
         flexDirection="column"
         width={width}
         height={height}
@@ -105,7 +106,7 @@ export function FlowMap({
     return (
       <Box
         borderStyle="single"
-        borderColor="gray"
+        borderColor={BORDER_COLORS.panel}
         flexDirection="column"
         width={width}
         height={height}
@@ -120,7 +121,7 @@ export function FlowMap({
   return (
     <Box
       borderStyle="single"
-      borderColor="gray"
+      borderColor={BORDER_COLORS.panel}
       flexDirection="column"
       width={width}
       height={height}

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import type { StageStats } from '../dashboard-types';
 import type { Mode } from '../types';
-import { getModeColor } from '../utils/theme';
+import { getModeColor, BORDER_COLORS } from '../utils/theme';
 
 export interface StageHealthBarProps {
   stageHealth: Record<Mode, StageStats>;
@@ -85,7 +85,12 @@ export function StageHealthBar({
   const countStr = toolCount >= 1000 ? `${Math.round(toolCount / 1000)}k` : String(toolCount);
 
   return (
-    <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="column">
+    <Box
+      borderStyle="double"
+      borderColor={BORDER_COLORS.panel}
+      width={width}
+      flexDirection="column"
+    >
       <Box>
         <Box gap={2}>
           {(['PLAN', 'ACT', 'EVAL'] as const).map(mode => (
