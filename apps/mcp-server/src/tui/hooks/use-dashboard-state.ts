@@ -46,7 +46,7 @@ export function createInitialDashboardState(): DashboardState {
     toolCalls: [],
     objectives: [],
     activeSkills: [],
-    tokenUsage: 0,
+    toolInvokeCount: 0,
     outputStats: { files: 0, commits: 0 },
   };
 }
@@ -202,6 +202,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         agents,
         eventLog: [...base, entry],
         toolCalls: [...toolCallsBase, toolCall],
+        toolInvokeCount: state.toolInvokeCount + 1,
       };
     }
 
