@@ -12,12 +12,13 @@ import {
   type TaskSyncedEvent,
   type ToolInvokedEvent,
   type ObjectiveSetEvent,
+  type SessionResetEvent,
   type TuiEventMap,
 } from './types';
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 11 event names', () => {
+    it('should define all 12 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -30,7 +31,12 @@ describe('tui/events/types', () => {
         TASK_SYNCED: 'task:synced',
         TOOL_INVOKED: 'tool:invoked',
         OBJECTIVE_SET: 'objective:set',
+        SESSION_RESET: 'session:reset',
       });
+    });
+
+    it('should include SESSION_RESET event', () => {
+      expect(TUI_EVENTS.SESSION_RESET).toBe('session:reset');
     });
 
     it('should include AGENTS_LOADED event', () => {
@@ -178,6 +184,7 @@ describe('tui/events/types', () => {
         'task:synced': { agentId: 'a1', tasks: [] },
         'tool:invoked': { toolName: 'search_rules', agentId: null, timestamp: 0 },
         'objective:set': { objective: 'implement auth feature' },
+        'session:reset': { reason: 'new-plan-session' },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
     });
@@ -187,6 +194,18 @@ describe('tui/events/types', () => {
     it('should have correct shape', () => {
       const event: ObjectiveSetEvent = { objective: 'implement auth feature' };
       expect(event.objective).toBe('implement auth feature');
+    });
+  });
+
+  describe('SessionResetEvent', () => {
+    it('should have reason field', () => {
+      const event: SessionResetEvent = { reason: 'new-plan-session' };
+      expect(event.reason).toBe('new-plan-session');
+    });
+
+    it('should accept manual reason', () => {
+      const event: SessionResetEvent = { reason: 'manual' };
+      expect(event.reason).toBe('manual');
     });
   });
 });

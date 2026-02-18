@@ -164,6 +164,7 @@ async function initIpc(app: INestApplicationContext): Promise<InitIpcResult> {
     (p: unknown) => (p as { agentId: string }).agentId,
   );
   stateCache.trackToggle(TUI_EVENTS.PARALLEL_STARTED, TUI_EVENTS.PARALLEL_COMPLETED);
+  stateCache.trackReset(TUI_EVENTS.SESSION_RESET);
 
   // Provide initial state snapshot for late-connecting TUI clients
   const ipcServer = new TuiIpcServer(socketPath, {

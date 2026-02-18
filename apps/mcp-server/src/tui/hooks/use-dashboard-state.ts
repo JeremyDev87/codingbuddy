@@ -21,6 +21,7 @@ import {
   type TaskSyncedEvent,
   type ToolInvokedEvent,
   type ObjectiveSetEvent,
+  type SessionResetEvent,
 } from '../events';
 import { selectFocusedAgent } from './use-focus-agent';
 
@@ -62,7 +63,8 @@ export type DashboardAction =
   | { type: 'AGENT_RELATIONSHIP'; payload: AgentRelationshipEvent }
   | { type: 'TASK_SYNCED'; payload: TaskSyncedEvent }
   | { type: 'TOOL_INVOKED'; payload: ToolInvokedEvent }
-  | { type: 'OBJECTIVE_SET'; payload: ObjectiveSetEvent };
+  | { type: 'OBJECTIVE_SET'; payload: ObjectiveSetEvent }
+  | { type: 'SESSION_RESET'; payload: SessionResetEvent };
 
 function cloneAgents(agents: Map<string, DashboardNode>): Map<string, DashboardNode> {
   return new Map(agents);
@@ -233,6 +235,9 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       return { ...state, agents };
     }
 
+    case 'SESSION_RESET':
+      return createInitialDashboardState();
+
     // Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
     case 'PARALLEL_COMPLETED':
     case 'AGENTS_LOADED':
@@ -273,6 +278,8 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
     const onToolInvoked = (p: ToolInvokedEvent) => dispatch({ type: 'TOOL_INVOKED', payload: p });
     const onObjectiveSet = (p: ObjectiveSetEvent) =>
       dispatch({ type: 'OBJECTIVE_SET', payload: p });
+    const onSessionReset = (p: SessionResetEvent) =>
+      dispatch({ type: 'SESSION_RESET', payload: p });
 
     eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
     eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, onDeactivated);
@@ -285,6 +292,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
     eventBus.on(TUI_EVENTS.TASK_SYNCED, onTaskSynced);
     eventBus.on(TUI_EVENTS.TOOL_INVOKED, onToolInvoked);
     eventBus.on(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
+    eventBus.on(TUI_EVENTS.SESSION_RESET, onSessionReset);
 
     return () => {
       eventBus.off(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
@@ -298,6 +306,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       eventBus.off(TUI_EVENTS.TASK_SYNCED, onTaskSynced);
       eventBus.off(TUI_EVENTS.TOOL_INVOKED, onToolInvoked);
       eventBus.off(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
+      eventBus.off(TUI_EVENTS.SESSION_RESET, onSessionReset);
     };
   }, [eventBus]);
 

@@ -88,6 +88,15 @@ export class IpcStateCache {
     this.removers.push(() => this.eventBus.off(endEvent, endHandler));
   }
 
+  /** Clear all cached state when the given reset event fires (e.g. session:reset) */
+  trackReset(resetEvent: string): void {
+    const handler = (): void => {
+      this.latestState.clear();
+    };
+    this.eventBus.on(resetEvent, handler);
+    this.removers.push(() => this.eventBus.off(resetEvent, handler));
+  }
+
   /** Return snapshot of all cached state for late-connecting clients */
   getSnapshot(): IpcMessage[] {
     return [...this.latestState.values()];

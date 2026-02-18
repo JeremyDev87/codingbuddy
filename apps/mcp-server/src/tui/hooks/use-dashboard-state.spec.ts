@@ -599,4 +599,48 @@ describe('dashboardReducer', () => {
     // Focused primary agent should NOT be incremented (exact match took priority)
     expect(state.agents.get('primary:arch')?.progress).toBe(0);
   });
+
+  describe('SESSION_RESET', () => {
+    it('should clear agents, edges, eventLog, tasks, objectives on SESSION_RESET', () => {
+      let state = dashboardReducer(initialDashboardState, {
+        type: 'AGENT_ACTIVATED',
+        payload: { agentId: 'a1', name: 'Architect', role: 'architect', isPrimary: true },
+      });
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: null, to: 'PLAN' },
+      });
+      state = dashboardReducer(state, {
+        type: 'TOOL_INVOKED',
+        payload: { toolName: 'search_rules', agentId: 'a1', timestamp: Date.now() },
+      });
+      state = dashboardReducer(state, {
+        type: 'OBJECTIVE_SET',
+        payload: { objective: 'build auth feature' },
+      });
+
+      const result = dashboardReducer(state, {
+        type: 'SESSION_RESET',
+        payload: { reason: 'new-plan-session' },
+      });
+
+      expect(result.agents.size).toBe(0);
+      expect(result.edges).toEqual([]);
+      expect(result.eventLog).toEqual([]);
+      expect(result.tasks).toEqual([]);
+      expect(result.objectives).toEqual([]);
+      expect(result.currentMode).toBeNull();
+      expect(result.globalState).toBe('IDLE');
+      expect(result.toolInvokeCount).toBe(0);
+    });
+
+    it('should generate a new sessionId on SESSION_RESET', () => {
+      const result = dashboardReducer(initialDashboardState, {
+        type: 'SESSION_RESET',
+        payload: { reason: 'new-plan-session' },
+      });
+      expect(result.sessionId).toBeDefined();
+      expect(typeof result.sessionId).toBe('string');
+    });
+  });
 });

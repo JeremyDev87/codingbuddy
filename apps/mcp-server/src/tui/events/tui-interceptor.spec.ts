@@ -433,6 +433,157 @@ describe('TuiInterceptor', () => {
     });
   });
 
+  describe('resetSession()', () => {
+    beforeEach(() => {
+      interceptor.enable();
+    });
+
+    it('should emit session:reset event with given reason', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      interceptor.resetSession('manual');
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).toHaveBeenCalledWith({ reason: 'manual' });
+    });
+
+    it('should emit session:reset only once per call', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      interceptor.resetSession('test');
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('MODE_CHANGED auto-reset', () => {
+    beforeEach(() => {
+      interceptor.enable();
+    });
+
+    it('should NOT emit SESSION_RESET on first PLAN when currentMode is null', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN first session' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).not.toHaveBeenCalled();
+    });
+
+    it('should emit SESSION_RESET on second PLAN when previous session exists', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      // 첫 번째 PLAN: currentMode null → PLAN (reset 없음)
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN first' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+      expect(resetHandler).not.toHaveBeenCalled();
+
+      // 두 번째 PLAN: currentMode PLAN → reset 발생
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN second' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).toHaveBeenCalledWith({ reason: 'new-plan-session' });
+      expect(resetHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should emit SESSION_RESET on AUTO when previous session exists', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      // 첫 번째 PLAN
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN setup' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      // AUTO: currentMode PLAN → reset 발생
+      await interceptor.intercept('parse_mode', { prompt: 'AUTO build feature' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'AUTO' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).toHaveBeenCalledWith({ reason: 'new-plan-session' });
+    });
+
+    it('should NOT emit SESSION_RESET on ACT even with previous session', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      // PLAN 먼저
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN setup' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+      resetHandler.mockClear();
+
+      // ACT: reset 없어야 함
+      await interceptor.intercept('parse_mode', { prompt: 'ACT implement' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'ACT' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).not.toHaveBeenCalled();
+    });
+
+    it('should NOT emit SESSION_RESET on EVAL even with previous session', async () => {
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      // PLAN → ACT 먼저
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN setup' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+      await interceptor.intercept('parse_mode', { prompt: 'ACT impl' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'ACT' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+      resetHandler.mockClear();
+
+      // EVAL: reset 없어야 함
+      await interceptor.intercept('parse_mode', { prompt: 'EVAL review' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'EVAL' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).not.toHaveBeenCalled();
+    });
+
+    it('MODE_CHANGED should still be emitted after SESSION_RESET', async () => {
+      const modeHandler = vi.fn();
+      const resetHandler = vi.fn();
+      eventBus.on(TUI_EVENTS.MODE_CHANGED, modeHandler);
+      eventBus.on(TUI_EVENTS.SESSION_RESET, resetHandler);
+
+      // 첫 PLAN
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN first' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+      modeHandler.mockClear();
+
+      // 두 번째 PLAN: reset 후 mode:changed도 발생해야 함
+      await interceptor.intercept('parse_mode', { prompt: 'PLAN second' }, async () => ({
+        content: [{ type: 'text', text: JSON.stringify({ mode: 'PLAN' }) }],
+      }));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(resetHandler).toHaveBeenCalledTimes(1);
+      expect(modeHandler).toHaveBeenCalledWith({ from: null, to: 'PLAN' });
+    });
+  });
+
   describe('enable/disable', () => {
     it('should be disabled by default', () => {
       expect(interceptor.isEnabled()).toBe(false);

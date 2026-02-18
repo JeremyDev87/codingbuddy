@@ -143,6 +143,42 @@ describe('IpcStateCache', () => {
     });
   });
 
+  describe('trackReset', () => {
+    it('should clear all cached state when reset event fires', () => {
+      cache.trackSimple('mode:changed');
+      cache.trackSimple('agents:loaded');
+      bus.emit('mode:changed', { from: null, to: 'PLAN' });
+      bus.emit('agents:loaded', { agents: [] });
+
+      expect(cache.getSnapshot()).toHaveLength(2);
+
+      cache.trackReset('session:reset');
+      bus.emit('session:reset', { reason: 'new-plan-session' });
+
+      expect(cache.getSnapshot()).toHaveLength(0);
+    });
+
+    it('should not affect cache before reset event fires', () => {
+      cache.trackSimple('mode:changed');
+      bus.emit('mode:changed', { from: null, to: 'PLAN' });
+
+      cache.trackReset('session:reset');
+
+      // reset 이벤트가 아직 발생 전이므로 캐시는 유지됨
+      expect(cache.getSnapshot()).toHaveLength(1);
+    });
+
+    it('should register cleanup for reset handler on destroy', () => {
+      const offSpy = vi.spyOn(bus, 'off');
+      cache.trackReset('session:reset');
+
+      cache.destroy();
+
+      // trackReset이 등록한 리스너 1개가 정리되어야 함
+      expect(offSpy).toHaveBeenCalledWith('session:reset', expect.any(Function));
+    });
+  });
+
   describe('destroy', () => {
     it('should remove all listeners and clear cache', () => {
       const offSpy = vi.spyOn(bus, 'off');

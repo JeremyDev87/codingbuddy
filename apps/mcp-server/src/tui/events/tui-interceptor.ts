@@ -112,9 +112,23 @@ export class TuiInterceptor {
     }
   }
 
+  /**
+   * Emits SESSION_RESET and clears internal session state.
+   * Public for testability — prefer auto-trigger via emitSemanticEvent().
+   */
+  resetSession(reason: string): void {
+    this.eventBus.emit(TUI_EVENTS.SESSION_RESET, { reason });
+    this.currentMode = null;
+    this.currentPrimaryAgentId = null;
+  }
+
   private emitSemanticEvent(evt: ExtractedEvent): void {
     switch (evt.event) {
       case TUI_EVENTS.MODE_CHANGED: {
+        const targetMode = evt.payload.to;
+        if ((targetMode === 'PLAN' || targetMode === 'AUTO') && this.currentMode !== null) {
+          this.resetSession('new-plan-session');
+        }
         const payload = { ...evt.payload, from: this.currentMode };
         this.currentMode = evt.payload.to;
         this.eventBus.emit(TUI_EVENTS.MODE_CHANGED, payload);

@@ -9,7 +9,8 @@ import type { EdgeType } from '../dashboard-types';
 import type { AgentMetadata } from './agent-metadata.types';
 
 /**
- * Event name constants for the TUI EventBus
+ * Event name constants for the TUI EventBus.
+ * Defines the 12 core events for the TUI Agent Monitor event system.
  */
 export const TUI_EVENTS = Object.freeze({
   AGENT_ACTIVATED: 'agent:activated',
@@ -23,6 +24,7 @@ export const TUI_EVENTS = Object.freeze({
   TASK_SYNCED: 'task:synced',
   TOOL_INVOKED: 'tool:invoked',
   OBJECTIVE_SET: 'objective:set',
+  SESSION_RESET: 'session:reset',
 } as const);
 
 export type TuiEventName = (typeof TUI_EVENTS)[keyof typeof TUI_EVENTS];
@@ -97,6 +99,11 @@ export interface ObjectiveSetEvent {
   objective: string;
 }
 
+/** Payload when the session is reset (e.g. after /clear command) */
+export interface SessionResetEvent {
+  reason: string;
+}
+
 /**
  * Maps event names to their payload types for type-safe emit/subscribe.
  */
@@ -112,4 +119,5 @@ export interface TuiEventMap {
   [TUI_EVENTS.TASK_SYNCED]: TaskSyncedEvent;
   [TUI_EVENTS.TOOL_INVOKED]: ToolInvokedEvent;
   [TUI_EVENTS.OBJECTIVE_SET]: ObjectiveSetEvent;
+  [TUI_EVENTS.SESSION_RESET]: SessionResetEvent;
 }
