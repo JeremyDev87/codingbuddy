@@ -182,13 +182,15 @@ describe('tui/dashboard-types', () => {
         header: { x: 0, y: 0, width: 120, height: 3 },
         flowMap: { x: 0, y: 3, width: 54, height: 17 },
         monitorPanel: { x: 0, y: 20, width: 54, height: 17 },
-        focusedAgent: { x: 54, y: 3, width: 66, height: 34 },
+        checklistPanel: { x: 54, y: 3, width: 66, height: 7 },
+        focusedAgent: { x: 54, y: 10, width: 66, height: 27 },
         stageHealth: { x: 0, y: 37, width: 120, height: 3 },
         total: { width: 120, height: 40 },
       };
       expect(grid.header).toBeDefined();
       expect(grid.flowMap).toBeDefined();
       expect(grid.monitorPanel).toBeDefined();
+      expect(grid.checklistPanel).toBeDefined();
       expect(grid.focusedAgent).toBeDefined();
       expect(grid.stageHealth).toBeDefined();
       expect(grid.total).toBeDefined();

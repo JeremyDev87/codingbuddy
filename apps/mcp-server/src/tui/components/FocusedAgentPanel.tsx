@@ -1,10 +1,9 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import type { DashboardNode, TaskItem, EventLogEntry, ToolCallRecord } from '../dashboard-types';
+import type { DashboardNode, EventLogEntry, ToolCallRecord } from '../dashboard-types';
 import { STATUS_ICONS, getNodeStatusColor, BORDER_COLORS, getAgentAvatar } from '../utils/theme';
 import {
   formatObjective,
-  formatEnhancedChecklist,
   formatToolIO,
   formatLogTail,
   formatSectionDivider,
@@ -18,7 +17,6 @@ export interface FocusedAgentPanelProps {
   agent: DashboardNode | null;
   objectives: string[];
   activeSkills: string[];
-  tasks: TaskItem[];
   tools: string[];
   inputs: string[];
   outputs: ToolIOData;
@@ -67,7 +65,6 @@ export function FocusedAgentPanel({
   agent,
   objectives,
   activeSkills,
-  tasks,
   tools,
   inputs,
   outputs,
@@ -98,7 +95,6 @@ export function FocusedAgentPanel({
   const statusLabel = agent.status.toUpperCase();
   const progressBar = formatEnhancedProgressBar(agent.progress);
   const objective = formatObjective(objectives);
-  const checklist = formatEnhancedChecklist(tasks);
   const toolIO = formatToolIO(tools, inputs, outputs);
   const logs = formatLogTail(eventLog);
   const agentToolCalls = toolCalls.filter(tc => tc.agentId === agent.id);
@@ -139,21 +135,6 @@ export function FocusedAgentPanel({
         activeSkills.map((s, i) => <Text key={i}> {s}</Text>)
       ) : (
         <Text dimColor>No skills</Text>
-      )}
-
-      {/* Checklist Section */}
-      <SectionDivider title="Checklist" />
-      {checklist ? (
-        checklist.split('\n').map((line, i) => {
-          const isCompleted = line.includes('✔');
-          return (
-            <Text key={i} color={isCompleted ? 'green' : undefined}>
-              {line}
-            </Text>
-          );
-        })
-      ) : (
-        <Text dimColor>No tasks</Text>
       )}
 
       {/* Activity Sparkline */}

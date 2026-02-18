@@ -8,6 +8,8 @@ export {
   layoutAgentNodes,
 } from './flow-map.pure';
 export { FocusedAgentPanel, type FocusedAgentPanelProps } from './FocusedAgentPanel';
+export { ChecklistPanel, type ChecklistPanelProps } from './ChecklistPanel';
+export { resolveChecklistTasks } from './checklist-panel.pure';
 export {
   formatObjective,
   formatChecklist,

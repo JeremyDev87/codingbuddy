@@ -7,6 +7,7 @@ import { useDashboardState } from './hooks/use-dashboard-state';
 import { HeaderBar } from './components/HeaderBar';
 import { FlowMap } from './components/FlowMap';
 import { FocusedAgentPanel } from './components/FocusedAgentPanel';
+import { ChecklistPanel } from './components/ChecklistPanel';
 import { StageHealthBar } from './components/StageHealthBar';
 import { ActivityVisualizer } from './components/ActivityVisualizer';
 import { computeStageHealth, detectBottlenecks } from './components/stage-health.pure';
@@ -58,11 +59,19 @@ export function DashboardApp({
       />
       {layoutMode === 'narrow' ? (
         <Box flexDirection="column">
+          {grid.checklistPanel.height > 0 && (
+            <ChecklistPanel
+              tasks={state.tasks}
+              contextDecisions={state.contextDecisions}
+              contextNotes={state.contextNotes}
+              width={grid.checklistPanel.width}
+              height={grid.checklistPanel.height}
+            />
+          )}
           <FocusedAgentPanel
             agent={focusedAgent}
             objectives={state.objectives}
             activeSkills={state.activeSkills}
-            tasks={state.tasks}
             tools={tools}
             inputs={tools}
             outputs={state.outputStats}
@@ -82,7 +91,11 @@ export function DashboardApp({
           />
         </Box>
       ) : (
-        <Box flexDirection="row" width={grid.total.width} height={grid.focusedAgent.height}>
+        <Box
+          flexDirection="row"
+          width={grid.total.width}
+          height={grid.checklistPanel.height + grid.focusedAgent.height}
+        >
           <Box flexDirection="column" width={grid.flowMap.width}>
             <FlowMap
               agents={state.agents}
@@ -98,21 +111,29 @@ export function DashboardApp({
               height={grid.monitorPanel.height}
             />
           </Box>
-          <FocusedAgentPanel
-            agent={focusedAgent}
-            objectives={state.objectives}
-            activeSkills={state.activeSkills}
-            tasks={state.tasks}
-            tools={tools}
-            inputs={tools}
-            outputs={state.outputStats}
-            eventLog={state.eventLog}
-            toolCalls={state.toolCalls}
-            contextDecisions={state.contextDecisions}
-            contextNotes={state.contextNotes}
-            width={grid.focusedAgent.width}
-            height={grid.focusedAgent.height}
-          />
+          <Box flexDirection="column" width={grid.checklistPanel.width}>
+            <ChecklistPanel
+              tasks={state.tasks}
+              contextDecisions={state.contextDecisions}
+              contextNotes={state.contextNotes}
+              width={grid.checklistPanel.width}
+              height={grid.checklistPanel.height}
+            />
+            <FocusedAgentPanel
+              agent={focusedAgent}
+              objectives={state.objectives}
+              activeSkills={state.activeSkills}
+              tools={tools}
+              inputs={tools}
+              outputs={state.outputStats}
+              eventLog={state.eventLog}
+              toolCalls={state.toolCalls}
+              contextDecisions={state.contextDecisions}
+              contextNotes={state.contextNotes}
+              width={grid.focusedAgent.width}
+              height={grid.focusedAgent.height}
+            />
+          </Box>
         </Box>
       )}
       <StageHealthBar

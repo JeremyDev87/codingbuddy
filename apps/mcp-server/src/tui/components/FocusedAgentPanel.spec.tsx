@@ -20,7 +20,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={['Add /users endpoints']}
-        tasks={[{ id: '1', subject: 'routes added', completed: true }]}
         tools={['file_edit']}
         inputs={['spec.md']}
         outputs={{ files: 3 }}
@@ -40,7 +39,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -60,7 +58,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={['Design auth']}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -70,7 +67,6 @@ describe('tui/components/FocusedAgentPanel', () => {
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('─── Objective');
-    expect(frame).toContain('─── Checklist');
     expect(frame).toContain('─── Activity');
     expect(frame).toContain('─── Tools / IO');
     expect(frame).toContain('─── Event Log');
@@ -82,7 +78,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={['Add /users endpoints', 'Update DTO']}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -93,35 +88,12 @@ describe('tui/components/FocusedAgentPanel', () => {
     expect(lastFrame()).toContain('Add /users endpoints');
   });
 
-  it('should render checklist with ✔/◻ icons', () => {
-    const { lastFrame } = render(
-      <FocusedAgentPanel
-        agent={mockAgent}
-        activeSkills={[]}
-        objectives={[]}
-        tasks={[
-          { id: '1', subject: 'routes added', completed: true },
-          { id: '2', subject: 'tests updated', completed: false },
-        ]}
-        tools={[]}
-        inputs={[]}
-        outputs={{}}
-        eventLog={[]}
-        toolCalls={[]}
-      />,
-    );
-    const frame = lastFrame() ?? '';
-    expect(frame).toContain('✔ routes added');
-    expect(frame).toContain('◻ tests updated');
-  });
-
   it('should render tool/IO section', () => {
     const { lastFrame } = render(
       <FocusedAgentPanel
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={['file_edit', 'test_run']}
         inputs={['spec.md']}
         outputs={{ files: 12, commits: 3 }}
@@ -140,7 +112,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -160,7 +131,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={null}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -177,7 +147,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -196,7 +165,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={null}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -215,7 +183,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -234,7 +201,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={['tdd', 'debugging']}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -254,7 +220,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -271,7 +236,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -289,7 +253,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -315,7 +278,6 @@ describe('tui/components/FocusedAgentPanel', () => {
         agent={mockAgent}
         activeSkills={[]}
         objectives={[]}
-        tasks={[]}
         tools={[]}
         inputs={[]}
         outputs={{}}
@@ -333,7 +295,6 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tasks={[]}
           tools={[]}
           inputs={[]}
           outputs={{}}
@@ -355,7 +316,6 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tasks={[]}
           tools={[]}
           inputs={[]}
           outputs={{}}
@@ -376,7 +336,6 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tasks={[]}
           tools={[]}
           inputs={[]}
           outputs={{}}
@@ -396,7 +355,6 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          tasks={[]}
           tools={[]}
           inputs={[]}
           outputs={{}}

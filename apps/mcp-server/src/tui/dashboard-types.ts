@@ -180,6 +180,7 @@ export interface GridRegion {
  */
 export interface DashboardGrid {
   header: GridRegion;
+  checklistPanel: GridRegion;
   flowMap: GridRegion;
   monitorPanel: GridRegion;
   focusedAgent: GridRegion;

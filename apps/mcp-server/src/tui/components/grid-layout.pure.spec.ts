@@ -15,6 +15,8 @@ function regionArea(r: GridRegion): number {
 describe('computeGridLayout', () => {
   describe('wide layout (120x40)', () => {
     const grid = computeGridLayout(120, 40, 'wide');
+    const mainHeight = 40 - 3 - 3; // 34
+    const checklistHeight = Math.max(6, Math.min(10, Math.ceil(mainHeight * 0.3))); // 10
 
     it('header spans full width at row 0 with height 3', () => {
       expect(grid.header).toEqual({ x: 0, y: 0, width: 120, height: 3 });
@@ -40,7 +42,6 @@ describe('computeGridLayout', () => {
     });
 
     it('flowMap and monitorPanel split the left column height evenly', () => {
-      const mainHeight = 40 - 3 - 3; // 34
       const flowMapHeight = Math.ceil(mainHeight / 2); // 17
       const monitorHeight = mainHeight - flowMapHeight; // 17
       expect(grid.flowMap.height).toBe(flowMapHeight);
@@ -53,9 +54,8 @@ describe('computeGridLayout', () => {
       expect(grid.monitorPanel.width).toBe(grid.flowMap.width);
     });
 
-    it('focusedAgent spans full main height', () => {
-      const mainHeight = 40 - 3 - 3;
-      expect(grid.focusedAgent.height).toBe(mainHeight);
+    it('focusedAgent spans mainHeight minus checklistPanel height', () => {
+      expect(grid.focusedAgent.height).toBe(mainHeight - checklistHeight);
     });
 
     it('flowMap starts at column 0, focusedAgent starts after flowMap', () => {
@@ -63,9 +63,19 @@ describe('computeGridLayout', () => {
       expect(grid.focusedAgent.x).toBe(grid.flowMap.width);
     });
 
-    it('both panels start at row 3 (after header)', () => {
+    it('flowMap starts at row 3 (after header)', () => {
       expect(grid.flowMap.y).toBe(3);
-      expect(grid.focusedAgent.y).toBe(3);
+    });
+
+    it('focusedAgent starts below checklistPanel', () => {
+      expect(grid.focusedAgent.y).toBe(grid.checklistPanel.y + grid.checklistPanel.height);
+    });
+
+    it('checklistPanel sits at the top of the focused-agent column', () => {
+      expect(grid.checklistPanel.x).toBe(grid.focusedAgent.x);
+      expect(grid.checklistPanel.width).toBe(grid.focusedAgent.width);
+      expect(grid.checklistPanel.y).toBe(3);
+      expect(grid.checklistPanel.height).toBe(checklistHeight);
     });
 
     it('total dimensions match input', () => {
@@ -75,6 +85,8 @@ describe('computeGridLayout', () => {
 
   describe('medium layout (100x30)', () => {
     const grid = computeGridLayout(100, 30, 'medium');
+    const mainHeight = 30 - 3 - 3; // 24
+    const checklistHeight = Math.max(6, Math.min(10, Math.ceil(mainHeight * 0.3))); // 8
 
     it('focusedAgent has fixed width 58 in medium mode', () => {
       expect(grid.focusedAgent.width).toBe(58);
@@ -88,13 +100,11 @@ describe('computeGridLayout', () => {
       expect(grid.focusedAgent.x + grid.focusedAgent.width).toBe(100);
     });
 
-    it('main area height is total - header(3) - stageHealth(3)', () => {
-      const mainHeight = 30 - 3 - 3;
-      expect(grid.focusedAgent.height).toBe(mainHeight);
+    it('main area height: focusedAgent height equals mainHeight minus checklistPanel height', () => {
+      expect(grid.focusedAgent.height).toBe(mainHeight - checklistHeight);
     });
 
     it('flowMap and monitorPanel split the left column height', () => {
-      const mainHeight = 30 - 3 - 3; // 24
       const flowMapHeight = Math.ceil(mainHeight / 2); // 12
       const monitorHeight = mainHeight - flowMapHeight; // 12
       expect(grid.flowMap.height).toBe(flowMapHeight);
@@ -106,14 +116,25 @@ describe('computeGridLayout', () => {
       expect(grid.monitorPanel.width).toBe(grid.flowMap.width);
     });
 
-    it('focusedAgent spans full main height', () => {
-      const mainHeight = 30 - 3 - 3;
-      expect(grid.focusedAgent.height).toBe(mainHeight);
+    it('focusedAgent starts below checklistPanel', () => {
+      expect(grid.focusedAgent.y).toBe(grid.checklistPanel.y + grid.checklistPanel.height);
+    });
+
+    it('checklistPanel sits at the top of the focused-agent column', () => {
+      expect(grid.checklistPanel.x).toBe(grid.focusedAgent.x);
+      expect(grid.checklistPanel.width).toBe(grid.focusedAgent.width);
+      expect(grid.checklistPanel.y).toBe(3);
+      expect(grid.checklistPanel.height).toBe(checklistHeight);
     });
   });
 
   describe('narrow layout (60x20)', () => {
     const grid = computeGridLayout(60, 20, 'narrow');
+    const mainHeight = 20 - 3 - 3; // 14
+    const flowMapHeight = Math.min(5, mainHeight - 1); // 5
+    const availableForChecklist = mainHeight - flowMapHeight; // 9
+    const rawChecklistHeight = Math.max(6, Math.min(10, Math.ceil(mainHeight * 0.3))); // 6
+    const checklistHeight = Math.min(rawChecklistHeight, Math.max(0, availableForChecklist - 1)); // 6
 
     it('all regions span full width', () => {
       expect(grid.header.width).toBe(60);
@@ -128,6 +149,7 @@ describe('computeGridLayout', () => {
 
     it('stageHealth is at bottom with height 3', () => {
       expect(grid.stageHealth.height).toBe(3);
+      expect(grid.stageHealth.height).toBe(3);
       expect(grid.stageHealth.y + grid.stageHealth.height).toBe(20);
     });
 
@@ -136,13 +158,21 @@ describe('computeGridLayout', () => {
       expect(grid.flowMap.y + grid.flowMap.height).toBe(grid.stageHealth.y);
     });
 
-    it('focusedAgent fills remaining space between header and flowMap', () => {
-      expect(grid.focusedAgent.y).toBe(3);
+    it('checklistPanel is at top in narrow mode', () => {
+      expect(grid.checklistPanel.x).toBe(0);
+      expect(grid.checklistPanel.width).toBe(60);
+      expect(grid.checklistPanel.y).toBe(3);
+      expect(grid.checklistPanel.height).toBe(checklistHeight);
+    });
+
+    it('focusedAgent fills remaining space between checklistPanel and flowMap', () => {
+      expect(grid.focusedAgent.y).toBe(grid.checklistPanel.y + grid.checklistPanel.height);
       expect(grid.focusedAgent.y + grid.focusedAgent.height).toBe(grid.flowMap.y);
     });
 
-    it('vertical stack order: header, focusedAgent, flowMap, stageHealth', () => {
-      expect(grid.header.y).toBeLessThan(grid.focusedAgent.y);
+    it('vertical stack order: header, checklistPanel, focusedAgent, flowMap, stageHealth', () => {
+      expect(grid.header.y).toBeLessThan(grid.checklistPanel.y);
+      expect(grid.checklistPanel.y).toBeLessThan(grid.focusedAgent.y);
       expect(grid.focusedAgent.y).toBeLessThan(grid.flowMap.y);
       expect(grid.flowMap.y).toBeLessThan(grid.stageHealth.y);
     });
@@ -160,7 +190,9 @@ describe('computeGridLayout', () => {
       expect(grid.flowMap.height).toBe(3);
     });
 
-    it('focusedAgent gets remaining 1 row', () => {
+    it('focusedAgent gets remaining row after checklist (checklist=0 when no space)', () => {
+      // availableForChecklist = 4-3 = 1, checklistHeight = min(6, max(0,1-1)) = 0
+      // focusedHeight = 1 - 0 = 1
       expect(grid.focusedAgent.height).toBe(1);
     });
 
@@ -177,9 +209,9 @@ describe('computeGridLayout', () => {
       expect(grid.flowMap.x + grid.flowMap.width).toBe(grid.focusedAgent.x);
     });
 
-    it('both panels start at row 3 (after header)', () => {
+    it('flowMap and checklistPanel start at row 3 (after header)', () => {
       expect(grid.flowMap.y).toBe(3);
-      expect(grid.focusedAgent.y).toBe(3);
+      expect(grid.checklistPanel.y).toBe(3);
     });
 
     it('header and stageHealth span full width', () => {
@@ -216,9 +248,17 @@ describe('computeGridLayout', () => {
           grid.focusedAgent,
           grid.stageHealth,
           grid.monitorPanel,
+          grid.checklistPanel,
         ];
-        const allNames = ['header', 'flowMap', 'focusedAgent', 'stageHealth', 'monitorPanel'];
-        // narrow 모드에서는 monitorPanel이 0x0이므로 필터링
+        const allNames = [
+          'header',
+          'flowMap',
+          'focusedAgent',
+          'stageHealth',
+          'monitorPanel',
+          'checklistPanel',
+        ];
+        // narrow 모드에서는 monitorPanel이 0x0이므로 필터링, checklistPanel도 공간 부족 시 0
         const regions = allRegions.filter(r => r.width > 0 && r.height > 0);
         const regionNames = allNames.filter(
           (_, i) => allRegions[i].width > 0 && allRegions[i].height > 0,
@@ -296,6 +336,7 @@ describe('computeGridLayout', () => {
         grid.focusedAgent,
         grid.stageHealth,
         grid.monitorPanel,
+        grid.checklistPanel,
       ];
       const regions = allRegions.filter(r => r.width > 0 && r.height > 0);
 
