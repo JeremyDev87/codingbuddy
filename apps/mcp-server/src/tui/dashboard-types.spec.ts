@@ -152,7 +152,7 @@ describe('tui/dashboard-types', () => {
       expect(region.height).toBe(3);
     });
 
-    it('DashboardState includes tokenUsage and outputStats fields', () => {
+    it('DashboardState includes toolInvokeCount and outputStats fields', () => {
       const state: DashboardState = {
         workspace: '/tmp',
         sessionId: 'test',
@@ -166,10 +166,10 @@ describe('tui/dashboard-types', () => {
         objectives: [],
         activeSkills: [],
         toolCalls: [],
-        tokenUsage: 0,
+        toolInvokeCount: 0,
         outputStats: { files: 0, commits: 0 },
       };
-      expect(state.tokenUsage).toBe(0);
+      expect(state.toolInvokeCount).toBe(0);
       expect(state.outputStats).toEqual({ files: 0, commits: 0 });
     });
 
