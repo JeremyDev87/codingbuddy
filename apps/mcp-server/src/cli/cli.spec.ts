@@ -24,6 +24,20 @@ describe('cli', () => {
       expect(result.command).toBe('mcp');
     });
 
+    it('should parse tui command with restart=false by default', () => {
+      const result = parseArgs(['tui']);
+
+      expect(result.command).toBe('tui');
+      expect(result.options.restart).toBe(false);
+    });
+
+    it('should parse tui --restart flag', () => {
+      const result = parseArgs(['tui', '--restart']);
+
+      expect(result.command).toBe('tui');
+      expect(result.options.restart).toBe(true);
+    });
+
     it('should parse init with --force flag', () => {
       const result = parseArgs(['init', '--force']);
 

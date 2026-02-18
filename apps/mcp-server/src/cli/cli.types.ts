@@ -40,6 +40,14 @@ export interface InitResult {
 }
 
 /**
+ * Tui command options
+ */
+export interface TuiOptions {
+  /** Restart the TUI client (terminate existing and spawn fresh) */
+  restart: boolean;
+}
+
+/**
  * Console output levels
  */
 export type LogLevel = 'info' | 'success' | 'warn' | 'error';

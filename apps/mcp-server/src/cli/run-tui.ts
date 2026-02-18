@@ -1,5 +1,6 @@
 import { getInstancesFilePath } from '../tui/ipc/ipc.types';
 import { InstanceRegistry } from '../tui/ipc/instance-registry';
+import { restartTui } from './restart-tui';
 
 /** Forced-exit timeout for client-side shutdown (ms) */
 const CLIENT_SHUTDOWN_TIMEOUT_MS = 3000;
@@ -7,8 +8,21 @@ const CLIENT_SHUTDOWN_TIMEOUT_MS = 3000;
 /**
  * Run standalone TUI client that connects to running MCP server instances.
  * Uses MultiSessionManager to handle multiple concurrent sessions.
+ *
+ * @param options.restart - When true, kill existing TUI and spawn a fresh one instead of connecting
  */
-export async function runTui(): Promise<void> {
+export async function runTui(options: { restart?: boolean } = {}): Promise<void> {
+  if (options.restart) {
+    const result = await restartTui();
+    if (result.success) {
+      process.stderr.write(`TUI restarted successfully (pid: ${result.pid ?? 'unknown'}).\n`);
+    } else {
+      process.stderr.write(`Failed to restart TUI: ${result.reason}\n`);
+      process.exitCode = 1;
+    }
+    return;
+  }
+
   const registry = new InstanceRegistry(getInstancesFilePath());
   registry.prune();
   const instances = registry.list();

@@ -26,6 +26,7 @@ import {
   ChecklistContextHandler,
   ConventionsHandler,
   ContextDocumentHandler,
+  TuiHandler,
 } from './handlers';
 
 const handlers = [
@@ -37,6 +38,7 @@ const handlers = [
   ChecklistContextHandler,
   ConventionsHandler,
   ContextDocumentHandler,
+  TuiHandler,
 ];
 
 @Module({

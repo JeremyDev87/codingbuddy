@@ -8,14 +8,14 @@
 import { runInit } from './init';
 import { bootstrap } from '../main';
 import { getPackageVersion } from '../shared/version.utils';
-import type { InitOptions } from './cli.types';
+import type { InitOptions, TuiOptions } from './cli.types';
 
 /**
  * Parsed command line arguments
  */
 export interface ParsedArgs {
   command: 'init' | 'mcp' | 'tui' | 'help' | 'version';
-  options: Partial<InitOptions>;
+  options: Partial<InitOptions> & Partial<TuiOptions>;
 }
 
 /**
@@ -45,7 +45,8 @@ export function parseArgs(args: string[]): ParsedArgs {
   }
 
   if (command === 'tui') {
-    return { command: 'tui', options };
+    const restart = args.includes('--restart');
+    return { command: 'tui', options: { ...options, restart } };
   }
 
   if (command !== 'init') {
@@ -82,6 +83,7 @@ Usage:
   codingbuddy init [path] [options]    Initialize configuration
   codingbuddy mcp                      Start MCP server (stdio mode)
   codingbuddy tui                      Monitor agent execution in real-time
+  codingbuddy tui --restart            Restart TUI client (fixes blank screen)
   codingbuddy --help                   Show this help
   codingbuddy --version                Show version
 
@@ -157,7 +159,7 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
 
     case 'tui': {
       const { runTui } = await import('./run-tui');
-      await runTui();
+      await runTui({ restart: options.restart ?? false });
       break;
     }
 

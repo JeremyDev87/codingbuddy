@@ -3,6 +3,11 @@ import type { IpcInstance } from '../tui/ipc/ipc.types';
 
 // --- runTui integration tests with module mocks ---
 
+const mockRestartTui = vi.fn();
+vi.mock('./restart-tui', () => ({
+  restartTui: mockRestartTui,
+}));
+
 const mockPrune = vi.fn().mockReturnValue(0);
 const mockList = vi.fn<() => IpcInstance[]>().mockReturnValue([]);
 
@@ -182,5 +187,55 @@ describe('runTui', () => {
 
     vi.doUnmock('../shared/esm-import');
     vi.doUnmock('../shared/tui-bundle-path');
+  });
+});
+
+describe('runTui with restart=true', () => {
+  let stderrSpy: ReturnType<typeof vi.spyOn>;
+  let savedExitCode: typeof process.exitCode;
+
+  beforeEach(() => {
+    stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+    savedExitCode = process.exitCode;
+    process.exitCode = undefined;
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    process.exitCode = savedExitCode;
+    stderrSpy.mockRestore();
+  });
+
+  it('should call restartTui and print success message', async () => {
+    mockRestartTui.mockResolvedValue({ success: true, reason: 'spawned', pid: 9999 });
+
+    const { runTui } = await import('./run-tui');
+    await runTui({ restart: true });
+
+    expect(mockRestartTui).toHaveBeenCalled();
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('TUI restarted'));
+  });
+
+  it('should print error and set exitCode=1 when restart fails', async () => {
+    mockRestartTui.mockResolvedValue({
+      success: false,
+      reason: 'No running MCP server found.',
+    });
+
+    const { runTui } = await import('./run-tui');
+    await runTui({ restart: true });
+
+    expect(process.exitCode).toBe(1);
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('No running MCP server found'));
+  });
+
+  it('should not proceed to normal TUI flow when restart=true', async () => {
+    mockRestartTui.mockResolvedValue({ success: true, reason: 'spawned', pid: 1 });
+
+    const { runTui } = await import('./run-tui');
+    await runTui({ restart: true });
+
+    // Normal flow would call mockConnectAll — it should NOT be called
+    expect(mockConnectAll).not.toHaveBeenCalled();
   });
 });

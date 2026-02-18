@@ -85,6 +85,12 @@ export { ConventionsHandler } from './conventions.handler';
 export { ContextDocumentHandler } from './context-document.handler';
 
 /**
+ * Handler for TUI tools (restart_tui)
+ * @see {@link TuiHandler}
+ */
+export { TuiHandler } from './tui.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
