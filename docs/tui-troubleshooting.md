@@ -503,6 +503,109 @@ wait
 
 Expected: Debug log shows `Graceful shutdown: unmounting TUI...`, then clean exit.
 
+## Auto-Launch Issues
+
+### TUI Window Opens and Immediately Closes
+
+**Symptom:** After starting Claude Code with codingbuddy MCP configured, a terminal window briefly appears and disappears.
+
+**Cause:** `TuiAutoLauncher` cannot find the `codingbuddy` binary in PATH.
+
+**Diagnosis:**
+
+```bash
+# Check if codingbuddy is in PATH
+which codingbuddy
+
+# Check instance registry
+cat ~/.codingbuddy/instances.json
+
+# Check if MCP server is running
+ps aux | grep codingbuddy
+
+# Run TUI manually with debug output
+npx codingbuddy tui
+```
+
+**Solutions:**
+
+- **Update to latest version**: The auto-launcher now resolves the binary path automatically (fixed in v4.2.0).
+- **Install globally**: `npm install -g codingbuddy`
+- **Run manually**: `npx codingbuddy tui`
+- **Disable auto-launch**: Remove `CODINGBUDDY_AUTO_TUI` from `~/.claude/settings.json` env section.
+
+### "No running codingbuddy MCP server found"
+
+**Symptom:** Running `codingbuddy tui` or `npx codingbuddy tui` shows this error.
+
+**Cause:** No MCP server instance is registered in `~/.codingbuddy/instances.json`.
+
+**Diagnosis:**
+
+```bash
+cat ~/.codingbuddy/instances.json
+ps aux | grep codingbuddy
+```
+
+**Solutions:**
+
+- Ensure your AI tool (Claude Code, Cursor, etc.) is running with codingbuddy MCP configured.
+- Verify `.mcp.json` has the codingbuddy entry.
+- Restart the AI tool to trigger MCP server startup.
+
+### "Failed to connect to any MCP server instance"
+
+**Symptom:** TUI finds instances but cannot connect.
+
+**Cause:** The MCP server may have shut down, or the socket file is stale.
+
+**Solutions:**
+
+- Restart the AI tool.
+- Manually clean stale entries: remove `~/.codingbuddy/instances.json` and restart.
+- Check socket file existence: `ls -la /tmp/codingbuddy-*.sock` (macOS: check `$TMPDIR`).
+
+### TUI Renders but Shows No Agent Activity
+
+**Symptom:** TUI dashboard is visible but all agents show idle/zero.
+
+**Cause:** The TUI connects via IPC but the MCP server hasn't received any tool calls yet.
+
+**Solution:** This is normal when no AI tool calls have been made yet. Interact with your AI tool to trigger MCP tool calls — the TUI will update in real-time.
+
+### "Failed to load TUI components"
+
+**Symptom:** Error message about TUI bundle not being found.
+
+**Cause:** The TUI ESM bundle (`tui-bundle.mjs`) is not built.
+
+**Solutions:**
+
+- For npx users: ensure you're using the latest published version.
+- For local development: run `yarn build && yarn build:tui` in `apps/mcp-server/`.
+
+### Auto-Launch Environment Variable Reference
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `CODINGBUDDY_AUTO_TUI` | Enable auto-launch of TUI in new terminal window | Not set (disabled) |
+| `CODINGBUDDY_PROJECT_ROOT` | Project root for instance registry | `process.cwd()` |
+| `MCP_DEBUG` | Enable debug logging to stderr | Not set (disabled) |
+
+**Enable debug logging** in `.mcp.json`:
+
+```json
+{
+  "codingbuddy": {
+    "command": "npx",
+    "args": ["codingbuddy", "mcp", "--tui"],
+    "env": {
+      "MCP_DEBUG": "1"
+    }
+  }
+}
+```
+
 ## Related Documentation
 
 - [TUI User Guide](./tui-guide.md) - How to run and configure the TUI
