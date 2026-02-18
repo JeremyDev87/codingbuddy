@@ -168,18 +168,24 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       const base =
         state.eventLog.length >= EVENT_LOG_MAX ? state.eventLog.slice(1) : state.eventLog;
 
-      // Progress increment for matched agent
+      // Progress increment with focusedAgentId fallback
       const invokedAgentId = action.payload.agentId;
       let agents = state.agents;
-      if (invokedAgentId) {
-        const agent = state.agents.get(invokedAgentId);
-        if (agent && agent.status === 'running') {
-          agents = cloneAgents(state.agents);
-          agents.set(invokedAgentId, {
-            ...agent,
-            progress: Math.min(95, agent.progress + 5),
-          });
-        }
+
+      // 1st: Try exact agentId match
+      let targetAgent = invokedAgentId ? (state.agents.get(invokedAgentId) ?? null) : null;
+
+      // 2nd: Fallback to focused agent when agentId exists but no exact match found
+      if (invokedAgentId && !targetAgent && state.focusedAgentId) {
+        targetAgent = state.agents.get(state.focusedAgentId) ?? null;
+      }
+
+      if (targetAgent && targetAgent.status === 'running') {
+        agents = cloneAgents(state.agents);
+        agents.set(targetAgent.id, {
+          ...targetAgent,
+          progress: Math.min(95, targetAgent.progress + 5),
+        });
       }
 
       const toolCall: ToolCallRecord = {

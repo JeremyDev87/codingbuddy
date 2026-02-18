@@ -515,4 +515,74 @@ describe('dashboardReducer', () => {
     });
     expect(state.objectives).toEqual(['second task']);
   });
+
+  it('should increment focused primary agent progress on TOOL_INVOKED with non-matching agentId (fallback)', () => {
+    // Primary agent registered as "primary:arch" — but TOOL_INVOKED has agentId "search_rules"
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'primary:arch', name: 'arch', role: 'primary', isPrimary: true },
+    });
+    expect(state.focusedAgentId).toBe('primary:arch');
+    expect(state.agents.get('primary:arch')?.progress).toBe(0);
+
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'search_rules', timestamp: Date.now() },
+    });
+    // Should fall back to focused agent and increment progress
+    expect(state.agents.get('primary:arch')?.progress).toBe(5);
+  });
+
+  it('should not crash on TOOL_INVOKED with non-matching agentId when focusedAgentId is null', () => {
+    // No agents activated — focusedAgentId is null
+    const state = dashboardReducer(initialDashboardState, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'search_rules', timestamp: Date.now() },
+    });
+    // Should not crash, agents map unchanged
+    expect(state.agents.size).toBe(0);
+  });
+
+  it('should not increment progress via fallback when focused agent is not running', () => {
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'primary:arch', name: 'arch', role: 'primary', isPrimary: true },
+    });
+    // Deactivate the primary agent
+    state = dashboardReducer(state, {
+      type: 'AGENT_DEACTIVATED',
+      payload: { agentId: 'primary:arch', reason: 'completed', durationMs: 1000 },
+    });
+    expect(state.agents.get('primary:arch')?.status).toBe('done');
+    expect(state.agents.get('primary:arch')?.progress).toBe(100);
+
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'search_rules', timestamp: Date.now() },
+    });
+    // Progress should remain 100 (not incremented because agent is 'done', not 'running')
+    expect(state.agents.get('primary:arch')?.progress).toBe(100);
+  });
+
+  it('should prefer exact agentId match over focusedAgentId fallback', () => {
+    // Register primary agent AND a specialist with the same ID as the tool event
+    let state = dashboardReducer(initialDashboardState, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'primary:arch', name: 'arch', role: 'primary', isPrimary: true },
+    });
+    state = dashboardReducer(state, {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'search_rules', name: 'search_rules', role: 'query', isPrimary: false },
+    });
+
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'search_rules', timestamp: Date.now() },
+    });
+
+    // Exact match agent should be incremented
+    expect(state.agents.get('search_rules')?.progress).toBe(5);
+    // Focused primary agent should NOT be incremented (exact match took priority)
+    expect(state.agents.get('primary:arch')?.progress).toBe(0);
+  });
 });
