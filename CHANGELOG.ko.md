@@ -5,6 +5,56 @@
 이 문서는 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/) 형식을 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/spec/v2.0.0.html)을 준수합니다.
 
+## [4.2.0] - 2026-02-18
+
+### 추가됨
+
+- **TUI 멀티세션**: 멀티세션 지원 및 MCP 연결 시 TUI 자동 실행 (#485)
+- **TUI 자동 실행**: `--tui` CLI 플래그를 통한 자동 실행 활성화 (#522)
+- **TUI ActivityVisualizer**: MonitorPanel을 ActivityVisualizer 패널로 교체 (#482)
+- **TUI FlowMap**: 시각적 계층, 파이프라인 헤더, 진행 바 강화 (#468)
+- **TUI MonitorPanel**: 이벤트 로그, 에이전트 타임라인, 작업 진행 표시
+- **TUI 목표**: `parse_mode` 응답에서 목표 연동 (#473)
+- **TUI 이벤트**: 대시보드 상태에 SKILL_RECOMMENDED 이벤트 반영 (#474)
+- **TUI 이벤트**: PARALLEL_STARTED 이벤트로 전문가 사전 등록 (#475)
+- **TUI 이벤트**: MODE_CHANGED로 실행 중인 에이전트 단계 동기화 (#476)
+- **TUI 이벤트**: `parse_mode`에서 `recommended_act_agent` 및 `parallelAgentsRecommendation` 추출 (#477)
+- **TUI 진행**: TOOL_INVOKED 카운트를 통한 진행률 추정 (#472)
+- **TUI 레이아웃**: FocusedAgent 패널 너비 2배 확장 (#466)
+- **TUI 레이아웃**: 정밀 그리드 레이아웃 시스템 (#458)
+- **TUI 레이아웃**: 고정 너비 우측 정렬 FocusedAgent와 반응형 FlowMap (#462)
+- **TUI StageHealthBar**: 하드코딩된 tokenCount를 실시간 도구 호출 카운트로 교체 (#490)
+- **TUI 체크리스트**: `parse_mode`에서 초기 체크리스트 생성 및 작업 완료 추적 개선 (#504)
+- **TUI FocusedAgent**: 아바타, 스파크라인, 개선된 진행 바 (#505)
+- **TUI 테마**: BORDER_COLORS 상수를 통한 패널 테두리 색상 통합 (#494)
+- **TUI 컨텍스트**: context:updated 이벤트로 FocusedAgentPanel에 결정/메모 표시 (#515)
+- **TUI 세션**: SESSION_RESET 이벤트를 통한 `/clear` 명령 시 대시보드 상태 초기화 (#499)
+- **Config**: codingbuddy MCP 우선순위 규칙 및 CLAUDE.md 섹션 추가 (#516, #512)
+- **MCP 서버**: RED 단계 중단 방지를 위한 TDD 실행 연속성 규칙 (#463)
+- **GitHub**: 커스텀 지침으로 Copilot 코드 리뷰 설정 (#460)
+- **문서**: 자동 실행 시작 문제를 위한 TUI 트러블슈팅 가이드 (#520)
+
+### 변경됨
+
+- **TUI 활동**: Activity 히트맵을 수평 바 차트로 교체 (#517)
+- **TUI 레이아웃**: FocusedAgent 패널 너비를 ~10% 줄이고 Activity/FlowMap 패널 확장 (#501)
+- **TUI 작업**: task:synced를 단일 패스로 통합하고 이벤트 순서 수정 (#504)
+
+### 수정됨
+
+- **TUI HeaderBar**: AUTO 모드가 프로세스 플로우에서 순차적 단계로 잘못 표시되던 문제 (#488)
+- **TUI 작업**: PLAN/EVAL 모드에서 작업 패널에 데이터가 없던 문제 — `extractFromUpdateContext`가 이제 decisions/findings/notes 읽기 (#492)
+- **TUI Live**: Live 패널에 데이터가 거의 표시되지 않던 문제 — 시간 기반 버블을 `renderLiveContext`로 교체 (#502)
+- **TUI 진행**: TOOL_INVOKED와 primary 에이전트 간 agentId 불일치로 진행률이 0%에 멈추던 문제 (#503)
+- **TUI AutoLauncher**: TuiAutoLauncher에서 절대 바이너리 경로 해결 (#519)
+- **빌드**: 오래된 내보내기 방지를 위해 TUI 번들을 메인 빌드 스크립트에 포함
+- **Config**: prettier 및 tsconfig에서 `.next` 및 빌드 산출물 제외 (#496)
+
+### 제거됨
+
+- **MCP 서버**: 사용하지 않는 코드 및 죽은 내보내기 (#486)
+- **TUI**: 순수 컴포넌트에서 deprecated 텍스트 포매터 함수 제거
+
 ## [4.1.0] - 2026-02-17
 
 ### 추가됨

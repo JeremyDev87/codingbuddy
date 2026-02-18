@@ -5,6 +5,56 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-02-18
+
+### Agregado
+
+- **TUI Multi-Sesión**: Soporte multi-sesión y apertura automática de TUI en conexión MCP (#485)
+- **TUI Auto-Lanzamiento**: Habilitación de auto-lanzamiento mediante flag `--tui` (#522)
+- **TUI ActivityVisualizer**: Reemplazo de MonitorPanel con panel ActivityVisualizer (#482)
+- **TUI FlowMap**: Jerarquía visual mejorada, encabezado de pipeline y barras de progreso (#468)
+- **TUI MonitorPanel**: Registro de eventos, cronología de agentes y progreso de tareas
+- **TUI Objetivos**: Integración de objetivos desde respuesta de `parse_mode` (#473)
+- **TUI Eventos**: Evento SKILL_RECOMMENDED en estado del dashboard (#474)
+- **TUI Eventos**: Pre-registro de especialistas en evento PARALLEL_STARTED (#475)
+- **TUI Eventos**: Sincronización de etapa del agente activo en MODE_CHANGED (#476)
+- **TUI Eventos**: Extracción de `recommended_act_agent` y `parallelAgentsRecommendation` de `parse_mode` (#477)
+- **TUI Progreso**: Estimación de progreso mediante conteo TOOL_INVOKED (#472)
+- **TUI Diseño**: Ancho del panel FocusedAgent duplicado (#466)
+- **TUI Diseño**: Sistema de diseño de cuadrícula precisa (#458)
+- **TUI Diseño**: FocusedAgent de ancho fijo alineado a la derecha con FlowMap responsivo (#462)
+- **TUI StageHealthBar**: Conteo de invocación de herramientas en tiempo real reemplaza tokenCount fijo (#490)
+- **TUI Lista de verificación**: Lista inicial desde `parse_mode` y seguimiento de completitud mejorado (#504)
+- **TUI FocusedAgent**: Avatar, sparkline y barra de progreso mejorada (#505)
+- **TUI Tema**: Colores de borde de paneles unificados mediante constante BORDER_COLORS (#494)
+- **TUI Contexto**: Decisiones/notas de context:updated en FocusedAgentPanel (#515)
+- **TUI Sesión**: Reinicio del estado del dashboard en comando `/clear` via evento SESSION_RESET (#499)
+- **Config**: Reglas de prioridad de herramientas y sección CLAUDE.md para codingbuddy MCP (#516, #512)
+- **Servidor MCP**: Reglas de continuidad de ejecución TDD para prevenir detención en fase RED (#463)
+- **GitHub**: Revisión de código Copilot con instrucciones personalizadas (#460)
+- **Docs**: Guía de solución de problemas TUI para problemas de inicio de auto-lanzamiento (#520)
+
+### Cambiado
+
+- **TUI Actividad**: Mapa de calor de Activity reemplazado por gráfico de barras horizontal (#517)
+- **TUI Diseño**: Ancho del panel FocusedAgent reducido ~10% y paneles Activity/FlowMap expandidos (#501)
+- **TUI Tareas**: task:synced consolidado en un solo paso y orden de eventos corregido (#504)
+
+### Corregido
+
+- **TUI HeaderBar**: Modo AUTO mostrado incorrectamente como paso secuencial en el flujo de proceso (#488)
+- **TUI Tareas**: Panel de tareas sin datos en modos PLAN/EVAL (#492)
+- **TUI Live**: Panel Live con casi ningún dato — burbujas de ventana de tiempo reemplazadas con `renderLiveContext` (#502)
+- **TUI Progreso**: Porcentaje de progreso bloqueado en 0% por incompatibilidad de agentId (#503)
+- **TUI AutoLauncher**: Resolución de ruta absoluta del binario en TuiAutoLauncher (#519)
+- **Build**: TUI bundle incluido en script de compilación principal para evitar exportaciones obsoletas
+- **Config**: Exclusión de `.next` y artefactos de build en prettier y tsconfig (#496)
+
+### Eliminado
+
+- **Servidor MCP**: Código no utilizado y exportaciones muertas (#486)
+- **TUI**: Funciones deprecadas de text-formatter de componentes puros
+
 ## [4.1.0] - 2026-02-17
 
 ### Agregado

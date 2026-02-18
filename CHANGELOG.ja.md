@@ -5,6 +5,56 @@
 このドキュメントは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) の形式に基づいており、
 [セマンティック バージョニング](https://semver.org/lang/ja/spec/v2.0.0.html) に準拠しています。
 
+## [4.2.0] - 2026-02-18
+
+### 追加
+
+- **TUI マルチセッション**: マルチセッションサポートおよびMCP接続時のTUI自動起動 (#485)
+- **TUI 自動起動**: `--tui` CLIフラグによる自動起動有効化 (#522)
+- **TUI ActivityVisualizer**: MonitorPanelをActivityVisualizerパネルに置き換え (#482)
+- **TUI FlowMap**: ビジュアル階層、パイプラインヘッダー、プログレスバーの強化 (#468)
+- **TUI MonitorPanel**: イベントログ、エージェントタイムライン、タスク進捗表示
+- **TUI 目標**: `parse_mode` レスポンスから目標を連携 (#473)
+- **TUI イベント**: ダッシュボード状態にSKILL_RECOMMENDEDイベントを反映 (#474)
+- **TUI イベント**: PARALLEL_STARTEDイベントでスペシャリストを事前登録 (#475)
+- **TUI イベント**: MODE_CHANGEDで実行中エージェントのステージを同期 (#476)
+- **TUI イベント**: `parse_mode`から`recommended_act_agent`と`parallelAgentsRecommendation`を抽出 (#477)
+- **TUI 進捗**: TOOL_INVOKEDカウントによる進捗推定 (#472)
+- **TUI レイアウト**: FocusedAgentパネル幅を2倍に拡大 (#466)
+- **TUI レイアウト**: 精密グリッドレイアウトシステム (#458)
+- **TUI レイアウト**: 固定幅右揃えFocusedAgentとレスポンシブFlowMap (#462)
+- **TUI StageHealthBar**: ハードコードされたtokenCountをライブツール呼び出しカウントに置き換え (#490)
+- **TUI チェックリスト**: `parse_mode`から初期チェックリストを生成し、タスク完了追跡を改善 (#504)
+- **TUI FocusedAgent**: アバター、スパークライン、改善されたプログレスバー (#505)
+- **TUI テーマ**: BORDER_COLORS定数によるパネルボーダーカラーの統一 (#494)
+- **TUI コンテキスト**: context:updatedイベントでFocusedAgentPanelに決定/メモを表示 (#515)
+- **TUI セッション**: SESSION_RESETイベントによる`/clear`コマンド時のダッシュボード状態リセット (#499)
+- **Config**: codingbuddy MCPの優先ルールおよびCLAUDE.mdセクション追加 (#516, #512)
+- **MCPサーバー**: REDフェーズ停止を防ぐTDD実行継続性ルール (#463)
+- **GitHub**: カスタム指示によるCopilotコードレビュー設定 (#460)
+- **ドキュメント**: 自動起動の起動問題向けTUIトラブルシューティングガイド (#520)
+
+### 変更
+
+- **TUI アクティビティ**: Activityヒートマップを水平バーチャートに置き換え (#517)
+- **TUI レイアウト**: FocusedAgentパネル幅を~10%縮小し、Activity/FlowMapパネルを拡大 (#501)
+- **TUI タスク**: task:syncedを単一パスに統合し、イベント順序を修正 (#504)
+
+### 修正
+
+- **TUI HeaderBar**: AUTOモードがプロセスフローで順次ステップとして誤表示されていた問題 (#488)
+- **TUI タスク**: PLAN/EVALモードでタスクパネルにデータが表示されなかった問題 (#492)
+- **TUI Live**: Liveパネルにデータがほとんど表示されなかった問題 — 時間ウィンドウバブルを`renderLiveContext`に置き換え (#502)
+- **TUI 進捗**: TOOL_INVOKEDとprimaryエージェント間のagentIdミスマッチにより進捗率が0%に固定されていた問題 (#503)
+- **TUI AutoLauncher**: TuiAutoLauncherでの絶対バイナリパス解決 (#519)
+- **ビルド**: 古い出力を防ぐためTUIバンドルをメインビルドスクリプトに含める
+- **Config**: prettierおよびtsconfigから`.next`とビルド成果物を除外 (#496)
+
+### 削除
+
+- **MCPサーバー**: 未使用コードとデッドエクスポート (#486)
+- **TUI**: 純粋コンポーネントからdeprecatedテキストフォーマッター関数を削除
+
 ## [4.1.0] - 2026-02-17
 
 ### 追加

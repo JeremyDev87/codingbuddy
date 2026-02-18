@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-02-18
+
+### Added
+
+- **TUI Multi-Session**: Multi-session support and auto-open TUI on MCP connection (#485)
+- **TUI Auto-Launch**: Enable auto-launch via `--tui` CLI flag (#522)
+- **TUI ActivityVisualizer**: Replace MonitorPanel with ActivityVisualizer panel (#482)
+- **TUI FlowMap**: Enhanced with visual hierarchy, pipeline header, and progress bars (#468)
+- **TUI MonitorPanel**: Event log, agent timeline, and task progress display
+- **TUI Objectives**: Wire up objectives from `parse_mode` response (#473)
+- **TUI Events**: SKILL_RECOMMENDED event in dashboard state (#474)
+- **TUI Events**: Pre-register specialists on PARALLEL_STARTED event (#475)
+- **TUI Events**: Sync running agent stage on MODE_CHANGED (#476)
+- **TUI Events**: Extract `recommended_act_agent` and `parallelAgentsRecommendation` from `parse_mode` (#477)
+- **TUI Progress**: Progress estimation via TOOL_INVOKED count (#472)
+- **TUI Layout**: Double FocusedAgent panel width (#466)
+- **TUI Layout**: Precise grid layout system (#458)
+- **TUI Layout**: Fixed-width right-aligned FocusedAgent with responsive FlowMap (#462)
+- **TUI StageHealthBar**: Live tool invocation count replaces hardcoded tokenCount (#490)
+- **TUI Checklist**: Populate initial checklist from `parse_mode` and improve task completion tracking (#504)
+- **TUI FocusedAgent**: Avatar, sparkline, and improved progress bar (#505)
+- **TUI Theme**: Unified panel border colors via centralized BORDER_COLORS constant (#494)
+- **TUI Context**: Display decisions/notes from context:updated in FocusedAgentPanel (#515)
+- **TUI Session**: Reset dashboard state on `/clear` command via SESSION_RESET event (#499)
+- **Config**: Tool-priority rules establishing codingbuddy MCP priority over OMC (#516, #512)
+- **MCP Server**: TDD execution continuity rules to prevent RED phase halt (#463)
+- **GitHub**: Copilot Code Review with custom instructions (#460)
+- **Docs**: TUI troubleshooting guide for auto-launch startup issues (#520)
+
+### Changed
+
+- **TUI Activity**: Replace Activity heatmap with horizontal bar chart (#517)
+- **TUI Layout**: Reduce FocusedAgent panel width by ~10% and expand Activity/FlowMap panels (#501)
+- **TUI Tasks**: Consolidate task:synced into single pass and fix event ordering (#504)
+
+### Fixed
+
+- **TUI HeaderBar**: AUTO mode displayed incorrectly as sequential step in process flow (#488)
+- **TUI Tasks**: Tasks panel shows no data in PLAN/EVAL modes — `extractFromUpdateContext` now reads decisions/findings/notes (#492)
+- **TUI Live**: Live panel shows almost no data — replaced time-windowed bubbles with `renderLiveContext` (#502)
+- **TUI Progress**: Progress percentage stuck at 0% due to agentId mismatch between TOOL_INVOKED and primary agent (#503)
+- **TUI AutoLauncher**: Resolve absolute binary path for TuiAutoLauncher (#519)
+- **Build**: Include TUI bundle in main build script to prevent stale exports
+- **Config**: Exclude `.next` and build artifacts from prettier and tsconfig (#496)
+
+### Removed
+
+- **MCP Server**: Unused code and dead exports (#486)
+- **TUI**: Deprecated text-formatter functions from pure components
+
 ## [4.1.0] - 2026-02-17
 
 ### Added

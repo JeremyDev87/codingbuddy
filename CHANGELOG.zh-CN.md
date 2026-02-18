@@ -5,6 +5,80 @@
 本文档格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/spec/v2.0.0.html)。
 
+## [4.2.0] - 2026-02-18
+
+### 新增
+
+- **TUI 多会话**: 多会话支持及MCP连接时自动打开TUI (#485)
+- **TUI 自动启动**: 通过`--tui` CLI参数启用自动启动 (#522)
+- **TUI ActivityVisualizer**: 用ActivityVisualizer面板替换MonitorPanel (#482)
+- **TUI FlowMap**: 增强视觉层次结构、管道头部和进度条 (#468)
+- **TUI MonitorPanel**: 事件日志、代理时间线和任务进度显示
+- **TUI 目标**: 从`parse_mode`响应中连接目标 (#473)
+- **TUI 事件**: 仪表板状态中的SKILL_RECOMMENDED事件 (#474)
+- **TUI 事件**: PARALLEL_STARTED事件预注册专家 (#475)
+- **TUI 事件**: MODE_CHANGED时同步运行代理阶段 (#476)
+- **TUI 事件**: 从`parse_mode`提取`recommended_act_agent`和`parallelAgentsRecommendation` (#477)
+- **TUI 进度**: 通过TOOL_INVOKED计数估算进度 (#472)
+- **TUI 布局**: FocusedAgent面板宽度加倍 (#466)
+- **TUI 布局**: 精确网格布局系统 (#458)
+- **TUI 布局**: 固定宽度右对齐FocusedAgent与响应式FlowMap (#462)
+- **TUI StageHealthBar**: 实时工具调用计数替换硬编码的tokenCount (#490)
+- **TUI 清单**: 从`parse_mode`生成初始清单并改善任务完成跟踪 (#504)
+- **TUI FocusedAgent**: 头像、迷你图和改进的进度条 (#505)
+- **TUI 主题**: 通过BORDER_COLORS常量统一面板边框颜色 (#494)
+- **TUI 上下文**: 通过context:updated事件在FocusedAgentPanel中显示决策/笔记 (#515)
+- **TUI 会话**: 通过SESSION_RESET事件在`/clear`命令时重置仪表板状态 (#499)
+- **配置**: codingbuddy MCP优先级规则和CLAUDE.md章节 (#516, #512)
+- **MCP服务器**: 防止RED阶段停止的TDD执行连续性规则 (#463)
+- **GitHub**: 带自定义说明的Copilot代码审查设置 (#460)
+- **文档**: 自动启动问题的TUI故障排除指南 (#520)
+
+### 变更
+
+- **TUI 活动**: Activity热图替换为水平条形图 (#517)
+- **TUI 布局**: FocusedAgent面板宽度减少约10%，Activity/FlowMap面板扩大 (#501)
+- **TUI 任务**: task:synced合并为单次处理并修复事件顺序 (#504)
+
+### 修复
+
+- **TUI HeaderBar**: AUTO模式在流程中错误显示为顺序步骤 (#488)
+- **TUI 任务**: PLAN/EVAL模式下任务面板无数据 (#492)
+- **TUI Live**: Live面板几乎无数据——用`renderLiveContext`替换时间窗口气泡 (#502)
+- **TUI 进度**: 因TOOL_INVOKED与主代理agentId不匹配导致进度百分比停在0% (#503)
+- **TUI AutoLauncher**: 解析TuiAutoLauncher中的绝对二进制路径 (#519)
+- **构建**: 在主构建脚本中包含TUI bundle以防止过时导出
+- **配置**: 在prettier和tsconfig中排除`.next`和构建产物 (#496)
+
+### 移除
+
+- **MCP服务器**: 未使用代码和死亡导出 (#486)
+- **TUI**: 从纯组件中移除已弃用的文本格式化函数
+
+## [4.1.0] - 2026-02-17
+
+### 新增
+
+- **TUI 仪表板**: 基于Ink的终端UI（Header、AgentCard、AgentTree、AgentGrid、StatusBar、ProgressBar组件）
+- **TUI EventBus**: 基于EventEmitter2的事件系统，包含`useEventBus`和`useAgentState` React钩子
+- **TUI IPC**: 基于Unix Domain Socket的独立进程间通信
+- **TUI 紧凑设计**: 针对24行终端优化的单行布局
+- **TUI 拦截器**: 用于实时UI更新的MCP工具分发层
+- **MCP 服务器**: SSE端点的Bearer令牌认证 (#416)
+- **代理系统**: `dispatch_agents`工具和`parse_mode`响应中的自动分发 (#328)
+- **EVAL模式**: EVAL模式中的`recommendedActAgent`支持 (#361)
+
+### 变更
+
+- **Prettier**: 使用`printWidth: 100`重新格式化整个代码库 (#423)
+- **MCP服务器**: 提取共享`rules-core`和`keyword-core`模块 (#415)
+
+### 修复
+
+- 插件`isPathSafe()`路径规范化和大小写不敏感匹配 (#419)
+- MCP服务器`appendContext` `findLastIndex`合并逻辑 (#410)
+- 关键字意图解析在推荐模式下跳过项目配置
+
 ## [4.0.1] - 2026-02-04
 
 ### 新增
