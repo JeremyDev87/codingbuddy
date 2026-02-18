@@ -8,9 +8,9 @@ import {
 describe('dashboardReducer', () => {
   const initialDashboardState = createInitialDashboardState();
 
-  it('initializes tokenUsage to 0 and outputStats to zero counts', () => {
+  it('initializes toolInvokeCount to 0 and outputStats to zero counts', () => {
     const state = createInitialDashboardState();
-    expect(state.tokenUsage).toBe(0);
+    expect(state.toolInvokeCount).toBe(0);
     expect(state.outputStats).toEqual({ files: 0, commits: 0 });
   });
 
@@ -190,6 +190,20 @@ describe('dashboardReducer', () => {
       payload: { toolName: 'search', agentId: null, timestamp: Date.now() },
     });
     expect(state.eventLog[0].message).toBe('search');
+  });
+
+  it('increments toolInvokeCount on TOOL_INVOKED', () => {
+    const s1 = dashboardReducer(createInitialDashboardState(), {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', timestamp: Date.now(), agentId: null },
+    });
+    expect(s1.toolInvokeCount).toBe(1);
+
+    const s2 = dashboardReducer(s1, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'get_agent_details', timestamp: Date.now(), agentId: null },
+    });
+    expect(s2.toolInvokeCount).toBe(2);
   });
 
   it('limits eventLog to ring buffer size (100)', () => {

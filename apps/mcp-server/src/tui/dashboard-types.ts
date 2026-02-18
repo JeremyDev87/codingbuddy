@@ -155,7 +155,7 @@ export interface DashboardState {
   toolCalls: ToolCallRecord[];
   objectives: string[];
   activeSkills: string[];
-  tokenUsage: number;
+  toolInvokeCount: number;
   outputStats: { files: number; commits: number };
 }
 

@@ -139,12 +139,12 @@ describe('tui/components/stage-health.pure', () => {
       expect(result).toContain('15k');
     });
 
-    it('should show token count', () => {
+    it('should show tool count', () => {
       const result = formatStageHealthBar(emptyHealth, [], 500, 120, 'wide');
       expect(result).toContain('500');
     });
 
-    it('should format token count as Nk for thousands', () => {
+    it('should format tool count as Nk for thousands', () => {
       const result = formatStageHealthBar(emptyHealth, [], 2500, 120, 'wide');
       expect(result).toContain('3k');
     });

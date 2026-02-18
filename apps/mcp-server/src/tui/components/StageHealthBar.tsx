@@ -7,7 +7,7 @@ import { getModeColor } from '../utils/theme';
 export interface StageHealthBarProps {
   stageHealth: Record<Mode, StageStats>;
   bottlenecks: string[];
-  tokenCount: number;
+  toolCount: number;
   width: number;
 }
 
@@ -79,10 +79,10 @@ function StageStatDisplay({
 export function StageHealthBar({
   stageHealth,
   bottlenecks,
-  tokenCount,
+  toolCount,
   width,
 }: StageHealthBarProps): React.ReactElement {
-  const tokenStr = tokenCount >= 1000 ? `${Math.round(tokenCount / 1000)}k` : String(tokenCount);
+  const countStr = toolCount >= 1000 ? `${Math.round(toolCount / 1000)}k` : String(toolCount);
 
   return (
     <Box borderStyle="double" borderColor="cyan" width={width} flexDirection="column">
@@ -99,7 +99,7 @@ export function StageHealthBar({
               ⚡ Bottlenecks: {bottlenecks.join(' / ')}
             </Text>
           )}
-          <Text dimColor>tokens: {tokenStr}</Text>
+          <Text dimColor>tools: {countStr}</Text>
         </Box>
       </Box>
     </Box>
