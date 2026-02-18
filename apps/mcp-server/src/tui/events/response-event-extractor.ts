@@ -164,6 +164,21 @@ function extractFromParseMode(json: Record<string, unknown>): ExtractedEvent[] {
     });
   }
 
+  // task:synced (initial checklist from included_skills)
+  if (Array.isArray(json.included_skills)) {
+    const initialTasks: Array<{ id: string; subject: string; completed: boolean }> = [];
+    for (const [i, skill] of json.included_skills.entries()) {
+      if (!skill || typeof skill !== 'object') continue;
+      const s = skill as Record<string, unknown>;
+      if (typeof s.name !== 'string') continue;
+      initialTasks.push({ id: `skill-${i}`, subject: `Apply ${s.name}`, completed: false });
+    }
+    if (initialTasks.length > 0) {
+      const agentId = delegateName ? `primary:${delegateName}` : UNKNOWN_AGENT_ID;
+      events.push({ event: TUI_EVENTS.TASK_SYNCED, payload: { agentId, tasks: initialTasks } });
+    }
+  }
+
   return events;
 }
 
@@ -234,15 +249,42 @@ function extractFromDispatchAgents(json: Record<string, unknown>): ExtractedEven
  * Pick the first non-empty string array from the section's task-related fields.
  * Priority: progress (ACT) > decisions (PLAN) > findings (EVAL) > notes (fallback).
  */
-function pickTaskSource(section: Record<string, unknown>): string[] | null {
-  for (const field of ['progress', 'decisions', 'findings', 'notes']) {
-    const value = section[field];
-    if (Array.isArray(value) && value.length > 0) {
-      const strings = value.filter((v): v is string => typeof v === 'string');
-      if (strings.length > 0) return strings;
-    }
+function buildTasksFromSection(
+  section: Record<string, unknown>,
+): Array<{ id: string; subject: string; completed: boolean }> {
+  const tasks: Array<{ id: string; subject: string; completed: boolean }> = [];
+  const sectionCompleted = section.status === 'completed';
+
+  // decisions: 결정된 사항은 항상 완료
+  if (Array.isArray(section.decisions)) {
+    section.decisions.forEach((d, i) => {
+      if (typeof d === 'string') tasks.push({ id: `ctx-d-${i}`, subject: d, completed: true });
+    });
   }
-  return null;
+
+  // progress: 섹션 완료 상태에 의존
+  if (Array.isArray(section.progress)) {
+    section.progress.forEach((p, i) => {
+      if (typeof p === 'string')
+        tasks.push({ id: `ctx-p-${i}`, subject: p, completed: sectionCompleted });
+    });
+  }
+
+  // findings: 관찰된 사항은 항상 완료
+  if (Array.isArray(section.findings)) {
+    section.findings.forEach((f, i) => {
+      if (typeof f === 'string') tasks.push({ id: `ctx-f-${i}`, subject: f, completed: true });
+    });
+  }
+
+  // notes: 참고 사항은 항상 미완료
+  if (Array.isArray(section.notes)) {
+    section.notes.forEach((n, i) => {
+      if (typeof n === 'string') tasks.push({ id: `ctx-n-${i}`, subject: n, completed: false });
+    });
+  }
+
+  return tasks;
 }
 
 /**
@@ -257,24 +299,11 @@ function extractFromUpdateContext(json: Record<string, unknown>): ExtractedEvent
   if (!Array.isArray(sections) || sections.length === 0) return [];
 
   const lastSection = sections[sections.length - 1] as Record<string, unknown>;
-  const items = pickTaskSource(lastSection);
-  if (!items || items.length === 0) return [];
-
-  const sectionCompleted = lastSection?.status === 'completed';
-  const tasks = items.map((item, idx) => ({
-    // Positional IDs are intentionally ephemeral; each TASK_SYNCED replaces all tasks.
-    id: `ctx-${idx}`,
-    subject: item,
-    completed: sectionCompleted,
-  }));
+  const tasks = buildTasksFromSection(lastSection);
+  if (tasks.length === 0) return [];
 
   const agentId =
     typeof lastSection.primaryAgent === 'string' ? lastSection.primaryAgent : UNKNOWN_AGENT_ID;
 
-  return [
-    {
-      event: TUI_EVENTS.TASK_SYNCED,
-      payload: { agentId, tasks },
-    },
-  ];
+  return [{ event: TUI_EVENTS.TASK_SYNCED, payload: { agentId, tasks } }];
 }

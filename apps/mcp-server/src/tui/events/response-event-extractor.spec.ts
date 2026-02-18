@@ -123,9 +123,10 @@ describe('extractEventsFromResponse', () => {
           included_skills: [{ name: 'debugging', reason: 'error' }],
         }),
       );
-      expect(result).toHaveLength(2);
       expect(result[0].event).toBe(TUI_EVENTS.MODE_CHANGED);
       expect(result[1].event).toBe(TUI_EVENTS.SKILL_RECOMMENDED);
+      // TASK_SYNCED is also emitted for included_skills (initial checklist)
+      expect(result.some(e => e.event === TUI_EVENTS.TASK_SYNCED)).toBe(true);
     });
   });
 
@@ -182,10 +183,11 @@ describe('extractEventsFromResponse', () => {
           included_skills: [{ name: 'writing-plans', reason: 'matched' }],
         }),
       );
-      expect(result).toHaveLength(3);
       expect(result[0].event).toBe(TUI_EVENTS.MODE_CHANGED);
       expect(result[1].event).toBe(TUI_EVENTS.SKILL_RECOMMENDED);
       expect(result[2].event).toBe(TUI_EVENTS.AGENT_ACTIVATED);
+      // TASK_SYNCED is also emitted for included_skills (initial checklist)
+      expect(result.some(e => e.event === TUI_EVENTS.TASK_SYNCED)).toBe(true);
     });
   });
 
@@ -359,6 +361,62 @@ describe('extractEventsFromResponse', () => {
       );
       const objectiveEvent = events.find(e => e.event === TUI_EVENTS.OBJECTIVE_SET);
       expect(objectiveEvent).toBeUndefined();
+    });
+  });
+
+  describe('parse_mode → task:synced (initial checklist)', () => {
+    it('should emit TASK_SYNCED with included_skills as initial checklist', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          mode: 'PLAN',
+          delegates_to: 'solution-architect',
+          included_skills: [{ name: 'tdd' }, { name: 'debugging' }],
+        }),
+      );
+      const taskSynced = events.filter(e => e.event === TUI_EVENTS.TASK_SYNCED);
+      expect(taskSynced).toHaveLength(1);
+      expect(taskSynced[0].payload).toEqual({
+        agentId: 'primary:solution-architect',
+        tasks: [
+          { id: 'skill-0', subject: 'Apply tdd', completed: false },
+          { id: 'skill-1', subject: 'Apply debugging', completed: false },
+        ],
+      });
+    });
+
+    it('should not emit TASK_SYNCED when included_skills is empty', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({ mode: 'PLAN', included_skills: [] }),
+      );
+      expect(events.filter(e => e.event === TUI_EVENTS.TASK_SYNCED)).toHaveLength(0);
+    });
+
+    it('should not emit TASK_SYNCED when included_skills is missing', () => {
+      const events = extractEventsFromResponse('parse_mode', makeResponse({ mode: 'PLAN' }));
+      expect(events.filter(e => e.event === TUI_EVENTS.TASK_SYNCED)).toHaveLength(0);
+    });
+
+    it('should use UNKNOWN_AGENT_ID when delegates_to is missing', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({ included_skills: [{ name: 'tdd' }] }),
+      );
+      const taskSynced = events.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+      expect(taskSynced?.payload.agentId).toBe('unknown-agent');
+    });
+
+    it('should skip skills without name field', () => {
+      const events = extractEventsFromResponse(
+        'parse_mode',
+        makeResponse({
+          delegates_to: 'planner',
+          included_skills: [{ name: 'tdd' }, { description: 'no name' }, { name: 'debugging' }],
+        }),
+      );
+      const taskSynced = events.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+      expect(taskSynced?.payload.tasks).toHaveLength(2);
     });
   });
 
@@ -542,8 +600,8 @@ describe('extractEventsFromResponse', () => {
       expect(result[0].payload).toEqual({
         agentId: 'frontend-developer',
         tasks: [
-          { id: 'ctx-0', subject: 'Implemented login form', completed: false },
-          { id: 'ctx-1', subject: 'Added validation', completed: false },
+          { id: 'ctx-p-0', subject: 'Implemented login form', completed: false },
+          { id: 'ctx-p-1', subject: 'Added validation', completed: false },
         ],
       });
     });
@@ -566,7 +624,7 @@ describe('extractEventsFromResponse', () => {
       );
       expect(result[0].payload).toEqual({
         agentId: 'dev',
-        tasks: [{ id: 'ctx-0', subject: 'Task done', completed: true }],
+        tasks: [{ id: 'ctx-p-0', subject: 'Task done', completed: true }],
       });
     });
 
@@ -652,8 +710,8 @@ describe('extractEventsFromResponse', () => {
       expect(result[0].payload).toEqual({
         agentId: 'technical-planner',
         tasks: [
-          { id: 'ctx-0', subject: 'Use JWT for auth', completed: false },
-          { id: 'ctx-1', subject: 'Add rate limiting', completed: false },
+          { id: 'ctx-d-0', subject: 'Use JWT for auth', completed: true },
+          { id: 'ctx-d-1', subject: 'Add rate limiting', completed: true },
         ],
       });
     });
@@ -679,8 +737,8 @@ describe('extractEventsFromResponse', () => {
       expect(result[0].payload).toEqual({
         agentId: 'code-reviewer',
         tasks: [
-          { id: 'ctx-0', subject: 'Missing error handling in auth', completed: false },
-          { id: 'ctx-1', subject: 'No input validation', completed: false },
+          { id: 'ctx-f-0', subject: 'Missing error handling in auth', completed: true },
+          { id: 'ctx-f-1', subject: 'No input validation', completed: true },
         ],
       });
     });
@@ -705,13 +763,13 @@ describe('extractEventsFromResponse', () => {
       expect(result[0].payload).toEqual({
         agentId: 'planner',
         tasks: [
-          { id: 'ctx-0', subject: 'Reviewed existing codebase', completed: false },
-          { id: 'ctx-1', subject: 'Identified dependencies', completed: false },
+          { id: 'ctx-n-0', subject: 'Reviewed existing codebase', completed: false },
+          { id: 'ctx-n-1', subject: 'Identified dependencies', completed: false },
         ],
       });
     });
 
-    it('should prioritize progress over decisions when both exist', () => {
+    it('should merge decisions and progress when both exist', () => {
       const result = extractEventsFromResponse(
         'update_context',
         makeResponse({
@@ -730,7 +788,138 @@ describe('extractEventsFromResponse', () => {
       );
       expect(result[0].payload).toEqual({
         agentId: 'dev',
-        tasks: [{ id: 'ctx-0', subject: 'Implemented feature', completed: false }],
+        tasks: [
+          { id: 'ctx-d-0', subject: 'Use pattern X', completed: true },
+          { id: 'ctx-p-0', subject: 'Implemented feature', completed: false },
+        ],
+      });
+    });
+
+    describe('source-aware completion', () => {
+      it('should mark decisions as completed: true always', () => {
+        const result = extractEventsFromResponse(
+          'update_context',
+          makeResponse({
+            document: {
+              sections: [
+                { primaryAgent: 'agent-1', status: 'in_progress', decisions: ['Use JWT'] },
+              ],
+            },
+          }),
+        );
+        const synced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+        expect(synced?.payload.tasks[0]).toEqual({
+          id: 'ctx-d-0',
+          subject: 'Use JWT',
+          completed: true,
+        });
+      });
+
+      it('should mark progress as completed: false when section is in_progress', () => {
+        const result = extractEventsFromResponse(
+          'update_context',
+          makeResponse({
+            document: {
+              sections: [
+                { primaryAgent: 'agent-1', status: 'in_progress', progress: ['Impl auth'] },
+              ],
+            },
+          }),
+        );
+        const synced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+        expect(synced?.payload.tasks[0]).toEqual({
+          id: 'ctx-p-0',
+          subject: 'Impl auth',
+          completed: false,
+        });
+      });
+
+      it('should mark progress as completed: true when section is completed', () => {
+        const result = extractEventsFromResponse(
+          'update_context',
+          makeResponse({
+            document: {
+              sections: [
+                { primaryAgent: 'agent-1', status: 'completed', progress: ['Impl auth'] },
+              ],
+            },
+          }),
+        );
+        const synced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+        expect(synced?.payload.tasks[0]).toEqual({
+          id: 'ctx-p-0',
+          subject: 'Impl auth',
+          completed: true,
+        });
+      });
+
+      it('should mark notes as completed: false always', () => {
+        const result = extractEventsFromResponse(
+          'update_context',
+          makeResponse({
+            document: {
+              sections: [
+                {
+                  primaryAgent: 'agent-1',
+                  status: 'completed',
+                  notes: ['Consider caching'],
+                },
+              ],
+            },
+          }),
+        );
+        const synced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+        expect(synced?.payload.tasks[0]).toEqual({
+          id: 'ctx-n-0',
+          subject: 'Consider caching',
+          completed: false,
+        });
+      });
+
+      it('should mark findings as completed: true always', () => {
+        const result = extractEventsFromResponse(
+          'update_context',
+          makeResponse({
+            document: {
+              sections: [
+                { primaryAgent: 'agent-1', status: 'in_progress', findings: ['No XSS found'] },
+              ],
+            },
+          }),
+        );
+        const synced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+        expect(synced?.payload.tasks[0]).toEqual({
+          id: 'ctx-f-0',
+          subject: 'No XSS found',
+          completed: true,
+        });
+      });
+
+      it('should merge all source fields with correct completion per source', () => {
+        const result = extractEventsFromResponse(
+          'update_context',
+          makeResponse({
+            document: {
+              sections: [
+                {
+                  primaryAgent: 'agent-1',
+                  status: 'in_progress',
+                  decisions: ['Use JWT'],
+                  progress: ['Impl auth'],
+                  findings: ['No XSS'],
+                  notes: ['Consider caching'],
+                },
+              ],
+            },
+          }),
+        );
+        const synced = result.find(e => e.event === TUI_EVENTS.TASK_SYNCED);
+        expect(synced?.payload.tasks).toEqual([
+          { id: 'ctx-d-0', subject: 'Use JWT', completed: true },
+          { id: 'ctx-p-0', subject: 'Impl auth', completed: false },
+          { id: 'ctx-f-0', subject: 'No XSS', completed: true },
+          { id: 'ctx-n-0', subject: 'Consider caching', completed: false },
+        ]);
       });
     });
   });
