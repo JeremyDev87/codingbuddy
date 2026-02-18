@@ -108,7 +108,7 @@ export function DashboardApp({ eventBus, externalState }: DashboardAppProps): Re
       <StageHealthBar
         stageHealth={stageHealth}
         bottlenecks={bottlenecks}
-        tokenCount={state.tokenUsage}
+        toolCount={state.toolInvokeCount}
         width={grid.stageHealth.width}
       />
     </Box>
