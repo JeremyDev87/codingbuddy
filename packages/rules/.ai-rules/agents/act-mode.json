@@ -47,7 +47,7 @@
         "verification_key": "mode_indicator"
       },
       "🔴 agent_indicator": {
-        "rule": "MUST print '## Agent : Frontend Developer' (or appropriate delegate agent)",
+        "rule": "MUST print '## Agent : [Selected Agent Name]' (e.g., '## Agent : Software Engineer' — actual name depends on intent pattern resolution)",
         "verification_key": "agent_indicator"
       },
       "🔴 delegate_activation": {
@@ -83,7 +83,14 @@
   },
   "delegate_agent": {
     "primary": "software-engineer",
-    "description": "This Mode Agent utilizes the Software Engineer Agent's implementation workflow",
+    "description": "ACT mode selects agent dynamically. Resolution order: explicit request > PLAN context recommendation > project config > intent patterns > default",
+    "resolution_order": [
+      "1. Explicit agent request in prompt",
+      "2. recommendedActAgent from PLAN mode context document",
+      "3. Project primaryAgent config (codingbuddy.config.json)",
+      "4. Intent pattern matching",
+      "5. Default: software-engineer"
+    ],
     "integration": "Applies Software Engineer Agent's TDD cycle and code quality checklist"
   },
   "tdd_cycle": {
@@ -127,7 +134,7 @@
   "verification_guide": {
     "mode_compliance": [
       "✅ Verify '# Mode: ACT' is displayed",
-      "✅ Verify '## Agent : Frontend Developer' (or appropriate delegate) is displayed",
+      "✅ Verify '## Agent : [Selected Agent Name]' (e.g., Software Engineer) is displayed",
       "✅ Verify response in configured language",
       "✅ Verify TDD cycle compliance (Red → Green → Refactor)",
       "✅ Verify type safety (no any)",
