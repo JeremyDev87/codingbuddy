@@ -19,8 +19,8 @@ const NODE_HEIGHT = 4;
 
 const PARALLEL_STYLES = {
   parallel: { fg: 'cyan' as const }, // 파랑 — 병렬 실행
-  single: { fg: 'gray' as const }, // 회색 — 단일 실행
 } as const;
+const TREE_CONNECTOR_STYLE: CellStyle = { fg: 'cyan', dim: true };
 const STAGE_ORDER: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
 // ▸ (2) + label (4) + stats " (99↑ 99✓)" (11) + spacing (1) = 18
 const STAGE_SLOT_WIDTH = 18;
@@ -63,12 +63,19 @@ function groupByStage(agents: Map<string, DashboardNode>): Map<Mode, DashboardNo
   return byStage;
 }
 
+function isBoxAgent(agent: DashboardNode): boolean {
+  return agent.isPrimary || agent.isParallel;
+}
+
 /**
- * Sort agents: primary first, then by name.
+ * Sort agents: primary first, then parallel, then single specialists, then by name.
  */
 function sortAgents(agents: DashboardNode[]): DashboardNode[] {
   return [...agents].sort((a, b) => {
     if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1;
+    if (!a.isPrimary && !b.isPrimary) {
+      if (a.isParallel !== b.isParallel) return a.isParallel ? -1 : 1;
+    }
     return a.name.localeCompare(b.name);
   });
 }
@@ -118,14 +125,18 @@ export function layoutAgentNodes(
 
     const sorted = sortAgents(stageAgents);
     const startY = 3; // accounts for 2-row pipeline header
-    sorted.forEach((agent, idx) => {
+    let currentY = startY;
+    for (const agent of sorted) {
+      const boxAgent = isBoxAgent(agent);
+      const height = boxAgent ? NODE_HEIGHT : 1;
       positions.set(agent.id, {
         x: col.startX + Math.floor((col.width - NODE_WIDTH) / 2),
-        y: startY + idx * (NODE_HEIGHT + 1),
+        y: currentY,
         width: NODE_WIDTH,
-        height: NODE_HEIGHT,
+        height,
       });
-    });
+      currentY += boxAgent ? height + 1 : height;
+    }
   }
 
   return positions;
@@ -137,6 +148,35 @@ export function layoutAgentNodes(
 function getNodeTextStyle(status: DashboardNodeStatus): CellStyle {
   if (status === 'running') return { fg: 'white', bold: true };
   return { dim: true };
+}
+
+function drawTreeConnector(
+  buf: ColorBuffer,
+  x: number,
+  y: number,
+  agent: DashboardNode,
+  isLast: boolean,
+  dimmed = false,
+): void {
+  const connector = isLast ? '└─' : '├─';
+  const icon = STATUS_ICONS[agent.status];
+  const maxNameLen = Math.max(1, NODE_WIDTH - connector.length - icon.length - 3);
+  const nameStr =
+    agent.name.length > maxNameLen ? agent.name.slice(0, maxNameLen - 3) + '...' : agent.name;
+
+  buf.writeText(x, y, connector, dimmed ? DIMMED_STYLE : TREE_CONNECTOR_STYLE);
+  buf.writeText(
+    x + connector.length + 1,
+    y,
+    icon,
+    dimmed ? DIMMED_STYLE : STATUS_STYLES[agent.status],
+  );
+  buf.writeText(
+    x + connector.length + 1 + icon.length + 1,
+    y,
+    nameStr,
+    dimmed ? DIMMED_STYLE : getNodeTextStyle(agent.status),
+  );
 }
 
 /**
@@ -190,9 +230,6 @@ function drawAgentNode(
   } else if (agent.isParallel) {
     // Parallel Specialist: ⫸ parallel 표시
     buf.writeText(x + 2, y + 2, '⫸ parallel', dimmed ? DIMMED_STYLE : PARALLEL_STYLES.parallel);
-  } else {
-    // Single Specialist: → single 표시
-    buf.writeText(x + 2, y + 2, '→ single', dimmed ? DIMMED_STYLE : PARALLEL_STYLES.single);
   }
 }
 
@@ -371,15 +408,34 @@ export function renderFlowMap(
     }
   }
 
-  // 3. Draw agent boxes with visual hierarchy
-  for (const [id, pos] of positions) {
-    const agent = agents.get(id);
-    if (!agent) continue;
-    drawAgentNode(buf, pos.x, pos.y, pos.width, agent, inactiveIds.has(id));
+  // 3. Draw agent boxes (primary / parallel) or tree connectors (single specialists)
+  const byStage = groupByStage(agents);
+  for (const [, stageAgents] of byStage) {
+    const sorted = sortAgents(stageAgents);
+    const connectorAgents = sorted.filter(a => !isBoxAgent(a));
+    const connectorLastIdx = connectorAgents.length - 1;
+    const connectorIndexMap = new Map(connectorAgents.map((a, i) => [a.id, i]));
+
+    for (const agent of sorted) {
+      const pos = positions.get(agent.id);
+      if (!pos) continue;
+
+      if (isBoxAgent(agent)) {
+        drawAgentNode(buf, pos.x, pos.y, pos.width, agent, inactiveIds.has(agent.id));
+      } else {
+        const isLast = connectorIndexMap.get(agent.id) === connectorLastIdx;
+        drawTreeConnector(buf, pos.x, pos.y, agent, isLast, inactiveIds.has(agent.id));
+      }
+    }
   }
 
   // 4. Draw edges with smooth curves
   for (const edge of edges) {
+    const fromAgent = agents.get(edge.from);
+    const toAgent = agents.get(edge.to);
+    // Skip same-column edges — tree connectors already represent this relationship
+    if (fromAgent && toAgent && fromAgent.stage === toAgent.stage) continue;
+
     const fromPos = positions.get(edge.from);
     const toPos = positions.get(edge.to);
     if (!fromPos || !toPos) continue;

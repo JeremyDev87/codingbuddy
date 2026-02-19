@@ -403,10 +403,21 @@ describe('tui/components/flow-map.pure', () => {
       expect(result).toContain('║');
     });
 
-    it('should render secondary agents with round corners ╭─╮', () => {
-      const agents = createTestAgents();
+    it('should render parallel agents with round corners ╭─╮', () => {
+      const agents = new Map<string, DashboardNode>([
+        [
+          'par-1',
+          makeAgent({
+            id: 'par-1',
+            name: 'ParallelGroup',
+            stage: 'EVAL',
+            status: 'idle',
+            isPrimary: false,
+            isParallel: true,
+          }),
+        ],
+      ]);
       const result = bufferToString(renderFlowMap(agents, [], 120, 30));
-
       expect(result).toContain('╭');
       expect(result).toContain('╮');
       expect(result).toContain('╰');
@@ -766,7 +777,7 @@ describe('tui/components/flow-map.pure', () => {
       expect(result).not.toContain('░');
     });
 
-    it('renders → single for isParallel:false specialist node (non-primary)', () => {
+    it('renders tree connector for isParallel:false specialist node (non-primary)', () => {
       const agents = new Map([
         [
           'rev-1',
@@ -781,7 +792,9 @@ describe('tui/components/flow-map.pure', () => {
         ],
       ]);
       const result = bufferToString(renderFlowMap(agents, [], 120, 20));
-      expect(result).toContain('→ single');
+      expect(result).toContain('└─');
+      expect(result).toContain('code-rev'); // truncated to fit NODE_WIDTH=17
+      expect(result).not.toContain('→ single');
     });
 
     it('renders progress bar for isPrimary:true node regardless of isParallel', () => {
@@ -801,6 +814,165 @@ describe('tui/components/flow-map.pure', () => {
       expect(result).not.toContain('⫸ parallel');
       expect(result).not.toContain('→ single');
       expect(result).toMatch(/[█░]/);
+    });
+  });
+
+  describe('tree connector rendering', () => {
+    it('single specialist renders as tree connector line, not a box', () => {
+      const agents = new Map([
+        [
+          'primary',
+          makeAgent({
+            id: 'primary',
+            name: 'plan-mode',
+            stage: 'PLAN',
+            isPrimary: true,
+            status: 'running',
+          }),
+        ],
+        [
+          'spec',
+          makeAgent({
+            id: 'spec',
+            name: 'architect',
+            stage: 'PLAN',
+            isPrimary: false,
+            isParallel: false,
+            status: 'idle',
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
+      expect(result).toContain('└─');
+      expect(result).toContain('architect');
+    });
+
+    it('multiple single specialists render with ├─ (non-last) and └─ (last)', () => {
+      const agents = new Map([
+        [
+          'primary',
+          makeAgent({
+            id: 'primary',
+            name: 'plan-mode',
+            stage: 'PLAN',
+            isPrimary: true,
+            status: 'running',
+          }),
+        ],
+        [
+          'spec1',
+          makeAgent({
+            id: 'spec1',
+            name: 'architect',
+            stage: 'PLAN',
+            isPrimary: false,
+            isParallel: false,
+            status: 'idle',
+          }),
+        ],
+        [
+          'spec2',
+          makeAgent({
+            id: 'spec2',
+            name: 'event-arc',
+            stage: 'PLAN',
+            isPrimary: false,
+            isParallel: false,
+            status: 'idle',
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
+      expect(result).toContain('├─');
+      expect(result).toContain('└─');
+    });
+
+    it('single specialist does not render as a box (no round corners ╭╯)', () => {
+      const agents = new Map([
+        [
+          'primary',
+          makeAgent({
+            id: 'primary',
+            name: 'plan-mode',
+            stage: 'PLAN',
+            isPrimary: true,
+            status: 'running',
+          }),
+        ],
+        [
+          'spec',
+          makeAgent({
+            id: 'spec',
+            name: 'architect',
+            stage: 'PLAN',
+            isPrimary: false,
+            isParallel: false,
+            status: 'idle',
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
+      expect(result).not.toContain('╭');
+    });
+
+    it('same-column edges do not produce U-curve backwards arrows (◂)', () => {
+      const agents = new Map([
+        [
+          'primary',
+          makeAgent({
+            id: 'primary',
+            name: 'plan-mode',
+            stage: 'PLAN',
+            isPrimary: true,
+            status: 'running',
+          }),
+        ],
+        [
+          'spec',
+          makeAgent({
+            id: 'spec',
+            name: 'architect',
+            stage: 'PLAN',
+            isPrimary: false,
+            isParallel: false,
+            status: 'idle',
+          }),
+        ],
+      ]);
+      const edges: Edge[] = [{ from: 'primary', to: 'spec', label: '', type: 'delegation' }];
+      const result = bufferToString(renderFlowMap(agents, edges, 120, 30));
+      expect(result).not.toContain('◂');
+      expect(result).not.toContain('╮');
+      expect(result).not.toContain('╰');
+    });
+
+    it('parallel agents still render as boxes with ⫸ parallel (unchanged)', () => {
+      const agents = new Map([
+        [
+          'primary',
+          makeAgent({
+            id: 'primary',
+            name: 'plan-mode',
+            stage: 'PLAN',
+            isPrimary: true,
+            status: 'running',
+          }),
+        ],
+        [
+          'par',
+          makeAgent({
+            id: 'par',
+            name: 'technical-team',
+            stage: 'ACT',
+            isPrimary: false,
+            isParallel: true,
+            status: 'running',
+          }),
+        ],
+      ]);
+      const result = bufferToString(renderFlowMap(agents, [], 120, 30));
+      expect(result).toContain('⫸ parallel');
+      expect(result).toContain('╭');
     });
   });
 
