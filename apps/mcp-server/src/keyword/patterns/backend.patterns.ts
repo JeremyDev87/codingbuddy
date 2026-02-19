@@ -3,7 +3,7 @@
  *
  * These patterns detect prompts related to server-side development,
  * API design, and backend services.
- * Priority: 6th (after AI/ML patterns).
+ * Priority: 9th (after agent-architect, test, tooling, platform, security, systems, data, ai-ml patterns).
  *
  * Confidence Levels:
  * - 0.95: Backend frameworks (NestJS, Express, Django, Spring)

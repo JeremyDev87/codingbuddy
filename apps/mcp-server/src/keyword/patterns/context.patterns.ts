@@ -91,7 +91,7 @@ export const CONTEXT_PATTERNS: ReadonlyArray<ContextPattern> = [
   { pattern: /\.go$/i, agent: 'backend-developer', confidence: 0.85 },
   { pattern: /\.py$/i, agent: 'backend-developer', confidence: 0.85 },
   { pattern: /\.java$/i, agent: 'backend-developer', confidence: 0.85 },
-  { pattern: /\.rs$/i, agent: 'backend-developer', confidence: 0.85 },
+  { pattern: /\.rs$/i, agent: 'systems-developer', confidence: 0.85 },
   // Frontend patterns (lower priority)
   { pattern: /\.tsx?$/i, agent: 'frontend-developer', confidence: 0.7 },
   { pattern: /\.jsx?$/i, agent: 'frontend-developer', confidence: 0.7 },

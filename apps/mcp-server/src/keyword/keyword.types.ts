@@ -21,6 +21,7 @@ export const ACT_PRIMARY_AGENTS = [
   'agent-architect',
   'test-engineer', // TDD, unit/integration/e2e test specialist
   'security-engineer', // Security features implementation & vulnerability remediation (intent priority: 5th)
+  'systems-developer', // Rust, C, C++, FFI, WASM, embedded, low-level optimization (intent priority: 6th)
 ] as const;
 
 /** Primary Agent for EVAL mode - centralized definition */
@@ -111,6 +112,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
   'security-engineer': {
     name: 'Security Engineer',
     description: 'Security implementation, vulnerability fixes, auth/authz, encryption',
+  },
+  'systems-developer': {
+    name: 'Systems Developer',
+    description: 'Rust, C, C++, FFI, WASM, embedded, low-level performance',
   },
 };
 

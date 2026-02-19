@@ -351,6 +351,92 @@ describe('ActAgentStrategy', () => {
       });
     });
 
+    describe('systems-developer patterns', () => {
+      // Patterns from systems.patterns.ts:
+      // - /\brust\b/i (0.95)
+      // - /c\+\+|\.cpp\b|\.hpp\b|\bcpp\b/i (0.95)
+      // - /\bffi\b|foreign\s*function\s*interface/i (0.95)
+      // - /ffi\s*(바인딩|binding)/i (0.95)
+      // - /\bwasm\b|\bwebassembly\b/i (0.95)
+      // - /시스템\s*프로그래밍|systems?\s*programming/i (0.90)
+      // - /저수준\s*(구현|개발|최적화)|low[-\s]?level\s*(implement|develop|optim)/i (0.90)
+      const systemsPrompts = [
+        'Rust로 서버 구현해줘', // matches /\brust\b/i
+        'C++ 메모리 최적화', // matches /c\+\+/i
+        'FFI 바인딩 작성', // matches /ffi\s*(바인딩|binding)/i
+        'WASM 모듈 구현해줘', // matches /\bwasm\b/i
+        '시스템 프로그래밍 구현', // matches /시스템\s*프로그래밍/i
+        '저수준 최적화해줘', // matches /저수준\s*(구현|개발|최적화)/i
+      ];
+
+      it.each(systemsPrompts)('should detect systems-developer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt,
+            availableAgents: ['frontend-developer', 'backend-developer', 'systems-developer'],
+          }),
+        );
+
+        expect(result.agentName).toBe('systems-developer');
+        expect(result.source).toBe('intent');
+      });
+    });
+
+    describe('systems-developer boundary cases', () => {
+      it('should NOT route "React 바인딩 작성해줘" to systems-developer (→ frontend-developer)', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'React 바인딩 작성해줘',
+            availableAgents: ['frontend-developer', 'backend-developer', 'systems-developer'],
+          }),
+        );
+        expect(result.agentName).toBe('frontend-developer');
+        expect(result.agentName).not.toBe('systems-developer');
+      });
+
+      it('should NOT route "customer lifetime value 계산" to systems-developer (→ data-engineer)', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'customer lifetime value 계산해줘',
+            availableAgents: ['data-engineer', 'backend-developer', 'systems-developer'],
+          }),
+        );
+        expect(result.agentName).not.toBe('systems-developer');
+      });
+
+      it('should NOT route "embedded 비디오 추가해줘" to systems-developer (→ frontend-developer)', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'embedded 비디오 추가해줘',
+            availableAgents: ['frontend-developer', 'backend-developer', 'systems-developer'],
+          }),
+        );
+        expect(result.agentName).not.toBe('systems-developer');
+      });
+
+      it('should still route "Rust lifetime 오류 수정" to systems-developer', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'Rust lifetime 오류 수정해줘',
+            availableAgents: ['frontend-developer', 'backend-developer', 'systems-developer'],
+          }),
+        );
+        expect(result.agentName).toBe('systems-developer');
+        expect(result.source).toBe('intent');
+      });
+
+      it('should still route "embedded system 개발" to systems-developer', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'embedded system 개발해줘',
+            availableAgents: ['frontend-developer', 'backend-developer', 'systems-developer'],
+          }),
+        );
+        expect(result.agentName).toBe('systems-developer');
+        expect(result.source).toBe('intent');
+      });
+    });
+
     describe('security-engineer boundary cases', () => {
       it('should NOT route "인증 서버 개발해줘" to security-engineer (→ backend-developer)', async () => {
         const result = await strategy.resolve(createActContext({ prompt: '인증 서버 개발해줘' }));
