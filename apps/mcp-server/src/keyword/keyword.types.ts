@@ -13,6 +13,7 @@ export const ACT_PRIMARY_AGENTS = [
   'tooling-engineer', // Config/build tools specialist - highest priority for pattern matching
   'platform-engineer', // IaC, Kubernetes, multi-cloud specialist - high priority for infra tasks
   'data-engineer', // Database/schema specialist - high priority for data tasks
+  'ai-ml-engineer', // ML frameworks, LLM integration, embeddings, fine-tuning
   'mobile-developer', // Mobile app specialist - detected by project files
   'frontend-developer',
   'backend-developer',
@@ -76,6 +77,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
   'data-engineer': {
     name: 'Data Engineer',
     description: 'Database, schema design, migrations, analytics',
+  },
+  'ai-ml-engineer': {
+    name: 'AI/ML Engineer',
+    description: 'ML frameworks, LLM integration, embeddings, fine-tuning',
   },
   'mobile-developer': {
     name: 'Mobile Developer',

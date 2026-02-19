@@ -304,6 +304,8 @@ describe('ActAgentStrategy', () => {
         'Create embeddings for vector search', // matches /embedding/i
         '딥러닝 모델 학습시켜줘', // matches /딥\s*러닝|deep\s*learning/i
         'Fine-tune the LLM model', // matches /fine.?tun/i
+        'LLM 파인튜닝해줘', // matches /파인.?튜닝|fine.?tun/i (Korean)
+        '임베딩 모델 구현', // matches /임베딩|embedding/i (Korean)
       ];
 
       it.each(aiMlPrompts)('should detect ai-ml-engineer intent: "%s"', async prompt => {
