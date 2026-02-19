@@ -17,9 +17,45 @@ const ACTIVITY_STATUS_ICONS: Readonly<Record<DashboardNodeStatus, string>> = Obj
   done: '○',
 });
 
-type AgentChild = { type: 'agent'; node: DashboardNode };
-type SkillChild = { type: 'skill'; name: string };
-type TreeChild = AgentChild | SkillChild;
+function renderSubtree(
+  nodeId: string,
+  agents: Map<string, DashboardNode>,
+  childrenOf: Map<string, string[]>,
+  visited: Set<string>,
+  prefix: string,
+  isLast: boolean,
+  lines: string[],
+  height: number,
+  width: number,
+): void {
+  if (lines.length >= height) return;
+  if (visited.has(nodeId)) return; // cycle guard
+  visited.add(nodeId);
+
+  const node = agents.get(nodeId);
+  if (!node) return;
+
+  const connector = isLast ? '└' : '├';
+  const icon = ACTIVITY_STATUS_ICONS[node.status] ?? '?';
+  lines.push(truncateToDisplayWidth(`${prefix}${connector} ${icon} ${node.name}`, width));
+
+  const childIds = (childrenOf.get(nodeId) ?? []).filter(id => agents.has(id));
+  const nextPrefix = prefix + (isLast ? '   ' : '│  ');
+  for (let i = 0; i < childIds.length; i++) {
+    if (lines.length >= height) break;
+    renderSubtree(
+      childIds[i],
+      agents,
+      childrenOf,
+      visited,
+      nextPrefix,
+      i === childIds.length - 1,
+      lines,
+      height,
+      width,
+    );
+  }
+}
 
 export function renderAgentTree(
   agents: Map<string, DashboardNode>,
@@ -52,26 +88,22 @@ export function renderAgentTree(
   const rootIcon = ACTIVITY_STATUS_ICONS[root.status] ?? '?';
   lines.push(truncateToDisplayWidth(`${rootIcon} ${root.name}`, width));
 
-  // Collect children: edge-based agents + activeSkills as leaf nodes
-  const childIds = childrenOf.get(root.id) ?? [];
-  const agentChildren: TreeChild[] = childIds
-    .filter(id => agents.has(id))
-    .map(id => ({ type: 'agent', node: agents.get(id)! }));
-  const skillChildren: TreeChild[] = activeSkills.map(s => ({ type: 'skill', name: s }));
-  const allChildren: TreeChild[] = [...agentChildren, ...skillChildren];
+  // Recursive subtree rendering with cycle detection
+  const visited = new Set<string>([root.id]);
+  const rootChildIds = (childrenOf.get(root.id) ?? []).filter(id => agents.has(id));
+  const totalChildren = rootChildIds.length + activeSkills.length;
 
-  for (let i = 0; i < allChildren.length; i++) {
+  for (let i = 0; i < rootChildIds.length; i++) {
     if (lines.length >= height) break;
-    const isLast = i === allChildren.length - 1;
-    const connector = isLast ? '└' : '├';
-    const item = allChildren[i];
+    const isLast = i === totalChildren - 1;
+    renderSubtree(rootChildIds[i], agents, childrenOf, visited, '  ', isLast, lines, height, width);
+  }
 
-    if (item.type === 'agent') {
-      const icon = ACTIVITY_STATUS_ICONS[item.node.status] ?? '?';
-      lines.push(truncateToDisplayWidth(`  ${connector} ${icon} ${item.node.name}`, width));
-    } else {
-      lines.push(truncateToDisplayWidth(`  ${connector} ◉ ${item.name} (skill)`, width));
-    }
+  for (let i = 0; i < activeSkills.length; i++) {
+    if (lines.length >= height) break;
+    const isLast = rootChildIds.length + i === totalChildren - 1;
+    const connector = isLast ? '└' : '├';
+    lines.push(truncateToDisplayWidth(`  ${connector} ◉ ${activeSkills[i]} (skill)`, width));
   }
 
   return lines.slice(0, height);

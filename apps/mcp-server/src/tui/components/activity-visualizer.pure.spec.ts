@@ -171,6 +171,99 @@ describe('renderAgentTree', () => {
     const childLine = lines.find(l => l.includes('idle-child'));
     expect(childLine).toContain('○');
   });
+
+  it('shows grandchild agent (depth 2)', () => {
+    const agents = new Map<string, DashboardNode>();
+    agents.set(
+      'root',
+      createDefaultDashboardNode({
+        id: 'root',
+        name: 'root',
+        stage: 'PLAN',
+        status: 'running',
+        isPrimary: true,
+      }),
+    );
+    agents.set(
+      'child',
+      createDefaultDashboardNode({ id: 'child', name: 'child', stage: 'PLAN', status: 'running' }),
+    );
+    agents.set(
+      'grandchild',
+      createDefaultDashboardNode({
+        id: 'grandchild',
+        name: 'grandchild',
+        stage: 'PLAN',
+        status: 'idle',
+      }),
+    );
+    const edges: Edge[] = [
+      { from: 'root', to: 'child', label: '', type: 'delegation' },
+      { from: 'child', to: 'grandchild', label: '', type: 'delegation' },
+    ];
+    const lines = renderAgentTree(agents, edges, [], 80, 10);
+    expect(lines.join('\n')).toContain('grandchild');
+  });
+
+  it('does not enter infinite loop on cyclic edges', () => {
+    const agents = new Map<string, DashboardNode>();
+    agents.set(
+      'a',
+      createDefaultDashboardNode({
+        id: 'a',
+        name: 'a',
+        stage: 'PLAN',
+        status: 'running',
+        isPrimary: true,
+      }),
+    );
+    agents.set(
+      'b',
+      createDefaultDashboardNode({ id: 'b', name: 'b', stage: 'PLAN', status: 'running' }),
+    );
+    const edges: Edge[] = [
+      { from: 'a', to: 'b', label: '', type: 'delegation' },
+      { from: 'b', to: 'a', label: '', type: 'delegation' }, // cycle
+    ];
+    expect(() => renderAgentTree(agents, edges, [], 80, 10)).not.toThrow();
+  });
+
+  it('indents grandchildren deeper than direct children', () => {
+    const agents = new Map<string, DashboardNode>();
+    agents.set(
+      'root',
+      createDefaultDashboardNode({
+        id: 'root',
+        name: 'root',
+        stage: 'PLAN',
+        status: 'running',
+        isPrimary: true,
+      }),
+    );
+    agents.set(
+      'child',
+      createDefaultDashboardNode({ id: 'child', name: 'child', stage: 'PLAN', status: 'running' }),
+    );
+    agents.set(
+      'grandchild',
+      createDefaultDashboardNode({
+        id: 'grandchild',
+        name: 'grandchild',
+        stage: 'PLAN',
+        status: 'idle',
+      }),
+    );
+    const edges: Edge[] = [
+      { from: 'root', to: 'child', label: '', type: 'delegation' },
+      { from: 'child', to: 'grandchild', label: '', type: 'delegation' },
+    ];
+    const lines = renderAgentTree(agents, edges, [], 80, 10);
+    const childLine = lines.find(l => l.includes('child') && !l.includes('grandchild'))!;
+    const grandchildLine = lines.find(l => l.includes('grandchild'))!;
+    const childIndent = childLine.search(/\S/);
+    const grandchildIndent = grandchildLine.search(/\S/);
+    expect(grandchildIndent).toBeGreaterThan(childIndent);
+  });
 });
 
 describe('renderAgentStatusCard', () => {
