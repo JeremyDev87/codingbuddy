@@ -4,6 +4,7 @@ import {
   createInitialDashboardState,
   type DashboardAction,
 } from './use-dashboard-state';
+import type { DashboardNode, DashboardState } from '../dashboard-types';
 
 describe('dashboardReducer', () => {
   const initialDashboardState = createInitialDashboardState();
@@ -431,7 +432,7 @@ describe('dashboardReducer', () => {
     expect(state.agents.get('a1')!.stage).toBe('ACT');
   });
 
-  it('should only update running agents stage, preserving done/error/idle on MODE_CHANGED', () => {
+  it('on MODE_CHANGED: running agent stage updated, done/idle-parallel removed, error preserved', () => {
     let state = createInitialDashboardState();
     state = dashboardReducer(state, {
       type: 'MODE_CHANGED',
@@ -442,7 +443,7 @@ describe('dashboardReducer', () => {
       type: 'AGENT_ACTIVATED',
       payload: { agentId: 'r1', name: 'runner', role: 'primary', isPrimary: true },
     });
-    // done agent
+    // done agent (PLAN stage → should be removed on MODE_CHANGED PLAN→ACT)
     state = dashboardReducer(state, {
       type: 'AGENT_ACTIVATED',
       payload: { agentId: 'd1', name: 'done-agent', role: 'specialist', isPrimary: false },
@@ -451,7 +452,7 @@ describe('dashboardReducer', () => {
       type: 'AGENT_DEACTIVATED',
       payload: { agentId: 'd1', reason: 'completed', durationMs: 100 },
     });
-    // error agent
+    // error agent (PLAN stage → persists, error agents are not removed on MODE_CHANGED)
     state = dashboardReducer(state, {
       type: 'AGENT_ACTIVATED',
       payload: { agentId: 'e1', name: 'error-agent', role: 'specialist', isPrimary: false },
@@ -460,7 +461,7 @@ describe('dashboardReducer', () => {
       type: 'AGENT_DEACTIVATED',
       payload: { agentId: 'e1', reason: 'error', durationMs: 50 },
     });
-    // idle agent (pre-registered specialist)
+    // idle parallel agent (PLAN stage → should be removed on MODE_CHANGED PLAN→ACT)
     state = dashboardReducer(state, {
       type: 'PARALLEL_STARTED',
       payload: { specialists: ['idle-spec'], mode: 'PLAN' },
@@ -471,10 +472,15 @@ describe('dashboardReducer', () => {
       payload: { from: 'PLAN', to: 'ACT' },
     });
 
+    // running: stage updated
     expect(state.agents.get('r1')!.stage).toBe('ACT');
-    expect(state.agents.get('d1')!.stage).toBe('PLAN');
+    // done from previous mode: removed
+    expect(state.agents.has('d1')).toBe(false);
+    // error from previous mode: preserved (uses TTL-based cleanup instead)
+    expect(state.agents.has('e1')).toBe(true);
     expect(state.agents.get('e1')!.stage).toBe('PLAN');
-    expect(state.agents.get('specialist:idle-spec')!.stage).toBe('PLAN');
+    // idle parallel from previous mode: removed
+    expect(state.agents.has('specialist:idle-spec')).toBe(false);
   });
 
   it('does not mutate original agents map', () => {
@@ -691,6 +697,283 @@ describe('dashboardReducer', () => {
     expect(state.agents.get('search_rules')?.progress).toBe(5);
     // Focused primary agent should NOT be incremented (exact match took priority)
     expect(state.agents.get('primary:arch')?.progress).toBe(0);
+  });
+
+  describe('timestamps', () => {
+    it('records startedAt on AGENT_ACTIVATED', () => {
+      const before = Date.now();
+      const state = dashboardReducer(createInitialDashboardState(), {
+        type: 'AGENT_ACTIVATED',
+        payload: { agentId: 'a1', name: 'Alpha', role: 'primary', isPrimary: true },
+      });
+      const after = Date.now();
+      const agent = state.agents.get('a1')!;
+      expect(agent.startedAt).toBeGreaterThanOrEqual(before);
+      expect(agent.startedAt).toBeLessThanOrEqual(after);
+    });
+
+    it('records completedAt on AGENT_DEACTIVATED with reason=completed', () => {
+      let state = dashboardReducer(createInitialDashboardState(), {
+        type: 'AGENT_ACTIVATED',
+        payload: { agentId: 'a1', name: 'Alpha', role: 'primary', isPrimary: true },
+      });
+      const before = Date.now();
+      state = dashboardReducer(state, {
+        type: 'AGENT_DEACTIVATED',
+        payload: { agentId: 'a1', reason: 'completed', durationMs: 100 },
+      });
+      const after = Date.now();
+      const agent = state.agents.get('a1')!;
+      expect(agent.completedAt).toBeGreaterThanOrEqual(before);
+      expect(agent.completedAt).toBeLessThanOrEqual(after);
+    });
+
+    it('records completedAt on AGENT_DEACTIVATED with reason=error', () => {
+      let state = dashboardReducer(createInitialDashboardState(), {
+        type: 'AGENT_ACTIVATED',
+        payload: { agentId: 'a1', name: 'Alpha', role: 'primary', isPrimary: true },
+      });
+      const before = Date.now();
+      state = dashboardReducer(state, {
+        type: 'AGENT_DEACTIVATED',
+        payload: { agentId: 'a1', reason: 'error', durationMs: 50 },
+      });
+      const after = Date.now();
+      const agent = state.agents.get('a1')!;
+      expect(agent.completedAt).toBeGreaterThanOrEqual(before);
+      expect(agent.completedAt).toBeLessThanOrEqual(after);
+    });
+
+    it('records startedAt on PARALLEL_STARTED for each specialist', () => {
+      const before = Date.now();
+      const state = dashboardReducer(createInitialDashboardState(), {
+        type: 'PARALLEL_STARTED',
+        payload: { specialists: ['sec', 'perf'], mode: 'PLAN' },
+      });
+      const after = Date.now();
+      const sec = state.agents.get('specialist:sec')!;
+      const perf = state.agents.get('specialist:perf')!;
+      expect(sec.startedAt).toBeGreaterThanOrEqual(before);
+      expect(sec.startedAt).toBeLessThanOrEqual(after);
+      expect(perf.startedAt).toBeGreaterThanOrEqual(before);
+      expect(perf.startedAt).toBeLessThanOrEqual(after);
+    });
+  });
+
+  describe('CLEANUP_STALE_AGENTS', () => {
+    const TTL = 30_000;
+
+    function stateWithAgent(overrides: Partial<DashboardNode>): DashboardState {
+      const state = createInitialDashboardState();
+      const agents = new Map(state.agents);
+      agents.set('a1', {
+        id: 'a1',
+        name: 'Alpha',
+        stage: 'PLAN',
+        status: 'done',
+        isPrimary: true,
+        progress: 100,
+        isParallel: false,
+        startedAt: Date.now() - TTL - 1000,
+        completedAt: Date.now() - TTL - 1000,
+        ...overrides,
+      });
+      return { ...state, agents };
+    }
+
+    it('removes done agent after TTL expires', () => {
+      const s = stateWithAgent({ status: 'done', completedAt: Date.now() - TTL - 1 });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(false);
+    });
+
+    it('keeps done agent within TTL', () => {
+      const s = stateWithAgent({ status: 'done', completedAt: Date.now() - TTL + 5000 });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(true);
+    });
+
+    it('removes idle parallel agent after TTL if startedAt exceeds ttl', () => {
+      const s = stateWithAgent({
+        status: 'idle',
+        isParallel: true,
+        startedAt: Date.now() - TTL - 1,
+        completedAt: undefined,
+      });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(false);
+    });
+
+    it('keeps idle non-parallel agent (normal idle before activation)', () => {
+      const s = stateWithAgent({
+        status: 'idle',
+        isParallel: false,
+        startedAt: Date.now() - TTL - 1,
+        completedAt: undefined,
+      });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(true);
+    });
+
+    it('removes error agent after double TTL', () => {
+      const s = stateWithAgent({
+        status: 'error',
+        completedAt: Date.now() - TTL * 2 - 1,
+      });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(false);
+    });
+
+    it('keeps error agent within double TTL', () => {
+      const s = stateWithAgent({
+        status: 'error',
+        completedAt: Date.now() - TTL - 1, // only 1 TTL elapsed, needs 2x
+      });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(true);
+    });
+
+    it('keeps running agent regardless of timestamps', () => {
+      const s = stateWithAgent({
+        status: 'running',
+        completedAt: Date.now() - TTL - 1,
+      });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result.agents.has('a1')).toBe(true);
+    });
+
+    it('keeps done agent without completedAt (defensive — no timestamp, no cleanup)', () => {
+      const s = stateWithAgent({ status: 'done', completedAt: undefined });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now() + TTL * 10, ttlMs: TTL }, // far future
+      });
+      expect(result.agents.has('a1')).toBe(true);
+    });
+
+    it('returns same state reference when nothing is removed', () => {
+      const s = stateWithAgent({ status: 'done', completedAt: Date.now() - TTL + 5000 });
+      const result = dashboardReducer(s, {
+        type: 'CLEANUP_STALE_AGENTS',
+        payload: { now: Date.now(), ttlMs: TTL },
+      });
+      expect(result).toBe(s); // referential equality — no clone when no changes
+    });
+  });
+
+  describe('MODE_CHANGED cleanup', () => {
+    it('removes done agents from previous mode on MODE_CHANGED', () => {
+      let state = createInitialDashboardState();
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: null, to: 'PLAN' },
+      });
+      state = dashboardReducer(state, {
+        type: 'AGENT_ACTIVATED',
+        payload: { agentId: 'plan-agent', name: 'Planner', role: 'primary', isPrimary: true },
+      });
+      state = dashboardReducer(state, {
+        type: 'AGENT_DEACTIVATED',
+        payload: { agentId: 'plan-agent', reason: 'completed', durationMs: 1000 },
+      });
+      expect(state.agents.get('plan-agent')?.status).toBe('done');
+
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: 'PLAN', to: 'ACT' },
+      });
+
+      expect(state.agents.has('plan-agent')).toBe(false);
+    });
+
+    it('keeps error agents on MODE_CHANGED', () => {
+      let state = createInitialDashboardState();
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: null, to: 'PLAN' },
+      });
+      state = dashboardReducer(state, {
+        type: 'AGENT_ACTIVATED',
+        payload: { agentId: 'err-agent', name: 'Errored', role: 'specialist', isPrimary: false },
+      });
+      state = dashboardReducer(state, {
+        type: 'AGENT_DEACTIVATED',
+        payload: { agentId: 'err-agent', reason: 'error', durationMs: 50 },
+      });
+
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: 'PLAN', to: 'ACT' },
+      });
+
+      expect(state.agents.has('err-agent')).toBe(true);
+    });
+
+    it('removes idle parallel agents from previous mode on MODE_CHANGED', () => {
+      let state = createInitialDashboardState();
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: null, to: 'PLAN' },
+      });
+      state = dashboardReducer(state, {
+        type: 'PARALLEL_STARTED',
+        payload: { specialists: ['sec-specialist'], mode: 'PLAN' },
+      });
+      expect(state.agents.has('specialist:sec-specialist')).toBe(true);
+
+      state = dashboardReducer(state, {
+        type: 'MODE_CHANGED',
+        payload: { from: 'PLAN', to: 'ACT' },
+      });
+
+      expect(state.agents.has('specialist:sec-specialist')).toBe(false);
+    });
+
+    it('does not remove done agents when from is null (session start)', () => {
+      // Agent registered in a previous session with some stage, now session restarts
+      const state = createInitialDashboardState();
+      const agents = new Map(state.agents);
+      agents.set('old-agent', {
+        id: 'old-agent',
+        name: 'Old',
+        stage: 'PLAN',
+        status: 'done',
+        isPrimary: false,
+        progress: 100,
+        isParallel: false,
+        completedAt: Date.now() - 1000,
+      });
+      const s = { ...state, agents };
+
+      const result = dashboardReducer(s, {
+        type: 'MODE_CHANGED',
+        payload: { from: null, to: 'PLAN' },
+      });
+
+      // from=null means session start, so no cleanup
+      expect(result.agents.has('old-agent')).toBe(true);
+    });
   });
 
   describe('SESSION_RESET', () => {

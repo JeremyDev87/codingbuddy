@@ -72,7 +72,8 @@ export type DashboardAction =
   | { type: 'TOOL_INVOKED'; payload: ToolInvokedEvent }
   | { type: 'OBJECTIVE_SET'; payload: ObjectiveSetEvent }
   | { type: 'SESSION_RESET'; payload: SessionResetEvent }
-  | { type: 'CONTEXT_UPDATED'; payload: ContextUpdatedEvent };
+  | { type: 'CONTEXT_UPDATED'; payload: ContextUpdatedEvent }
+  | { type: 'CLEANUP_STALE_AGENTS'; payload: { now: number; ttlMs: number } };
 
 function cloneAgents(agents: Map<string, DashboardNode>): Map<string, DashboardNode> {
   return new Map(agents);
@@ -91,6 +92,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         isPrimary,
         progress: 0,
         isParallel: false, // AGENT_ACTIVATED는 항상 단일 에이전트
+        startedAt: Date.now(),
       });
       const globalState = 'RUNNING' as const;
       const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
@@ -112,6 +114,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
           ...existing,
           status: reason === 'error' ? 'error' : 'done',
           progress: reason === 'error' ? existing.progress : 100,
+          completedAt: Date.now(),
         });
       }
       // Check if any agents still running
@@ -132,24 +135,26 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     }
 
     case 'MODE_CHANGED': {
-      const newMode = action.payload.to;
-      let agents = state.agents;
-      let needsClone = false;
-      for (const a of state.agents.values()) {
+      const { from, to: newMode } = action.payload;
+      const agents = cloneAgents(state.agents);
+      for (const [id, a] of agents) {
+        // from이 null이면 세션 시작이므로 클린업 스킵
+        if (
+          from !== null &&
+          a.stage === from &&
+          (a.status === 'done' || (a.status === 'idle' && a.isParallel))
+        ) {
+          // 이전 모드의 done/idle(parallel) 에이전트 즉시 제거
+          agents.delete(id);
+          continue;
+        }
+        // running 에이전트는 새 모드로 stage 업데이트
         if (a.status === 'running') {
-          needsClone = true;
-          break;
+          agents.set(id, { ...a, stage: newMode });
         }
       }
-      if (needsClone) {
-        agents = cloneAgents(state.agents);
-        for (const [id, a] of agents) {
-          if (a.status === 'running') {
-            agents.set(id, { ...a, stage: newMode });
-          }
-        }
-      }
-      return { ...state, currentMode: newMode, agents, activeSkills: [] };
+      const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
+      return { ...state, currentMode: newMode, agents, activeSkills: [], focusedAgentId };
     }
 
     case 'AGENT_RELATIONSHIP': {
@@ -250,6 +255,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
           isPrimary: false,
           progress: 0,
           isParallel: true, // parallel dispatch로 등록된 에이전트
+          startedAt: Date.now(),
         });
       }
       return { ...state, agents };
@@ -268,6 +274,33 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
 
     case 'SESSION_RESET':
       return createInitialDashboardState();
+
+    case 'CLEANUP_STALE_AGENTS': {
+      // Note: 'blocked' agents are intentionally excluded from TTL cleanup.
+      // Blocked agents require explicit state transitions to resolve.
+      const { now, ttlMs } = action.payload;
+      let changed = false;
+      const agents = cloneAgents(state.agents);
+      for (const [id, a] of agents) {
+        if (a.status === 'running') continue; // running 에이전트는 절대 제거 금지
+        if (
+          (a.status === 'done' && a.completedAt !== undefined && now - a.completedAt > ttlMs) ||
+          (a.status === 'error' &&
+            a.completedAt !== undefined &&
+            now - a.completedAt > ttlMs * 2) ||
+          (a.status === 'idle' &&
+            a.isParallel &&
+            a.startedAt !== undefined &&
+            now - a.startedAt > ttlMs)
+        ) {
+          agents.delete(id);
+          changed = true;
+        }
+      }
+      if (!changed) return state;
+      const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
+      return { ...state, agents, focusedAgentId };
+    }
 
     // Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
     case 'PARALLEL_COMPLETED':
@@ -344,6 +377,14 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       eventBus.off(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
     };
   }, [eventBus]);
+
+  // Cleanup interval: TTL 초과 에이전트를 10초마다 제거
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      dispatch({ type: 'CLEANUP_STALE_AGENTS', payload: { now: Date.now(), ttlMs: 30_000 } });
+    }, 10_000);
+    return () => clearInterval(cleanupInterval);
+  }, []);
 
   return state;
 }

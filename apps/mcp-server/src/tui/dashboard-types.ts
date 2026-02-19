@@ -43,6 +43,8 @@ export interface DashboardNode {
   isPrimary: boolean;
   progress: number;
   isParallel: boolean; // true when agent runs as part of parallel dispatch
+  startedAt?: number; // ms timestamp when agent was registered/started
+  completedAt?: number; // ms timestamp when agent completed or errored
 }
 
 type DashboardNodeRequired = Pick<DashboardNode, 'id' | 'name' | 'stage'>;
