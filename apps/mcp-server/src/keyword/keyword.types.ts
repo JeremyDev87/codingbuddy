@@ -8,11 +8,18 @@ export const MODE_AGENTS = ['plan-mode', 'act-mode', 'eval-mode', 'auto-mode'] a
 /** Primary Agents for PLAN mode - centralized definition */
 export const PLAN_PRIMARY_AGENTS = ['solution-architect', 'technical-planner'] as const;
 
-/** Primary Agents for ACT mode - centralized definition */
+/**
+ * Primary Agents for ACT mode - centralized definition.
+ *
+ * NOTE: Array order here does NOT reflect intent-pattern priority.
+ * Intent matching priority is determined by INTENT_PATTERN_CHECKS in intent-pattern-checks.ts.
+ * This array is used for type-safe validation and display info mapping only.
+ */
 export const ACT_PRIMARY_AGENTS = [
   'tooling-engineer', // Config/build tools specialist - highest priority for pattern matching
   'platform-engineer', // IaC, Kubernetes, multi-cloud specialist - high priority for infra tasks
   'data-engineer', // Database/schema specialist - high priority for data tasks
+  'data-scientist', // EDA, statistical analysis, ML modeling, visualization, Jupyter notebooks
   'ai-ml-engineer', // ML frameworks, LLM integration, embeddings, fine-tuning
   'mobile-developer', // Mobile app specialist - detected by project files
   'frontend-developer',
@@ -80,6 +87,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
   'data-engineer': {
     name: 'Data Engineer',
     description: 'Database, schema design, migrations, analytics',
+  },
+  'data-scientist': {
+    name: 'Data Scientist',
+    description: 'EDA, statistical analysis, ML modeling, data visualization, Jupyter notebooks',
   },
   'ai-ml-engineer': {
     name: 'AI/ML Engineer',

@@ -300,6 +300,100 @@ describe('ActAgentStrategy', () => {
       });
     });
 
+    describe('data-scientist patterns', () => {
+      // Patterns that match data-science.patterns.ts (13 patterns total):
+      // - /pandas|numpy|matplotlib|seaborn|plotly/i (0.95)
+      // - /jupyter|\.ipynb|주피터/i (0.95)
+      // - /scikit.?learn|sklearn/i (0.95)
+      // - /탐색적\s*분석|EDA|exploratory\s*data\s*analysis/i (0.95)
+      // - /데이터\s*분석\s*(스크립트|코드|구현|작성)|data\s*analysis\s*(script|code|implement)/i (0.95)
+      // - /데이터\s*시각화|data\s*visualization/i (0.90)
+      // - /통계\s*(분석|모델|검정)|statistical\s*(analysis|model|test)/i (0.90)
+      // - /상관관계\s*분석|correlation\s*analysis/i (0.90)
+      // - /회귀\s*(분석|모델)|regression\s*(analysis|model)/i (0.90)
+      // - /분류\s*(모델|알고리즘)|classification\s*(model|algorithm)/i (0.90)
+      // - /피처\s*엔지니어링|feature\s*engineering/i (0.90)
+      // - /scipy|statsmodels/i (0.90)
+      // - /데이터\s*분석/i (0.85) - standalone Korean
+      const dataScientistPrompts = [
+        'Pandas로 데이터 분석해줘', // matches /pandas/i (0.95)
+        'matplotlib 시각화 코드 작성', // matches /matplotlib/i (0.95)
+        'EDA 스크립트 구현해줘', // matches /EDA/i (0.95)
+        'sklearn 분류 모델 만들어줘', // matches /scikit.?learn|sklearn/i (0.95)
+        '주피터 노트북 작성해줘', // matches /주피터/i (0.95)
+        '데이터 분석 코드 작성해줘', // matches /데이터\s*분석\s*(코드)/i (0.95)
+        '데이터 시각화 구현해줘', // matches /데이터\s*시각화/i (0.90)
+        '통계 분석 코드 작성해줘', // matches /통계\s*(분석)/i (0.90)
+        '상관관계 분석해줘', // matches /상관관계\s*분석/i (0.90)
+        '회귀 모델 만들어줘', // matches /회귀\s*(모델)/i (0.90)
+        '피처 엔지니어링 코드 작성', // matches /피처\s*엔지니어링/i (0.90)
+        '분류 알고리즘 구현해줘', // matches /분류\s*(모델|알고리즘)/i (0.90)
+      ];
+
+      it.each(dataScientistPrompts)('should detect data-scientist intent: "%s"', async prompt => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt,
+            availableAgents: ['data-scientist', 'data-engineer', 'frontend-developer'],
+          }),
+        );
+
+        expect(result.agentName).toBe('data-scientist');
+        expect(result.source).toBe('intent');
+      });
+    });
+
+    describe('data-scientist boundary cases', () => {
+      it('should NOT route "Create a migration script" to data-scientist (→ data-engineer)', async () => {
+        const result = await strategy.resolve(
+          createActContext({ prompt: 'Create a migration script' }),
+        );
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.agentName).not.toBe('data-scientist');
+      });
+
+      it('should NOT route "데이터베이스 스키마 설계" to data-scientist (→ data-engineer)', async () => {
+        const result = await strategy.resolve(
+          createActContext({ prompt: '데이터베이스 스키마 설계해줘' }),
+        );
+        expect(result.agentName).toBe('data-engineer');
+        expect(result.agentName).not.toBe('data-scientist');
+      });
+
+      it('should NOT route "Train a PyTorch model" to data-scientist (→ ai-ml-engineer)', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'Train a PyTorch model',
+            availableAgents: ['data-scientist', 'ai-ml-engineer', 'backend-developer'],
+          }),
+        );
+        expect(result.agentName).toBe('ai-ml-engineer');
+        expect(result.agentName).not.toBe('data-scientist');
+      });
+
+      it('should route "데이터 분석해줘" to data-scientist (standalone 0.85 pattern)', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: '데이터 분석해줘',
+            availableAgents: ['data-scientist', 'data-engineer', 'frontend-developer'],
+          }),
+        );
+        expect(result.agentName).toBe('data-scientist');
+        expect(result.source).toBe('intent');
+      });
+
+      it('should route "scipy 통계 분석 코드" to data-scientist (scipy 0.90 pattern)', async () => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt: 'scipy 통계 분석 코드 작성해줘',
+            availableAgents: ['data-scientist', 'data-engineer', 'backend-developer'],
+          }),
+        );
+        expect(result.agentName).toBe('data-scientist');
+        expect(result.source).toBe('intent');
+      });
+    });
+
     describe('platform-engineer patterns', () => {
       // Need to check platform.patterns.ts for actual patterns
       const platformPrompts = [

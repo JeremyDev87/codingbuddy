@@ -12,11 +12,12 @@
  * 5. security-engineer - Security implementation, vulnerability fixes, auth/authz, encryption
  * 6. systems-developer - Rust, C, C++, FFI, WASM, embedded, low-level optimization
  * 7. data-engineer - Database, schema, migrations
- * 8. ai-ml-engineer - ML frameworks, LLM, embeddings
- * 9. backend-developer - APIs, servers, authentication
- * 10. frontend-developer - React, Vue, Angular, UI components, CSS
- * 11. devops-engineer - CI/CD, Docker, deployment, monitoring
- * 12. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
+ * 8. data-scientist - EDA, pandas/numpy/sklearn, data visualization, Jupyter notebooks
+ * 9. ai-ml-engineer - ML frameworks, LLM, embeddings
+ * 10. backend-developer - APIs, servers, authentication
+ * 11. frontend-developer - React, Vue, Angular, UI components, CSS
+ * 12. devops-engineer - CI/CD, Docker, deployment, monitoring
+ * 13. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
  */
 
 import type { IntentPatternCheck } from './intent-patterns.types';
@@ -27,6 +28,7 @@ import { PLATFORM_INTENT_PATTERNS } from './platform.patterns';
 import { SECURITY_INTENT_PATTERNS } from './security.patterns';
 import { SYSTEMS_INTENT_PATTERNS } from './systems.patterns';
 import { DATA_INTENT_PATTERNS } from './data.patterns';
+import { DATA_SCIENCE_INTENT_PATTERNS } from './data-science.patterns';
 import { AI_ML_INTENT_PATTERNS } from './ai-ml.patterns';
 import { BACKEND_INTENT_PATTERNS } from './backend.patterns';
 import { FRONTEND_INTENT_PATTERNS } from './frontend.patterns';
@@ -70,6 +72,11 @@ export const INTENT_PATTERN_CHECKS: ReadonlyArray<IntentPatternCheck> = [
     agent: 'data-engineer',
     patterns: DATA_INTENT_PATTERNS,
     category: 'Data',
+  },
+  {
+    agent: 'data-scientist',
+    patterns: DATA_SCIENCE_INTENT_PATTERNS,
+    category: 'DataScience',
   },
   {
     agent: 'ai-ml-engineer',
