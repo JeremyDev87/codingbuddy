@@ -76,6 +76,7 @@ export function DashboardApp({
             layoutMode={layoutMode}
             width={grid.flowMap.width}
             height={grid.flowMap.height}
+            activeStage={state.currentMode}
           />
         </Box>
       ) : (
@@ -91,6 +92,7 @@ export function DashboardApp({
               layoutMode={layoutMode}
               width={grid.flowMap.width}
               height={grid.flowMap.height}
+              activeStage={state.currentMode}
             />
             <ActivityVisualizer
               currentMode={state.currentMode}

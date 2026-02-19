@@ -22,8 +22,12 @@ const PARALLEL_STYLES = {
   single: { fg: 'gray' as const }, // 회색 — 단일 실행
 } as const;
 const STAGE_ORDER: Mode[] = ['PLAN', 'ACT', 'EVAL', 'AUTO'];
-const STAGE_SLOT_WIDTH = 8; // arrow + space + max label length
+// ▸ (2) + label (4) + stats " (99↑ 99✓)" (11) + spacing (1) = 18
+const STAGE_SLOT_WIDTH = 18;
 const PIPELINE_RIGHT_MARGIN = 10;
+
+/** Shared dim style for inactive stage rendering. */
+const DIMMED_STYLE: CellStyle = { dim: true };
 
 interface StageColumn {
   startX: number;
@@ -129,6 +133,7 @@ function getNodeTextStyle(status: DashboardNodeStatus): CellStyle {
 
 /**
  * Draw an agent node box with name, status icon, and progress bar.
+ * @param dimmed - When true, renders the node with dim style (inactive stage column)
  */
 function drawAgentNode(
   buf: ColorBuffer,
@@ -136,8 +141,9 @@ function drawAgentNode(
   y: number,
   boxW: number,
   agent: DashboardNode,
+  dimmed = false,
 ): void {
-  const borderStyle = getStatusStyle(agent.status);
+  const borderStyle = dimmed ? DIMMED_STYLE : getStatusStyle(agent.status);
 
   if (agent.isPrimary) {
     buf.drawDoubleBox(x, y, boxW, NODE_HEIGHT, borderStyle);
@@ -150,8 +156,10 @@ function drawAgentNode(
   const maxNameLen = Math.max(1, boxW - 5);
   const nameStr =
     agent.name.length > maxNameLen ? agent.name.slice(0, maxNameLen - 3) + '...' : agent.name;
-  buf.writeText(x + 2, y + 1, nameStr, getNodeTextStyle(agent.status));
-  buf.writeText(x + 2 + nameStr.length + 1, y + 1, icon, STATUS_STYLES[agent.status]);
+  const textStyle = dimmed ? DIMMED_STYLE : getNodeTextStyle(agent.status);
+  const iconStyle = dimmed ? DIMMED_STYLE : STATUS_STYLES[agent.status];
+  buf.writeText(x + 2, y + 1, nameStr, textStyle);
+  buf.writeText(x + 2 + nameStr.length + 1, y + 1, icon, iconStyle);
 
   // Row 2: progress bar (Primary) OR execution mode indicator (Specialist)
   if (agent.isPrimary) {
@@ -160,16 +168,18 @@ function drawAgentNode(
     const bar = buildProgressBar(agent.progress, barWidth);
     const filledStr = PROGRESS_BAR_CHARS.filled.repeat(bar.filled);
     const emptyStr = PROGRESS_BAR_CHARS.empty.repeat(bar.empty);
-    buf.writeText(x + 2, y + 2, filledStr, PROGRESS_BAR_STYLES.filled);
+    const filledStyle = dimmed ? DIMMED_STYLE : PROGRESS_BAR_STYLES.filled;
+    const emptyStyle = dimmed ? DIMMED_STYLE : PROGRESS_BAR_STYLES.empty;
+    buf.writeText(x + 2, y + 2, filledStr, filledStyle);
     if (bar.empty > 0) {
-      buf.writeText(x + 2 + bar.filled, y + 2, emptyStr, PROGRESS_BAR_STYLES.empty);
+      buf.writeText(x + 2 + bar.filled, y + 2, emptyStr, emptyStyle);
     }
   } else if (agent.isParallel) {
     // Parallel Specialist: ⫸ parallel 표시
-    buf.writeText(x + 2, y + 2, '⫸ parallel', PARALLEL_STYLES.parallel);
+    buf.writeText(x + 2, y + 2, '⫸ parallel', dimmed ? DIMMED_STYLE : PARALLEL_STYLES.parallel);
   } else {
     // Single Specialist: → single 표시
-    buf.writeText(x + 2, y + 2, '→ single', PARALLEL_STYLES.single);
+    buf.writeText(x + 2, y + 2, '→ single', dimmed ? DIMMED_STYLE : PARALLEL_STYLES.single);
   }
 }
 
@@ -231,6 +241,23 @@ function countByStatus(agents: Map<string, DashboardNode>): Record<DashboardNode
 }
 
 /**
+ * Count running and done agents for a specific stage.
+ */
+function countStageRunningDone(
+  agents: Map<string, DashboardNode>,
+  stage: Mode,
+): { running: number; done: number } {
+  let running = 0;
+  let done = 0;
+  for (const agent of agents.values()) {
+    if (agent.stage !== stage) continue;
+    if (agent.status === 'running') running++;
+    else if (agent.status === 'done') done++;
+  }
+  return { running, done };
+}
+
+/**
  * Render pipeline header: ▸ PLAN ═══▸ ACT ═══▸ EVAL [═══▸ AUTO]
  */
 export function renderPipelineHeader(
@@ -238,6 +265,7 @@ export function renderPipelineHeader(
   width: number,
   activeStage: Mode | null,
   hasAutoAgents = false,
+  agents?: Map<string, DashboardNode>,
 ): void {
   const stages = hasAutoAgents ? STAGE_ORDER : STAGE_ORDER.filter(s => s !== 'AUTO');
 
@@ -256,6 +284,19 @@ export function renderPipelineHeader(
     // Stage name
     buf.writeText(x, 0, stage, stageStyle);
     x += stage.length;
+
+    // Per-stage stats
+    if (agents && agents.size > 0) {
+      const { running, done } = countStageRunningDone(agents, stage);
+      if (running > 0 || done > 0) {
+        const parts: string[] = [];
+        if (running > 0) parts.push(`${running}↑`);
+        if (done > 0) parts.push(`${done}✓`);
+        const statsStr = ` (${parts.join(' ')})`;
+        buf.writeText(x, 0, statsStr, { fg: 'gray', dim: !isActive });
+        x += statsStr.length;
+      }
+    }
 
     // Connector to next stage
     if (i < stages.length - 1) {
@@ -300,13 +341,19 @@ export function renderFlowMap(
   const positions = layoutAgentNodes(agents, columns);
 
   // 1. Pipeline header (replaces flat stage labels)
-  renderPipelineHeader(buf, width, activeStage, hasAutoAgents);
+  renderPipelineHeader(buf, width, activeStage, hasAutoAgents, agents);
+
+  // Pre-compute inactive agent IDs (avoids repeated checks in each loop)
+  const inactiveIds =
+    activeStage !== null
+      ? new Set([...agents.values()].filter(a => a.stage !== activeStage).map(a => a.id))
+      : new Set<string>();
 
   // 2. Draw glow effect for running primary agents (before boxes, so boxes draw on top)
   for (const [id, pos] of positions) {
     const agent = agents.get(id);
     if (!agent) continue;
-    if (agent.status === 'running' && agent.isPrimary) {
+    if (agent.status === 'running' && agent.isPrimary && !inactiveIds.has(id)) {
       drawGlow(buf, pos.x, pos.y, pos.width, pos.height, GLOW_STYLE);
     }
   }
@@ -315,7 +362,7 @@ export function renderFlowMap(
   for (const [id, pos] of positions) {
     const agent = agents.get(id);
     if (!agent) continue;
-    drawAgentNode(buf, pos.x, pos.y, pos.width, agent);
+    drawAgentNode(buf, pos.x, pos.y, pos.width, agent, inactiveIds.has(id));
   }
 
   // 4. Draw edges with smooth curves
@@ -334,15 +381,22 @@ export function renderFlowMap(
     };
 
     const path = computeEdgePath(fromPoint, toPoint);
+    const edgeDimmed = inactiveIds.has(edge.from) && inactiveIds.has(edge.to);
     for (const seg of path) {
       const isArrow = seg.char === '▸' || seg.char === '◂' || seg.char === '▾' || seg.char === '▴';
-      buf.setChar(seg.x, seg.y, seg.char, isArrow ? EDGE_STYLES.arrow : EDGE_STYLES.path);
+      const segStyle = edgeDimmed ? DIMMED_STYLE : isArrow ? EDGE_STYLES.arrow : EDGE_STYLES.path;
+      buf.setChar(seg.x, seg.y, seg.char, segStyle);
     }
 
     // Edge label
     const labelPos = computeLabelPosition(path, edge.label);
     if (labelPos) {
-      buf.writeText(labelPos.x, labelPos.y - 1, edge.label, EDGE_STYLES.label);
+      buf.writeText(
+        labelPos.x,
+        labelPos.y - 1,
+        edge.label,
+        edgeDimmed ? DIMMED_STYLE : EDGE_STYLES.label,
+      );
     }
   }
 
@@ -373,6 +427,7 @@ export function renderFlowMapSimplified(
   agents: Map<string, DashboardNode>,
   width: number,
   height: number,
+  activeStage: Mode | null = null,
 ): ColorBuffer {
   const buf = new ColorBuffer(width, height);
   const byStage = groupByStage(agents);
@@ -382,14 +437,18 @@ export function renderFlowMapSimplified(
     const stageAgents = byStage.get(stage);
     if (!stageAgents || stageAgents.length === 0) continue;
 
-    buf.writeText(1, y, stage, STAGE_LABEL_STYLES[stage]);
+    const isInactiveStage = activeStage !== null && stage !== activeStage;
+    const stageLabelStyle = isInactiveStage
+      ? { fg: STAGE_LABEL_STYLES[stage].fg, dim: true }
+      : STAGE_LABEL_STYLES[stage];
+    buf.writeText(1, y, stage, stageLabelStyle);
     y++;
 
     const sorted = sortAgents(stageAgents);
     for (const agent of sorted) {
       if (y >= height - 1) break;
       const boxW = Math.min(width - 2, NODE_WIDTH);
-      drawAgentNode(buf, 1, y, boxW, agent);
+      drawAgentNode(buf, 1, y, boxW, agent, isInactiveStage);
       y += NODE_HEIGHT + 1;
     }
   }

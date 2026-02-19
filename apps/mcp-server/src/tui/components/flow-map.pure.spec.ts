@@ -263,6 +263,73 @@ describe('tui/components/flow-map.pure', () => {
         .join('\n');
       expect(text).toContain('┄');
     });
+
+    it('should show running and done counts when agents provided', () => {
+      const buf = new ColorBuffer(80, 2);
+      const agents = new Map([
+        ['a1', makeAgent({ id: 'a1', name: 'A', stage: 'PLAN', status: 'running' })],
+        ['a2', makeAgent({ id: 'a2', name: 'B', stage: 'PLAN', status: 'running' })],
+        ['a3', makeAgent({ id: 'a3', name: 'C', stage: 'PLAN', status: 'done' })],
+      ]);
+      renderPipelineHeader(buf, 80, 'PLAN', false, agents);
+      const text = bufferToString(buf);
+      expect(text).toContain('2↑');
+      expect(text).toContain('1✓');
+    });
+
+    it('should not show stats when no agents provided', () => {
+      const buf = new ColorBuffer(80, 2);
+      renderPipelineHeader(buf, 80, 'PLAN');
+      const text = bufferToString(buf);
+      expect(text).not.toContain('↑');
+      expect(text).not.toContain('✓');
+    });
+
+    it('should not show stats when running+done is zero', () => {
+      const buf = new ColorBuffer(80, 2);
+      const agents = new Map([
+        ['a1', makeAgent({ id: 'a1', name: 'A', stage: 'PLAN', status: 'idle' })],
+      ]);
+      renderPipelineHeader(buf, 80, 'PLAN', false, agents);
+      const text = bufferToString(buf);
+      expect(text).not.toContain('↑');
+      expect(text).not.toContain('✓');
+    });
+
+    it('should show only running count when done is zero', () => {
+      const buf = new ColorBuffer(80, 2);
+      const agents = new Map([
+        ['a1', makeAgent({ id: 'a1', name: 'A', stage: 'ACT', status: 'running' })],
+      ]);
+      renderPipelineHeader(buf, 80, 'ACT', false, agents);
+      const text = bufferToString(buf);
+      expect(text).toContain('1↑');
+      expect(text).not.toContain('✓');
+    });
+
+    it('should show only done count when running is zero', () => {
+      const buf = new ColorBuffer(80, 2);
+      const agents = new Map([
+        ['a1', makeAgent({ id: 'a1', name: 'A', stage: 'EVAL', status: 'done' })],
+      ]);
+      renderPipelineHeader(buf, 80, 'EVAL', false, agents);
+      const text = bufferToString(buf);
+      expect(text).not.toContain('↑');
+      expect(text).toContain('1✓');
+    });
+
+    it('should only count agents belonging to each stage', () => {
+      const buf = new ColorBuffer(120, 2);
+      const agents = new Map([
+        ['a1', makeAgent({ id: 'a1', name: 'A', stage: 'PLAN', status: 'running' })],
+        ['a2', makeAgent({ id: 'a2', name: 'B', stage: 'ACT', status: 'running' })],
+        ['a3', makeAgent({ id: 'a3', name: 'C', stage: 'ACT', status: 'running' })],
+      ]);
+      renderPipelineHeader(buf, 120, 'ACT', false, agents);
+      const text = bufferToString(buf);
+      // ACT has 2 running, PLAN has 1 running
+      expect(text).toContain('2↑');
+    });
   });
 
   describe('renderFlowMap (wide)', () => {
@@ -447,6 +514,239 @@ describe('tui/components/flow-map.pure', () => {
     });
   });
 
+  describe('edge dimming for inactive stages', () => {
+    it('should dim edge when both endpoints are in inactive stages', () => {
+      // activeStage=ACT → PLAN and EVAL are both inactive
+      // isPrimary:true → double box uses ═ not ─, so ─ only comes from edge paths
+      const agents = new Map([
+        [
+          'plan-1',
+          makeAgent({
+            id: 'plan-1',
+            name: 'Planner',
+            stage: 'PLAN',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+        [
+          'eval-1',
+          makeAgent({
+            id: 'eval-1',
+            name: 'Reviewer',
+            stage: 'EVAL',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+      ]);
+      const edges = [
+        { from: 'plan-1', to: 'eval-1', label: 'review', type: 'delegation' as const },
+      ];
+      const buf = renderFlowMap(agents, edges, 120, 30, 'ACT');
+      const lines = buf.toLines();
+
+      // Dimmed edge uses DIMMED_STYLE={dim:true} (no fg), normal edge uses EDGE_STYLES.path={fg:'cyan',dim:true}
+      // Detect truly dimmed edges by checking dim===true AND no fg color
+      let foundDimmedEdge = false;
+      for (const row of lines) {
+        for (const cell of row) {
+          if (cell.char === '─' && cell.style.dim === true && !cell.style.fg) {
+            foundDimmedEdge = true;
+            break;
+          }
+        }
+        if (foundDimmedEdge) break;
+      }
+      expect(foundDimmedEdge).toBe(true);
+    });
+
+    it('should not dim edge when at least one endpoint is in active stage', () => {
+      // isPrimary:true → double box uses ═ not ─, so ─ only comes from edge paths
+      const agents = new Map([
+        [
+          'plan-1',
+          makeAgent({
+            id: 'plan-1',
+            name: 'Planner',
+            stage: 'PLAN',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+        [
+          'act-1',
+          makeAgent({
+            id: 'act-1',
+            name: 'Developer',
+            stage: 'ACT',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+      ]);
+      const edges = [
+        { from: 'plan-1', to: 'act-1', label: 'delegate', type: 'delegation' as const },
+      ];
+      // activeStage=PLAN → PLAN active, ACT inactive but edge connects to active stage
+      const buf = renderFlowMap(agents, edges, 120, 30, 'PLAN');
+      const lines = buf.toLines();
+
+      // Dimmed edge uses DIMMED_STYLE={dim:true} (no fg), normal edge uses EDGE_STYLES.path={fg:'cyan',dim:true}
+      // So we detect dimmed edges by checking dim===true AND no fg color
+      let foundDimmedEdge = false;
+      for (const row of lines) {
+        for (const cell of row) {
+          if (cell.char === '─' && cell.style.dim === true && !cell.style.fg) {
+            foundDimmedEdge = true;
+            break;
+          }
+        }
+        if (foundDimmedEdge) break;
+      }
+      expect(foundDimmedEdge).toBe(false);
+    });
+
+    it('should not dim edge when activeStage is null', () => {
+      // isPrimary:true → double box uses ═ not ─, so ─ only comes from edge paths
+      const agents = new Map([
+        [
+          'arch-1',
+          makeAgent({
+            id: 'arch-1',
+            name: 'Architect',
+            stage: 'PLAN',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+        [
+          'dev-1',
+          makeAgent({
+            id: 'dev-1',
+            name: 'Developer',
+            stage: 'ACT',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+      ]);
+      const edges = [
+        { from: 'arch-1', to: 'dev-1', label: 'delegate', type: 'delegation' as const },
+      ];
+      const buf = renderFlowMap(agents, edges, 120, 30, null);
+      const lines = buf.toLines();
+
+      // Dimmed edge uses DIMMED_STYLE={dim:true} (no fg), normal edge uses EDGE_STYLES.path={fg:'cyan',dim:true}
+      let foundDimmedEdge = false;
+      for (const row of lines) {
+        for (const cell of row) {
+          if (cell.char === '─' && cell.style.dim === true && !cell.style.fg) {
+            foundDimmedEdge = true;
+            break;
+          }
+        }
+        if (foundDimmedEdge) break;
+      }
+      expect(foundDimmedEdge).toBe(false);
+    });
+  });
+
+  describe('inactive stage column dimming', () => {
+    it('should dim agents in inactive stage columns when activeStage is set', () => {
+      const agents = new Map([
+        ['plan-1', makeAgent({ id: 'plan-1', name: 'Planner', stage: 'PLAN', status: 'running' })],
+        ['act-1', makeAgent({ id: 'act-1', name: 'Developer', stage: 'ACT', status: 'running' })],
+      ]);
+      const buf = renderFlowMap(agents, [], 120, 30, 'PLAN');
+      const lines = buf.toLines();
+
+      // Find 'D' of 'Developer' (ACT stage — should be dimmed)
+      let devCellDimmed = false;
+      for (const row of lines) {
+        for (let i = 0; i < row.length - 2; i++) {
+          if (row[i].char === 'D' && row[i + 1]?.char === 'e' && row[i + 2]?.char === 'v') {
+            devCellDimmed = row[i].style.dim === true;
+            break;
+          }
+        }
+        if (devCellDimmed) break;
+      }
+      expect(devCellDimmed).toBe(true);
+    });
+
+    it('should not dim agents in the active stage column', () => {
+      const agents = new Map([
+        ['plan-1', makeAgent({ id: 'plan-1', name: 'Planner', stage: 'PLAN', status: 'running' })],
+      ]);
+      const buf = renderFlowMap(agents, [], 120, 30, 'PLAN');
+      const lines = buf.toLines();
+
+      // 'Planner' is in PLAN (active) — should NOT be dimmed
+      let plannerCellDimmed: boolean | undefined;
+      for (const row of lines) {
+        for (let i = 0; i < row.length - 2; i++) {
+          if (row[i].char === 'P' && row[i + 1]?.char === 'l' && row[i + 2]?.char === 'a') {
+            plannerCellDimmed = row[i].style.dim === true;
+            break;
+          }
+        }
+        if (plannerCellDimmed !== undefined) break;
+      }
+      expect(plannerCellDimmed).toBe(false);
+    });
+
+    it('should not dim any agents when activeStage is null', () => {
+      const agents = new Map([
+        ['act-1', makeAgent({ id: 'act-1', name: 'Developer', stage: 'ACT', status: 'running' })],
+      ]);
+      const buf = renderFlowMap(agents, [], 120, 30, null);
+      const lines = buf.toLines();
+
+      let devCellDimmed = false;
+      for (const row of lines) {
+        for (let i = 0; i < row.length - 2; i++) {
+          if (row[i].char === 'D' && row[i + 1]?.char === 'e' && row[i + 2]?.char === 'v') {
+            if (row[i].style.dim === true) devCellDimmed = true;
+            break;
+          }
+        }
+        if (devCellDimmed) break;
+      }
+      expect(devCellDimmed).toBe(false);
+    });
+
+    it('should suppress glow for inactive stage running primary agents', () => {
+      const agents = new Map([
+        [
+          'act-1',
+          makeAgent({
+            id: 'act-1',
+            name: 'Builder',
+            stage: 'ACT',
+            status: 'running',
+            isPrimary: true,
+          }),
+        ],
+      ]);
+      // activeStage = PLAN → ACT is inactive, so no glow
+      const buf = renderFlowMap(agents, [], 120, 30, 'PLAN');
+      const lines = buf.toLines();
+
+      let hasGlow = false;
+      for (const row of lines) {
+        for (const cell of row) {
+          if (cell.char === '░' && cell.style.fg === 'green' && cell.style.dim === true) {
+            hasGlow = true;
+            break;
+          }
+        }
+        if (hasGlow) break;
+      }
+      expect(hasGlow).toBe(false);
+    });
+  });
+
   describe('drawAgentNode — execution mode display', () => {
     it('renders ⫸ parallel for isParallel:true specialist node', () => {
       const agents = new Map([
@@ -499,6 +799,50 @@ describe('tui/components/flow-map.pure', () => {
       expect(result).not.toContain('⫸ parallel');
       expect(result).not.toContain('→ single');
       expect(result).toMatch(/[█░]/);
+    });
+  });
+
+  describe('renderFlowMapSimplified — activeStage dimming (medium)', () => {
+    it('should dim agents in inactive stage when activeStage is set', () => {
+      const agents = new Map([
+        ['plan-1', makeAgent({ id: 'plan-1', name: 'Planner', stage: 'PLAN', status: 'running' })],
+        ['act-1', makeAgent({ id: 'act-1', name: 'Developer', stage: 'ACT', status: 'running' })],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 100, 30, 'PLAN');
+      const lines = buf.toLines();
+
+      // 'Developer' is in ACT (inactive) — its name cells should be dimmed
+      let devCellDimmed = false;
+      for (const row of lines) {
+        for (let i = 0; i < row.length - 2; i++) {
+          if (row[i].char === 'D' && row[i + 1]?.char === 'e' && row[i + 2]?.char === 'v') {
+            devCellDimmed = row[i].style.dim === true;
+            break;
+          }
+        }
+        if (devCellDimmed) break;
+      }
+      expect(devCellDimmed).toBe(true);
+    });
+
+    it('should not dim agents when activeStage is null', () => {
+      const agents = new Map([
+        ['act-1', makeAgent({ id: 'act-1', name: 'Developer', stage: 'ACT', status: 'running' })],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 100, 30, null);
+      const lines = buf.toLines();
+
+      let devCellDimmed = false;
+      for (const row of lines) {
+        for (let i = 0; i < row.length - 2; i++) {
+          if (row[i].char === 'D' && row[i + 1]?.char === 'e' && row[i + 2]?.char === 'v') {
+            if (row[i].style.dim === true) devCellDimmed = true;
+            break;
+          }
+        }
+        if (devCellDimmed) break;
+      }
+      expect(devCellDimmed).toBe(false);
     });
   });
 
