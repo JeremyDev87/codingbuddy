@@ -26,6 +26,7 @@ export { DATA_INTENT_PATTERNS } from './data.patterns';
 export { MOBILE_INTENT_PATTERNS } from './mobile.patterns';
 export { PLATFORM_INTENT_PATTERNS } from './platform.patterns';
 export { TOOLING_INTENT_PATTERNS } from './tooling.patterns';
+export { SECURITY_INTENT_PATTERNS } from './security.patterns';
 
 // Aggregated intent pattern checks
 export { INTENT_PATTERN_CHECKS } from './intent-pattern-checks';

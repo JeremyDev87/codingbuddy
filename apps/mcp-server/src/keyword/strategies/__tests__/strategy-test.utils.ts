@@ -22,6 +22,7 @@ export const ACT_MODE_AGENTS = [
   'mobile-developer',
   'ai-ml-engineer',
   'test-engineer',
+  'security-engineer',
 ] as const;
 
 /**

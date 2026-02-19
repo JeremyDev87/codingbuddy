@@ -9,12 +9,13 @@
  * 2. test-engineer - TDD, unit/integration/e2e tests, coverage (before backend/frontend to prevent keyword theft)
  * 3. tooling-engineer - Build tools, linters, bundlers
  * 4. platform-engineer - IaC, Kubernetes, cloud infrastructure
- * 5. data-engineer - Database, schema, migrations
- * 6. ai-ml-engineer - ML frameworks, LLM, embeddings
- * 7. backend-developer - APIs, servers, authentication
- * 8. frontend-developer - React, Vue, Angular, UI components, CSS
- * 9. devops-engineer - CI/CD, Docker, deployment, monitoring
- * 10. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
+ * 5. security-engineer - Security implementation, vulnerability fixes, auth/authz, encryption
+ * 6. data-engineer - Database, schema, migrations
+ * 7. ai-ml-engineer - ML frameworks, LLM, embeddings
+ * 8. backend-developer - APIs, servers, authentication
+ * 9. frontend-developer - React, Vue, Angular, UI components, CSS
+ * 10. devops-engineer - CI/CD, Docker, deployment, monitoring
+ * 11. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
  */
 
 import type { IntentPatternCheck } from './intent-patterns.types';
@@ -22,6 +23,7 @@ import { AGENT_INTENT_PATTERNS } from './agent.patterns';
 import { TEST_INTENT_PATTERNS } from './test.patterns';
 import { TOOLING_INTENT_PATTERNS } from './tooling.patterns';
 import { PLATFORM_INTENT_PATTERNS } from './platform.patterns';
+import { SECURITY_INTENT_PATTERNS } from './security.patterns';
 import { DATA_INTENT_PATTERNS } from './data.patterns';
 import { AI_ML_INTENT_PATTERNS } from './ai-ml.patterns';
 import { BACKEND_INTENT_PATTERNS } from './backend.patterns';
@@ -51,6 +53,11 @@ export const INTENT_PATTERN_CHECKS: ReadonlyArray<IntentPatternCheck> = [
     agent: 'platform-engineer',
     patterns: PLATFORM_INTENT_PATTERNS,
     category: 'Platform',
+  },
+  {
+    agent: 'security-engineer',
+    patterns: SECURITY_INTENT_PATTERNS,
+    category: 'Security',
   },
   {
     agent: 'data-engineer',

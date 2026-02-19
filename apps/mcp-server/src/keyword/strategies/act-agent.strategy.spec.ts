@@ -316,6 +316,58 @@ describe('ActAgentStrategy', () => {
       });
     });
 
+    describe('security-engineer patterns', () => {
+      // Patterns that match security.patterns.ts:
+      // - /JWT\s*(구현|인증|토큰\s*생성)/i (0.95)
+      // - /SQL\s*(injection|인젝션)/i (0.95)
+      // - /XSS\s*(방어|방지|수정|취약점|fix|prevent|vulnerabilit)/i (0.95)
+      // - /CSRF\s*(방어|방지|토큰|fix|prevent|token)/i (0.95)
+      // - /OAuth\s*(구현|2\.0|플로우|implement|flow)/i (0.95)
+      // - /암호화\s*(구현|추가|적용)|encrypt.*(implement|add)/i (0.90)
+      // - /RBAC|role[-\s]?based\s*access/i (0.90)
+      // - /CORS\s*(설정|구현|정책|configuration|policy|implement)/i (0.90)
+      const securityPrompts = [
+        'JWT 인증 구현해줘', // matches /JWT\s*(구현|인증)/i
+        'SQL injection 취약점 수정', // matches /SQL\s*(injection|인젝션)/i
+        '비밀번호 암호화 추가', // matches /암호화\s*(구현|추가|적용)/i
+        'XSS 취약점 수정해줘', // matches /XSS\s*(취약점)/i
+        'CSRF 방어 추가', // matches /CSRF\s*(방어)/i
+        'OAuth 2.0 구현', // matches /OAuth\s*(2\.0)/i
+        'RBAC 구현해줘', // matches /RBAC/i
+        'CORS 설정 구현', // matches /CORS\s*(설정|구현)/i
+        'security vulnerability fix', // matches /security\s*(vulnerabilit\w*|bug|issue)\s*(fix|patch|resolv)/i
+        'OWASP 준수 구현해줘', // matches /OWASP\s*(구현|적용|준수\s*구현|implement|apply|remedi)/i
+      ];
+
+      it.each(securityPrompts)('should detect security-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt,
+          }),
+        );
+
+        expect(result.agentName).toBe('security-engineer');
+        expect(result.source).toBe('intent');
+      });
+    });
+
+    describe('security-engineer boundary cases', () => {
+      it('should NOT route "인증 서버 개발해줘" to security-engineer (→ backend-developer)', async () => {
+        const result = await strategy.resolve(createActContext({ prompt: '인증 서버 개발해줘' }));
+        expect(result.agentName).toBe('backend-developer');
+      });
+
+      it('should route "인증 시스템 구현" to security-engineer (auth system = security domain)', async () => {
+        const result = await strategy.resolve(createActContext({ prompt: '인증 시스템 구현' }));
+        expect(result.agentName).toBe('security-engineer');
+      });
+
+      it('should NOT route "보안 검토해줘" to security-engineer (EVAL-type prompt, no implementation verb)', async () => {
+        const result = await strategy.resolve(createActContext({ prompt: '보안 검토해줘' }));
+        expect(result.agentName).not.toBe('security-engineer');
+      });
+    });
+
     describe('ai-ml-engineer patterns', () => {
       // Patterns that match ai-ml.patterns.ts:
       // - /pytorch|tensorflow|keras|jax/i (0.95)

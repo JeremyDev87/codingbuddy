@@ -20,6 +20,7 @@ export const ACT_PRIMARY_AGENTS = [
   'devops-engineer',
   'agent-architect',
   'test-engineer', // TDD, unit/integration/e2e test specialist
+  'security-engineer', // Security features implementation & vulnerability remediation (intent priority: 5th)
 ] as const;
 
 /** Primary Agent for EVAL mode - centralized definition */
@@ -106,6 +107,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
   'test-engineer': {
     name: 'Test Engineer',
     description: 'TDD, unit/integration/e2e testing, coverage improvement',
+  },
+  'security-engineer': {
+    name: 'Security Engineer',
+    description: 'Security implementation, vulnerability fixes, auth/authz, encryption',
   },
 };
 

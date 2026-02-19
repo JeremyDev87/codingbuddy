@@ -11,6 +11,7 @@ import {
   AI_ML_INTENT_PATTERNS,
   BACKEND_INTENT_PATTERNS,
   AGENT_INTENT_PATTERNS,
+  SECURITY_INTENT_PATTERNS,
 } from './patterns';
 
 describe('PrimaryAgentResolver', () => {
@@ -721,6 +722,64 @@ describe('PrimaryAgentResolver', () => {
         // Should fall back to devops-engineer via projectType since platform-engineer unavailable
         expect(result.agentName).toBe('devops-engineer');
         expect(result.source).toBe('context');
+      });
+    });
+
+    describe('security-engineer pattern matching', () => {
+      beforeEach(() => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'backend-developer',
+          'security-engineer',
+        ]);
+      });
+
+      const securityPrompts = [
+        // 0.95 patterns
+        { prompt: 'JWT 인증 구현해줘', description: 'JWT implementation' },
+        { prompt: 'SQL injection 취약점 수정', description: 'SQL Injection' },
+        { prompt: 'XSS 취약점 수정해줘', description: 'XSS vulnerability' },
+        { prompt: 'CSRF 방어 추가', description: 'CSRF vulnerability' },
+        { prompt: 'OAuth 2.0 구현', description: 'OAuth implementation' },
+        { prompt: 'bcrypt로 비밀번호 해시', description: 'Password hashing' },
+        { prompt: '보안 취약점 수정해줘', description: 'Fix security vulnerability (KO)' },
+        { prompt: 'security vulnerability fix', description: 'Fix security vulnerability (EN)' },
+        { prompt: 'OWASP 준수 구현해줘', description: 'OWASP compliance implementation' },
+        // 0.90 patterns
+        { prompt: 'RBAC 구현해줘', description: 'RBAC' },
+        { prompt: '암호화 구현', description: 'Encryption' },
+        { prompt: 'CORS 설정 구현', description: 'CORS configuration' },
+        { prompt: 'CSP 설정 추가', description: 'CSP security header' },
+      ];
+
+      it.each(securityPrompts)(
+        'should detect security-engineer: $description ("$prompt")',
+        async ({ prompt }) => {
+          const result = await resolver.resolve('ACT', prompt);
+
+          expect(result.agentName).toBe('security-engineer');
+          expect(result.source).toBe('intent');
+        },
+      );
+
+      it('should NOT route "인증 서버 개발해줘" to security-engineer', async () => {
+        mockListPrimaryAgents.mockResolvedValue([
+          'frontend-developer',
+          'backend-developer',
+          'security-engineer',
+        ]);
+
+        const result = await resolver.resolve('ACT', '인증 서버 개발해줘');
+
+        expect(result.agentName).toBe('backend-developer');
+      });
+
+      it('falls back to default when security-engineer unavailable', async () => {
+        mockListPrimaryAgents.mockResolvedValue(['frontend-developer', 'backend-developer']);
+
+        const result = await resolver.resolve('ACT', 'SQL injection 취약점 수정');
+
+        expect(result.agentName).not.toBe('security-engineer');
       });
     });
 
@@ -1775,6 +1834,17 @@ describe('PrimaryAgentResolver', () => {
         for (const vector of REDOS_ATTACK_VECTORS) {
           const start = performance.now();
           for (const { pattern } of AGENT_INTENT_PATTERNS) {
+            pattern.test(vector);
+          }
+          const elapsed = performance.now() - start;
+          expect(elapsed).toBeLessThan(TIMEOUT_MS);
+        }
+      });
+
+      it('SECURITY_INTENT_PATTERNS are safe from ReDoS attacks', () => {
+        for (const vector of REDOS_ATTACK_VECTORS) {
+          const start = performance.now();
+          for (const { pattern } of SECURITY_INTENT_PATTERNS) {
             pattern.test(vector);
           }
           const elapsed = performance.now() - start;
