@@ -378,6 +378,17 @@ describe('ModeHandler', () => {
         const response = JSON.parse(responseText as string);
         expect(response.contextWarning).toContain('Failed to create context document');
       });
+
+      it('should not read context before parseMode when mode is PLAN', async () => {
+        const result = await handler.handle('parse_mode', {
+          prompt: 'PLAN design feature',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        const readContextCalls = (mockContextDocService.readContext as ReturnType<typeof vi.fn>)
+          .mock.calls;
+        expect(readContextCalls.length).toBe(0);
+      });
     });
 
     describe('AUTO mode', () => {
@@ -433,6 +444,132 @@ describe('ModeHandler', () => {
 
         expect(result?.isError).toBeFalsy();
         expect(mockContextDocService.appendContext).toHaveBeenCalled();
+      });
+
+      it('should auto-inherit recommendedActAgent from context when not explicitly provided', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'ACT',
+          originalPrompt: 'implement feature',
+        });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({
+          exists: true,
+          document: {
+            metadata: {
+              title: 'test-task',
+              createdAt: '2024-01-01T00:00:00.000Z',
+              lastUpdatedAt: '2024-01-01T00:00:00.000Z',
+              currentMode: 'PLAN',
+              status: 'active',
+            },
+            sections: [{ mode: 'PLAN', recommendedActAgent: 'backend-developer' }],
+          },
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'ACT implement feature',
+          // recommended_agent NOT provided
+        });
+
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('ACT implement feature', {
+          recommendedActAgent: 'backend-developer',
+          verbosity: 'standard',
+        });
+      });
+
+      it('should prefer explicit recommended_agent param over context value', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'ACT',
+          originalPrompt: 'implement feature',
+        });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({
+          exists: true,
+          document: {
+            metadata: {
+              title: 'test-task',
+              createdAt: '2024-01-01T00:00:00.000Z',
+              lastUpdatedAt: '2024-01-01T00:00:00.000Z',
+              currentMode: 'PLAN',
+              status: 'active',
+            },
+            sections: [{ mode: 'PLAN', recommendedActAgent: 'backend-developer' }],
+          },
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'ACT implement feature',
+          recommended_agent: 'frontend-developer',
+        });
+
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('ACT implement feature', {
+          recommendedActAgent: 'frontend-developer',
+          verbosity: 'standard',
+        });
+        // readContext must NOT be called before parseMode when explicit param is provided (performance)
+        expect(mockContextDocService.readContext).not.toHaveBeenCalledBefore(
+          mockKeywordService.parseMode as ReturnType<typeof vi.fn>,
+        );
+      });
+
+      it('should auto-inherit recommendedActAgent when using Korean ACT keyword (실행)', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'ACT',
+          originalPrompt: '피처 구현',
+        });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({
+          exists: true,
+          document: {
+            metadata: {
+              title: 'test-task',
+              createdAt: '2024-01-01T00:00:00.000Z',
+              lastUpdatedAt: '2024-01-01T00:00:00.000Z',
+              currentMode: 'PLAN',
+              status: 'active',
+            },
+            sections: [{ mode: 'PLAN', recommendedActAgent: 'backend-developer' }],
+          },
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: '실행 피처 구현',
+        });
+
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('실행 피처 구현', {
+          recommendedActAgent: 'backend-developer',
+          verbosity: 'standard',
+        });
+      });
+
+      it('should auto-inherit recommendedActAgent when using Spanish ACT keyword (ACTUAR)', async () => {
+        mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+          ...mockParseModeResult,
+          mode: 'ACT',
+          originalPrompt: 'implementar feature',
+        });
+        mockContextDocService.readContext = vi.fn().mockResolvedValue({
+          exists: true,
+          document: {
+            metadata: {
+              title: 'test-task',
+              createdAt: '2024-01-01T00:00:00.000Z',
+              lastUpdatedAt: '2024-01-01T00:00:00.000Z',
+              currentMode: 'PLAN',
+              status: 'active',
+            },
+            sections: [{ mode: 'PLAN', recommendedActAgent: 'backend-developer' }],
+          },
+        });
+
+        await handler.handle('parse_mode', {
+          prompt: 'ACTUAR implementar feature',
+        });
+
+        expect(mockKeywordService.parseMode).toHaveBeenCalledWith('ACTUAR implementar feature', {
+          recommendedActAgent: 'backend-developer',
+          verbosity: 'standard',
+        });
       });
     });
 

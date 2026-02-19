@@ -14,6 +14,7 @@ import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import { CONTEXT_FILE_PATH, type ContextDocument } from '../../context/context-document.types';
+import { LOCALIZED_KEYWORD_MAP } from '../../keyword/keyword.types';
 import type {
   Mode,
   DispatchReady,
@@ -118,8 +119,24 @@ export class ModeHandler extends AbstractHandler {
       // This prevents stale config from MCP server startup location issues
       await this.configService.reload();
 
+      // ACT mode: pre-read context to inherit recommendedActAgent if not explicitly provided
+      let resolvedRecommendedAgent = recommendedAgent;
+      const firstWord = prompt.trim().split(/\s+/)[0] ?? '';
+      const isActKeyword =
+        firstWord.toUpperCase() === 'ACT' ||
+        LOCALIZED_KEYWORD_MAP[firstWord] === 'ACT' ||
+        LOCALIZED_KEYWORD_MAP[firstWord.toUpperCase()] === 'ACT';
+      if (isActKeyword && !resolvedRecommendedAgent) {
+        const ctxResult = await this.contextDocService.readContext();
+        const sections = ctxResult.document?.sections ?? [];
+        const lastPlan = [...sections].reverse().find(s => s.mode === 'PLAN' || s.mode === 'AUTO');
+        if (lastPlan?.recommendedActAgent) {
+          resolvedRecommendedAgent = lastPlan.recommendedActAgent;
+        }
+      }
+
       const options = {
-        ...(recommendedAgent && { recommendedActAgent: recommendedAgent }),
+        ...(resolvedRecommendedAgent && { recommendedActAgent: resolvedRecommendedAgent }),
         verbosity,
       };
       const result = await this.keywordService.parseMode(prompt, options);
