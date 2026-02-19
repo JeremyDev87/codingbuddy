@@ -29,6 +29,7 @@ export const ACT_PRIMARY_AGENTS = [
   'test-engineer', // TDD, unit/integration/e2e test specialist
   'security-engineer', // Security features implementation & vulnerability remediation (intent priority: 5th)
   'systems-developer', // Rust, C, C++, FFI, WASM, embedded, low-level optimization (intent priority: 6th)
+  'software-engineer', // fallback default — no intent patterns, language-agnostic generalist
 ] as const;
 
 /** Primary Agent for EVAL mode - centralized definition */
@@ -44,7 +45,7 @@ export const EVAL_PRIMARY_AGENT = 'code-reviewer' as const;
  *
  * @see ACT_PRIMARY_AGENTS for the full list of ACT mode agents
  */
-export const DEFAULT_ACT_AGENT = 'frontend-developer' as const;
+export const DEFAULT_ACT_AGENT = 'software-engineer' as const;
 
 /** All Primary Agents (Tier 1) - combined list */
 export const ALL_PRIMARY_AGENTS = [
@@ -127,6 +128,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
   'systems-developer': {
     name: 'Systems Developer',
     description: 'Rust, C, C++, FFI, WASM, embedded, low-level performance',
+  },
+  'software-engineer': {
+    name: 'Software Engineer',
+    description: 'General-purpose engineer — any language, any domain, TDD-first',
   },
 };
 

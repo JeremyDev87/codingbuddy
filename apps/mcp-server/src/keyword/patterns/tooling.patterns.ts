@@ -13,7 +13,7 @@
  * 6. MOBILE_INTENT_PATTERNS
  * 7. CONTEXT_PATTERNS (file path/extension inference)
  * 8. Project config (primaryAgent setting)
- * 9. Default fallback (frontend-developer) - lowest
+ * 9. Default fallback (software-engineer) - lowest
  *
  * Confidence Levels:
  * - 0.95-0.98: Highly specific config file names (tsconfig, vite.config, etc.)

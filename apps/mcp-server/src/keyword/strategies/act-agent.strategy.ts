@@ -10,7 +10,7 @@
  * 4. Meta-discussion detection (skip intent patterns if discussing agent names)
  * 5-11. Intent patterns (agent, tooling, platform, data, ai-ml, backend, mobile)
  * 12. Context-based suggestion (file path inference)
- * 13. Default fallback (frontend-developer)
+ * 13. Default fallback (software-engineer)
  */
 
 import { Logger } from '@nestjs/common';
@@ -241,7 +241,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
         DEFAULT_ACT_AGENT,
         'default',
         1.0,
-        'ACT mode default: frontend-developer (no specific intent detected)',
+        'ACT mode default: software-engineer (no domain detected — language-agnostic generalist)',
       );
     }
 
@@ -258,7 +258,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
       DEFAULT_ACT_AGENT,
       'default',
       0.5,
-      'ACT mode fallback: frontend-developer (no agents available)',
+      'ACT mode fallback: software-engineer (no agents available)',
     );
   }
 }

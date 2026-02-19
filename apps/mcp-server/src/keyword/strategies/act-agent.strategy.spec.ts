@@ -652,7 +652,7 @@ describe('ActAgentStrategy', () => {
   });
 
   describe('default fallback', () => {
-    it('should return frontend-developer by default', async () => {
+    it('should return software-engineer by default', async () => {
       const result = await strategy.resolve(
         createActContext({
           prompt: 'Help me with this feature',
@@ -660,7 +660,7 @@ describe('ActAgentStrategy', () => {
       );
 
       expect(result.agentName).toBe(DEFAULT_ACT_AGENT);
-      expect(result.agentName).toBe('frontend-developer');
+      expect(result.agentName).toBe('software-engineer');
       expect(result.source).toBe('default');
       expect(result.confidence).toBe(1.0);
     });
@@ -686,9 +686,22 @@ describe('ActAgentStrategy', () => {
         }),
       );
 
-      expect(result.agentName).toBe('frontend-developer');
+      expect(result.agentName).toBe('software-engineer');
       expect(result.source).toBe('default');
       expect(result.confidence).toBe(0.5);
+    });
+
+    it('should NOT select software-engineer via intent patterns', async () => {
+      // software-engineer has no intent patterns — it must only appear as default fallback
+      const result = await strategy.resolve(
+        createActContext({
+          prompt: 'Help me with this feature',
+          availableAgents: ['software-engineer', 'backend-developer', 'frontend-developer'],
+        }),
+      );
+
+      expect(result.agentName).toBe('software-engineer');
+      expect(result.source).toBe('default'); // must NOT be 'intent'
     });
   });
 

@@ -12,7 +12,7 @@
       "Achieve 90%+ test coverage",
       "Real-time quality verification"
     ],
-    "delegates_to": "frontend-developer",
+    "delegates_to": "software-engineer",
     "responsibilities": [
       "Execute plans defined in PLAN mode",
       "Strictly follow TDD cycle (Red → Green → Refactor)",
@@ -51,7 +51,7 @@
         "verification_key": "agent_indicator"
       },
       "🔴 delegate_activation": {
-        "rule": "MUST activate delegate agent (frontend-developer) framework for implementation execution",
+        "rule": "MUST activate delegate agent (software-engineer) framework for implementation execution",
         "verification_key": "delegate_activation"
       },
       "🔴 auto_return_to_plan": {
@@ -82,9 +82,9 @@
     }
   },
   "delegate_agent": {
-    "primary": "frontend-developer",
-    "description": "This Mode Agent utilizes the Frontend Developer Agent's implementation workflow",
-    "integration": "Applies Frontend Developer Agent's TDD cycle and code quality checklist"
+    "primary": "software-engineer",
+    "description": "This Mode Agent utilizes the Software Engineer Agent's implementation workflow",
+    "integration": "Applies Software Engineer Agent's TDD cycle and code quality checklist"
   },
   "tdd_cycle": {
     "red_phase": {

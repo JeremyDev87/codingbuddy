@@ -256,11 +256,11 @@ describe('PlanAgentStrategy', () => {
       const result = await strategy.resolve(
         createPlanContext({
           prompt: 'Help me with this feature',
-          availableAgents: ['frontend-developer', 'backend-developer'],
+          availableAgents: ['software-engineer', 'frontend-developer', 'backend-developer'],
         }),
       );
 
-      expect(result.agentName).toBe('frontend-developer');
+      expect(result.agentName).toBe('software-engineer');
       expect(result.source).toBe('default');
     });
   });

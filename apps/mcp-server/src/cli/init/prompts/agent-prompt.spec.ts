@@ -13,8 +13,8 @@ vi.mock('@inquirer/prompts', () => ({
 
 describe('agent-prompt', () => {
   describe('DEFAULT_PRIMARY_AGENT', () => {
-    it('should be frontend-developer', () => {
-      expect(DEFAULT_PRIMARY_AGENT).toBe('frontend-developer');
+    it('should be software-engineer', () => {
+      expect(DEFAULT_PRIMARY_AGENT).toBe('software-engineer');
     });
   });
 
@@ -44,11 +44,11 @@ describe('agent-prompt', () => {
       }
     });
 
-    it('should include frontend-developer with recommended label', () => {
+    it('should include software-engineer with recommended label', () => {
       const choices = getPrimaryAgentChoices();
-      const frontend = choices.find(c => c.value === 'frontend-developer');
-      expect(frontend).toBeDefined();
-      expect(frontend?.name).toContain('Recommended');
+      const softwareEng = choices.find(c => c.value === 'software-engineer');
+      expect(softwareEng).toBeDefined();
+      expect(softwareEng?.name).toContain('Recommended');
     });
 
     it('should include descriptions for agents', () => {
@@ -78,7 +78,7 @@ describe('agent-prompt', () => {
         message: 'Select your primary development agent:',
         choices: expect.arrayContaining([
           expect.objectContaining({
-            value: 'frontend-developer',
+            value: 'software-engineer',
             name: expect.stringContaining('Recommended'),
           }),
         ]),

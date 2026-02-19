@@ -685,7 +685,7 @@ describe('KeywordService', () => {
         expect(result.agent).toBe('plan-mode');
       });
 
-      it('does not include agent field when agent is undefined in config, but delegates_to defaults to frontend-developer', async () => {
+      it('does not include agent field when agent is undefined in config, but delegates_to defaults to software-engineer', async () => {
         const configWithoutAgent: KeywordModesConfig = {
           modes: {
             PLAN: {
@@ -706,8 +706,8 @@ describe('KeywordService', () => {
 
         // agent field is undefined since not in config
         expect(result.agent).toBeUndefined();
-        // delegates_to defaults to 'frontend-developer' for PLAN/ACT modes (dynamic resolution)
-        expect(result.delegates_to).toBe('frontend-developer');
+        // delegates_to defaults to 'software-engineer' for PLAN/ACT modes (dynamic resolution)
+        expect(result.delegates_to).toBe('software-engineer');
         expect(result.primary_agent_source).toBe('default');
       });
     });
@@ -2324,7 +2324,7 @@ describe('KeywordService', () => {
               instructions: 'Design approach.',
               rules: ['rules/core.md'],
               agent: 'plan-mode',
-              // No delegates_to - will fallback to 'frontend-developer'
+              // No delegates_to - will fallback to 'software-engineer'
             },
             ACT: mockConfig.modes.ACT,
             EVAL: mockConfig.modes.EVAL,
@@ -2343,10 +2343,10 @@ describe('KeywordService', () => {
         const result = await serviceWithAgentPrompt.parseMode('PLAN design feature');
 
         // Since no PrimaryAgentResolver is provided and no delegates_to in config,
-        // it will use default 'frontend-developer' (fallback behavior)
-        expect(result.delegates_to).toBe('frontend-developer');
+        // it will use default 'software-engineer' (fallback behavior)
+        expect(result.delegates_to).toBe('software-engineer');
         // Agent system prompt function SHOULD be called with the fallback agent
-        expect(mockLoadAgentSystemPrompt).toHaveBeenCalledWith('frontend-developer', 'PLAN');
+        expect(mockLoadAgentSystemPrompt).toHaveBeenCalledWith('software-engineer', 'PLAN');
         expect(result.included_agent).toBeDefined();
         expect(result.included_agent?.name).toBe('Default Agent');
       });

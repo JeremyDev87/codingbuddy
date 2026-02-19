@@ -6,7 +6,7 @@
  * 2. Project configuration
  * 3. Intent analysis (prompt content analysis)
  * 4. Context (file path, project type)
- * 5. Default fallback (frontend-developer)
+ * 5. Default fallback (software-engineer)
  *
  * This is the main entry point for agent resolution.
  * Resolution logic is delegated to mode-specific strategies.

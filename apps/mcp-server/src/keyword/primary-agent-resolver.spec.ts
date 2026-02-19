@@ -1211,6 +1211,7 @@ describe('PrimaryAgentResolver', () => {
           'solution-architect',
           'technical-planner',
           'code-reviewer',
+          'software-engineer',
         ]);
       });
 
@@ -1237,15 +1238,15 @@ describe('PrimaryAgentResolver', () => {
         expect(result.source).toBe('context');
       });
 
-      it('suggests frontend-developer when context includes .tsx files', async () => {
+      it('suggests software-engineer when context includes .tsx files', async () => {
         const context: ResolutionContext = {
           filePath: '/project/component.tsx',
         };
 
         const result = await resolver.resolve('ACT', '이 파일 수정해', context);
 
-        // .tsx has lower confidence (0.7), so falls through to default
-        expect(result.agentName).toBe('frontend-developer');
+        // .tsx has lower confidence (0.7), so falls through to default (software-engineer)
+        expect(result.agentName).toBe('software-engineer');
       });
 
       describe('mobile context patterns', () => {
@@ -1716,12 +1717,27 @@ describe('PrimaryAgentResolver', () => {
     });
 
     describe('no pattern match falls back to default', () => {
-      it('returns frontend-developer for unmatched generic prompt', async () => {
+      it('returns software-engineer for unmatched generic prompt', async () => {
+        mockListPrimaryAgents.mockResolvedValueOnce([
+          'frontend-developer',
+          'backend-developer',
+          'agent-architect',
+          'devops-engineer',
+          'solution-architect',
+          'technical-planner',
+          'code-reviewer',
+          'mobile-developer',
+          'data-engineer',
+          'platform-engineer',
+          'tooling-engineer',
+          'ai-ml-engineer',
+          'software-engineer',
+        ]);
         const result = await resolver.resolve('ACT', 'help me with this random task');
 
-        expect(result.agentName).toBe('frontend-developer');
+        expect(result.agentName).toBe('software-engineer');
         expect(result.source).toBe('default');
-        expect(result.reason).toContain('no specific intent detected');
+        expect(result.reason).toContain('no domain detected');
       });
 
       it('returns frontend-developer for Korean generic prompt', async () => {

@@ -153,7 +153,7 @@ Primary Agent is dynamically determined based on the following priority:
 | 1 | **explicit** | Explicit request in prompt (e.g., "use backend-developer agent") |
 | 2 | **config** | Project configuration's `primaryAgent` setting |
 | 3 | **context** | Inference based on file path (e.g., `.go` → backend-developer) |
-| 4 | **default** | Default value (frontend-developer) |
+| 4 | **default** | Default value (software-engineer) |
 
 ### Primary Agent Request Patterns
 
@@ -225,7 +225,7 @@ Mode Agents (Workflow Orchestrators)
 
 Primary Agents (Implementation Experts) - role.type: "primary"
 ├── tooling-engineer       # Config/build tools specialist (highest priority)
-├── frontend-developer     # React/Next.js expertise (default)
+├── frontend-developer     # React/Next.js expertise
 ├── backend-developer      # Multi-language backend expertise
 ├── agent-architect        # AI agent framework expertise
 ├── devops-engineer        # Docker/monitoring expertise
@@ -1358,7 +1358,7 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 ├── solution-architect.json          # Primary Agent for PLAN mode (architecture)
 ├── technical-planner.json           # Primary Agent for PLAN mode (implementation)
 ├── tooling-engineer.json            # Primary Agent for ACT mode (config/build tools)
-├── frontend-developer.json          # Primary Agent for ACT mode (default)
+├── frontend-developer.json          # Primary Agent for ACT mode (web UI)
 ├── backend-developer.json           # Primary Agent for ACT mode (backend)
 ├── agent-architect.json             # Primary Agent for agent management
 ├── devops-engineer.json             # Primary Agent for Docker/monitoring
