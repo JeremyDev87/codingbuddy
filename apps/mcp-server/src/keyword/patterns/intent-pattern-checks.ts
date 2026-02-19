@@ -6,18 +6,20 @@
  *
  * Pattern check order (reordered to prevent false positives):
  * 1. agent-architect - MCP, AI agents, workflows (MOVED UP - prevents false positives from agent name mentions)
- * 2. tooling-engineer - Build tools, linters, bundlers
- * 3. platform-engineer - IaC, Kubernetes, cloud infrastructure
- * 4. data-engineer - Database, schema, migrations
- * 5. ai-ml-engineer - ML frameworks, LLM, embeddings
- * 6. backend-developer - APIs, servers, authentication
- * 7. frontend-developer - React, Vue, Angular, UI components, CSS
- * 8. devops-engineer - CI/CD, Docker, deployment, monitoring
- * 9. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
+ * 2. test-engineer - TDD, unit/integration/e2e tests, coverage (before backend/frontend to prevent keyword theft)
+ * 3. tooling-engineer - Build tools, linters, bundlers
+ * 4. platform-engineer - IaC, Kubernetes, cloud infrastructure
+ * 5. data-engineer - Database, schema, migrations
+ * 6. ai-ml-engineer - ML frameworks, LLM, embeddings
+ * 7. backend-developer - APIs, servers, authentication
+ * 8. frontend-developer - React, Vue, Angular, UI components, CSS
+ * 9. devops-engineer - CI/CD, Docker, deployment, monitoring
+ * 10. mobile-developer - React Native, Flutter, iOS/Android (MOVED DOWN - "mobile develop" patterns are greedy)
  */
 
 import type { IntentPatternCheck } from './intent-patterns.types';
 import { AGENT_INTENT_PATTERNS } from './agent.patterns';
+import { TEST_INTENT_PATTERNS } from './test.patterns';
 import { TOOLING_INTENT_PATTERNS } from './tooling.patterns';
 import { PLATFORM_INTENT_PATTERNS } from './platform.patterns';
 import { DATA_INTENT_PATTERNS } from './data.patterns';
@@ -33,6 +35,12 @@ export const INTENT_PATTERN_CHECKS: ReadonlyArray<IntentPatternCheck> = [
     agent: 'agent-architect',
     patterns: AGENT_INTENT_PATTERNS,
     category: 'Agent',
+  },
+  // Test patterns second (before backend/frontend to prevent test keywords being stolen)
+  {
+    agent: 'test-engineer',
+    patterns: TEST_INTENT_PATTERNS,
+    category: 'Test',
   },
   {
     agent: 'tooling-engineer',

@@ -992,6 +992,7 @@ describe('KeywordService', () => {
       expect(result.available_act_agents).toContain('devops-engineer');
       expect(result.available_act_agents).toContain('agent-architect');
       expect(result.available_act_agents).toContain('ai-ml-engineer');
+      expect(result.available_act_agents).toContain('test-engineer');
     });
 
     it('does not return recommended_act_agent in ACT mode', async () => {

@@ -216,6 +216,33 @@ describe('ActAgentStrategy', () => {
       });
     });
 
+    describe('test-engineer patterns', () => {
+      // Patterns that match test.patterns.ts:
+      // - /TDD\s*(로|로\s*구현|cycle|approach)/i (0.95)
+      // - /\b(jest|vitest|mocha|jasmine)\s*(unit|test|spec|설정|config)/i (0.95)
+      // - /테스트\s*(코드|케이스|작성|추가|구현)/i (0.90)
+      // - /단위\s*테스트|unit\s*test/i (0.90)
+      const testPrompts = [
+        '테스트 코드 작성해줘', // matches /테스트\s*(코드|케이스|작성|추가|구현)/i
+        'Jest unit test 추가', // matches /\b(jest|vitest...)/ + unit test
+        'TDD로 구현해줘', // matches /TDD\s*(로|로\s*구현|cycle|approach)/i
+        '단위 테스트 추가해줘', // matches /단위\s*테스트|unit\s*test/i
+        'Write Vitest unit tests', // matches /\b(jest|vitest...)/i
+        'e2e 테스트 작성', // matches /e2e\s*(테스트|test)/i
+      ];
+
+      it.each(testPrompts)('should detect test-engineer intent: "%s"', async prompt => {
+        const result = await strategy.resolve(
+          createActContext({
+            prompt,
+          }),
+        );
+
+        expect(result.agentName).toBe('test-engineer');
+        expect(result.source).toBe('intent');
+      });
+    });
+
     describe('backend-developer patterns', () => {
       // Patterns that match backend.patterns.ts:
       // - /REST\s*API|RESTful/i

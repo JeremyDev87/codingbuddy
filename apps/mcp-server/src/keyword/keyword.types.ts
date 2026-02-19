@@ -19,6 +19,7 @@ export const ACT_PRIMARY_AGENTS = [
   'backend-developer',
   'devops-engineer',
   'agent-architect',
+  'test-engineer', // TDD, unit/integration/e2e test specialist
 ] as const;
 
 /** Primary Agent for EVAL mode - centralized definition */
@@ -101,6 +102,10 @@ export const ACT_AGENT_DISPLAY_INFO: Record<ActPrimaryAgent, AgentDisplayInfo> =
   'agent-architect': {
     name: 'Agent Architect',
     description: 'AI agent systems, MCP servers, LLM integration',
+  },
+  'test-engineer': {
+    name: 'Test Engineer',
+    description: 'TDD, unit/integration/e2e testing, coverage improvement',
   },
 };
 

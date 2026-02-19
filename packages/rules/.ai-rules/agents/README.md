@@ -53,6 +53,7 @@ AI Agent definitions for specialized development roles.
 | **Config/Build Tools** | Tooling Engineer | `tooling-engineer.json` |
 | **Agent Management** | Agent Architect | `agent-architect.json` |
 | **AI/ML Development** | AI/ML Engineer | `ai-ml-engineer.json` |
+| **TDD/Test Engineering** | Test Engineer | `test-engineer.json` |
 
 ### Agent Summary
 
@@ -66,6 +67,7 @@ AI Agent definitions for specialized development roles.
 | Mobile Developer | Cross-platform (React Native, Flutter) and native (iOS, Android) development |
 | Code Reviewer | Auto-activated in EVAL mode, multi-dimensional code quality assessment |
 | Architecture Specialist | Layer boundaries, dependency direction, Clean Architecture |
+| Test Engineer | TDD cycle execution, unit/integration/e2e testing, coverage improvement |
 | Test Strategy Specialist | TDD strategy, test coverage, test quality |
 | Performance Specialist | Core Web Vitals, bundle optimization, rendering performance |
 | Security Specialist | OWASP, authentication/authorization, XSS/CSRF defense |
@@ -187,6 +189,7 @@ as agent-architect, design new agent
 | DevOps Engineer | `primary` | Dockerfile, docker-compose context |
 | Platform Engineer | `primary` | Terraform, Kubernetes, cloud infrastructure |
 | AI/ML Engineer | `primary` | LLM integration, RAG, prompt engineering, AI safety |
+| Test Engineer | `primary` | TDD, unit/integration/e2e testing, coverage improvement |
 
 ### EVAL Mode
 
@@ -224,7 +227,8 @@ Primary Agents (Implementation Experts) - role.type: "primary"
 ├── agent-architect        # AI agent framework expertise
 ├── devops-engineer        # Docker/monitoring expertise
 ├── platform-engineer      # IaC/Kubernetes/multi-cloud expertise
-└── ai-ml-engineer         # LLM/RAG/AI safety expertise
+├── ai-ml-engineer         # LLM/RAG/AI safety expertise
+└── test-engineer          # TDD, unit/integration/e2e test specialist
 
 Specialist Agents (Domain Experts)
 ├── architecture-specialist

@@ -20,6 +20,7 @@ export { EXPLICIT_PATTERNS } from './explicit.patterns';
 // Intent patterns by domain
 export { AGENT_INTENT_PATTERNS } from './agent.patterns';
 export { AI_ML_INTENT_PATTERNS } from './ai-ml.patterns';
+export { TEST_INTENT_PATTERNS } from './test.patterns';
 export { BACKEND_INTENT_PATTERNS } from './backend.patterns';
 export { DATA_INTENT_PATTERNS } from './data.patterns';
 export { MOBILE_INTENT_PATTERNS } from './mobile.patterns';
