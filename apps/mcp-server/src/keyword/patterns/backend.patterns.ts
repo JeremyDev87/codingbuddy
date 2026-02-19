@@ -9,6 +9,8 @@
  * - 0.95: Backend frameworks (NestJS, Express, Django, Spring)
  * - 0.90: API patterns (REST, GraphQL, gRPC), server concepts
  * - 0.85: Generic backend keywords
+ * - 0.80: TypeScript type definitions
+ * - 0.75: Generic development (refactoring)
  *
  * @example
  * "NestJS API 만들어줘" → backend-developer (0.95)
@@ -108,5 +110,17 @@ export const BACKEND_INTENT_PATTERNS: ReadonlyArray<IntentPattern> = [
     pattern: /마이크로서비스|microservice/i,
     confidence: 0.85,
     description: 'Microservice',
+  },
+  // TODO(#568): Move to software-engineer.patterns.ts after software-engineer agent is created
+  // Generic Development Patterns (0.75-0.80) - fallback before DEFAULT_ACT_AGENT
+  {
+    pattern: /리팩토링|refactor/i,
+    confidence: 0.75,
+    description: 'Refactoring',
+  },
+  {
+    pattern: /타입\s*추가|type\s*definition/i,
+    confidence: 0.8,
+    description: 'TypeScript Type Definition',
   },
 ];
