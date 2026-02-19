@@ -29,6 +29,14 @@ const PIPELINE_RIGHT_MARGIN = 10;
 /** Shared dim style for inactive stage rendering. */
 const DIMMED_STYLE: CellStyle = { dim: true };
 
+/**
+ * Style for idle/waiting specialist agents.
+ * NOTE: ⌛ is a wide emoji (2 terminal cells on some systems).
+ * ColorBuffer writes chars by column index, so rendering may shift
+ * by 1 cell on terminals that treat ⌛ as double-width.
+ */
+const WAITING_STYLE: CellStyle = { fg: 'gray' as const, dim: true };
+
 interface StageColumn {
   startX: number;
   width: number;
@@ -163,8 +171,8 @@ function drawAgentNode(
 
   // Row 2: progress bar (Primary) OR execution mode indicator (Specialist)
   if (agent.isPrimary) {
-    // Primary: progress bar 유지
-    const barWidth = boxW - 4;
+    // Primary: progress bar + % 레이블 (barWidth를 줄여 레이블 공간 확보)
+    const barWidth = Math.max(1, boxW - 8); // 4(패딩) + 4(레이블 " 0%"+공백)
     const bar = buildProgressBar(agent.progress, barWidth);
     const filledStr = PROGRESS_BAR_CHARS.filled.repeat(bar.filled);
     const emptyStr = PROGRESS_BAR_CHARS.empty.repeat(bar.empty);
@@ -174,6 +182,11 @@ function drawAgentNode(
     if (bar.empty > 0) {
       buf.writeText(x + 2 + bar.filled, y + 2, emptyStr, emptyStyle);
     }
+    // % 레이블 (바 오른쪽에 1칸 간격)
+    buf.writeText(x + 2 + barWidth + 1, y + 2, bar.label, dimmed ? DIMMED_STYLE : WAITING_STYLE);
+  } else if (agent.status === 'idle') {
+    // Idle Specialist: 대기 표시 (오해 소지가 있는 0% 바 대신)
+    buf.writeText(x + 2, y + 2, '⌛ waiting...', dimmed ? DIMMED_STYLE : WAITING_STYLE);
   } else if (agent.isParallel) {
     // Parallel Specialist: ⫸ parallel 표시
     buf.writeText(x + 2, y + 2, '⫸ parallel', dimmed ? DIMMED_STYLE : PARALLEL_STYLES.parallel);

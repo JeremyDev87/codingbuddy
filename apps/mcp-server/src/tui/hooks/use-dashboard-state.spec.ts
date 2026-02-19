@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   dashboardReducer,
   createInitialDashboardState,
@@ -523,7 +523,7 @@ describe('dashboardReducer', () => {
       type: 'AGENT_ACTIVATED',
       payload: { agentId: 'a1', name: 'test-agent', role: 'primary', isPrimary: true },
     });
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 32; i++) {
       state = dashboardReducer(state, {
         type: 'TOOL_INVOKED',
         payload: { toolName: `tool_${i}`, agentId: 'a1', timestamp: Date.now() },
@@ -643,7 +643,7 @@ describe('dashboardReducer', () => {
       payload: { toolName: 'search_rules', agentId: 'search_rules', timestamp: Date.now() },
     });
     // Should fall back to focused agent and increment progress
-    expect(state.agents.get('primary:arch')?.progress).toBe(5);
+    expect(state.agents.get('primary:arch')?.progress).toBe(3);
   });
 
   it('should not crash on TOOL_INVOKED with non-matching agentId when focusedAgentId is null', () => {
@@ -694,7 +694,7 @@ describe('dashboardReducer', () => {
     });
 
     // Exact match agent should be incremented
-    expect(state.agents.get('search_rules')?.progress).toBe(5);
+    expect(state.agents.get('search_rules')?.progress).toBe(3);
     // Focused primary agent should NOT be incremented (exact match took priority)
     expect(state.agents.get('primary:arch')?.progress).toBe(0);
   });
@@ -1078,5 +1078,139 @@ describe('dashboardReducer', () => {
       expect(reset.contextMode).toBeNull();
       expect(reset.contextStatus).toBeNull();
     });
+  });
+});
+
+describe('TOOL_INVOKED — time-based progress', () => {
+  it('uses time-based progress when elapsed exceeds tool-based progress', () => {
+    // Arrange: agent activated at t=0, tool invoked at t=60_000ms (halfway through 120s)
+    const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // activation time
+
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'Architect', role: 'primary', isPrimary: true },
+    });
+
+    // At 60s elapsed: timeBased = min(90, (60000/120000)*100) = 50
+    // toolBased = min(95, 0 + 3) = 3
+    // expected = max(50, 3) = 50
+    dateSpy.mockReturnValueOnce(60_000); // tool invocation time
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: 60_000 },
+    });
+
+    expect(state.agents.get('a1')!.progress).toBe(50);
+    dateSpy.mockRestore();
+  });
+
+  it('uses tool-based progress (+3) when elapsed is small', () => {
+    // Arrange: agent activated at t=0, tool invoked at t=100ms (tiny elapsed)
+    const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // activation time
+
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'Architect', role: 'primary', isPrimary: true },
+    });
+
+    // At 100ms elapsed: timeBased = min(90, (100/120000)*100) ≈ 0.08
+    // toolBased = min(95, 0 + 3) = 3
+    // expected = max(0.08, 3) = 3
+    dateSpy.mockReturnValueOnce(100);
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: 100 },
+    });
+
+    expect(state.agents.get('a1')!.progress).toBe(3);
+    dateSpy.mockRestore();
+  });
+
+  it('accumulates tool-based progress across multiple tool calls when elapsed is small', () => {
+    const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValue(0); // activation + all tool calls at t=0
+
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'Architect', role: 'primary', isPrimary: true },
+    });
+
+    // 3 tool calls: 0→3→6→9
+    for (let i = 0; i < 3; i++) {
+      state = dashboardReducer(state, {
+        type: 'TOOL_INVOKED',
+        payload: { toolName: 'search_rules', agentId: 'a1', timestamp: 0 },
+      });
+    }
+
+    expect(state.agents.get('a1')!.progress).toBe(9);
+    dateSpy.mockRestore();
+  });
+
+  it('caps time-based progress at 90', () => {
+    const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // activation
+
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'Architect', role: 'primary', isPrimary: true },
+    });
+
+    // 240s = 2x expected duration → raw = 200%, clamped to 90
+    dateSpy.mockReturnValueOnce(240_000);
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: 240_000 },
+    });
+
+    expect(state.agents.get('a1')!.progress).toBe(90);
+    dateSpy.mockRestore();
+  });
+
+  it('rounds time-based progress to nearest integer (no float labels)', () => {
+    // 61s elapsed: (61000/120000)*100 = 50.8333... → rounded to 51
+    const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // activation
+
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'AGENT_ACTIVATED',
+      payload: { agentId: 'a1', name: 'Architect', role: 'primary', isPrimary: true },
+    });
+
+    dateSpy.mockReturnValueOnce(61_000);
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: 61_000 },
+    });
+
+    expect(state.agents.get('a1')!.progress).toBe(51);
+    dateSpy.mockRestore();
+  });
+
+  it('defaults to tool-based (+3) when startedAt is undefined', () => {
+    // Manually create an agent without startedAt
+    let state = createInitialDashboardState();
+    const agents = new Map(state.agents);
+    agents.set('a1', {
+      id: 'a1',
+      name: 'Architect',
+      stage: 'PLAN',
+      status: 'running',
+      isPrimary: true,
+      progress: 10,
+      isParallel: false,
+      // startedAt deliberately omitted
+    });
+    state = { ...state, agents };
+
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: 'a1', timestamp: Date.now() },
+    });
+
+    // elapsed = 0 (no startedAt), timeBased = 0, toolBased = min(95, 10+3) = 13
+    expect(state.agents.get('a1')!.progress).toBe(13);
   });
 });

@@ -756,6 +756,7 @@ describe('tui/components/flow-map.pure', () => {
             id: 'sec-1',
             name: 'security',
             stage: 'EVAL',
+            status: 'running',
             isParallel: true,
           }),
         ],
@@ -773,6 +774,7 @@ describe('tui/components/flow-map.pure', () => {
             id: 'rev-1',
             name: 'code-reviewer',
             stage: 'EVAL',
+            status: 'running',
             isPrimary: false,
             isParallel: false,
           }),
@@ -1047,6 +1049,126 @@ describe('tui/components/flow-map.pure', () => {
       ]);
       const result = renderFlowMapCompact(agents);
       expect(result).not.toContain('%');
+    });
+  });
+
+  describe('buildProgressBar — label values', () => {
+    it('returns " 0%" for 0%', () => {
+      expect(buildProgressBar(0, 10).label).toBe(' 0%');
+    });
+
+    it('returns "67%" for 67%', () => {
+      expect(buildProgressBar(67, 10).label).toBe('67%');
+    });
+
+    it('returns "100" for 100%', () => {
+      expect(buildProgressBar(100, 10).label).toBe('100');
+    });
+
+    it('returns "50%" for 50%', () => {
+      expect(buildProgressBar(50, 10).label).toBe('50%');
+    });
+  });
+
+  describe('drawAgentNode — progress bar label', () => {
+    it('renders percentage label next to progress bar for primary agent', () => {
+      const agents = new Map<string, DashboardNode>([
+        [
+          'arch-1',
+          makeAgent({
+            id: 'arch-1',
+            name: 'Architect',
+            stage: 'PLAN',
+            status: 'running',
+            isPrimary: true,
+            progress: 67,
+          }),
+        ],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 80, 20);
+      const text = bufferToString(buf);
+      expect(text).toContain('67%');
+    });
+
+    it('renders " 0%" label when progress is 0', () => {
+      const agents = new Map<string, DashboardNode>([
+        [
+          'arch-1',
+          makeAgent({
+            id: 'arch-1',
+            name: 'Architect',
+            stage: 'PLAN',
+            status: 'running',
+            isPrimary: true,
+            progress: 0,
+          }),
+        ],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 80, 20);
+      const text = bufferToString(buf);
+      expect(text).toContain(' 0%');
+    });
+  });
+
+  describe('drawAgentNode — idle specialist display', () => {
+    it('shows ⌛ waiting... for idle non-primary parallel agent', () => {
+      const agents = new Map<string, DashboardNode>([
+        [
+          'spec-1',
+          makeAgent({
+            id: 'spec-1',
+            name: 'security',
+            stage: 'EVAL',
+            status: 'idle',
+            isPrimary: false,
+            isParallel: true,
+          }),
+        ],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 80, 20);
+      const text = bufferToString(buf);
+      expect(text).toContain('⌛ waiting...');
+      expect(text).not.toContain('⫸ parallel');
+    });
+
+    it('shows ⌛ waiting... for idle non-primary single agent', () => {
+      const agents = new Map<string, DashboardNode>([
+        [
+          'spec-1',
+          makeAgent({
+            id: 'spec-1',
+            name: 'security',
+            stage: 'EVAL',
+            status: 'idle',
+            isPrimary: false,
+            isParallel: false,
+          }),
+        ],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 80, 20);
+      const text = bufferToString(buf);
+      expect(text).toContain('⌛ waiting...');
+      expect(text).not.toContain('→ single');
+    });
+
+    it('still shows ⫸ parallel for running parallel agent', () => {
+      const agents = new Map<string, DashboardNode>([
+        [
+          'spec-1',
+          makeAgent({
+            id: 'spec-1',
+            name: 'security',
+            stage: 'EVAL',
+            status: 'running',
+            isPrimary: false,
+            isParallel: true,
+          }),
+        ],
+      ]);
+      const buf = renderFlowMapSimplified(agents, 80, 20);
+      const text = bufferToString(buf);
+      expect(text).toContain('⫸ parallel');
+      expect(text).not.toContain('⌛ waiting...');
     });
   });
 });

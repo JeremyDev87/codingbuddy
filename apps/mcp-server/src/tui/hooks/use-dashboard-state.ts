@@ -29,6 +29,8 @@ import { selectFocusedAgent } from './use-focus-agent';
 const EVENT_LOG_MAX = 100;
 const EDGE_MAX = 200;
 const TOOL_CALLS_MAX = 200;
+/** TOOL_INVOKED 시간 기반 진행률 계산 기준선 (밀리초) */
+const EXPECTED_AGENT_DURATION_MS = 120_000;
 
 /**
  * Creates fresh initial dashboard state.
@@ -203,10 +205,18 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       }
 
       if (targetAgent && targetAgent.status === 'running') {
+        const now = Date.now();
+        const elapsed = targetAgent.startedAt !== undefined ? now - targetAgent.startedAt : 0;
+        // 시간 기반 추정: 초반에 빠르게 성장, 90% 상한
+        const timeBased = Math.min(90, (elapsed / EXPECTED_AGENT_DURATION_MS) * 100);
+        // 툴 호출 기반: 호출마다 +3%, 95% 상한
+        const toolBased = Math.min(95, targetAgent.progress + 3);
+        // 후퇴 방지를 위해 둘 중 높은 값 사용, 정수 반올림으로 레이블 오버플로우 방지
+        const newProgress = Math.round(Math.max(timeBased, toolBased));
         agents = cloneAgents(state.agents);
         agents.set(targetAgent.id, {
           ...targetAgent,
-          progress: Math.min(95, targetAgent.progress + 5),
+          progress: newProgress,
         });
       }
 
