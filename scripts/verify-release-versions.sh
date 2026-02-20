@@ -12,8 +12,27 @@ if [ -z "$TAG_VERSION" ]; then
   exit 1
 fi
 
-echo "🔍 Verifying package.json versions match git tag: v$TAG_VERSION"
+echo "🔍 Verifying all version files match git tag: v$TAG_VERSION"
 echo ""
+
+# Check version.ts (single source of truth for runtime version)
+VERSION_TS_FILE="apps/mcp-server/src/shared/version.ts"
+if [ ! -f "$VERSION_TS_FILE" ]; then
+  echo "❌ File not found: $VERSION_TS_FILE"
+  ALL_MATCH=false
+else
+  ts_version=$(node -e "
+    const content = require('fs').readFileSync('$VERSION_TS_FILE', 'utf-8');
+    const match = content.match(/export const VERSION = '(.*)';/);
+    console.log(match ? match[1] : '');
+  ")
+  if [ "$ts_version" = "$TAG_VERSION" ]; then
+    echo "✅ version.ts VERSION: $ts_version (matches tag)"
+  else
+    echo "❌ version.ts VERSION: $ts_version (tag is v$TAG_VERSION)"
+    ALL_MATCH=false
+  fi
+fi
 
 PACKAGES=(
   "apps/mcp-server/package.json:codingbuddy"
