@@ -34,7 +34,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     benefit1Title: 'Single Source of Truth',
     benefit1Desc:
       'One ruleset automatically applied to Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.',
-    benefit2Title: '29 Specialist Agents',
+    benefit2Title: '35 AI Agents',
     benefit2Desc:
       'Focused expertise for architecture, security, testing, performance, accessibility, and more.',
     benefit3Title: 'Structured Workflow',
@@ -45,7 +45,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
   },
   agents: {
     title: 'AI Specialist Agents',
-    subtitle: '29 specialized AI agents',
+    subtitle: '35 AI agents',
     filter: 'Filter by category',
     search: 'Search agents...',
     allCategories: 'All Categories',
@@ -130,7 +130,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     q5: 'Can I customize the rules and agents?',
     a5: 'Absolutely. You can create custom rules in the .ai-rules directory.',
     q6: 'What are specialist agents?',
-    a6: 'Specialist agents are 29 focused AI personas with expertise in specific areas.',
+    a6: 'Specialist agents are 35 focused AI personas with expertise in specific areas.',
   },
 };
 

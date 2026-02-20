@@ -109,7 +109,7 @@ graph TB
 │   ├── frontend-developer.json
 │   ├── backend-developer.json
 │   ├── security-specialist.json
-│   └── ... (12+ エージェント)
+│   └── ... (35 エージェント)
 ├── skills/           # 再利用可能なワークフロー（Markdown）
 │   ├── tdd.md
 │   ├── debugging.md

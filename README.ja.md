@@ -18,7 +18,7 @@
 
 ## コードのためのAIエキスパートチーム
 
-**Codingbuddyは29の専門AIエージェントを調整し、人間のエキスパートチームレベルのコード品質を提供します。**
+**Codingbuddyは35のAIエージェントを調整し、人間のエキスパートチームレベルのコード品質を提供します。**
 
 単一のAIがすべてのエキスパートになることはできません。Codingbuddyは、アーキテクト、開発者、セキュリティスペシャリスト、アクセシビリティエキスパートなどで構成されるAI開発チームを編成し、コードがプロフェッショナルな基準に達するまで協力してレビュー、検証、改善します。
 
@@ -89,9 +89,9 @@ AIにコードを依頼すると、単一の視点しか得られません。セ
 
 | 層 | エージェント | 役割 |
 |----|------------|------|
-| **モードエージェント** | plan-mode, act-mode, eval-mode | ワークフローオーケストレーション |
-| **主要エージェント** | solution-architect, frontend-developer, backend-developer, code-reviewer など8つ | コア実装 |
-| **スペシャリストエージェント** | security, accessibility, performance, test-strategy など15 | ドメイン専門知識 |
+| **モードエージェント** (4個) | plan-mode, act-mode, eval-mode, auto-mode | ワークフローオーケストレーション |
+| **主要エージェント** (16個) | solution-architect, technical-planner, frontend-developer, backend-developer など | コア実装 |
+| **スペシャリストエージェント** (15個) | security, accessibility, performance, test-strategy など | ドメイン専門知識 |
 
 ### エージェントコラボレーション例
 
@@ -152,7 +152,7 @@ AUTO: リフレッシュトークン付きのJWT認証を実装して
 
 | 従来のAIコーディング | Codingbuddy |
 |---------------------|-------------|
-| 単一AIの視点 | 29のスペシャリストエージェントの視点 |
+| 単一AIの視点 | 35のスペシャリストエージェントの視点 |
 | 「生成して祈る」 | 計画 → 実装 → 検証 |
 | 品質ゲートなし | Critical=0, High=0 必須 |
 | 手動レビューが必要 | 自動多次元レビュー |
@@ -231,6 +231,29 @@ npm install -g codingbuddy
 
 ---
 
+## ターミナルダッシュボード (TUI)
+
+CodingbuddyはAIアシスタントと並行して、エージェントアクティビティ、タスクの進捗、ワークフロー状態をリアルタイムで表示する組み込みターミナルUIを提供します。
+
+### クイックスタート
+
+```bash
+# TUIを有効にしてMCPサーバーを起動
+npx codingbuddy mcp --tui
+```
+
+### 機能
+
+| パネル | 説明 |
+|--------|------|
+| **FlowMap** | アクティブなエージェント、ステージ、進捗を視覚化 |
+| **FocusedAgent** | 現在アクティブなエージェントのリアルタイムビューとスパークライン |
+| **Checklist** | PLAN/ACT/EVALコンテキストからのタスク完了追跡 |
+| **Activity Chart** | リアルタイムのツール呼び出し棒グラフ |
+| **マルチセッション** | 複数のClaude Codeセッションが単一TUIウィンドウを共有 |
+
+---
+
 ## 対応AIツール
 
 | ツール | ステータス |
@@ -253,11 +276,10 @@ npm install -g codingbuddy
 
 `codingbuddy.config.json`でデフォルトのAIモデルを設定します：
 
-```javascript
-module.exports = {
-  ai: {
-    defaultModel: 'claude-sonnet-4-20250514', // デフォルト
-    // オプション：claude-opus-4-*、claude-sonnet-4-*、claude-haiku-3-5-*
+```json
+{
+  "ai": {
+    "defaultModel": "claude-sonnet-4-20250514"
   }
 }
 ```
@@ -272,9 +294,9 @@ module.exports = {
 
 詳細度レベルでトークン使用量を最適化します：
 
-```javascript
-module.exports = {
-  verbosity: 'compact', // オプション：'minimal'、'compact'、'standard'、'detailed'
+```json
+{
+  "verbosity": "compact"
 }
 ```
 
@@ -294,6 +316,7 @@ module.exports = {
 | [はじめに](docs/ja/getting-started.md) | インストールとクイックセットアップ |
 | [設計思想](docs/ja/philosophy.md) | ビジョンと設計原則 |
 | [エージェントシステム](packages/rules/.ai-rules/agents/README.md) | 完全なエージェントリファレンス |
+| [スキルライブラリ](packages/rules/.ai-rules/skills/README.md) | 再利用可能なワークフロースキル（TDD、デバッグ、PRなど） |
 | [対応ツール](docs/ja/supported-tools.md) | AIツール統合ガイド |
 | [設定](docs/config-schema.md) | 設定ファイルオプション |
 | [APIリファレンス](docs/api.md) | MCPサーバー機能 |

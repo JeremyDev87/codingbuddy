@@ -18,7 +18,7 @@ Preguntas frecuentes sobre el Plugin de CodingBuddy para Claude Code.
 CodingBuddy es un sistema Multi-AI Rules que proporciona prácticas de codificación consistentes entre asistentes de IA. Incluye:
 
 - **Modos de Flujo de Trabajo**: PLAN/ACT/EVAL/AUTO para desarrollo estructurado
-- **Agentes Especialistas**: Más de 12 expertos en dominios (seguridad, rendimiento, accesibilidad, etc.)
+- **Agentes Especialistas**: 35 agentes de IA (seguridad, rendimiento, accesibilidad, etc.)
 - **Habilidades**: Flujos de trabajo reutilizables (TDD, depuración, diseño de API, etc.)
 - **Listas de Verificación**: Verificaciones de calidad específicas por dominio
 

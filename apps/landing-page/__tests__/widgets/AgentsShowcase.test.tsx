@@ -39,7 +39,7 @@ describe('AgentsShowcase', () => {
 
   it('should display agent count', () => {
     render(<AgentsShowcase locale="en" />);
-    expect(screen.getByText('29 agents')).toBeInTheDocument();
+    expect(screen.getByText('35 AI agents')).toBeInTheDocument();
   });
 
   it('should display search input', () => {

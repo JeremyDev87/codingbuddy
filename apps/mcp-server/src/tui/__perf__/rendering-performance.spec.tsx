@@ -43,7 +43,7 @@ function median(values: number[]): number {
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-describe('29 Agent 초기 렌더링', () => {
+describe(`${ALL_AGENT_NAMES.length} Agent 초기 렌더링`, () => {
   let unmountFn: (() => void) | undefined;
 
   afterEach(() => {
@@ -51,7 +51,7 @@ describe('29 Agent 초기 렌더링', () => {
     unmountFn = undefined;
   });
 
-  it('should render 29 activated agents within 300ms (median of 3 runs)', async () => {
+  it(`should render ${ALL_AGENT_NAMES.length} activated agents within 300ms (median of 3 runs)`, async () => {
     const durations: number[] = [];
 
     for (let run = 0; run < 3; run++) {
@@ -64,7 +64,7 @@ describe('29 Agent 초기 렌더링', () => {
       });
       await tick();
 
-      // Measure activation of all 29 agents (first as primary, rest as specialists)
+      // Measure activation of all agents (first as primary, rest as specialists)
       const start = performance.now();
 
       for (let i = 0; i < ALL_AGENT_NAMES.length; i++) {
@@ -155,7 +155,7 @@ describe('단일 Agent 상태 변경 리렌더', () => {
   });
 });
 
-describe('29 Agent 동시 상태 업데이트', () => {
+describe(`${ALL_AGENT_NAMES.length} Agent 동시 상태 업데이트`, () => {
   let unmountFn: (() => void) | undefined;
 
   afterEach(() => {
@@ -163,7 +163,7 @@ describe('29 Agent 동시 상태 업데이트', () => {
     unmountFn = undefined;
   });
 
-  it('should deactivate all 29 agents in rapid succession within 500ms (median of 3 runs)', async () => {
+  it('should deactivate all agents in rapid succession within 500ms (median of 3 runs)', async () => {
     const durations: number[] = [];
 
     for (let run = 0; run < 3; run++) {
@@ -191,7 +191,7 @@ describe('29 Agent 동시 상태 업데이트', () => {
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
 
-      // Measure rapid deactivation of all 29 agents
+      // Measure rapid deactivation of all agents
       const start = performance.now();
 
       for (let i = 0; i < ALL_AGENT_NAMES.length; i++) {

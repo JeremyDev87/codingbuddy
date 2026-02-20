@@ -109,7 +109,7 @@ graph TB
 │   ├── frontend-developer.json
 │   ├── backend-developer.json
 │   ├── security-specialist.json
-│   └── ...（12+ 个代理）
+│   └── ...（35 个代理）
 ├── skills/           # 可重用工作流（Markdown）
 │   ├── tdd.md
 │   ├── debugging.md

@@ -18,7 +18,7 @@
 
 ## Equipo de Expertos IA para Tu Código
 
-**Codingbuddy orquesta 29 agentes de IA especializados para ofrecer calidad de código a nivel de equipo de expertos humanos.**
+**Codingbuddy orquesta 35 agentes de IA para ofrecer calidad de código a nivel de equipo de expertos humanos.**
 
 Una sola IA no puede ser experta en todo. Codingbuddy crea un equipo de desarrollo de IA—arquitectos, desarrolladores, especialistas en seguridad, expertos en accesibilidad y más—que colaboran para revisar, verificar y refinar tu código hasta que cumpla con los estándares profesionales.
 
@@ -89,9 +89,9 @@ En lugar de que una sola IA intente hacerlo todo, Codingbuddy coordina múltiple
 
 | Nivel | Agentes | Rol |
 |-------|---------|-----|
-| **Agentes de Modo** | plan-mode, act-mode, eval-mode | Orquestación de flujo de trabajo |
-| **Agentes Principales** | solution-architect, frontend-developer, backend-developer, code-reviewer, +8 más | Implementación central |
-| **Agentes Especialistas** | security, accessibility, performance, test-strategy, +15 más | Experiencia de dominio |
+| **Agentes de Modo** (4) | plan-mode, act-mode, eval-mode, auto-mode | Orquestación de flujo de trabajo |
+| **Agentes Principales** (16) | solution-architect, technical-planner, frontend-developer, backend-developer y más | Implementación central |
+| **Agentes Especialistas** (15) | security, accessibility, performance, test-strategy y más | Experiencia de dominio |
 
 ### Ejemplo de Colaboración de Agentes
 
@@ -152,7 +152,7 @@ AUTO: Implementar autenticación JWT con tokens de refresco
 
 | Programación IA Tradicional | Codingbuddy |
 |----------------------------|-------------|
-| Perspectiva de una sola IA | 29 perspectivas de agentes especialistas |
+| Perspectiva de una sola IA | 35 perspectivas de agentes especialistas |
 | "Generar y esperar" | Planificar → Implementar → Verificar |
 | Sin puertas de calidad | Critical=0, High=0 requerido |
 | Revisión manual necesaria | Revisión multidimensional automatizada |
@@ -231,6 +231,29 @@ npm install -g codingbuddy
 
 ---
 
+## Panel de Control Terminal (TUI)
+
+Codingbuddy incluye una interfaz de terminal integrada que muestra la actividad de agentes, el progreso de tareas y el estado del flujo de trabajo en tiempo real junto a tu asistente de IA.
+
+### Inicio Rápido
+
+```bash
+# Iniciar servidor MCP con TUI habilitado
+npx codingbuddy mcp --tui
+```
+
+### Características
+
+| Panel | Descripción |
+|-------|-------------|
+| **FlowMap** | Tubería visual que muestra agentes activos, etapas y progreso |
+| **FocusedAgent** | Vista en tiempo real del agente activo con sparkline de actividad |
+| **Checklist** | Seguimiento de tareas completadas desde el contexto PLAN/ACT/EVAL |
+| **Activity Chart** | Gráfico de barras de invocaciones de herramientas en tiempo real |
+| **Multi-sesión** | Múltiples sesiones de Claude Code comparten una sola ventana TUI |
+
+---
+
 ## Herramientas de IA Compatibles
 
 | Herramienta | Estado |
@@ -253,11 +276,10 @@ npm install -g codingbuddy
 
 Configure el modelo de IA predeterminado en `codingbuddy.config.json`:
 
-```javascript
-module.exports = {
-  ai: {
-    defaultModel: 'claude-sonnet-4-20250514', // Predeterminado
-    // Opciones: claude-opus-4-*, claude-sonnet-4-*, claude-haiku-3-5-*
+```json
+{
+  "ai": {
+    "defaultModel": "claude-sonnet-4-20250514"
   }
 }
 ```
@@ -272,9 +294,9 @@ module.exports = {
 
 Optimice el uso de tokens con niveles de verbosidad:
 
-```javascript
-module.exports = {
-  verbosity: 'compact', // Opciones: 'minimal', 'compact', 'standard', 'detailed'
+```json
+{
+  "verbosity": "compact"
 }
 ```
 
@@ -294,6 +316,7 @@ module.exports = {
 | [Primeros Pasos](docs/es/getting-started.md) | Instalación y configuración rápida |
 | [Filosofía](docs/es/philosophy.md) | Visión y principios de diseño |
 | [Sistema de Agentes](packages/rules/.ai-rules/agents/README.md) | Referencia completa de agentes |
+| [Biblioteca de Skills](packages/rules/.ai-rules/skills/README.md) | Skills de flujo de trabajo reutilizables (TDD, depuración, PR, etc.) |
 | [Herramientas Compatibles](docs/es/supported-tools.md) | Guías de integración de herramientas IA |
 | [Configuración](docs/config-schema.md) | Opciones del archivo de configuración |
 | [Referencia API](docs/api.md) | Capacidades del servidor MCP |

@@ -34,10 +34,10 @@ You have four modes of operation:
 - **Frontend Developer** (`packages/rules/.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
 - **Code Reviewer** (`packages/rules/.ai-rules/agents/code-reviewer.json`): EVAL mode
 
-**Specialist Agents** (12 available):
+**Specialist Agents** (35 available):
 - Architecture, Test Strategy, Performance, Security
-- Accessibility, SEO, Design System, Documentation
-- Code Quality, DevOps Engineer
+- Accessibility, SEO, i18n, Documentation
+- Code Quality, and more
 
 For complete workflow details, see [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 

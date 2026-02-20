@@ -18,7 +18,7 @@
 
 ## AI Expert Team for Your Code
 
-**Codingbuddy orchestrates 29 specialized AI agents to deliver human-expert-team-level code quality.**
+**Codingbuddy orchestrates 35 AI agents to deliver human-expert-team-level code quality.**
 
 A single AI can't be an expert at everything. Codingbuddy creates an AI development team—architects, developers, security specialists, accessibility experts, and more—that collaborate to review, verify, and refine your code until it meets professional standards.
 
@@ -89,9 +89,9 @@ Instead of one AI trying to do everything, Codingbuddy coordinates multiple spec
 
 | Tier | Agents | Role |
 |------|--------|------|
-| **Mode Agents** | plan-mode, act-mode, eval-mode | Workflow orchestration |
-| **Primary Agents** | solution-architect, frontend-developer, backend-developer, code-reviewer, +8 more | Core implementation |
-| **Specialist Agents** | security, accessibility, performance, test-strategy, +15 more | Domain expertise |
+| **Mode Agents** (4) | plan-mode, act-mode, eval-mode, auto-mode | Workflow orchestration |
+| **Primary Agents** (16) | solution-architect, technical-planner, frontend-developer, backend-developer, +12 more | Core implementation |
+| **Specialist Agents** (15) | security, accessibility, performance, test-strategy, +11 more | Domain expertise |
 
 ### Agent Collaboration Example
 
@@ -152,7 +152,7 @@ AUTO: Implement JWT authentication with refresh tokens
 
 | Traditional AI Coding | Codingbuddy |
 |----------------------|-------------|
-| Single AI perspective | 29 specialist agent perspectives |
+| Single AI perspective | 35 specialist agent perspectives |
 | "Generate and hope" | Plan → Implement → Verify |
 | No quality gates | Critical=0, High=0 required |
 | Manual review needed | Automated multi-dimensional review |
@@ -231,6 +231,29 @@ npm install -g codingbuddy
 
 ---
 
+## Terminal Dashboard (TUI)
+
+Codingbuddy includes a built-in terminal UI that displays real-time agent activity, task progress, and workflow state alongside your AI assistant.
+
+### Quick Start
+
+```bash
+# Launch MCP server with TUI auto-enabled
+npx codingbuddy mcp --tui
+```
+
+### Features
+
+| Panel | Description |
+|-------|-------------|
+| **FlowMap** | Visual pipeline showing active agents, stages, and progress |
+| **FocusedAgent** | Live view of the currently active agent with sparkline activity |
+| **Checklist** | Task completion tracking from PLAN/ACT/EVAL context |
+| **Activity Chart** | Real-time tool invocation bar chart |
+| **Multi-session** | Multiple Claude Code sessions share a single TUI window |
+
+---
+
 ## Supported AI Tools
 
 | Tool | Status |
@@ -253,11 +276,10 @@ npm install -g codingbuddy
 
 Configure the default AI model in `codingbuddy.config.json`:
 
-```javascript
-module.exports = {
-  ai: {
-    defaultModel: 'claude-sonnet-4-20250514', // Default
-    // Options: claude-opus-4-*, claude-sonnet-4-*, claude-haiku-3-5-*
+```json
+{
+  "ai": {
+    "defaultModel": "claude-sonnet-4-20250514"
   }
 }
 ```
@@ -272,9 +294,9 @@ module.exports = {
 
 Optimize token usage with verbosity levels:
 
-```javascript
-module.exports = {
-  verbosity: 'compact', // Options: 'minimal', 'compact', 'standard', 'detailed'
+```json
+{
+  "verbosity": "compact"
 }
 ```
 
@@ -294,6 +316,7 @@ module.exports = {
 | [Getting Started](docs/getting-started.md) | Installation and quick setup |
 | [Philosophy](docs/philosophy.md) | Vision and design principles |
 | [Agent System](packages/rules/.ai-rules/agents/README.md) | Complete agent reference |
+| [Skills Library](packages/rules/.ai-rules/skills/README.md) | Reusable workflow skills (TDD, debugging, PR, etc.) |
 | [Supported Tools](docs/supported-tools.md) | AI tool integration guides |
 | [Configuration](docs/config-schema.md) | Config file options |
 | [API Reference](docs/api.md) | MCP server capabilities |

@@ -109,7 +109,7 @@ graph TB
 │   ├── frontend-developer.json
 │   ├── backend-developer.json
 │   ├── security-specialist.json
-│   └── ... (30개의 에이전트)
+│   └── ... (35개의 에이전트)
 ├── skills/           # 재사용 가능한 워크플로우 (Markdown)
 │   ├── tdd.md
 │   ├── debugging.md

@@ -272,27 +272,31 @@ yarn workspace codingbuddy start:dev -- --tui
 
 ## UI Components Overview
 
-The TUI Agent Monitor dashboard consists of four primary components arranged vertically:
+The TUI Agent Monitor dashboard consists of five primary panels arranged vertically:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │  🤖 CODINGBUDDY              ● ACT                        14:23:45  │
 ├──────────────────────────────────────────────────────────────────────┤
-│                    ┌──────────────────────┐                          │
-│                    │ [AA] agent-architect │                          │
-│                    │ ████████░░ running   │                          │
-│                    └──────────────────────┘                          │
-│                              │                                       │
-│                    ┌─────────┴─────────┐                            │
-│          ┌─────────────────┐ ┌─────────────────┐                    │
-│          │ [Se] security   │ │ [CQ] code-qual  │                    │
-│          │ ██████░░ running│ │ ████████ done    │                    │
-│          └─────────────────┘ └─────────────────┘                    │
+│  FlowMap                                          stage 1 · 2 agents │
+│  ┌──────────────────────┐                                            │
+│  │ [AA] agent-architect │                                            │
+│  │ ████████░░ running   │                                            │
+│  └──────────┬───────────┘                                            │
+│             ├── [Se] security-specialist  ██████░░ running           │
+│             └── [CQ] code-quality        ████████ done               │
+├──────────────────────────────┬───────────────────────────────────────┤
+│  FocusedAgent                │  Checklist                            │
+│  [AA] agent-architect        │  ✅ Write failing test                 │
+│  ▁▂▄▆█▇▅▃▁ (sparkline)      │  ✅ Implement minimal code             │
+│  ████████░░░ 80%             │  ⬜ Refactor and verify               │
+├──────────────────────────────┴───────────────────────────────────────┤
+│  Activity Chart                                                       │
+│  read_file   ████████████████ 32                                     │
+│  edit        ████████░░░░░░░░ 16                                     │
+│  bash        ████░░░░░░░░░░░░  8                                     │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Specialists: [Ac] [Ar] [CQ] [CR] [Do] [Ev] [In] [Mi] ...         │
-│  Developers:  [Fe] [Be] [Mo] [Da] [AI] [Pl] [To] [Dv] [Ux] ...    │
-├──────────────────────────────────────────────────────────────────────┤
-│  🤖 2 active  🎹 tdd, debugging  ████████░░ 80%  ⚡ Parallel       │
+│  🤖 Agents: 3  🎹 Skills: 2  🔧 Tools: 56  ████████░░ 80% Parallel │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -300,11 +304,15 @@ The TUI Agent Monitor dashboard consists of four primary components arranged ver
 
 **Header**: Displays "CODINGBUDDY" branding, current workflow mode (PLAN/ACT/EVAL/AUTO) with mode-specific color, and a real-time clock.
 
-**AgentTree**: Shows the primary agent as a card with a progress bar and status label. When parallel agents are active, displays branching connectors to child agent cards below.
+**FlowMap**: Visual pipeline showing the active agent workflow as a tree structure. Per-stage agent statistics (agent count, completion state) appear inline. When agents run in parallel, tree connectors (├──, └──) branch from the parent stage to child agent cards. Completed agents are removed from the map automatically. The `activeStage` is highlighted so you always know which part of the pipeline is executing.
 
-**AgentGrid**: Groups all available agents by category (Specialists, Developers, Modes) using `CategoryRow` components. Each agent is shown as an `AgentMiniCard` with its icon or fallback abbreviation. Active agents are highlighted.
+**FocusedAgent**: Displays the currently active agent in detail — agent avatar, a real-time sparkline activity chart of recent tool invocations, and an enhanced progress bar. Mirrors the agent's progress reported via PLAN/ACT/EVAL context events.
 
-**StatusBar**: Displays active agent count, recommended skills, an overall progress bar with percentage, and the current execution phase (Parallel/Sequential/Waiting).
+**ChecklistPanel**: Separate panel tracking task completion. Populated from `parse_mode` context decisions and notes. Items are checked off as the workflow progresses through PLAN/ACT/EVAL stages.
+
+**Activity Chart**: Real-time horizontal bar chart of tool invocation counts. Each row shows a tool name and its invocation frequency represented as a proportional bar. Replaced the previous heatmap visualization for clearer at-a-glance reading.
+
+**Footer**: Displays cumulative Agent/Skill/Tool invocation counts for the session, an overall progress bar with percentage, and the current execution mode (Parallel/Sequential/Waiting).
 
 **Color Coding** (when enabled):
 

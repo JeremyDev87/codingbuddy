@@ -10,7 +10,7 @@
 
 Pon en marcha Codingbuddy en minutos.
 
-**Codingbuddy orquesta 29 agentes de IA especializados** para ofrecer calidad de código a nivel de equipo de expertos humanos a través del flujo de trabajo PLAN → ACT → EVAL.
+**Codingbuddy orquesta 35 agentes de IA** para ofrecer calidad de código a nivel de equipo de expertos humanos a través del flujo de trabajo PLAN → ACT → EVAL.
 
 ## Prerrequisitos
 

@@ -10,7 +10,7 @@
 
 Get up and running with Codingbuddy in minutes.
 
-**Codingbuddy orchestrates 29 specialized AI agents** to deliver human-expert-team-level code quality through the PLAN → ACT → EVAL workflow.
+**Codingbuddy orchestrates 35 AI agents** to deliver human-expert-team-level code quality through the PLAN → ACT → EVAL workflow.
 
 ## Prerequisites
 
@@ -112,7 +112,7 @@ npm install -g codingbuddy
 
 The plugin provides:
 - **Workflow Modes**: PLAN/ACT/EVAL/AUTO structured development
-- **Specialist Agents**: 12+ domain experts (security, performance, accessibility)
+- **Specialist Agents**: 35 AI agents (security, performance, accessibility and more)
 - **Skills**: Reusable workflows (TDD, debugging, API design)
 - **Context Persistence**: Decisions survive conversation compaction
 

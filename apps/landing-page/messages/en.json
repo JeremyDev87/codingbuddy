@@ -23,7 +23,7 @@
     "subtitle": "Codingbuddy gives your AI assistants consistent rules, specialist agents, and structured workflows.",
     "benefit1Title": "Single Source of Truth",
     "benefit1Desc": "One ruleset automatically applied to Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.",
-    "benefit2Title": "29 Specialist Agents",
+    "benefit2Title": "35 AI Agents",
     "benefit2Desc": "Focused expertise for architecture, security, testing, performance, accessibility, and more.",
     "benefit3Title": "Structured Workflow",
     "benefit3Desc": "PLAN → ACT → EVAL cycle ensures consistent quality across all your AI-assisted development.",
@@ -32,7 +32,7 @@
   },
   "agents": {
     "title": "AI Specialist Agents",
-    "subtitle": "29 specialized AI agents to enhance your development workflow",
+    "subtitle": "35 AI agents to enhance your development workflow",
     "filter": "Filter by category",
     "search": "Search agents...",
     "allCategories": "All Categories",
@@ -129,6 +129,6 @@
     "q5": "Can I customize the rules and agents?",
     "a5": "Absolutely. You can create custom rules in the .ai-rules directory, define your own specialist agents, and adjust quality standards to match your team's workflow.",
     "q6": "What are specialist agents?",
-    "a6": "Specialist agents are 29 focused AI personas with expertise in specific areas like architecture review, security auditing, test strategy, performance optimization, and accessibility. They provide deep, domain-specific guidance."
+    "a6": "Specialist agents are 35 focused AI personas with expertise in specific areas like architecture review, security auditing, test strategy, performance optimization, and accessibility. They provide deep, domain-specific guidance."
   }
 }

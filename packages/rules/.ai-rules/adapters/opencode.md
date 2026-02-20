@@ -136,6 +136,8 @@ Update your configuration file (`.opencode.json` or `crush.json`):
 }
 ```
 
+> **Note:** `auto-mode` does not require a separate agent entry. AUTO mode is triggered by prefixing any message with the `AUTO` keyword while using the `plan-mode` agent (see [AUTO Mode](#auto-mode) section below).
+
 ### 2. Agent System Mapping
 
 | Codingbuddy Agent | OpenCode Agent | Purpose |
@@ -143,6 +145,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
 | **plan-mode.json** | `plan-mode` | PLAN mode workflow (delegates to frontend-developer) |
 | **act-mode.json** | `act-mode` | ACT mode workflow (delegates to frontend-developer) |
 | **eval-mode.json** | `eval-mode` | EVAL mode workflow (delegates to code-reviewer) |
+| **auto-mode.json** | N/A (keyword-triggered) | AUTO mode workflow (autonomous PLAN→ACT→EVAL cycle) |
 | **frontend-developer.json** | N/A (delegate) | Primary development implementation |
 | **backend-developer.json** | `backend` | Backend development (Node.js, Python, Go, Java, Rust) |
 | **code-reviewer.json** | N/A (delegate) | Code quality evaluation implementation |
@@ -154,7 +157,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
 
 #### Mode Agent vs Specialist Agent
 
-- **Mode Agents** (`plan-mode`, `act-mode`, `eval-mode`): Workflow orchestrators that delegate to appropriate implementation agents
+- **Mode Agents** (`plan-mode`, `act-mode`, `eval-mode`, `auto-mode`): Workflow orchestrators that delegate to appropriate implementation agents
 - **Specialist Agents** (`architect`, `security`, etc.): Domain-specific expertise for specialized tasks
 - **Delegate Agents** (`frontend-developer`, `code-reviewer`): Implementation agents that Mode Agents delegate to
 
@@ -238,7 +241,7 @@ The `parse_mode` tool now returns additional Mode Agent information and dynamic 
 **New Fields:**
 - `language`: Language code from codingbuddy.config.json
 - `languageInstruction`: Formatted instruction text for AI assistants (🆕)
-- `agent`: Mode Agent name (plan-mode, act-mode, eval-mode)
+- `agent`: Mode Agent name (plan-mode, act-mode, eval-mode, auto-mode)
 - `delegates_to`: Which specialist agent the Mode Agent delegates to
 - `delegate_agent_info`: Detailed information about the delegate agent (optional)
 
@@ -559,7 +562,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Korean | `자동` |
 | Japanese | `自動` |
 | Chinese | `自动` |
-| Spanish | `AUTOMATICO` |
+| Spanish | `AUTOMÁTICO` |
 
 ### Example Usage
 

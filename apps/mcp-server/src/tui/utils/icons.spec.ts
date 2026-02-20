@@ -40,7 +40,7 @@ describe('tui/utils/icons', () => {
   });
 
   describe('AGENT_ICONS', () => {
-    it('should have entries for all 29 agents', () => {
+    it('should have entries for all agents in AGENT_ICONS', () => {
       expect(Object.keys(AGENT_ICONS)).toHaveLength(29);
     });
 
@@ -56,6 +56,9 @@ describe('tui/utils/icons', () => {
     });
 
     it('should contain key agents', () => {
+      // Note: auto-mode, data-scientist, systems-developer, software-engineer,
+      // test-engineer, security-engineer are intentionally absent from AGENT_ICONS
+      // (they use DEFAULT_ICON fallback in icons.ts)
       const expectedKeys = [
         'architecture-specialist',
         'test-strategy-specialist',

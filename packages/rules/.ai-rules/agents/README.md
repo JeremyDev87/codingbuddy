@@ -55,6 +55,9 @@ AI Agent definitions for specialized development roles.
 | **AI/ML Development** | AI/ML Engineer | `ai-ml-engineer.json` |
 | **TDD/Test Engineering** | Test Engineer | `test-engineer.json` |
 | **Security Implementation** | Security Engineer | `security-engineer.json` |
+| **General Purpose / Fallback** | Software Engineer | `software-engineer.json` |
+| **Data Analysis / EDA / ML Modeling** | Data Scientist | `data-scientist.json` |
+| **Systems Programming / Rust / C / C++** | Systems Developer | `systems-developer.json` |
 
 ### Agent Summary
 
@@ -88,6 +91,9 @@ AI Agent definitions for specialized development roles.
 | Tooling Engineer | Project configuration, build tools, dev environment setup |
 | Agent Architect | AI agent design, validation, checklist auditing |
 | AI/ML Engineer | LLM integration, RAG architecture, prompt engineering, AI safety |
+| Software Engineer | General-purpose implementation, any language or domain, TDD-first (default fallback) |
+| Data Scientist | EDA, statistical modeling, ML model development, Jupyter notebook development |
+| Systems Developer | Rust/C/C++, FFI bindings, embedded systems, low-level performance optimization |
 
 ### DevOps Engineer vs Platform Engineer Decision Matrix
 
@@ -142,7 +148,7 @@ Use this matrix to determine which agent to use for monitoring and observability
 
 ## Primary Agent System
 
-**Primary Agents** are core agents that receive delegation from Mode Agents (PLAN/ACT/EVAL) to perform actual work.
+**Primary Agents** are core agents that receive delegation from Mode Agents (PLAN/ACT/EVAL/AUTO) to perform actual work.
 
 ### Dynamic Primary Agent Resolution
 
@@ -193,6 +199,9 @@ as agent-architect, design new agent
 | AI/ML Engineer | `primary` | LLM integration, RAG, prompt engineering, AI safety |
 | Test Engineer | `primary` | TDD, unit/integration/e2e testing, coverage improvement |
 | Security Engineer | `primary` | Security features, vulnerability fixes, auth/authz implementation |
+| Data Scientist | `primary` | EDA, ML modeling, Jupyter notebooks, data analysis and visualization |
+| Systems Developer | `primary` | Rust/C/C++, FFI bindings, embedded systems, low-level performance optimization |
+| Software Engineer | `primary` | Universal fallback — any language, any domain, when no specific agent matches |
 
 ### EVAL Mode
 
@@ -221,7 +230,8 @@ Mode Agents are workflow orchestrators that provide seamless integration with Op
 Mode Agents (Workflow Orchestrators)
 ├── plan-mode      → delegates to → [Dynamic Primary Agent]
 ├── act-mode       → delegates to → [Dynamic Primary Agent]
-└── eval-mode      → delegates to → code-reviewer (always)
+├── eval-mode      → delegates to → code-reviewer (always)
+└── auto-mode      → delegates to → [Dynamic Primary Agent] (autonomous PLAN→ACT→EVAL cycle)
 
 Primary Agents (Implementation Experts) - role.type: "primary"
 ├── tooling-engineer       # Config/build tools specialist (highest priority)
@@ -232,7 +242,10 @@ Primary Agents (Implementation Experts) - role.type: "primary"
 ├── platform-engineer      # IaC/Kubernetes/multi-cloud expertise
 ├── ai-ml-engineer         # LLM/RAG/AI safety expertise
 ├── test-engineer          # TDD, unit/integration/e2e test specialist
-└── security-engineer      # Security features, vulnerability remediation, auth/authz
+├── security-engineer      # Security features, vulnerability remediation, auth/authz
+├── data-scientist         # EDA, ML modeling, Jupyter notebooks, data analysis
+├── systems-developer      # Rust/C/C++, FFI, embedded systems, low-level optimization
+└── software-engineer      # General-purpose fallback (default when no agent matches)
 
 Specialist Agents (Domain Experts)
 ├── architecture-specialist
@@ -250,6 +263,7 @@ Specialist Agents (Domain Experts)
 | **plan-mode** | PLAN | Dynamic Primary Agent | Analysis and planning without changes |
 | **act-mode** | ACT | Dynamic Primary Agent | Full development with all tools |
 | **eval-mode** | EVAL | code-reviewer (fixed) | Code quality evaluation |
+| **auto-mode** | AUTO | Dynamic Primary Agent | Autonomous PLAN→ACT→EVAL cycle until quality achieved |
 
 **Key Features:**
 - **Seamless Integration**: Works with OpenCode agent system
@@ -299,7 +313,7 @@ When using the `parse_mode` MCP tool, you receive enhanced response with Mode Ag
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `mode` | string | Yes | Detected mode: "PLAN", "ACT", or "EVAL" |
+| `mode` | string | Yes | Detected mode: "PLAN", "ACT", "EVAL", or "AUTO" |
 | `originalPrompt` | string | Yes | User prompt with keyword removed |
 | `instructions` | string | Yes | Mode-specific instructions |
 | `rules` | array | Yes | Applicable rule files with content |
@@ -312,7 +326,7 @@ When using the `parse_mode` MCP tool, you receive enhanced response with Mode Ag
 ### Agent Priority System
 
 Agents are listed in priority order:
-1. **Mode Agents** (plan-mode, act-mode, eval-mode)
+1. **Mode Agents** (plan-mode, act-mode, eval-mode, auto-mode)
 2. **Delegate Agents** (alphabetical)
 3. **Specialist Agents** (alphabetical)
 
@@ -327,8 +341,9 @@ This ensures Mode Agents appear first in agent selection interfaces.
 Mode Agents handle workflow orchestration and delegate to implementation experts:
 
 - **Plan Mode** (`plan-mode.json`): Analysis and planning (delegates to primary developer)
-- **Act Mode** (`act-mode.json`): Implementation execution (delegates to primary developer)  
+- **Act Mode** (`act-mode.json`): Implementation execution (delegates to primary developer)
 - **Eval Mode** (`eval-mode.json`): Quality evaluation (delegates to code reviewer)
+- **Auto Mode** (`auto-mode.json`): Autonomous PLAN→ACT→EVAL cycle until quality achieved (Critical=0, High=0)
 
 ### Core Agents (Auto-activated via delegation)
 
@@ -354,6 +369,7 @@ Unified specialist agents organized by domain:
 - **Performance** (`performance-specialist.json`)
 - **Security** (`security-specialist.json`)
 - **SEO** (`seo-specialist.json`)
+- **i18n** (`i18n-specialist.json`)
 - **Test Strategy** (`test-strategy-specialist.json`)
 
 ### Utility Agents
@@ -753,6 +769,140 @@ Unified specialist agents organized by domain:
 
 - Korean: "LLM 통합", "RAG 구현", "프롬프트 엔지니어링", "AI 안전"
 - English: "LLM integration", "RAG implementation", "prompt engineering", "AI safety"
+
+---
+
+### Data Scientist (`data-scientist.json`)
+
+> **Note**: This is a **Primary Agent** for data science tasks, specializing in exploratory data analysis, statistical modeling, machine learning, and Jupyter notebook development.
+
+**Expertise:**
+
+- Exploratory Data Analysis (EDA) with statistical summaries
+- Statistical Analysis & Modeling (regression, classification, clustering)
+- Machine Learning (supervised/unsupervised, scikit-learn, XGBoost)
+- Data Visualization (matplotlib, seaborn, plotly)
+- Feature Engineering
+- Jupyter Notebook Development (pandas, numpy, scipy, statsmodels)
+- TDD for data pipelines (deterministic seeds, fixture-based testing)
+
+**Distinction from Data Engineer:**
+
+| Data Engineer | Data Scientist |
+|---------------|----------------|
+| ETL pipelines, database schema, migrations, SQL | EDA, statistical analysis, ML modeling, data visualization |
+| Data infrastructure, data warehouses | Jupyter notebooks, model training, feature engineering |
+
+**Development Philosophy:**
+
+- **EDA-First**: Always start with exploratory analysis before modeling
+- **Reproducible**: Deterministic seeds (`random_state`) for all ML experiments
+- **TDD for pipelines**: Test data transformation functions with known input/output pairs
+- **Type-annotated**: All Python functions use type annotations
+
+**Responsibilities:**
+
+- Perform EDA with statistical summaries and visualizations
+- Build and evaluate ML models (regression, classification, clustering)
+- Engineer features for model improvement
+- Create data visualizations for insights and reporting
+- Develop and maintain Jupyter notebooks
+- Write comprehensive tests for data pipelines with 90%+ coverage
+
+**Activation Patterns:**
+
+- Files: `*.ipynb`, `*eda*.py`, `*analysis*.py`, `*model*.py`, `notebooks/`
+- Korean: "데이터 분석", "탐색적 분석", "EDA", "시각화", "회귀", "분류", "주피터"
+- English: "EDA", "exploratory", "data analysis", "visualization", "regression", "classification", "pandas", "scikit-learn", "jupyter"
+
+---
+
+### Systems Developer (`systems-developer.json`)
+
+> **Note**: This is a **Primary Agent** for systems programming tasks, specializing in Rust, C, C++, FFI bindings, embedded systems, and low-level performance optimization.
+
+**Expertise:**
+
+- Rust — ownership, borrowing, lifetimes, async, cargo
+- C and C++ — memory management, pointers, RAII, templates
+- Go (systems-level) — concurrency primitives, cgo, build constraints
+- FFI (Foreign Function Interface) — binding Rust/C to other languages
+- WebAssembly (WASM) — wasm-bindgen, wasmtime, emscripten
+- Embedded systems — bare-metal, no_std, RTOS integration
+- Unsafe code — unsafe blocks, raw pointers, transmute
+- Concurrency primitives — mutexes, channels, lock-free data structures
+
+**Development Philosophy:**
+
+- **Safety-First**: Every unsafe block must have documented safety invariants
+- **Memory-Aware**: No use-after-free, double-free, or buffer overflows
+- **Idiomatic**: Use Result/Option in Rust; RAII in C++; proper error codes in C
+- **Verified**: Run cargo clippy + address sanitizer for memory validation
+
+**Mandatory Checklist:**
+
+| Check | Rule |
+|-------|------|
+| Memory safety | No use-after-free, double-free, or buffer overflows |
+| Unsafe justification | Every `unsafe {}` block has a comment explaining invariants |
+| Error handling | Result/Option in Rust; error codes + cleanup in C |
+| FFI null check | All FFI pointers validated before dereferencing |
+| Resource cleanup | All resources freed on all exit paths (RAII or explicit) |
+
+**Responsibilities:**
+
+- Implement memory-safe systems code in Rust, C, or C++
+- Write FFI bindings between native and managed languages
+- Optimize hot paths (SIMD, cache-friendly layouts)
+- Manage unsafe blocks with clear safety invariants
+- Implement concurrency primitives and lock-free algorithms
+- Port or bridge native code to WebAssembly
+
+**Activation Patterns:**
+
+- Korean: "Rust로 구현", "C++ 최적화", "FFI 바인딩", "메모리 관리", "임베디드 개발", "WASM 구현"
+- English: "rust implementation", "FFI binding", "memory management", "embedded", "WASM", "low-level", "systems programming"
+
+---
+
+### Software Engineer (`software-engineer.json`)
+
+> **Note**: This is the **default Primary Agent** — the universal fallback activated when no domain-specific agent matches. Supports any language, any domain, with TDD-first approach.
+
+**Expertise:**
+
+- TypeScript, Python, Go, Rust, SQL, Shell, and any other language
+- TDD (Test-Driven Development) — language-agnostic Red → Green → Refactor
+- SOLID Principles, Design Patterns, Refactoring
+- Algorithms & Data Structures
+- Reading and adapting to existing code conventions
+
+**Key Behavior:**
+
+- **Read first**: Always reads existing code to understand conventions before implementing
+- **No assumptions**: Does not default to web UI, REST APIs, or any specific paradigm
+- **Domain-agnostic TDD**: Applies test-first regardless of language or domain
+- **Delegate when appropriate**: Delegates to specialists when domain-specific expertise is clearly needed
+
+**Delegation Rules:**
+
+| Delegate To | When |
+|-------------|------|
+| Frontend Developer | Implementing React/Vue/Angular UI components |
+| Backend Developer | Building REST/GraphQL APIs with framework-specific patterns |
+| Test Engineer | Primary task is improving test coverage strategy or setting up a test framework |
+
+**Activation:**
+
+Software Engineer is the **fallback of last resort** — it has no intent patterns and only activates (priority 4) when all domain-specific agents fail to match. It is never selected via intent patterns.
+
+**Workflow:**
+
+1. Read existing code to understand conventions and patterns
+2. Apply TDD cycle: Red (failing test) → Green (minimal code) → Refactor
+3. Use the project's type system strictly — no unsafe bypasses
+4. Follow SOLID principles, DRY, minimal complexity
+5. Delegate to domain specialists if scope clearly requires it
 
 ---
 
@@ -1355,15 +1505,26 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 
 ```
 .ai-rules/agents/
+├── plan-mode.json                   # Mode Agent (PLAN workflow)
+├── act-mode.json                    # Mode Agent (ACT workflow)
+├── eval-mode.json                   # Mode Agent (EVAL workflow)
+├── auto-mode.json                   # Mode Agent (AUTO workflow)
 ├── solution-architect.json          # Primary Agent for PLAN mode (architecture)
 ├── technical-planner.json           # Primary Agent for PLAN mode (implementation)
 ├── tooling-engineer.json            # Primary Agent for ACT mode (config/build tools)
 ├── frontend-developer.json          # Primary Agent for ACT mode (web UI)
 ├── backend-developer.json           # Primary Agent for ACT mode (backend)
+├── data-engineer.json               # Primary Agent for ACT mode (database/analytics)
+├── mobile-developer.json            # Primary Agent for ACT mode (mobile)
 ├── agent-architect.json             # Primary Agent for agent management
 ├── devops-engineer.json             # Primary Agent for Docker/monitoring
 ├── platform-engineer.json           # Primary Agent for IaC/K8s/multi-cloud
 ├── ai-ml-engineer.json              # Primary Agent for AI/ML development
+├── test-engineer.json               # Primary Agent for TDD/test engineering
+├── security-engineer.json           # Primary Agent for security implementation
+├── data-scientist.json              # Primary Agent for data science/ML modeling
+├── systems-developer.json           # Primary Agent for systems programming (Rust/C/C++)
+├── software-engineer.json           # Default Primary Agent (universal fallback)
 ├── code-reviewer.json               # Core agent (EVAL mode, fixed)
 ├── code-quality-specialist.json     # Utility agent
 ├── accessibility-specialist.json    # Domain specialist
@@ -1377,6 +1538,7 @@ All agent files are located directly in `.ai-rules/agents/` directory without su
 ├── performance-specialist.json      # Domain specialist
 ├── security-specialist.json         # Domain specialist
 ├── seo-specialist.json              # Domain specialist
+├── i18n-specialist.json             # Domain specialist
 └── test-strategy-specialist.json    # Domain specialist
 ```
 

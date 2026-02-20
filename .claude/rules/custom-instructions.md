@@ -46,8 +46,8 @@ Follow the common rules defined in `packages/rules/.ai-rules/` for consistency a
 
 **Source**: `packages/rules/.ai-rules/agents/`
 
-**Available Agents** (26 agents + 4 mode agents):
-- **Primary**: Solution Architect, Technical Planner, Frontend Developer, Backend Developer, Mobile Developer, Data Engineer, Agent Architect, Platform Engineer, Tooling Engineer, AI/ML Engineer, DevOps Engineer
+**Available Agents** (31 agents + 4 mode agents):
+- **Primary**: Solution Architect, Technical Planner, Frontend Developer, Backend Developer, Mobile Developer, Data Engineer, Agent Architect, Platform Engineer, Tooling Engineer, AI/ML Engineer, DevOps Engineer, Test Engineer, Security Engineer, Software Engineer, Data Scientist, Systems Developer
 - **Domain**: Architecture, Test Strategy, Performance, Security, Accessibility, SEO, UI/UX Design, Documentation, Integration, Event Architecture, Observability, Migration, i18n
 - **Core/Utility**: Code Reviewer, Code Quality
 

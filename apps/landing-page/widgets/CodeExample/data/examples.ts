@@ -34,7 +34,7 @@ rules:
 }
 
 # ✅ One source of truth → All AI tools in sync
-# ✅ 29 specialist agents included
+# ✅ 35 AI agents included
 # ✅ TDD, Security, a11y checklists built-in`,
   },
   {

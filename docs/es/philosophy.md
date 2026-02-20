@@ -24,7 +24,7 @@ Los equipos de desarrollo humanos tienen especialistas:
 
 **Codingbuddy trae el modelo de equipo especializado a la programación con IA.**
 
-En lugar de que una sola IA intente hacerlo todo, Codingbuddy coordina 29 agentes especializados que colaboran para revisar, verificar y refinar tu código hasta que cumpla con los estándares profesionales.
+En lugar de que una sola IA intente hacerlo todo, Codingbuddy coordina 35 agentes especializados que colaboran para revisar, verificar y refinar tu código hasta que cumpla con los estándares profesionales.
 
 ## Creencias Fundamentales
 
@@ -71,7 +71,7 @@ Comenzar simple, profundizar cuando sea necesario:
 
 - **Inicio Rápido**: Funciona en 2 minutos con `npx codingbuddy init`
 - **Modos de Flujo de Trabajo**: Desarrollo estructurado PLAN → ACT → EVAL
-- **Agentes Especialistas**: Acceso bajo demanda a 29 expertos de dominio
+- **Agentes Especialistas**: Acceso bajo demanda a 35 expertos de dominio
 - **Modo AUTO**: Iteración autónoma hasta alcanzar la calidad
 
 ### 5. Convención Sobre Configuración
@@ -91,20 +91,21 @@ Anular solo lo que necesites cambiar.
 
 ```
 ┌─────────────────────────────────────────┐
-│         Agentes de Modo (3)             │
-│    plan-mode, act-mode, eval-mode       │
+│         Agentes de Modo (4)             │
+│  plan-mode, act-mode, eval-mode,        │
+│  auto-mode                              │
 └─────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│       Agentes Principales (12)          │
+│       Agentes Principales (16)          │
 │  solution-architect, frontend-developer │
 │  backend-developer, code-reviewer, ...  │
 └─────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│      Agentes Especialistas (15+)        │
+│      Agentes Especialistas (15)         │
 │   security, accessibility, performance  │
 │   test-strategy, event-architecture ... │
 └─────────────────────────────────────────┘
@@ -173,7 +174,7 @@ Este flujo de trabajo previene el error común de los asistentes de IA de saltar
 
 | Programación IA Tradicional | Codingbuddy |
 |---------------------------|-------------|
-| Perspectiva de una sola IA | 29 perspectivas de agentes especialistas |
+| Perspectiva de una sola IA | 35 perspectivas de agentes especialistas |
 | "Generar y esperar" | Planificar → Implementar → Verificar |
 | Sin puertas de calidad | Critical=0, High=0 requerido |
 | Revisión manual necesaria | Revisión multidimensional automatizada |

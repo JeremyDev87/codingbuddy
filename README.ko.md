@@ -18,7 +18,7 @@
 
 ## 코드를 위한 AI 전문가 팀
 
-**Codingbuddy는 29개의 전문 AI 에이전트를 조율하여 인간 전문가 팀 수준의 코드 품질을 제공합니다.**
+**Codingbuddy는 35개의 AI 에이전트를 조율하여 인간 전문가 팀 수준의 코드 품질을 제공합니다.**
 
 단일 AI는 모든 것의 전문가가 될 수 없습니다. Codingbuddy는 아키텍트, 개발자, 보안 전문가, 접근성 전문가 등으로 구성된 AI 개발팀을 구성하여, 코드가 전문가 수준에 도달할 때까지 협업하며 검토하고 개선합니다.
 
@@ -89,9 +89,9 @@ AI에게 코드를 요청하면 단일 관점만 얻게 됩니다. 보안 검토
 
 | 계층 | 에이전트 | 역할 |
 |------|----------|------|
-| **모드 에이전트** | plan-mode, act-mode, eval-mode | 워크플로우 오케스트레이션 |
-| **주요 에이전트** | solution-architect, frontend-developer, backend-developer, code-reviewer 등 8개 | 핵심 구현 |
-| **전문가 에이전트** | security, accessibility, performance, test-strategy 등 15개 | 도메인 전문성 |
+| **모드 에이전트** (4개) | plan-mode, act-mode, eval-mode, auto-mode | 워크플로우 오케스트레이션 |
+| **주요 에이전트** (16개) | solution-architect, technical-planner, frontend-developer, backend-developer 등 | 핵심 구현 |
+| **전문가 에이전트** (15개) | security, accessibility, performance, test-strategy 등 | 도메인 전문성 |
 
 ### 에이전트 협업 예시
 
@@ -152,7 +152,7 @@ AUTO: 리프레시 토큰과 JWT 인증 구현해줘
 
 | 기존 AI 코딩 | Codingbuddy |
 |-------------|-------------|
-| 단일 AI 관점 | 29개 전문가 에이전트 관점 |
+| 단일 AI 관점 | 35개 전문가 에이전트 관점 |
 | "생성하고 기도하기" | 계획 → 구현 → 검증 |
 | 품질 게이트 없음 | Critical=0, High=0 필수 |
 | 수동 검토 필요 | 자동 다차원 검토 |
@@ -231,6 +231,29 @@ npm install -g codingbuddy
 
 ---
 
+## 터미널 대시보드 (TUI)
+
+Codingbuddy는 AI 어시스턴트와 함께 에이전트 활동, 작업 진행 상황, 워크플로우 상태를 실시간으로 표시하는 내장 터미널 UI를 제공합니다.
+
+### 빠른 시작
+
+```bash
+# TUI를 활성화하여 MCP 서버 실행
+npx codingbuddy mcp --tui
+```
+
+### 기능
+
+| 패널 | 설명 |
+|------|------|
+| **FlowMap** | 활성 에이전트, 단계, 진행 상황을 시각적으로 표시 |
+| **FocusedAgent** | 현재 활성 에이전트의 실시간 뷰와 활동 스파크라인 |
+| **Checklist** | PLAN/ACT/EVAL 컨텍스트에서 작업 완료 추적 |
+| **Activity Chart** | 실시간 도구 호출 바 차트 |
+| **멀티 세션** | 여러 Claude Code 세션이 단일 TUI 창 공유 |
+
+---
+
 ## 지원 AI 도구
 
 | 도구 | 상태 |
@@ -253,11 +276,10 @@ npm install -g codingbuddy
 
 `codingbuddy.config.json`에서 기본 AI 모델을 설정합니다:
 
-```javascript
-module.exports = {
-  ai: {
-    defaultModel: 'claude-sonnet-4-20250514', // 기본값
-    // 옵션: claude-opus-4-*, claude-sonnet-4-*, claude-haiku-3-5-*
+```json
+{
+  "ai": {
+    "defaultModel": "claude-sonnet-4-20250514"
   }
 }
 ```
@@ -272,9 +294,9 @@ module.exports = {
 
 verbosity 레벨로 토큰 사용량을 최적화합니다:
 
-```javascript
-module.exports = {
-  verbosity: 'compact', // 옵션: 'minimal', 'compact', 'standard', 'detailed'
+```json
+{
+  "verbosity": "compact"
 }
 ```
 
@@ -294,6 +316,7 @@ module.exports = {
 | [시작하기](docs/ko/getting-started.md) | 설치 및 빠른 설정 |
 | [철학](docs/ko/philosophy.md) | 비전과 설계 원칙 |
 | [에이전트 시스템](packages/rules/.ai-rules/agents/README.md) | 전체 에이전트 참조 |
+| [스킬 라이브러리](packages/rules/.ai-rules/skills/README.md) | 재사용 가능한 워크플로우 스킬 (TDD, 디버깅, PR 등) |
 | [지원 도구](docs/ko/supported-tools.md) | AI 도구 통합 가이드 |
 | [설정](docs/config-schema.md) | 설정 파일 옵션 |
 | [API 레퍼런스](docs/api.md) | MCP 서버 기능 |

@@ -3,7 +3,7 @@ import { isNerdFontEnabled, getAgentIcon, AGENT_ICONS } from '../utils/icons';
 
 const ALL_AGENT_NAMES = Object.keys(AGENT_ICONS);
 
-describe('Nerd Font fallback – systematic icon rendering for all 29 agents', () => {
+describe('Nerd Font fallback – systematic icon rendering for all agents', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {

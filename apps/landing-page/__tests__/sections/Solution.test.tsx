@@ -38,7 +38,7 @@ describe('Solution', () => {
   it('should render 4 benefit cards', async () => {
     render(await Solution({ locale: 'en' }));
     expect(screen.getByText('Single Source of Truth')).toBeInTheDocument();
-    expect(screen.getByText('29 Specialist Agents')).toBeInTheDocument();
+    expect(screen.getByText('35 AI Agents')).toBeInTheDocument();
     expect(screen.getByText('Structured Workflow')).toBeInTheDocument();
     expect(screen.getByText('Quality Built-in')).toBeInTheDocument();
   });

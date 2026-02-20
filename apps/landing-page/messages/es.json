@@ -23,7 +23,7 @@
     "subtitle": "Codingbuddy da a tus asistentes IA reglas consistentes, agentes especialistas y flujos de trabajo estructurados.",
     "benefit1Title": "Fuente Única de Verdad",
     "benefit1Desc": "Un conjunto de reglas aplicado automáticamente a Cursor, Claude Code, Codex, Antigravity, Q y Kiro.",
-    "benefit2Title": "29 Agentes Especialistas",
+    "benefit2Title": "35 Agentes de IA",
     "benefit2Desc": "Experiencia enfocada en arquitectura, seguridad, testing, rendimiento, accesibilidad y más.",
     "benefit3Title": "Flujo de Trabajo Estructurado",
     "benefit3Desc": "El ciclo PLAN → ACT → EVAL asegura calidad consistente en todo tu desarrollo asistido por IA.",
@@ -32,7 +32,7 @@
   },
   "agents": {
     "title": "Agentes AI Especializados",
-    "subtitle": "29 agentes AI especializados para mejorar tu flujo de desarrollo",
+    "subtitle": "35 agentes de IA para mejorar tu flujo de desarrollo",
     "filter": "Filtrar por categoría",
     "search": "Buscar agentes...",
     "allCategories": "Todas las categorías",
@@ -129,6 +129,6 @@
     "q5": "¿Puedo personalizar las reglas y agentes?",
     "a5": "Por supuesto. Puedes crear reglas personalizadas en el directorio .ai-rules, definir tus propios agentes especialistas y ajustar los estándares de calidad al flujo de trabajo de tu equipo.",
     "q6": "¿Qué son los agentes especialistas?",
-    "a6": "Los agentes especialistas son 29 personas IA enfocadas con experiencia en áreas específicas como revisión de arquitectura, auditoría de seguridad, estrategia de testing, optimización de rendimiento y accesibilidad. Proporcionan guía profunda y específica del dominio."
+    "a6": "Los agentes especialistas son 35 personas IA enfocadas con experiencia en áreas específicas como revisión de arquitectura, auditoría de seguridad, estrategia de testing, optimización de rendimiento y accesibilidad. Proporcionan guía profunda y específica del dominio."
   }
 }

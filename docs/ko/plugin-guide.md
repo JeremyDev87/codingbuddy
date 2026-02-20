@@ -9,7 +9,7 @@
 
 # Claude Code 플러그인 설치 및 설정 가이드
 
-**Codingbuddy는 29개의 전문 AI 에이전트를 조율하여** PLAN → ACT → EVAL 워크플로우를 통해 인간 전문가 팀 수준의 코드 품질을 제공합니다.
+**Codingbuddy는 35개의 전문 AI 에이전트를 조율하여** PLAN → ACT → EVAL 워크플로우를 통해 인간 전문가 팀 수준의 코드 품질을 제공합니다.
 
 이 가이드는 CodingBuddy Claude Code 플러그인의 설치 및 설정 방법을 단계별로 안내합니다.
 

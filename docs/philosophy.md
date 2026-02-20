@@ -24,7 +24,7 @@ Human development teams have specialists:
 
 **Codingbuddy brings the specialist team model to AI coding.**
 
-Instead of one AI trying to do everything, Codingbuddy orchestrates 29 specialized agents that collaborate to review, verify, and refine your code until it meets professional standards.
+Instead of one AI trying to do everything, Codingbuddy orchestrates 35 specialized agents that collaborate to review, verify, and refine your code until it meets professional standards.
 
 ## Core Beliefs
 
@@ -34,7 +34,7 @@ Quality comes from multiple perspectives. Our 3-tier agent system ensures compre
 
 | Tier | Purpose | Examples |
 |------|---------|----------|
-| **Mode Agents** | Workflow orchestration | plan-mode, act-mode, eval-mode |
+| **Mode Agents** | Workflow orchestration | plan-mode, act-mode, eval-mode, auto-mode |
 | **Primary Agents** | Core implementation | solution-architect, frontend-developer, backend-developer |
 | **Specialist Agents** | Domain expertise | security, accessibility, performance, test-strategy |
 
@@ -71,7 +71,7 @@ Start simple, go deep when needed:
 
 - **Quick Start**: Get running in 2 minutes with `npx codingbuddy init`
 - **Workflow Modes**: PLAN → ACT → EVAL structured development
-- **Specialist Agents**: Access 29 domain experts on demand
+- **Specialist Agents**: Access 35 domain experts on demand
 - **AUTO Mode**: Autonomous iteration until quality achieved
 
 ### 5. Convention Over Configuration
@@ -91,20 +91,21 @@ Override only what you need to change.
 
 ```
 ┌─────────────────────────────────────────┐
-│           Mode Agents (3)               │
-│    plan-mode, act-mode, eval-mode       │
+│           Mode Agents (4)               │
+│  plan-mode, act-mode, eval-mode,        │
+│  auto-mode                              │
 └─────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│         Primary Agents (12)             │
+│         Primary Agents (16)             │
 │  solution-architect, frontend-developer │
-│  backend-developer, code-reviewer, ...  │
+│  backend-developer, data-engineer, ...  │
 └─────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│        Specialist Agents (15+)          │
+│        Specialist Agents (15)           │
 │   security, accessibility, performance  │
 │   test-strategy, event-architecture ... │
 └─────────────────────────────────────────┘
@@ -173,7 +174,7 @@ This workflow prevents the common pitfall of AI assistants jumping straight into
 
 | Traditional AI Coding | Codingbuddy |
 |----------------------|-------------|
-| Single AI perspective | 29 specialist agent perspectives |
+| Single AI perspective | 35 specialist agent perspectives |
 | "Generate and hope" | Plan → Implement → Verify |
 | No quality gates | Critical=0, High=0 required |
 | Manual review needed | Automated multi-dimensional review |

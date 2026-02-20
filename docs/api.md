@@ -134,6 +134,7 @@ Specialist agent definitions.
 | `rules://agents/plan-mode.json` | Plan Mode (workflow orchestrator) |
 | `rules://agents/act-mode.json` | Act Mode (workflow orchestrator) |
 | `rules://agents/eval-mode.json` | Eval Mode (workflow orchestrator) |
+| `rules://agents/auto-mode.json` | Auto Mode (workflow orchestrator) |
 | **Primary Agents** | |
 | `rules://agents/solution-architect.json` | Solution Architect (PLAN mode) |
 | `rules://agents/technical-planner.json` | Technical Planner (PLAN mode) |
@@ -144,6 +145,11 @@ Specialist agent definitions.
 | `rules://agents/tooling-engineer.json` | Tooling Engineer (ACT mode) |
 | `rules://agents/agent-architect.json` | Agent Architect (ACT mode) |
 | `rules://agents/devops-engineer.json` | DevOps Engineer (ACT mode) |
+| `rules://agents/test-engineer.json` | Test Engineer (ACT mode) |
+| `rules://agents/security-engineer.json` | Security Engineer (ACT mode) |
+| `rules://agents/software-engineer.json` | Software Engineer (ACT mode) |
+| `rules://agents/data-scientist.json` | Data Scientist (ACT mode) |
+| `rules://agents/systems-developer.json` | Systems Developer (ACT mode) |
 | `rules://agents/code-reviewer.json` | Code Reviewer (EVAL mode) |
 | **Domain Specialists** | |
 | `rules://agents/architecture-specialist.json` | Architecture Specialist |
