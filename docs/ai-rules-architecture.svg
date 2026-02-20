@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1900" width="1100" height="1900">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 2000" width="1100" height="2000">
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" style="stop-color:#0f0f1a"/>
@@ -29,8 +29,8 @@
   </defs>
 
   <!-- Background -->
-  <rect width="1100" height="1900" fill="url(#bgGradient)"/>
-  <rect width="1100" height="1900" fill="url(#grid)"/>
+  <rect width="1100" height="2000" fill="url(#bgGradient)"/>
+  <rect width="1100" height="2000" fill="url(#grid)"/>
 
   <!-- ==================== TITLE ==================== -->
   <!-- centerX = 550 -->
@@ -54,7 +54,7 @@
     <line x1="354" y1="212" x2="370" y2="212" stroke="#64748b" stroke-width="2"/>
     <polygon points="378,212 368,207 368,217" fill="#64748b"/>
 
-    <!-- ACT: x=178+176+24=378 -->
+    <!-- ACT: x=378 -->
     <rect x="378" y="176" width="176" height="72" rx="14" fill="url(#actGradient)" filter="url(#shadow)"/>
     <text x="466" y="212" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">ACT</text>
     <text x="466" y="232" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">Implement &amp; Code</text>
@@ -63,12 +63,12 @@
     <line x1="554" y1="212" x2="570" y2="212" stroke="#64748b" stroke-width="2"/>
     <polygon points="578,212 568,207 568,217" fill="#64748b"/>
 
-    <!-- EVAL: x=378+176+24=578 -->
+    <!-- EVAL: x=578 -->
     <rect x="578" y="176" width="176" height="72" rx="14" fill="url(#evalGradient)" filter="url(#shadow)"/>
     <text x="666" y="212" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">EVAL</text>
     <text x="666" y="232" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">Review &amp; Improve</text>
 
-    <!-- AUTO: x=578+176+24=778 -->
+    <!-- AUTO: x=778 -->
     <rect x="778" y="176" width="144" height="72" rx="14" fill="url(#autoGradient)" filter="url(#shadow)"/>
     <text x="850" y="208" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">AUTO</text>
     <text x="850" y="228" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#fecaca" text-anchor="middle">Autonomous Cycle</text>
@@ -85,313 +85,355 @@
   </g>
 
   <!-- ==================== LAYER 2: PRIMARY AGENTS ==================== -->
-  <!-- 3 columns: PLAN(152w x2), ACT(472w for 3x3 grid, 152w each, 8px gap), EVAL(152w x1) -->
+  <!-- PLAN: x=58, w=152 | ACT: 4 cols startX=234, total w=632 | EVAL: x=890, w=152 -->
+  <!-- ACT: 4*152 + 3*8 = 632, startX = 550-316 = 234 -->
+  <!-- PLAN left margin = 58 (= 234-24-152), EVAL right edge = 890+152 = 1042, right margin = 58 -->
   <g id="layer-2">
     <text x="550" y="384" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="3">LAYER 2 : PRIMARY AGENTS</text>
 
-    <!-- PLAN Column: x=122, width=152 -->
-    <text x="198" y="416" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#8b5cf6" font-weight="600" text-anchor="middle">PLAN</text>
+    <!-- PLAN Column: x=58, center=134, width=152 -->
+    <text x="134" y="416" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#8b5cf6" font-weight="600" text-anchor="middle">PLAN</text>
 
-    <rect x="122" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
-    <text x="144" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="13">🏛️</text>
-    <text x="166" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Solution Architect</text>
-    <text x="166" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">System Design</text>
+    <rect x="58" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+    <text x="80" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="13">🏛️</text>
+    <text x="102" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Solution Architect</text>
+    <text x="102" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">System Design</text>
 
-    <rect x="122" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
-    <text x="144" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="13">📋</text>
-    <text x="166" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Technical Planner</text>
-    <text x="166" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Implementation Plan</text>
+    <rect x="58" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+    <text x="80" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="13">📋</text>
+    <text x="102" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Technical Planner</text>
+    <text x="102" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Implementation Plan</text>
 
-    <!-- ACT Column: 3x3 grid, 152w cards, 8px gap -->
-    <!-- Total width: 152*3 + 8*2 = 472, startX = 550 - 236 = 314 -->
+    <!-- ACT Column: 4 cols, startX=234, col step=160 (152+8) -->
     <text x="550" y="416" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#10b981" font-weight="600" text-anchor="middle">ACT</text>
 
-    <!-- Row 1 -->
-    <rect x="314" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="336" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">🖥️</text>
-    <text x="358" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Frontend Dev</text>
-    <text x="358" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">React, Next.js</text>
+    <!-- Row 1: y=432 -->
+    <rect x="234" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="256" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">🔧</text>
+    <text x="278" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Tooling Eng</text>
+    <text x="278" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">Config, Build</text>
 
-    <rect x="474" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="496" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">⚙️</text>
-    <text x="518" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Backend Dev</text>
-    <text x="518" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">Node, Go, Python</text>
+    <rect x="394" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="416" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">🖥️</text>
+    <text x="438" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Frontend Dev</text>
+    <text x="438" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">React, Next.js</text>
 
-    <rect x="634" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="656" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">📱</text>
-    <text x="678" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Mobile Dev</text>
-    <text x="678" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">React Native</text>
+    <rect x="554" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="576" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">⚙️</text>
+    <text x="598" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Backend Dev</text>
+    <text x="598" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">Node, Go, Python</text>
 
-    <!-- Row 2 -->
-    <rect x="314" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="336" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">📊</text>
-    <text x="358" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Data Engineer</text>
-    <text x="358" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">ETL, Analytics</text>
+    <rect x="714" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="736" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">📱</text>
+    <text x="758" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Mobile Dev</text>
+    <text x="758" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">React Native</text>
 
-    <rect x="474" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="496" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">🔧</text>
-    <text x="518" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Tooling Dev</text>
-    <text x="518" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">CLI, Build</text>
+    <!-- Row 2: y=488 -->
+    <rect x="234" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="256" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">📊</text>
+    <text x="278" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Data Engineer</text>
+    <text x="278" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">ETL, Analytics</text>
 
-    <rect x="634" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="656" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">🤖</text>
-    <text x="678" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Agent Architect</text>
-    <text x="678" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">AI, MCP</text>
+    <rect x="394" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="416" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">🤖</text>
+    <text x="438" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Agent Architect</text>
+    <text x="438" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">AI, MCP</text>
 
-    <!-- Row 3 -->
-    <rect x="314" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="336" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">🚀</text>
-    <text x="358" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">DevOps Engineer</text>
-    <text x="358" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">CI/CD, Docker</text>
+    <rect x="554" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="576" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">🚀</text>
+    <text x="598" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">DevOps Engineer</text>
+    <text x="598" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">CI/CD, Docker</text>
 
-    <rect x="474" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="496" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">☁️</text>
-    <text x="518" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Platform Engineer</text>
-    <text x="518" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">IaC, K8s</text>
+    <rect x="714" y="488" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="736" y="517" font-family="system-ui, -apple-system, sans-serif" font-size="12">☁️</text>
+    <text x="758" y="509" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Platform Eng</text>
+    <text x="758" y="523" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">IaC, K8s</text>
 
-    <rect x="634" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-    <text x="656" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">🧠</text>
-    <text x="678" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">AI/ML Engineer</text>
-    <text x="678" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">LLM, RAG</text>
+    <!-- Row 3: y=544 -->
+    <rect x="234" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="256" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">🧠</text>
+    <text x="278" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">AI/ML Engineer</text>
+    <text x="278" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">LLM, RAG</text>
 
-    <!-- EVAL Column: x=826, width=152 -->
-    <text x="902" y="416" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#f59e0b" font-weight="600" text-anchor="middle">EVAL</text>
+    <rect x="394" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="416" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">🧪</text>
+    <text x="438" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Test Engineer</text>
+    <text x="438" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">TDD, Coverage</text>
 
-    <rect x="826" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
-    <text x="848" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">🔍</text>
-    <text x="870" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Code Reviewer</text>
-    <text x="870" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Quality, Security</text>
+    <rect x="554" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="576" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">🛡️</text>
+    <text x="598" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Security Eng</text>
+    <text x="598" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">Auth, OWASP</text>
 
-    <!-- Down Arrow -->
-    <line x1="550" y1="608" x2="550" y2="648" stroke="#475569" stroke-width="2"/>
-    <polygon points="550,656 545,646 555,646" fill="#475569"/>
-    <text x="566" y="640" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">references</text>
+    <rect x="714" y="544" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="736" y="573" font-family="system-ui, -apple-system, sans-serif" font-size="12">📈</text>
+    <text x="758" y="565" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Data Scientist</text>
+    <text x="758" y="579" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">EDA, ML Models</text>
+
+    <!-- Row 4: y=600, 2 cards centered in ACT area (startX=234, width=632) -->
+    <!-- 2*152+8=312, offset=(632-312)/2=160, col1 x=234+160=394, col2 x=394+160=554 -->
+    <rect x="394" y="600" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="416" y="629" font-family="system-ui, -apple-system, sans-serif" font-size="12">⚡</text>
+    <text x="438" y="621" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Systems Dev</text>
+    <text x="438" y="635" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">Rust, C/C++</text>
+
+    <rect x="554" y="600" width="152" height="48" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="576" y="629" font-family="system-ui, -apple-system, sans-serif" font-size="12">💡</text>
+    <text x="598" y="621" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ffffff">Software Eng</text>
+    <text x="598" y="635" font-family="system-ui, -apple-system, sans-serif" font-size="7" fill="#64748b">Universal Fallback</text>
+
+    <!-- EVAL Column: x=890, center=966, width=152 -->
+    <text x="966" y="416" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#f59e0b" font-weight="600" text-anchor="middle">EVAL</text>
+
+    <rect x="890" y="432" width="152" height="48" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="912" y="461" font-family="system-ui, -apple-system, sans-serif" font-size="12">🔍</text>
+    <text x="934" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Code Reviewer</text>
+    <text x="934" y="467" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Quality, Security</text>
+
+    <!-- Down Arrow to Layer 3: starts after ACT row4 ends (648), gap 16 -->
+    <line x1="550" y1="664" x2="550" y2="704" stroke="#475569" stroke-width="2"/>
+    <polygon points="550,712 545,702 555,702" fill="#475569"/>
+    <text x="566" y="696" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b">references</text>
   </g>
 
   <!-- ==================== LAYER 3: SPECIALIST AGENTS ==================== -->
   <!-- 14 specialists: 4 cols x 3 rows + 2 centered, 152w each, gap 16 -->
   <!-- Total = 152*4+16*3 = 656, startX = 550-328 = 222 -->
+  <!-- y shifted +56 from original (Layer 2 extra row) -->
   <g id="layer-3">
-    <text x="550" y="688" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="3">LAYER 3 : SPECIALIST AGENTS</text>
+    <text x="550" y="744" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="3">LAYER 3 : SPECIALIST AGENTS</text>
 
-    <!-- Row 1 -->
-    <rect x="222" y="712" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="244" y="741" font-family="system-ui, -apple-system, sans-serif" font-size="14">🏗️</text>
-    <text x="266" y="733" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Architecture</text>
-    <text x="266" y="747" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Layer, Dependencies</text>
-
-    <rect x="390" y="712" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="412" y="741" font-family="system-ui, -apple-system, sans-serif" font-size="14">🧪</text>
-    <text x="434" y="733" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Test Strategy</text>
-    <text x="434" y="747" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">TDD, Coverage 90%+</text>
-
-    <rect x="558" y="712" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="580" y="741" font-family="system-ui, -apple-system, sans-serif" font-size="14">⚡</text>
-    <text x="602" y="733" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Performance</text>
-    <text x="602" y="747" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Bundle, Optimize</text>
-
-    <rect x="726" y="712" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="748" y="741" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔒</text>
-    <text x="770" y="733" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Security</text>
-    <text x="770" y="747" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">OAuth, OWASP</text>
-
-    <!-- Row 2 -->
+    <!-- Row 1: y=768 -->
     <rect x="222" y="768" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="244" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">♿</text>
-    <text x="266" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Accessibility</text>
-    <text x="266" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">WCAG 2.1, ARIA</text>
+    <text x="244" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">🏗️</text>
+    <text x="266" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Architecture</text>
+    <text x="266" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Layer, Dependencies</text>
 
     <rect x="390" y="768" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="412" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔍</text>
-    <text x="434" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">SEO</text>
-    <text x="434" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Metadata, Schema</text>
+    <text x="412" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">🧪</text>
+    <text x="434" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Test Strategy</text>
+    <text x="434" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">TDD, Coverage 90%+</text>
 
     <rect x="558" y="768" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="580" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">🎨</text>
-    <text x="602" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">UI/UX Designer</text>
-    <text x="602" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Hierarchy, UX Laws</text>
+    <text x="580" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">⚡</text>
+    <text x="602" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Performance</text>
+    <text x="602" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Bundle, Optimize</text>
 
     <rect x="726" y="768" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="748" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">📚</text>
-    <text x="770" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Documentation</text>
-    <text x="770" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">JSDoc, README</text>
+    <text x="748" y="797" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔒</text>
+    <text x="770" y="789" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Security</text>
+    <text x="770" y="803" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">OAuth, OWASP</text>
 
-    <!-- Row 3 -->
+    <!-- Row 2: y=824 -->
     <rect x="222" y="824" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="244" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">📐</text>
-    <text x="266" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Code Quality</text>
-    <text x="266" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">SOLID, DRY</text>
+    <text x="244" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">♿</text>
+    <text x="266" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Accessibility</text>
+    <text x="266" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">WCAG 2.1, ARIA</text>
 
     <rect x="390" y="824" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="412" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">🌐</text>
-    <text x="434" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">i18n Specialist</text>
-    <text x="434" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Internationalization</text>
+    <text x="412" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔍</text>
+    <text x="434" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">SEO</text>
+    <text x="434" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Metadata, Schema</text>
 
     <rect x="558" y="824" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="580" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔗</text>
-    <text x="602" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Integration</text>
-    <text x="602" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">APIs, Webhooks</text>
+    <text x="580" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">🎨</text>
+    <text x="602" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">UI/UX Designer</text>
+    <text x="602" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Hierarchy, UX Laws</text>
 
     <rect x="726" y="824" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="748" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">📨</text>
-    <text x="770" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Event Architecture</text>
-    <text x="770" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">MQ, CQRS, Saga</text>
+    <text x="748" y="853" font-family="system-ui, -apple-system, sans-serif" font-size="14">📚</text>
+    <text x="770" y="845" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Documentation</text>
+    <text x="770" y="859" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">JSDoc, README</text>
 
-    <!-- Row 4: 2 cards centered. Total = 152*2+16 = 320, startX = 550-160 = 390 -->
+    <!-- Row 3: y=880 -->
+    <rect x="222" y="880" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="244" y="909" font-family="system-ui, -apple-system, sans-serif" font-size="14">📐</text>
+    <text x="266" y="901" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Code Quality</text>
+    <text x="266" y="915" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">SOLID, DRY</text>
+
     <rect x="390" y="880" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="412" y="909" font-family="system-ui, -apple-system, sans-serif" font-size="14">📊</text>
-    <text x="434" y="901" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Observability</text>
-    <text x="434" y="915" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">OTel, SLI/SLO</text>
+    <text x="412" y="909" font-family="system-ui, -apple-system, sans-serif" font-size="14">🌐</text>
+    <text x="434" y="901" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">i18n Specialist</text>
+    <text x="434" y="915" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Internationalization</text>
 
     <rect x="558" y="880" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="580" y="909" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔄</text>
-    <text x="602" y="901" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Migration</text>
-    <text x="602" y="915" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Strangler Fig</text>
+    <text x="580" y="909" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔗</text>
+    <text x="602" y="901" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Integration</text>
+    <text x="602" y="915" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">APIs, Webhooks</text>
+
+    <rect x="726" y="880" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="748" y="909" font-family="system-ui, -apple-system, sans-serif" font-size="14">📨</text>
+    <text x="770" y="901" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Event Architecture</text>
+    <text x="770" y="915" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">MQ, CQRS, Saga</text>
+
+    <!-- Row 4: y=936, 2 cards centered. Total = 152*2+16 = 320, startX = 550-160 = 390 -->
+    <rect x="390" y="936" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="412" y="965" font-family="system-ui, -apple-system, sans-serif" font-size="14">📊</text>
+    <text x="434" y="957" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Observability</text>
+    <text x="434" y="971" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">OTel, SLI/SLO</text>
+
+    <rect x="558" y="936" width="152" height="48" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="580" y="965" font-family="system-ui, -apple-system, sans-serif" font-size="14">🔄</text>
+    <text x="602" y="957" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Migration</text>
+    <text x="602" y="971" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#64748b">Strangler Fig</text>
   </g>
 
   <!-- ==================== COUNTS ==================== -->
   <!-- 5 cards: 144w, gap 24, total = 144*5+24*4 = 816, startX = 550-408 = 142 -->
+  <!-- y shift: +56 from original -->
   <g id="counts">
-    <line x1="100" y1="960" x2="1000" y2="960" stroke="#334155" stroke-width="1"/>
+    <line x1="100" y1="1016" x2="1000" y2="1016" stroke="#334155" stroke-width="1"/>
 
-    <rect x="142" y="984" width="144" height="56" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1"/>
-    <text x="214" y="1014" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#ef4444" text-anchor="middle">4</text>
-    <text x="214" y="1032" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Mode Agents</text>
+    <rect x="142" y="1040" width="144" height="56" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1"/>
+    <text x="214" y="1070" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#ef4444" text-anchor="middle">4</text>
+    <text x="214" y="1088" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Mode Agents</text>
 
-    <rect x="310" y="984" width="144" height="56" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
-    <text x="382" y="1014" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#3b82f6" text-anchor="middle">12</text>
-    <text x="382" y="1032" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Primary Agents</text>
+    <rect x="310" y="1040" width="144" height="56" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+    <text x="382" y="1070" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#3b82f6" text-anchor="middle">17</text>
+    <text x="382" y="1088" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Primary Agents</text>
 
-    <rect x="478" y="984" width="144" height="56" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
-    <text x="550" y="1014" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#10b981" text-anchor="middle">14</text>
-    <text x="550" y="1032" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Specialists</text>
+    <rect x="478" y="1040" width="144" height="56" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+    <text x="550" y="1070" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#10b981" text-anchor="middle">14</text>
+    <text x="550" y="1088" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Specialists</text>
 
-    <rect x="646" y="984" width="144" height="56" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="1"/>
-    <text x="718" y="1014" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#ec4899" text-anchor="middle">15</text>
-    <text x="718" y="1032" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Skills</text>
+    <rect x="646" y="1040" width="144" height="56" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="1"/>
+    <text x="718" y="1070" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#ec4899" text-anchor="middle">17</text>
+    <text x="718" y="1088" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Skills</text>
 
-    <rect x="814" y="984" width="144" height="56" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
-    <text x="886" y="1014" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#f59e0b" text-anchor="middle">7</text>
-    <text x="886" y="1032" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">AI Tools</text>
+    <rect x="814" y="1040" width="144" height="56" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+    <text x="886" y="1070" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#f59e0b" text-anchor="middle">7</text>
+    <text x="886" y="1088" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">AI Tools</text>
   </g>
 
   <!-- ==================== SKILLS ==================== -->
-  <!-- 15 skills: 5 rows x 3 cols, 168w pills, gap 16, row total = 168*3+16*2 = 536, startX = 550-268 = 282 -->
+  <!-- 17 skills: 5 rows x 3 cols + 1 row x 2 centered, 168w pills, gap 16 -->
+  <!-- row total = 168*3+16*2 = 536, startX = 550-268 = 282 -->
+  <!-- y shift: +56 from original -->
   <g id="skills">
-    <line x1="100" y1="1064" x2="1000" y2="1064" stroke="#334155" stroke-width="1"/>
-    <text x="550" y="1096" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ec4899" text-anchor="middle" letter-spacing="2">SKILLS</text>
+    <line x1="100" y1="1120" x2="1000" y2="1120" stroke="#334155" stroke-width="1"/>
+    <text x="550" y="1152" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ec4899" text-anchor="middle" letter-spacing="2">SKILLS</text>
 
-    <!-- Row 1 -->
-    <rect x="282" y="1120" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
-    <text x="366" y="1141" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">🧠 Brainstorming</text>
+    <!-- Row 1: y=1176 -->
+    <rect x="282" y="1176" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
+    <text x="366" y="1197" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">🧠 Brainstorming</text>
 
-    <rect x="466" y="1120" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
-    <text x="550" y="1141" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#bfdbfe" text-anchor="middle">📝 Writing Plans</text>
+    <rect x="466" y="1176" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
+    <text x="550" y="1197" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#bfdbfe" text-anchor="middle">📝 Writing Plans</text>
 
-    <rect x="650" y="1120" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
-    <text x="734" y="1141" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">🧪 TDD</text>
+    <rect x="650" y="1176" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
+    <text x="734" y="1197" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">🧪 TDD</text>
 
-    <!-- Row 2 -->
-    <rect x="282" y="1160" width="168" height="32" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
-    <text x="366" y="1181" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">🐛 Debugging</text>
+    <!-- Row 2: y=1216 -->
+    <rect x="282" y="1216" width="168" height="32" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
+    <text x="366" y="1237" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">🐛 Debugging</text>
 
-    <rect x="466" y="1160" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
-    <text x="550" y="1181" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">⚡ Parallel Agents</text>
+    <rect x="466" y="1216" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
+    <text x="550" y="1237" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">⚡ Parallel Agents</text>
 
-    <rect x="650" y="1160" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
-    <text x="734" y="1181" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#bfdbfe" text-anchor="middle">🎨 Frontend Design</text>
+    <rect x="650" y="1216" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
+    <text x="734" y="1237" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#bfdbfe" text-anchor="middle">🎨 Frontend Design</text>
 
-    <!-- Row 3 -->
-    <rect x="282" y="1200" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
-    <text x="366" y="1221" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">🚀 Execute Plans</text>
+    <!-- Row 3: y=1256 -->
+    <rect x="282" y="1256" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
+    <text x="366" y="1277" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">🚀 Execute Plans</text>
 
-    <rect x="466" y="1200" width="168" height="32" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
-    <text x="550" y="1221" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">🤖 Subagent Dev</text>
+    <rect x="466" y="1256" width="168" height="32" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
+    <text x="550" y="1277" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">🤖 Subagent Dev</text>
 
-    <rect x="650" y="1200" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#06b6d4" stroke-width="1"/>
-    <text x="734" y="1221" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#a5f3fc" text-anchor="middle">🔌 API Design</text>
+    <rect x="650" y="1256" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#06b6d4" stroke-width="1"/>
+    <text x="734" y="1277" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#a5f3fc" text-anchor="middle">🔌 API Design</text>
 
-    <!-- Row 4 (NEW) -->
-    <rect x="282" y="1240" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
-    <text x="366" y="1261" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">🔧 Refactoring</text>
+    <!-- Row 4: y=1296 -->
+    <rect x="282" y="1296" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
+    <text x="366" y="1317" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">🔧 Refactoring</text>
 
-    <rect x="466" y="1240" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
-    <text x="550" y="1261" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">👀 PR Review</text>
+    <rect x="466" y="1296" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
+    <text x="550" y="1317" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">👀 PR Review</text>
 
-    <rect x="650" y="1240" width="168" height="32" rx="6" fill="#3d1f1f" stroke="#ef4444" stroke-width="1"/>
-    <text x="734" y="1261" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fecaca" text-anchor="middle">🚨 Incident Response</text>
+    <rect x="650" y="1296" width="168" height="32" rx="6" fill="#3d1f1f" stroke="#ef4444" stroke-width="1"/>
+    <text x="734" y="1317" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fecaca" text-anchor="middle">🚨 Incident Response</text>
 
-    <!-- Row 5 (NEW) -->
-    <rect x="282" y="1280" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
-    <text x="366" y="1301" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#bfdbfe" text-anchor="middle">📦 Dependency Mgmt</text>
+    <!-- Row 5: y=1336 -->
+    <rect x="282" y="1336" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#3b82f6" stroke-width="1"/>
+    <text x="366" y="1357" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#bfdbfe" text-anchor="middle">📦 Dependency Mgmt</text>
 
-    <rect x="466" y="1280" width="168" height="32" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
-    <text x="550" y="1301" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">🗄️ DB Migration</text>
+    <rect x="466" y="1336" width="168" height="32" rx="6" fill="#3d2d1f" stroke="#f59e0b" stroke-width="1"/>
+    <text x="550" y="1357" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#fef3c7" text-anchor="middle">🗄️ DB Migration</text>
 
-    <rect x="650" y="1280" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
-    <text x="734" y="1301" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">⚡ Perf Optimization</text>
+    <rect x="650" y="1336" width="168" height="32" rx="6" fill="#1f3d2d" stroke="#10b981" stroke-width="1"/>
+    <text x="734" y="1357" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d1fae5" text-anchor="middle">⚡ Perf Optimization</text>
+
+    <!-- Row 6 (NEW): y=1376, 2 cards centered -->
+    <!-- 2*168+16=352, startX=550-176=374 -->
+    <rect x="374" y="1376" width="168" height="32" rx="6" fill="#2d1f3d" stroke="#a855f7" stroke-width="1"/>
+    <text x="458" y="1397" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#e9d5ff" text-anchor="middle">🔀 PR All-in-One</text>
+
+    <rect x="558" y="1376" width="168" height="32" rx="6" fill="#1f2d3d" stroke="#06b6d4" stroke-width="1"/>
+    <text x="642" y="1397" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#a5f3fc" text-anchor="middle">🧩 Widget Slots</text>
   </g>
 
   <!-- ==================== SUPPORTED AI TOOLS ==================== -->
   <!-- 6 pills row + 1 centered, 120w, gap 16, row = 120*6+16*5 = 800, startX = 550-400 = 150 -->
+  <!-- y shift: +96 from original (Layer2 +56, Skills row +40) -->
   <g id="supported-tools">
-    <line x1="100" y1="1336" x2="1000" y2="1336" stroke="#334155" stroke-width="1"/>
-    <text x="550" y="1368" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">SUPPORTED AI TOOLS</text>
+    <line x1="100" y1="1432" x2="1000" y2="1432" stroke="#334155" stroke-width="1"/>
+    <text x="550" y="1464" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">SUPPORTED AI TOOLS</text>
 
-    <rect x="150" y="1392" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="210" y="1413" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Cursor</text>
+    <rect x="150" y="1488" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="210" y="1509" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Cursor</text>
 
-    <rect x="286" y="1392" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="346" y="1413" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Claude Code</text>
+    <rect x="286" y="1488" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="346" y="1509" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Claude Code</text>
 
-    <rect x="422" y="1392" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="482" y="1413" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Codex</text>
+    <rect x="422" y="1488" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="482" y="1509" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Codex</text>
 
-    <rect x="558" y="1392" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="618" y="1413" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Amazon Q</text>
+    <rect x="558" y="1488" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="618" y="1509" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Amazon Q</text>
 
-    <rect x="694" y="1392" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="754" y="1413" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Kiro</text>
+    <rect x="694" y="1488" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="754" y="1509" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Kiro</text>
 
-    <rect x="830" y="1392" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="890" y="1413" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Antigravity</text>
+    <rect x="830" y="1488" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="890" y="1509" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">Antigravity</text>
 
     <!-- OpenCode centered -->
-    <rect x="490" y="1440" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-    <text x="550" y="1461" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">OpenCode</text>
+    <rect x="490" y="1536" width="120" height="32" rx="16" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="550" y="1557" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">OpenCode</text>
   </g>
 
   <!-- ==================== HOW IT WORKS ==================== -->
   <!-- 4 cards: 200w, gap 24, total = 200*4+24*3 = 872, startX = 550-436 = 114 -->
+  <!-- y shift: +96 from original -->
   <g id="how-it-works">
-    <line x1="100" y1="1496" x2="1000" y2="1496" stroke="#334155" stroke-width="1"/>
-    <text x="550" y="1528" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">HOW IT WORKS</text>
+    <line x1="100" y1="1592" x2="1000" y2="1592" stroke="#334155" stroke-width="1"/>
+    <text x="550" y="1624" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="2">HOW IT WORKS</text>
 
-    <rect x="114" y="1552" width="200" height="64" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1"/>
-    <text x="214" y="1580" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#a5b4fc" text-anchor="middle">1. User Types Keyword</text>
-    <text x="214" y="1600" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">PLAN / ACT / EVAL / AUTO</text>
+    <rect x="114" y="1648" width="200" height="64" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1"/>
+    <text x="214" y="1676" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#a5b4fc" text-anchor="middle">1. User Types Keyword</text>
+    <text x="214" y="1696" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">PLAN / ACT / EVAL / AUTO</text>
 
-    <polygon points="322,1584 312,1579 312,1589" fill="#475569"/>
+    <polygon points="322,1680 312,1675 312,1685" fill="#475569"/>
 
-    <rect x="338" y="1552" width="200" height="64" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
-    <text x="438" y="1580" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#93c5fd" text-anchor="middle">2. Mode Agent Activates</text>
-    <text x="438" y="1600" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Primary Agent + Skills</text>
+    <rect x="338" y="1648" width="200" height="64" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+    <text x="438" y="1676" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#93c5fd" text-anchor="middle">2. Mode Agent Activates</text>
+    <text x="438" y="1696" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Primary Agent + Skills</text>
 
-    <polygon points="546,1584 536,1579 536,1589" fill="#475569"/>
+    <polygon points="546,1680 536,1675 536,1685" fill="#475569"/>
 
-    <rect x="562" y="1552" width="200" height="64" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
-    <text x="662" y="1580" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#6ee7b7" text-anchor="middle">3. Specialists Referenced</text>
-    <text x="662" y="1600" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">As Needed by Context</text>
+    <rect x="562" y="1648" width="200" height="64" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+    <text x="662" y="1676" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#6ee7b7" text-anchor="middle">3. Specialists Referenced</text>
+    <text x="662" y="1696" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">As Needed by Context</text>
 
-    <polygon points="770,1584 760,1579 760,1589" fill="#475569"/>
+    <polygon points="770,1680 760,1675 760,1685" fill="#475569"/>
 
-    <rect x="786" y="1552" width="200" height="64" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
-    <text x="886" y="1580" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#fcd34d" text-anchor="middle">4. Consistent Output</text>
-    <text x="886" y="1600" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Same Rules, Any AI Tool</text>
+    <rect x="786" y="1648" width="200" height="64" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+    <text x="886" y="1676" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#fcd34d" text-anchor="middle">4. Consistent Output</text>
+    <text x="886" y="1696" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Same Rules, Any AI Tool</text>
   </g>
 
   <!-- ==================== FOOTER ==================== -->
   <g id="footer">
-    <text x="550" y="1676" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#475569" text-anchor="middle">github.com/anthropics/codingbuddy</text>
+    <text x="550" y="1772" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#475569" text-anchor="middle">github.com/anthropics/codingbuddy</text>
   </g>
 </svg>
