@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-02-20
+
+### Added
+
+- **TUI FlowMap**: Replace U-curve arrows with tree connectors for cleaner agent hierarchy visualization (#574)
+- **TUI FlowMap**: Wire `activeStage` and add per-stage agent statistics (#571)
+- **TUI FlowMap**: Add `isParallel` flag and execution mode display for agent nodes (#550)
+- **TUI FlowMap**: Extend `renderAgentTree` to support multi-level agent subtree rendering (#557)
+- **TUI ActivityVisualizer**: Redesign Activity and Live panels for improved clarity (#551)
+- **TUI Footer**: Track and display Agent, Skill, and Tool invocation counts
+- **TUI ChecklistPanel**: Split `ChecklistPanel` from `FocusedAgentPanel` for independent display (#548)
+- **TUI Agent Visibility**: Replace tool-centric display with real agent visibility (#549)
+- **TUI Restart**: Implement TUI restart capability via MCP tool and CLI flag (#545)
+- **Agents**: Add `software-engineer` as default ACT agent (#568)
+- **Agents**: Add `data-scientist` as ACT primary agent (#566)
+- **Agents**: Add `systems-developer` as ACT primary agent (#565)
+- **Agents**: Add `security-engineer` as ACT primary agent
+- **Agents**: Add `test-engineer` as ACT primary agent (#563)
+- **Keyword Patterns**: Add refactoring and type definition patterns to backend keyword detection (#567)
+
+### Fixed
+
+- **TUI FlowMap**: Show intermediate progress values in progress bars (#572)
+- **TUI FlowMap**: Remove stale agents from FlowMap after completion (#570)
+- **TUI HeaderBar**: Fix header bar overflow, workspace path display, and remove `sess:` prefix (#547)
+- **Keyword Types**: Add `ai-ml-engineer` to `ACT_PRIMARY_AGENTS` (#562)
+- **Mode Handler**: Auto-inherit `recommendedActAgent` from context in ACT mode (#561)
+
 ## [4.2.0] - 2026-02-18
 
 ### Added

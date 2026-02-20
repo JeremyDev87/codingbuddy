@@ -5,6 +5,34 @@
 本文档格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/spec/v2.0.0.html)。
 
+## [4.3.0] - 2026-02-20
+
+### 新增
+
+- **TUI FlowMap**: 用树形连接器替换 U 形曲线箭头，改善 Agent 层次可视化 (#574)
+- **TUI FlowMap**: 接入 `activeStage` 并添加每阶段 Agent 统计 (#571)
+- **TUI FlowMap**: 为 Agent 节点添加 `isParallel` 标志和执行模式显示 (#550)
+- **TUI FlowMap**: 扩展 `renderAgentTree` 支持多级 Agent 子树渲染 (#557)
+- **TUI ActivityVisualizer**: 重新设计 Activity 和 Live 面板，提升可读性 (#551)
+- **TUI 页脚**: 追踪并显示 Agent、Skill 和 Tool 调用次数
+- **TUI ChecklistPanel**: 将 `ChecklistPanel` 从 `FocusedAgentPanel` 中拆分，独立显示 (#548)
+- **TUI Agent 可见性**: 以真实 Agent 可见性替换以工具为中心的显示 (#549)
+- **TUI 重启**: 通过 MCP 工具和 CLI 标志实现 TUI 重启功能 (#545)
+- **Agent**: 将 `software-engineer` 添加为默认 ACT Agent (#568)
+- **Agent**: 将 `data-scientist` 添加为 ACT 主 Agent (#566)
+- **Agent**: 将 `systems-developer` 添加为 ACT 主 Agent (#565)
+- **Agent**: 将 `security-engineer` 添加为 ACT 主 Agent
+- **Agent**: 将 `test-engineer` 添加为 ACT 主 Agent (#563)
+- **关键词模式**: 在后端关键词检测中添加重构和类型定义模式 (#567)
+
+### 修复
+
+- **TUI FlowMap**: 在进度条中显示中间进度值 (#572)
+- **TUI FlowMap**: 完成后从 FlowMap 中移除旧 Agent (#570)
+- **TUI HeaderBar**: 修复页眉溢出、工作区路径显示及移除 `sess:` 前缀 (#547)
+- **关键词类型**: 将 `ai-ml-engineer` 添加到 `ACT_PRIMARY_AGENTS` (#562)
+- **模式处理器**: ACT 模式下自动从上下文继承 `recommendedActAgent` (#561)
+
 ## [4.2.0] - 2026-02-18
 
 ### 新增

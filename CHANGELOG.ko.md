@@ -5,6 +5,34 @@
 이 문서는 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/) 형식을 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/spec/v2.0.0.html)을 준수합니다.
 
+## [4.3.0] - 2026-02-20
+
+### 추가됨
+
+- **TUI FlowMap**: U-커브 화살표를 트리 커넥터로 교체하여 에이전트 계층 시각화 개선 (#574)
+- **TUI FlowMap**: `activeStage` 연동 및 단계별 에이전트 통계 추가 (#571)
+- **TUI FlowMap**: 에이전트 노드에 `isParallel` 플래그 및 실행 모드 표시 (#550)
+- **TUI FlowMap**: `renderAgentTree`를 다중 레벨 에이전트 서브트리 렌더링 지원으로 확장 (#557)
+- **TUI ActivityVisualizer**: Activity 및 Live 패널 재설계로 가시성 향상 (#551)
+- **TUI 푸터**: Agent, Skill, Tool 호출 횟수 추적 및 표시
+- **TUI ChecklistPanel**: `ChecklistPanel`을 `FocusedAgentPanel`에서 분리하여 독립 표시 (#548)
+- **TUI 에이전트 가시성**: 도구 중심 표시를 실제 에이전트 가시성으로 교체 (#549)
+- **TUI 재시작**: MCP 툴 및 CLI 플래그를 통한 TUI 재시작 기능 구현 (#545)
+- **에이전트**: `software-engineer`를 기본 ACT 에이전트로 추가 (#568)
+- **에이전트**: `data-scientist` ACT 주 에이전트 추가 (#566)
+- **에이전트**: `systems-developer` ACT 주 에이전트 추가 (#565)
+- **에이전트**: `security-engineer` ACT 주 에이전트 추가
+- **에이전트**: `test-engineer` ACT 주 에이전트 추가 (#563)
+- **키워드 패턴**: 백엔드 키워드 감지에 리팩토링 및 타입 정의 패턴 추가 (#567)
+
+### 수정됨
+
+- **TUI FlowMap**: 진행 바에서 중간값 표시 (#572)
+- **TUI FlowMap**: 완료 후 오래된 에이전트 FlowMap에서 제거 (#570)
+- **TUI HeaderBar**: 헤더 바 오버플로우, 워크스페이스 경로 표시, `sess:` 접두사 제거 수정 (#547)
+- **키워드 타입**: `ACT_PRIMARY_AGENTS`에 `ai-ml-engineer` 추가 (#562)
+- **모드 핸들러**: ACT 모드에서 컨텍스트의 `recommendedActAgent` 자동 상속 (#561)
+
 ## [4.2.0] - 2026-02-18
 
 ### 추가됨

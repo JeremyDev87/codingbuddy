@@ -5,6 +5,34 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-02-20
+
+### Agregado
+
+- **TUI FlowMap**: Reemplazar flechas en curva U con conectores de árbol para mejor visualización de jerarquía de agentes (#574)
+- **TUI FlowMap**: Conectar `activeStage` y agregar estadísticas de agentes por etapa (#571)
+- **TUI FlowMap**: Agregar bandera `isParallel` y visualización de modo de ejecución en nodos de agente (#550)
+- **TUI FlowMap**: Extender `renderAgentTree` para soportar renderizado de subárbol de agentes multinivel (#557)
+- **TUI ActivityVisualizer**: Rediseñar paneles Activity y Live para mayor claridad (#551)
+- **TUI Pie de página**: Rastrear y mostrar conteos de invocaciones de Agent, Skill y Tool
+- **TUI ChecklistPanel**: Separar `ChecklistPanel` de `FocusedAgentPanel` para visualización independiente (#548)
+- **TUI Visibilidad de Agente**: Reemplazar visualización centrada en herramientas con visibilidad real del agente (#549)
+- **TUI Reinicio**: Implementar capacidad de reinicio de TUI via herramienta MCP y flag CLI (#545)
+- **Agentes**: Agregar `software-engineer` como agente ACT predeterminado (#568)
+- **Agentes**: Agregar `data-scientist` como agente ACT principal (#566)
+- **Agentes**: Agregar `systems-developer` como agente ACT principal (#565)
+- **Agentes**: Agregar `security-engineer` como agente ACT principal
+- **Agentes**: Agregar `test-engineer` como agente ACT principal (#563)
+- **Patrones de Palabras Clave**: Agregar patrones de refactorización y definición de tipos a la detección de palabras clave del backend (#567)
+
+### Corregido
+
+- **TUI FlowMap**: Mostrar valores de progreso intermedios en barras de progreso (#572)
+- **TUI FlowMap**: Eliminar agentes obsoletos de FlowMap tras completarse (#570)
+- **TUI HeaderBar**: Corregir desbordamiento de barra de encabezado, visualización de ruta de workspace y eliminar prefijo `sess:` (#547)
+- **Tipos de Palabras Clave**: Agregar `ai-ml-engineer` a `ACT_PRIMARY_AGENTS` (#562)
+- **Manejador de Modo**: Auto-heredar `recommendedActAgent` del contexto en modo ACT (#561)
+
 ## [4.2.0] - 2026-02-18
 
 ### Agregado

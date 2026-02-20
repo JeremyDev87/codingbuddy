@@ -5,6 +5,34 @@
 このドキュメントは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) の形式に基づいており、
 [セマンティック バージョニング](https://semver.org/lang/ja/spec/v2.0.0.html) に準拠しています。
 
+## [4.3.0] - 2026-02-20
+
+### 追加
+
+- **TUI FlowMap**: U字カーブ矢印をツリーコネクターに置き換えてエージェント階層の可視化を改善 (#574)
+- **TUI FlowMap**: `activeStage` の連携とステージ別エージェント統計の追加 (#571)
+- **TUI FlowMap**: エージェントノードに `isParallel` フラグと実行モード表示を追加 (#550)
+- **TUI FlowMap**: `renderAgentTree` をマルチレベルエージェントサブツリーレンダリング対応に拡張 (#557)
+- **TUI ActivityVisualizer**: Activity および Live パネルを再設計して視認性向上 (#551)
+- **TUI フッター**: Agent、Skill、Tool の呼び出し回数を追跡・表示
+- **TUI ChecklistPanel**: `ChecklistPanel` を `FocusedAgentPanel` から分離して独立表示 (#548)
+- **TUI エージェント可視性**: ツール中心表示を実際のエージェント可視性に置き換え (#549)
+- **TUI 再起動**: MCP ツールおよび CLI フラグによる TUI 再起動機能を実装 (#545)
+- **エージェント**: `software-engineer` をデフォルト ACT エージェントとして追加 (#568)
+- **エージェント**: `data-scientist` を ACT 主エージェントとして追加 (#566)
+- **エージェント**: `systems-developer` を ACT 主エージェントとして追加 (#565)
+- **エージェント**: `security-engineer` を ACT 主エージェントとして追加
+- **エージェント**: `test-engineer` を ACT 主エージェントとして追加 (#563)
+- **キーワードパターン**: バックエンドキーワード検出にリファクタリングおよび型定義パターンを追加 (#567)
+
+### 修正
+
+- **TUI FlowMap**: プログレスバーに中間進捗値を表示 (#572)
+- **TUI FlowMap**: 完了後に古いエージェントを FlowMap から削除 (#570)
+- **TUI HeaderBar**: ヘッダーバーのオーバーフロー、ワークスペースパス表示、`sess:` プレフィックス削除を修正 (#547)
+- **キーワードタイプ**: `ACT_PRIMARY_AGENTS` に `ai-ml-engineer` を追加 (#562)
+- **モードハンドラー**: ACT モードでコンテキストから `recommendedActAgent` を自動継承 (#561)
+
 ## [4.2.0] - 2026-02-18
 
 ### 追加
