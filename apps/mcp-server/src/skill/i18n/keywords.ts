@@ -1152,6 +1152,119 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // AGENT DESIGN - Priority 14
+  // codingbuddy-specific: designing specialist agent JSON definitions
+  // Above brainstorming (10), below TDD (15) — niche design skill
+  // ============================================================================
+  {
+    skillName: 'agent-design',
+    priority: 14,
+    description: 'Design specialist agent JSON definitions for codingbuddy',
+    concepts: {
+      agent_creation: {
+        en: [
+          'create agent',
+          'new agent',
+          'design agent',
+          'build agent',
+          'add agent',
+          'agent definition',
+          'agent design',
+          'define agent',
+          'specialist agent',
+        ],
+        ko: [
+          '에이전트 생성',
+          '에이전트 만들기',
+          '에이전트 설계',
+          '에이전트 추가',
+          '에이전트 정의',
+          '에이전트 디자인',
+          '새 에이전트',
+          '전문가 에이전트',
+        ],
+        ja: [
+          'エージェント作成',
+          'エージェント設計',
+          'エージェント追加',
+          'エージェント定義',
+          '新しいエージェント',
+          'スペシャリストエージェント',
+        ],
+        zh: [
+          '创建代理',
+          '新代理',
+          '设计代理',
+          '添加代理',
+          '代理定义',
+          '专家代理',
+          '智能体设计',
+          '智能体定义',
+        ],
+        es: [
+          'crear agente',
+          'nuevo agente',
+          'diseñar agente',
+          'agregar agente',
+          'definición de agente',
+          'agente especialista',
+        ],
+      },
+      agent_schema: {
+        en: [
+          'agent JSON',
+          'agent schema',
+          'agent config',
+          'agent template',
+          'agent system prompt',
+          'agent expertise',
+        ],
+        ko: [
+          '에이전트 JSON',
+          '에이전트 스키마',
+          '에이전트 설정',
+          '에이전트 템플릿',
+          '에이전트 시스템 프롬프트',
+          '에이전트 전문성',
+        ],
+        ja: [
+          'エージェントJSON',
+          'エージェントスキーマ',
+          'エージェント設定',
+          'エージェントテンプレート',
+          'エージェントシステムプロンプト',
+        ],
+        zh: ['代理JSON', '代理模式', '代理配置', '代理模板', '代理系统提示词', '代理专长'],
+        es: [
+          'JSON de agente',
+          'esquema de agente',
+          'configuración de agente',
+          'plantilla de agente',
+          'prompt del sistema del agente',
+        ],
+      },
+      agent_differentiation: {
+        en: [
+          'agent overlap',
+          'agent differentiation',
+          'agent boundary',
+          'agent scope',
+          'agent tier',
+        ],
+        ko: ['에이전트 중복', '에이전트 차별화', '에이전트 경계', '에이전트 범위', '에이전트 티어'],
+        ja: ['エージェント重複', 'エージェント差別化', 'エージェント境界', 'エージェントスコープ'],
+        zh: ['代理重叠', '代理差异化', '代理边界', '代理范围', '代理层级'],
+        es: [
+          'superposición de agentes',
+          'diferenciación de agentes',
+          'límite de agente',
+          'alcance de agente',
+        ],
+      },
+    },
+  },
+
+  // ============================================================================
   // BRAINSTORMING - Priority 10 (lowest, most general)
   // ============================================================================
   {
