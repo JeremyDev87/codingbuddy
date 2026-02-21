@@ -179,6 +179,137 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // DEPLOYMENT CHECKLIST - Priority 23
+  // Same level as performance-optimization: proactive pre/post deploy validation
+  // ============================================================================
+  {
+    skillName: 'deployment-checklist',
+    priority: 23,
+    description: 'Pre-deploy validation, health checks, and rollback planning',
+    concepts: {
+      deploy: {
+        en: [
+          'deploy',
+          'deployment',
+          'release',
+          'ship',
+          'go live',
+          'push to production',
+          'promote to production',
+          'production deploy',
+        ],
+        ko: ['배포', '릴리즈', '릴리스', '출시', '프로덕션 배포', '운영 배포', '라이브 배포'],
+        ja: ['デプロイ', 'デプロイメント', 'リリース', '本番公開', '本番デプロイ', '本番リリース'],
+        zh: ['部署', '发布', '上线', '推送到生产', '生产部署', '发布上线'],
+        es: [
+          'desplegar',
+          'despliegue',
+          'release',
+          'publicar',
+          'puesta en producción',
+          'lanzamiento',
+        ],
+      },
+      pre_deploy: {
+        en: [
+          'pre-deploy',
+          'pre deploy',
+          'deployment checklist',
+          'deploy checklist',
+          'pre-flight',
+          'preflight',
+          'readiness check',
+          'deploy validation',
+          'smoke test',
+          'go/no-go',
+        ],
+        ko: [
+          '배포 전',
+          '배포 체크리스트',
+          '배포 검증',
+          '사전 점검',
+          '배포 준비',
+          '스모크 테스트',
+          '배포 확인',
+        ],
+        ja: [
+          'デプロイ前',
+          'デプロイチェックリスト',
+          'デプロイ検証',
+          '事前確認',
+          'デプロイ準備',
+          'スモークテスト',
+        ],
+        zh: ['部署前', '部署清单', '部署检查', '预检', '部署准备', '冒烟测试', '上线前检查'],
+        es: [
+          'pre-despliegue',
+          'checklist de despliegue',
+          'validación de despliegue',
+          'verificación previa',
+          'prueba de humo',
+          'preparación de despliegue',
+        ],
+      },
+      rollback: {
+        en: [
+          'rollback plan',
+          'rollback strategy',
+          'revert deployment',
+          'undo deploy',
+          'deployment rollback',
+          'roll back deploy',
+        ],
+        ko: ['롤백 계획', '롤백 전략', '배포 롤백', '배포 되돌리기', '롤백 플랜'],
+        ja: ['ロールバック計画', 'ロールバック戦略', 'デプロイロールバック', 'デプロイ取り消し'],
+        zh: ['回滚计划', '回滚策略', '部署回滚', '撤销部署', '回滚方案'],
+        es: [
+          'plan de rollback',
+          'estrategia de rollback',
+          'revertir despliegue',
+          'deshacer despliegue',
+        ],
+      },
+      health_check: {
+        en: [
+          'health check',
+          'health endpoint',
+          'post-deploy',
+          'post deploy',
+          'post-deployment monitoring',
+          'deploy monitoring',
+          'canary deploy',
+          'blue-green',
+        ],
+        ko: [
+          '헬스 체크',
+          '상태 확인',
+          '배포 후',
+          '배포 모니터링',
+          '카나리 배포',
+          '블루그린',
+          '배포 후 모니터링',
+        ],
+        ja: [
+          'ヘルスチェック',
+          'デプロイ後',
+          'デプロイモニタリング',
+          'カナリアデプロイ',
+          'ブルーグリーン',
+        ],
+        zh: ['健康检查', '部署后', '部署监控', '金丝雀部署', '蓝绿部署', '部署后监控'],
+        es: [
+          'health check',
+          'verificación de salud',
+          'post-despliegue',
+          'monitoreo de despliegue',
+          'despliegue canario',
+          'blue-green',
+        ],
+      },
+    },
+  },
+
+  // ============================================================================
   // PERFORMANCE OPTIMIZATION - Priority 23
   // Just below incident-response: systematic profiling before optimization
   // ============================================================================
