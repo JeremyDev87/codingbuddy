@@ -338,7 +338,12 @@ describe('skill-triggers', () => {
       expect(prReviewPriority).toBeGreaterThan(refactoringPriority!);
       expect(refactoringPriority).toBeGreaterThan(writingPriority!);
       expect(writingPriority).toBeGreaterThan(frontendPriority!);
-      expect(frontendPriority).toBeGreaterThan(tddPriority!);
+      const codeExplanationPriority = priorities.find(p => p.name === 'code-explanation')?.priority;
+      const docGenPriority = priorities.find(p => p.name === 'documentation-generation')?.priority;
+
+      expect(frontendPriority).toBeGreaterThan(codeExplanationPriority!);
+      expect(codeExplanationPriority).toBeGreaterThan(docGenPriority!);
+      expect(docGenPriority).toBeGreaterThan(tddPriority!);
       expect(tddPriority).toBeGreaterThan(brainstormingPriority!);
     });
   });
@@ -914,6 +919,116 @@ describe('skill-triggers', () => {
           const matched = trigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('code-explanation skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have code-explanation skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'code-explanation');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(17);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'explain this code to me',
+        'can you explain the authentication flow',
+        'walk me through this function',
+        'how does this work exactly',
+        'what does this do',
+        'I need a code walkthrough',
+        'give me a codebase overview',
+        'I am new to this project, onboarding please',
+        'analyze code in this module',
+        'architecture overview of the system',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'code-explanation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '이 코드 설명해줘',
+        '코드 분석 부탁해',
+        '이게 뭐야 이 함수',
+        '어떻게 동작하는거야',
+        '온보딩 자료 만들어줘',
+        '프로젝트 구조 설명해 줘',
+        '코드 워크스루 해줘',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'code-explanation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'このコードを説明してください',
+        'コード説明お願いします',
+        'どう動くか教えて',
+        'オンボーディング資料',
+        'アーキテクチャ概要を教えて',
+        'コードウォークスルーして',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'code-explanation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '解释代码给我',
+        '这是什么代码',
+        '怎么工作的',
+        '代码分析一下',
+        '代码库概览',
+        '项目结构说明',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'code-explanation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'explicar este código',
+        'cómo funciona esto',
+        'qué hace esto exactamente',
+        'análisis de código por favor',
+        'visión general de arquitectura',
+        'soy nuevo en esto, necesito guía',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'code-explanation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'deploy to production',
+        'write unit tests',
+        'create a new component',
+        'optimize performance',
+        'update the README',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'code-explanation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
       });
     });
   });
