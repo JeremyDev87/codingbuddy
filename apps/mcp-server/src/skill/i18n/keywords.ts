@@ -518,6 +518,66 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // DOCUMENTATION GENERATION - Priority 16
+  // Above TDD (15): documentation is a concrete deliverable, not just process
+  // ============================================================================
+  {
+    skillName: 'documentation-generation',
+    priority: 16,
+    description: 'Generate README, API docs, CHANGELOG, and ADRs from code',
+    concepts: {
+      readme: {
+        en: ['README', 'write documentation', 'create documentation', 'technical documentation'],
+        ko: ['README', '문서 작성', '기술 문서'],
+        ja: [
+          'README',
+          'ドキュメント作成',
+          'ドキュメントを作成',
+          '技術文書',
+          'ドキュメント生成',
+          '文書化',
+        ],
+        zh: ['README', '写文档', '技术文档', '文档生成', '文档化'],
+        es: ['README', 'escribir documentación', 'documentación técnica'],
+      },
+      api_docs: {
+        en: [
+          'API docs',
+          'API documentation',
+          'API reference',
+          'generate docs',
+          'generate documentation',
+        ],
+        ko: ['API 문서', 'API 레퍼런스', '문서 생성'],
+        ja: ['APIドキュメント', 'APIリファレンス', 'ドキュメント生成'],
+        zh: ['API文档', 'API参考', '生成文档'],
+        es: ['documentación API', 'referencia API', 'generar documentación'],
+      },
+      changelog: {
+        en: ['CHANGELOG', 'changelog', 'release notes', 'change log'],
+        ko: ['CHANGELOG', '릴리즈 노트', '변경 이력'],
+        ja: ['CHANGELOG', 'リリースノート', '変更履歴'],
+        zh: ['CHANGELOG', '发布说明', '更新日志'],
+        es: ['CHANGELOG', 'notas de versión', 'registro de cambios'],
+      },
+      adr: {
+        en: ['ADR', 'architecture decision', 'decision record'],
+        ko: ['ADR', '아키텍처 결정', '결정 기록'],
+        ja: ['ADR', 'アーキテクチャ決定', '決定記録'],
+        zh: ['ADR', '架构决策', '决策记录'],
+        es: ['ADR', 'decisión de arquitectura', 'registro de decisión'],
+      },
+      document: {
+        en: ['document this', 'document the', 'documenting'],
+        ko: ['문서화'],
+        ja: ['ドキュメント化'],
+        zh: ['文档化'],
+        es: ['documentar'],
+      },
+    },
+  },
+
+  // ============================================================================
   // WRITING PLANS - Priority 20
   // ============================================================================
   {
