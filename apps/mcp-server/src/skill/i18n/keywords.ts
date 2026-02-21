@@ -1333,6 +1333,126 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // MCP BUILDER - Priority 13
+  // codingbuddy-specific: building/extending NestJS-based MCP servers
+  // Same priority as rule-authoring (13) — niche codingbuddy development skill
+  // ============================================================================
+  {
+    skillName: 'mcp-builder',
+    priority: 13,
+    description: 'NestJS-based MCP server development with Tools/Resources/Prompts design',
+    concepts: {
+      mcp_server: {
+        en: [
+          'MCP server',
+          'MCP tool',
+          'MCP resource',
+          'MCP prompt',
+          'Model Context Protocol',
+          'build MCP',
+          'create MCP',
+          'extend MCP',
+          'add MCP',
+        ],
+        ko: [
+          'MCP 서버',
+          'MCP 도구',
+          'MCP 리소스',
+          'MCP 프롬프트',
+          'MCP 확장',
+          'MCP 구축',
+          'MCP 추가',
+        ],
+        ja: ['MCPサーバー', 'MCPツール', 'MCPリソース', 'MCPプロンプト', 'MCP拡張', 'MCP構築'],
+        zh: ['MCP服务器', 'MCP工具', 'MCP资源', 'MCP提示词', 'MCP扩展', 'MCP构建'],
+        es: [
+          'servidor MCP',
+          'herramienta MCP',
+          'recurso MCP',
+          'prompt MCP',
+          'extender MCP',
+          'construir MCP',
+        ],
+      },
+      mcp_capability: {
+        en: [
+          'tool handler',
+          'resource handler',
+          'prompt handler',
+          'inputSchema',
+          'tool schema',
+          'MCP capability',
+          'tool definition',
+          'resource definition',
+        ],
+        ko: [
+          '툴 핸들러',
+          '리소스 핸들러',
+          '프롬프트 핸들러',
+          '입력 스키마',
+          'MCP 기능',
+          '도구 정의',
+          '리소스 정의',
+        ],
+        ja: [
+          'ツールハンドラー',
+          'リソースハンドラー',
+          'プロンプトハンドラー',
+          '入力スキーマ',
+          'MCP機能',
+          'ツール定義',
+        ],
+        zh: [
+          '工具处理器',
+          '资源处理器',
+          '提示词处理器',
+          '输入模式',
+          'MCP能力',
+          '工具定义',
+          '资源定义',
+        ],
+        es: [
+          'manejador de herramienta',
+          'manejador de recurso',
+          'manejador de prompt',
+          'esquema de entrada',
+          'capacidad MCP',
+          'definición de herramienta',
+        ],
+      },
+      mcp_transport: {
+        en: [
+          'stdio transport',
+          'SSE transport',
+          'stdio mode',
+          'SSE mode',
+          'MCP transport',
+          'server transport',
+          'SSE endpoint',
+        ],
+        ko: ['stdio 전송', 'SSE 전송', 'stdio 모드', 'SSE 모드', 'MCP 전송', 'SSE 엔드포인트'],
+        ja: [
+          'stdioトランスポート',
+          'SSEトランスポート',
+          'stdioモード',
+          'SSEモード',
+          'MCPトランスポート',
+          'SSEエンドポイント',
+        ],
+        zh: ['stdio传输', 'SSE传输', 'stdio模式', 'SSE模式', 'MCP传输', 'SSE端点'],
+        es: [
+          'transporte stdio',
+          'transporte SSE',
+          'modo stdio',
+          'modo SSE',
+          'transporte MCP',
+          'endpoint SSE',
+        ],
+      },
+    },
+  },
+
+  // ============================================================================
   // AGENT DESIGN - Priority 14
   // codingbuddy-specific: designing specialist agent JSON definitions
   // Above brainstorming (10), below TDD (15) — niche design skill
