@@ -26,25 +26,37 @@ What this agent explicitly does NOT handle is as important as what it does.
 
 ## Agent Schema Reference
 
-Agents are defined in `packages/rules/.ai-rules/agents/<name>.json`:
+Agents are defined in `packages/rules/.ai-rules/agents/<name>.json` (filename is kebab-case):
 
 ```json
 {
-  "name": "my-specialist",
-  "displayName": "My Specialist",
+  "name": "My Specialist",
   "description": "One-sentence description of what this agent specializes in",
-  "systemPrompt": "# My Specialist\n\nYou are a ...",
-  "expertise": [
-    "Domain Expertise Area 1",
-    "Domain Expertise Area 2",
-    "Domain Expertise Area 3"
-  ],
-  "triggers": {
-    "keywords": ["keyword1", "keyword2"],
-    "patterns": ["pattern that indicates this agent should activate"]
+  "role": {
+    "title": "Specialist Role Title",
+    "type": "specialist",
+    "expertise": [
+      "Domain Expertise Area 1",
+      "Domain Expertise Area 2",
+      "Domain Expertise Area 3"
+    ],
+    "responsibilities": [
+      "Key responsibility 1",
+      "Key responsibility 2"
+    ]
   },
-  "modes": ["PLAN", "ACT", "EVAL"],
-  "tier": "specialist"
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
+  "modes": {
+    "planning": {
+      "activation": { "trigger": "When planning..." }
+    },
+    "evaluation": {
+      "activation": { "trigger": "When evaluating..." }
+    }
+  }
 }
 ```
 
@@ -52,20 +64,26 @@ Agents are defined in `packages/rules/.ai-rules/agents/<name>.json`:
 
 | Field | Type | Rules |
 |-------|------|-------|
-| `name` | string | `^[a-z0-9-]+$` — lowercase, hyphens only |
-| `displayName` | string | Title case, human-readable |
-| `description` | string | 1-200 chars, one sentence |
-| `systemPrompt` | string | Markdown, starts with `# DisplayName` |
-| `expertise` | string[] | 3-7 items, specific domains |
+| `name` | string | Display name, Title Case (e.g., "Migration Specialist") |
+| `description` | string | 10+ chars, one sentence |
+| `role` | object | Must include `title` at minimum |
+| `role.title` | string | Official role title |
+| `role.expertise` | string[] | 3-7 items, specific domains |
+| `context_files` | string[] | Paths starting with `.ai-rules/` |
+
+> **Note:** The JSON filename uses kebab-case (e.g., `migration-specialist.json`), while `name` is Title Case.
 
 ### Optional Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `triggers.keywords` | string[] | Words that suggest this agent |
-| `triggers.patterns` | string[] | Contextual patterns for activation |
-| `modes` | string[] | PLAN / ACT / EVAL — which modes this agent is used in |
-| `tier` | string | `primary` / `specialist` / `utility` |
+| `role.type` | string | `primary` (main agent in a mode) / `specialist` (domain reviews) |
+| `role.responsibilities` | string[] | Key responsibilities |
+| `modes.planning` | object | Planning mode activation config |
+| `modes.implementation` | object | Implementation mode activation config |
+| `modes.evaluation` | object | Evaluation mode activation config |
+| `activation` | object | Activation triggers, workflow integration |
+| `model` | object | Preferred AI model config (`preferred`, `reason`) |
 
 ## Design Process
 
@@ -142,25 +160,45 @@ Always structure your responses as:
 
 ### Phase 4: Write the JSON
 
+Save as `packages/rules/.ai-rules/agents/migration-specialist.json`:
+
 ```json
 {
-  "name": "migration-specialist",
-  "displayName": "Migration Specialist",
+  "name": "Migration Specialist",
   "description": "Zero-downtime database schema migration planning and execution specialist",
-  "systemPrompt": "# Migration Specialist\n\nYou are a database migration specialist...",
-  "expertise": [
-    "Zero-Downtime Schema Changes",
-    "Expand-Contract Migration Pattern",
-    "Rollback Strategy Design",
-    "Large Data Migration Batching",
-    "Migration Validation Procedures"
-  ],
-  "triggers": {
-    "keywords": ["migration", "schema change", "alter table", "zero downtime"],
-    "patterns": ["adding column to production", "renaming table", "data migration"]
+  "role": {
+    "title": "Database Migration Engineer",
+    "type": "specialist",
+    "expertise": [
+      "Zero-Downtime Schema Changes",
+      "Expand-Contract Migration Pattern",
+      "Rollback Strategy Design",
+      "Large Data Migration Batching",
+      "Migration Validation Procedures"
+    ],
+    "responsibilities": [
+      "Plan and verify zero-downtime schema migrations",
+      "Design rollback strategies for all migration scenarios",
+      "Validate data integrity pre and post migration"
+    ]
   },
-  "modes": ["PLAN", "EVAL"],
-  "tier": "specialist"
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
+  "modes": {
+    "planning": {
+      "activation": {
+        "trigger": "When planning database schema migrations",
+        "auto_activate_conditions": ["Schema change planning", "Migration strategy design"]
+      }
+    },
+    "evaluation": {
+      "activation": {
+        "trigger": "When evaluating migration safety and rollback readiness"
+      }
+    }
+  }
 }
 ```
 
@@ -170,10 +208,10 @@ Always structure your responses as:
 # Validate JSON syntax
 cat packages/rules/.ai-rules/agents/my-agent.json | jq .
 
-# Check name uniqueness
+# Check filename uniqueness (filenames are kebab-case)
 ls packages/rules/.ai-rules/agents/ | grep "my-agent"
 
-# Validate against schema
+# Validate against schema (required: name, description, role, context_files)
 npx ajv validate \
   -s packages/rules/.ai-rules/schemas/agent.schema.json \
   -d packages/rules/.ai-rules/agents/my-agent.json
@@ -198,7 +236,7 @@ npx ajv validate \
 | System prompt has no "you do NOT handle" | Every agent needs explicit boundaries |
 | Expertise items are vague ("databases") | Make specific ("PostgreSQL Query Optimization") |
 | No mode specified | Always define which PLAN/ACT/EVAL modes apply |
-| Name uses camelCase | Use kebab-case only |
+| Filename uses camelCase | Use kebab-case for filenames (e.g., `my-agent.json`) |
 
 ## Quick Reference
 
@@ -207,7 +245,6 @@ Agent Tier Definitions:
 ─────────────────────────────
 primary     → Used as main agent in a mode (solution-architect, plan-mode)
 specialist  → Called in parallel for domain reviews (security-specialist)
-utility     → Helper agent for specific tasks (code-reviewer)
 
 Mode Usage:
 ─────────────────────────────
@@ -225,7 +262,7 @@ ALL    → Cross-cutting agents (code-reviewer)
 - [ ] System prompt includes "what this agent does NOT handle"
 - [ ] 3-7 expertise items, all specific
 - [ ] JSON validates against agent.schema.json
-- [ ] Name follows kebab-case convention
+- [ ] Filename follows kebab-case convention
 - [ ] Modes reflect actual usage patterns
 - [ ] README.md updated with new agent
 - [ ] Added to relevant adapter configurations
