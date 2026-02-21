@@ -438,6 +438,86 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // SECURITY AUDIT - Priority 22
+  // Same priority as pr-review/executing-plans: mandatory action skill before shipping
+  // ============================================================================
+  {
+    skillName: 'security-audit',
+    priority: 22,
+    description: 'OWASP Top 10 based security review, secrets scanning, auth/authz checks',
+    concepts: {
+      security: {
+        en: [
+          'security review',
+          'security audit',
+          'security check',
+          'OWASP',
+          'secure code',
+          'security assessment',
+        ],
+        ko: ['보안 검토', '보안 감사', '보안 점검', '보안 리뷰', 'OWASP', '시큐리티 감사'],
+        ja: ['セキュリティレビュー', 'セキュリティ監査', 'セキュリティチェック', 'OWASP'],
+        zh: ['安全审查', '安全审计', '安全检查', 'OWASP', '安全评估'],
+        es: ['revisión de seguridad', 'auditoría de seguridad', 'OWASP', 'evaluación de seguridad'],
+      },
+      vulnerability: {
+        en: [
+          'vulnerability',
+          'vulnerabilities',
+          'CVE',
+          'exploit',
+          'injection',
+          'XSS',
+          'CSRF',
+          'SSRF',
+          'SQL injection',
+        ],
+        ko: ['취약점', '취약성', 'CVE', '인젝션', 'SQL 인젝션', 'XSS', 'CSRF'],
+        ja: ['脆弱性', 'CVE', 'インジェクション', 'SQLインジェクション', 'XSS'],
+        zh: ['漏洞', 'CVE', '注入', 'SQL注入', 'XSS', 'CSRF', 'SSRF'],
+        es: ['vulnerabilidad', 'vulnerabilidades', 'CVE', 'inyección', 'SQL injection', 'XSS'],
+      },
+      credentials: {
+        en: [
+          'hardcoded secret',
+          'hardcoded secrets',
+          'exposed credential',
+          'API key leak',
+          'token leak',
+          'secrets scan',
+        ],
+        ko: ['하드코딩된 시크릿', '자격증명 노출', 'API 키 유출', '토큰 유출', '시크릿 스캔'],
+        ja: ['ハードコードシークレット', '認証情報漏洩', 'APIキー漏洩', 'シークレットスキャン'],
+        zh: ['硬编码密钥', '凭据泄露', 'API密钥泄露', 'token泄露', '密钥扫描'],
+        es: [
+          'secreto hardcodeado',
+          'credencial expuesta',
+          'fuga de API key',
+          'escaneo de secretos',
+        ],
+      },
+      auth: {
+        en: [
+          'authentication flaw',
+          'authorization bypass',
+          'access control',
+          'broken auth',
+          'privilege escalation',
+        ],
+        ko: ['인증 결함', '인가 우회', '접근 제어', '권한 상승', '인증 취약점'],
+        ja: ['認証の欠陥', '認可バイパス', 'アクセス制御', '権限昇格'],
+        zh: ['认证缺陷', '授权绕过', '访问控制', '权限提升'],
+        es: [
+          'fallo de autenticación',
+          'bypass de autorización',
+          'control de acceso',
+          'escalación de privilegios',
+        ],
+      },
+    },
+  },
+
+  // ============================================================================
   // WRITING PLANS - Priority 20
   // ============================================================================
   {
