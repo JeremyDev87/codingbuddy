@@ -646,4 +646,116 @@ describe('skill-triggers', () => {
       );
     });
   });
+
+  describe('security-audit skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have security-audit skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'security-audit');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(22);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'do a security review before shipping',
+        'run a security audit on this code',
+        'security check on the API endpoints',
+        'OWASP compliance check needed',
+        'check for vulnerabilities in the code',
+        'found a CVE in a dependency',
+        'there is an XSS vulnerability here',
+        'check for SQL injection risks',
+        'scan for hardcoded secrets',
+        'check for authentication flaw in login',
+        'there is an authorization bypass in this route',
+        'review access control implementation',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'security-audit');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '보안 검토 해줘',
+        '보안 감사 실시해',
+        '보안 점검 부탁해',
+        'OWASP 체크리스트 확인해',
+        '취약점 있는지 봐줘',
+        'SQL 인젝션 위험 확인해',
+        '하드코딩된 시크릿 스캔해줘',
+        '인가 우회 문제 검토해',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'security-audit');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'セキュリティレビューをお願いします',
+        'セキュリティ監査を実施してください',
+        'OWASP準拠チェックが必要です',
+        '脆弱性がないか確認してください',
+        'SQLインジェクションのリスクを確認',
+        '認証の欠陥を調べてください',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'security-audit');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '做一次安全审查',
+        '进行安全审计',
+        'OWASP合规检查',
+        '检查漏洞',
+        '检查SQL注入风险',
+        '检查认证缺陷',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'security-audit');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'hacer una revisión de seguridad',
+        'realizar auditoría de seguridad',
+        'verificar cumplimiento OWASP',
+        'buscar vulnerabilidades en el código',
+        'revisar inyección SQL',
+        'fallo de autenticación detectado',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'security-audit');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'review my essay',
+        'check the weather',
+        'improve performance',
+        'add a new feature',
+        'write unit tests',
+        'update the README',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'security-audit');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+  });
 });
