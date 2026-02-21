@@ -1168,4 +1168,126 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('agent-design skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have agent-design skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'agent-design');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(14);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'create a new agent for the project',
+        'design agent for code review',
+        'I need to add agent for security',
+        'write an agent definition',
+        'build a specialist agent',
+        'update the agent JSON schema',
+        'write the agent system prompt',
+        'check agent differentiation',
+        'define agent scope and boundary',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'agent-design');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '새 에이전트 만들어줘',
+        '에이전트 설계 해주세요',
+        '에이전트 추가하고 싶어',
+        '에이전트 JSON 작성해줘',
+        '에이전트 스키마 확인해',
+        '에이전트 중복 검사해줘',
+        '전문가 에이전트 정의해',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'agent-design');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'エージェント作成してください',
+        'エージェント設計お願い',
+        '新しいエージェントを追加',
+        'エージェントJSON書いて',
+        'エージェント差別化を確認',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'agent-design');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '创建代理定义',
+        '设计代理模板',
+        '添加代理到项目',
+        '代理JSON配置',
+        '检查代理重叠',
+        '智能体设计',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'agent-design');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'crear agente especialista',
+        'diseñar agente para revisión',
+        'nuevo agente para el proyecto',
+        'esquema de agente JSON',
+        'verificar diferenciación de agentes',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'agent-design');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'review this PR',
+        'optimize performance',
+        'write documentation',
+        'the travel agent booked my flight',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'agent-design');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have lower priority than TDD (15)', () => {
+        const agentDesignTrigger = triggers.find(t => t.skillName === 'agent-design');
+        const tddTrigger = triggers.find(t => t.skillName === 'test-driven-development');
+        expect(tddTrigger?.priority).toBeGreaterThan(agentDesignTrigger!.priority);
+      });
+
+      it('should have higher priority than brainstorming (10)', () => {
+        const agentDesignTrigger = triggers.find(t => t.skillName === 'agent-design');
+        const brainstormingTrigger = triggers.find(t => t.skillName === 'brainstorming');
+        expect(agentDesignTrigger?.priority).toBeGreaterThan(brainstormingTrigger!.priority);
+      });
+    });
+  });
 });
