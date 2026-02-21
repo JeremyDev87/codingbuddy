@@ -1436,6 +1436,141 @@ describe('skill-triggers', () => {
     });
   });
 
+  describe('context-management skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have context-management skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'context-management');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(16);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'preserve context across sessions',
+        'save context before compaction',
+        'context management for this task',
+        'update the context document',
+        'read the context file',
+        'session continuity is important',
+        'resume session from where I left off',
+        'context window is running low',
+        'decisions need to persist across sessions',
+        'start a new session and check context',
+        'end session and save progress',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'context-management');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '컨텍스트 관리 해줘',
+        '컨텍스트 보존해줘',
+        '세션 재개할게',
+        '세션 종료하기 전에 저장해',
+        '컨텍스트 문서 업데이트해',
+        '결정 사항 기록해줘',
+        '컨텍스트 윈도우가 부족해',
+        '이전 세션에서 이어서 작업',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'context-management');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'コンテキスト管理をお願いします',
+        'コンテキストを保存して',
+        'セッション再開します',
+        'セッション終了前に保存して',
+        'コンテキストドキュメントを更新して',
+        '決定事項を記録して',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'context-management');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '上下文管理',
+        '保存上下文',
+        '会话恢复',
+        '会话结束前保存',
+        '更新上下文文档',
+        '记录决策',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'context-management');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'gestión de contexto por favor',
+        'preservar contexto entre sesiones',
+        'reanudar sesión anterior',
+        'guardar contexto antes de terminar',
+        'actualizar documento de contexto',
+        'registrar decisiones tomadas',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'context-management');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'review this PR',
+        'create a new component',
+        'optimize performance',
+        'write documentation',
+        'explain this code',
+        'design a new agent',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'context-management');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have same priority as documentation-generation (16)', () => {
+        const contextTrigger = triggers.find(t => t.skillName === 'context-management');
+        const docGenTrigger = triggers.find(t => t.skillName === 'documentation-generation');
+        expect(contextTrigger?.priority).toBe(docGenTrigger?.priority);
+      });
+
+      it('should have higher priority than TDD (15)', () => {
+        const contextTrigger = triggers.find(t => t.skillName === 'context-management');
+        const tddTrigger = triggers.find(t => t.skillName === 'test-driven-development');
+        expect(contextTrigger?.priority).toBeGreaterThan(tddTrigger!.priority);
+      });
+
+      it('should have lower priority than code-explanation (17)', () => {
+        const contextTrigger = triggers.find(t => t.skillName === 'context-management');
+        const codeExplTrigger = triggers.find(t => t.skillName === 'code-explanation');
+        expect(codeExplTrigger?.priority).toBeGreaterThan(contextTrigger!.priority);
+      });
+    });
+  });
+
   describe('mcp-builder skill triggers', () => {
     let triggers: ReturnType<typeof buildTriggersFromKeywords>;
 
