@@ -1566,6 +1566,138 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // CONTEXT MANAGEMENT - Priority 16
+  // Same priority as documentation-generation: concrete process skill
+  // Preserving decisions and progress across sessions and context compaction
+  // ============================================================================
+  {
+    skillName: 'context-management',
+    priority: 16,
+    description: 'Preserve critical decisions across sessions and context compaction',
+    concepts: {
+      context_persistence: {
+        en: [
+          'context management',
+          'preserve context',
+          'save context',
+          'persist context',
+          'context document',
+          'update context',
+          'read context',
+          'context file',
+          'context compaction',
+          'context window',
+        ],
+        ko: [
+          '컨텍스트 관리',
+          '컨텍스트 보존',
+          '컨텍스트 저장',
+          '컨텍스트 유지',
+          '컨텍스트 문서',
+          '컨텍스트 업데이트',
+          '컨텍스트 윈도우',
+          '컨텍스트 압축',
+        ],
+        ja: [
+          'コンテキスト管理',
+          'コンテキスト保存',
+          'コンテキストを保存',
+          'コンテキスト維持',
+          'コンテキストドキュメント',
+          'コンテキスト更新',
+          'コンテキストウィンドウ',
+        ],
+        zh: [
+          '上下文管理',
+          '保存上下文',
+          '持久化上下文',
+          '上下文文档',
+          '更新上下文',
+          '上下文窗口',
+          '上下文压缩',
+        ],
+        es: [
+          'gestión de contexto',
+          'preservar contexto',
+          'guardar contexto',
+          'persistir contexto',
+          'documento de contexto',
+          'actualizar contexto',
+          'ventana de contexto',
+        ],
+      },
+      session_management: {
+        en: [
+          'session continuity',
+          'resume session',
+          'end session',
+          'start session',
+          'session start',
+          'session end',
+          'across sessions',
+          'between sessions',
+          'multi-session',
+          'new session',
+        ],
+        ko: [
+          '세션 연속성',
+          '세션 재개',
+          '세션 종료',
+          '세션 시작',
+          '세션 간',
+          '이전 세션',
+          '새 세션',
+          '멀티 세션',
+        ],
+        ja: [
+          'セッション継続',
+          'セッション再開',
+          'セッション終了',
+          'セッション開始',
+          'セッション間',
+          '前回のセッション',
+        ],
+        zh: ['会话连续性', '会话恢复', '会话结束', '会话开始', '跨会话', '多会话', '上次会话'],
+        es: [
+          'continuidad de sesión',
+          'reanudar sesión',
+          'finalizar sesión',
+          'iniciar sesión',
+          'entre sesiones',
+          'multi-sesión',
+        ],
+      },
+      decision_tracking: {
+        en: [
+          'persist decisions',
+          'track decisions',
+          'record decisions',
+          'decisions persist',
+          'save progress',
+          'save decisions',
+        ],
+        ko: [
+          '결정 사항 기록',
+          '결정 기록',
+          '결정 추적',
+          '결정 보존',
+          '진행 상황 저장',
+          '결정 저장',
+        ],
+        ja: ['決定事項を記録', '決定を追跡', '決定を保存', '進捗を保存', '決定事項の保存'],
+        zh: ['记录决策', '追踪决策', '保存决策', '决策持久化', '保存进度'],
+        es: [
+          'persistir decisiones',
+          'registrar decisiones',
+          'rastrear decisiones',
+          'guardar progreso',
+          'guardar decisiones',
+        ],
+      },
+    },
+  },
+
+  // ============================================================================
   // BRAINSTORMING - Priority 10 (lowest, most general)
   // ============================================================================
   {
