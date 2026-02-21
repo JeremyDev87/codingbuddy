@@ -346,7 +346,12 @@ describe('skill-triggers', () => {
       expect(frontendPriority).toBeGreaterThan(codeExplanationPriority!);
       expect(codeExplanationPriority).toBeGreaterThan(docGenPriority!);
       expect(docGenPriority).toBeGreaterThan(tddPriority!);
-      expect(tddPriority).toBeGreaterThan(brainstormingPriority!);
+      const agentDesignPriority = priorities.find(p => p.name === 'agent-design')?.priority;
+      const ruleAuthoringPriority = priorities.find(p => p.name === 'rule-authoring')?.priority;
+
+      expect(tddPriority).toBeGreaterThan(agentDesignPriority!);
+      expect(agentDesignPriority).toBeGreaterThan(ruleAuthoringPriority!);
+      expect(ruleAuthoringPriority).toBeGreaterThan(brainstormingPriority!);
     });
   });
 
@@ -1287,6 +1292,146 @@ describe('skill-triggers', () => {
         const agentDesignTrigger = triggers.find(t => t.skillName === 'agent-design');
         const brainstormingTrigger = triggers.find(t => t.skillName === 'brainstorming');
         expect(agentDesignTrigger?.priority).toBeGreaterThan(brainstormingTrigger!.priority);
+      });
+    });
+  });
+
+  describe('rule-authoring skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have rule-authoring skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(13);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'write a new coding rule for TypeScript',
+        'create rule for authentication checks',
+        'I need to add a rule to ai-rules',
+        'rule authoring for the project',
+        'check rule quality and ambiguity',
+        'fix this ambiguous rule to be clearer',
+        'make rules multi-tool compatible',
+        'audit rules for consistency',
+        'review rule overlap between files',
+        'quarterly audit of coding rules',
+        'write a Cursor rule for this pattern',
+        'Copilot rule needs updating',
+        'write a rule for auth validation',
+        'create a rule for TypeScript strict mode',
+        'add a rule to the project',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '새 규칙 작성해줘',
+        '코딩 규칙 만들어줘',
+        '규칙 추가하고 싶어',
+        'AI 규칙 정의해줘',
+        '규칙 품질 확인해',
+        '모호한 규칙 수정해',
+        '규칙 호환성 확인해줘',
+        '규칙 감사 실시해',
+        '규칙 중복 검토해줘',
+        '룰 작성 부탁해',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'ルール作成してください',
+        '新しいルール追加して',
+        'コーディングルールを書いて',
+        'ルール品質を確認して',
+        'ルールの曖昧さを修正',
+        'マルチツール互換ルール',
+        'ルール監査お願いします',
+        'ルール重複を確認して',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '编写规则给项目',
+        '创建新规则',
+        '添加编码规则',
+        '规则质量检查',
+        '模糊规则修正',
+        '多工具兼容规则',
+        '规则审计进行',
+        '规则重叠检查',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'escribir regla de codificación',
+        'crear nueva regla para el proyecto',
+        'agregar regla AI al sistema',
+        'verificar calidad de regla',
+        'regla ambigua necesita corrección',
+        'compatibilidad de regla multi-herramienta',
+        'auditoría de reglas del proyecto',
+        'revisar superposición de reglas',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'review this PR',
+        'create a new component',
+        'optimize performance',
+        'write documentation',
+        'explain this code',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have lower priority than agent-design (14)', () => {
+        const ruleAuthoringTrigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const agentDesignTrigger = triggers.find(t => t.skillName === 'agent-design');
+        expect(agentDesignTrigger?.priority).toBeGreaterThan(ruleAuthoringTrigger!.priority);
+      });
+
+      it('should have higher priority than brainstorming (10)', () => {
+        const ruleAuthoringTrigger = triggers.find(t => t.skillName === 'rule-authoring');
+        const brainstormingTrigger = triggers.find(t => t.skillName === 'brainstorming');
+        expect(ruleAuthoringTrigger?.priority).toBeGreaterThan(brainstormingTrigger!.priority);
       });
     });
   });
