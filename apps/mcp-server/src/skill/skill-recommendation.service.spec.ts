@@ -262,6 +262,24 @@ describe('SkillRecommendationService', () => {
       const hasFrontend = result.recommendations.some(r => r.skillName === 'frontend-design');
       expect(hasFrontend).toBe(true);
     });
+
+    it('"Write a README for this project" -> documentation-generation', () => {
+      const result = service.recommendSkills('Write a README for this project');
+
+      const hasDocGen = result.recommendations.some(
+        r => r.skillName === 'documentation-generation',
+      );
+      expect(hasDocGen).toBe(true);
+    });
+
+    it('"Generate API documentation" -> documentation-generation', () => {
+      const result = service.recommendSkills('Generate API documentation');
+
+      const hasDocGen = result.recommendations.some(
+        r => r.skillName === 'documentation-generation',
+      );
+      expect(hasDocGen).toBe(true);
+    });
   });
 
   describe('RecommendSkillsResult structure', () => {

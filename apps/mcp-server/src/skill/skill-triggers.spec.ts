@@ -758,4 +758,163 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('documentation-generation skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have documentation-generation skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(16);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'write a README for this project',
+        'generate documentation for the API',
+        'create API docs',
+        'update the CHANGELOG',
+        'write an ADR for this decision',
+        'document this function',
+        'generate API reference',
+        'create technical documentation',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        'README 작성해줘',
+        'API 문서 만들어줘',
+        'CHANGELOG 업데이트해줘',
+        '문서 작성 부탁해',
+        '문서화 해줘',
+        'ADR 작성해',
+        '기술 문서 작성',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'READMEを書いてください',
+        'APIドキュメントを生成して',
+        'CHANGELOGを更新して',
+        'ドキュメントを作成して',
+        'ADRを書いて',
+        '技術文書を作成',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '写一个README',
+        '生成API文档',
+        '更新CHANGELOG',
+        '写文档',
+        '创建技术文档',
+        '编写ADR',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'escribir README para el proyecto',
+        'generar documentación de la API',
+        'actualizar CHANGELOG',
+        'escribir documentación técnica',
+        'crear ADR para esta decisión',
+        'documentar esta función',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      describe('English', () => {
+        it.each([
+          'fix this bug',
+          'refactor this function',
+          'run performance tests',
+          'deploy to production',
+          'write unit tests for this',
+          'the document is ready',
+          'shared document link',
+          'open the document',
+        ])('should NOT match: %s', prompt => {
+          const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+          const matched = trigger?.patterns.some(p => p.test(prompt));
+          expect(matched).toBe(false);
+        });
+      });
+
+      describe('Korean', () => {
+        it.each(['버그 고쳐줘', '배포 준비해줘', '리팩토링 해줘', '테스트 작성해줘'])(
+          'should NOT match: %s',
+          prompt => {
+            const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+            const matched = trigger?.patterns.some(p => p.test(prompt));
+            expect(matched).toBe(false);
+          },
+        );
+      });
+
+      describe('Japanese', () => {
+        it.each([
+          'バグを修正して',
+          'デプロイしてください',
+          'リファクタリングして',
+          'テストを書いて',
+        ])('should NOT match: %s', prompt => {
+          const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+          const matched = trigger?.patterns.some(p => p.test(prompt));
+          expect(matched).toBe(false);
+        });
+      });
+
+      describe('Chinese', () => {
+        it.each(['修复这个bug', '部署到生产环境', '重构这段代码', '写单元测试'])(
+          'should NOT match: %s',
+          prompt => {
+            const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+            const matched = trigger?.patterns.some(p => p.test(prompt));
+            expect(matched).toBe(false);
+          },
+        );
+      });
+
+      describe('Spanish', () => {
+        it.each([
+          'arreglar este error',
+          'desplegar en producción',
+          'refactorizar este código',
+          'escribir pruebas unitarias',
+        ])('should NOT match: %s', prompt => {
+          const trigger = triggers.find(t => t.skillName === 'documentation-generation');
+          const matched = trigger?.patterns.some(p => p.test(prompt));
+          expect(matched).toBe(false);
+        });
+      });
+    });
+  });
 });
