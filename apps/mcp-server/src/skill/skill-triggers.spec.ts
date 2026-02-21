@@ -330,6 +330,7 @@ describe('skill-triggers', () => {
       const writingPriority = priorities.find(p => p.name === 'writing-plans')?.priority;
       const frontendPriority = priorities.find(p => p.name === 'frontend-design')?.priority;
       const refactoringPriority = priorities.find(p => p.name === 'refactoring')?.priority;
+      const techDebtPriority = priorities.find(p => p.name === 'tech-debt')?.priority;
       const tddPriority = priorities.find(p => p.name === 'test-driven-development')?.priority;
       const brainstormingPriority = priorities.find(p => p.name === 'brainstorming')?.priority;
 
@@ -337,7 +338,8 @@ describe('skill-triggers', () => {
       expect(executingPriority).toBeGreaterThanOrEqual(prReviewPriority!);
       expect(prReviewPriority).toBeGreaterThan(refactoringPriority!);
       expect(refactoringPriority).toBeGreaterThan(writingPriority!);
-      expect(writingPriority).toBeGreaterThan(frontendPriority!);
+      expect(writingPriority).toBeGreaterThan(techDebtPriority!);
+      expect(techDebtPriority).toBeGreaterThan(frontendPriority!);
       const codeExplanationPriority = priorities.find(p => p.name === 'code-explanation')?.priority;
       const docGenPriority = priorities.find(p => p.name === 'documentation-generation')?.priority;
 
@@ -468,8 +470,6 @@ describe('skill-triggers', () => {
         'there is duplicate code here',
         'extract method from this',
         'extract function please',
-        'we have technical debt',
-        'this is legacy code',
         'improve code structure',
         'restructure this class',
       ])('should match: %s', prompt => {
@@ -489,8 +489,6 @@ describe('skill-triggers', () => {
         '정리해줘',
         '깔끔하게 만들어줘',
         '중복 코드가 있어',
-        '기술 부채 정리',
-        '레거시 코드 개선',
         '메서드 추출해줘',
         '함수 추출 부탁',
       ])('should match: %s', prompt => {
@@ -509,8 +507,6 @@ describe('skill-triggers', () => {
         '整理してほしい',
         '重複コードがある',
         'メソッド抽出して',
-        '技術的負債を解消',
-        'レガシーコード改善',
       ])('should match: %s', prompt => {
         const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
@@ -528,8 +524,6 @@ describe('skill-triggers', () => {
         '整理代码',
         '重复代码',
         '提取方法',
-        '技术债务',
-        '遗留代码',
       ])('should match: %s', prompt => {
         const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
@@ -546,8 +540,6 @@ describe('skill-triggers', () => {
         'mejorar estructura',
         'código duplicado aquí',
         'extraer método',
-        'deuda técnica',
-        'código legacy',
       ])('should match: %s', prompt => {
         const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
         const matched = refactoringTrigger?.patterns.some(p => p.test(prompt));
@@ -919,6 +911,150 @@ describe('skill-triggers', () => {
           const matched = trigger?.patterns.some(p => p.test(prompt));
           expect(matched).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('tech-debt skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have tech-debt skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'tech-debt');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(19);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'we have a lot of technical debt',
+        'need a tech debt assessment',
+        'do a tech health review',
+        'run a code health check',
+        'this project suffers from code rot',
+        'code decay is slowing us down',
+        'prioritize our debt paydown',
+        'calculate ROI prioritization for this debt',
+        'create a debt register for the project',
+        'we need to pay down debt this sprint',
+        'quarterly tech review of our codebase',
+        'what is the velocity impact of this debt',
+        'track our debt inventory',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'tech-debt');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '기술 부채 평가해줘',
+        '기술부채 분석 부탁해',
+        '부채 우선순위 정해줘',
+        'ROI 우선순위 계산해',
+        '부채 레지스터 만들어줘',
+        '스프린트 용량 계획',
+        '부채 상환 계획 세워줘',
+        '유지보수성 점검',
+        '분기 부채 리뷰 하자',
+        '코드 건강 점검',
+        '분기 기술 리뷰',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'tech-debt');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        '技術的負債の評価をお願いします',
+        '負債分析してください',
+        '負債優先順位を決めて',
+        'ROI優先順位を計算して',
+        '負債レジスターを作成して',
+        '負債返済計画を立てて',
+        '保守性を確認して',
+        '四半期技術レビューしましょう',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'tech-debt');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '评估技术债务',
+        '技术债分析',
+        '债务优先级排序',
+        'ROI优先级计算',
+        '创建债务登记',
+        '偿还债务计划',
+        '检查可维护性',
+        '季度技术审查进行',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'tech-debt');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'evaluar la deuda técnica',
+        'análisis de deuda tecnológica',
+        'priorización de deuda del proyecto',
+        'calcular priorización ROI',
+        'crear registro de deuda',
+        'pagar deuda técnica este sprint',
+        'revisar mantenibilidad',
+        'revisión trimestral técnica del proyecto',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'tech-debt');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'create a new component',
+        'review this PR',
+        'write documentation',
+        'financial debt management',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'tech-debt');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order with related skills', () => {
+      it('should have lower priority than refactoring (21)', () => {
+        const techDebtTrigger = triggers.find(t => t.skillName === 'tech-debt');
+        const refactoringTrigger = triggers.find(t => t.skillName === 'refactoring');
+        expect(refactoringTrigger?.priority).toBeGreaterThan(techDebtTrigger!.priority);
+      });
+
+      it('should have higher priority than frontend-design (18)', () => {
+        const techDebtTrigger = triggers.find(t => t.skillName === 'tech-debt');
+        const frontendTrigger = triggers.find(t => t.skillName === 'frontend-design');
+        expect(techDebtTrigger?.priority).toBeGreaterThan(frontendTrigger!.priority);
+      });
+
+      it('should have lower priority than writing-plans (20)', () => {
+        const techDebtTrigger = triggers.find(t => t.skillName === 'tech-debt');
+        const writingPlansTrigger = triggers.find(t => t.skillName === 'writing-plans');
+        expect(writingPlansTrigger?.priority).toBeGreaterThan(techDebtTrigger!.priority);
       });
     });
   });
