@@ -578,6 +578,80 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // CODE EXPLANATION - Priority 17
+  // Above documentation-generation (16): understanding code is prerequisite to documenting
+  // Below frontend-design (18): analysis skill, not creation skill
+  // ============================================================================
+  {
+    skillName: 'code-explanation',
+    priority: 17,
+    description:
+      "Structured code explanation from bird's eye to line-by-line for onboarding and reviews",
+    concepts: {
+      explain: {
+        en: [
+          'explain code',
+          'explain this',
+          'explain the',
+          'code explanation',
+          'walk me through',
+          'walk through',
+        ],
+        ko: ['코드 설명', '설명해줘', '설명해 줘', '설명 부탁', '코드 분석'],
+        ja: ['コード説明', '説明して', 'コードを説明', '解説して'],
+        zh: ['解释代码', '代码解释', '讲解代码', '说明代码'],
+        es: ['explicar código', 'explicar este', 'explicación de código'],
+      },
+      understand: {
+        en: [
+          'understand code',
+          'understand this',
+          'how does this work',
+          'what does this do',
+          'what is this code',
+        ],
+        ko: ['이해', '이게 뭐야', '어떻게 동작', '어떻게 작동', '뭐하는 코드'],
+        ja: ['理解', 'どう動く', '何をする', 'これは何'],
+        zh: ['理解代码', '这是什么', '怎么工作', '做什么的'],
+        es: ['entender código', 'cómo funciona', 'qué hace esto'],
+      },
+      onboarding: {
+        en: [
+          'onboarding',
+          'new to this',
+          'unfamiliar',
+          'codebase overview',
+          'codebase tour',
+          'getting started with code',
+        ],
+        ko: ['온보딩', '처음 보는', '익숙하지 않', '코드베이스 개요', '코드 투어'],
+        ja: ['オンボーディング', '初めて見る', '不慣れ', 'コードベース概要'],
+        zh: ['入职', '不熟悉', '代码库概览', '代码导览'],
+        es: ['incorporación', 'nuevo en esto', 'desconocido', 'visión general del código'],
+      },
+      review_explanation: {
+        en: ['code review explanation', 'analyze code', 'code analysis', 'code walkthrough'],
+        ko: ['코드 리뷰 설명', '코드 워크스루', '분석해줘'],
+        ja: ['コードレビュー説明', 'コード分析', 'コードウォークスルー'],
+        zh: ['代码审查说明', '代码分析', '代码走查'],
+        es: ['explicación de revisión', 'analizar código', 'análisis de código'],
+      },
+      architecture_explanation: {
+        en: [
+          'architecture overview',
+          'system overview',
+          'how is this organized',
+          'project structure',
+        ],
+        ko: ['아키텍처 개요', '시스템 개요', '프로젝트 구조', '전체 구조'],
+        ja: ['アーキテクチャ概要', 'システム概要', 'プロジェクト構造'],
+        zh: ['架构概览', '系统概览', '项目结构', '整体结构'],
+        es: ['visión general de arquitectura', 'visión del sistema', 'estructura del proyecto'],
+      },
+    },
+  },
+
+  // ============================================================================
   // WRITING PLANS - Priority 20
   // ============================================================================
   {
