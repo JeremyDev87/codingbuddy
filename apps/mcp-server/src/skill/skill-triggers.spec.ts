@@ -1707,4 +1707,142 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('deployment-checklist skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have deployment-checklist skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(23);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'deploy to production',
+        'deployment checklist for the release',
+        'pre-deploy validation steps',
+        'run smoke test before shipping',
+        'we need a rollback plan',
+        'health check after deployment',
+        'post-deploy monitoring setup',
+        'go live with the new version',
+        'canary deploy strategy',
+        'blue-green deployment approach',
+        'push to production today',
+        'promote to production after staging',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '프로덕션 배포 준비해',
+        '배포 체크리스트 확인해',
+        '배포 전 점검 해야 해',
+        '배포 검증 절차 알려줘',
+        '롤백 계획 세워줘',
+        '배포 후 모니터링 해야 해',
+        '헬스 체크 설정해줘',
+        '카나리 배포 전략 알려줘',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'デプロイ前の確認をお願いします',
+        'デプロイチェックリストを確認して',
+        '本番デプロイの準備をして',
+        'ロールバック計画を立てて',
+        'ヘルスチェックを設定して',
+        'カナリアデプロイの戦略を教えて',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '部署前检查清单',
+        '部署清单确认',
+        '生产部署准备',
+        '回滚计划制定',
+        '健康检查设置',
+        '金丝雀部署策略',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'checklist de despliegue por favor',
+        'validación de despliegue previa',
+        'preparar despliegue a producción',
+        'plan de rollback para el release',
+        'health check después del despliegue',
+        'despliegue canario para el servicio',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'review this PR',
+        'create a new component',
+        'optimize performance',
+        'explain this code',
+        'design a new agent',
+        'write documentation',
+        'manage context across sessions',
+        'production incident occurred',
+        'rollback the failed service',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have lower priority than incident-response (24)', () => {
+        const deployTrigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const incidentTrigger = triggers.find(t => t.skillName === 'incident-response');
+        expect(incidentTrigger?.priority).toBeGreaterThan(deployTrigger!.priority);
+      });
+
+      it('should have same priority as performance-optimization (23)', () => {
+        const deployTrigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const perfTrigger = triggers.find(t => t.skillName === 'performance-optimization');
+        expect(deployTrigger?.priority).toBe(perfTrigger?.priority);
+      });
+
+      it('should have higher priority than database-migration (22)', () => {
+        const deployTrigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        const dbTrigger = triggers.find(t => t.skillName === 'database-migration');
+        expect(deployTrigger?.priority).toBeGreaterThan(dbTrigger!.priority);
+      });
+    });
+  });
 });
