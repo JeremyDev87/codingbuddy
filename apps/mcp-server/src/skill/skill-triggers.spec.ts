@@ -1435,4 +1435,141 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('mcp-builder skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have mcp-builder skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(13);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'build an MCP server for this project',
+        'create a new MCP tool for search',
+        'add MCP resource for config data',
+        'extend MCP with a new prompt',
+        'implement Model Context Protocol server',
+        'need a tool handler for this feature',
+        'design the inputSchema for this tool',
+        'add SSE transport to the server',
+        'implement stdio transport mode',
+        'create an SSE endpoint for the MCP server',
+        'define MCP capability for data access',
+        'write a resource definition for rules',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        'MCP 서버 구축하자',
+        'MCP 도구 추가해줘',
+        'MCP 리소스 정의해',
+        'MCP 프롬프트 만들어줘',
+        'MCP 확장하고 싶어',
+        '툴 핸들러 작성해',
+        '입력 스키마 설계해줘',
+        'SSE 전송 구현해',
+        'stdio 모드 설정해줘',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'MCPサーバーを構築して',
+        'MCPツールを追加してください',
+        'MCPリソースを定義して',
+        'ツールハンドラーを作成して',
+        'SSEトランスポートを実装して',
+        'stdioモードを設定して',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '构建MCP服务器',
+        '添加MCP工具',
+        '定义MCP资源',
+        '创建工具处理器',
+        '实现SSE传输',
+        '配置stdio模式',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'construir servidor MCP para el proyecto',
+        'crear herramienta MCP para búsqueda',
+        'agregar recurso MCP para configuración',
+        'implementar transporte SSE',
+        'configurar modo stdio',
+        'definir esquema de entrada para la herramienta',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'review this PR',
+        'create a new React component',
+        'optimize database queries',
+        'write documentation',
+        'explain this code',
+        'design a new agent',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have same priority as rule-authoring (13)', () => {
+        const mcpBuilderTrigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const ruleAuthoringTrigger = triggers.find(t => t.skillName === 'rule-authoring');
+        expect(mcpBuilderTrigger?.priority).toBe(ruleAuthoringTrigger?.priority);
+      });
+
+      it('should have lower priority than agent-design (14)', () => {
+        const mcpBuilderTrigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const agentDesignTrigger = triggers.find(t => t.skillName === 'agent-design');
+        expect(agentDesignTrigger?.priority).toBeGreaterThan(mcpBuilderTrigger!.priority);
+      });
+
+      it('should have higher priority than brainstorming (10)', () => {
+        const mcpBuilderTrigger = triggers.find(t => t.skillName === 'mcp-builder');
+        const brainstormingTrigger = triggers.find(t => t.skillName === 'brainstorming');
+        expect(mcpBuilderTrigger?.priority).toBeGreaterThan(brainstormingTrigger!.priority);
+      });
+    });
+  });
 });
