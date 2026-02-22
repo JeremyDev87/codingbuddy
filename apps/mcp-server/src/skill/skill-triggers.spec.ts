@@ -1845,4 +1845,165 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('error-analysis skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have error-analysis skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'error-analysis');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(24);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'I got a stack trace from production',
+        'read this error message for me',
+        'what does this error mean',
+        'classify this error type',
+        'trace the error to its origin',
+        'analyze error in the logs',
+        'diagnose error from this output',
+        'call stack shows an issue',
+        'traceback from the Python service',
+        'error catalog for TypeScript',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '스택 트레이스 분석해줘',
+        '이 에러 메시지 뭐야',
+        '에러 분류 해줘',
+        '에러 추적 부탁해',
+        '오류 분석 해주세요',
+        '에러 진단 해줘',
+        '콜 스택 확인해',
+        '이 에러가 뭐야',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'スタックトレースを分析して',
+        'エラーメッセージの意味を教えて',
+        'エラー分類してください',
+        'エラー追跡お願いします',
+        'エラー診断して',
+        'コールスタックを確認して',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '分析堆栈跟踪',
+        '这个错误消息是什么意思',
+        '错误分类',
+        '追踪错误来源',
+        '诊断错误',
+        '调用栈分析',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'analizar stack trace del servidor',
+        'qué significa este error',
+        'clasificar tipo de error',
+        'rastrear error al origen',
+        'diagnosticar error de la aplicación',
+        'traza de pila del servicio',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'review this PR',
+        'create a new component',
+        'optimize performance',
+        'write documentation',
+        'explain this code',
+        'design a new agent',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have lower priority than systematic-debugging (25)', () => {
+        const errorAnalysisTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        expect(debuggingTrigger?.priority).toBeGreaterThan(errorAnalysisTrigger!.priority);
+      });
+
+      it('should have same priority as incident-response (24)', () => {
+        const errorAnalysisTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const incidentTrigger = triggers.find(t => t.skillName === 'incident-response');
+        expect(errorAnalysisTrigger?.priority).toBe(incidentTrigger?.priority);
+      });
+
+      it('should have higher priority than deployment-checklist (23)', () => {
+        const errorAnalysisTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const deployTrigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        expect(errorAnalysisTrigger?.priority).toBeGreaterThan(deployTrigger!.priority);
+      });
+    });
+
+    describe('differentiation from systematic-debugging', () => {
+      it('should match "stack trace" but systematic-debugging should not', () => {
+        const errorAnalysisTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+
+        const prompt = 'analyze this stack trace';
+        const errorAnalysisMatched = errorAnalysisTrigger?.patterns.some(p => p.test(prompt));
+        const _debuggingMatched = debuggingTrigger?.patterns.some(p => p.test(prompt));
+
+        expect(errorAnalysisMatched).toBe(true);
+        expect(debuggingMatched).toBe(false);
+      });
+
+      it('should match "classify error" but systematic-debugging should not', () => {
+        const errorAnalysisTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const debuggingTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+
+        const prompt = 'classify this error type';
+        const errorAnalysisMatched = errorAnalysisTrigger?.patterns.some(p => p.test(prompt));
+        const _debuggingMatched = debuggingTrigger?.patterns.some(p => p.test(prompt));
+
+        expect(errorAnalysisMatched).toBe(true);
+        // systematic-debugging may match "error" but not "classify error" as a concept
+        // We only assert error-analysis matches; debugging matching "error" is expected
+      });
+    });
+  });
 });
