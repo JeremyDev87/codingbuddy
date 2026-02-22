@@ -1845,4 +1845,159 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('error-analysis skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have error-analysis skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'error-analysis');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(24);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'I got a stack trace from the server',
+        'can you read the stacktrace for me',
+        'look at the call stack and tell me what happened',
+        'what does this error message mean',
+        'read the error and explain it',
+        'analyze the error output',
+        'classify error type for this exception',
+        'what type of error is this',
+        'this is a runtime error in production',
+        'trace to origin of this crash',
+        'where does the error come from',
+        'find the root cause of this failure',
+        'I need a diagnosis of this error',
+        'what could cause this exception',
+        'form a hypothesis about why this fails',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '스택 트레이스를 분석해줘',
+        '콜 스택을 확인해봐',
+        '에러 메시지가 뭘 의미하는지 알려줘',
+        '에러 분석 좀 해줘',
+        '오류 메시지를 읽어봐',
+        '에러 분류 좀 해줘',
+        '이 에러 타입이 뭐야',
+        '런타임 에러가 발생했어',
+        '원인 추적을 해야 해',
+        '근본 원인을 찾아줘',
+        '에러 진단 좀 해줘',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'スタックトレースを見てください',
+        'コールスタックを確認して',
+        'エラーメッセージの意味を教えて',
+        'エラー分析をお願いします',
+        'エラー分類してください',
+        'エラータイプは何ですか',
+        'ランタイムエラーが発生しました',
+        '原因追跡をしてください',
+        '根本原因を見つけて',
+        'エラー診断をお願いします',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '请查看堆栈跟踪',
+        '分析调用栈',
+        '这个错误消息是什么意思',
+        '错误分析一下',
+        '错误分类是什么',
+        '这是什么错误类型',
+        '运行时错误发生了',
+        '追踪根因',
+        '找到根本原因',
+        '错误诊断',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'muestra el stack trace del servidor',
+        'analizar la traza de pila',
+        'qué significa este mensaje de error',
+        'analizar el error de producción',
+        'leer el error y explicarlo',
+        'clasificar error de esta excepción',
+        'cuál es el tipo de error',
+        'error de sintaxis en el código',
+        'encontrar la causa raíz',
+        'origen del error en el sistema',
+        'necesito un diagnóstico de este error',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('negative cases', () => {
+      it.each([
+        'deploy to production',
+        'write a new feature for authentication',
+        'refactor the payment module',
+        'create a REST API endpoint',
+        'optimize database queries',
+        'I got an error',
+        'fix this error please',
+        'there is a bug in the code',
+        'the app crashed',
+        'debug the login flow',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'error-analysis');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have lower priority than systematic-debugging (25)', () => {
+        const errorTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const debugTrigger = triggers.find(t => t.skillName === 'systematic-debugging');
+        expect(debugTrigger?.priority).toBeGreaterThan(errorTrigger!.priority);
+      });
+
+      it('should have same priority as incident-response (24)', () => {
+        const errorTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const incidentTrigger = triggers.find(t => t.skillName === 'incident-response');
+        expect(errorTrigger?.priority).toBe(incidentTrigger?.priority);
+      });
+
+      it('should have higher priority than deployment-checklist (23)', () => {
+        const errorTrigger = triggers.find(t => t.skillName === 'error-analysis');
+        const deployTrigger = triggers.find(t => t.skillName === 'deployment-checklist');
+        expect(errorTrigger?.priority).toBeGreaterThan(deployTrigger!.priority);
+      });
+    });
+  });
 });
