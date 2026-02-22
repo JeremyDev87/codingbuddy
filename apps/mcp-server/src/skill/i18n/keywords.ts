@@ -179,6 +179,163 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
   },
 
   // ============================================================================
+  // ERROR ANALYSIS - Priority 24
+  // Same level as incident-response: structured error reading before debugging
+  // Prerequisite to systematic-debugging: classify and trace BEFORE fixing
+  // ============================================================================
+  {
+    skillName: 'error-analysis',
+    priority: 24,
+    description: 'Classify and trace errors from stack traces to root cause',
+    concepts: {
+      stack_trace: {
+        en: [
+          'stack trace',
+          'stacktrace',
+          'traceback',
+          'call stack',
+          'error trace',
+          'exception trace',
+          'stack frame',
+        ],
+        ko: ['스택 트레이스', '스택 추적', '콜 스택', '호출 스택', '예외 추적'],
+        ja: [
+          'スタックトレース',
+          'コールスタック',
+          'エラートレース',
+          '例外トレース',
+          'スタックフレーム',
+        ],
+        zh: ['堆栈跟踪', '调用栈', '错误追踪', '异常追踪', '堆栈帧'],
+        es: [
+          'stack trace',
+          'traza de pila',
+          'pila de llamadas',
+          'traza de error',
+          'traza de excepción',
+        ],
+      },
+      error_reading: {
+        en: [
+          'read error',
+          'read the error',
+          'understand error',
+          'what does this error mean',
+          'error message',
+          'parse error',
+          'interpret error',
+          'analyze error',
+        ],
+        ko: [
+          '에러 분석',
+          '오류 분석',
+          '에러 메시지',
+          '오류 메시지',
+          '에러 읽기',
+          '에러 해석',
+          '이 에러가 뭐야',
+          '에러 의미',
+        ],
+        ja: [
+          'エラー分析',
+          'エラーメッセージ',
+          'エラーを読む',
+          'エラーの意味',
+          'このエラーは何',
+          'エラー解析',
+        ],
+        zh: [
+          '分析错误',
+          '错误消息',
+          '读取错误',
+          '理解错误',
+          '错误含义',
+          '这个错误是什么',
+          '解析错误',
+        ],
+        es: [
+          'analizar error',
+          'mensaje de error',
+          'leer error',
+          'entender error',
+          'qué significa este error',
+          'interpretar error',
+        ],
+      },
+      error_classification: {
+        en: [
+          'classify error',
+          'error type',
+          'error class',
+          'error category',
+          'type of error',
+          'kind of error',
+          'error catalog',
+          'error pattern',
+        ],
+        ko: [
+          '에러 분류',
+          '오류 분류',
+          '에러 유형',
+          '에러 종류',
+          '오류 유형',
+          '에러 카탈로그',
+          '에러 패턴',
+        ],
+        ja: ['エラー分類', 'エラータイプ', 'エラーの種類', 'エラーカタログ', 'エラーパターン'],
+        zh: ['错误分类', '错误类型', '错误类别', '错误目录', '错误模式'],
+        es: [
+          'clasificar error',
+          'tipo de error',
+          'clase de error',
+          'categoría de error',
+          'catálogo de errores',
+          'patrón de error',
+        ],
+      },
+      diagnosis: {
+        en: [
+          'diagnose error',
+          'error diagnosis',
+          'trace error',
+          'trace the error',
+          'find origin',
+          'find source',
+          'error origin',
+          'where does this error come from',
+        ],
+        ko: [
+          '에러 진단',
+          '오류 진단',
+          '에러 추적',
+          '오류 추적',
+          '원인 추적',
+          '에러 원점',
+          '에러 출처',
+          '어디서 발생한 에러',
+        ],
+        ja: [
+          'エラー診断',
+          'エラー追跡',
+          'エラーの原因を追跡',
+          'エラーの起源',
+          'エラーの出所',
+          'どこから発生した',
+        ],
+        zh: ['诊断错误', '追踪错误', '错误诊断', '错误溯源', '错误来源', '哪里产生的错误'],
+        es: [
+          'diagnosticar error',
+          'diagnóstico de error',
+          'rastrear error',
+          'origen del error',
+          'fuente del error',
+          'de dónde viene este error',
+        ],
+      },
+    },
+  },
+
+  // ============================================================================
   // DEPLOYMENT CHECKLIST - Priority 23
   // Same level as performance-optimization: proactive pre/post deploy validation
   // ============================================================================
