@@ -2138,4 +2138,176 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('prompt-engineering skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have prompt-engineering skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(14);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'I need help with prompt engineering',
+        'write a prompt for this agent',
+        'create prompt for the code reviewer',
+        'design prompt for security analysis',
+        'optimize prompt for better results',
+        'improve the system prompt',
+        'write system prompt for the planner agent',
+        'design system prompt for code review',
+        'the tool description needs improvement',
+        'write tool description for search_rules',
+        'improve MCP tool description',
+        'test prompt with different inputs',
+        'prompt evaluation rubric needed',
+        'check prompt quality and consistency',
+        'use chain of thought for this',
+        'try few-shot approach',
+        'use meta-prompting to improve this',
+        'update CLAUDE.md instructions',
+        'write cursorrules for the project',
+        'copilot instructions need updating',
+        'make AI-readable instructions',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '프롬프트 엔지니어링 해줘',
+        '프롬프트 작성 부탁해',
+        '프롬프트 최적화 해줘',
+        '프롬프트 개선이 필요해',
+        '시스템 프롬프트 작성해줘',
+        '에이전트 프롬프트 설계해',
+        '도구 설명 개선해줘',
+        'MCP 도구 설명 작성해',
+        '프롬프트 테스트 해봐',
+        '프롬프트 품질 확인해',
+        '프롬프트 패턴 적용해',
+        'AI 지시문 작성해줘',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'プロンプトエンジニアリングをお願い',
+        'プロンプト作成してください',
+        'プロンプト最適化して',
+        'システムプロンプト設計して',
+        'ツール説明を改善して',
+        'MCPツール説明を作成して',
+        'プロンプトテストしてください',
+        'プロンプト品質を確認して',
+        'チェーンオブソートを使って',
+        'フューショットで試して',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '提示词工程帮忙做一下',
+        '编写提示词给这个代理',
+        '优化提示词效果',
+        '系统提示词设计',
+        '编写系统提示词',
+        '工具描述需要优化',
+        '测试提示词效果',
+        '提示词质量检查',
+        '思维链方法使用',
+        '少样本方法尝试',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'necesito ingeniería de prompts',
+        'escribir prompt para el agente',
+        'diseñar prompt para revisión de código',
+        'optimizar prompt para mejores resultados',
+        'escribir prompt del sistema',
+        'descripción de herramienta MCP',
+        'evaluación de prompt necesaria',
+        'cadena de pensamiento para esto',
+        'instrucciones AI para el proyecto',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'refactor this function',
+        'write unit tests',
+        'deploy to production',
+        'review this PR',
+        'create a new component',
+        'optimize database queries',
+        'explain this code',
+        'design a new API',
+        'security audit needed',
+        'migrate the database schema',
+        // Ambiguous "prompt" usage - should NOT trigger prompt-engineering
+        'prompt the user for input',
+        'add a confirmation prompt before delete',
+        'show a prompt dialog to the user',
+        'command prompt settings',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have same priority as agent-design (14)', () => {
+        const promptTrigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const agentDesignTrigger = triggers.find(t => t.skillName === 'agent-design');
+        expect(promptTrigger?.priority).toBe(agentDesignTrigger?.priority);
+      });
+
+      it('should have higher priority than rule-authoring (13)', () => {
+        const promptTrigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const ruleAuthoringTrigger = triggers.find(t => t.skillName === 'rule-authoring');
+        expect(promptTrigger?.priority).toBeGreaterThan(ruleAuthoringTrigger!.priority);
+      });
+
+      it('should have lower priority than TDD (15)', () => {
+        const promptTrigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const tddTrigger = triggers.find(t => t.skillName === 'test-driven-development');
+        expect(tddTrigger?.priority).toBeGreaterThan(promptTrigger!.priority);
+      });
+
+      it('should have higher priority than brainstorming (10)', () => {
+        const promptTrigger = triggers.find(t => t.skillName === 'prompt-engineering');
+        const brainstormingTrigger = triggers.find(t => t.skillName === 'brainstorming');
+        expect(promptTrigger?.priority).toBeGreaterThan(brainstormingTrigger!.priority);
+      });
+    });
+  });
 });
