@@ -2000,4 +2000,142 @@ describe('skill-triggers', () => {
       });
     });
   });
+
+  describe('legacy-modernization skill triggers', () => {
+    let triggers: ReturnType<typeof buildTriggersFromKeywords>;
+
+    beforeAll(() => {
+      triggers = buildTriggersFromKeywords(SKILL_KEYWORDS);
+    });
+
+    it('should have legacy-modernization skill registered', () => {
+      const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+      expect(trigger).toBeDefined();
+      expect(trigger?.priority).toBe(20);
+    });
+
+    describe('English triggers', () => {
+      it.each([
+        'modernize the legacy codebase',
+        'migrate from CommonJS to ESM',
+        'strangler fig pattern for the old service',
+        'branch by abstraction to replace the parser',
+        'upgrade from NestJS 9 to NestJS 10',
+        'replace callbacks with async await',
+        'convert to TypeScript for the old modules',
+        'incremental migration of the old module',
+        'deprecated API needs replacement',
+        'modernization plan for the legacy system',
+        'migrate old patterns to modern approach',
+        'rewrite the legacy service incrementally',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Korean triggers', () => {
+      it.each([
+        '레거시 코드 현대화 해줘',
+        'CommonJS에서 ESM으로 마이그레이션',
+        '스트랭글러 피그 패턴으로 교체해',
+        '콜백을 async await로 변환해',
+        'NestJS 메이저 버전 업그레이드',
+        '레거시 시스템 점진적 전환',
+        '구 코드 모던화 계획',
+        '프레임워크 마이그레이션 해야 해',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Japanese triggers', () => {
+      it.each([
+        'レガシーコードのモダナイゼーション',
+        'CommonJSからESMへ移行して',
+        'ストラングラーフィグパターンで置き換え',
+        'コールバックをasync awaitに変換',
+        'フレームワークのメジャーバージョンアップグレード',
+        'レガシーシステムの段階的移行',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Chinese triggers', () => {
+      it.each([
+        '遗留代码现代化',
+        '从CommonJS迁移到ESM',
+        '绞杀者模式替换旧服务',
+        '回调转换为async await',
+        '框架大版本升级',
+        '遗留系统渐进式迁移',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Spanish triggers', () => {
+      it.each([
+        'modernizar el código legacy',
+        'migrar de CommonJS a ESM',
+        'patrón strangler fig para el servicio antiguo',
+        'convertir callbacks a async await',
+        'actualizar la versión mayor del framework',
+        'migración incremental del sistema legacy',
+      ])('should match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(true);
+      });
+    });
+
+    describe('Negative test cases (should NOT match)', () => {
+      it.each([
+        'fix this bug',
+        'write unit tests',
+        'review this PR',
+        'deploy to production',
+        'create a new component',
+        'optimize database queries',
+        'explain this code',
+        'design a new API',
+        'write documentation',
+        'production incident occurred',
+        'refactor this function',
+        'manage technical debt backlog',
+      ])('should NOT match: %s', prompt => {
+        const trigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const matched = trigger?.patterns.some(p => p.test(prompt));
+        expect(matched).toBe(false);
+      });
+    });
+
+    describe('priority order', () => {
+      it('should have lower priority than refactoring (21)', () => {
+        const legacyTrigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const refactorTrigger = triggers.find(t => t.skillName === 'refactoring');
+        expect(refactorTrigger?.priority).toBeGreaterThan(legacyTrigger!.priority);
+      });
+
+      it('should have same priority as writing-plans (20)', () => {
+        const legacyTrigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const plansTrigger = triggers.find(t => t.skillName === 'writing-plans');
+        expect(legacyTrigger?.priority).toBe(plansTrigger?.priority);
+      });
+
+      it('should have higher priority than tech-debt (19)', () => {
+        const legacyTrigger = triggers.find(t => t.skillName === 'legacy-modernization');
+        const techDebtTrigger = triggers.find(t => t.skillName === 'tech-debt');
+        expect(legacyTrigger?.priority).toBeGreaterThan(techDebtTrigger!.priority);
+      });
+    });
+  });
 });
