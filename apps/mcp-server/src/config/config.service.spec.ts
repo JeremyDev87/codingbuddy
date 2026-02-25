@@ -101,6 +101,21 @@ describe('ConfigService', () => {
       expect(existsSync(projectRoot)).toBe(true);
     });
 
+    it('should report source as "env" when CODINGBUDDY_PROJECT_ROOT is set', () => {
+      testTempDir = createTestDir();
+      process.env.CODINGBUDDY_PROJECT_ROOT = testTempDir;
+
+      const service = new ConfigService();
+      expect(service.getProjectRootSource()).toBe('env');
+    });
+
+    it('should report source as "auto_detect" when no env var is set', () => {
+      delete process.env.CODINGBUDDY_PROJECT_ROOT;
+
+      const service = new ConfigService();
+      expect(service.getProjectRootSource()).toBe('auto_detect');
+    });
+
     it('should normalize relative paths in CODINGBUDDY_PROJECT_ROOT', () => {
       // Setup: Create a directory and use path with ..
       testTempDir = createTestDir();
@@ -232,6 +247,26 @@ describe('ConfigService', () => {
       // Use realpathSync because setProjectRootAndReload resolves symlinks
       expect(service.getProjectRoot()).toBe(realpathSync(testTempDir));
       expect(service.isConfigLoaded()).toBe(true);
+    });
+
+    it('should update projectRootSource to "roots_list" after setProjectRootAndReload', async () => {
+      testTempDir = createTestDir();
+      delete process.env.CODINGBUDDY_PROJECT_ROOT;
+
+      const service = new ConfigService();
+      expect(service.getProjectRootSource()).toBe('auto_detect');
+
+      await service.setProjectRootAndReload(testTempDir);
+      expect(service.getProjectRootSource()).toBe('roots_list');
+    });
+
+    it('should use custom source when provided to setProjectRootAndReload', async () => {
+      testTempDir = createTestDir();
+      delete process.env.CODINGBUDDY_PROJECT_ROOT;
+
+      const service = new ConfigService();
+      await service.setProjectRootAndReload(testTempDir, 'env');
+      expect(service.getProjectRootSource()).toBe('env');
     });
 
     it('should throw error when path does not exist', async () => {

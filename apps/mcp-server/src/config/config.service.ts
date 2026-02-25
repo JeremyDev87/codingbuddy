@@ -24,6 +24,8 @@ import {
 } from './context.loader';
 import type { CodingBuddyConfig } from './config.schema';
 
+export type ProjectRootSource = 'env' | 'roots_list' | 'auto_detect';
+
 /**
  * Complete project configuration including all loaded data
  */
@@ -46,6 +48,7 @@ export interface ProjectConfig {
 export class ConfigService implements OnModuleInit {
   private readonly logger = new Logger(ConfigService.name);
   private projectRoot: string;
+  private projectRootSource: ProjectRootSource = 'auto_detect';
   private projectConfig: ProjectConfig | null = null;
   private isLoaded = false;
 
@@ -72,6 +75,7 @@ export class ConfigService implements OnModuleInit {
           const stat = statSync(normalizedPath);
           if (stat.isDirectory()) {
             this.logger.log(`Using project root from CODINGBUDDY_PROJECT_ROOT: ${normalizedPath}`);
+            this.projectRootSource = 'env';
             return normalizedPath;
           }
           this.logger.warn(
@@ -113,7 +117,10 @@ export class ConfigService implements OnModuleInit {
    * @param root - Path to the project root directory
    * @throws Error if path does not exist, is not a directory, or contains invalid characters
    */
-  async setProjectRootAndReload(root: string): Promise<void> {
+  async setProjectRootAndReload(
+    root: string,
+    source: ProjectRootSource = 'roots_list',
+  ): Promise<void> {
     // Security: Reject null bytes (null byte injection attack)
     if (root.includes('\x00')) {
       throw new Error('Path contains null bytes (possible null byte injection)');
@@ -152,6 +159,7 @@ export class ConfigService implements OnModuleInit {
 
     // Set new project root (use resolved real path)
     this.projectRoot = resolvedPath;
+    this.projectRootSource = source;
     this.isLoaded = false;
     this.projectConfig = null;
 
@@ -166,6 +174,13 @@ export class ConfigService implements OnModuleInit {
    */
   getProjectRoot(): string {
     return this.projectRoot;
+  }
+
+  /**
+   * Get how the project root was resolved
+   */
+  getProjectRootSource(): ProjectRootSource {
+    return this.projectRootSource;
   }
 
   /**
