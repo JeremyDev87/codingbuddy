@@ -47,6 +47,30 @@ describe('SkillHandler', () => {
       expect(mockSkillRecommendationService.recommendSkills).toHaveBeenCalledWith('test prompt');
     });
 
+    it('should include nextAction hint when recommendations exist', async () => {
+      const result = await handler.handle('recommend_skills', {
+        prompt: 'test prompt',
+      });
+
+      const parsed = JSON.parse(result!.content[0].text);
+      expect(parsed.nextAction).toBeDefined();
+      expect(parsed.nextAction).toContain('get_skill');
+    });
+
+    it('should not include nextAction when no recommendations', async () => {
+      mockSkillRecommendationService.recommendSkills = vi.fn().mockReturnValue({
+        originalPrompt: 'no match',
+        recommendations: [],
+      });
+
+      const result = await handler.handle('recommend_skills', {
+        prompt: 'no match',
+      });
+
+      const parsed = JSON.parse(result!.content[0].text);
+      expect(parsed.nextAction).toBeUndefined();
+    });
+
     it('should return error for recommend_skills without prompt', async () => {
       const result = await handler.handle('recommend_skills', {});
 
@@ -112,6 +136,13 @@ describe('SkillHandler', () => {
 
       expect(recommendSkills?.inputSchema.required).toContain('prompt');
       expect(recommendSkills?.inputSchema.properties.prompt).toBeDefined();
+    });
+
+    it('should include get_skill chaining hint in recommend_skills description', () => {
+      const definitions = handler.getToolDefinitions();
+      const recommendSkills = definitions.find(d => d.name === 'recommend_skills');
+
+      expect(recommendSkills?.description).toContain('get_skill');
     });
 
     it('should have correct schema for get_skill', () => {
