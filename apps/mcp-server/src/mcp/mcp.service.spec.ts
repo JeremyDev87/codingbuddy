@@ -177,6 +177,8 @@ const createMockConfigService = (config: CodingBuddyConfig = {}): Partial<Config
   getLanguage: vi.fn().mockResolvedValue(config.language),
   getFormattedContext: vi.fn().mockResolvedValue(''),
   getProjectRoot: vi.fn().mockReturnValue('/test/project'),
+  getProjectRootSource: vi.fn().mockReturnValue('env'),
+  isConfigLoaded: vi.fn().mockReturnValue(true),
   reload: vi.fn().mockResolvedValue({
     settings: config,
     ignorePatterns: ['node_modules', '.git'],

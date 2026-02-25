@@ -166,6 +166,19 @@ export class ModeHandler extends AbstractHandler {
         await this.diagnosticLogService.logConfigLoading(true, projectRoot, configLanguage);
       }
 
+      // Diagnostic: Warn when project root was auto-detected and config may be wrong
+      const projectRootSource = this.configService.getProjectRootSource();
+      const isAutoDetectedWithoutConfig =
+        projectRootSource === 'auto_detect' &&
+        !configLanguage &&
+        !this.configService.isConfigLoaded();
+      const projectRootWarning = isAutoDetectedWithoutConfig
+        ? `⚠️ Project root was auto-detected as "${projectRoot}" but no codingbuddy.config.json was found. ` +
+          `This usually means the MCP server is running from a different directory than your project. ` +
+          `Fix: Set CODINGBUDDY_PROJECT_ROOT environment variable in your MCP client config. ` +
+          `Example: "env": { "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project" }`
+        : undefined;
+
       // Use config language, fallback to 'en' only if not configured
       const language = configLanguage || 'en';
       const languageInstructionResult = this.languageService.getLanguageInstruction(language);
@@ -200,6 +213,8 @@ export class ModeHandler extends AbstractHandler {
         ...(dispatchReady && { dispatchReady }),
         // Include context document info (mandatory)
         ...contextResult,
+        // Include project root warning when auto-detected and config missing
+        ...(projectRootWarning && { projectRootWarning }),
       });
     } catch (error) {
       return createErrorResponse(

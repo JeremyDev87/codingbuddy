@@ -40,6 +40,8 @@ describe('ModeHandler', () => {
     mockConfigService = {
       getLanguage: vi.fn().mockResolvedValue('ko'),
       getProjectRoot: vi.fn().mockReturnValue('/test/project'),
+      getProjectRootSource: vi.fn().mockReturnValue('env'),
+      isConfigLoaded: vi.fn().mockReturnValue(true),
       reload: vi.fn().mockResolvedValue({}),
     } as unknown as ConfigService;
 
@@ -318,6 +320,53 @@ describe('ModeHandler', () => {
         expect(result?.isError).toBeFalsy();
         const parsed = JSON.parse((result?.content[0] as { text: string }).text);
         expect(parsed.dispatchReady).toBeUndefined();
+      });
+
+      it('should include projectRootWarning when source is auto_detect and config not loaded', async () => {
+        (mockConfigService.getProjectRootSource as ReturnType<typeof vi.fn>).mockReturnValue(
+          'auto_detect',
+        );
+        (mockConfigService.getLanguage as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+        (mockConfigService.isConfigLoaded as ReturnType<typeof vi.fn>).mockReturnValue(false);
+
+        const result = await handler.handle('parse_mode', { prompt: 'PLAN test' });
+        const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+
+        expect(parsed.projectRootWarning).toBeDefined();
+        expect(parsed.projectRootWarning).toContain('CODINGBUDDY_PROJECT_ROOT');
+      });
+
+      it('should NOT include projectRootWarning when source is env', async () => {
+        (mockConfigService.getProjectRootSource as ReturnType<typeof vi.fn>).mockReturnValue('env');
+
+        const result = await handler.handle('parse_mode', { prompt: 'PLAN test' });
+        const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+
+        expect(parsed.projectRootWarning).toBeUndefined();
+      });
+
+      it('should NOT include projectRootWarning when source is roots_list', async () => {
+        (mockConfigService.getProjectRootSource as ReturnType<typeof vi.fn>).mockReturnValue(
+          'roots_list',
+        );
+
+        const result = await handler.handle('parse_mode', { prompt: 'PLAN test' });
+        const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+
+        expect(parsed.projectRootWarning).toBeUndefined();
+      });
+
+      it('should NOT include projectRootWarning when auto_detect but config is loaded', async () => {
+        (mockConfigService.getProjectRootSource as ReturnType<typeof vi.fn>).mockReturnValue(
+          'auto_detect',
+        );
+        (mockConfigService.getLanguage as ReturnType<typeof vi.fn>).mockResolvedValue('ko');
+        (mockConfigService.isConfigLoaded as ReturnType<typeof vi.fn>).mockReturnValue(true);
+
+        const result = await handler.handle('parse_mode', { prompt: 'PLAN test' });
+        const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+
+        expect(parsed.projectRootWarning).toBeUndefined();
       });
     });
   });
