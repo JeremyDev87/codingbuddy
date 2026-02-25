@@ -27,6 +27,19 @@ When `PLAN`, `ACT`, `EVAL`, `AUTO` keywords detected → **Immediately** call `p
 
 Use `get_project_config` MCP tool to retrieve project-specific settings (language, tech stack, conventions).
 
+## Skills
+
+When a skill might apply to the user's task:
+1. Call `recommend_skills` with the user's prompt
+2. If recommendations returned, call `get_skill` with the top skillName
+3. Follow the loaded skill instructions
+
+Key skill triggers:
+- Bug/error/debug → `systematic-debugging`
+- New feature/build → `brainstorming` → `writing-plans`
+- TDD/test → `test-driven-development`
+- Plan execution → `executing-plans`
+
 ## Detailed Rules
 
 All details in Single Source of Truth:

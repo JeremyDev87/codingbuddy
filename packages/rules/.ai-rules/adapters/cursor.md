@@ -133,20 +133,39 @@ Available codingbuddy MCP tools in Cursor:
 | `parse_mode` | Parse mode keywords + load Agent/rules |
 | `get_agent_details` | Get specific Agent details |
 | `get_project_config` | Get project configuration |
-| `recommend_skills` | Recommend skills based on prompt |
+| `recommend_skills` | Recommend skills based on prompt → then call `get_skill` |
+| `get_skill` | Load full skill content by name (e.g., `get_skill("systematic-debugging")`) |
+| `list_skills` | List all available skills with optional filtering |
 | `prepare_parallel_agents` | Prepare parallel Agent execution |
 
 ## Skills
 
 ### Using Skills in Cursor
 
-Load skills via file reference (monorepo only):
+**Method 1: MCP Tool Chain (End Users — Recommended)**
+
+The AI should follow this chain when a skill might apply:
+
+1. `recommend_skills({ prompt: "user's message" })` — Get skill recommendations
+2. `get_skill("skill-name")` — Load the recommended skill's full content
+3. Follow the skill instructions in the response
+
+Example flow:
+```
+User: "There is a bug in the authentication logic"
+→ AI calls recommend_skills({ prompt: "There is a bug in the authentication logic" })
+→ Response: { recommendations: [{ skillName: "systematic-debugging", ... }], nextAction: "Call get_skill..." }
+→ AI calls get_skill("systematic-debugging")
+→ AI follows the systematic-debugging skill instructions
+```
+
+**Method 2: File Reference (Monorepo Contributors Only)**
 
 ```
 @packages/rules/.ai-rules/skills/test-driven-development/SKILL.md
 ```
 
-For end users, use `recommend_skills` MCP tool instead.
+> **Note:** `parse_mode` already embeds matched skill content in `included_skills` — no separate `get_skill` call needed when using mode keywords (PLAN/ACT/EVAL/AUTO).
 
 ### Available Skills
 
