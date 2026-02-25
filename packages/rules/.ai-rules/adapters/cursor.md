@@ -21,11 +21,19 @@ End users access rules **only through MCP tools**. No local rule files needed.
   "mcpServers": {
     "codingbuddy": {
       "command": "npx",
-      "args": ["-y", "codingbuddy"]
+      "args": ["-y", "codingbuddy"],
+      "env": {
+        "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project"
+      }
     }
   }
 }
 ```
+
+> **Important:** Cursor may not support the `roots/list` MCP capability.
+> Without `CODINGBUDDY_PROJECT_ROOT`, the server cannot locate your project's
+> `codingbuddy.config.json`, causing `language` and other settings to use defaults.
+> Always set this environment variable to your project's absolute path.
 
 Optional: Create `.cursor/rules/codingbuddy.mdc` for basic integration:
 
