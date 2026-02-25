@@ -47,7 +47,10 @@ export class SkillHandler extends AbstractHandler {
     return [
       {
         name: 'recommend_skills',
-        description: 'Recommend skills based on user prompt with multi-language support',
+        description:
+          'Recommend skills based on user prompt with multi-language support. ' +
+          'Returns skill names and confidence scores. ' +
+          'IMPORTANT: After receiving recommendations, call `get_skill` with the recommended skillName to load the full skill content and follow its instructions.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -103,7 +106,13 @@ export class SkillHandler extends AbstractHandler {
     }
     try {
       const result = this.skillRecommendationService.recommendSkills(prompt);
-      return createJsonResponse(result);
+      return createJsonResponse({
+        ...result,
+        ...(result.recommendations.length > 0 && {
+          nextAction:
+            'Call get_skill with the top recommended skillName to load and apply the skill instructions.',
+        }),
+      });
     } catch (error) {
       return createErrorResponse(
         `Failed to recommend skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
