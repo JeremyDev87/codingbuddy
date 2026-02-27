@@ -40,7 +40,18 @@ When user message starts with `PLAN`, `ACT`, `EVAL`, `AUTO` (or localized varian
 | Testing, TDD, coverage | test-strategy-specialist |
 | Architecture, layers, dependencies | architecture-specialist |
 
-→ Use `prepare_parallel_agents` for parallel reviews
+## Specialist Execution Pattern
+
+When `parse_mode` returns `parallelAgentsRecommendation`:
+
+1. Call `prepare_parallel_agents` MCP tool with the recommended specialists
+2. Execute each specialist **sequentially** (one at a time):
+   - Announce: "🔍 Analyzing from [icon] [specialist-name] perspective..."
+   - Apply specialist system prompt to analyze target code
+   - Record findings
+3. Present consolidated findings summary
+
+See `packages/rules/.ai-rules/adapters/cursor.md` for full details.
 
 ## Reference
 

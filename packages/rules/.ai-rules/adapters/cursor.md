@@ -138,6 +138,65 @@ Available codingbuddy MCP tools in Cursor:
 | `list_skills` | List all available skills with optional filtering |
 | `prepare_parallel_agents` | Prepare parallel Agent execution |
 
+## Specialist Agents Execution
+
+Cursor does not have a `Task` tool for spawning background subagents. When `parse_mode` returns `parallelAgentsRecommendation`, execute specialists **sequentially**.
+
+### Auto-Detection
+
+The MCP server automatically detects Cursor as the client and returns a sequential execution hint in `parallelAgentsRecommendation.hint`. No manual configuration is needed.
+
+### Sequential Workflow
+
+```
+parse_mode returns parallelAgentsRecommendation
+  ↓
+Call prepare_parallel_agents with recommended specialists
+  ↓
+For each specialist (sequentially):
+  - Announce: "🔍 Analyzing from [icon] [specialist-name] perspective..."
+  - Apply the specialist's system prompt as analysis context
+  - Analyze the target code/design from that specialist's viewpoint
+  - Record findings
+  ↓
+Consolidate all specialist findings into unified summary
+```
+
+### Example (EVAL mode)
+
+```
+parse_mode({ prompt: "EVAL review auth implementation" })
+→ parallelAgentsRecommendation:
+    specialists: ["security-specialist", "accessibility-specialist", "performance-specialist"]
+
+prepare_parallel_agents({
+  mode: "EVAL",
+  specialists: ["security-specialist", "accessibility-specialist", "performance-specialist"]
+})
+→ agents[]: each has systemPrompt
+
+Sequential analysis:
+  1. 🔒 Security: Apply security-specialist prompt, analyze, record findings
+  2. ♿ Accessibility: Apply accessibility-specialist prompt, analyze, record findings
+  3. ⚡ Performance: Apply performance-specialist prompt, analyze, record findings
+
+Present: Consolidated findings from all 3 specialists
+```
+
+### Specialist Icons
+
+| Icon | Specialist |
+|------|------------|
+| 🔒 | security-specialist |
+| ♿ | accessibility-specialist |
+| ⚡ | performance-specialist |
+| 📏 | code-quality-specialist |
+| 🧪 | test-strategy-specialist |
+| 🏛️ | architecture-specialist |
+| 📚 | documentation-specialist |
+| 🔍 | seo-specialist |
+| 🎨 | design-system-specialist |
+
 ## Skills
 
 ### Using Skills in Cursor
