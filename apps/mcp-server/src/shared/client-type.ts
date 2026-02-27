@@ -1,4 +1,4 @@
-export type ClientType = 'claude-code' | 'cursor' | 'unknown';
+export type ClientType = 'claude-code' | 'cursor' | 'opencode' | 'unknown';
 
 /**
  * Mapping table from keyword substring to ClientType.
@@ -6,6 +6,8 @@ export type ClientType = 'claude-code' | 'cursor' | 'unknown';
  */
 export const CLIENT_TYPE_MATCHERS: ReadonlyArray<{ keyword: string; clientType: ClientType }> = [
   { keyword: 'cursor', clientType: 'cursor' },
+  { keyword: 'opencode', clientType: 'opencode' },
+  { keyword: 'crush', clientType: 'opencode' },
   { keyword: 'claude', clientType: 'claude-code' },
 ];
 

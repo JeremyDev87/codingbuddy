@@ -30,6 +30,22 @@ describe('resolveClientType', () => {
     expect(resolveClientType('some-other-client')).toBe('unknown');
   });
 
+  it('should return "opencode" for OpenCode client', () => {
+    expect(resolveClientType('OpenCode')).toBe('opencode');
+  });
+
+  it('should return "opencode" for case-insensitive opencode name', () => {
+    expect(resolveClientType('opencode-cli')).toBe('opencode');
+  });
+
+  it('should return "opencode" for Crush client', () => {
+    expect(resolveClientType('Crush')).toBe('opencode');
+  });
+
+  it('should return "opencode" for case-insensitive crush name', () => {
+    expect(resolveClientType('crush-terminal')).toBe('opencode');
+  });
+
   it('should match first matching entry when multiple could match', () => {
     // Ensures deterministic ordering from the matchers array
     const result = resolveClientType('cursor');
@@ -40,7 +56,7 @@ describe('resolveClientType', () => {
 describe('CLIENT_TYPE_MATCHERS', () => {
   it('should be an array of keyword-to-type mappings', () => {
     expect(Array.isArray(CLIENT_TYPE_MATCHERS)).toBe(true);
-    expect(CLIENT_TYPE_MATCHERS.length).toBeGreaterThanOrEqual(2);
+    expect(CLIENT_TYPE_MATCHERS.length).toBe(4);
   });
 
   it('each entry should have keyword and clientType', () => {
