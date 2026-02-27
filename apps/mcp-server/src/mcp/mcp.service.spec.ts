@@ -36,13 +36,15 @@ const { handlers } = vi.hoisted(() => ({
 }));
 
 // Hoist listRoots mock so it can be controlled per test
-const { listRootsMock } = vi.hoisted(() => ({
+const { listRootsMock, getClientVersionMock } = vi.hoisted(() => ({
   listRootsMock: vi.fn(),
+  getClientVersionMock: vi.fn(),
 }));
 
 // Mock the MCP SDK Server
 vi.mock('@modelcontextprotocol/sdk/server/index.js', () => ({
   Server: class MockServer {
+    oninitialized?: () => void;
     constructor() {
       // Clear handlers on new instance
     }
@@ -60,6 +62,7 @@ vi.mock('@modelcontextprotocol/sdk/server/index.js', () => ({
       /* noop */
     }
     listRoots = listRootsMock;
+    getClientVersion = getClientVersionMock;
   },
 }));
 
@@ -178,6 +181,8 @@ const createMockConfigService = (config: CodingBuddyConfig = {}): Partial<Config
   getFormattedContext: vi.fn().mockResolvedValue(''),
   getProjectRoot: vi.fn().mockReturnValue('/test/project'),
   getProjectRootSource: vi.fn().mockReturnValue('env'),
+  getClientName: vi.fn().mockReturnValue(undefined),
+  setClientName: vi.fn(),
   isConfigLoaded: vi.fn().mockReturnValue(true),
   reload: vi.fn().mockResolvedValue({
     settings: config,
@@ -1550,12 +1555,68 @@ describe('McpService', () => {
     });
   });
 
+  describe('captureClientInfo', () => {
+    it('should capture client name from server after connection', () => {
+      getClientVersionMock.mockReturnValue({ name: 'Cursor', version: '1.0.0' });
+      const service = createMcpServiceWithHandlers(defaultMocks);
+
+      service.captureClientInfo();
+
+      expect(mockConfigService.setClientName).toHaveBeenCalledWith('Cursor');
+    });
+
+    it('should handle missing client version gracefully', () => {
+      getClientVersionMock.mockReturnValue(undefined);
+      const service = createMcpServiceWithHandlers(defaultMocks);
+
+      service.captureClientInfo();
+
+      expect(mockConfigService.setClientName).not.toHaveBeenCalled();
+    });
+
+    it('should handle client version without name', () => {
+      getClientVersionMock.mockReturnValue({ version: '1.0.0' });
+      const service = createMcpServiceWithHandlers(defaultMocks);
+
+      service.captureClientInfo();
+
+      expect(mockConfigService.setClientName).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getServer', () => {
     it('should return the MCP server instance', () => {
       const service = createMcpServiceWithHandlers(defaultMocks);
 
       const server = service.getServer();
       expect(server).toBeDefined();
+    });
+  });
+
+  describe('createServer', () => {
+    it('should set oninitialized callback that captures client info', () => {
+      getClientVersionMock.mockReturnValue({ name: 'Cursor', version: '1.0.0' });
+      const service = createMcpServiceWithHandlers(defaultMocks);
+
+      const newServer = service.createServer() as unknown as {
+        oninitialized?: () => void;
+        getClientVersion: typeof getClientVersionMock;
+      };
+
+      expect(newServer.oninitialized).toBeDefined();
+      newServer.oninitialized!();
+
+      expect(mockConfigService.setClientName).toHaveBeenCalledWith('Cursor');
+    });
+
+    it('should handle missing client version in oninitialized gracefully', () => {
+      getClientVersionMock.mockReturnValue(undefined);
+      const service = createMcpServiceWithHandlers(defaultMocks);
+
+      const newServer = service.createServer() as unknown as { oninitialized?: () => void };
+
+      expect(() => newServer.oninitialized!()).not.toThrow();
+      expect(mockConfigService.setClientName).not.toHaveBeenCalled();
     });
   });
 

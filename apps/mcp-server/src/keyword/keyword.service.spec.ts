@@ -937,6 +937,34 @@ describe('KeywordService', () => {
       );
       expect(result.parallelAgentsRecommendation?.hint).toContain('run_in_background=true');
     });
+
+    describe('client-specific hint', () => {
+      it('should return Cursor sequential hint when client type is cursor', async () => {
+        const cursorService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo, {
+          getClientTypeFn: () => 'cursor',
+        });
+        const result = await cursorService.parseMode('PLAN test');
+        expect(result.parallelAgentsRecommendation?.hint).toContain('sequentially');
+        expect(result.parallelAgentsRecommendation?.hint).toContain('prepare_parallel_agents');
+        expect(result.parallelAgentsRecommendation?.hint).not.toContain('Task tool');
+      });
+
+      it('should return Claude Code Task tool hint when client type is claude-code', async () => {
+        const claudeService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo, {
+          getClientTypeFn: () => 'claude-code',
+        });
+        const result = await claudeService.parseMode('PLAN test');
+        expect(result.parallelAgentsRecommendation?.hint).toContain('Task tool');
+      });
+
+      it('should default to Claude Code hint when client type is unknown', async () => {
+        const unknownService = new KeywordService(mockLoadConfig, mockLoadRule, mockLoadAgentInfo, {
+          getClientTypeFn: () => 'unknown',
+        });
+        const result = await unknownService.parseMode('PLAN test');
+        expect(result.parallelAgentsRecommendation?.hint).toContain('Task tool');
+      });
+    });
   });
 
   describe('recommended_act_agent (with PrimaryAgentResolver)', () => {

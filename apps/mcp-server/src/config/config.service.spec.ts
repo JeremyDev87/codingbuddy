@@ -692,4 +692,21 @@ describe('ConfigService', () => {
   // - Lines 150-153: Fallback when realpath fails
   // ESM modules don't allow spying on exports (fs/promises.stat, realpath).
   // These paths are defensive error handling and are acceptable to remain uncovered.
+
+  describe('clientName', () => {
+    let service: ConfigService;
+
+    beforeEach(() => {
+      service = new ConfigService();
+    });
+
+    it('should default to undefined', () => {
+      expect(service.getClientName()).toBeUndefined();
+    });
+
+    it('should store and retrieve clientName', () => {
+      service.setClientName('Cursor');
+      expect(service.getClientName()).toBe('Cursor');
+    });
+  });
 });
