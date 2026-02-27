@@ -964,6 +964,21 @@ describe('KeywordService', () => {
         const result = await unknownService.parseMode('PLAN test');
         expect(result.parallelAgentsRecommendation?.hint).toContain('Task tool');
       });
+
+      it('should return OpenCode sequential hint when client type is opencode', async () => {
+        const opencodeService = new KeywordService(
+          mockLoadConfig,
+          mockLoadRule,
+          mockLoadAgentInfo,
+          {
+            getClientTypeFn: () => 'opencode',
+          },
+        );
+        const result = await opencodeService.parseMode('PLAN test');
+        expect(result.parallelAgentsRecommendation?.hint).toContain('sequentially');
+        expect(result.parallelAgentsRecommendation?.hint).toContain('/agent');
+        expect(result.parallelAgentsRecommendation?.hint).not.toContain('Task tool');
+      });
     });
   });
 

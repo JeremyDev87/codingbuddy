@@ -848,10 +848,14 @@ export class KeywordService {
     }
 
     const clientType = this.getClientTypeFn?.() ?? 'unknown';
-    const hint =
-      clientType === 'cursor'
-        ? `Execute specialists sequentially: call prepare_parallel_agents MCP tool to get specialist prompts, then analyze from each specialist's perspective one by one, consolidating findings at the end.`
-        : `Use Task tool with subagent_type="general-purpose" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts.`;
+    let hint: string;
+    if (clientType === 'cursor') {
+      hint = `Execute specialists sequentially: call prepare_parallel_agents MCP tool to get specialist prompts, then analyze from each specialist's perspective one by one, consolidating findings at the end.`;
+    } else if (clientType === 'opencode') {
+      hint = `Execute specialists sequentially using /agent <name> command: for each recommended specialist, switch to the specialist agent, perform the analysis, record findings, then switch back. Consolidate all findings at the end. Use prepare_parallel_agents MCP tool to get specialist system prompts if dispatchReady is not available.`;
+    } else {
+      hint = `Use Task tool with subagent_type="general-purpose" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts.`;
+    }
 
     return {
       specialists: allSpecialists,
