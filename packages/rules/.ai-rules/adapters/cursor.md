@@ -207,6 +207,11 @@ Present: Consolidated findings from all 3 specialists
 | 📚 | documentation-specialist |
 | 🔍 | seo-specialist |
 | 🎨 | design-system-specialist |
+| 📨 | event-architecture-specialist |
+| 🔗 | integration-specialist |
+| 📊 | observability-specialist |
+| 🔄 | migration-specialist |
+| 🌐 | i18n-specialist |
 
 ## Skills
 
