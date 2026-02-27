@@ -194,7 +194,11 @@ Once connected, you can use:
 - `search_rules`: Query AI rules and guidelines
 - `get_agent_details`: Get specialist agent information
 - `recommend_skills`: Get skill recommendations based on prompt
+- `get_skill`: Load full skill content by name
+- `list_skills`: List all available skills with optional filtering
 - `parse_mode`: Parse PLAN/ACT/EVAL workflow mode (includes dynamic language instructions)
+- `analyze_task`: Pre-planning task analysis with risk assessment and specialist recommendations
+- `generate_checklist`: Contextual checklists (security, accessibility, performance, testing)
 
 #### Dynamic Language Configuration
 
@@ -400,17 +404,29 @@ For Crush users, additional features available:
 }
 ```
 
-### Skills System
+### Skills Integration
+
+Crush supports skills through two mechanisms:
+
+1. **Native Discovery**: Place skills in `~/.config/crush/skills/` or configure additional paths via `options.skills_paths`. Crush automatically injects available skills into the system prompt.
+
+2. **MCP Tools (Recommended)**: Use codingbuddy MCP server's skill tools for cross-platform, programmatic skill access:
+   - `recommend_skills` — prompt-based skill recommendations
+   - `get_skill` — load full skill content by name
+   - `list_skills` — list all available skills
+
+**Configuration:**
 ```json
 {
   "options": {
     "skills_paths": [
-      "packages/rules/.ai-rules/skills",
-      "~/.config/crush/skills"
+      "packages/rules/.ai-rules/skills"
     ]
   }
 }
 ```
+
+> **Note:** There is no `/skill` slash command. Skills are activated through natural language or via MCP tools. See [opencode-skills.md](opencode-skills.md) for detailed usage patterns.
 
 ## Benefits
 
