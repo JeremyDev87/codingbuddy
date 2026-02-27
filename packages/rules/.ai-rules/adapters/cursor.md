@@ -130,13 +130,24 @@ Available codingbuddy MCP tools in Cursor:
 
 | Tool | Purpose |
 |------|---------|
-| `parse_mode` | Parse mode keywords + load Agent/rules |
-| `get_agent_details` | Get specific Agent details |
-| `get_project_config` | Get project configuration |
+| `parse_mode` | Parse mode keywords (PLAN/ACT/EVAL/AUTO) + load Agent/rules |
+| `search_rules` | Search rules and guidelines by query |
+| `get_agent_details` | Get specific Agent profile and expertise |
+| `get_project_config` | Get project configuration (language, tech stack) |
+| `get_code_conventions` | Get project code conventions and style guide |
+| `suggest_config_updates` | Analyze project and suggest config updates |
 | `recommend_skills` | Recommend skills based on prompt → then call `get_skill` |
 | `get_skill` | Load full skill content by name (e.g., `get_skill("systematic-debugging")`) |
 | `list_skills` | List all available skills with optional filtering |
-| `prepare_parallel_agents` | Prepare parallel Agent execution |
+| `get_agent_system_prompt` | Get full system prompt for a specialist agent |
+| `prepare_parallel_agents` | Prepare specialist agents for sequential execution |
+| `dispatch_agents` | Get Task tool-ready dispatch params (Claude Code optimized) |
+| `generate_checklist` | Generate contextual checklists (security, a11y, performance) |
+| `analyze_task` | Analyze task for risk assessment and specialist recommendations |
+| `read_context` | Read context document (`docs/codingbuddy/context.md`) |
+| `update_context` | Update context document with decisions, notes, progress |
+| `cleanup_context` | Manually trigger context document cleanup |
+| `set_project_root` | ~~Set project root directory~~ **(deprecated)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
 
 ## Specialist Agents Execution
 
@@ -355,6 +366,72 @@ module.exports = {
 - Complex refactoring with quality verification
 - Bug fixes needing comprehensive testing
 - Code quality improvements with measurable criteria
+
+> **Cursor limitation:** AUTO mode has no enforcement mechanism in Cursor. See [Known Limitations](#known-limitations) for details.
+
+## Context Document Management
+
+codingbuddy uses a fixed-path context document (`docs/codingbuddy/context.md`) to persist decisions across mode transitions.
+
+### How It Works
+
+| Mode | Behavior |
+|------|----------|
+| PLAN / AUTO | Resets (clears) existing content and starts fresh |
+| ACT / EVAL | Appends new section to existing content |
+
+### Required Workflow
+
+1. `parse_mode` automatically reads/creates the context document
+2. Review `contextDocument` in the response for previous decisions
+3. **Before completing each mode:** call `update_context` to persist current work
+
+### Available Tools
+
+| Tool | Purpose |
+|------|---------|
+| `read_context` | Read current context document |
+| `update_context` | Persist decisions, notes, progress, findings |
+| `cleanup_context` | Summarize older sections to reduce document size |
+
+### Cursor-Specific Note
+
+Unlike Claude Code, Cursor has no hooks to enforce `update_context` calls. You must **manually remember** to call `update_context` before concluding each mode to avoid losing context across sessions.
+
+## Known Limitations
+
+Cursor environment does not support several features available in Claude Code:
+
+| Feature | Status | Workaround |
+|---------|--------|------------|
+| **Task tool** (background subagents) | ❌ Not available | Use `prepare_parallel_agents` for sequential execution |
+| **Native Skill tool** (`/skill-name`) | ❌ Not available | Use MCP tool chain: `recommend_skills` → `get_skill` |
+| **Session hooks** (PreToolUse, etc.) | ❌ Not available | Rely on `.cursor/rules/*.mdc` for always-on instructions |
+| **Autonomous loop mechanism** | ❌ Not available | AUTO mode depends on Cursor AI voluntarily looping |
+| **Context compaction hooks** | ❌ Not available | Manually call `update_context` before ending each mode |
+| **`dispatch_agents` full usage** | ⚠️ Partial | Returns Claude Code-specific `dispatchParams`; use `prepare_parallel_agents` instead |
+| **`restart_tui`** | ❌ Not applicable | Claude Code TUI-only tool |
+
+### AUTO Mode Reliability
+
+AUTO mode documents autonomous PLAN → ACT → EVAL cycling. In Cursor, this depends entirely on the AI model voluntarily continuing the loop — there is no enforcement mechanism like Claude Code's hooks. Results may vary:
+
+- The AI may stop after one iteration instead of looping
+- Quality exit criteria (`Critical = 0 AND High = 0`) are advisory, not enforced
+- For reliable multi-iteration workflows, prefer manual `PLAN` → `ACT` → `EVAL` cycling
+
+## Verification Status
+
+> Audit per [#609](https://github.com/JeremyDev87/codingbuddy/issues/609). Code-level analysis complete, Cursor runtime verification pending.
+
+| Pattern | Status | Notes |
+|---------|--------|-------|
+| MCP Tools Table | ✅ Updated | All 18 tools documented (including 1 deprecated) |
+| Mode keyword detection (imports.mdc) | ⚠️ Code-verified | `parse_mode` handler exists; Cursor AI invocation depends on model behavior |
+| File pattern → Agent mapping (auto-agent.mdc) | ⚠️ Code-verified | Mappings reference valid agents; Cursor auto-apply depends on glob matching |
+| AUTO mode workflow | ⚠️ Documented with caveat | No enforcement mechanism in Cursor; see Known Limitations |
+| Context document management | ✅ Documented | New section added with Cursor-specific guidance |
+| Known Limitations | ✅ Added | Task tool, hooks, autonomous loop, TUI limitations documented |
 
 ## Reference
 

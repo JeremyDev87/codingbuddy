@@ -40,6 +40,13 @@ When user message starts with `PLAN`, `ACT`, `EVAL`, `AUTO` (or localized varian
 | Testing, TDD, coverage | test-strategy-specialist |
 | Architecture, layers, dependencies | architecture-specialist |
 
+## Pre-Analysis
+
+Before starting specialist analysis, optionally call `analyze_task` MCP tool for:
+- Risk assessment of the current task
+- Recommended specialists (may differ from file-pattern defaults)
+- Contextual checklists
+
 ## Specialist Execution Pattern
 
 When `parse_mode` returns `parallelAgentsRecommendation`:

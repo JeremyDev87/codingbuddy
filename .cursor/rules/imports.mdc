@@ -16,6 +16,17 @@ alwaysApply: true
 
 When `PLAN`, `ACT`, `EVAL`, `AUTO` keywords detected → **Immediately** call `parse_mode` MCP tool
 
+## Context Persistence
+
+After completing work in any mode → call `update_context` MCP tool to persist decisions and notes.
+
+## Quality Tools
+
+- `analyze_task` — Pre-planning task analysis with risk assessment
+- `generate_checklist` — Contextual checklists for security, accessibility, performance
+- `search_rules` — Search project rules and guidelines
+- `get_code_conventions` — Get code conventions and style guide
+
 ## Core Principles
 
 - TDD: Red → Green → Refactor
