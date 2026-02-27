@@ -510,20 +510,112 @@ npx codingbuddy@latest mcp
 
 ## Advanced Usage
 
-### Parallel Agent Workflows
+### Specialist Agents Execution
 
-```bash
-# Terminal 1: Planning
-opencode --agent plan-mode
-Create a plan for me
+OpenCode/Crush does not have a `Task` tool for spawning background subagents like Claude Code. When `parse_mode` returns `parallelAgentsRecommendation`, execute specialists **sequentially** using the `/agent <name>` command.
 
-# Terminal 2: Implementation  
-opencode --agent act-mode
-ACT
+#### Auto-Detection
 
-# Terminal 3: Review
-opencode --agent eval-mode
-EVAL
+The MCP server automatically detects OpenCode/Crush as the client and returns a sequential execution hint in `parallelAgentsRecommendation.hint`. No manual configuration is needed.
+
+#### Sequential Workflow
+
+```
+parse_mode returns parallelAgentsRecommendation
+  ↓
+For each recommended specialist (sequentially):
+  /agent <specialist-name>
+  Perform specialist analysis
+  Record findings
+  ↓
+/agent <current-mode-agent>  (e.g., /agent eval-mode — return to mode agent)
+Consolidate all findings
+```
+
+#### Example (EVAL mode)
+
+```
+parse_mode({ prompt: "EVAL review auth implementation" })
+→ parallelAgentsRecommendation:
+    specialists: ["security-specialist", "accessibility-specialist", "performance-specialist"]
+
+Sequential analysis:
+  1. /agent security     → security-specialist: 🔒 Analyze from security perspective, record findings
+  2. /agent a11y         → accessibility-specialist: ♿ Analyze from accessibility perspective, record findings
+  3. /agent performance  → performance-specialist: ⚡ Analyze from performance perspective, record findings
+  4. /agent eval-mode    → Return to EVAL mode
+
+Present: Consolidated findings from all 3 specialists
+```
+
+#### Consuming dispatchReady from parse_mode
+
+When `parse_mode` returns `dispatchReady`, the specialist system prompts are pre-built. In OpenCode, use the `dispatchParams.prompt` field as analysis context (ignore `subagent_type` — it is Claude Code specific):
+
+```
+parse_mode returns dispatchReady
+  ↓
+dispatchReady.primaryAgent
+  → Use as the main analysis context
+  ↓
+dispatchReady.parallelAgents[] (if present)
+  → For each: the dispatchParams.prompt field contains the specialist's system prompt.
+    Switch via /agent, apply the prompt as analysis context, record findings
+  ↓
+Consolidate all findings
+```
+
+#### Specialist Agent Mapping
+
+| parallelAgentsRecommendation | OpenCode Agent | Icon |
+|------------------------------|----------------|------|
+| security-specialist | `security` | 🔒 |
+| accessibility-specialist | `a11y` | ♿ |
+| performance-specialist | `performance` | ⚡ |
+| architecture-specialist | `architect` | 🏛️ |
+| test-strategy-specialist | `tester` | 🧪 |
+| code-quality-specialist | N/A (inline) | 📏 |
+| event-architecture-specialist | N/A (inline) | 📨 |
+| integration-specialist | N/A (inline) | 🔗 |
+| observability-specialist | N/A (inline) | 📊 |
+| migration-specialist | N/A (inline) | 🔄 |
+| documentation-specialist | N/A (inline) | 📚 |
+| seo-specialist | N/A (inline) | 🔍 |
+| i18n-specialist | N/A (inline) | 🌐 |
+
+> **Note:** Specialists without a dedicated OpenCode agent (e.g., `code-quality-specialist`) should be analyzed inline within the current agent context using the specialist's system prompt from `prepare_parallel_agents`.
+>
+> **Fallback:** If `dispatchReady` is not present in the `parse_mode` response, call `prepare_parallel_agents` MCP tool to retrieve specialist system prompts.
+
+#### Visibility Pattern
+
+When executing sequential specialists, display clear status messages:
+
+**Start:**
+```
+🔄 Executing N specialist analyses sequentially...
+   → 🔒 security
+   → ♿ a11y
+   → ⚡ performance
+```
+
+**During:**
+```
+🔍 Analyzing from 🔒 security perspective... (1/3)
+```
+
+**Completion:**
+```
+📊 Specialist Analysis Complete:
+
+🔒 Security:
+   [findings summary]
+
+♿ Accessibility:
+   [findings summary]
+
+⚡ Performance:
+   [findings summary]
 ```
 
 ### Custom Agent Creation
