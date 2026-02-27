@@ -74,7 +74,7 @@
     "codingbuddy-rules": "workspace:*",
     "eventemitter2": "6.4.9",
     "ink": "6.7.0",
-    "minimatch": "10.2.1",
+    "minimatch": "10.2.3",
     "react": "19.2.4",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",

@@ -8,6 +8,7 @@ import { SkillRecommendationService } from '../skill/skill-recommendation.servic
 import { AgentModule } from '../agent/agent.module';
 import { AgentService } from '../agent/agent.service';
 import { normalizeAgentName } from '../shared/agent.utils';
+import { resolveClientType } from '../shared/client-type';
 import {
   KeywordService,
   type KeywordServiceOptions,
@@ -177,6 +178,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           loadSkillContentFn: loadSkillContent,
           loadAgentSystemPromptFn: loadAgentSystemPrompt,
           getMaxIncludedSkillsFn: getMaxIncludedSkills,
+          getClientTypeFn: () => resolveClientType(configService.getClientName()),
         };
 
         return new KeywordService(loadConfig, loadRule, loadAgent, options);

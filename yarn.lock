@@ -5482,7 +5482,7 @@ __metadata:
     ink-testing-library: "npm:^4.0.0"
     madge: "npm:8.0.0"
     memfs: "npm:^3.4.1"
-    minimatch: "npm:10.2.1"
+    minimatch: "npm:10.2.3"
     prettier: "npm:3.7.4"
     react: "npm:19.2.4"
     reflect-metadata: "npm:0.2.2"
@@ -8927,12 +8927,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:10.2.1":
-  version: 10.2.1
-  resolution: "minimatch@npm:10.2.1"
+"minimatch@npm:10.2.3":
+  version: 10.2.3
+  resolution: "minimatch@npm:10.2.3"
   dependencies:
     brace-expansion: "npm:^5.0.2"
-  checksum: 10c0/86c3ed013630e820fda00336ee786a03098723b60bfae452de6306708fc83619df40a99dc6ec59c97d14e25b3b3371669a04e5bf508b1b00339b20229c4907d2
+  checksum: 10c0/d9ae5f355e8bb77a42dd8c20b950141cec8773ef8716a2bb6df7a6840cc44a00ed828883884e4f1c7b5cb505fa06a17e3ea9ca2edb18fd1dec865ea7f9fcf0e5
   languageName: node
   linkType: hard
 

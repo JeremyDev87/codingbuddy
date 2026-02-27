@@ -60,6 +60,31 @@ export class McpService implements OnModuleInit {
     // Try to get project root from client's roots capability
     // This runs after connection is established
     await this.updateProjectRootFromClient();
+    this.captureClientInfo();
+  }
+
+  /**
+   * Capture client info from the MCP connection and store in ConfigService.
+   * Called after transport connection is established (stdio) or client initialized (SSE).
+   *
+   * @param server - Optional Server instance to read client info from.
+   *                 Defaults to the main stdio server if not provided.
+   */
+  captureClientInfo(server?: Server): void {
+    const targetServer = server ?? this.server;
+    try {
+      const clientVersion = targetServer.getClientVersion();
+      if (clientVersion?.name) {
+        this.configService.setClientName(clientVersion.name);
+        this.logger.debug(
+          `MCP client detected: ${clientVersion.name} v${clientVersion.version ?? 'unknown'}`,
+        );
+      }
+    } catch (error) {
+      this.logger.debug(
+        `Could not capture client info: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   /** Timeout for listRoots() request in milliseconds */
@@ -165,6 +190,11 @@ export class McpService implements OnModuleInit {
     this.registerResourcesOn(newServer);
     this.registerToolsOn(newServer);
     this.registerPromptsOn(newServer);
+
+    // Auto-capture client info when client completes initialization (SSE mode)
+    newServer.oninitialized = () => {
+      this.captureClientInfo(newServer);
+    };
 
     return newServer;
   }

@@ -51,6 +51,7 @@ export class ConfigService implements OnModuleInit {
   private projectRootSource: ProjectRootSource = 'auto_detect';
   private projectConfig: ProjectConfig | null = null;
   private isLoaded = false;
+  private clientName?: string;
 
   constructor() {
     // Priority: env var (validated) > auto-detect from cwd
@@ -181,6 +182,14 @@ export class ConfigService implements OnModuleInit {
    */
   getProjectRootSource(): ProjectRootSource {
     return this.projectRootSource;
+  }
+
+  getClientName(): string | undefined {
+    return this.clientName;
+  }
+
+  setClientName(name: string): void {
+    this.clientName = name;
   }
 
   /**

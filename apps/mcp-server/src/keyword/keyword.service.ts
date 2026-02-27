@@ -32,6 +32,7 @@ import { truncateSkillContent } from '../skill/skill-content.utils';
 import { createAgentSummary } from '../agent/agent-summary.utils';
 import { truncateRuleContent } from '../rules/rules-content.utils';
 import { getDefaultModeConfig } from '../shared/keyword-core';
+import { type ClientType } from '../shared/client-type';
 
 /**
  * Options for parseMode method
@@ -73,6 +74,8 @@ export interface KeywordServiceOptions {
   ) => Promise<AgentSystemPromptInfo | null>;
   /** Function to get max included skills from config (defaults to DEFAULT_MAX_INCLUDED_SKILLS) */
   getMaxIncludedSkillsFn?: () => Promise<number | null>;
+  /** Function to get the resolved client type */
+  getClientTypeFn?: () => ClientType;
 }
 
 /**
@@ -234,6 +237,7 @@ export class KeywordService {
     mode: Mode,
   ) => Promise<AgentSystemPromptInfo | null>;
   private readonly getMaxIncludedSkillsFn?: () => Promise<number | null>;
+  private readonly getClientTypeFn?: () => ClientType;
 
   /**
    * Context-aware specialist patterns for automatic agent recommendation.
@@ -314,6 +318,7 @@ export class KeywordService {
     this.loadSkillContentFn = options?.loadSkillContentFn;
     this.loadAgentSystemPromptFn = options?.loadAgentSystemPromptFn;
     this.getMaxIncludedSkillsFn = options?.getMaxIncludedSkillsFn;
+    this.getClientTypeFn = options?.getClientTypeFn;
 
     // Environment-based TTL: 5 minutes for development, 1 hour for production
     this.cacheTTL = process.env.NODE_ENV === 'production' ? 3600000 : 300000;
@@ -842,9 +847,15 @@ export class KeywordService {
       return undefined;
     }
 
+    const clientType = this.getClientTypeFn?.() ?? 'unknown';
+    const hint =
+      clientType === 'cursor'
+        ? `Execute specialists sequentially: call prepare_parallel_agents MCP tool to get specialist prompts, then analyze from each specialist's perspective one by one, consolidating findings at the end.`
+        : `Use Task tool with subagent_type="general-purpose" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts.`;
+
     return {
       specialists: allSpecialists,
-      hint: `Use Task tool with subagent_type="general-purpose" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts.`,
+      hint,
     };
   }
 
