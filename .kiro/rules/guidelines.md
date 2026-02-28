@@ -37,13 +37,38 @@ See `packages/rules/.ai-rules/agents/`:
 - Accessibility (WCAG 2.1 AA compliance)
 - SEO, Architecture, Test Strategy, Design System, Documentation, Code Quality, DevOps
 
+### MCP Server Integration
+
+When the codingbuddy MCP server is configured (`.kiro/settings/mcp.json`), use MCP tools for enhanced workflow:
+
+**Core Workflow Tools:**
+- `parse_mode` — Parse PLAN/ACT/EVAL/AUTO keywords and load appropriate Agent/rules
+- `update_context` — Persist decisions and notes to `docs/codingbuddy/context.md` (mandatory at mode completion)
+- `read_context` — Read current context document
+
+**Analysis Tools:**
+- `search_rules` — Search rules and guidelines by query
+- `analyze_task` — Pre-planning task analysis with risk assessment
+- `generate_checklist` — Contextual checklists (security, a11y, performance)
+
+**Agent & Skills Tools:**
+- `get_agent_details` — Get specialist agent profile
+- `recommend_skills` → `get_skill` — Discover and load relevant skills
+- `prepare_parallel_agents` — Get specialist prompts for sequential execution
+
+**Configuration Tools:**
+- `get_project_config` — Get project configuration (language, tech stack)
+- `get_code_conventions` — Get project code conventions
+
+> **Note:** MCP 서버가 설정되어 있지 않은 경우, `.ai-rules/` 디렉토리의 파일을 직접 참조하여 동일한 규칙을 적용할 수 있습니다.
+
 ## 🔴 MANDATORY: Keyword Mode Detection
 
 <CODINGBUDDY_CRITICAL_RULE>
 
 **When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized: Korean 계획/실행/평가/자동, Japanese 計画/実行/評価/自動, Chinese 计划/执行/评估/自动, Spanish PLANIFICAR/ACTUAR/EVALUAR/AUTOMÁTICO):**
 
-1. **IMMEDIATELY** follow the mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
+1. **IMMEDIATELY** call `parse_mode` MCP tool (if available) or follow the mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
 2. Apply the mode's workflow **EXACTLY**
 3. Do NOT proceed with your own interpretation
 
@@ -70,7 +95,7 @@ Example: `EVAL` → **즉시** EVAL 모드 규칙 적용 → Devil's Advocate An
 ## Kiro-Specific Features
 
 ### Communication
-- Always respond in Korean (한국어)
+- Follow the `languageInstruction` from `parse_mode` response (or the project's `codingbuddy.config.json` language setting)
 - Use clear, structured markdown formatting
 - Provide actionable, specific feedback
 
