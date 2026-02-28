@@ -37,7 +37,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "plan-mode": {
       "description": "PLAN mode - Analysis and planning without changes",
       "mode": "primary",
-      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}\n\n[OpenCode Override]\nMode: PLAN only. Always respond in Korean. Do NOT make any file changes. Focus on analysis and planning.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/plan-mode.json}\n\n[OpenCode Override]\nMode: PLAN only. Do NOT make any file changes. Focus on analysis and planning. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -51,7 +51,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "act-mode": {
       "description": "ACT mode - Full development with all tools",
       "mode": "primary",
-      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}\n\n[OpenCode Override]\nMode: ACT. Always respond in Korean. Follow TDD workflow and code quality standards.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/act-mode.json}\n\n[OpenCode Override]\nMode: ACT. Follow TDD workflow and code quality standards. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "allow",
         "bash": "allow"
@@ -60,7 +60,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "eval-mode": {
       "description": "EVAL mode - Code quality evaluation", 
       "mode": "primary",
-      "prompt": "{file:packages/rules/.ai-rules/agents/eval-mode.json}\n\n[OpenCode Override]\nMode: EVAL. Always respond in Korean. Provide evidence-based evaluation.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/eval-mode.json}\n\n[OpenCode Override]\nMode: EVAL. Provide evidence-based evaluation. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -74,7 +74,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "backend": {
       "description": "Backend development - Node.js, Python, Go, Java, Rust",
       "mode": "subagent",
-      "prompt": "{file:packages/rules/.ai-rules/agents/backend-developer.json}\n\n[OpenCode Override]\nAlways respond in Korean. Follow TDD workflow and clean architecture.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/backend-developer.json}\n\n[OpenCode Override]\nFollow TDD workflow and clean architecture. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "allow",
         "bash": "allow"
@@ -83,7 +83,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "architect": {
       "description": "Architecture and design patterns specialist",
       "mode": "subagent",
-      "prompt": "{file:packages/rules/.ai-rules/agents/architecture-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Focus on layer boundaries and dependency direction.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/architecture-specialist.json}\n\n[OpenCode Override]\nFocus on layer boundaries and dependency direction. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "deny",
         "bash": "ask"
@@ -92,7 +92,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "tester": {
       "description": "Test strategy and TDD specialist",
       "mode": "subagent",
-      "prompt": "{file:packages/rules/.ai-rules/agents/test-strategy-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Enforce 90%+ coverage and no-mocking principle.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/test-strategy-specialist.json}\n\n[OpenCode Override]\nEnforce 90%+ coverage and no-mocking principle. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "allow",
         "bash": "allow"
@@ -101,7 +101,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "security": {
       "description": "Security audit - OAuth, JWT, XSS/CSRF protection",
       "mode": "subagent",
-      "prompt": "{file:packages/rules/.ai-rules/agents/security-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Follow OWASP guidelines.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/security-specialist.json}\n\n[OpenCode Override]\nFollow OWASP guidelines. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "deny",
         "bash": "ask"
@@ -110,7 +110,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "a11y": {
       "description": "Accessibility - WCAG 2.1 AA compliance",
       "mode": "subagent",
-      "prompt": "{file:packages/rules/.ai-rules/agents/accessibility-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Verify ARIA and keyboard navigation.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/accessibility-specialist.json}\n\n[OpenCode Override]\nVerify ARIA and keyboard navigation. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "deny",
         "bash": "ask"
@@ -119,7 +119,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
     "performance": {
       "description": "Performance optimization specialist",
       "mode": "subagent",
-      "prompt": "{file:packages/rules/.ai-rules/agents/performance-specialist.json}\n\n[OpenCode Override]\nAlways respond in Korean. Focus on bundle size and runtime optimization.",
+      "prompt": "{file:packages/rules/.ai-rules/agents/performance-specialist.json}\n\n[OpenCode Override]\nFocus on bundle size and runtime optimization. Follow languageInstruction from parse_mode response.",
       "permission": {
         "edit": "deny",
         "bash": "ask"
@@ -190,15 +190,65 @@ Add to your MCP configuration:
 
 #### Available MCP Tools
 
-Once connected, you can use:
+Once connected, you can use the following tools (17 tools total):
+
+**Core Workflow:**
+- `parse_mode`: Parse PLAN/ACT/EVAL/AUTO workflow mode (includes dynamic language instructions)
+- `update_context`: Persist decisions and notes to `docs/codingbuddy/context.md` (**mandatory** at mode completion)
+- `read_context`: Read current context document
+- `cleanup_context`: Manually trigger context document cleanup (auto-triggered when size exceeds threshold)
+
+**Analysis & Planning:**
 - `search_rules`: Query AI rules and guidelines
+- `analyze_task`: Pre-planning task analysis with risk assessment and specialist recommendations
+- `generate_checklist`: Contextual checklists (security, accessibility, performance, testing)
+
+**Agent Dispatch:**
 - `get_agent_details`: Get specialist agent information
+- `get_agent_system_prompt`: Get complete system prompt for a specialist agent
+- `dispatch_agents`: Get Task tool-ready dispatch parameters for agents
+- `prepare_parallel_agents`: Ready-to-use prompts for parallel specialist agents
+
+**Skills:**
 - `recommend_skills`: Get skill recommendations based on prompt
 - `get_skill`: Load full skill content by name
 - `list_skills`: List all available skills with optional filtering
-- `parse_mode`: Parse PLAN/ACT/EVAL workflow mode (includes dynamic language instructions)
-- `analyze_task`: Pre-planning task analysis with risk assessment and specialist recommendations
-- `generate_checklist`: Contextual checklists (security, accessibility, performance, testing)
+
+**Configuration:**
+- `get_project_config`: Get project configuration (tech stack, architecture, language)
+- `get_code_conventions`: Get project code conventions
+- `suggest_config_updates`: Analyze project and suggest config updates based on detected changes
+
+#### Context Persistence Workflow
+
+The `update_context` tool persists PLAN/ACT/EVAL decisions to `docs/codingbuddy/context.md`. This is **mandatory** — without it, context is lost between mode switches and context compaction.
+
+**Workflow:**
+
+```
+PLAN mode:
+  parse_mode → (automatically resets context document)
+  ... do planning work ...
+  update_context({ mode: "PLAN", task: "...", decisions: [...], notes: [...] })
+
+ACT mode:
+  parse_mode → (reads existing context, appends new section)
+  ... review previous PLAN decisions from contextDocument ...
+  ... implement changes ...
+  update_context({ mode: "ACT", progress: [...], notes: [...] })
+
+EVAL mode:
+  parse_mode → (reads existing context, appends new section)
+  ... review PLAN decisions + ACT progress from contextDocument ...
+  ... evaluate quality ...
+  update_context({ mode: "EVAL", findings: [...], recommendations: [...] })
+```
+
+**Key Rules:**
+- `parse_mode` automatically manages the context file (reset in PLAN, append in ACT/EVAL)
+- You **must** call `update_context` before completing each mode
+- The context file survives context compaction — it is the only persistent memory across modes
+- Use `read_context` to check current context state at any time
 
 #### Dynamic Language Configuration
 
@@ -437,14 +487,14 @@ Crush supports skills through two mechanisms:
 - **Agent-based Workflow**: Clear separation of concerns
 - **Consistent Standards**: Same rules across all AI tools
 - **MCP Integration**: Access to specialized tools and knowledge
-- **Korean Language Support**: Full Korean responses configured
+- **Dynamic Language Support**: Configurable language via codingbuddy.config.json (ko, en, ja, zh, es, etc.)
 
 ### ✅ Key Features
 
 - **Dynamic Model Switching**: Change AI models during session
 - **Advanced Permissions**: Fine-grained tool access control
 - **Auto-initialization**: Project-specific context loading
-- **File Reference System**: `{file:path}` syntax for instructions
+- **File Reference System**: `{file:path}` syntax for instructions — *unverified in Crush*
 
 ## Troubleshooting
 
@@ -469,9 +519,10 @@ npx codingbuddy@latest --version
 npx codingbuddy@latest mcp
 ```
 
-**3. Agent Not Responding in Korean**
-- Verify `[OpenCode Override]` includes Korean language setting
-- Check agent prompt includes language instruction
+**3. Agent Not Responding in Configured Language**
+- Verify `codingbuddy.config.json` has the correct `language` setting
+- Call `parse_mode` to receive dynamic `languageInstruction`
+- Ensure agent prompts do NOT hardcode a language — use `languageInstruction` from `parse_mode`
 
 **4. Project Config Not Detected**
 ```bash
@@ -489,6 +540,21 @@ npx codingbuddy@latest mcp
 2. **Update schema reference**: Use Crush schema URL
 3. **Install Crush**: `brew install charmbracelet/tap/crush`
 4. **Migrate sessions**: Export/import session data
+
+## Verification Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Agent configuration (plan/act/eval-mode) | ✅ Verified | Agent JSON files exist at expected paths |
+| MCP server connection | ✅ Verified | `npx codingbuddy@latest mcp` works |
+| `parse_mode` with dynamic language | ✅ Verified | Returns `languageInstruction` field |
+| `update_context` persistence | ✅ Verified | Writes to `docs/codingbuddy/context.md` |
+| `{file:path}` syntax in prompts | ⚠️ Unverified | Not tested in live OpenCode/Crush environment |
+| Custom Commands (`~/.config/opencode/commands/`) | ⚠️ Unverified | Command syntax may differ in Crush |
+| AUTO mode single-agent execution | ⚠️ Unverified | Requires manual agent switching for permissions |
+| Crush `skills_paths` configuration | ⚠️ Unverified | Based on Crush documentation, not tested |
+| LSP integration | ⚠️ Unverified | Configuration format based on Crush docs |
+| Multi-model support | ⚠️ Unverified | Configuration format based on Crush docs |
 
 ## Maintenance
 
@@ -710,21 +776,29 @@ AUTO Build a new user authentication feature
 
 ### OpenCode Agent Integration
 
-AUTO mode automatically switches between agents:
+AUTO mode describes an autonomous PLAN→ACT→EVAL cycle. However, agent switching behavior differs by platform:
+
+**⚠️ Limitation:** OpenCode/Crush does not support automatic agent switching. The `/agent <name>` command requires manual user input. Therefore, AUTO mode in OpenCode works in one of two ways:
+
+**1. Single-Agent AUTO (Recommended):** Stay in the `plan-mode` agent and prefix your message with `AUTO`. The AI handles all phases within a single agent context, using `parse_mode` for mode-specific rules at each phase.
 
 ```
-AUTO detected
-    ↓
-plan-mode agent (PLAN phase)
-    ↓
-act-mode agent (ACT phase)
-    ↓
-eval-mode agent (EVAL phase)
-    ↓
-[Check quality criteria]
-    ↓
-Loop or Exit
+/agent plan-mode
+AUTO Build a new user authentication feature
+→ AI internally cycles: PLAN → ACT → EVAL using parse_mode
+→ Note: File edits require the user to approve permission prompts
 ```
+
+**2. Manual Agent Switching:** The user manually switches agents between phases:
+
+```
+/agent plan-mode → AUTO Build auth feature (PLAN phase starts)
+/agent act-mode  → Continue (ACT phase — full edit/bash permissions)
+/agent eval-mode → Continue (EVAL phase — read-only evaluation)
+→ Repeat if quality criteria not met
+```
+
+**Recommended approach:** Use Single-Agent AUTO for simplicity. For strict permission control, use Manual Agent Switching.
 
 ### Configuration
 
