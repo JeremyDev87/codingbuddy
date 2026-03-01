@@ -204,7 +204,13 @@ For each specialist (sequentially):
   - Record findings
   ↓
 Consolidate all specialist findings into unified summary
+  ↓
+Persist findings via update_context (see Completion Ordering below)
+  ↓
+Signal boundary via task_boundary (if mode is completing)
 ```
+
+> **Important:** Always call `update_context` to persist specialist findings before signaling `task_boundary`. See [Completion Ordering](#completion-ordering) for the required call sequence.
 
 ### Example (EVAL mode)
 
@@ -231,19 +237,60 @@ Present: Consolidated findings from all 3 specialists
 
 When `parse_mode` returns `dispatchReady`, the specialist system prompts are pre-built. In Antigravity, use the `dispatchParams.prompt` field as analysis context (ignore `subagent_type` — it is Claude Code specific):
 
+**`dispatchReady` structure:**
+
+```json
+{
+  "dispatchReady": {
+    "primaryAgent": {
+      "name": "software-engineer",
+      "displayName": "Software Engineer",
+      "description": "Software Engineer - ACT mode",
+      "dispatchParams": {
+        "subagent_type": "general-purpose",  // ← Ignore (Claude Code specific)
+        "prompt": "# Software Engineer\n\nYou are a Senior Software Engineer...",  // ← Use this
+        "description": "Software Engineer - ACT mode"
+      }
+    },
+    "parallelAgents": [
+      {
+        "name": "security-specialist",
+        "displayName": "Security Specialist",
+        "dispatchParams": {
+          "subagent_type": "general-purpose",  // ← Ignore
+          "prompt": "# Security Specialist\n\nYou are a Security...",  // ← Use this
+          "description": "Security review"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Key fields:**
+- `dispatchReady.primaryAgent.dispatchParams.prompt` — Primary agent system prompt. Use as the main analysis context.
+- `dispatchReady.parallelAgents[].dispatchParams.prompt` — Each specialist's system prompt. Apply as analysis context for sequential execution.
+- `subagent_type` — Claude Code Task tool parameter. **Ignore in Antigravity.**
+
+**Workflow:**
+
 ```
 parse_mode returns dispatchReady
   ↓
-dispatchReady.primaryAgent
+dispatchReady.primaryAgent.dispatchParams.prompt
   → Use as the main analysis context
   ↓
 dispatchReady.parallelAgents[] (if present)
-  → For each: the dispatchParams.prompt field contains the specialist's system prompt.
-    Apply the prompt as analysis context, analyze sequentially, record findings
+  → For each: apply dispatchParams.prompt as analysis context
+  → Analyze sequentially, record findings
   ↓
 Consolidate all findings
+  ↓
+Persist via update_context → signal via task_boundary
 ```
 
+> **Known limitation:** Antigravity cannot execute specialists in parallel. The `parallelAgents[]` array is consumed sequentially. True parallel execution requires Claude Code's Task tool. See [Known Limitations](#known-limitations).
+>
 > **Fallback:** If `dispatchReady` is not present in the `parse_mode` response, call `prepare_parallel_agents` MCP tool to retrieve specialist system prompts.
 
 ### Visibility Pattern
@@ -635,6 +682,47 @@ task_boundary(
 | EVAL | `VERIFICATION` | Evaluating quality |
 | AUTO | `AUTO_ITERATION` | Autonomous cycling |
 
+### Completion Ordering
+
+Each mode completion requires **two calls in strict order**:
+
+1. **`update_context`** — Persist decisions, notes, findings to `docs/codingbuddy/context.md`
+2. **`task_boundary`** — Signal mode boundary to Antigravity
+
+```
+Mode work complete
+  ↓
+update_context({              ← FIRST: persist cross-mode context
+  mode: "PLAN",
+  decisions: ["..."],
+  notes: ["..."],
+  status: "completed"
+})
+  ↓
+task_boundary(                ← SECOND: signal boundary to Antigravity
+  TaskName="Feature Implementation",
+  Mode="PLANNING",
+  TaskSummary="PLAN phase completed",
+  TaskStatus="Completed",
+  PredictedTaskSize=10
+)
+```
+
+**Why this order matters:**
+- `update_context` writes to `docs/codingbuddy/context.md` which survives context compaction and mode transitions
+- `task_boundary` is Antigravity-native session signaling
+- If `task_boundary` is called first and the session is interrupted, cross-mode context may be lost
+- `update_context` ensures ACT mode can see PLAN decisions, and EVAL mode can see ACT progress
+
+**Per-mode example:**
+
+| Mode | `update_context` params | `task_boundary` Mode |
+|------|-------------------------|---------------------|
+| PLAN | `decisions`, `notes`, `recommendedActAgent` | `PLANNING` |
+| ACT | `progress`, `notes` | `EXECUTION` |
+| EVAL | `findings`, `recommendations` | `VERIFICATION` |
+| AUTO | Per-phase params (cycles automatically) | `AUTO_ITERATION` |
+
 ### Artifact Management
 
 Antigravity uses artifact files for structured output:
@@ -656,12 +744,12 @@ Antigravity environment does not support several features available in Claude Co
 
 | Feature | Status | Workaround |
 |---------|--------|------------|
-| **Task tool** (background subagents) | ❌ Not available | Use `prepare_parallel_agents` for sequential execution |
+| **Task tool** (background subagents) | ❌ Not available | True parallel execution unavailable. Use `dispatchReady.parallelAgents[].dispatchParams.prompt` or `prepare_parallel_agents` for **sequential** execution |
 | **Native Skill tool** (`/skill-name`) | ❌ Not available | Use MCP tool chain: `recommend_skills` → `get_skill` |
 | **Session hooks** (PreToolUse, etc.) | ❌ Not available | Rely on `.antigravity/rules/instructions.md` for always-on instructions |
 | **Autonomous loop mechanism** | ❌ Not available | AUTO mode depends on Antigravity AI voluntarily looping |
 | **Context compaction hooks** | ❌ Not available | Manually call `update_context` before ending each mode |
-| **`dispatch_agents` full usage** | ⚠️ Partial | Use `dispatchReady.dispatchParams.prompt` as analysis context; `prepare_parallel_agents` as fallback |
+| **`dispatch_agents` full usage** | ⚠️ Partial | Use `dispatchReady.primaryAgent.dispatchParams.prompt` and `dispatchReady.parallelAgents[].dispatchParams.prompt` as analysis context; ignore `subagent_type`; `prepare_parallel_agents` as fallback |
 | **`restart_tui`** | ❌ Not applicable | Claude Code TUI-only tool |
 
 ### AUTO Mode Reliability
@@ -685,7 +773,8 @@ AUTO mode documents autonomous PLAN → ACT → EVAL cycling. In Antigravity, th
 | Skills Access Workflow | ✅ Documented | Auto-recommend, browse/select, slash-command mapping |
 | Context Document Management | ✅ Documented | With Antigravity-specific guidance |
 | Known Limitations | ✅ Documented | Task tool, hooks, AUTO mode limitations |
-| Antigravity-Specific Features | ✅ Preserved | task_boundary, artifact management |
+| `task_boundary` + `update_context` ordering | ✅ Documented | `update_context` BEFORE `task_boundary`, per-mode params |
+| Antigravity-Specific Features | ✅ Preserved | task_boundary, artifact management, completion ordering |
 | Antigravity unique capabilities | ⚠️ Partial | task_boundary and artifacts documented; other Gemini-specific features TBD |
 | `roots/list` support | ⚠️ Unknown | Not confirmed in Antigravity documentation |
 | AUTO mode reliability | ⚠️ Documented with caveat | No enforcement mechanism in Antigravity |
