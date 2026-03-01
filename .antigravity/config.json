@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["-y", "codingbuddy"],
+      "env": {
+        "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project"
+      }
+    }
+  }
+}

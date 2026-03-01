@@ -96,9 +96,11 @@ See agent details in [packages/rules/.ai-rules/agents/README.md](../../packages/
 
 **When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized: Korean 계획/실행/평가/자동, Japanese 計画/実行/評価/自動, Chinese 计划/执行/评估/自动, Spanish PLANIFICAR/ACTUAR/EVALUAR/AUTOMÁTICO):**
 
-1. **IMMEDIATELY** follow the mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
-2. Apply the mode's workflow **EXACTLY**
-3. Do NOT proceed with your own interpretation
+1. **IMMEDIATELY** call `parse_mode` MCP tool with the user's prompt
+2. Follow the returned `instructions` **EXACTLY**
+3. Apply the returned `rules` as context
+4. If `warnings` are present, inform the user
+5. **Fallback** (MCP unavailable): Follow mode-specific rules from `packages/rules/.ai-rules/rules/core.md`
 
 **This is MANDATORY, not optional.**
 
@@ -108,6 +110,7 @@ Failure to follow mode rules when these keywords are present will result in:
 - Quality issues not caught before deployment
 
 **Red Flags** (STOP if you think these):
+
 | Thought | Reality |
 |---------|---------|
 | "I can handle EVAL myself" | NO. Follow mode rules FIRST. |
@@ -117,6 +120,69 @@ Failure to follow mode rules when these keywords are present will result in:
 </CODINGBUDDY_CRITICAL_RULE>
 
 Example: `EVAL` → **즉시** EVAL 모드 규칙 적용 → Devil's Advocate Analysis 수행
+
+---
+
+## MCP Server Integration
+
+codingbuddy MCP 서버가 설정되어 있다면, 다음 도구들을 활용하세요:
+
+### 핵심 도구
+
+| 도구 | 용도 |
+|------|------|
+| `parse_mode` | PLAN/ACT/EVAL/AUTO 모드 키워드 파싱 + Agent/rules 로딩 |
+| `search_rules` | 규칙 및 가이드라인 검색 |
+| `get_agent_details` | 전문 Agent 프로필 및 전문 분야 조회 |
+| `recommend_skills` | 프롬프트 기반 스킬 추천 → `get_skill` 호출 |
+| `get_skill` | 스킬 전체 내용 로딩 |
+| `update_context` | 컨텍스트 문서 업데이트 (결정, 노트, 진행상황) |
+
+> 전체 도구 목록(17개)은 [antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md#mcp-tools)를 참조하세요.
+
+### 설정 방법
+
+MCP 서버 설정은 `.antigravity/config.json`에 추가합니다:
+
+```json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["-y", "codingbuddy"],
+      "env": {
+        "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project"
+      }
+    }
+  }
+}
+```
+
+자세한 설정 가이드: [packages/rules/.ai-rules/adapters/antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md)
+
+---
+
+## Skills
+
+codingbuddy 스킬은 MCP tool chain을 통해 접근합니다:
+
+1. **자동 추천**: `recommend_skills({ prompt: "사용자 메시지" })` → AI가 적합한 스킬 추천
+2. **수동 검색**: `list_skills()` → `get_skill("스킬명")` → 스킬 내용 로딩
+3. **슬래시 커맨드**: 사용자가 `/<command>` 입력 시 → `get_skill` 호출
+
+> **Note:** `parse_mode`는 `included_skills`에 매칭된 스킬을 자동 포함합니다.
+> PLAN/ACT/EVAL/AUTO 키워드 사용 시 별도의 `recommend_skills` 호출이 불필요합니다.
+
+---
+
+## Context Document
+
+`docs/codingbuddy/context.md`에 모드 간 결정사항을 지속합니다:
+
+- `parse_mode`가 자동으로 컨텍스트 문서를 읽기/생성
+- **각 모드 완료 전**: `update_context` 호출 필수
+- PLAN/AUTO 모드: 기존 내용 초기화 후 새로 시작
+- ACT/EVAL 모드: 기존 내용에 새 섹션 추가
 
 ---
 
@@ -132,7 +198,7 @@ Use `task_boundary` tool for tracking progress in different modes:
 
 ### Communication
 
-- **Always respond in Korean (한국어)** as specified in common rules
+- **Follow project's configured language setting** — use `get_project_config` MCP tool to retrieve current language setting
 - Use structured markdown formatting
 - Provide clear, actionable feedback
 
