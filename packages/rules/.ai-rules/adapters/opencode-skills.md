@@ -142,7 +142,7 @@ allowed-tools: Bash Read   # Optional. Space-delimited pre-approved tools (exper
 
 ## Available Skills
 
-The table below shows representative skills by mode. Use `list_skills` MCP tool for the complete list of all 29 skills.
+The table below shows representative skills by mode. Use `list_skills` MCP tool for the complete list.
 
 ### PLAN Mode Skills
 

@@ -254,6 +254,12 @@ Present: Consolidated findings from all 3 specialists
 
 ## Skills
 
+Kiro accesses codingbuddy skills through three patterns:
+
+1. **Auto-recommend** — AI calls `recommend_skills` based on intent detection
+2. **Browse and select** — User calls `list_skills` to discover, then `get_skill` to load
+3. **Slash-command** — User types `/<command>`, AI maps to `get_skill`
+
 ### Using Skills in Kiro
 
 **Method 1: MCP Tool Chain (End Users — Recommended)**
@@ -279,7 +285,77 @@ Reference skill files directly from `.ai-rules/skills/` directory in your prompt
 
 > **Note:** `parse_mode` already embeds matched skill content in `included_skills` — no separate `get_skill` call needed when using mode keywords (PLAN/ACT/EVAL/AUTO).
 
+### Skill Discovery
+
+Use `list_skills` to browse available skills before deciding which one to load:
+
+```
+list_skills()                                    # Browse all skills
+list_skills({ minPriority: 1, maxPriority: 3 })  # Filter by priority
+```
+
+**Discovery flow:**
+
+1. `list_skills()` — Browse available skills and descriptions
+2. Identify the skill relevant to the current task
+3. `get_skill("skill-name")` — Load the full skill content
+4. Follow the skill instructions
+
+> **Tip:** Use `recommend_skills` when you want AI to automatically pick the best skill. Use `list_skills` when you want to manually browse and select.
+
+### Slash-Command Mapping
+
+Kiro has no native slash-command skill invocation. When a user types `/<command>`, the AI must call `get_skill` to replicate the behavior of Claude Code's built-in Skill tool.
+
+**Rule:** When user input matches `/<command>`, call `get_skill("<skill-name>")` and follow the returned instructions. This table is a curated subset — use `list_skills()` to discover all available skills.
+
+| User Types | MCP Call |
+|---|---|
+| `/debug` or `/debugging` | `get_skill("systematic-debugging")` |
+| `/tdd` | `get_skill("test-driven-development")` |
+| `/brainstorm` | `get_skill("brainstorming")` |
+| `/plan` or `/write-plan` | `get_skill("writing-plans")` |
+| `/execute` or `/exec` | `get_skill("executing-plans")` |
+| `/design` or `/frontend` | `get_skill("frontend-design")` |
+| `/refactor` | `get_skill("refactoring")` |
+| `/security` or `/audit` | `get_skill("security-audit")` |
+| `/pr` | `get_skill("pr-all-in-one")` |
+| `/review` or `/pr-review` | `get_skill("pr-review")` |
+| `/parallel` or `/agents` | `get_skill("dispatching-parallel-agents")` |
+| `/subagent` | `get_skill("subagent-driven-development")` |
+
+For unrecognized slash commands, call `recommend_skills({ prompt: "<user's full message>" })` to find the closest match.
+
+> **Disambiguation:** `/plan` (with slash prefix) triggers `get_skill("writing-plans")`. `PLAN` (without slash, at message start) triggers `parse_mode`. Similarly, `/execute` triggers `get_skill("executing-plans")` while `ACT` triggers `parse_mode`. The slash prefix is the distinguishing signal.
+
+### Proactive Skill Activation
+
+Kiro lacks session hooks that automatically enforce skill invocation (unlike Claude Code). The AI must detect intent patterns and call `recommend_skills` proactively — without waiting for the user to explicitly request a skill.
+
+**Rule:** When the user's message suggests a skill would help, call `recommend_skills` at the start of the response — before any other action. The `recommend_skills` engine matches trigger patterns across multiple languages and is the authoritative source of truth.
+
+Common trigger examples (not exhaustive):
+
+| User Intent Signal | Likely Skill |
+|---|---|
+| Bug report, error, "not working", exception | `systematic-debugging` |
+| "Brainstorm", "build", "create", "implement" | `brainstorming` |
+| "Test first", TDD, write tests before code | `test-driven-development` |
+| "Plan", "design", implementation approach | `writing-plans` |
+| PR, commit, code review workflow | `pr-all-in-one` |
+
+```
+User: "I need to plan the implementation for user authentication"
+-> AI calls recommend_skills({ prompt: "plan implementation for user authentication" })
+-> Loads writing-plans via get_skill
+-> Follows skill instructions to create structured plan
+```
+
+> **Note:** When the user message starts with a mode keyword (`PLAN`, `ACT`, `EVAL`, `AUTO`), `parse_mode` already handles skill matching automatically via `included_skills` — no separate `recommend_skills` call is needed.
+
 ### Available Skills
+
+Highlighted skills (use `list_skills()` for the complete list):
 
 - `brainstorming/SKILL.md` - Idea → Design
 - `test-driven-development/SKILL.md` - TDD workflow

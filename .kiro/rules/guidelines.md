@@ -56,6 +56,14 @@ When the codingbuddy MCP server is configured (`.kiro/settings/mcp.json`), use M
 - `recommend_skills` → `get_skill` — Discover and load relevant skills
 - `prepare_parallel_agents` — Get specialist prompts for sequential execution
 
+**Slash-Command Handling:**
+- When user types `/<command>` (e.g., `/debug`, `/tdd`), call `get_skill("<skill-name>")` to load the skill
+- See `packages/rules/.ai-rules/adapters/kiro.md` for the full mapping table
+
+**Proactive Skill Activation:**
+- When user intent matches skill patterns (bugs, planning, TDD), call `recommend_skills` proactively — before any other action
+- `recommend_skills` is the authoritative source of truth for intent-to-skill matching
+
 **Configuration Tools:**
 - `get_project_config` — Get project configuration (language, tech stack)
 - `get_code_conventions` — Get project code conventions
@@ -80,6 +88,7 @@ Failure to follow mode rules when these keywords are present will result in:
 - Quality issues not caught before deployment
 
 **Red Flags** (STOP if you think these):
+
 | Thought | Reality |
 |---------|---------|
 | "I can handle EVAL myself" | NO. Follow mode rules FIRST. |
