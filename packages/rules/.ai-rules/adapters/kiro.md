@@ -200,15 +200,15 @@ The MCP server automatically detects Kiro as the client and returns a sequential
 
 ```
 parse_mode returns parallelAgentsRecommendation
-  |
+  ↓
 Call prepare_parallel_agents with recommended specialists
-  |
+  ↓
 For each specialist (sequentially):
   - Announce: "Analyzing from [icon] [specialist-name] perspective..."
   - Apply the specialist's system prompt as analysis context
   - Analyze the target code/design from that specialist's viewpoint
   - Record findings
-  |
+  ↓
 Consolidate all specialist findings into unified summary
 ```
 
@@ -233,6 +233,72 @@ Sequential analysis:
 Present: Consolidated findings from all 3 specialists
 ```
 
+### Consuming dispatchReady from parse_mode
+
+When `parse_mode` returns `dispatchReady`, the specialist system prompts are pre-built. In Kiro, use the `dispatchParams.prompt` field as analysis context (ignore `subagent_type` — it is Claude Code specific):
+
+```
+parse_mode returns dispatchReady
+  ↓
+dispatchReady.primaryAgent
+  → Use as the main analysis context
+  ↓
+dispatchReady.parallelAgents[] (if present)
+  → For each: the dispatchParams.prompt field contains the specialist's system prompt.
+    Apply the prompt as analysis context, analyze sequentially, record findings
+  ↓
+Consolidate all findings
+```
+
+> **Fallback:** If `dispatchReady` is not present in the `parse_mode` response, call `prepare_parallel_agents` MCP tool to retrieve specialist system prompts.
+
+### Visibility Pattern
+
+When executing sequential specialists, display clear status messages:
+
+**Start:**
+```
+🔄 Executing N specialist analyses sequentially...
+   → 🔒 security-specialist
+   → ♿ accessibility-specialist
+   → ⚡ performance-specialist
+```
+
+**During:**
+```
+🔍 Analyzing from 🔒 security-specialist perspective... (1/3)
+```
+
+**Completion:**
+```
+📊 Specialist Analysis Complete:
+
+🔒 Security:
+   [findings summary]
+
+♿ Accessibility:
+   [findings summary]
+
+⚡ Performance:
+   [findings summary]
+```
+
+### Handling Failures
+
+When `prepare_parallel_agents` returns `failedAgents`:
+
+```
+⚠️ Some agents failed to load:
+   ✗ performance-specialist: Profile not found
+
+Continuing with 2/3 agents...
+```
+
+**Strategy:**
+- Continue with successfully loaded agents
+- Report failures clearly to user
+- Document which agents couldn't be loaded in final report
+
 ### Specialist Icons
 
 | Icon | Specialist |
@@ -251,6 +317,26 @@ Present: Consolidated findings from all 3 specialists
 | 📊 | observability-specialist |
 | 🔄 | migration-specialist |
 | 🌐 | i18n-specialist |
+
+### When to Use Specialist Execution
+
+Specialist execution is recommended when `parse_mode` returns a `parallelAgentsRecommendation` field:
+
+| Mode | Default Specialists | Use Case |
+|------|---------------------|----------|
+| **PLAN** | architecture-specialist, test-strategy-specialist | Validate architecture and test approach |
+| **ACT** | code-quality-specialist, test-strategy-specialist | Verify implementation quality |
+| **EVAL** | security-specialist, accessibility-specialist, performance-specialist, code-quality-specialist | Comprehensive multi-dimensional review |
+
+### Specialist Activation Scope
+
+Each workflow mode activates different specialist agents:
+
+- **PLAN mode**: Architecture and test strategy specialists validate design
+- **ACT mode**: Code quality and test strategy specialists verify implementation
+- **EVAL mode**: Security, accessibility, performance, and code quality specialists provide comprehensive review
+
+**Important:** Specialists from one mode do NOT carry over to the next mode. Each mode has its own recommended specialist set.
 
 ## Skills
 
@@ -527,7 +613,7 @@ Kiro environment does not support several features available in Claude Code:
 | **Session hooks** (PreToolUse, etc.) | ❌ Not available | Rely on `.kiro/rules/guidelines.md` for always-on instructions |
 | **Autonomous loop mechanism** | ❌ Not available | AUTO mode depends on Kiro AI voluntarily looping |
 | **Context compaction hooks** | ❌ Not available | Manually call `update_context` before ending each mode |
-| **`dispatch_agents` full usage** | ⚠️ Partial | Returns Claude Code-specific `dispatchParams`; use `prepare_parallel_agents` instead |
+| **`dispatch_agents` full usage** | ⚠️ Partial | Use `dispatchReady.dispatchParams.prompt` as analysis context; `prepare_parallel_agents` as fallback |
 | **`restart_tui`** | ❌ Not applicable | Claude Code TUI-only tool |
 
 ### AUTO Mode Reliability
@@ -582,7 +668,7 @@ This agent-native architecture provides a natural fit for codingbuddy's agent-ba
 | MCP Configuration | ✅ Documented | `.kiro/settings/mcp.json` with `CODINGBUDDY_PROJECT_ROOT` |
 | `CODINGBUDDY_PROJECT_ROOT` guidance | ✅ Documented | Priority and fallback behavior explained |
 | MCP Tools Table | ✅ Documented | All 17 tools documented |
-| Specialist Agents Execution | ✅ Documented | Sequential workflow with icons |
+| Specialist Agents Execution | ✅ Documented | Sequential workflow, dispatchReady, visibility, failures, activation scope |
 | Context Document Management | ✅ Documented | With Kiro-specific guidance |
 | Known Limitations | ✅ Added | Task tool, hooks, AUTO mode limitations |
 | Kiro Powers integration | ⚠️ Unverified | Documented but not tested in live environment |
