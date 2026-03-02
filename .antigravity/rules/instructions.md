@@ -138,7 +138,7 @@ If the codingbuddy MCP server is configured, use these tools:
 | `get_skill` | Load full skill content |
 | `update_context` | Update context document (decisions, notes, progress) |
 
-> For the full list of tools (17 total), see [antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md#mcp-tools).
+> For the full list of tools (18 total, including 1 deprecated), see [antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md#mcp-tools).
 
 ### Configuration
 

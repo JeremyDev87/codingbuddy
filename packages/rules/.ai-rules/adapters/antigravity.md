@@ -760,6 +760,25 @@ AUTO mode documents autonomous PLAN → ACT → EVAL cycling. In Antigravity, th
 - Quality exit criteria (`Critical = 0 AND High = 0`) are advisory, not enforced
 - For reliable multi-iteration workflows, prefer manual `PLAN` → `ACT` → `EVAL` cycling
 
+## Verification Status
+
+> Audit per [#621](https://github.com/JeremyDev87/codingbuddy/issues/621). Code-level analysis complete, Antigravity runtime verification pending.
+
+| Pattern | Status | Notes |
+|---------|--------|-------|
+| MCP Configuration | ✅ Documented | `.antigravity/config.json` with `CODINGBUDDY_PROJECT_ROOT` |
+| `CODINGBUDDY_PROJECT_ROOT` guidance | ✅ Documented | Priority and fallback behavior explained |
+| MCP Tools Table | ✅ Documented | All 18 tools documented (including 1 deprecated) |
+| Mode keyword detection (instructions.md) | ✅ Documented | `parse_mode` invocation rule with CODINGBUDDY_CRITICAL_RULE |
+| Specialist Agents Execution | ✅ Documented | Sequential workflow, dispatchReady consumption, visibility, failures |
+| Skills workflow (`get_skill`) | ✅ Documented | MCP tool chain, slash-command mapping, proactive activation |
+| Context Document Management | ✅ Documented | With Antigravity-specific guidance |
+| Completion Ordering (`update_context` → `task_boundary`) | ✅ Documented | Strict ordering with rationale |
+| Known Limitations | ✅ Documented | Task tool, hooks, AUTO mode, dispatch_agents limitations |
+| `roots/list` support | ⚠️ Unknown | Not confirmed in Antigravity |
+| AUTO mode reliability | ⚠️ Documented with caveat | No enforcement mechanism in Antigravity |
+| `task_boundary` integration | ⚠️ Unverified | Documented but not tested in live environment |
+
 ## Getting Started
 
 1. Ensure `.ai-rules/` directory exists with all common rules
