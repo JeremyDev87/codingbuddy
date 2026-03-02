@@ -760,25 +760,6 @@ AUTO mode documents autonomous PLAN → ACT → EVAL cycling. In Antigravity, th
 - Quality exit criteria (`Critical = 0 AND High = 0`) are advisory, not enforced
 - For reliable multi-iteration workflows, prefer manual `PLAN` → `ACT` → `EVAL` cycling
 
-## Verification Status
-
-> Initial documentation based on code analysis and Antigravity public documentation. Runtime verification pending.
-
-| Pattern | Status | Notes |
-|---------|--------|-------|
-| MCP Configuration | ✅ Documented | `.antigravity/config.json` with `CODINGBUDDY_PROJECT_ROOT` |
-| `CODINGBUDDY_PROJECT_ROOT` guidance | ✅ Documented | Priority and fallback behavior explained |
-| MCP Tools Table | ✅ Documented | All 17 tools documented (including 1 deprecated) |
-| Specialist Agents Execution | ✅ Documented | Sequential workflow, dispatchReady, visibility, failures, activation scope |
-| Skills Access Workflow | ✅ Documented | Auto-recommend, browse/select, slash-command mapping |
-| Context Document Management | ✅ Documented | With Antigravity-specific guidance |
-| Known Limitations | ✅ Documented | Task tool, hooks, AUTO mode limitations |
-| `task_boundary` + `update_context` ordering | ✅ Documented | `update_context` BEFORE `task_boundary`, per-mode params |
-| Antigravity-Specific Features | ✅ Preserved | task_boundary, artifact management, completion ordering |
-| Antigravity unique capabilities | ⚠️ Partial | task_boundary and artifacts documented; other Gemini-specific features TBD |
-| `roots/list` support | ⚠️ Unknown | Not confirmed in Antigravity documentation |
-| AUTO mode reliability | ⚠️ Documented with caveat | No enforcement mechanism in Antigravity |
-
 ## Getting Started
 
 1. Ensure `.ai-rules/` directory exists with all common rules

@@ -38,7 +38,7 @@ See full workflow details in [packages/rules/.ai-rules/rules/core.md](../../pack
 
 #### Tech Stack
 
-프로젝트의 `package.json`을 참조하세요.
+Refer to the project's `package.json`.
 
 #### Project Structure
 ```
@@ -119,30 +119,30 @@ Failure to follow mode rules when these keywords are present will result in:
 
 </CODINGBUDDY_CRITICAL_RULE>
 
-Example: `EVAL` → **즉시** EVAL 모드 규칙 적용 → Devil's Advocate Analysis 수행
+Example: `EVAL` → **immediately** apply EVAL mode rules → perform Devil's Advocate Analysis
 
 ---
 
 ## MCP Server Integration
 
-codingbuddy MCP 서버가 설정되어 있다면, 다음 도구들을 활용하세요:
+If the codingbuddy MCP server is configured, use these tools:
 
-### 핵심 도구
+### Key Tools
 
-| 도구 | 용도 |
-|------|------|
-| `parse_mode` | PLAN/ACT/EVAL/AUTO 모드 키워드 파싱 + Agent/rules 로딩 |
-| `search_rules` | 규칙 및 가이드라인 검색 |
-| `get_agent_details` | 전문 Agent 프로필 및 전문 분야 조회 |
-| `recommend_skills` | 프롬프트 기반 스킬 추천 → `get_skill` 호출 |
-| `get_skill` | 스킬 전체 내용 로딩 |
-| `update_context` | 컨텍스트 문서 업데이트 (결정, 노트, 진행상황) |
+| Tool | Purpose |
+|------|---------|
+| `parse_mode` | Parse PLAN/ACT/EVAL/AUTO mode keywords + load Agent/rules |
+| `search_rules` | Search rules and guidelines |
+| `get_agent_details` | Get specialist Agent profile and expertise |
+| `recommend_skills` | Recommend skills based on prompt → then call `get_skill` |
+| `get_skill` | Load full skill content |
+| `update_context` | Update context document (decisions, notes, progress) |
 
-> 전체 도구 목록(17개)은 [antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md#mcp-tools)를 참조하세요.
+> For the full list of tools (17 total), see [antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md#mcp-tools).
 
-### 설정 방법
+### Configuration
 
-MCP 서버 설정은 `.antigravity/config.json`에 추가합니다:
+Add MCP server configuration to `.antigravity/config.json`:
 
 ```json
 {
@@ -158,31 +158,31 @@ MCP 서버 설정은 `.antigravity/config.json`에 추가합니다:
 }
 ```
 
-자세한 설정 가이드: [packages/rules/.ai-rules/adapters/antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md)
+Full configuration guide: [packages/rules/.ai-rules/adapters/antigravity.md](../../packages/rules/.ai-rules/adapters/antigravity.md)
 
 ---
 
 ## Skills
 
-codingbuddy 스킬은 MCP tool chain을 통해 접근합니다:
+codingbuddy skills are accessed through the MCP tool chain:
 
-1. **자동 추천**: `recommend_skills({ prompt: "사용자 메시지" })` → AI가 적합한 스킬 추천
-2. **수동 검색**: `list_skills()` → `get_skill("스킬명")` → 스킬 내용 로딩
-3. **슬래시 커맨드**: 사용자가 `/<command>` 입력 시 → `get_skill` 호출
+1. **Auto-recommend**: `recommend_skills({ prompt: "user message" })` → AI recommends matching skills
+2. **Browse and select**: `list_skills()` → `get_skill("skill-name")` → load skill content
+3. **Slash-command**: When user types `/<command>` → call `get_skill`
 
-> **Note:** `parse_mode`는 `included_skills`에 매칭된 스킬을 자동 포함합니다.
-> PLAN/ACT/EVAL/AUTO 키워드 사용 시 별도의 `recommend_skills` 호출이 불필요합니다.
+> **Note:** `parse_mode` automatically embeds matched skills in `included_skills`.
+> No separate `recommend_skills` call is needed when using mode keywords (PLAN/ACT/EVAL/AUTO).
 
 ---
 
 ## Context Document
 
-`docs/codingbuddy/context.md`에 모드 간 결정사항을 지속합니다:
+Persists decisions across mode transitions in `docs/codingbuddy/context.md`:
 
-- `parse_mode`가 자동으로 컨텍스트 문서를 읽기/생성
-- **각 모드 완료 전**: `update_context` 호출 필수
-- PLAN/AUTO 모드: 기존 내용 초기화 후 새로 시작
-- ACT/EVAL 모드: 기존 내용에 새 섹션 추가
+- `parse_mode` automatically reads/creates the context document
+- **Before completing each mode**: call `update_context` (mandatory)
+- PLAN/AUTO mode: resets existing content and starts fresh
+- ACT/EVAL mode: appends new section to existing content
 
 ---
 
