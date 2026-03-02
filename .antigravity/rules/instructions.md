@@ -188,13 +188,19 @@ codingbuddy 스킬은 MCP tool chain을 통해 접근합니다:
 
 ## Antigravity-Specific Features
 
-### Task Boundaries
+### Task Boundaries & Completion Ordering
 
-Use `task_boundary` tool for tracking progress in different modes:
-- Mode: PLANNING, EXECUTION, or VERIFICATION
+**When completing each mode**, execute two calls in strict order:
+1. **`update_context`** — Persist decisions, notes, findings to `docs/codingbuddy/context.md` (first)
+2. **`task_boundary`** — Signal mode boundary to Antigravity (second)
+
+> `update_context` must be called first to preserve cross-mode context even if the session is interrupted.
+
+`task_boundary` parameters:
+- Mode: `PLANNING`, `EXECUTION`, `VERIFICATION`, or `AUTO_ITERATION`
 - TaskName: Current work area
 - TaskStatus: Next steps
-- TaskSummary: Work completed so far
+- TaskSummary: Summary of completed work
 
 ### Communication
 
