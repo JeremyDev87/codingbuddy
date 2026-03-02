@@ -12,14 +12,38 @@ import { DEFAULT_MODEL } from './model.constants';
 export const SYSTEM_DEFAULT_MODEL = DEFAULT_MODEL;
 
 /**
- * Known Claude model ID patterns for validation
- * Uses prefixes to allow future model versions
+ * Known model ID patterns for validation (multi-provider)
+ *
+ * Uses provider-level prefixes for automatic future model compatibility.
+ * When a new model version is released (e.g., gpt-6, gemini-4),
+ * it is automatically recognized without code changes.
  */
 export const KNOWN_MODEL_PREFIXES = [
-  'claude-opus-4',
-  'claude-sonnet-4',
-  'claude-sonnet-3',
-  'claude-haiku-3',
+  // Anthropic
+  'claude-',
+  // OpenAI
+  'gpt-',
+  'o1', // No trailing dash: matches both standalone 'o1' and 'o1-mini'/'o1-preview'
+  'o3', // No trailing dash: matches both standalone 'o3' and 'o3-mini'
+  'o4', // No trailing dash: matches both standalone 'o4' and 'o4-mini'
+  'chatgpt-',
+  // Google
+  'gemini-',
+  // xAI
+  'grok-',
+  // DeepSeek
+  'deepseek-',
+  // Mistral
+  'mistral-',
+  'codestral-',
+  // Meta
+  'llama-',
+  // Cohere
+  'command-',
+  // Alibaba
+  'qwen-',
+  // Microsoft
+  'phi-',
 ] as const;
 
 /**
@@ -64,7 +88,7 @@ export function formatUnknownModelWarning(
 }
 
 /**
- * Check if a model ID matches known Claude model patterns
+ * Check if a model ID matches known model patterns (multi-provider)
  * @param modelId - Model ID to check
  * @param additionalPrefixes - Optional additional prefixes to recognize
  */
