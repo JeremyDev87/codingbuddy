@@ -118,6 +118,22 @@ All specialist agents are defined in `packages/rules/.ai-rules/agents/` director
 
 For complete agent documentation, see [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
 
+### Specialist Execution
+
+When `parse_mode` returns `parallelAgentsRecommendation` or `dispatchReady`, execute specialists **sequentially**:
+
+1. Announce specialists being analyzed
+2. For each specialist: apply its system prompt as analysis context, analyze, record findings
+3. Consolidate all findings into a unified summary
+
+**Preferred workflow:**
+- If `dispatchReady.parallelAgents[]` exists: use `dispatchParams.prompt` directly
+- Otherwise: call `prepare_parallel_agents` MCP tool to get system prompts
+
+**Note:** `subagent_type` and `run_in_background` are Claude Code-specific parameters — ignore them in Codex.
+
+See [packages/rules/.ai-rules/adapters/codex.md](../../packages/rules/.ai-rules/adapters/codex.md#specialist-agents-execution) for the full workflow.
+
 ---
 
 ## 🔴 MANDATORY: Keyword Mode Detection
