@@ -1,6 +1,6 @@
 # Codex Adapter Configuration Guide
 
-This guide explains how to use the Codebuddy MCP server in GitHub Copilot/Codex CLI environment.
+This guide explains how to use the Codingbuddy MCP server in GitHub Copilot/Codex CLI environment.
 
 ## Overview
 
@@ -24,20 +24,32 @@ This file provides the context needed for Codex to understand project rules:
 - Keyword Invocation setup
 - TDD and code quality guidelines
 
-### 2. MCP Server Connection (Optional)
+### 2. MCP Server Connection (Recommended)
 
-Using MCP server enables additional features:
+MCP server enables full codingbuddy features including workflow management and agent dispatch:
 
 ```json
 {
   "mcpServers": {
-    "codebuddy": {
+    "codingbuddy": {
       "command": "npx",
-      "args": ["codebuddy-mcp-server"]
+      "args": ["-y", "codingbuddy"],
+      "env": {
+        "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project"
+      }
     }
   }
 }
 ```
+
+> **Important:** `CODINGBUDDY_PROJECT_ROOT`를 설정하지 않으면 서버가 프로젝트의
+> `codingbuddy.config.json`을 찾지 못하여 `language`, `primaryAgent` 등의 설정이
+> 기본값으로 동작합니다. 항상 프로젝트의 절대 경로로 설정하세요.
+
+**Project root resolution priority:**
+1. `CODINGBUDDY_PROJECT_ROOT` environment variable (highest priority)
+2. `roots/list` MCP capability (support unconfirmed in Codex)
+3. `findProjectRoot()` automatic detection (fallback)
 
 ## Available MCP Tools
 
@@ -45,9 +57,15 @@ Tools available when connected to MCP server:
 
 | Tool | Description |
 |------|-------------|
+| `parse_mode` | Parse PLAN/ACT/EVAL keywords and return mode-specific rules |
 | `search_rules` | Search rules and guidelines |
 | `get_agent_details` | Get specific AI agent information |
-| `parse_mode` | Parse PLAN/ACT/EVAL keywords and return mode-specific rules |
+| `get_project_config` | Get project configuration (tech stack, language, etc.) |
+| `recommend_skills` | Recommend skills based on user prompt |
+| `generate_checklist` | Generate contextual checklists |
+| `analyze_task` | Pre-planning task analysis and risk assessment |
+| `dispatch_agents` | Get Task tool-ready params for agent dispatch |
+| `set_project_root` | ~~Set project root directory~~ **(deprecated)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
 
 ## Keyword Invocation
 
@@ -58,6 +76,7 @@ When a prompt starts with specific keywords, it automatically works in that mode
 | `PLAN` | Planning Mode | Task planning and design phase |
 | `ACT` | Action Mode | Actual task execution phase |
 | `EVAL` | Evaluation Mode | Result review and evaluation phase |
+| `AUTO` | Autonomous Mode | Autonomous PLAN → ACT → EVAL cycle until quality achieved |
 
 ### Usage Examples
 
@@ -109,10 +128,25 @@ packages/rules/.ai-rules/                  # Common AI rules (shared across all 
 2. Check configuration file path
 3. Review logs for error messages
 
+### Project Config Not Detected
+
+If `get_project_config` returns default values instead of your project settings:
+
+1. Verify `CODINGBUDDY_PROJECT_ROOT` is set in MCP server configuration
+2. Ensure the path points to the directory containing `codingbuddy.config.json`
+3. Check that `codingbuddy.config.json` exists and is valid JSON
+
 ### Keyword Not Recognized
 
 - Keywords are case-insensitive (`PLAN`, `plan`, `Plan` all work)
 - Keyword must be followed by a space and prompt content
+
+## Verification
+
+After configuration, call `get_project_config` MCP tool in Codex and confirm:
+- `projectName` matches the project's `codingbuddy.config.json`
+- `language` matches the project's configured value
+- `docs/codingbuddy/context.md` is created in the correct project root
 
 ## Related Documentation
 

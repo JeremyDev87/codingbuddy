@@ -4,7 +4,48 @@ This guide explains how to use the common AI rules (`.ai-rules/`) with GitHub Co
 
 ## Overview
 
-GitHub Copilot can use custom instructions from `.github/` or `.codex/` directory.
+codingbuddy integrates with GitHub Copilot / Codex in two ways:
+
+1. **`.codex/rules/system-prompt.md`** - Codex system prompt (always-on instructions)
+2. **MCP Server** - codingbuddy MCP tools for workflow management
+
+## Two Usage Contexts
+
+### End Users (Your Project)
+
+End users access rules **only through MCP tools**. No local rule files needed.
+
+```jsonc
+// Codex MCP configuration
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["-y", "codingbuddy"],
+      "env": {
+        "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project"
+      }
+    }
+  }
+}
+```
+
+> **Important:** Codex(GitHub Copilot)의 `roots/list` MCP capability 지원 여부는 미확인입니다.
+> `CODINGBUDDY_PROJECT_ROOT` 없이는 서버가 프로젝트의 `codingbuddy.config.json`을 찾지 못하여
+> `language` 등 설정이 기본값으로 동작합니다. 항상 이 환경변수를 프로젝트의 절대 경로로 설정하세요.
+> Codex가 `${workspaceFolder}` 변수 확장을 지원하는 경우, 절대 경로 대신 사용할 수 있습니다.
+
+### Monorepo Contributors
+
+Contributors to the codingbuddy repository can use direct file references:
+
+```
+Project Root/
+├── .codex/
+│   └── rules/
+│       └── system-prompt.md        # References .ai-rules
+└── packages/rules/.ai-rules/      # Single Source of Truth
+```
 
 ## Integration Method
 
@@ -73,7 +114,30 @@ See [docs/codex-adapter-configuration.md](../../docs/codex-adapter-configuration
     └── codex.md             # This guide
 ```
 
-## Configuration Guide
+## Configuration Files
+
+### MCP Server Configuration
+
+See the MCP configuration in the [End Users](#end-users-your-project) section above.
+
+**Project root resolution priority** (in `mcp.service.ts`):
+1. `CODINGBUDDY_PROJECT_ROOT` environment variable (highest priority)
+2. `roots/list` MCP capability (support unconfirmed in Codex)
+3. `findProjectRoot()` automatic detection (fallback)
+
+### .codex/rules/system-prompt.md
+
+System prompt providing context for Codex:
+
+- Common AI rules reference from `.ai-rules/`
+- PLAN/ACT/EVAL workflow modes
+- Keyword Invocation support
+- TDD and code quality guidelines
+- Specialist agents reference
+
+**File location**: `.codex/rules/system-prompt.md`
+
+### Detailed Guides
 
 For detailed setup instructions, see:
 - **Quick Start**: [docs/codex-adapter-configuration.md](../../docs/codex-adapter-configuration.md)
@@ -96,6 +160,19 @@ Copilot will use context from:
 - `.ai-rules/rules/project.md` for naming conventions
 - `.ai-rules/rules/augmented-coding.md` for code quality patterns
 - Existing codebase structure
+
+### Available MCP Tools
+
+For the full list of available tools, see [docs/codex-adapter-configuration.md](../../docs/codex-adapter-configuration.md#available-mcp-tools).
+
+Key tools:
+
+| Tool | Description |
+|------|-------------|
+| `parse_mode` | Parse PLAN/ACT/EVAL keywords and return mode-specific rules |
+| `search_rules` | Search rules and guidelines |
+| `get_project_config` | Get project configuration (tech stack, language, etc.) |
+| `set_project_root` | ~~Set project root directory~~ **(deprecated)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
 
 ## GitHub Copilot Workspace Integration
 
