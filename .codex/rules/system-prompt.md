@@ -190,6 +190,48 @@ codingbuddy MCP 서버 사용 시 `CODINGBUDDY_PROJECT_ROOT` 환경변수를 프
 
 ---
 
+## 🛠️ Skills
+
+Skills are structured AI instructions for specialized tasks (brainstorming, TDD, debugging, planning, etc.).
+
+### Skill Access Methods
+
+**Primary (MCP Tool — works with npm install):**
+
+| Tool | Description |
+|------|-------------|
+| `recommend_skills` | Recommend skills based on user prompt with multi-language support |
+| `get_skill` | Load full skill content by name |
+| `list_skills` | List all available skills with optional filtering |
+
+**Usage pattern:**
+```
+User prompt → recommend_skills(prompt) → get_skill(recommended skillName) → follow instructions
+```
+
+**Fallback (Monorepo contributors only):**
+```bash
+cat .ai-rules/skills/<skill-name>/SKILL.md
+```
+
+> **Note:** `parse_mode` already embeds matched skill content in `included_skills` — no separate `get_skill` call needed when using mode keywords (PLAN/ACT/EVAL/AUTO).
+
+### Available Skills
+
+Highlighted skills (use `list_skills()` for the complete list):
+
+- `brainstorming` - Explore requirements before implementation
+- `test-driven-development` - TDD workflow
+- `systematic-debugging` - Debug methodically
+- `writing-plans` - Create implementation plans
+- `executing-plans` - Execute plans with checkpoints
+- `subagent-driven-development` - In-session plan execution
+- `dispatching-parallel-agents` - Handle parallel tasks
+- `frontend-design` - Build production-grade UI
+- `pr-all-in-one` - Unified commit and PR workflow
+
+---
+
 ## 📖 Full Documentation
 
 For comprehensive guides:

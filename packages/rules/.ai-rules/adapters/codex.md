@@ -173,6 +173,9 @@ Key tools:
 | `search_rules` | Search rules and guidelines |
 | `get_project_config` | Get project configuration (tech stack, language, etc.) |
 | `set_project_root` | ~~Set project root directory~~ **(deprecated)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
+| `recommend_skills` | Recommend skills based on user prompt with multi-language support |
+| `get_skill` | Load full skill content by name |
+| `list_skills` | List all available skills with optional filtering |
 
 ## GitHub Copilot Workspace Integration
 
@@ -202,19 +205,63 @@ When using Copilot Workspace:
 
 ## Skills
 
+Codex accesses codingbuddy skills through three patterns:
+
+1. **Auto-recommend** — AI calls `recommend_skills` based on intent detection
+2. **Browse and select** — User calls `list_skills` to discover, then `get_skill` to load
+3. **Direct load** — AI calls `get_skill` with a known skill name
+
 ### Using Skills in Codex
 
-Skills are located in `.ai-rules/skills/`. To use a skill:
+**Method 1: MCP Tool Chain (End Users — Recommended)**
 
-1. Read the skill file:
+The AI should follow this chain when a skill might apply:
 
-   ```bash
-   cat .ai-rules/skills/<skill-name>/SKILL.md
-   ```
+1. `recommend_skills({ prompt: "user's message" })` — Get skill recommendations
+2. `get_skill("skill-name")` — Load the recommended skill's full content
+3. Follow the skill instructions in the response
 
-2. Follow the skill's checklist and process.
+Example flow:
+```
+User: "There is a bug in the authentication logic"
+→ AI calls recommend_skills({ prompt: "There is a bug in the authentication logic" })
+→ Response: { recommendations: [{ skillName: "systematic-debugging", ... }], nextAction: "Call get_skill..." }
+→ AI calls get_skill("systematic-debugging")
+→ AI follows the systematic-debugging skill instructions
+```
+
+**Method 2: File Reference (Monorepo Contributors Only)**
+
+```bash
+cat .ai-rules/skills/<skill-name>/SKILL.md
+```
+
+> ⚠️ This method only works when `.ai-rules/` directory exists locally (monorepo development).
+> It will fail silently when codingbuddy is installed via npm (`npx codingbuddy`).
+>
+> **Note:** `parse_mode` already embeds matched skill content in `included_skills` — no separate `get_skill` call needed when using mode keywords (PLAN/ACT/EVAL/AUTO).
+
+### Skill Discovery
+
+Use `list_skills` to browse available skills before deciding which one to load:
+
+```
+AI calls list_skills()
+→ Returns all skills with names, descriptions, and priority scores
+
+# With filtering:
+AI calls list_skills({ minPriority: 1, maxPriority: 3 })
+→ Returns only skills within priority range
+
+→ AI selects the most relevant skill
+→ AI calls get_skill("selected-skill-name")
+```
+
+> **Tip:** Use `recommend_skills` when you want AI to automatically pick the best skill. Use `list_skills` when you want to manually browse and select.
 
 ### Available Skills
+
+Highlighted skills (use `list_skills()` for the complete list):
 
 - `brainstorming` - Explore requirements before implementation
 - `test-driven-development` - TDD workflow
@@ -224,6 +271,7 @@ Skills are located in `.ai-rules/skills/`. To use a skill:
 - `subagent-driven-development` - In-session plan execution
 - `dispatching-parallel-agents` - Handle parallel tasks
 - `frontend-design` - Build production-grade UI
+- `pr-all-in-one` - Unified commit and PR workflow
 
 ## PR All-in-One Skill
 
