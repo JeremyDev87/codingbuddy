@@ -5,6 +5,36 @@
 이 문서는 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/) 형식을 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/spec/v2.0.0.html)을 준수합니다.
 
+## [4.4.0] - 2026-03-04
+
+### 추가됨
+
+- **모델**: Provider별 접두사를 지원하는 multi-provider 모델 지원 추가
+- **MCP**: opencode/crush 및 cursor에 대한 클라이언트 타입 감지 및 플랫폼별 병렬 에이전트 힌트 추가
+- **MCP**: `recommend_skills` 도구에 `get_skill` 체이닝 힌트 추가
+- **MCP**: opencode 전용 순차 전문가 디스패치 힌트 추가
+- **MCP**: `parse_mode`에 `projectRootWarning` 진단 추가
+- **설정**: 프로젝트 루트 해석 소스 추적
+- **스킬**: 12개 신규 스킬 정의 추가 (security-audit, documentation-generation, code-explanation, tech-debt, agent-design, rule-authoring, mcp-builder, context-management, deployment-checklist, error-analysis, legacy-modernization, prompt-engineering)
+- **스킬**: 12개 스킬에 i18n 키워드 트리거 추가 (KO/JA/ZH/ES)
+
+### 수정됨
+
+- **스킬**: agent-design 스킬 JSON 예제를 `agent.schema.json`에 맞춤
+
+### 테스트
+
+- 클라이언트 타입 감지 및 힌트 분기 테스트 추가
+- `recommend_skills` nextAction 및 체이닝 힌트 테스트 추가
+- 12개 스킬 키워드 트리거 테스트 추가
+
+### 문서
+
+- Codex, Antigravity, Kiro, OpenCode, Cursor 어댑터 문서 감사 및 보강
+- 모든 어댑터에 MCP 설정 및 프로젝트 루트 감지 문서 추가
+- 모든 어댑터에 전문가 에이전트 실행 패턴 추가
+- 스킬 카탈로그를 카테고리별 테이블로 재구성
+
 ## [4.3.0] - 2026-02-20
 
 ### 추가됨

@@ -5,6 +5,36 @@
 このドキュメントは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) の形式に基づいており、
 [セマンティック バージョニング](https://semver.org/lang/ja/spec/v2.0.0.html) に準拠しています。
 
+## [4.4.0] - 2026-03-04
+
+### 追加
+
+- **モデル**: プロバイダーレベルのプレフィックスによるマルチプロバイダーモデルサポートを追加
+- **MCP**: opencode/crush および cursor のクライアントタイプ検出とプラットフォーム固有の並列エージェントヒントを追加
+- **MCP**: `recommend_skills` ツールに `get_skill` チェーンヒントを追加
+- **MCP**: opencode 固有の順次スペシャリストディスパッチヒントを追加
+- **MCP**: `parse_mode` に `projectRootWarning` 診断を追加
+- **Config**: プロジェクトルート解決ソースの追跡を追加
+- **スキル**: 12個の新しいスキル定義を追加（security-audit、documentation-generation、code-explanation、tech-debt、agent-design、rule-authoring、mcp-builder、context-management、deployment-checklist、error-analysis、legacy-modernization、prompt-engineering）
+- **スキル**: 12スキルのi18nキーワードトリガーを追加（KO/JA/ZH/ES）
+
+### 修正
+
+- **スキル**: agent-design スキルの JSON サンプルを `agent.schema.json` に準拠するよう修正
+
+### テスト
+
+- クライアントタイプ検出およびヒント分岐テストを追加
+- `recommend_skills` の nextAction およびチェーンヒントテストを追加
+- 12スキルのキーワードトリガーテストを追加
+
+### ドキュメント
+
+- Codex、Antigravity、Kiro、OpenCode、Cursor のアダプタードキュメントを監査・強化
+- 全アダプターに MCP 設定およびプロジェクトルート検出ドキュメントを追加
+- 全アダプターにスペシャリストエージェント実行パターンを追加
+- スキルカタログをカテゴリ別テーブルに再編成
+
 ## [4.3.0] - 2026-02-20
 
 ### 追加

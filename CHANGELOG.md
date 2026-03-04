@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-03-04
+
+### Added
+
+- **Model**: Add multi-provider model support with provider-level prefixes
+- **MCP**: Add client-type detection for opencode/crush and cursor with platform-specific parallel agent hints
+- **MCP**: Add `get_skill` chaining hint to `recommend_skills` tool
+- **MCP**: Add opencode-specific sequential specialist dispatch hint
+- **MCP**: Add `projectRootWarning` diagnostic to `parse_mode`
+- **Config**: Track project root resolution source
+- **Skills**: Add 12 new skill definitions (security-audit, documentation-generation, code-explanation, tech-debt, agent-design, rule-authoring, mcp-builder, context-management, deployment-checklist, error-analysis, legacy-modernization, prompt-engineering)
+- **Skills**: Add i18n keyword triggers for 12 skills (KO/JA/ZH/ES)
+
+### Fixed
+
+- **Skills**: Align agent-design skill JSON examples with `agent.schema.json`
+
+### Tests
+
+- Add client-type detection and hint branching tests
+- Add `recommend_skills` nextAction and chaining hint tests
+- Add keyword trigger tests for 12 skills
+
+### Docs
+
+- Audit and enhance adapter documentation for Codex, Antigravity, Kiro, OpenCode, and Cursor
+- Add MCP configuration and project root detection docs across all adapters
+- Add specialist agents execution patterns across all adapters
+- Reorganize skill catalog with categorized tables
+
 ## [4.3.0] - 2026-02-20
 
 ### Added

@@ -5,6 +5,36 @@
 本文档格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/spec/v2.0.0.html)。
 
+## [4.4.0] - 2026-03-04
+
+### 新增
+
+- **模型**: 新增多供应商模型支持，支持供应商级别前缀
+- **MCP**: 新增 opencode/crush 和 cursor 的客户端类型检测，以及平台特定的并行代理提示
+- **MCP**: 在 `recommend_skills` 工具中新增 `get_skill` 链式调用提示
+- **MCP**: 新增 opencode 专用的顺序专家分发提示
+- **MCP**: 在 `parse_mode` 中新增 `projectRootWarning` 诊断
+- **配置**: 追踪项目根目录解析来源
+- **技能**: 新增 12 个技能定义（security-audit、documentation-generation、code-explanation、tech-debt、agent-design、rule-authoring、mcp-builder、context-management、deployment-checklist、error-analysis、legacy-modernization、prompt-engineering）
+- **技能**: 为 12 个技能新增 i18n 关键词触发器（KO/JA/ZH/ES）
+
+### 修复
+
+- **技能**: 将 agent-design 技能 JSON 示例与 `agent.schema.json` 对齐
+
+### 测试
+
+- 新增客户端类型检测和提示分支测试
+- 新增 `recommend_skills` nextAction 和链式调用提示测试
+- 新增 12 个技能的关键词触发器测试
+
+### 文档
+
+- 审查并增强 Codex、Antigravity、Kiro、OpenCode 和 Cursor 的适配器文档
+- 在所有适配器中新增 MCP 配置和项目根目录检测文档
+- 在所有适配器中新增专家代理执行模式文档
+- 将技能目录重组为分类表格
+
 ## [4.3.0] - 2026-02-20
 
 ### 新增

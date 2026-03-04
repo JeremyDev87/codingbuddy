@@ -5,6 +5,36 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-03-04
+
+### Agregado
+
+- **Modelo**: Agregar soporte de modelos multi-proveedor con prefijos a nivel de proveedor
+- **MCP**: Agregar detección de tipo de cliente para opencode/crush y cursor con hints de agentes paralelos específicos por plataforma
+- **MCP**: Agregar hint de encadenamiento `get_skill` a la herramienta `recommend_skills`
+- **MCP**: Agregar hint de despacho secuencial de especialistas específico para opencode
+- **MCP**: Agregar diagnóstico `projectRootWarning` a `parse_mode`
+- **Config**: Rastrear fuente de resolución de raíz del proyecto
+- **Habilidades**: Agregar 12 nuevas definiciones de habilidades (security-audit, documentation-generation, code-explanation, tech-debt, agent-design, rule-authoring, mcp-builder, context-management, deployment-checklist, error-analysis, legacy-modernization, prompt-engineering)
+- **Habilidades**: Agregar disparadores de palabras clave i18n para 12 habilidades (KO/JA/ZH/ES)
+
+### Corregido
+
+- **Habilidades**: Alinear ejemplos JSON de habilidad agent-design con `agent.schema.json`
+
+### Pruebas
+
+- Agregar pruebas de detección de tipo de cliente y ramificación de hints
+- Agregar pruebas de nextAction y hint de encadenamiento de `recommend_skills`
+- Agregar pruebas de disparadores de palabras clave para 12 habilidades
+
+### Documentación
+
+- Auditar y mejorar documentación de adaptadores para Codex, Antigravity, Kiro, OpenCode y Cursor
+- Agregar documentación de configuración MCP y detección de raíz del proyecto en todos los adaptadores
+- Agregar patrones de ejecución de agentes especialistas en todos los adaptadores
+- Reorganizar catálogo de habilidades con tablas categorizadas
+
 ## [4.3.0] - 2026-02-20
 
 ### Agregado
