@@ -177,24 +177,24 @@ Key tools:
 
 | Tool | Description |
 |------|-------------|
-| `parse_mode` | Parse PLAN/ACT/EVAL keywords and return mode-specific rules |
-| `search_rules` | Search rules and guidelines |
-| `get_project_config` | Get project configuration (tech stack, language, etc.) |
-| `set_project_root` | ~~Set project root directory~~ **(deprecated)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
+| `parse_mode` | **MANDATORY.** Parse PLAN/ACT/EVAL/AUTO keywords and return mode-specific rules, agent, and context |
+| `search_rules` | Search for rules and guidelines |
+| `get_project_config` | Get project configuration including tech stack, architecture, conventions, and language settings |
+| `set_project_root` | ~~Set project root directory~~ **(deprecated — will be removed in v2.0.0)** — use `CODINGBUDDY_PROJECT_ROOT` env var or `--project-root` CLI flag instead |
 | `recommend_skills` | Recommend skills based on user prompt with multi-language support |
-| `get_skill` | Load full skill content by name |
-| `list_skills` | List all available skills with optional filtering |
-| `get_agent_details` | Get detailed profile of a specialist agent |
+| `get_skill` | Get skill content by name (returns full skill definition including instructions) |
+| `list_skills` | List all available skills with optional filtering by priority |
+| `get_agent_details` | Get detailed profile of a specific AI agent |
 | `get_agent_system_prompt` | Get complete system prompt for a specialist agent |
-| `prepare_parallel_agents` | Prepare specialist agents for sequential execution |
-| `dispatch_agents` | Get Task tool-ready dispatch params (Claude Code optimized) |
-| `generate_checklist` | Generate contextual checklists (security, a11y, performance) |
-| `analyze_task` | Analyze task for risk assessment and specialist recommendations |
+| `prepare_parallel_agents` | Prepare multiple specialist agents with system prompts for execution (**recommended for Codex** — use for sequential specialist analysis) |
+| `dispatch_agents` | Get Task-tool-ready dispatch parameters for agents (optimized for Claude Code Task tool; in Codex, prefer `prepare_parallel_agents`) |
+| `generate_checklist` | Generate contextual checklists based on file patterns and domains (security, a11y, performance, testing, code-quality, SEO) |
+| `analyze_task` | Analyze a task for risk assessment, relevant checklists, specialist recommendations, and workflow suggestions |
 | `get_code_conventions` | Get project code conventions from config files (tsconfig, eslint, prettier) |
-| `suggest_config_updates` | Analyze project and suggest config updates based on detected changes |
-| `read_context` | Read context document (`docs/codingbuddy/context.md`) |
-| `update_context` | Update context document with decisions, notes, progress |
-| `cleanup_context` | Manually trigger context document cleanup |
+| `suggest_config_updates` | Analyze the project and suggest config updates based on detected changes (new frameworks, dependencies, patterns) |
+| `read_context` | Read current context document (`docs/codingbuddy/context.md`) with verbosity control |
+| `update_context` | **MANDATORY at mode end.** Update context document with decisions, notes, progress, findings |
+| `cleanup_context` | Manually trigger context document cleanup (summarizes older sections to reduce size) |
 
 ## Specialist Agents Execution
 
@@ -532,7 +532,7 @@ Unified commit and PR workflow that:
 
 ### Configuration
 
-Create `.claude/pr-config.json` in your project root. Required settings:
+Create `.claude/pr-config.json` in your project root (this is the canonical path used by the pr-all-in-one skill across all AI tools). Required settings:
 - `defaultTargetBranch`: Target branch for PRs
 - `issueTracker`: `jira`, `github`, `linear`, `gitlab`, or `custom`
 - `issuePattern`: Regex pattern for issue ID extraction
@@ -557,7 +557,7 @@ If no config file exists, the skill guides you through interactive setup:
 
 ### Platform-Specific Note
 
-Use `cat .ai-rules/skills/pr-all-in-one/SKILL.md` to access skill documentation directly.
+Use `get_skill('pr-all-in-one')` MCP tool to access the full skill documentation. This works in all environments (end users and monorepo contributors alike), unlike direct file access which only works when `.ai-rules/` exists locally.
 
 ## Context Document Management
 
@@ -659,9 +659,12 @@ Codex environment does not support several features available in Claude Code:
 | **Session hooks** (PreToolUse, etc.) | ❌ Not available | Rely on `.codex/rules/system-prompt.md` for always-on instructions |
 | **Autonomous loop mechanism** | ❌ Not available | AUTO mode depends on Codex AI voluntarily looping |
 | **Context compaction hooks** | ❌ Not available | Manually call `update_context` before ending each mode |
-| **`dispatch_agents` full usage** | ⚠️ Partial | Returns Claude Code-specific `dispatchParams`; use `prepare_parallel_agents` as fallback |
+| **`dispatch_agents` full usage** | ⚠️ Partial | Returns Claude Code-specific `dispatchParams`; use `prepare_parallel_agents` instead |
 | **`roots/list` MCP capability** | ⚠️ Unconfirmed | Set `CODINGBUDDY_PROJECT_ROOT` env var explicitly |
-| **`restart_tui`** | ❌ Not applicable | Claude Code TUI-only tool |
+| **`restart_tui`** | ❌ Not applicable | Claude Code TUI-only tool; not functional in Codex |
+| **Proactive skill detection** | ❌ No hooks | AI must call `recommend_skills` voluntarily based on intent |
+| **Slash command native support** | ❌ Not available | Map `/<command>` to `get_skill` calls (see [Skills](#skills) section) |
+| **`analyze_task` auto-invocation** | ❌ No hooks | AI must call at PLAN start voluntarily |
 
 ### AUTO Mode Reliability
 
@@ -695,20 +698,43 @@ AUTO mode documents autonomous PLAN → ACT → EVAL cycling. In Codex, this dep
 
 ## Verification Status
 
-> Documentation based on code analysis and Codex/GitHub Copilot public documentation. Runtime verification status tracked below.
+> Documentation based on MCP server source code analysis and Codex/GitHub Copilot public documentation. Runtime verification in a live Copilot + MCP environment has not yet been performed.
+
+### Verification Levels
+
+| Level | Meaning |
+|-------|---------|
+| ✅ Code-verified | Server-side code confirms the feature exists and returns expected data |
+| ✅ Documented | Workflow documented based on design; runtime behavior not yet tested |
+| ⚠️ Unconfirmed | Depends on Codex/Copilot capabilities not documented in public docs |
+| ❌ Not supported | Feature confirmed unavailable in Codex environment |
+
+### Feature Verification
 
 | Pattern | Status | Notes |
 |---------|--------|-------|
-| MCP Tool Access | ✅ Verified | MCP tools accessible via codingbuddy MCP server |
-| PLAN/ACT/EVAL Modes | ✅ Verified | `parse_mode` keyword detection and mode-specific rules |
-| Keyword Invocation | ✅ Verified | Mode keywords (PLAN/ACT/EVAL/AUTO) and localized variants |
-| Skills (MCP Tools) | ✅ Verified | `recommend_skills` → `get_skill` tool chain |
-| Specialist Agents Execution | ✅ Verified | Sequential workflow with `prepare_parallel_agents` |
-| AUTO Mode | ✅ Documented | Workflow documented; runtime loop verification pending |
-| Context Document Management | ✅ Documented | `update_context` / `read_context` workflow documented |
-| `roots/list` MCP Capability | ⚠️ Unconfirmed | Not confirmed in Codex/GitHub Copilot documentation |
+| MCP Tool Access | ✅ Code-verified | 19 tools registered in handlers; 18 applicable to Codex (`restart_tui` is Claude Code-only) |
+| PLAN/ACT/EVAL Modes | ✅ Code-verified | `parse_mode` returns mode-specific rules, agent, context, and dispatchReady |
+| Keyword Invocation | ⚠️ Unconfirmed | Depends on Copilot reliably calling `parse_mode` when mode keywords are detected |
+| Skills (MCP Tools) | ✅ Code-verified | `recommend_skills` → `get_skill` tool chain returns correct data |
+| Specialist Agents Execution | ✅ Documented | Sequential workflow with `prepare_parallel_agents`; not runtime-tested in Copilot |
+| AUTO Mode | ⚠️ Unconfirmed | Depends on Copilot voluntarily continuing PLAN → ACT → EVAL loop |
+| Context Document Management | ✅ Code-verified | `read_context`, `update_context`, `cleanup_context` tools exist and function |
+| `roots/list` MCP Capability | ⚠️ Unconfirmed | Not confirmed in Codex/GitHub Copilot public documentation |
 | Known Limitations | ✅ Documented | Task tool, hooks, AUTO mode, background subagent, dispatch_agents limitations |
 | Task Tool / Background Subagent | ❌ Not supported | Sequential execution only; no parallel subagent spawning |
+
+### Runtime Verification Checklist
+
+To fully verify these patterns, test in VS Code with GitHub Copilot + codingbuddy MCP:
+
+- [ ] Type `PLAN design auth` → Copilot calls `parse_mode` (check MCP logs with `MCP_DEBUG=1`)
+- [ ] Type `EVAL review code` → Copilot calls `parse_mode` with EVAL mode
+- [ ] Type `/debug` → Copilot calls `get_skill("systematic-debugging")`
+- [ ] Type `AUTO implement feature` → Copilot attempts PLAN→ACT→EVAL loop
+- [ ] Verify `prepare_parallel_agents` returns specialist prompts correctly
+- [ ] Verify `update_context` persists across mode transitions
+- [ ] Test `CODINGBUDDY_PROJECT_ROOT` env var resolution
 
 ## Reference
 

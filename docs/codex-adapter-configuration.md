@@ -42,9 +42,10 @@ MCP server enables full codingbuddy features including workflow management and a
 }
 ```
 
-> **Important:** `CODINGBUDDY_PROJECT_ROOT`를 설정하지 않으면 서버가 프로젝트의
-> `codingbuddy.config.json`을 찾지 못하여 `language`, `primaryAgent` 등의 설정이
-> 기본값으로 동작합니다. 항상 프로젝트의 절대 경로로 설정하세요.
+> **Important:** Codex(GitHub Copilot)의 `roots/list` MCP capability 지원 여부는 미확인입니다.
+> `CODINGBUDDY_PROJECT_ROOT` 없이는 서버가 프로젝트의 `codingbuddy.config.json`을 찾지 못하여
+> `language`, `primaryAgent` 등의 설정이 기본값으로 동작합니다. 항상 프로젝트의 절대 경로로 설정하세요.
+> Codex가 `${workspaceFolder}` 변수 확장을 지원하는 경우, 절대 경로 대신 사용할 수 있습니다.
 
 **Project root resolution priority:**
 1. `CODINGBUDDY_PROJECT_ROOT` environment variable (highest priority)
@@ -57,15 +58,25 @@ Tools available when connected to MCP server:
 
 | Tool | Description |
 |------|-------------|
-| `parse_mode` | Parse PLAN/ACT/EVAL keywords and return mode-specific rules |
+| `parse_mode` | Parse PLAN/ACT/EVAL/AUTO keywords and return mode-specific rules |
 | `search_rules` | Search rules and guidelines |
-| `get_agent_details` | Get specific AI agent information |
+| `get_agent_details` | Get detailed profile of a specific AI agent |
 | `get_project_config` | Get project configuration (tech stack, language, etc.) |
-| `recommend_skills` | Recommend skills based on user prompt |
-| `generate_checklist` | Generate contextual checklists |
-| `analyze_task` | Pre-planning task analysis and risk assessment |
-| `dispatch_agents` | Get Task tool-ready params for agent dispatch |
-| `set_project_root` | ~~Set project root directory~~ **(deprecated)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
+| `suggest_config_updates` | Analyze project and suggest config updates based on detected changes |
+| `recommend_skills` | Recommend skills based on user prompt with multi-language support |
+| `list_skills` | List all available skills with optional filtering |
+| `get_skill` | Get skill content by name |
+| `get_agent_system_prompt` | Get complete system prompt for a specialist agent |
+| `prepare_parallel_agents` | Prepare specialist agents for sequential execution (recommended for Codex) |
+| `dispatch_agents` | Get dispatch parameters for agents (Claude Code Task tool optimized; in Codex, use `prepare_parallel_agents` instead) |
+| `generate_checklist` | Generate contextual checklists (security, a11y, performance, testing, code-quality, SEO) |
+| `analyze_task` | Analyze task for risk assessment, specialist recommendations, and workflow suggestions |
+| `get_code_conventions` | Get project code conventions from config files (tsconfig, eslint, prettier) |
+| `read_context` | Read context document (`docs/codingbuddy/context.md`) |
+| `update_context` | Update context document with decisions, notes, progress |
+| `cleanup_context` | Manually trigger context document cleanup |
+| `restart_tui` | Restart TUI client **(Claude Code only — not applicable to Codex)** |
+| `set_project_root` | ~~Set project root directory~~ **(deprecated — will be removed in v2.0.0)** — use `CODINGBUDDY_PROJECT_ROOT` env var instead |
 
 ## Keyword Invocation
 
