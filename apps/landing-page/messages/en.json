@@ -1,42 +1,71 @@
 {
   "hero": {
-    "badge": "Open Source",
     "title": "Multi-AI Rules for Consistent Coding",
-    "description": "One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro. Consistent AI-assisted coding across all your tools.",
+    "subtitle": "One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.",
     "cta": "Get Started",
-    "github": "GitHub"
+    "github": "Star on GitHub",
+    "terminalTitle": "~/your-project",
+    "terminalCmd": "npx codingbuddy init",
+    "terminalInstalling": "Installing codingbuddy-rules...",
+    "terminalRulesSynced": "Rules synced to 6 AI tools",
+    "terminalAgents": "35 specialist agents activated",
+    "terminalWorkflow": "PLAN → ACT → EVAL workflow ready",
+    "terminalCursorrules": ".cursorrules",
+    "terminalClaudeMd": "CLAUDE.md",
+    "terminalCodex": ".codex/",
+    "terminalAntigravity": ".antigravity/",
+    "terminalQ": ".q/",
+    "terminalKiro": ".kiro/",
+    "terminalReady": "Ready! One source, all tools."
   },
-  "problem": {
-    "title": "The Problem with AI Coding Today",
-    "subtitle": "Every AI tool has its own rules format. Your team wastes time maintaining duplicate configurations.",
-    "pain1Title": "Inconsistent Rules",
-    "pain1Desc": "Each tool needs its own config — .cursorrules, CLAUDE.md, .codex — with no shared standard.",
-    "pain2Title": "Duplicated Effort",
-    "pain2Desc": "Copy-paste the same coding rules across multiple tools every time you update them.",
-    "pain3Title": "No Quality Standards",
-    "pain3Desc": "AI generates code without structured TDD, SOLID principles, or coverage requirements.",
-    "pain4Title": "Lost Context",
-    "pain4Desc": "Different workflows per tool means no shared specialist knowledge or consistent methodology."
+  "beforeAfter": {
+    "title": "The Problem & Solution",
+    "beforeLabel": "Before",
+    "afterLabel": "After",
+    "beforeFiles": "6 config files. Always out of sync.",
+    "afterFiles": "Single source. Auto-synced to all tools.",
+    "cursorrules": ".cursorrules",
+    "claudeMd": "CLAUDE.md",
+    "codexRules": ".codex/instructions.md",
+    "antigravityRules": ".antigravity/rules.md",
+    "qRules": ".q/rules.md",
+    "kiroRules": ".kiro/rules.md",
+    "singleSource": "codingbuddy-rules/.ai-rules/",
+    "autoSynced": "Auto-synced",
+    "alwaysCurrent": "Always current"
   },
-  "solution": {
-    "title": "One Ruleset. All Tools.",
-    "subtitle": "Codingbuddy gives your AI assistants consistent rules, specialist agents, and structured workflows.",
-    "benefit1Title": "Single Source of Truth",
-    "benefit1Desc": "One ruleset automatically applied to Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.",
-    "benefit2Title": "35 AI Agents",
-    "benefit2Desc": "Focused expertise for architecture, security, testing, performance, accessibility, and more.",
-    "benefit3Title": "Structured Workflow",
-    "benefit3Desc": "PLAN → ACT → EVAL cycle ensures consistent quality across all your AI-assisted development.",
-    "benefit4Title": "Quality Built-in",
-    "benefit4Desc": "TDD, SOLID principles, and 90%+ test coverage enforced as standard practice."
+  "features": {
+    "title": "What You Get",
+    "universalRulesTitle": "Universal Rules",
+    "universalRulesDesc": "One source of truth automatically applied to all 6 AI coding tools.",
+    "agentsTitle": "35 AI Agents",
+    "agentsDesc": "Specialist agents for architecture, security, testing, performance, and accessibility.",
+    "workflowTitle": "Structured Workflow",
+    "workflowDesc": "PLAN → ACT → EVAL cycle ensures consistent quality across all development.",
+    "qualityTitle": "Quality Built-in",
+    "qualityDesc": "TDD, SOLID principles, and 90%+ test coverage enforced as standard practice.",
+    "mcpTitle": "MCP Protocol",
+    "mcpDesc": "Standard Model Context Protocol for seamless AI tool integration.",
+    "zeroConfigTitle": "Zero Config",
+    "zeroConfigDesc": "One command to install. Works out of the box with all supported tools."
+  },
+  "supportedTools": {
+    "title": "Works with your favorite AI tools",
+    "plus": "+ any MCP-compatible tool",
+    "cursor": "Cursor",
+    "claudeCode": "Claude Code",
+    "codex": "Codex",
+    "antigravity": "Antigravity",
+    "amazonQ": "Amazon Q",
+    "kiro": "Kiro"
   },
   "agents": {
-    "title": "AI Specialist Agents",
-    "subtitle": "35 AI agents to enhance your development workflow",
+    "title": "35 Specialist Agents",
+    "subtitle": "Focused expertise for every aspect of development",
     "filter": "Filter by category",
-    "search": "Search agents...",
-    "allCategories": "All Categories",
+    "allCategories": "All",
     "noResults": "No agents found matching your criteria",
+    "viewAll": "View All Agents",
     "categories": {
       "Planning": "Planning",
       "Development": "Development",
@@ -46,34 +75,33 @@
     },
     "count": "{count} agents"
   },
-  "codeExample": {
-    "title": "See the Difference",
-    "subtitle": "One ruleset replaces scattered configs across all your AI tools",
-    "before": "Before: Without Codingbuddy",
-    "after": "After: With Codingbuddy",
-    "copy": "Copy code",
-    "copied": "Copied!",
-    "copyFailed": "Copy failed"
-  },
   "quickStart": {
     "title": "Quick Start",
     "subtitle": "Get started in 3 simple steps",
-    "step1": "Install the Package",
-    "step1Desc": "Add codingbuddy-rules to your project with a single command",
-    "step2": "Configure Your AI Tool",
-    "step2Desc": "Add the MCP server config to your AI tool's settings file",
-    "step3": "Start Coding",
-    "step3Desc": "Use PLAN, ACT, and EVAL modes with specialist agents across all your tools",
+    "step1": "Install",
+    "step1Desc": "Add codingbuddy-rules to your project",
+    "step2": "Configure",
+    "step2Desc": "Add the MCP server to your AI tool",
+    "step3": "Code",
+    "step3Desc": "Use PLAN, ACT, EVAL modes with specialist agents",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "ctaFooter": {
+    "title": "Ready to unify your AI coding?",
+    "command": "npx codingbuddy init",
+    "github": "Star on GitHub",
+    "docs": "Documentation",
     "copy": "Copy",
     "copied": "Copied!",
-    "copyFailed": "Copy failed"
+    "copyright": "© {year} Codingbuddy. MIT License.",
+    "madeWith": "Made for developers, by developers."
   },
   "header": {
     "nav": {
       "features": "Features",
       "agents": "Agents",
-      "quickStart": "Quick Start",
-      "faq": "FAQ"
+      "quickStart": "Quick Start"
     },
     "theme": {
       "label": "Toggle theme",
@@ -105,30 +133,9 @@
     "accept": "Accept",
     "decline": "Decline"
   },
-  "footer": {
-    "label": "Site footer",
-    "copyright": "\u00a9 {year} Codingbuddy. All rights reserved.",
-    "github": "GitHub",
-    "license": "MIT License"
-  },
   "metadata": {
     "title": "Codingbuddy - Multi-AI Rules for Consistent Coding",
     "description": "One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro. Consistent AI-assisted coding across all your tools."
   },
-  "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Everything you need to know about Codingbuddy",
-    "q1": "What AI tools does Codingbuddy support?",
-    "a1": "Codingbuddy supports Cursor, Claude Code, GitHub Copilot (Codex), Antigravity (Gemini), Amazon Q, and Kiro. One ruleset works across all these tools via the MCP server protocol.",
-    "q2": "How does the PLAN/ACT/EVAL workflow work?",
-    "a2": "PLAN mode designs your implementation approach with TDD. ACT mode executes the changes. EVAL mode reviews code quality and suggests improvements. You can also use AUTO mode for autonomous cycling until quality targets are met.",
-    "q3": "Do I need to configure each AI tool separately?",
-    "a3": "No. Codingbuddy uses a single .ai-rules directory as the source of truth. Each AI tool reads from this shared ruleset through its adapter, so you only maintain one configuration.",
-    "q4": "Is Codingbuddy free and open source?",
-    "a4": "Yes. Codingbuddy is fully open source under the MIT license. You can use it freely in personal and commercial projects.",
-    "q5": "Can I customize the rules and agents?",
-    "a5": "Absolutely. You can create custom rules in the .ai-rules directory, define your own specialist agents, and adjust quality standards to match your team's workflow.",
-    "q6": "What are specialist agents?",
-    "a6": "Specialist agents are 35 focused AI personas with expertise in specific areas like architecture review, security auditing, test strategy, performance optimization, and accessibility. They provide deep, domain-specific guidance."
-  }
+  "i18n": {}
 }

@@ -9,13 +9,12 @@ describe('Header', () => {
   it('renders navigation with correct links', () => {
     render(<Header />);
     expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '#solution');
+    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '#features');
     expect(screen.getByRole('link', { name: /agents/i })).toHaveAttribute('href', '#agents');
     expect(screen.getByRole('link', { name: /quick start/i })).toHaveAttribute(
       'href',
       '#quick-start',
     );
-    expect(screen.getByRole('link', { name: /faq/i })).toHaveAttribute('href', '#faq');
   });
 
   it('renders brand link pointing to home with accessible label', () => {

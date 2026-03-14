@@ -35,6 +35,14 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-border: var(--terminal-border);
+  --color-terminal-text: var(--terminal-text);
+  --color-terminal-green: var(--terminal-green);
+  --color-terminal-purple: var(--terminal-purple);
+  --color-terminal-red: var(--terminal-red);
+  --color-terminal-yellow: var(--terminal-yellow);
+  --color-terminal-muted: var(--terminal-muted);
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
@@ -70,6 +78,17 @@
   --chart-3: oklch(0.508 0.16 145.071);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  --terminal-bg: oklch(0.165 0.015 280);
+  --terminal-border: oklch(0.3 0.02 280);
+  --terminal-text: oklch(0.85 0 0);
+  --terminal-green: oklch(0.65 0.2 145);
+  --terminal-purple: oklch(0.65 0.25 293);
+  --terminal-red: oklch(0.65 0.2 25);
+  --terminal-yellow: oklch(0.8 0.15 85);
+  --terminal-muted: oklch(0.5 0 0);
+  --glow-green: oklch(0.65 0.2 145 / 0.3);
+  --glow-purple: oklch(0.65 0.25 293 / 0.2);
+  --dot-pattern: oklch(0.3 0 0);
 }
 
 .dark {
@@ -96,6 +115,17 @@
   --chart-3: oklch(0.586 0.158 145.071);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.645 0.246 16.439);
+  --terminal-bg: oklch(0.13 0.015 280);
+  --terminal-border: oklch(0.25 0.02 280);
+  --terminal-text: oklch(0.9 0 0);
+  --terminal-green: oklch(0.72 0.22 145);
+  --terminal-purple: oklch(0.72 0.27 293);
+  --terminal-red: oklch(0.72 0.22 25);
+  --terminal-yellow: oklch(0.85 0.17 85);
+  --terminal-muted: oklch(0.55 0 0);
+  --glow-green: oklch(0.72 0.22 145 / 0.25);
+  --glow-purple: oklch(0.72 0.27 293 / 0.15);
+  --dot-pattern: oklch(0.22 0 0);
 }
 
 /* Accessibility: Reduce motion for users who prefer it */
@@ -140,5 +170,59 @@
     box-shadow:
       0 0 40px oklch(from var(--primary) l c h / 15%),
       0 0 80px oklch(from var(--secondary-foreground) l c h / 10%);
+  }
+}
+
+/* Terminal glow effects */
+.glow-green {
+  box-shadow:
+    0 0 20px var(--glow-green),
+    0 0 60px var(--glow-green);
+}
+
+.glow-purple {
+  box-shadow:
+    0 0 20px var(--glow-purple),
+    0 0 60px var(--glow-purple);
+}
+
+/* Dot grid background pattern */
+.bg-dot-pattern {
+  background-image: radial-gradient(var(--dot-pattern) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Scroll-triggered fade-in animation */
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Terminal typing cursor */
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-blink {
+    animation: none;
   }
 }

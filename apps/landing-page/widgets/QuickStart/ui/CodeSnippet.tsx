@@ -6,13 +6,13 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { cn } from '@/lib/utils';
 
 interface CodeSnippetProps {
-  /** 표시할 코드 */
+  /** Code to display */
   code: string;
-  /** 복사 버튼 라벨 */
+  /** Copy button label */
   copyLabel: string;
-  /** 복사 완료 라벨 */
+  /** Copied feedback label */
   copiedLabel: string;
-  /** 복사 실패 라벨 */
+  /** Copy failed label */
   failedLabel: string;
   className?: string;
 }
@@ -30,7 +30,12 @@ export const CodeSnippet = ({
   });
 
   return (
-    <div className={cn('bg-muted/50 relative rounded-md border font-mono text-sm', className)}>
+    <div
+      className={cn(
+        'bg-terminal-bg border-terminal-border text-terminal-text relative rounded-lg border font-mono text-sm',
+        className,
+      )}
+    >
       <div className="flex items-start justify-between gap-2 p-3">
         <pre className="overflow-x-auto whitespace-pre-wrap break-words">
           <code>{code}</code>
@@ -39,7 +44,7 @@ export const CodeSnippet = ({
           variant="ghost"
           size="icon"
           onClick={handleCopy}
-          className="size-8 shrink-0"
+          className="text-terminal-muted hover:text-terminal-text hover:bg-terminal-border size-8 shrink-0"
           aria-label={copied ? copiedLabel : copyLabel}
         >
           {copied ? (

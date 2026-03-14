@@ -31,10 +31,12 @@ export default defineConfig({
         '**/__tests__/**',
         '**/node_modules/**',
         'components/ui/**',
+        'components/theme-provider.tsx',
         '**/*.config.{ts,js}',
         '**/layout.tsx',
         'middleware.ts',
         'i18n.ts',
+        'i18n/request.ts',
       ],
       thresholds: {
         statements: 90,

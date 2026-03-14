@@ -1,12 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import type { WidgetProps } from '@/types';
 import { quickStartSteps } from './data/steps';
 import { CodeSnippet } from './ui/CodeSnippet';
@@ -29,31 +23,41 @@ export const QuickStart = ({ locale }: WidgetProps) => {
         <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
 
-      <Accordion type="single" collapsible defaultValue="step-1">
-        {quickStartSteps.map(step => (
-          <AccordionItem key={step.step} value={`step-${step.step}`}>
-            <AccordionTrigger className="text-base font-medium">
-              <span className="flex items-center gap-2">
-                <span className="bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
+      <div className="relative flex flex-col" data-testid="step-flow">
+        {quickStartSteps.map((step, index) => {
+          const isLast = index === quickStartSteps.length - 1;
+
+          return (
+            <div key={step.step} className="relative flex gap-4" data-testid={`step-${step.step}`}>
+              {/* Vertical connector line + step badge */}
+              <div className="flex flex-col items-center">
+                <span className="bg-primary text-primary-foreground z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">
                   {step.step}
                 </span>
-                {t(step.title)}
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="pt-2 pl-8">
+                {!isLast && (
+                  <div
+                    className="bg-border w-px flex-1"
+                    aria-hidden="true"
+                    data-testid="step-connector"
+                  />
+                )}
+              </div>
+
+              {/* Step content */}
+              <div className={isLast ? 'min-w-0 flex-1' : 'min-w-0 flex-1 pb-8'}>
+                <h3 className="text-lg font-semibold">{t(step.title)}</h3>
                 <p className="text-muted-foreground mb-3 text-sm">{t(`${step.title}Desc`)}</p>
                 <CodeSnippet
                   code={step.code}
                   copyLabel={t('copy')}
                   copiedLabel={t('copied')}
-                  failedLabel={t('copyFailed')}
+                  failedLabel={t('copied')}
                 />
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 };

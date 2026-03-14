@@ -1,42 +1,71 @@
 {
   "hero": {
-    "badge": "オープンソース",
     "title": "一貫したコーディングのためのマルチAIルール",
-    "description": "Cursor、Claude Code、Codex、Antigravity、Q、Kiro対応の統一ルールセット。すべてのツールで一貫したAI支援コーディング。",
+    "subtitle": "Cursor、Claude Code、Codex、Antigravity、Q、Kiro対応の統一ルールセット。",
     "cta": "始める",
-    "github": "GitHub"
+    "github": "GitHubでStarする",
+    "terminalTitle": "~/your-project",
+    "terminalCmd": "npx codingbuddy init",
+    "terminalInstalling": "codingbuddy-rulesをインストール中...",
+    "terminalRulesSynced": "6つのAIツールにルールを同期",
+    "terminalAgents": "35の専門エージェントを有効化",
+    "terminalWorkflow": "PLAN → ACT → EVALワークフロー準備完了",
+    "terminalCursorrules": ".cursorrules",
+    "terminalClaudeMd": "CLAUDE.md",
+    "terminalCodex": ".codex/",
+    "terminalAntigravity": ".antigravity/",
+    "terminalQ": ".q/",
+    "terminalKiro": ".kiro/",
+    "terminalReady": "準備完了！1つのソース、すべてのツール。"
   },
-  "problem": {
-    "title": "今日のAIコーディングの問題",
-    "subtitle": "AIツールごとに独自のルール形式があります。チームは重複する設定の維持に時間を費やしています。",
-    "pain1Title": "一貫性のないルール",
-    "pain1Desc": "各ツールに.cursorrules、CLAUDE.md、.codexなど個別の設定が必要で、共有基準がありません。",
-    "pain2Title": "重複した作業",
-    "pain2Desc": "更新のたびに同じコーディングルールを複数のツールにコピー＆ペーストする必要があります。",
-    "pain3Title": "品質基準の欠如",
-    "pain3Desc": "AIは構造化されたTDD、SOLID原則、カバレッジ要件なしでコードを生成します。",
-    "pain4Title": "コンテキストの損失",
-    "pain4Desc": "ツールごとに異なるワークフローにより、専門知識や一貫した方法論を共有できません。"
+  "beforeAfter": {
+    "title": "問題と解決策",
+    "beforeLabel": "導入前",
+    "afterLabel": "導入後",
+    "beforeFiles": "6つの設定ファイル。常に同期が崩れる。",
+    "afterFiles": "単一ソース。すべてのツールに自動同期。",
+    "cursorrules": ".cursorrules",
+    "claudeMd": "CLAUDE.md",
+    "codexRules": ".codex/instructions.md",
+    "antigravityRules": ".antigravity/rules.md",
+    "qRules": ".q/rules.md",
+    "kiroRules": ".kiro/rules.md",
+    "singleSource": "codingbuddy-rules/.ai-rules/",
+    "autoSynced": "自動同期",
+    "alwaysCurrent": "常に最新"
   },
-  "solution": {
-    "title": "1つのルールセット。すべてのツール。",
-    "subtitle": "CodingbuddyはAIアシスタントに一貫したルール、専門エージェント、構造化されたワークフローを提供します。",
-    "benefit1Title": "唯一の真実の情報源",
-    "benefit1Desc": "1つのルールセットがCursor、Claude Code、Codex、Antigravity、Q、Kiroに自動適用されます。",
-    "benefit2Title": "35の専門エージェント",
-    "benefit2Desc": "アーキテクチャ、セキュリティ、テスト、パフォーマンス、アクセシビリティなどの専門知識を提供します。",
-    "benefit3Title": "構造化されたワークフロー",
-    "benefit3Desc": "PLAN → ACT → EVALサイクルで、すべてのAI支援開発で一貫した品質を保証します。",
-    "benefit4Title": "組み込みの品質基準",
-    "benefit4Desc": "TDD、SOLID原則、90%以上のテストカバレッジが標準プラクティスとして適用されます。"
+  "features": {
+    "title": "提供する機能",
+    "universalRulesTitle": "統一ルール",
+    "universalRulesDesc": "1つの信頼できるソースが6つのAIコーディングツールに自動適用されます。",
+    "agentsTitle": "35のAIエージェント",
+    "agentsDesc": "アーキテクチャ、セキュリティ、テスト、パフォーマンス、アクセシビリティの専門エージェント。",
+    "workflowTitle": "構造化されたワークフロー",
+    "workflowDesc": "PLAN → ACT → EVALサイクルで、すべての開発で一貫した品質を保証します。",
+    "qualityTitle": "組み込みの品質基準",
+    "qualityDesc": "TDD、SOLID原則、90%以上のテストカバレッジが標準プラクティスとして適用されます。",
+    "mcpTitle": "MCPプロトコル",
+    "mcpDesc": "シームレスなAIツール統合のための標準Model Context Protocol。",
+    "zeroConfigTitle": "設定不要",
+    "zeroConfigDesc": "1つのコマンドでインストール。対応するすべてのツールですぐに使えます。"
+  },
+  "supportedTools": {
+    "title": "お使いのAIツールに対応しています",
+    "plus": "+ すべてのMCP対応ツール",
+    "cursor": "Cursor",
+    "claudeCode": "Claude Code",
+    "codex": "Codex",
+    "antigravity": "Antigravity",
+    "amazonQ": "Amazon Q",
+    "kiro": "Kiro"
   },
   "agents": {
-    "title": "AI専門エージェント",
-    "subtitle": "開発ワークフローを強化する35の専門AIエージェント",
+    "title": "35の専門エージェント",
+    "subtitle": "開発のあらゆる側面に特化した専門知識",
     "filter": "カテゴリで絞り込み",
-    "search": "エージェントを検索...",
-    "allCategories": "すべてのカテゴリ",
+    "allCategories": "すべて",
     "noResults": "条件に一致するエージェントが見つかりません",
+    "viewAll": "すべてのエージェントを見る",
     "categories": {
       "Planning": "企画",
       "Development": "開発",
@@ -46,34 +75,33 @@
     },
     "count": "{count}エージェント"
   },
-  "codeExample": {
-    "title": "違いを確認",
-    "subtitle": "1つのルールセットで全AIツールの分散設定を置き換え",
-    "before": "変更前：Codingbuddyなし",
-    "after": "変更後：Codingbuddy使用",
-    "copy": "コードをコピー",
-    "copied": "コピーしました！",
-    "copyFailed": "コピーに失敗しました"
-  },
   "quickStart": {
     "title": "クイックスタート",
     "subtitle": "3つの簡単なステップで始めましょう",
-    "step1": "パッケージをインストール",
-    "step1Desc": "1つのコマンドでcodingbuddy-rulesをプロジェクトに追加",
-    "step2": "AIツールを設定",
-    "step2Desc": "AIツールの設定ファイルにMCPサーバー構成を追加",
-    "step3": "コーディング開始",
-    "step3Desc": "すべてのツールでPLAN、ACT、EVALモードとスペシャリストエージェントを活用",
+    "step1": "インストール",
+    "step1Desc": "プロジェクトにcodingbuddy-rulesを追加",
+    "step2": "設定",
+    "step2Desc": "AIツールにMCPサーバーを追加",
+    "step3": "コーディング",
+    "step3Desc": "専門エージェントとPLAN、ACT、EVALモードを活用",
+    "copy": "コピー",
+    "copied": "コピーしました！"
+  },
+  "ctaFooter": {
+    "title": "AIコーディングを統一する準備はできましたか？",
+    "command": "npx codingbuddy init",
+    "github": "GitHubでStarする",
+    "docs": "ドキュメント",
     "copy": "コピー",
     "copied": "コピーしました！",
-    "copyFailed": "コピーに失敗しました"
+    "copyright": "© {year} Codingbuddy. MITライセンス。",
+    "madeWith": "開発者のために、開発者が作りました。"
   },
   "header": {
     "nav": {
       "features": "機能",
       "agents": "エージェント",
-      "quickStart": "クイックスタート",
-      "faq": "FAQ"
+      "quickStart": "クイックスタート"
     },
     "theme": {
       "label": "テーマ切替",
@@ -105,30 +133,9 @@
     "accept": "同意",
     "decline": "拒否"
   },
-  "footer": {
-    "label": "サイトフッター",
-    "copyright": "\u00a9 {year} Codingbuddy. All rights reserved.",
-    "github": "GitHub",
-    "license": "MITライセンス"
-  },
   "metadata": {
     "title": "Codingbuddy - 一貫したコーディングのためのマルチAIルール",
     "description": "Cursor、Claude Code、Codex、Antigravity、Q、Kiro対応の統一ルールセット。すべてのツールで一貫したAI支援コーディング。"
   },
-  "faq": {
-    "title": "よくある質問",
-    "subtitle": "Codingbuddyについて知っておくべきすべて",
-    "q1": "どのAIツールに対応していますか？",
-    "a1": "CodingbuddyはCursor、Claude Code、GitHub Copilot（Codex）、Antigravity（Gemini）、Amazon Q、Kiroに対応しています。MCPサーバープロトコルを通じて、1つのルールセットがすべてのツールで機能します。",
-    "q2": "PLAN/ACT/EVALワークフローはどのように機能しますか？",
-    "a2": "PLANモードはTDDアプローチで実装計画を設計します。ACTモードは変更を実行します。EVALモードはコード品質をレビューし改善を提案します。AUTOモードで品質目標達成まで自動サイクルすることもできます。",
-    "q3": "各AIツールを個別に設定する必要がありますか？",
-    "a3": "いいえ。Codingbuddyは単一の.ai-rulesディレクトリを信頼できる情報源として使用します。各AIツールはアダプターを通じてこの共有ルールセットを読み取るため、1つの設定だけを管理すれば十分です。",
-    "q4": "Codingbuddyは無料でオープンソースですか？",
-    "a4": "はい。CodingbuddyはMITライセンスの下で完全にオープンソースです。個人および商用プロジェクトで自由に使用できます。",
-    "q5": "ルールやエージェントをカスタマイズできますか？",
-    "a5": "もちろんです。.ai-rulesディレクトリでカスタムルールを作成し、独自の専門エージェントを定義し、チームのワークフローに合わせて品質基準を調整できます。",
-    "q6": "専門エージェントとは何ですか？",
-    "a6": "専門エージェントとは、アーキテクチャレビュー、セキュリティ監査、テスト戦略、パフォーマンス最適化、アクセシビリティなどの特定分野に専門性を持つ35のAIペルソナです。ドメイン固有の深い指導を提供します。"
-  }
+  "i18n": {}
 }

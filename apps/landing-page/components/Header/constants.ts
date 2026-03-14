@@ -1,8 +1,7 @@
 export const NAV_ITEMS = [
-  { key: 'features', href: '#solution' },
+  { key: 'features', href: '#features' },
   { key: 'agents', href: '#agents' },
   { key: 'quickStart', href: '#quick-start' },
-  { key: 'faq', href: '#faq' },
 ] as const;
 
 export const FOCUS_RING_CLASSES =

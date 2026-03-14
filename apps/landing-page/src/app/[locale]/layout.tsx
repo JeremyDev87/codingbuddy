@@ -10,7 +10,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { isValidLocale, SUPPORTED_LOCALES } from '@/lib/locale';
 import { generateJsonLd } from '@/lib/json-ld';
 import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { CookieConsent } from '@/components/cookie-consent';
 
 const inter = Inter({
@@ -29,14 +28,7 @@ const jetbrainsMono = JetBrains_Mono({
   adjustFontFallback: true,
 });
 
-const CLIENT_NAMESPACES = [
-  'header',
-  'cookieConsent',
-  'faq',
-  'agents',
-  'codeExample',
-  'quickStart',
-] as const;
+const CLIENT_NAMESPACES = ['header', 'cookieConsent', 'agents', 'quickStart'] as const;
 
 const pickClientMessages = (messages: AbstractIntlMessages): AbstractIntlMessages =>
   Object.fromEntries(CLIENT_NAMESPACES.filter(ns => ns in messages).map(ns => [ns, messages[ns]]));
@@ -76,17 +68,25 @@ export const generateMetadata = async ({
 
 interface LocaleLayoutProps {
   children: ReactNode;
+  hero: ReactNode;
+  before_after: ReactNode;
+  features: ReactNode;
+  supported_tools: ReactNode;
   agents: ReactNode;
-  code_example: ReactNode;
   quick_start: ReactNode;
+  cta_footer: ReactNode;
   params: Promise<{ locale: string }>;
 }
 
 const LocaleLayout = async ({
   children,
+  hero,
+  before_after,
+  features,
+  supported_tools,
   agents,
-  code_example,
   quick_start,
+  cta_footer,
   params,
 }: LocaleLayoutProps) => {
   const { locale } = await params;
@@ -129,13 +129,14 @@ const LocaleLayout = async ({
             <Header />
             <main id="main-content" className="flex min-h-screen flex-col">
               {children}
+              {hero}
+              {before_after}
+              {features}
+              {supported_tools}
               {agents}
-              {code_example}
               {quick_start}
             </main>
-            <Suspense>
-              <Footer locale={locale} />
-            </Suspense>
+            {cta_footer}
             <Suspense>
               <CookieConsent />
             </Suspense>

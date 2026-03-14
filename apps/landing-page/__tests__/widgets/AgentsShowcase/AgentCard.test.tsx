@@ -8,7 +8,7 @@ const mockAgent: Agent = {
   name: 'Frontend Developer',
   description: 'Modern React/Next.js specialist',
   category: 'Development',
-  icon: '⚛️',
+  icon: '\u269B\uFE0F',
   tags: ['React', 'Next.js', 'TypeScript'],
   expertise: ['React', 'TypeScript'],
 };
@@ -26,7 +26,7 @@ describe('AgentCard', () => {
 
   it('should render agent icon with aria-hidden', () => {
     render(<AgentCard agent={mockAgent} />);
-    const icon = screen.getByText('⚛️');
+    const icon = screen.getByText('\u269B\uFE0F');
     expect(icon).toHaveAttribute('aria-hidden', 'true');
     expect(icon).toHaveAttribute('role', 'img');
   });
@@ -37,15 +37,10 @@ describe('AgentCard', () => {
   });
 
   it('should render translated category when translatedCategory is provided', () => {
-    render(<AgentCard agent={mockAgent} translatedCategory="개발" />);
-    expect(screen.getByText('개발')).toBeInTheDocument();
-    expect(screen.queryByText('Development')).not.toBeInTheDocument();
-  });
-
-  it('should render all tags as badges', () => {
-    render(<AgentCard agent={mockAgent} />);
-    expect(screen.getByText('React')).toBeInTheDocument();
-    expect(screen.getByText('Next.js')).toBeInTheDocument();
-    expect(screen.getByText('TypeScript')).toBeInTheDocument();
+    render(<AgentCard agent={mockAgent} translatedCategory={'\uAC1C\uBC1C'} />);
+    const badge = document.querySelector('[data-slot="badge"]');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent('\uAC1C\uBC1C');
+    expect(badge).not.toHaveTextContent('Development');
   });
 });

@@ -48,16 +48,16 @@ describe('i18n request config logic', () => {
       expect(messages).toBeDefined();
       expect(Object.keys(messages)).toEqual([
         'hero',
-        'problem',
-        'solution',
+        'beforeAfter',
+        'features',
+        'supportedTools',
         'agents',
-        'codeExample',
         'quickStart',
+        'ctaFooter',
         'header',
         'cookieConsent',
-        'footer',
         'metadata',
-        'faq',
+        'i18n',
       ]);
     });
   });

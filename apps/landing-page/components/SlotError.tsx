@@ -4,7 +4,14 @@ import { useEffect, useRef } from 'react';
 
 interface SlotErrorProps {
   reset: () => void;
-  slotName: 'agents' | 'code example' | 'quick start';
+  slotName:
+    | 'agents'
+    | 'quick start'
+    | 'hero'
+    | 'before after'
+    | 'features'
+    | 'supported tools'
+    | 'footer';
 }
 
 export const SlotError = ({ reset, slotName }: SlotErrorProps) => {

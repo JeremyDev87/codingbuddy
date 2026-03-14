@@ -1,42 +1,71 @@
 {
   "hero": {
-    "badge": "开源",
     "title": "统一 AI 编码规则",
-    "description": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。所有工具中一致的 AI 辅助编码。",
+    "subtitle": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。",
     "cta": "开始使用",
-    "github": "GitHub"
+    "github": "在 GitHub 上 Star",
+    "terminalTitle": "~/your-project",
+    "terminalCmd": "npx codingbuddy init",
+    "terminalInstalling": "正在安装 codingbuddy-rules...",
+    "terminalRulesSynced": "规则已同步到 6 个 AI 工具",
+    "terminalAgents": "35 个专家代理已激活",
+    "terminalWorkflow": "PLAN → ACT → EVAL 工作流已就绪",
+    "terminalCursorrules": ".cursorrules",
+    "terminalClaudeMd": "CLAUDE.md",
+    "terminalCodex": ".codex/",
+    "terminalAntigravity": ".antigravity/",
+    "terminalQ": ".q/",
+    "terminalKiro": ".kiro/",
+    "terminalReady": "准备就绪！一个源头，所有工具。"
   },
-  "problem": {
-    "title": "当今 AI 编码的问题",
-    "subtitle": "每个 AI 工具都有自己的规则格式。您的团队浪费时间维护重复的配置。",
-    "pain1Title": "规则不一致",
-    "pain1Desc": "每个工具需要各自的配置 — .cursorrules、CLAUDE.md、.codex — 没有共享标准。",
-    "pain2Title": "重复劳动",
-    "pain2Desc": "每次更新时都需要将相同的编码规则复制粘贴到多个工具中。",
-    "pain3Title": "缺乏质量标准",
-    "pain3Desc": "AI 在没有结构化 TDD、SOLID 原则或覆盖率要求的情况下生成代码。",
-    "pain4Title": "上下文丢失",
-    "pain4Desc": "每个工具不同的工作流意味着无法共享专家知识或一致的方法论。"
+  "beforeAfter": {
+    "title": "问题与解决方案",
+    "beforeLabel": "之前",
+    "afterLabel": "之后",
+    "beforeFiles": "6 个配置文件，始终不同步。",
+    "afterFiles": "单一源头，自动同步到所有工具。",
+    "cursorrules": ".cursorrules",
+    "claudeMd": "CLAUDE.md",
+    "codexRules": ".codex/instructions.md",
+    "antigravityRules": ".antigravity/rules.md",
+    "qRules": ".q/rules.md",
+    "kiroRules": ".kiro/rules.md",
+    "singleSource": "codingbuddy-rules/.ai-rules/",
+    "autoSynced": "自动同步",
+    "alwaysCurrent": "始终最新"
   },
-  "solution": {
-    "title": "一套规则。所有工具。",
-    "subtitle": "Codingbuddy 为您的 AI 助手提供一致的规则、专家代理和结构化工作流。",
-    "benefit1Title": "单一事实来源",
-    "benefit1Desc": "一套规则自动应用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。",
-    "benefit2Title": "35 个专家代理",
-    "benefit2Desc": "为架构、安全、测试、性能、可访问性等提供专业知识。",
-    "benefit3Title": "结构化工作流",
-    "benefit3Desc": "PLAN → ACT → EVAL 循环确保所有 AI 辅助开发中的一致质量。",
-    "benefit4Title": "内置质量标准",
-    "benefit4Desc": "TDD、SOLID 原则和 90% 以上测试覆盖率作为标准实践执行。"
+  "features": {
+    "title": "您将获得",
+    "universalRulesTitle": "统一规则",
+    "universalRulesDesc": "一个真实来源自动应用于所有 6 个 AI 编码工具。",
+    "agentsTitle": "35 个 AI 代理",
+    "agentsDesc": "为架构、安全、测试、性能和可访问性提供专业代理。",
+    "workflowTitle": "结构化工作流",
+    "workflowDesc": "PLAN → ACT → EVAL 循环确保所有开发中的一致质量。",
+    "qualityTitle": "内置质量标准",
+    "qualityDesc": "TDD、SOLID 原则和 90% 以上测试覆盖率作为标准实践执行。",
+    "mcpTitle": "MCP 协议",
+    "mcpDesc": "标准 Model Context Protocol，实现无缝 AI 工具集成。",
+    "zeroConfigTitle": "零配置",
+    "zeroConfigDesc": "一条命令即可安装。所有支持的工具开箱即用。"
+  },
+  "supportedTools": {
+    "title": "支持您喜爱的 AI 工具",
+    "plus": "+ 所有 MCP 兼容工具",
+    "cursor": "Cursor",
+    "claudeCode": "Claude Code",
+    "codex": "Codex",
+    "antigravity": "Antigravity",
+    "amazonQ": "Amazon Q",
+    "kiro": "Kiro"
   },
   "agents": {
-    "title": "AI 专业代理",
-    "subtitle": "35个专业AI代理，提升您的开发工作流程",
+    "title": "35 个专家代理",
+    "subtitle": "为开发的各个方面提供专业知识",
     "filter": "按类别筛选",
-    "search": "搜索代理...",
-    "allCategories": "所有类别",
+    "allCategories": "全部",
     "noResults": "未找到符合条件的代理",
+    "viewAll": "查看所有代理",
     "categories": {
       "Planning": "规划",
       "Development": "开发",
@@ -44,36 +73,35 @@
       "Security": "安全",
       "UX": "用户体验"
     },
-    "count": "{count}个代理"
-  },
-  "codeExample": {
-    "title": "看看区别",
-    "subtitle": "一套规则替代所有AI工具中分散的配置",
-    "before": "之前：没有Codingbuddy",
-    "after": "之后：使用Codingbuddy",
-    "copy": "复制代码",
-    "copied": "已复制！",
-    "copyFailed": "复制失败"
+    "count": "{count} 个代理"
   },
   "quickStart": {
     "title": "快速入门",
-    "subtitle": "3个简单步骤即可开始",
-    "step1": "安装包",
-    "step1Desc": "一条命令将 codingbuddy-rules 添加到项目中",
-    "step2": "配置 AI 工具",
-    "step2Desc": "将 MCP 服务器配置添加到 AI 工具的设置文件中",
-    "step3": "开始编码",
-    "step3Desc": "在所有工具中使用 PLAN、ACT、EVAL 模式和专业代理",
+    "subtitle": "3 个简单步骤即可开始",
+    "step1": "安装",
+    "step1Desc": "将 codingbuddy-rules 添加到您的项目",
+    "step2": "配置",
+    "step2Desc": "将 MCP 服务器添加到您的 AI 工具",
+    "step3": "编码",
+    "step3Desc": "使用 PLAN、ACT、EVAL 模式和专业代理",
+    "copy": "复制",
+    "copied": "已复制！"
+  },
+  "ctaFooter": {
+    "title": "准备好统一您的 AI 编码了吗？",
+    "command": "npx codingbuddy init",
+    "github": "在 GitHub 上 Star",
+    "docs": "文档",
     "copy": "复制",
     "copied": "已复制！",
-    "copyFailed": "复制失败"
+    "copyright": "© {year} Codingbuddy. MIT 许可证。",
+    "madeWith": "为开发者打造，由开发者创建。"
   },
   "header": {
     "nav": {
       "features": "功能",
       "agents": "代理",
-      "quickStart": "快速开始",
-      "faq": "常见问题"
+      "quickStart": "快速开始"
     },
     "theme": {
       "label": "切换主题",
@@ -105,30 +133,9 @@
     "accept": "接受",
     "decline": "拒绝"
   },
-  "footer": {
-    "label": "网站页脚",
-    "copyright": "\u00a9 {year} Codingbuddy. 保留所有权利。",
-    "github": "GitHub",
-    "license": "MIT 许可证"
-  },
   "metadata": {
     "title": "Codingbuddy - 统一 AI 编码规则",
     "description": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。所有工具中一致的 AI 辅助编码。"
   },
-  "faq": {
-    "title": "常见问题",
-    "subtitle": "关于 Codingbuddy 您需要了解的一切",
-    "q1": "支持哪些 AI 工具？",
-    "a1": "Codingbuddy 支持 Cursor、Claude Code、GitHub Copilot（Codex）、Antigravity（Gemini）、Amazon Q 和 Kiro。通过 MCP 服务器协议，一套规则在所有工具中生效。",
-    "q2": "PLAN/ACT/EVAL 工作流如何运作？",
-    "a2": "PLAN 模式通过 TDD 方法设计实施方案。ACT 模式执行变更。EVAL 模式审查代码质量并提出改进建议。您也可以使用 AUTO 模式自动循环直到达到质量目标。",
-    "q3": "需要为每个 AI 工具单独配置吗？",
-    "a3": "不需要。Codingbuddy 使用单一的 .ai-rules 目录作为唯一事实来源。每个 AI 工具通过适配器读取此共享规则集，因此只需维护一份配置。",
-    "q4": "Codingbuddy 是免费开源的吗？",
-    "a4": "是的。Codingbuddy 基于 MIT 许可证完全开源。您可以在个人和商业项目中自由使用。",
-    "q5": "可以自定义规则和代理吗？",
-    "a5": "当然可以。您可以在 .ai-rules 目录中创建自定义规则、定义自己的专家代理，并根据团队工作流调整质量标准。",
-    "q6": "什么是专家代理？",
-    "a6": "专家代理是 35 个在架构审查、安全审计、测试策略、性能优化、可访问性等特定领域具有专业知识的 AI 角色。它们提供深入的领域特定指导。"
-  }
+  "i18n": {}
 }

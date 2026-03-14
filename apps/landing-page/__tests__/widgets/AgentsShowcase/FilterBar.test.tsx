@@ -5,8 +5,7 @@ import { FilterBar } from '@/widgets/AgentsShowcase/ui/FilterBar';
 
 const defaultTranslations = {
   filter: 'Filter by category',
-  search: 'Search agents...',
-  allCategories: 'All Categories',
+  allCategories: 'All',
   categories: {
     Planning: 'Planning',
     Development: 'Development',
@@ -17,74 +16,60 @@ const defaultTranslations = {
 };
 
 describe('FilterBar', () => {
-  it('should render search input with placeholder', () => {
+  it('should render category buttons as a button group', () => {
+    render(
+      <FilterBar category="all" onCategoryChange={vi.fn()} translations={defaultTranslations} />,
+    );
+    expect(screen.getByRole('group', { name: 'Filter by category' })).toBeInTheDocument();
+  });
+
+  it('should render All button and all category buttons', () => {
+    render(
+      <FilterBar category="all" onCategoryChange={vi.fn()} translations={defaultTranslations} />,
+    );
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Planning' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Development' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Review' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'UX' })).toBeInTheDocument();
+  });
+
+  it('should mark selected category button as pressed', () => {
     render(
       <FilterBar
-        category="all"
+        category="Development"
         onCategoryChange={vi.fn()}
-        searchQuery=""
-        onSearchChange={vi.fn()}
         translations={defaultTranslations}
       />,
     );
-    expect(screen.getByPlaceholderText('Search agents...')).toBeInTheDocument();
-  });
-
-  it('should render search input with aria-label', () => {
-    render(
-      <FilterBar
-        category="all"
-        onCategoryChange={vi.fn()}
-        searchQuery=""
-        onSearchChange={vi.fn()}
-        translations={defaultTranslations}
-      />,
+    expect(screen.getByRole('button', { name: 'Development' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
     );
-    expect(screen.getByLabelText('Search agents...')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('should render select with aria-label', () => {
-    render(
-      <FilterBar
-        category="all"
-        onCategoryChange={vi.fn()}
-        searchQuery=""
-        onSearchChange={vi.fn()}
-        translations={defaultTranslations}
-      />,
-    );
-    expect(screen.getByLabelText('Filter by category')).toBeInTheDocument();
-  });
-
-  it('should call onSearchChange when typing', async () => {
-    const onSearchChange = vi.fn();
+  it('should call onCategoryChange when a category button is clicked', async () => {
+    const onCategoryChange = vi.fn();
     const user = userEvent.setup();
     render(
       <FilterBar
         category="all"
-        onCategoryChange={vi.fn()}
-        searchQuery=""
-        onSearchChange={onSearchChange}
+        onCategoryChange={onCategoryChange}
         translations={defaultTranslations}
       />,
     );
 
-    const input = screen.getByPlaceholderText('Search agents...');
-    await user.type(input, 'test');
+    await user.click(screen.getByRole('button', { name: 'Security' }));
 
-    expect(onSearchChange).toHaveBeenCalled();
+    expect(onCategoryChange).toHaveBeenCalledWith('Security');
   });
 
-  it('should display current search query value', () => {
+  it('should not render a search input', () => {
     render(
-      <FilterBar
-        category="all"
-        onCategoryChange={vi.fn()}
-        searchQuery="frontend"
-        onSearchChange={vi.fn()}
-        translations={defaultTranslations}
-      />,
+      <FilterBar category="all" onCategoryChange={vi.fn()} translations={defaultTranslations} />,
     );
-    expect(screen.getByDisplayValue('frontend')).toBeInTheDocument();
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
   });
 });

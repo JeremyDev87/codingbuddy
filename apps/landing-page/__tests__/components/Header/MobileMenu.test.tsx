@@ -19,13 +19,12 @@ describe('MobileMenu', () => {
 
     expect(screen.getByText('Navigation')).toBeInTheDocument();
     expect(screen.getByText('Site navigation and settings')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '#solution');
+    expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '#features');
     expect(screen.getByRole('link', { name: /agents/i })).toHaveAttribute('href', '#agents');
     expect(screen.getByRole('link', { name: /quick start/i })).toHaveAttribute(
       'href',
       '#quick-start',
     );
-    expect(screen.getByRole('link', { name: /faq/i })).toHaveAttribute('href', '#faq');
   });
 
   it('has accessible navigation region with aria-label', async () => {

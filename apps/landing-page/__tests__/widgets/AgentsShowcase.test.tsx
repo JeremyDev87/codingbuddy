@@ -17,7 +17,7 @@ describe('AgentsShowcase', () => {
 
   it('should display section heading', () => {
     render(<AgentsShowcase locale="en" />);
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('AI Specialist Agents');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('35 Specialist Agents');
   });
 
   it('should have id attribute for anchor navigation', () => {
@@ -31,40 +31,58 @@ describe('AgentsShowcase', () => {
     expect(section).toHaveAttribute('aria-labelledby', 'agents-heading');
   });
 
-  it('should render agent cards', () => {
+  it('should render agent cards up to max 8', () => {
     render(<AgentsShowcase locale="en" />);
+    // Total agents is 29, but only 8 should be visible
     expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
+    // Count visible agent cards (each has role="img" for the emoji)
+    const agentIcons = screen.getAllByRole('img', { hidden: true });
+    expect(agentIcons.length).toBeLessThanOrEqual(8);
+  });
+
+  it('should display agent count for all agents', () => {
+    render(<AgentsShowcase locale="en" />);
+    expect(screen.getByText('29 agents')).toBeInTheDocument();
+  });
+
+  it('should not render a search input', () => {
+    render(<AgentsShowcase locale="en" />);
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Search agents...')).not.toBeInTheDocument();
+  });
+
+  it('should render category filter buttons', () => {
+    render(<AgentsShowcase locale="en" />);
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Planning' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Development' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Review' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'UX' })).toBeInTheDocument();
+  });
+
+  it('should filter agents when category button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<AgentsShowcase locale="en" />);
+
+    await user.click(screen.getByRole('button', { name: 'Security' }));
+
     expect(screen.getByText('Security Specialist')).toBeInTheDocument();
+    expect(screen.queryByText('Frontend Developer')).not.toBeInTheDocument();
   });
 
-  it('should display agent count', () => {
+  it('should show View All Agents link when more than 8 agents', () => {
     render(<AgentsShowcase locale="en" />);
-    expect(screen.getByText('35 AI agents')).toBeInTheDocument();
+    expect(screen.getByText('View All Agents')).toBeInTheDocument();
   });
 
-  it('should display search input', () => {
-    render(<AgentsShowcase locale="en" />);
-    expect(screen.getByPlaceholderText('Search agents...')).toBeInTheDocument();
-  });
-
-  it('should filter agents by search query', async () => {
+  it('should not show View All Agents link when 8 or fewer agents', async () => {
     const user = userEvent.setup();
     render(<AgentsShowcase locale="en" />);
 
-    const searchInput = screen.getByPlaceholderText('Search agents...');
-    await user.type(searchInput, 'frontend');
+    // Security category has only 2 agents
+    await user.click(screen.getByRole('button', { name: 'Security' }));
 
-    expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
-    expect(screen.queryByText('Security Specialist')).not.toBeInTheDocument();
-  });
-
-  it('should show no results message when search has no matches', async () => {
-    const user = userEvent.setup();
-    render(<AgentsShowcase locale="en" />);
-
-    const searchInput = screen.getByPlaceholderText('Search agents...');
-    await user.type(searchInput, 'xyznonexistent');
-
-    expect(screen.getByText('No agents found matching your criteria')).toBeInTheDocument();
+    expect(screen.queryByText('View All Agents')).not.toBeInTheDocument();
   });
 });

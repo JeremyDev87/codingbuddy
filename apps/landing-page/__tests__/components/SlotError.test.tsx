@@ -52,12 +52,8 @@ describe('SlotError', () => {
   });
 
   it('should render with different slot names', () => {
-    render(<SlotError reset={vi.fn()} slotName="code example" />);
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      'Failed to load code example',
-    );
-    expect(
-      screen.getByRole('button', { name: /try loading code example again/i }),
-    ).toBeInTheDocument();
+    render(<SlotError reset={vi.fn()} slotName="hero" />);
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Failed to load hero');
+    expect(screen.getByRole('button', { name: /try loading hero again/i })).toBeInTheDocument();
   });
 });

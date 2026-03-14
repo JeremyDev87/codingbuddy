@@ -19,7 +19,7 @@ export const Header = () => {
         {/* Brand */}
         <Link
           href="/"
-          className={`text-lg font-bold tracking-tight ${FOCUS_RING_CLASSES}`}
+          className={`font-mono text-lg font-bold tracking-tight ${FOCUS_RING_CLASSES}`}
           aria-label={t('brand.homeLink')}
         >
           Codingbuddy

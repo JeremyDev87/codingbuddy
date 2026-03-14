@@ -1,42 +1,71 @@
 {
   "hero": {
-    "badge": "Código Abierto",
     "title": "Reglas Multi-IA para Codificación Consistente",
-    "description": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro. Codificación asistida por IA consistente en todas tus herramientas.",
+    "subtitle": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro.",
     "cta": "Comenzar",
-    "github": "GitHub"
+    "github": "Star en GitHub",
+    "terminalTitle": "~/your-project",
+    "terminalCmd": "npx codingbuddy init",
+    "terminalInstalling": "Instalando codingbuddy-rules...",
+    "terminalRulesSynced": "Reglas sincronizadas en 6 herramientas IA",
+    "terminalAgents": "35 agentes especialistas activados",
+    "terminalWorkflow": "Flujo PLAN → ACT → EVAL listo",
+    "terminalCursorrules": ".cursorrules",
+    "terminalClaudeMd": "CLAUDE.md",
+    "terminalCodex": ".codex/",
+    "terminalAntigravity": ".antigravity/",
+    "terminalQ": ".q/",
+    "terminalKiro": ".kiro/",
+    "terminalReady": "¡Listo! Una fuente, todas las herramientas."
   },
-  "problem": {
-    "title": "El Problema con la Codificación IA Hoy",
-    "subtitle": "Cada herramienta IA tiene su propio formato de reglas. Tu equipo pierde tiempo manteniendo configuraciones duplicadas.",
-    "pain1Title": "Reglas Inconsistentes",
-    "pain1Desc": "Cada herramienta necesita su propia configuración — .cursorrules, CLAUDE.md, .codex — sin un estándar compartido.",
-    "pain2Title": "Esfuerzo Duplicado",
-    "pain2Desc": "Copiar y pegar las mismas reglas de codificación en múltiples herramientas cada vez que las actualizas.",
-    "pain3Title": "Sin Estándares de Calidad",
-    "pain3Desc": "La IA genera código sin TDD estructurado, principios SOLID ni requisitos de cobertura.",
-    "pain4Title": "Contexto Perdido",
-    "pain4Desc": "Flujos de trabajo diferentes por herramienta significa que no hay conocimiento especialista compartido ni metodología consistente."
+  "beforeAfter": {
+    "title": "El Problema y la Solución",
+    "beforeLabel": "Antes",
+    "afterLabel": "Después",
+    "beforeFiles": "6 archivos de configuración. Siempre desincronizados.",
+    "afterFiles": "Una sola fuente. Auto-sincronizada con todas las herramientas.",
+    "cursorrules": ".cursorrules",
+    "claudeMd": "CLAUDE.md",
+    "codexRules": ".codex/instructions.md",
+    "antigravityRules": ".antigravity/rules.md",
+    "qRules": ".q/rules.md",
+    "kiroRules": ".kiro/rules.md",
+    "singleSource": "codingbuddy-rules/.ai-rules/",
+    "autoSynced": "Auto-sincronizado",
+    "alwaysCurrent": "Siempre actualizado"
   },
-  "solution": {
-    "title": "Un Conjunto de Reglas. Todas las Herramientas.",
-    "subtitle": "Codingbuddy da a tus asistentes IA reglas consistentes, agentes especialistas y flujos de trabajo estructurados.",
-    "benefit1Title": "Fuente Única de Verdad",
-    "benefit1Desc": "Un conjunto de reglas aplicado automáticamente a Cursor, Claude Code, Codex, Antigravity, Q y Kiro.",
-    "benefit2Title": "35 Agentes de IA",
-    "benefit2Desc": "Experiencia enfocada en arquitectura, seguridad, testing, rendimiento, accesibilidad y más.",
-    "benefit3Title": "Flujo de Trabajo Estructurado",
-    "benefit3Desc": "El ciclo PLAN → ACT → EVAL asegura calidad consistente en todo tu desarrollo asistido por IA.",
-    "benefit4Title": "Calidad Incorporada",
-    "benefit4Desc": "TDD, principios SOLID y cobertura de tests del 90%+ aplicados como práctica estándar."
+  "features": {
+    "title": "Lo Que Obtienes",
+    "universalRulesTitle": "Reglas Universales",
+    "universalRulesDesc": "Una fuente de verdad aplicada automáticamente a las 6 herramientas de codificación IA.",
+    "agentsTitle": "35 Agentes IA",
+    "agentsDesc": "Agentes especialistas en arquitectura, seguridad, testing, rendimiento y accesibilidad.",
+    "workflowTitle": "Flujo de Trabajo Estructurado",
+    "workflowDesc": "El ciclo PLAN → ACT → EVAL asegura calidad consistente en todo el desarrollo.",
+    "qualityTitle": "Calidad Incorporada",
+    "qualityDesc": "TDD, principios SOLID y cobertura de tests del 90%+ aplicados como práctica estándar.",
+    "mcpTitle": "Protocolo MCP",
+    "mcpDesc": "Model Context Protocol estándar para integración fluida de herramientas IA.",
+    "zeroConfigTitle": "Sin Configuración",
+    "zeroConfigDesc": "Un comando para instalar. Funciona de inmediato con todas las herramientas compatibles."
+  },
+  "supportedTools": {
+    "title": "Compatible con tus herramientas IA favoritas",
+    "plus": "+ cualquier herramienta compatible con MCP",
+    "cursor": "Cursor",
+    "claudeCode": "Claude Code",
+    "codex": "Codex",
+    "antigravity": "Antigravity",
+    "amazonQ": "Amazon Q",
+    "kiro": "Kiro"
   },
   "agents": {
-    "title": "Agentes AI Especializados",
-    "subtitle": "35 agentes de IA para mejorar tu flujo de desarrollo",
+    "title": "35 Agentes Especialistas",
+    "subtitle": "Experiencia enfocada para cada aspecto del desarrollo",
     "filter": "Filtrar por categoría",
-    "search": "Buscar agentes...",
-    "allCategories": "Todas las categorías",
+    "allCategories": "Todos",
     "noResults": "No se encontraron agentes que coincidan con los criterios",
+    "viewAll": "Ver Todos los Agentes",
     "categories": {
       "Planning": "Planificación",
       "Development": "Desarrollo",
@@ -46,34 +75,33 @@
     },
     "count": "{count} agentes"
   },
-  "codeExample": {
-    "title": "Mira la Diferencia",
-    "subtitle": "Un conjunto de reglas reemplaza configuraciones dispersas en todas tus herramientas de IA",
-    "before": "Antes: Sin Codingbuddy",
-    "after": "Después: Con Codingbuddy",
-    "copy": "Copiar código",
-    "copied": "¡Copiado!",
-    "copyFailed": "Error al copiar"
-  },
   "quickStart": {
     "title": "Inicio Rápido",
     "subtitle": "Comienza en 3 simples pasos",
-    "step1": "Instalar el paquete",
-    "step1Desc": "Agrega codingbuddy-rules a tu proyecto con un solo comando",
-    "step2": "Configurar tu herramienta IA",
-    "step2Desc": "Agrega la configuración del servidor MCP al archivo de tu herramienta IA",
-    "step3": "Empezar a codificar",
-    "step3Desc": "Usa los modos PLAN, ACT y EVAL con agentes especialistas en todas tus herramientas",
+    "step1": "Instalar",
+    "step1Desc": "Agrega codingbuddy-rules a tu proyecto",
+    "step2": "Configurar",
+    "step2Desc": "Agrega el servidor MCP a tu herramienta IA",
+    "step3": "Codificar",
+    "step3Desc": "Usa los modos PLAN, ACT, EVAL con agentes especialistas",
+    "copy": "Copiar",
+    "copied": "¡Copiado!"
+  },
+  "ctaFooter": {
+    "title": "¿Listo para unificar tu codificación IA?",
+    "command": "npx codingbuddy init",
+    "github": "Star en GitHub",
+    "docs": "Documentación",
     "copy": "Copiar",
     "copied": "¡Copiado!",
-    "copyFailed": "Error al copiar"
+    "copyright": "© {year} Codingbuddy. Licencia MIT.",
+    "madeWith": "Hecho para desarrolladores, por desarrolladores."
   },
   "header": {
     "nav": {
       "features": "Características",
       "agents": "Agentes",
-      "quickStart": "Inicio Rápido",
-      "faq": "FAQ"
+      "quickStart": "Inicio Rápido"
     },
     "theme": {
       "label": "Cambiar tema",
@@ -105,30 +133,9 @@
     "accept": "Aceptar",
     "decline": "Rechazar"
   },
-  "footer": {
-    "label": "Pie de página",
-    "copyright": "\u00a9 {year} Codingbuddy. Todos los derechos reservados.",
-    "github": "GitHub",
-    "license": "Licencia MIT"
-  },
   "metadata": {
     "title": "Codingbuddy - Reglas Multi-IA para Codificación Consistente",
     "description": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro. Codificación asistida por IA consistente en todas tus herramientas."
   },
-  "faq": {
-    "title": "Preguntas Frecuentes",
-    "subtitle": "Todo lo que necesitas saber sobre Codingbuddy",
-    "q1": "¿Qué herramientas IA soporta Codingbuddy?",
-    "a1": "Codingbuddy soporta Cursor, Claude Code, GitHub Copilot (Codex), Antigravity (Gemini), Amazon Q y Kiro. Un conjunto de reglas funciona en todas estas herramientas a través del protocolo MCP.",
-    "q2": "¿Cómo funciona el flujo PLAN/ACT/EVAL?",
-    "a2": "El modo PLAN diseña tu enfoque de implementación con TDD. El modo ACT ejecuta los cambios. El modo EVAL revisa la calidad del código y sugiere mejoras. También puedes usar AUTO para ciclar automáticamente hasta alcanzar los objetivos de calidad.",
-    "q3": "¿Necesito configurar cada herramienta IA por separado?",
-    "a3": "No. Codingbuddy usa un único directorio .ai-rules como fuente de verdad. Cada herramienta IA lee de este conjunto de reglas compartido a través de su adaptador, así que solo mantienes una configuración.",
-    "q4": "¿Es Codingbuddy gratuito y de código abierto?",
-    "a4": "Sí. Codingbuddy es completamente de código abierto bajo la licencia MIT. Puedes usarlo libremente en proyectos personales y comerciales.",
-    "q5": "¿Puedo personalizar las reglas y agentes?",
-    "a5": "Por supuesto. Puedes crear reglas personalizadas en el directorio .ai-rules, definir tus propios agentes especialistas y ajustar los estándares de calidad al flujo de trabajo de tu equipo.",
-    "q6": "¿Qué son los agentes especialistas?",
-    "a6": "Los agentes especialistas son 35 personas IA enfocadas con experiencia en áreas específicas como revisión de arquitectura, auditoría de seguridad, estrategia de testing, optimización de rendimiento y accesibilidad. Proporcionan guía profunda y específica del dominio."
-  }
+  "i18n": {}
 }
