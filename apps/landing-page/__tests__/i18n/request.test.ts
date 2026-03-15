@@ -51,6 +51,7 @@ describe('i18n request config logic', () => {
         'beforeAfter',
         'features',
         'supportedTools',
+        'tuiDashboard',
         'agents',
         'quickStart',
         'ctaFooter',

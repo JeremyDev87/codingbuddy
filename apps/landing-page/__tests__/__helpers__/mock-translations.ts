@@ -105,6 +105,23 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     amazonQ: 'Amazon Q',
     kiro: 'Kiro',
   },
+  tuiDashboard: {
+    title: 'Real-Time Agent Dashboard',
+    subtitle: 'Watch your AI agents work in real-time with a built-in terminal UI.',
+    screenshotAlt:
+      'Codingbuddy TUI Dashboard showing agent pipeline, activity charts, and task progress',
+    feature1Title: 'FlowMap',
+    feature1Desc: 'Visual pipeline showing active agents, stages, and real-time progress',
+    feature2Title: 'Focused Agent',
+    feature2Desc: 'Live view of the active agent with sparkline activity and progress bar',
+    feature3Title: 'Checklist',
+    feature3Desc: 'Task completion tracking synced from PLAN/ACT/EVAL context',
+    feature4Title: 'Activity Chart',
+    feature4Desc: 'Real-time tool invocation bar chart updated as agents work',
+    command: 'npx codingbuddy tui',
+    commandLabel: 'Launch in a separate terminal',
+    multiSession: 'Multiple Claude Code sessions share a single TUI window via IPC',
+  },
   features: {
     title: 'What You Get',
     universalRulesTitle: 'Universal Rules',

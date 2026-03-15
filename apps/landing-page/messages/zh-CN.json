@@ -59,6 +59,22 @@
     "amazonQ": "Amazon Q",
     "kiro": "Kiro"
   },
+  "tuiDashboard": {
+    "title": "实时代理仪表板",
+    "subtitle": "通过内置终端UI实时监控AI代理的工作状态。",
+    "screenshotAlt": "显示代理流水线、活动图表和任务进度的Codingbuddy TUI仪表板",
+    "feature1Title": "FlowMap",
+    "feature1Desc": "显示活跃代理、阶段和实时进度的可视化流水线",
+    "feature2Title": "Focused Agent",
+    "feature2Desc": "带有迷你活动图和进度条的活跃代理实时视图",
+    "feature3Title": "Checklist",
+    "feature3Desc": "与PLAN/ACT/EVAL上下文同步的任务完成跟踪",
+    "feature4Title": "Activity Chart",
+    "feature4Desc": "代理工作时实时更新的工具调用条形图",
+    "command": "npx codingbuddy tui",
+    "commandLabel": "在单独终端中启动",
+    "multiSession": "多个Claude Code会话通过IPC共享同一个TUI窗口"
+  },
   "agents": {
     "title": "35 个专家代理",
     "subtitle": "为开发的各个方面提供专业知识",

@@ -72,6 +72,7 @@ interface LocaleLayoutProps {
   before_after: ReactNode;
   features: ReactNode;
   supported_tools: ReactNode;
+  tui_dashboard: ReactNode;
   agents: ReactNode;
   quick_start: ReactNode;
   cta_footer: ReactNode;
@@ -84,6 +85,7 @@ const LocaleLayout = async ({
   before_after,
   features,
   supported_tools,
+  tui_dashboard,
   agents,
   quick_start,
   cta_footer,
@@ -133,6 +135,7 @@ const LocaleLayout = async ({
               {before_after}
               {features}
               {supported_tools}
+              {tui_dashboard}
               {agents}
               {quick_start}
             </main>

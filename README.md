@@ -235,22 +235,39 @@ npm install -g codingbuddy
 
 Codingbuddy includes a built-in terminal UI that displays real-time agent activity, task progress, and workflow state alongside your AI assistant.
 
+<p align="center">
+  <img src="docs/images/tui-dashboard.jpeg" alt="Codingbuddy TUI Dashboard" width="800" />
+</p>
+
 ### Quick Start
 
 ```bash
-# Launch MCP server with TUI auto-enabled
+# Standalone mode (recommended) — run in a separate terminal
+npx codingbuddy tui
+
+# Embedded mode — launch alongside MCP server
 npx codingbuddy mcp --tui
 ```
 
-### Features
+### Dashboard Panels
 
 | Panel | Description |
 |-------|-------------|
-| **FlowMap** | Visual pipeline showing active agents, stages, and progress |
-| **FocusedAgent** | Live view of the currently active agent with sparkline activity |
-| **Checklist** | Task completion tracking from PLAN/ACT/EVAL context |
-| **Activity Chart** | Real-time tool invocation bar chart |
-| **Multi-session** | Multiple Claude Code sessions share a single TUI window |
+| **HeaderBar** | Workflow mode indicator (PLAN → ACT → EVAL), global state, and real-time clock |
+| **FlowMap** | Hierarchical pipeline showing active agents, stages, and tree-structured progress |
+| **FocusedAgent** | Live view of the active agent with sparkline activity chart and progress bar |
+| **Checklist** | Task completion tracking synced from PLAN/ACT/EVAL context decisions |
+| **Activity Chart** | Real-time horizontal bar chart of tool invocations updated as agents work |
+| **StageHealth** | Cumulative session stats — agent count, skill count, tool invocations, and bottleneck detection |
+
+### Key Capabilities
+
+- **Multi-session**: Multiple Claude Code sessions share a single TUI window via IPC (Unix Domain Socket)
+- **Responsive layout**: Adapts to terminal width — narrow (<80), medium (80-119), wide (120+) columns
+- **Zero overhead**: Non-blocking event emission via `setImmediate()` — <1ms impact on MCP response times
+- **Auto-launch**: Optionally spawns TUI in a new terminal window automatically (`CODINGBUDDY_AUTO_TUI=true`)
+
+[TUI Guide →](docs/tui-guide.md) · [Architecture →](docs/tui-architecture.md) · [Troubleshooting →](docs/tui-troubleshooting.md)
 
 ---
 

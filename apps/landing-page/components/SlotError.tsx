@@ -11,6 +11,7 @@ interface SlotErrorProps {
     | 'before after'
     | 'features'
     | 'supported tools'
+    | 'tui-dashboard'
     | 'footer';
 }
 

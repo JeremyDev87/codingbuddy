@@ -59,6 +59,22 @@
     "amazonQ": "Amazon Q",
     "kiro": "Kiro"
   },
+  "tuiDashboard": {
+    "title": "リアルタイムエージェントダッシュボード",
+    "subtitle": "内蔵ターミナルUIでAIエージェントの作業をリアルタイムで監視できます。",
+    "screenshotAlt": "エージェントパイプライン、アクティビティチャート、タスク進捗を表示するCodingbuddy TUIダッシュボード",
+    "feature1Title": "FlowMap",
+    "feature1Desc": "アクティブなエージェント、ステージ、リアルタイム進捗を表示するビジュアルパイプライン",
+    "feature2Title": "Focused Agent",
+    "feature2Desc": "スパークラインアクティビティとプログレスバー付きのアクティブエージェントライブビュー",
+    "feature3Title": "Checklist",
+    "feature3Desc": "PLAN/ACT/EVALコンテキストと同期されたタスク完了トラッキング",
+    "feature4Title": "Activity Chart",
+    "feature4Desc": "エージェント作業中にリアルタイム更新されるツール呼び出しバーチャート",
+    "command": "npx codingbuddy tui",
+    "commandLabel": "別のターミナルで起動",
+    "multiSession": "複数のClaude CodeセッションがIPCを通じて1つのTUIウィンドウを共有します"
+  },
   "agents": {
     "title": "35の専門エージェント",
     "subtitle": "開発のあらゆる側面に特化した専門知識",

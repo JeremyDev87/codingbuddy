@@ -59,6 +59,22 @@
     "amazonQ": "Amazon Q",
     "kiro": "Kiro"
   },
+  "tuiDashboard": {
+    "title": "Panel de Agentes en Tiempo Real",
+    "subtitle": "Observa tus agentes de IA trabajar en tiempo real con una interfaz de terminal integrada.",
+    "screenshotAlt": "Panel TUI de Codingbuddy mostrando pipeline de agentes, gráficos de actividad y progreso de tareas",
+    "feature1Title": "FlowMap",
+    "feature1Desc": "Pipeline visual que muestra agentes activos, etapas y progreso en tiempo real",
+    "feature2Title": "Focused Agent",
+    "feature2Desc": "Vista en vivo del agente activo con gráfico de actividad y barra de progreso",
+    "feature3Title": "Checklist",
+    "feature3Desc": "Seguimiento de tareas sincronizado con el contexto PLAN/ACT/EVAL",
+    "feature4Title": "Activity Chart",
+    "feature4Desc": "Gráfico de barras de invocaciones de herramientas actualizado en tiempo real",
+    "command": "npx codingbuddy tui",
+    "commandLabel": "Ejecutar en una terminal separada",
+    "multiSession": "Múltiples sesiones de Claude Code comparten una sola ventana TUI a través de IPC"
+  },
   "agents": {
     "title": "35 Agentes Especialistas",
     "subtitle": "Experiencia enfocada para cada aspecto del desarrollo",

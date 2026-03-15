@@ -59,6 +59,22 @@
     "amazonQ": "Amazon Q",
     "kiro": "Kiro"
   },
+  "tuiDashboard": {
+    "title": "실시간 에이전트 대시보드",
+    "subtitle": "내장 터미널 UI로 AI 에이전트의 작업을 실시간으로 모니터링하세요.",
+    "screenshotAlt": "에이전트 파이프라인, 활동 차트, 작업 진행 상황을 보여주는 Codingbuddy TUI 대시보드",
+    "feature1Title": "FlowMap",
+    "feature1Desc": "활성 에이전트, 스테이지, 실시간 진행 상황을 보여주는 시각적 파이프라인",
+    "feature2Title": "Focused Agent",
+    "feature2Desc": "스파크라인 활동 차트와 진행 바가 있는 활성 에이전트 실시간 뷰",
+    "feature3Title": "Checklist",
+    "feature3Desc": "PLAN/ACT/EVAL 컨텍스트와 동기화된 작업 완료 추적",
+    "feature4Title": "Activity Chart",
+    "feature4Desc": "에이전트 작업 중 실시간으로 업데이트되는 도구 호출 바 차트",
+    "command": "npx codingbuddy tui",
+    "commandLabel": "별도 터미널에서 실행",
+    "multiSession": "여러 Claude Code 세션이 IPC를 통해 하나의 TUI 창을 공유합니다"
+  },
   "agents": {
     "title": "35개 전문 에이전트",
     "subtitle": "개발의 모든 측면을 위한 전문 지식",
