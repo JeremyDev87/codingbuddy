@@ -26,4 +26,12 @@ describe('CSP Headers', () => {
     expect(cspValue).toContain("base-uri 'self'");
     expect(cspValue).toContain("form-action 'self'");
   });
+
+  it('should allow unsafe-inline for script-src to support Next.js PPR', async () => {
+    const headers = await nextConfig.headers!();
+    const cspHeader = headers[0].headers.find(h => h.key === 'Content-Security-Policy');
+    const cspValue = cspHeader!.value;
+
+    expect(cspValue).toContain("'unsafe-inline'");
+  });
 });

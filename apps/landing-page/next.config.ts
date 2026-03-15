@@ -60,14 +60,16 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains',
           },
-          // Content Security Policy (stricter in production)
+          // Content Security Policy
+          // 'unsafe-inline' is required for Next.js PPR hydration/streaming inline scripts.
+          // Acceptable for this landing page (no user auth, no sensitive data).
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
               process.env.NODE_ENV === 'development'
                 ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-                : "script-src 'self' https://va.vercel-scripts.com",
+                : "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
               "img-src 'self' data: https: blob:",
