@@ -6,6 +6,7 @@ import type {
   EventLogEntry,
   TaskItem,
   ToolCallRecord,
+  ActivitySample,
 } from '../dashboard-types';
 import type { TuiEventBus } from '../events';
 import {
@@ -48,6 +49,7 @@ export function createInitialDashboardState(): DashboardState {
     tasks: [],
     eventLog: [],
     toolCalls: [],
+    activityHistory: [],
     objectives: [],
     activeSkills: [],
     toolInvokeCount: 0,
@@ -187,6 +189,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         timestamp: new Date(action.payload.timestamp).toTimeString().slice(0, 8),
         message: `${action.payload.toolName}${action.payload.agentId ? ` [${action.payload.agentId}]` : ''}`,
         level: 'info',
+        rawTimestamp: action.payload.timestamp,
       };
       // Ring buffer: drop oldest when at capacity, then append (consistent with edges)
       const base =
@@ -229,11 +232,26 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       const toolCallsBase =
         state.toolCalls.length >= TOOL_CALLS_MAX ? state.toolCalls.slice(1) : state.toolCalls;
 
+      // Activity history: track tool calls per second for sparkline
+      const sec = Math.floor(action.payload.timestamp / 1000);
+      const history = state.activityHistory;
+      const last = history.length > 0 ? history[history.length - 1] : null;
+      let activityHistory: ActivitySample[];
+      if (last && last.timestamp === sec) {
+        activityHistory = [
+          ...history.slice(0, -1),
+          { timestamp: sec, toolCalls: last.toolCalls + 1 },
+        ];
+      } else {
+        activityHistory = [...history.slice(-59), { timestamp: sec, toolCalls: 1 }];
+      }
+
       return {
         ...state,
         agents,
         eventLog: [...base, entry],
         toolCalls: [...toolCallsBase, toolCall],
+        activityHistory,
         toolInvokeCount: state.toolInvokeCount + 1,
       };
     }

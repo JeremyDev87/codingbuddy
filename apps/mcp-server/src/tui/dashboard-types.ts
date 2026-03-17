@@ -92,6 +92,16 @@ export interface EventLogEntry {
   timestamp: string;
   message: string;
   level: LogLevel;
+  rawTimestamp?: number;
+}
+
+/**
+ * A single sample in the activity sparkline history.
+ * Tracks tool call frequency per second for the last 60 seconds.
+ */
+export interface ActivitySample {
+  timestamp: number;
+  toolCalls: number;
 }
 
 /**
@@ -157,6 +167,7 @@ export interface DashboardState {
   tasks: TaskItem[];
   eventLog: EventLogEntry[];
   toolCalls: ToolCallRecord[];
+  activityHistory: ActivitySample[];
   objectives: string[];
   activeSkills: string[];
   toolInvokeCount: number;

@@ -1214,3 +1214,86 @@ describe('TOOL_INVOKED — time-based progress', () => {
     expect(state.agents.get('a1')!.progress).toBe(13);
   });
 });
+
+describe('activityHistory & rawTimestamp', () => {
+  it('initializes activityHistory as empty array', () => {
+    const state = createInitialDashboardState();
+    expect(state.activityHistory).toEqual([]);
+  });
+
+  it('creates first ActivitySample on TOOL_INVOKED', () => {
+    const ts = 1710000001500;
+    const state = dashboardReducer(createInitialDashboardState(), {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: null, timestamp: ts },
+    });
+    expect(state.activityHistory).toHaveLength(1);
+    expect(state.activityHistory[0]).toEqual({
+      timestamp: Math.floor(ts / 1000),
+      toolCalls: 1,
+    });
+  });
+
+  it('increments toolCalls for same-second TOOL_INVOKED', () => {
+    const baseSec = 1710000001;
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'tool1', agentId: null, timestamp: baseSec * 1000 + 100 },
+    });
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'tool2', agentId: null, timestamp: baseSec * 1000 + 500 },
+    });
+    expect(state.activityHistory).toHaveLength(1);
+    expect(state.activityHistory[0].toolCalls).toBe(2);
+  });
+
+  it('appends new sample for different-second TOOL_INVOKED', () => {
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'tool1', agentId: null, timestamp: 1000 },
+    });
+    state = dashboardReducer(state, {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'tool2', agentId: null, timestamp: 2000 },
+    });
+    expect(state.activityHistory).toHaveLength(2);
+    expect(state.activityHistory[0].timestamp).toBe(1);
+    expect(state.activityHistory[1].timestamp).toBe(2);
+  });
+
+  it('caps activityHistory at 60 samples', () => {
+    let state = createInitialDashboardState();
+    for (let i = 0; i < 65; i++) {
+      state = dashboardReducer(state, {
+        type: 'TOOL_INVOKED',
+        payload: { toolName: `tool_${i}`, agentId: null, timestamp: i * 1000 },
+      });
+    }
+    expect(state.activityHistory).toHaveLength(60);
+    expect(state.activityHistory[0].timestamp).toBe(5);
+    expect(state.activityHistory[59].timestamp).toBe(64);
+  });
+
+  it('sets rawTimestamp on EventLogEntry from TOOL_INVOKED', () => {
+    const ts = 1710000001500;
+    const state = dashboardReducer(createInitialDashboardState(), {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'search_rules', agentId: null, timestamp: ts },
+    });
+    expect(state.eventLog[0].rawTimestamp).toBe(ts);
+  });
+
+  it('resets activityHistory on SESSION_RESET', () => {
+    let state = dashboardReducer(createInitialDashboardState(), {
+      type: 'TOOL_INVOKED',
+      payload: { toolName: 'tool1', agentId: null, timestamp: 1000 },
+    });
+    expect(state.activityHistory).toHaveLength(1);
+    state = dashboardReducer(state, {
+      type: 'SESSION_RESET',
+      payload: { reason: 'reset' },
+    });
+    expect(state.activityHistory).toEqual([]);
+  });
+});
