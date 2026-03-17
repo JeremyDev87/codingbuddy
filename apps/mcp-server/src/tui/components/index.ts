@@ -18,3 +18,13 @@ export { ActivityVisualizer, type ActivityVisualizerProps } from './ActivityVisu
 export { renderAgentTree, renderAgentStatusCard } from './activity-visualizer.pure';
 export { SessionTabBar } from './SessionTabBar';
 export type { SessionTabBarProps } from './SessionTabBar';
+export {
+  formatElapsed,
+  formatRelativeTime,
+  spinnerFrame,
+  pulseIcon,
+  renderSparkline,
+  computeThroughput,
+  formatTimeWithSeconds,
+} from './live.pure';
+export type { ActivitySample } from './live.pure';
