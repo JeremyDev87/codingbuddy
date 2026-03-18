@@ -5,9 +5,11 @@ import { STATUS_ICONS, getNodeStatusColor, BORDER_COLORS, getAgentAvatar } from 
 import {
   formatObjective,
   formatLogTail,
+  formatLogTailRelative,
   formatSectionDivider,
   formatEnhancedProgressBar,
 } from './focused-agent.pure';
+import { spinnerFrame, formatElapsed } from './live.pure';
 import { ContextSection } from './ContextSection';
 
 export interface FocusedAgentPanelProps {
@@ -17,6 +19,8 @@ export interface FocusedAgentPanelProps {
   eventLog: EventLogEntry[];
   contextDecisions?: string[];
   contextNotes?: string[];
+  tick?: number;
+  now?: number;
   width?: number;
   height?: number;
 }
@@ -61,6 +65,8 @@ export function FocusedAgentPanel({
   eventLog,
   contextDecisions = [],
   contextNotes = [],
+  tick,
+  now,
   width,
   height,
 }: FocusedAgentPanelProps): React.ReactElement {
@@ -84,7 +90,10 @@ export function FocusedAgentPanel({
   const statusLabel = agent.status.toUpperCase();
   const progressBar = formatEnhancedProgressBar(agent.progress);
   const objective = formatObjective(objectives);
-  const logs = formatLogTail(eventLog);
+  const logs = now != null ? formatLogTailRelative(eventLog, now) : formatLogTail(eventLog);
+  const isRunning = agent.status === 'running';
+  const showSpinner = isRunning && tick != null;
+  const showElapsed = isRunning && now != null && agent.startedAt != null;
 
   return (
     <Box
@@ -98,10 +107,17 @@ export function FocusedAgentPanel({
       <Box gap={2}>
         <Text>{avatar}</Text>
         <Text bold>{agent.name}</Text>
-        <Text color={statusColor} bold>
-          {icon}
-        </Text>
+        {showSpinner ? (
+          <Text color="cyan">{spinnerFrame(tick!)}</Text>
+        ) : (
+          <Text color={statusColor} bold>
+            {icon}
+          </Text>
+        )}
         <Text color={statusColor}>{statusLabel}</Text>
+        {showElapsed && (
+          <Text dimColor>{formatElapsed(agent.startedAt!, now!)}</Text>
+        )}
         <Text dimColor>{agent.stage}</Text>
       </Box>
 

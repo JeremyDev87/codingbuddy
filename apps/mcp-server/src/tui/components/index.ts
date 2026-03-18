@@ -10,7 +10,12 @@ export {
 export { FocusedAgentPanel, type FocusedAgentPanelProps } from './FocusedAgentPanel';
 export { ChecklistPanel, type ChecklistPanelProps } from './ChecklistPanel';
 export { resolveChecklistTasks } from './checklist-panel.pure';
-export { formatObjective, formatLogTail, formatSectionDivider } from './focused-agent.pure';
+export {
+  formatObjective,
+  formatLogTail,
+  formatLogTailRelative,
+  formatSectionDivider,
+} from './focused-agent.pure';
 export { StageHealthBar, type StageHealthBarProps } from './StageHealthBar';
 export { computeStageHealth, detectBottlenecks } from './stage-health.pure';
 export { computeGridLayout } from './grid-layout.pure';

@@ -156,6 +156,114 @@ describe('tui/components/FocusedAgentPanel', () => {
     expect(lastFrame()).toContain('⚙️');
   });
 
+  describe('elapsed timer and spinner for running agent', () => {
+    it('should show spinner frame and elapsed time when tick and now are provided', () => {
+      const now = 1710000090000;
+      const startedAt = now - 83000; // 1m 23s ago
+      const runningAgent = createDefaultDashboardNode({
+        id: 'agent-1',
+        name: 'BackendDev',
+        stage: 'ACT',
+        status: 'running',
+        isPrimary: true,
+        progress: 50,
+        startedAt,
+      });
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={runningAgent}
+          activeSkills={[]}
+          objectives={[]}
+          eventLog={[]}
+          tick={0}
+          now={now}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('⠋'); // spinnerFrame(0)
+      expect(frame).toContain('1m 23s');
+    });
+
+    it('should not show spinner/elapsed when agent is not running', () => {
+      const now = 1710000090000;
+      const doneAgent = createDefaultDashboardNode({
+        id: 'agent-1',
+        name: 'BackendDev',
+        stage: 'ACT',
+        status: 'done',
+        isPrimary: true,
+        progress: 100,
+        startedAt: now - 83000,
+      });
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={doneAgent}
+          activeSkills={[]}
+          objectives={[]}
+          eventLog={[]}
+          tick={0}
+          now={now}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).not.toContain('⠋');
+      expect(frame).not.toContain('1m 23s');
+    });
+
+    it('should not show elapsed when startedAt is missing', () => {
+      const now = 1710000090000;
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          eventLog={[]}
+          tick={0}
+          now={now}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('⠋'); // spinner still shows for running
+      expect(frame).not.toContain('m '); // no elapsed time
+    });
+  });
+
+  describe('relative timestamps in event log', () => {
+    it('should show relative timestamps when now is provided and rawTimestamp exists', () => {
+      const now = 1710000060000;
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          eventLog={[
+            { timestamp: '10:00:00', message: 'Started', level: 'info', rawTimestamp: now - 5000 },
+          ]}
+          now={now}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('5s ago');
+      expect(frame).toContain('Started');
+    });
+
+    it('should fall back to original timestamp when now is not provided', () => {
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={mockAgent}
+          activeSkills={[]}
+          objectives={[]}
+          eventLog={[
+            { timestamp: '10:12:01', message: 'ACT start', level: 'info' },
+          ]}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('10:12:01');
+      expect(frame).toContain('ACT start');
+    });
+  });
+
   describe('Context section', () => {
     it('renders context decisions when provided', () => {
       const { lastFrame } = render(

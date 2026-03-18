@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   formatObjective,
   formatLogTail,
+  formatLogTailRelative,
   formatSectionDivider,
   formatEnhancedProgressBar,
   formatEnhancedChecklist,
@@ -94,6 +95,55 @@ describe('tui/components/focused-agent.pure', () => {
     it('should handle title longer than width gracefully', () => {
       const result = formatSectionDivider('VeryLongTitle', 10);
       expect(result).toContain('VeryLongTitle');
+    });
+  });
+
+  describe('formatLogTailRelative', () => {
+    it('should use formatRelativeTime when rawTimestamp is present', () => {
+      const now = 1710000060000;
+      const events: EventLogEntry[] = [
+        { timestamp: '10:00:00', message: 'Started', level: 'info', rawTimestamp: now - 5000 },
+        { timestamp: '10:01:00', message: 'Done', level: 'info', rawTimestamp: now - 1000 },
+      ];
+      const result = formatLogTailRelative(events, now);
+      expect(result).toBe('5s ago Started\njust now Done');
+    });
+
+    it('should fall back to timestamp when rawTimestamp is absent', () => {
+      const now = 1710000060000;
+      const events: EventLogEntry[] = [
+        { timestamp: '10:00:01', message: 'Legacy event', level: 'info' },
+      ];
+      const result = formatLogTailRelative(events, now);
+      expect(result).toBe('10:00:01 Legacy event');
+    });
+
+    it('should handle mixed events (some with rawTimestamp, some without)', () => {
+      const now = 1710000060000;
+      const events: EventLogEntry[] = [
+        { timestamp: '10:00:01', message: 'Old format', level: 'info' },
+        { timestamp: '10:01:00', message: 'New format', level: 'info', rawTimestamp: now - 30000 },
+      ];
+      const result = formatLogTailRelative(events, now);
+      const lines = result.split('\n');
+      expect(lines[0]).toBe('10:00:01 Old format');
+      expect(lines[1]).toBe('30s ago New format');
+    });
+
+    it('should respect maxLines', () => {
+      const now = 1710000060000;
+      const events: EventLogEntry[] = Array.from({ length: 20 }, (_, i) => ({
+        timestamp: `10:00:${String(i).padStart(2, '0')}`,
+        message: `Event ${i}`,
+        level: 'info' as const,
+        rawTimestamp: now - (20 - i) * 1000,
+      }));
+      const result = formatLogTailRelative(events, now, 5);
+      expect(result.split('\n')).toHaveLength(5);
+    });
+
+    it('should return empty string for empty events', () => {
+      expect(formatLogTailRelative([], Date.now())).toBe('');
     });
   });
 

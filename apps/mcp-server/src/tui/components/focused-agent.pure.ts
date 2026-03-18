@@ -1,4 +1,5 @@
 import type { TaskItem, EventLogEntry } from '../dashboard-types';
+import { formatRelativeTime } from './live.pure';
 
 export function formatObjective(objectives: string[], maxLines = 3): string {
   const lines = objectives.slice(0, maxLines).map(o => `- ${o}`);
@@ -11,6 +12,20 @@ export function formatObjective(objectives: string[], maxLines = 3): string {
 export function formatLogTail(events: EventLogEntry[], maxLines = 10): string {
   const tail = events.slice(-maxLines);
   return tail.map(e => `${e.timestamp} ${e.message}`).join('\n');
+}
+
+/**
+ * Format log tail with relative timestamps when rawTimestamp is available.
+ * Falls back to the original timestamp string otherwise.
+ */
+export function formatLogTailRelative(events: EventLogEntry[], now: number, maxLines = 10): string {
+  const tail = events.slice(-maxLines);
+  return tail
+    .map(e => {
+      const ts = e.rawTimestamp != null ? formatRelativeTime(e.rawTimestamp, now) : e.timestamp;
+      return `${ts} ${e.message}`;
+    })
+    .join('\n');
 }
 
 /**
