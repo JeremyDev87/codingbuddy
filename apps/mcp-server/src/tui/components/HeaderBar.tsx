@@ -8,6 +8,7 @@ import {
   GLOBAL_STATE_COLORS,
   BORDER_COLORS,
 } from '../utils/theme';
+import { spinnerFrame, formatTimeWithSeconds } from './live.pure';
 
 export interface HeaderBarProps {
   workspace: string;
@@ -15,6 +16,8 @@ export interface HeaderBarProps {
   globalState: GlobalRunState;
   layoutMode: LayoutMode;
   width: number;
+  tick?: number;
+  now?: number;
 }
 
 const PROCESS_MODES: Mode[] = ['PLAN', 'ACT', 'EVAL'];
@@ -51,11 +54,19 @@ function ModeFlow({ currentMode }: { currentMode: Mode | null }): React.ReactEle
   );
 }
 
-function StateIndicator({ globalState }: { globalState: GlobalRunState }): React.ReactElement {
-  const icon = GLOBAL_STATE_ICONS[globalState];
+function StateIndicator({
+  globalState,
+  tick,
+}: {
+  globalState: GlobalRunState;
+  tick?: number;
+}): React.ReactElement {
+  const isRunning = globalState === 'RUNNING';
+  const icon =
+    isRunning && tick !== undefined ? spinnerFrame(tick) : GLOBAL_STATE_ICONS[globalState];
   const color = GLOBAL_STATE_COLORS[globalState];
   return (
-    <Text color={color} bold={globalState === 'RUNNING' || globalState === 'ERROR'}>
+    <Text color={color} bold={isRunning || globalState === 'ERROR'}>
       {icon} {globalState}
     </Text>
   );
@@ -67,6 +78,8 @@ export function HeaderBar({
   globalState,
   layoutMode,
   width,
+  tick,
+  now,
 }: HeaderBarProps): React.ReactElement {
   if (layoutMode === 'narrow') {
     return (
@@ -83,7 +96,10 @@ export function HeaderBar({
         <Box flexGrow={1} />
         <ModeFlow currentMode={currentMode} />
         <Box flexGrow={1} />
-        <StateIndicator globalState={globalState} />
+        <StateIndicator globalState={globalState} tick={tick} />
+        {now !== undefined && (
+          <Text dimColor> {formatTimeWithSeconds(now)}</Text>
+        )}
       </Box>
     );
   }
@@ -105,7 +121,10 @@ export function HeaderBar({
           ⟨⟩ CODINGBUDDY AGENT DASHBOARD
         </Text>
         <ModeFlow currentMode={currentMode} />
-        <StateIndicator globalState={globalState} />
+        <StateIndicator globalState={globalState} tick={tick} />
+        {now !== undefined && (
+          <Text dimColor>{formatTimeWithSeconds(now)}</Text>
+        )}
       </Box>
       <Box flexGrow={1} />
       <Box flexShrink={1} overflowX="hidden">

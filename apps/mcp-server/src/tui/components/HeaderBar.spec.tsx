@@ -3,6 +3,8 @@ import { describe, it, expect } from 'vitest';
 import { render } from 'ink-testing-library';
 import { HeaderBar } from './HeaderBar';
 
+const FIXED_NOW = new Date('2026-03-18T14:30:45Z').getTime();
+
 describe('tui/components/HeaderBar', () => {
   it('should render title with neon branding', () => {
     const { lastFrame } = render(
@@ -12,6 +14,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     expect(lastFrame()).toContain('CODINGBUDDY');
@@ -25,6 +29,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -41,6 +47,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="IDLE"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -48,7 +56,7 @@ describe('tui/components/HeaderBar', () => {
     expect(frame).toContain('○');
   });
 
-  it('should render RUNNING state with filled circle', () => {
+  it('should render RUNNING state with spinner when tick provided', () => {
     const { lastFrame } = render(
       <HeaderBar
         workspace="/repo"
@@ -56,10 +64,12 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
-    expect(frame).toContain('●');
+    expect(frame).toContain('⠋');
     expect(frame).toContain('RUNNING');
   });
 
@@ -71,6 +81,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="ERROR"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -86,6 +98,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="narrow"
         width={60}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -100,6 +114,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -115,6 +131,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="IDLE"
         layoutMode="medium"
         width={100}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     expect(lastFrame()).toBeTruthy();
@@ -130,6 +148,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -147,6 +167,8 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
@@ -154,7 +176,6 @@ describe('tui/components/HeaderBar', () => {
     expect(frame).toContain('PLAN');
     expect(frame).toContain('ACT');
     expect(frame).toContain('EVAL');
-    // AUTO should not be connected by arrow to EVAL
     expect(frame).not.toMatch(/EVAL[^A]*→[^A]*AUTO/);
   });
 
@@ -166,13 +187,64 @@ describe('tui/components/HeaderBar', () => {
         globalState="RUNNING"
         layoutMode="wide"
         width={120}
+        tick={0}
+        now={FIXED_NOW}
       />,
     );
     const frame = lastFrame() ?? '';
-    // Double border uses ╔ ╗ ╚ ╝ characters
     expect(frame).toContain('╔');
     expect(frame).toContain('╗');
     expect(frame).toContain('╚');
     expect(frame).toContain('╝');
+  });
+
+  // --- Issue #673: Animated spinner + live clock ---
+
+  it('should change spinner frame based on tick value', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+        tick={3}
+        now={FIXED_NOW}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('⠸');
+    expect(frame).not.toContain('⠋');
+  });
+
+  it('should display live clock when now is provided', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+        tick={0}
+        now={FIXED_NOW}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('14:30:45');
+  });
+
+  it('should render without tick/now for backward compatibility', () => {
+    const { lastFrame } = render(
+      <HeaderBar
+        workspace="/repo"
+        currentMode="PLAN"
+        globalState="RUNNING"
+        layoutMode="wide"
+        width={120}
+      />,
+    );
+    const frame = lastFrame() ?? '';
+    expect(frame).toContain('●');
+    expect(frame).toContain('RUNNING');
   });
 });
