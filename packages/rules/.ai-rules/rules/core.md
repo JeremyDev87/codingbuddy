@@ -546,7 +546,8 @@ To preserve this implementation session for future reference:
 - All implementations must follow the Primary Developer Agent's code quality checklist
 - Respond in the language specified in the agent's communication.language setting
 - Execute one step at a time, verify tests after each step
-- Stop and return to PLAN if blockers encountered
+- On recoverable errors (file not found, command failure, path issues), try alternatives immediately
+- Only return to PLAN on unrecoverable blockers (missing dependencies, architectural conflicts)
 
 **Verification:**
 - Agent name should appear as `## Agent : [Primary Developer Agent Name]` in response
