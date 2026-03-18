@@ -36,4 +36,4 @@ export * from './types';
 export * from './dashboard-types';
 export { useDashboardState } from './hooks';
 export { useTerminalSize } from './hooks';
-export { useClock } from './hooks';
+export { useTick } from './hooks';
