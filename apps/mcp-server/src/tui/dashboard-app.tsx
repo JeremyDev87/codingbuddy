@@ -3,6 +3,7 @@ import { Box } from 'ink';
 import type { TuiEventBus } from './events';
 import type { DashboardState } from './dashboard-types';
 import { useTerminalSize } from './hooks/use-terminal-size';
+import { useTick } from './hooks/use-tick';
 import { useDashboardState } from './hooks/use-dashboard-state';
 import { HeaderBar } from './components/HeaderBar';
 import { FlowMap } from './components/FlowMap';
@@ -25,6 +26,8 @@ export function DashboardApp({
   workspace: workspaceProp,
 }: DashboardAppProps): React.ReactElement {
   const { columns, rows, layoutMode } = useTerminalSize();
+  const tick = useTick(1000);
+  const now = Date.now();
   const internalState = useDashboardState(externalState ? undefined : eventBus);
   const state = externalState ?? internalState;
   const focusedAgent = state.focusedAgentId
@@ -48,6 +51,8 @@ export function DashboardApp({
         globalState={state.globalState}
         layoutMode={layoutMode}
         width={grid.header.width}
+        tick={tick}
+        now={now}
       />
       {layoutMode === 'narrow' ? (
         <Box flexDirection="column">
@@ -69,6 +74,8 @@ export function DashboardApp({
             contextNotes={state.contextNotes}
             width={grid.focusedAgent.width}
             height={grid.focusedAgent.height}
+            tick={tick}
+            now={now}
           />
           <FlowMap
             agents={state.agents}
@@ -77,6 +84,8 @@ export function DashboardApp({
             width={grid.flowMap.width}
             height={grid.flowMap.height}
             activeStage={state.currentMode}
+            tick={tick}
+            now={now}
           />
         </Box>
       ) : (
@@ -93,6 +102,8 @@ export function DashboardApp({
               width={grid.flowMap.width}
               height={grid.flowMap.height}
               activeStage={state.currentMode}
+              tick={tick}
+              now={now}
             />
             <ActivityVisualizer
               currentMode={state.currentMode}
@@ -122,6 +133,8 @@ export function DashboardApp({
               contextNotes={state.contextNotes}
               width={grid.focusedAgent.width}
               height={grid.focusedAgent.height}
+              tick={tick}
+              now={now}
             />
           </Box>
         </Box>
@@ -133,6 +146,9 @@ export function DashboardApp({
         agentCount={state.agentActivateCount}
         skillCount={state.skillInvokeCount}
         width={grid.stageHealth.width}
+        activityHistory={state.activityHistory}
+        tick={tick}
+        now={now}
       />
     </Box>
   );
