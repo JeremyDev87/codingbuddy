@@ -571,6 +571,12 @@ To preserve this implementation session for future reference:
 - Only report to user on unrecoverable errors (auth failure, critical data loss risk)
 - Never break the workflow on error — try alternatives and continue
 
+### Path Safety (monorepo)
+
+- Always verify current directory (pwd) or use absolute paths before git add/commit
+- In monorepo subdirectories, use git -C "$REPO_ROOT" flag for git commands
+- After using cd, ensure relative paths are not double-applied in subsequent commands
+
 ---
 
 ### Eval Mode
