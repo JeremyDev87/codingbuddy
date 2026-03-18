@@ -18,6 +18,22 @@ on:
       - '.github/copilot-instructions.md'
       - '.github/instructions/**'
       - .github/workflows/dev.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'apps/mcp-server/**'
+      - 'apps/landing-page/**'
+      - 'packages/rules/**'
+      - 'packages/claude-code-plugin/**'
+      - '.antigravity/**'
+      - '.claude/**'
+      - '.codex/**'
+      - '.cursor/**'
+      - 'scripts/**'
+      - '.github/copilot-instructions.md'
+      - '.github/instructions/**'
+      - .github/workflows/dev.yml
 
 permissions:
   statuses: write
