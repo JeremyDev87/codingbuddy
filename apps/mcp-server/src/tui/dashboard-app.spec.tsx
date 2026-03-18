@@ -10,6 +10,10 @@ vi.mock('./utils/icons', async importOriginal => {
   return { ...actual, isNerdFontEnabled: () => false };
 });
 
+vi.mock('./hooks/use-tick', () => ({
+  useTick: () => 0,
+}));
+
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('DashboardApp', () => {

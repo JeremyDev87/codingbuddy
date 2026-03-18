@@ -12,6 +12,10 @@ vi.mock('./utils/icons', async importOriginal => {
   };
 });
 
+vi.mock('./hooks/use-tick', () => ({
+  useTick: () => 0,
+}));
+
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('EventBus ↔ UI Integration', () => {
