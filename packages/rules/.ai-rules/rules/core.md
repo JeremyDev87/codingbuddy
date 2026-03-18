@@ -564,6 +564,15 @@ To preserve this implementation session for future reference:
 
 ---
 
+### Error Recovery (ACT mode)
+
+- On recoverable errors (file not found, command failure, path issues), try alternatives immediately
+- Do not wait for user confirmation on recoverable errors — recover immediately
+- Only report to user on unrecoverable errors (auth failure, critical data loss risk)
+- Never break the workflow on error — try alternatives and continue
+
+---
+
 ### Eval Mode
 
 **Important:**

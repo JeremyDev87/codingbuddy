@@ -100,10 +100,7 @@ When working in this codebase, use these modes:
 
 ## Error Recovery
 
-- On CLI command failure (label not found, permission error, file not found, etc.), automatically try alternatives
-- Do not wait for user confirmation on recoverable errors — recover immediately
-- Only report to user on unrecoverable errors (auth failure, risk of critical data loss, etc.)
-- Never break the workflow on error — try alternatives and continue
+See shared rules: packages/rules/.ai-rules/rules/core.md (Error Recovery section)
 
 ## Communication
 
