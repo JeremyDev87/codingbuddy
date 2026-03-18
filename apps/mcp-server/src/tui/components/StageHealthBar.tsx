@@ -1,9 +1,11 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { StageStats } from '../dashboard-types';
+import type { ActivitySample } from './live.pure';
 import type { Mode } from '../types';
 import { getModeColor, BORDER_COLORS } from '../utils/theme';
 import { formatCount } from './stage-health.pure';
+import { renderSparkline, computeThroughput } from './live.pure';
 
 export interface StageHealthBarProps {
   stageHealth: Record<Mode, StageStats>;
@@ -12,6 +14,9 @@ export interface StageHealthBarProps {
   agentCount: number;
   skillCount: number;
   width: number;
+  activityHistory?: ActivitySample[];
+  tick?: number;
+  now?: number;
 }
 
 type DisplayableStage = 'PLAN' | 'ACT' | 'EVAL';
@@ -86,7 +91,12 @@ export function StageHealthBar({
   agentCount,
   skillCount,
   width,
+  activityHistory,
+  tick: _tick,
+  now: _now,
 }: StageHealthBarProps): React.ReactElement {
+  const hasActivity = activityHistory && activityHistory.length > 0;
+
   return (
     <Box
       borderStyle="double"
@@ -95,6 +105,17 @@ export function StageHealthBar({
       flexDirection="column"
     >
       <Box>
+        {hasActivity && (
+          <Box gap={1} marginRight={1}>
+            <Text color="cyan">
+              {renderSparkline(
+                activityHistory.map(s => s.toolCalls),
+                10,
+              )}
+            </Text>
+            <Text dimColor>{computeThroughput(activityHistory)}</Text>
+          </Box>
+        )}
         <Box gap={2}>
           {(['PLAN', 'ACT', 'EVAL'] as const).map(mode => (
             <StageStatDisplay key={mode} mode={mode} stats={stageHealth[mode]} />

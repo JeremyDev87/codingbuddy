@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from 'ink-testing-library';
 import { StageHealthBar } from './StageHealthBar';
 import { createEmptyStageStats } from '../dashboard-types';
+import type { ActivitySample } from './live.pure';
 
 function makeHealth() {
   return {
@@ -161,5 +162,61 @@ describe('tui/components/StageHealthBar', () => {
     expect(out).toContain('🤖 2k');
     expect(out).toContain('🔧 2k');
     expect(out).toContain('⚙ 0');
+  });
+
+  it('renders sparkline and throughput when activityHistory is provided', () => {
+    const samples: ActivitySample[] = [
+      { timestamp: 1000, toolCalls: 2 },
+      { timestamp: 61000, toolCalls: 5 },
+      { timestamp: 121000, toolCalls: 3 },
+    ];
+    const { lastFrame } = render(
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={0}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+        activityHistory={samples}
+      />,
+    );
+    const out = lastFrame() ?? '';
+    // sparkline block chars should be present
+    expect(out).toMatch(/[▁▂▃▄▅▆▇█]/);
+    // throughput label
+    expect(out).toContain('/min');
+  });
+
+  it('does not render sparkline when activityHistory is undefined', () => {
+    const { lastFrame } = render(
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={0}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+      />,
+    );
+    const out = lastFrame() ?? '';
+    expect(out).not.toMatch(/[▁▂▃▄▅▆▇█]/);
+    expect(out).not.toContain('/min');
+  });
+
+  it('does not render sparkline when activityHistory is empty', () => {
+    const { lastFrame } = render(
+      <StageHealthBar
+        stageHealth={makeHealth()}
+        bottlenecks={[]}
+        toolCount={0}
+        agentCount={0}
+        skillCount={0}
+        width={120}
+        activityHistory={[]}
+      />,
+    );
+    const out = lastFrame() ?? '';
+    expect(out).not.toContain('/min');
   });
 });
