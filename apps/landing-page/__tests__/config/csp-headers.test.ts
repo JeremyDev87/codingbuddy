@@ -1,37 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import nextConfig from '@/next.config';
 
-describe('CSP Headers', () => {
-  it('should include Vercel Analytics domains in CSP', async () => {
+describe('CSP Headers (next.config.ts)', () => {
+  it('should NOT include static CSP header (handled by middleware)', async () => {
     const headers = await nextConfig.headers!();
     const globalHeaders = headers[0].headers;
     const cspHeader = globalHeaders.find(h => h.key === 'Content-Security-Policy');
 
-    expect(cspHeader).toBeDefined();
-    const cspValue = cspHeader!.value;
-
-    // script-src must allow Vercel Analytics script loading
-    expect(cspValue).toContain('va.vercel-scripts.com');
-    // connect-src must allow analytics data reporting
-    expect(cspValue).toContain('vitals.vercel-insights.com');
+    expect(cspHeader).toBeUndefined();
   });
 
-  it('should have restrictive defaults', async () => {
+  it('should still include other security headers', async () => {
     const headers = await nextConfig.headers!();
-    const cspHeader = headers[0].headers.find(h => h.key === 'Content-Security-Policy');
-    const cspValue = cspHeader!.value;
+    const globalHeaders = headers[0].headers;
+    const headerKeys = globalHeaders.map(h => h.key);
 
-    expect(cspValue).toContain("default-src 'self'");
-    expect(cspValue).toContain("frame-ancestors 'none'");
-    expect(cspValue).toContain("base-uri 'self'");
-    expect(cspValue).toContain("form-action 'self'");
-  });
-
-  it('should allow unsafe-inline for script-src to support Next.js PPR', async () => {
-    const headers = await nextConfig.headers!();
-    const cspHeader = headers[0].headers.find(h => h.key === 'Content-Security-Policy');
-    const cspValue = cspHeader!.value;
-
-    expect(cspValue).toContain("'unsafe-inline'");
+    expect(headerKeys).toContain('X-Frame-Options');
+    expect(headerKeys).toContain('X-Content-Type-Options');
+    expect(headerKeys).toContain('Referrer-Policy');
+    expect(headerKeys).toContain('Permissions-Policy');
+    expect(headerKeys).toContain('Strict-Transport-Security');
   });
 });
