@@ -159,6 +159,25 @@ describe('DashboardApp', () => {
     expect(frame).not.toContain('/from-state');
   });
 
+  it('memoizes now based on tick to avoid non-deterministic re-renders', () => {
+    const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
+
+    const state = createInitialDashboardState();
+    const { lastFrame, rerender } = render(<DashboardApp externalState={state} />);
+    const frame1 = lastFrame() ?? '';
+
+    // Advance Date.now() by 1 minute — but tick has NOT changed (still 0 from mock)
+    dateNowSpy.mockReturnValue(1700000060000);
+    rerender(<DashboardApp externalState={state} />);
+    const frame2 = lastFrame() ?? '';
+
+    // With useMemo([tick]): now stays cached → frames identical
+    // Without useMemo: now = Date.now() changes → time display differs
+    expect(frame1).toBe(frame2);
+
+    dateNowSpy.mockRestore();
+  });
+
   it('should use externalState when provided (multi-session mode)', () => {
     const mockState = createInitialDashboardState();
     // Modify some fields to verify they propagate

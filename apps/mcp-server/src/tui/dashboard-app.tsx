@@ -27,7 +27,7 @@ export function DashboardApp({
 }: DashboardAppProps): React.ReactElement {
   const { columns, rows, layoutMode } = useTerminalSize();
   const tick = useTick(1000);
-  const now = Date.now();
+  const now = useMemo(() => Date.now(), [tick]);
   const internalState = useDashboardState(externalState ? undefined : eventBus);
   const state = externalState ?? internalState;
   const focusedAgent = state.focusedAgentId
