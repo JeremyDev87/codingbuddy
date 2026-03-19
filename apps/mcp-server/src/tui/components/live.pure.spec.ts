@@ -40,6 +40,11 @@ describe('tui/components/live.pure', () => {
       const now = start + 725_000; // 12분 5초
       expect(formatElapsed(start, now)).toBe('12m 5s');
     });
+
+    it('startedAt > now (clock drift) → "0s"로 클램프', () => {
+      const now = 1000000;
+      expect(formatElapsed(now + 5000, now)).toBe('0s');
+    });
   });
 
   describe('formatRelativeTime', () => {
@@ -67,6 +72,11 @@ describe('tui/components/live.pure', () => {
       const now = 10000000;
       expect(formatRelativeTime(now - 3600000, now)).toBe('1h ago');
       expect(formatRelativeTime(now - 7200000, now)).toBe('2h ago');
+    });
+
+    it('timestamp > now (clock drift) → "just now"로 클램프', () => {
+      const now = 1000000;
+      expect(formatRelativeTime(now + 5000, now)).toBe('just now');
     });
   });
 
@@ -177,21 +187,19 @@ describe('tui/components/live.pure', () => {
   });
 
   describe('formatTimeWithSeconds', () => {
-    it('자정 → "00:00:00"', () => {
-      // 2026-01-01T00:00:00Z = 1767225600000
-      const midnight = new Date('2026-01-01T00:00:00Z').getTime();
-      // UTC 기준
-      expect(formatTimeWithSeconds(midnight)).toBe('00:00:00');
-    });
-
-    it('오후 시간 → "14:23:45"', () => {
-      const t = new Date('2026-01-01T14:23:45Z').getTime();
-      expect(formatTimeWithSeconds(t)).toBe('14:23:45');
+    it('로컬 시간 기준으로 HH:MM:SS 형식 반환', () => {
+      const d = new Date(2026, 0, 1, 14, 23, 45); // local 14:23:45
+      expect(formatTimeWithSeconds(d.getTime())).toBe('14:23:45');
     });
 
     it('한 자리 시/분/초 → 0으로 패딩', () => {
-      const t = new Date('2026-01-01T03:05:09Z').getTime();
-      expect(formatTimeWithSeconds(t)).toBe('03:05:09');
+      const d = new Date(2026, 0, 1, 3, 5, 9); // local 03:05:09
+      expect(formatTimeWithSeconds(d.getTime())).toBe('03:05:09');
+    });
+
+    it('자정 → "00:00:00"', () => {
+      const d = new Date(2026, 0, 1, 0, 0, 0); // local midnight
+      expect(formatTimeWithSeconds(d.getTime())).toBe('00:00:00');
     });
   });
 });

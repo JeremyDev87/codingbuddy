@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from 'ink-testing-library';
 import { HeaderBar } from './HeaderBar';
 
-const FIXED_NOW = new Date('2026-03-18T14:30:45Z').getTime();
+const FIXED_NOW = new Date(2026, 2, 18, 14, 30, 45).getTime(); // local 14:30:45
 
 describe('tui/components/HeaderBar', () => {
   it('should render title with neon branding', () => {

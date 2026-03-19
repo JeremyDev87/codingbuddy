@@ -5,7 +5,7 @@ export interface ActivitySample {
 
 /** Format elapsed time as "Xm Ys" or "Ys". */
 export function formatElapsed(startedAt: number, now: number): string {
-  const totalSec = Math.floor((now - startedAt) / 1000);
+  const totalSec = Math.max(0, Math.floor((now - startedAt) / 1000));
   const min = Math.floor(totalSec / 60);
   const sec = totalSec % 60;
   return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
@@ -13,7 +13,7 @@ export function formatElapsed(startedAt: number, now: number): string {
 
 /** Format relative time as "just now", "Ns ago", "Nm ago", "Nh ago". */
 export function formatRelativeTime(timestamp: number, now: number): string {
-  const diffSec = Math.floor((now - timestamp) / 1000);
+  const diffSec = Math.max(0, Math.floor((now - timestamp) / 1000));
   if (diffSec <= 2) return 'just now';
   if (diffSec < 60) return `${diffSec}s ago`;
   const diffMin = Math.floor(diffSec / 60);
@@ -63,11 +63,11 @@ export function computeThroughput(samples: ActivitySample[]): string {
   return `${(totalCalls / durationMin).toFixed(1)}/min`;
 }
 
-/** Format a UTC timestamp as "HH:MM:SS". */
+/** Format a timestamp as local "HH:MM:SS". */
 export function formatTimeWithSeconds(now: number): string {
   const d = new Date(now);
-  const h = String(d.getUTCHours()).padStart(2, '0');
-  const m = String(d.getUTCMinutes()).padStart(2, '0');
-  const s = String(d.getUTCSeconds()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const s = String(d.getSeconds()).padStart(2, '0');
   return `${h}:${m}:${s}`;
 }
