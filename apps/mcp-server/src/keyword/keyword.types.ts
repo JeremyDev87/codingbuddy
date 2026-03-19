@@ -440,6 +440,10 @@ export interface ParseModeResult {
    * without needing to call dispatch_agents or prepare_parallel_agents.
    */
   dispatchReady?: DispatchReady;
+  /** @apiProperty External API - do not rename. Available execution strategies (e.g. ['subagent', 'taskmaestro']) */
+  availableStrategies?: string[];
+  /** @apiProperty External API - do not rename. Hint for installing TaskMaestro when not available */
+  taskmaestroInstallHint?: string;
 }
 
 /**
