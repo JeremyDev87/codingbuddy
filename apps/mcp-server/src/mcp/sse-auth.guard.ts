@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 /**
  * Guard for SSE endpoints that validates Bearer token against MCP_SSE_TOKEN env var.
@@ -53,17 +53,13 @@ export class SseAuthGuard implements CanActivate {
   }
 
   /**
-   * Timing-safe token comparison to prevent timing attacks.
-   * Handles tokens of different lengths safely.
+   * Timing-safe token comparison using HMAC to prevent timing attacks.
+   * HMAC produces fixed-length digests, eliminating length-based timing leaks.
    */
   private tokensMatch(expected: string, provided: string): boolean {
-    const expectedBuf = Buffer.from(expected, 'utf-8');
-    const providedBuf = Buffer.from(provided, 'utf-8');
-
-    if (expectedBuf.length !== providedBuf.length) {
-      return false;
-    }
-
-    return timingSafeEqual(expectedBuf, providedBuf);
+    const key = Buffer.from('codingbuddy-sse-auth');
+    const expectedHash = createHmac('sha256', key).update(expected).digest();
+    const providedHash = createHmac('sha256', key).update(provided).digest();
+    return timingSafeEqual(expectedHash, providedHash);
   }
 }

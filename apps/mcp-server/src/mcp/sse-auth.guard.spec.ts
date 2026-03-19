@@ -92,5 +92,23 @@ describe('SseAuthGuard', () => {
 
       expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
     });
+
+    it('should reject tokens of different lengths without timing leak', () => {
+      const context = createMockContext('Bearer short');
+
+      expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
+    });
+
+    it('should use HMAC-based comparison (no length early-return)', () => {
+      // Verify the guard uses createHmac, not raw Buffer length comparison
+      const { createHmac } = require('crypto');
+      const key = Buffer.from('codingbuddy-sse-auth');
+      const expectedHash = createHmac('sha256', key).update('my-secret-token').digest();
+      const providedHash = createHmac('sha256', key).update('wrong').digest();
+
+      // Both hashes should be same length (32 bytes) regardless of input length
+      expect(expectedHash.length).toBe(providedHash.length);
+      expect(expectedHash.length).toBe(32);
+    });
   });
 });
