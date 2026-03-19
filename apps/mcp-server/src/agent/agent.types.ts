@@ -74,6 +74,24 @@ export interface DispatchedAgent {
 }
 
 /**
+ * A single TaskMaestro pane assignment with agent name and prompt
+ */
+export interface TaskmaestroAssignment {
+  name: string;
+  displayName: string;
+  prompt: string;
+}
+
+/**
+ * TaskMaestro dispatch configuration for parallel tmux pane execution
+ */
+export interface TaskmaestroDispatch {
+  sessionName: string;
+  paneCount: number;
+  assignments: TaskmaestroAssignment[];
+}
+
+/**
  * Result of dispatching agents for execution
  */
 export interface DispatchResult {
@@ -82,6 +100,10 @@ export interface DispatchResult {
   executionHint: string;
   /** Agents that failed to load */
   failedAgents?: FailedAgent[];
+  /** TaskMaestro dispatch data when executionStrategy is 'taskmaestro' */
+  taskmaestro?: TaskmaestroDispatch;
+  /** Execution strategy used for this dispatch */
+  executionStrategy?: string;
 }
 
 /**
@@ -94,6 +116,8 @@ export interface DispatchAgentsInput {
   specialists?: string[];
   includeParallel?: boolean;
   primaryAgent?: string;
+  /** Execution strategy: 'subagent' (default) or 'taskmaestro' */
+  executionStrategy?: 'subagent' | 'taskmaestro';
 }
 
 /**
