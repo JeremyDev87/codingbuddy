@@ -1,7 +1,5 @@
-export interface ActivitySample {
-  timestamp: number;
-  toolCalls: number;
-}
+import type { ActivitySample } from '../dashboard-types';
+export type { ActivitySample } from '../dashboard-types';
 
 /** Format elapsed time as "Xm Ys" or "Ys". */
 export function formatElapsed(startedAt: number, now: number): string {
