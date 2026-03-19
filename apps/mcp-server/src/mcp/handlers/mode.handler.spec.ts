@@ -810,4 +810,36 @@ describe('ModeHandler', () => {
       expect(result?.isError).toBeFalsy();
     });
   });
+
+  describe('parse_mode availableStrategies', () => {
+    it('should include availableStrategies in parse_mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        availableStrategies: ['subagent', 'taskmaestro'],
+      });
+
+      const result = await handler.handle('parse_mode', { prompt: 'PLAN test task' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.availableStrategies).toBeDefined();
+      expect(parsed.availableStrategies).toContain('subagent');
+      expect(parsed.availableStrategies).toContain('taskmaestro');
+    });
+
+    it('should include taskmaestroInstallHint when present', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        availableStrategies: ['subagent'],
+        taskmaestroInstallHint: 'TaskMaestro skill not found',
+      });
+
+      const result = await handler.handle('parse_mode', { prompt: 'PLAN test task' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.availableStrategies).toEqual(['subagent']);
+      expect(parsed.taskmaestroInstallHint).toContain('TaskMaestro skill not found');
+    });
+  });
 });
