@@ -10,6 +10,7 @@ import type {
   DispatchAgentsInput,
   DispatchResult,
   DispatchedAgent,
+  TaskmaestroAssignment,
 } from './agent.types';
 import { FILE_PATTERN_SPECIALISTS } from './agent.types';
 import {
@@ -222,7 +223,31 @@ export class AgentService {
       }
     }
 
-    // Dispatch parallel agents
+    // Dispatch taskmaestro strategy
+    if (input.executionStrategy === 'taskmaestro' && input.specialists?.length) {
+      const uniqueSpecialists = Array.from(new Set(input.specialists));
+      const { agents, failedAgents } = await this.loadAgents(uniqueSpecialists, context, true);
+
+      const assignments: TaskmaestroAssignment[] = agents.map(agent => ({
+        name: agent.id,
+        displayName: agent.displayName,
+        prompt: this.buildTaskmaestroPrompt(agent, input),
+      }));
+
+      return {
+        primaryAgent: result.primaryAgent,
+        taskmaestro: {
+          sessionName: `${(input.mode ?? 'eval').toLowerCase()}-specialists`,
+          paneCount: assignments.length,
+          assignments,
+        },
+        executionStrategy: 'taskmaestro',
+        executionHint: this.buildTaskmaestroHint(assignments.length),
+        failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
+      };
+    }
+
+    // Dispatch parallel agents (subagent strategy)
     if (input.includeParallel && input.specialists?.length) {
       const uniqueSpecialists = Array.from(new Set(input.specialists));
       const { agents, failedAgents } = await this.loadAgents(
@@ -251,6 +276,34 @@ export class AgentService {
       }
     }
 
+    result.executionStrategy = 'subagent';
     return result;
+  }
+
+  private buildTaskmaestroPrompt(agent: PreparedAgent, input: DispatchAgentsInput): string {
+    const taskContext = input.taskDescription ? `\n\n**Task:** ${input.taskDescription}` : '';
+    const fileContext = input.targetFiles?.length
+      ? `\n\n**Target Files:**\n${input.targetFiles.map(f => '- ' + f).join('\n')}`
+      : '';
+
+    return `${agent.taskPrompt || agent.summary || ''}${taskContext}${fileContext}
+
+**Output Format:**
+- Severity: CRITICAL / HIGH / MEDIUM / LOW / INFO
+- File reference
+- Finding description
+- Recommendation
+
+When done, provide a summary of all findings.`;
+  }
+
+  private buildTaskmaestroHint(paneCount: number): string {
+    return `TaskMaestro execution:
+1. /taskmaestro start --panes ${paneCount}
+2. Wait for all panes to show Claude Code prompt
+3. For each assignment: /taskmaestro assign <pane_index> "<prompt>"
+4. /taskmaestro status — monitor progress
+5. When all panes show idle: collect results
+6. /taskmaestro stop all — cleanup`;
   }
 }
