@@ -41,7 +41,8 @@
   },
   "scripts": {
     "prepublishOnly": "yarn build && chmod +x dist/src/main.js dist/src/cli/cli.js",
-    "build": "yarn tsc -p tsconfig.build.json && node scripts/build-tui.js",
+    "clean": "rm -rf dist/",
+    "build": "yarn clean && yarn tsc -p tsconfig.build.json && node scripts/build-tui.js",
     "build:tui": "node scripts/build-tui.js",
     "start": "node dist/src/main.js",
     "start:dev": "yarn ts-node src/main.ts",
