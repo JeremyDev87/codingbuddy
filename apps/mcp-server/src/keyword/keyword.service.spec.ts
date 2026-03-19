@@ -2677,4 +2677,31 @@ ${'Even more content.\n'.repeat(150)}`;
       expect(result.rules[0].content).toContain('## Section');
     });
   });
+
+  describe('taskmaestro detection', () => {
+    it('should include taskmaestro in availableStrategies when skill is available', async () => {
+      const detector = await import('./taskmaestro-detector');
+      const spy = vi.spyOn(detector, 'isTaskmaestroAvailable').mockReturnValue(true);
+
+      const result = await service.parseMode('PLAN test task', {});
+
+      expect(result.availableStrategies).toContain('subagent');
+      expect(result.availableStrategies).toContain('taskmaestro');
+      expect(result.taskmaestroInstallHint).toBeUndefined();
+
+      spy.mockRestore();
+    });
+
+    it('should return only subagent with installHint when taskmaestro not installed', async () => {
+      const detector = await import('./taskmaestro-detector');
+      const spy = vi.spyOn(detector, 'isTaskmaestroAvailable').mockReturnValue(false);
+
+      const result = await service.parseMode('PLAN test task', {});
+
+      expect(result.availableStrategies).toEqual(['subagent']);
+      expect(result.taskmaestroInstallHint).toContain('TaskMaestro skill not found');
+
+      spy.mockRestore();
+    });
+  });
 });
