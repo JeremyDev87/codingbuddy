@@ -433,6 +433,40 @@ describe('AgentHandler', () => {
           text: expect.stringContaining('Dispatch failed'),
         });
       });
+
+      describe('executionStrategy parameter', () => {
+        it('should pass executionStrategy "subagent" to service', async () => {
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            specialists: ['security-specialist'],
+            executionStrategy: 'subagent',
+          });
+          expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+            expect.objectContaining({ executionStrategy: 'subagent' }),
+          );
+        });
+
+        it('should pass executionStrategy "taskmaestro" to service', async () => {
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            specialists: ['security-specialist'],
+            executionStrategy: 'taskmaestro',
+          });
+          expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+            expect.objectContaining({ executionStrategy: 'taskmaestro' }),
+          );
+        });
+
+        it('should default executionStrategy to "subagent" when not specified', async () => {
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            specialists: ['security-specialist'],
+          });
+          expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+            expect.objectContaining({ executionStrategy: 'subagent' }),
+          );
+        });
+      });
     });
   });
 
