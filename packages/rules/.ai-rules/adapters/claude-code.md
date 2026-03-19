@@ -523,6 +523,45 @@ Each workflow mode activates different specialist agents:
 
 **Important:** Specialists from one mode do NOT carry over to the next mode. Each mode has its own recommended specialist set.
 
+### Execution Strategy Selection (MANDATORY)
+
+When `parse_mode` returns `availableStrategies`:
+
+1. **Check `availableStrategies`** in the response
+2. **If both strategies available** (`["subagent", "taskmaestro"]`), ask user with AskUserQuestion:
+   - Option A: "SubAgent (background agents, fast)" (Recommended)
+   - Option B: "TaskMaestro (tmux parallel panes, visual monitoring)"
+3. **If only `["subagent"]`** and `taskmaestroInstallHint` present:
+   - Ask: "TaskMaestro is not installed. Would you like to install it for tmux-based parallel execution?"
+   - Yes → invoke `/taskmaestro` skill to guide installation, then re-check
+   - No → proceed with subagent
+4. **Call `dispatch_agents`** with chosen `executionStrategy` parameter:
+   - `dispatch_agents({ mode, specialists, executionStrategy: "subagent" })` — existing Agent tool flow
+   - `dispatch_agents({ mode, specialists, executionStrategy: "taskmaestro" })` — returns tmux assignments
+5. **Execute** based on strategy:
+   - **subagent**: Use `dispatchParams` with Agent tool (`run_in_background: true`)
+   - **taskmaestro**: Follow `executionHint` — start panes, assign prompts, monitor, collect results
+
+### TaskMaestro Execution Flow
+
+When `executionStrategy: "taskmaestro"` is chosen, `dispatch_agents` returns:
+
+```json
+{
+  "taskmaestro": {
+    "sessionName": "eval-specialists",
+    "paneCount": 5,
+    "assignments": [
+      { "name": "security-specialist", "displayName": "Security Specialist", "prompt": "..." },
+      { "name": "performance-specialist", "displayName": "Performance Specialist", "prompt": "..." }
+    ]
+  },
+  "executionHint": "1. /taskmaestro start --panes 5\n2. ..."
+}
+```
+
+Execute by following the `executionHint` commands sequentially.
+
 ## PR All-in-One Skill
 
 Unified commit and PR workflow that:

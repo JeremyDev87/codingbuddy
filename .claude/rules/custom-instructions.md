@@ -120,6 +120,12 @@ Examples:
 
 **When `parse_mode` returns `dispatchReady`, use it directly with the Task tool — no extra calls needed.**
 
+**Strategy Selection (before dispatch):**
+- [ ] Check `availableStrategies` in `parse_mode` response
+- [ ] If `["subagent", "taskmaestro"]` → AskUserQuestion to choose
+- [ ] If `taskmaestroInstallHint` present and user wants taskmaestro → guide installation
+- [ ] Pass chosen strategy to `dispatch_agents(executionStrategy: ...)`
+
 **Quick Checklist (Auto-Dispatch - Preferred):**
 - [ ] Check `dispatchReady` in `parse_mode` response
 - [ ] Use `dispatchReady.primaryAgent.dispatchParams` with Task tool
@@ -142,6 +148,9 @@ Examples:
 | **ACT** | 📏 code-quality, 🧪 test-strategy, 📨 event-architecture, 🔗 integration |
 | **EVAL** | 🔒 security, ♿ accessibility, ⚡ performance, 📏 code-quality, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
 | **AUTO** | 🏛️ architecture, 🧪 test-strategy, 🔒 security, 📏 code-quality, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
+
+> **Note:** All modes support both SubAgent and TaskMaestro execution strategies.
+> The strategy is selected per-invocation via user choice.
 
 **📖 Full Guide:** [Parallel Specialist Agents Execution](../../packages/rules/.ai-rules/adapters/claude-code.md#parallel-specialist-agents-execution)
 
