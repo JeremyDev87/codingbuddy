@@ -32,6 +32,7 @@ import { truncateSkillContent } from '../skill/skill-content.utils';
 import { createAgentSummary } from '../agent/agent-summary.utils';
 import { truncateRuleContent } from '../rules/rules-content.utils';
 import { getDefaultModeConfig } from '../shared/keyword-core';
+import { isTaskmaestroAvailable } from './taskmaestro-detector';
 import { type ClientType } from '../shared/client-type';
 
 /**
@@ -495,6 +496,14 @@ export class KeywordService {
 
     // 9. Auto-include primary agent system prompt (for MCP mode to force AI execution)
     await this.addIncludedAgentToResult(result, mode, options);
+
+    // 10. Add available execution strategies (subagent, taskmaestro)
+    const taskmaestroInstalled = isTaskmaestroAvailable();
+    result.availableStrategies = taskmaestroInstalled ? ['subagent', 'taskmaestro'] : ['subagent'];
+    if (!taskmaestroInstalled) {
+      result.taskmaestroInstallHint =
+        'TaskMaestro skill not found at ~/.claude/skills/taskmaestro/SKILL.md. To enable tmux-based parallel specialist execution, install the taskmaestro skill.';
+    }
 
     return result;
   }
