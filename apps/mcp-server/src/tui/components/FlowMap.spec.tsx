@@ -143,6 +143,28 @@ describe('tui/components/FlowMap', () => {
       expect(frame).toContain(formatElapsed(now - 90_000, now));
     });
 
+    it('should show pulse icon and elapsed label for running agents in medium mode', () => {
+      const now = 1710700000000;
+      const agents = new Map();
+      agents.set(
+        'a1',
+        createDefaultDashboardNode({
+          id: 'a1',
+          name: 'Architect',
+          stage: 'PLAN',
+          status: 'running',
+          isPrimary: true,
+          startedAt: now - 120_000, // 2 minutes ago
+        }),
+      );
+      const { lastFrame } = render(
+        <FlowMap agents={agents} edges={[]} layoutMode="medium" width={100} height={15} tick={1} now={now} />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain(pulseIcon(1));
+      expect(frame).toContain(formatElapsed(now - 120_000, now));
+    });
+
     it('should NOT show pulse icon when no agents are running', () => {
       const now = 1710700000000;
       const agents = new Map();

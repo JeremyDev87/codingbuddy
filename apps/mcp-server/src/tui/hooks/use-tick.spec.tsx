@@ -54,6 +54,24 @@ describe('tui/hooks/useTick', () => {
     expect(lastFrame()).toBe('2');
   });
 
+  it('should reset interval when intervalMs prop changes', () => {
+    const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
+    const { lastFrame, rerender } = render(<TestComponent intervalMs={1000} />);
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(lastFrame()).toBe('1');
+
+    rerender(<TestComponent intervalMs={500} />);
+    expect(clearIntervalSpy).toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(lastFrame()).toBe('2');
+    clearIntervalSpy.mockRestore();
+  });
+
   it('should cleanup interval on unmount', () => {
     const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
     const { unmount } = render(<TestComponent />);

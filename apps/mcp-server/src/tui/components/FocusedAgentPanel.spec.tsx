@@ -210,6 +210,30 @@ describe('tui/components/FocusedAgentPanel', () => {
       expect(frame).not.toContain('1m 23s');
     });
 
+    it('should show spinner but hide elapsed when tick is provided without now', () => {
+      const runningAgent = createDefaultDashboardNode({
+        id: 'agent-1',
+        name: 'BackendDev',
+        stage: 'ACT',
+        status: 'running',
+        isPrimary: true,
+        progress: 50,
+        startedAt: 1710000000000,
+      });
+      const { lastFrame } = render(
+        <FocusedAgentPanel
+          agent={runningAgent}
+          activeSkills={[]}
+          objectives={[]}
+          eventLog={[]}
+          tick={0}
+        />,
+      );
+      const frame = lastFrame() ?? '';
+      expect(frame).toContain('⠋'); // spinner shown
+      expect(frame).not.toMatch(/\d+m \d+s/); // no elapsed time
+    });
+
     it('should not show elapsed when startedAt is missing', () => {
       const now = 1710000090000;
       const { lastFrame } = render(
