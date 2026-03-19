@@ -81,6 +81,20 @@ node -e "
 "
 echo "  ✅ packages/claude-code-plugin/.claude-plugin/plugin.json"
 
+# 6. .mcp.json (if exists — gitignored, local only)
+if [ -f ".mcp.json" ]; then
+  node -e "
+    const fs = require('fs');
+    const p = '.mcp.json';
+    const content = fs.readFileSync(p, 'utf-8');
+    const updated = content.replace(/codingbuddy@[0-9]+\.[0-9]+\.[0-9]+/, 'codingbuddy@$NEW_VERSION');
+    fs.writeFileSync(p, updated);
+  "
+  echo "  ✅ .mcp.json"
+else
+  echo "  ⏭️  .mcp.json (not found, skipped)"
+fi
+
 echo ""
 echo "✅ All files bumped to v$NEW_VERSION"
 echo "   Next: git commit -am \"chore(release): prepare v$NEW_VERSION\""

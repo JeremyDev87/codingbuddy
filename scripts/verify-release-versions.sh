@@ -62,6 +62,23 @@ for package_info in "${PACKAGES[@]}"; do
   fi
 done
 
+# Check .mcp.json (gitignored, local only)
+if [ -f ".mcp.json" ]; then
+  mcp_version=$(node -e "
+    const content = require('fs').readFileSync('.mcp.json', 'utf-8');
+    const match = content.match(/codingbuddy@([0-9]+\.[0-9]+\.[0-9]+)/);
+    console.log(match ? match[1] : '');
+  ")
+  if [ "$mcp_version" = "$TAG_VERSION" ]; then
+    echo "✅ .mcp.json codingbuddy: @$mcp_version (matches tag)"
+  else
+    echo "❌ .mcp.json codingbuddy: @$mcp_version (tag is v$TAG_VERSION)"
+    ALL_MATCH=false
+  fi
+else
+  echo "⏭️  .mcp.json (not found, skipped)"
+fi
+
 echo ""
 
 if [ "$ALL_MATCH" = true ]; then
