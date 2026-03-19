@@ -578,4 +578,107 @@ describe('AgentService', () => {
       expect(result.parallelAgents).toHaveLength(1);
     });
   });
+
+  describe('dispatchAgents with taskmaestro strategy', () => {
+    it('should return taskmaestro field with assignments when strategy is taskmaestro', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+
+      expect(result.taskmaestro).toBeDefined();
+      expect(result.taskmaestro!.paneCount).toBe(2);
+      expect(result.taskmaestro!.assignments).toHaveLength(2);
+      expect(result.taskmaestro!.sessionName).toBe('eval-specialists');
+      expect(result.executionStrategy).toBe('taskmaestro');
+    });
+
+    it('should not include parallelAgents when strategy is taskmaestro', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+
+      expect(result.parallelAgents).toBeUndefined();
+      expect(result.taskmaestro).toBeDefined();
+    });
+
+    it('should include task description and target files in taskmaestro prompt', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        executionStrategy: 'taskmaestro',
+        taskDescription: 'Review auth flow',
+        targetFiles: ['src/auth.ts', 'src/middleware.ts'],
+      });
+
+      const prompt = result.taskmaestro!.assignments[0].prompt;
+      expect(prompt).toContain('Review auth flow');
+      expect(prompt).toContain('src/auth.ts');
+      expect(prompt).toContain('src/middleware.ts');
+    });
+
+    it('should include execution hint with correct pane count', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockAccessibilityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'PLAN',
+        specialists: [
+          'architecture-specialist',
+          'test-strategy-specialist',
+          'integration-specialist',
+        ],
+        executionStrategy: 'taskmaestro',
+      });
+
+      expect(result.executionHint).toContain('/taskmaestro start --panes 3');
+      expect(result.executionHint).toContain('/taskmaestro assign');
+    });
+
+    it('should set sessionName based on mode', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+      const planResult = await service.dispatchAgents({
+        mode: 'PLAN',
+        specialists: ['architecture-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+      expect(planResult.taskmaestro!.sessionName).toBe('plan-specialists');
+
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+      const actResult = await service.dispatchAgents({
+        mode: 'ACT',
+        specialists: ['code-quality-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+      expect(actResult.taskmaestro!.sessionName).toBe('act-specialists');
+    });
+
+    it('should still return subagent format when strategy is subagent', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        executionStrategy: 'subagent',
+        includeParallel: true,
+      });
+
+      expect(result.parallelAgents).toBeDefined();
+      expect(result.taskmaestro).toBeUndefined();
+      expect(result.executionStrategy).toBe('subagent');
+    });
+  });
 });
