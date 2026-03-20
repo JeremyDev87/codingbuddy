@@ -114,7 +114,15 @@ describe('tui/components/FlowMap', () => {
         }),
       );
       const { lastFrame } = render(
-        <FlowMap agents={agents} edges={[]} layoutMode="narrow" width={60} height={10} tick={0} now={now} />,
+        <FlowMap
+          agents={agents}
+          edges={[]}
+          layoutMode="narrow"
+          width={60}
+          height={10}
+          tick={0}
+          now={now}
+        />,
       );
       const frame = lastFrame() ?? '';
       expect(frame).toContain(pulseIcon(0));
@@ -136,7 +144,15 @@ describe('tui/components/FlowMap', () => {
         }),
       );
       const { lastFrame } = render(
-        <FlowMap agents={agents} edges={makeEdges()} layoutMode="wide" width={120} height={20} tick={2} now={now} />,
+        <FlowMap
+          agents={agents}
+          edges={makeEdges()}
+          layoutMode="wide"
+          width={120}
+          height={20}
+          tick={2}
+          now={now}
+        />,
       );
       const frame = lastFrame() ?? '';
       expect(frame).toContain(pulseIcon(2));
@@ -157,7 +173,15 @@ describe('tui/components/FlowMap', () => {
         }),
       );
       const { lastFrame } = render(
-        <FlowMap agents={agents} edges={[]} layoutMode="narrow" width={60} height={10} tick={3} now={now} />,
+        <FlowMap
+          agents={agents}
+          edges={[]}
+          layoutMode="narrow"
+          width={60}
+          height={10}
+          tick={3}
+          now={now}
+        />,
       );
       const frame = lastFrame() ?? '';
       // idle agent should NOT have pulse icons
@@ -190,10 +214,26 @@ describe('tui/components/FlowMap', () => {
         }),
       );
       const { lastFrame: frame0 } = render(
-        <FlowMap agents={agents} edges={[]} layoutMode="narrow" width={60} height={10} tick={0} now={now} />,
+        <FlowMap
+          agents={agents}
+          edges={[]}
+          layoutMode="narrow"
+          width={60}
+          height={10}
+          tick={0}
+          now={now}
+        />,
       );
       const { lastFrame: frame1 } = render(
-        <FlowMap agents={agents} edges={[]} layoutMode="narrow" width={60} height={10} tick={1} now={now} />,
+        <FlowMap
+          agents={agents}
+          edges={[]}
+          layoutMode="narrow"
+          width={60}
+          height={10}
+          tick={1}
+          now={now}
+        />,
       );
       expect(frame0()).toContain('●');
       expect(frame1()).toContain('◉');

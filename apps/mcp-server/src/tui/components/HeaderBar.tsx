@@ -97,9 +97,7 @@ export function HeaderBar({
         <ModeFlow currentMode={currentMode} />
         <Box flexGrow={1} />
         <StateIndicator globalState={globalState} tick={tick} />
-        {now !== undefined && (
-          <Text dimColor> {formatTimeWithSeconds(now)}</Text>
-        )}
+        {now !== undefined && <Text dimColor> {formatTimeWithSeconds(now)}</Text>}
       </Box>
     );
   }
@@ -122,9 +120,7 @@ export function HeaderBar({
         </Text>
         <ModeFlow currentMode={currentMode} />
         <StateIndicator globalState={globalState} tick={tick} />
-        {now !== undefined && (
-          <Text dimColor>{formatTimeWithSeconds(now)}</Text>
-        )}
+        {now !== undefined && <Text dimColor>{formatTimeWithSeconds(now)}</Text>}
       </Box>
       <Box flexGrow={1} />
       <Box flexShrink={1} overflowX="hidden">
