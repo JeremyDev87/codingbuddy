@@ -10,6 +10,8 @@ import type {
   DispatchAgentsInput,
   DispatchResult,
   DispatchedAgent,
+  ExecutionStrategy,
+  TaskMaestroAssignment,
 } from './agent.types';
 import { FILE_PATTERN_SPECIALISTS } from './agent.types';
 import {
@@ -191,6 +193,7 @@ export class AgentService {
    * Claude Code's Task tool, eliminating the need for manual prompt assembly.
    */
   async dispatchAgents(input: DispatchAgentsInput): Promise<DispatchResult> {
+    const strategy: ExecutionStrategy = input.executionStrategy || 'subagent';
     const context: AgentContext = {
       mode: input.mode,
       targetFiles: input.targetFiles,
@@ -198,11 +201,12 @@ export class AgentService {
     };
 
     const result: DispatchResult = {
+      executionStrategy: strategy,
       executionHint: buildParallelExecutionHint(),
     };
 
-    // Dispatch primary agent
-    if (input.primaryAgent) {
+    // Dispatch primary agent (subagent strategy only)
+    if (strategy === 'subagent' && input.primaryAgent) {
       try {
         const agentPrompt = await this.getAgentSystemPrompt(input.primaryAgent, context);
         result.primaryAgent = {
@@ -222,14 +226,34 @@ export class AgentService {
       }
     }
 
-    // Dispatch parallel agents
-    if (input.includeParallel && input.specialists?.length) {
+    if (strategy === 'taskmaestro' && input.specialists?.length) {
+      // TaskMaestro strategy: return tmux assignments
       const uniqueSpecialists = Array.from(new Set(input.specialists));
-      const { agents, failedAgents } = await this.loadAgents(
-        uniqueSpecialists,
-        context,
-        true, // always include full prompt for dispatch
-      );
+      const { agents, failedAgents } = await this.loadAgents(uniqueSpecialists, context, true);
+
+      const assignments: TaskMaestroAssignment[] = agents.map(agent => ({
+        name: agent.id,
+        displayName: agent.displayName,
+        prompt: this.buildTaskMaestroPrompt(
+          agent.taskPrompt || `Perform ${agent.displayName} analysis in ${input.mode} mode`,
+        ),
+      }));
+
+      const sessionName = `${input.mode.toLowerCase()}-specialists`;
+      result.taskmaestro = {
+        sessionName,
+        paneCount: assignments.length,
+        assignments,
+      };
+      result.executionHint = this.buildTaskMaestroHint(sessionName, assignments.length);
+
+      if (failedAgents.length > 0) {
+        result.failedAgents = failedAgents;
+      }
+    } else if (strategy === 'subagent' && input.includeParallel && input.specialists?.length) {
+      // SubAgent strategy: existing behavior
+      const uniqueSpecialists = Array.from(new Set(input.specialists));
+      const { agents, failedAgents } = await this.loadAgents(uniqueSpecialists, context, true);
 
       result.parallelAgents = agents.map(
         (agent): DispatchedAgent => ({
@@ -252,5 +276,18 @@ export class AgentService {
     }
 
     return result;
+  }
+
+  private buildTaskMaestroPrompt(basePrompt: string): string {
+    return `${basePrompt}\n\n## Output Format\n\nFor each finding, include:\n- Severity: CRITICAL / HIGH / MEDIUM / LOW / INFO\n- File reference\n- Recommendation`;
+  }
+
+  private buildTaskMaestroHint(sessionName: string, paneCount: number): string {
+    return [
+      `1. /taskmaestro start --panes ${paneCount}`,
+      `2. /taskmaestro assign --session ${sessionName}`,
+      `3. /taskmaestro status`,
+      `4. /taskmaestro stop all`,
+    ].join('\n');
   }
 }

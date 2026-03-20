@@ -73,13 +73,30 @@ export interface DispatchedAgent {
   dispatchParams: DispatchParams;
 }
 
+export type ExecutionStrategy = 'subagent' | 'taskmaestro';
+
+export interface TaskMaestroAssignment {
+  name: string;
+  displayName: string;
+  prompt: string;
+}
+
+export interface TaskMaestroResult {
+  sessionName: string;
+  paneCount: number;
+  assignments: TaskMaestroAssignment[];
+}
+
 /**
  * Result of dispatching agents for execution
  */
 export interface DispatchResult {
   primaryAgent?: DispatchedAgent;
   parallelAgents?: DispatchedAgent[];
+  executionStrategy: ExecutionStrategy;
   executionHint: string;
+  /** TaskMaestro-specific result (only when executionStrategy is 'taskmaestro') */
+  taskmaestro?: TaskMaestroResult;
   /** Agents that failed to load */
   failedAgents?: FailedAgent[];
 }
@@ -94,6 +111,7 @@ export interface DispatchAgentsInput {
   specialists?: string[];
   includeParallel?: boolean;
   primaryAgent?: string;
+  executionStrategy?: ExecutionStrategy;
 }
 
 /**

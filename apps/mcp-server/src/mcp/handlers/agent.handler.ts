@@ -158,6 +158,12 @@ export class AgentHandler extends AbstractHandler {
               type: 'boolean',
               description: 'Whether to include parallel specialist agents (default: false)',
             },
+            executionStrategy: {
+              type: 'string',
+              enum: ['subagent', 'taskmaestro'],
+              description:
+                'Execution strategy for specialist agents (default: subagent). Use "taskmaestro" for tmux-based parallel execution.',
+            },
           },
           required: ['mode'],
         },
@@ -182,6 +188,10 @@ export class AgentHandler extends AbstractHandler {
     const targetFiles = extractStringArray(args, 'targetFiles');
     const taskDescription = extractOptionalString(args, 'taskDescription');
     const includeParallel = args?.includeParallel === true;
+    const executionStrategy = extractOptionalString(args, 'executionStrategy') as
+      | 'subagent'
+      | 'taskmaestro'
+      | undefined;
 
     try {
       const result = await this.agentService.dispatchAgents({
@@ -191,6 +201,7 @@ export class AgentHandler extends AbstractHandler {
         targetFiles,
         taskDescription,
         includeParallel,
+        executionStrategy,
       });
       return createJsonResponse(result);
     } catch (error) {
