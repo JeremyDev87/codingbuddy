@@ -152,7 +152,7 @@ describe('tui/components/live.pure', () => {
     it('1분 동안 5회 호출 → "5.0/min"', () => {
       const samples: ActivitySample[] = [
         { timestamp: 0, toolCalls: 0 },
-        { timestamp: 60000, toolCalls: 5 },
+        { timestamp: 60, toolCalls: 5 },
       ];
       expect(computeThroughput(samples)).toBe('5.0/min');
     });
@@ -160,7 +160,7 @@ describe('tui/components/live.pure', () => {
     it('30초 동안 3회 호출 → "6.0/min"', () => {
       const samples: ActivitySample[] = [
         { timestamp: 0, toolCalls: 0 },
-        { timestamp: 30000, toolCalls: 3 },
+        { timestamp: 30, toolCalls: 3 },
       ];
       expect(computeThroughput(samples)).toBe('6.0/min');
     });
@@ -168,11 +168,19 @@ describe('tui/components/live.pure', () => {
     it('여러 샘플의 총합으로 계산', () => {
       const samples: ActivitySample[] = [
         { timestamp: 0, toolCalls: 1 },
-        { timestamp: 30000, toolCalls: 2 },
-        { timestamp: 60000, toolCalls: 3 },
+        { timestamp: 30, toolCalls: 2 },
+        { timestamp: 60, toolCalls: 3 },
       ];
       // 총 toolCalls = 1+2+3 = 6, 기간 = 60초 = 1분 → 6.0/min
       expect(computeThroughput(samples)).toBe('6.0/min');
+    });
+
+    it('역순 타임스탬프 → "0.0/min" (가드)', () => {
+      const samples: ActivitySample[] = [
+        { timestamp: 60, toolCalls: 2 },
+        { timestamp: 0, toolCalls: 3 },
+      ];
+      expect(computeThroughput(samples)).toBe('0.0/min');
     });
   });
 

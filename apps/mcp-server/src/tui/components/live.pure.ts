@@ -57,7 +57,7 @@ export function computeThroughput(samples: ActivitySample[]): string {
   if (samples.length <= 1) return '0.0/min';
   const first = samples[0];
   const last = samples[samples.length - 1];
-  const durationMin = (last.timestamp - first.timestamp) / 60000;
+  const durationMin = (last.timestamp - first.timestamp) / 60;
   if (durationMin <= 0) return '0.0/min';
   const totalCalls = samples.reduce((sum, s) => sum + s.toolCalls, 0);
   return `${(totalCalls / durationMin).toFixed(1)}/min`;
