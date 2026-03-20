@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createHmac } from 'crypto';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { SseAuthGuard } from './sse-auth.guard';
 
@@ -100,8 +101,7 @@ describe('SseAuthGuard', () => {
     });
 
     it('should use HMAC-based comparison (no length early-return)', () => {
-      // Verify the guard uses createHmac, not raw Buffer length comparison
-      const { createHmac } = require('crypto');
+      // Verify HMAC produces fixed-length digests regardless of input length
       const key = Buffer.from('codingbuddy-sse-auth');
       const expectedHash = createHmac('sha256', key).update('my-secret-token').digest();
       const providedHash = createHmac('sha256', key).update('wrong').digest();
