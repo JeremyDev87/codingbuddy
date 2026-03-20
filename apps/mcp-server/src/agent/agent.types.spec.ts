@@ -25,9 +25,7 @@ describe('agent.types - TaskMaestro types', () => {
       const dispatch: TaskmaestroDispatch = {
         sessionName: 'workspace-1',
         paneCount: 3,
-        assignments: [
-          { name: 'dev-1', displayName: 'Dev 1', prompt: 'Task 1' },
-        ],
+        assignments: [{ name: 'dev-1', displayName: 'Dev 1', prompt: 'Task 1' }],
       };
       expect(dispatch.sessionName).toBe('workspace-1');
       expect(dispatch.paneCount).toBe(3);
