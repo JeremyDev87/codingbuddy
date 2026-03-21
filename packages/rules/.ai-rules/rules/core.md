@@ -916,6 +916,7 @@ To preserve this evaluation session for future reference:
 - User initiates with `AUTO` keyword and the system handles the entire workflow
 - Continues iterating until quality targets are achieved or maximum iterations reached
 - Best for tasks where iterative refinement is expected
+- For parallel task execution within AUTO mode, see [parallel-execution.md](parallel-execution.md)
 
 **Trigger:**
 - Type `AUTO` to start autonomous execution
