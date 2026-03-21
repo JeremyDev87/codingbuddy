@@ -1,6 +1,7 @@
 ---
 name: mcp-builder
 description: Use when building or extending MCP (Model Context Protocol) servers. Covers NestJS-based server design, Tools/Resources/Prompts capability design, transport implementation (stdio/SSE), and testing strategies.
+argument-hint: [capability-name]
 ---
 
 # MCP Builder

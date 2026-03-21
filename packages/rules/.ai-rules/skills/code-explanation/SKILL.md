@@ -4,6 +4,7 @@ description: Use when explaining complex code to new team members, conducting co
 context: fork
 agent: Explore
 allowed-tools: Read, Grep, Glob
+argument-hint: [file-or-symbol]
 ---
 
 # Code Explanation

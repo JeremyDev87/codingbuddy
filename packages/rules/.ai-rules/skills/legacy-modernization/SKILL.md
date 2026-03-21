@@ -1,6 +1,7 @@
 ---
 name: legacy-modernization
 description: Use when modernizing legacy code or migrating outdated patterns to current best practices. Covers assessment, strangler fig pattern, incremental migration, and risk management.
+argument-hint: [target-module-or-path]
 ---
 
 # Legacy Modernization

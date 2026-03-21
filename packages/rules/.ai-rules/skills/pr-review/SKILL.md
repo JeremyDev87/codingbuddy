@@ -4,6 +4,7 @@ description: Use when conducting manual PR reviews - provides structured checkli
 context: fork
 agent: Explore
 allowed-tools: Read, Grep, Glob, Bash(gh:*, git:*)
+argument-hint: [pr-url-or-number]
 ---
 
 # PR Review

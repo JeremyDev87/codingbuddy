@@ -4,6 +4,7 @@ description: Use when reviewing code for security vulnerabilities, before shippi
 context: fork
 agent: general-purpose
 allowed-tools: Read, Grep, Glob, Bash(git:*)
+argument-hint: [scope-or-path]
 ---
 
 # Security Audit
