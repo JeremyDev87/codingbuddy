@@ -1,103 +1,43 @@
 ---
 name: {{SKILL_NAME}}
-description: >-
-  Use when... (describe trigger conditions, max 500 chars)
+description: TODO - describe when to use this skill with specific trigger phrases
 ---
 
 # {{SKILL_DISPLAY_NAME}}
 
 ## Overview
 
-Brief description of what this skill does and why it exists (2-3 sentences).
+TODO - one sentence describing what this skill does.
 
-**Core principle:** STATE THE ONE RULE THAT MUST NEVER BE VIOLATED.
+**Core principle:** TODO - the single most important rule.
 
 **Iron Law:**
 ```
-THE NON-NEGOTIABLE RULE IN ALL CAPS
-No exceptions. No shortcuts.
+TODO - the non-negotiable constraint
 ```
 
 ## When to Use
 
-- Scenario where this skill should be activated
-- Another trigger condition
-- Edge case that still requires this skill
+- TODO - specific situation 1
+- TODO - specific situation 2
+
+**Use this ESPECIALLY when:**
+- TODO
 
 ## When NOT to Use
 
-- Situation where a different skill is more appropriate
-- Case where this workflow adds unnecessary overhead
-- Delegate to `[other-skill]` instead when...
+- TODO - what this skill does NOT handle
 
----
+## The Process
 
-## Phase 1: [Name] — [Purpose]
+### Phase 1: TODO
 
-Describe the first major step of the workflow.
+TODO - step by step instructions
 
-```
-1. First action
-2. Second action
-3. Verification check
-```
+### Phase 2: TODO
 
-**Output:** What this phase produces.
+TODO
 
-## Phase 2: [Name] — [Purpose]
+## Additional resources
 
-Describe the second major step.
-
-```
-1. First action
-2. Second action
-3. Verification check
-```
-
-**Output:** What this phase produces.
-
-## Phase 3: [Name] — [Purpose]
-
-Describe the third major step.
-
-```
-1. First action
-2. Second action
-3. Verification check
-```
-
-**Output:** What this phase produces.
-
----
-
-## Verification Checklist
-
-```
-- [ ] Phase 1 output meets criteria
-- [ ] Phase 2 output meets criteria
-- [ ] Phase 3 output meets criteria
-- [ ] No tool-specific syntax in core workflow
-- [ ] Examples included for ambiguous steps
-```
-
-## Additional Resources
-
-### Related Skills
-
-| Skill | Relationship |
-|-------|-------------|
-| `skill-name` | How they relate |
-
-### Agent Support
-
-| Agent | When to Involve |
-|-------|----------------|
-| Specialist Name | Trigger condition |
-
-## Red Flags — STOP
-
-| Thought | Reality |
-|---------|---------|
-| "This is obvious, skip the process" | Obvious tasks still benefit from systematic approach. Follow the phases. |
-| "I'll do it manually this time" | Manual means inconsistent. Use the skill. |
-| "One step is enough" | Each phase exists for a reason. Complete all phases. |
+- For detailed reference, see [references/TODO.md](references/TODO.md)

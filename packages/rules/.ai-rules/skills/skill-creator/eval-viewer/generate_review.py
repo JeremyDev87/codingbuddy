@@ -7,6 +7,7 @@ comparison, assertion pass/fail coloring, and feedback collection.
 
 Usage:
     python generate_review.py <workspace>/iteration-N --skill-name <name> \
+        --benchmark <workspace>/iteration-N/benchmark.json \
         [--previous-workspace <path>] [--static <output.html>]
 
 Requirements: Python 3.8+, standard library only.
@@ -17,7 +18,6 @@ from __future__ import annotations
 import argparse
 import html
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -66,19 +66,94 @@ def count_assertions(scenarios: List[Dict]) -> Dict[str, int]:
     return counts
 
 
+def fmt_float(val: Any, decimals: int = 2) -> str:
+    """Format a float value, returning '—' for missing data."""
+    if val is None:
+        return "\u2014"
+    try:
+        return f"{float(val):.{decimals}f}"
+    except (TypeError, ValueError):
+        return "\u2014"
+
+
+def build_summary_section(benchmark: Optional[Dict]) -> str:
+    """Build the summary statistics section from benchmark.json data."""
+    if not benchmark:
+        return ""
+
+    def stat_card(label: str, value: str, sub: str = "") -> str:
+        sub_html = f'<div class="summary-sub">{html.escape(sub)}</div>' if sub else ""
+        return (
+            f'<div class="summary-card">'
+            f'<div class="summary-label">{html.escape(label)}</div>'
+            f'<div class="summary-value">{html.escape(value)}</div>'
+            f'{sub_html}</div>'
+        )
+
+    cards = []
+
+    # Pass rate
+    ws = benchmark.get("with_skill", {})
+    bl = benchmark.get("baseline", {})
+    ws_rate = ws.get("pass_rate")
+    bl_rate = bl.get("pass_rate")
+    if ws_rate is not None:
+        cards.append(stat_card("Pass Rate (with skill)", f"{fmt_float(ws_rate, 1)}%",
+                               f"baseline: {fmt_float(bl_rate, 1)}%"))
+
+    # Tokens
+    ws_tokens = ws.get("tokens", {})
+    bl_tokens = bl.get("tokens", {})
+    if ws_tokens.get("mean") is not None:
+        cards.append(stat_card(
+            "Tokens (with skill)",
+            f"{fmt_float(ws_tokens.get('mean'), 0)}",
+            f"\u00b1{fmt_float(ws_tokens.get('stddev'), 0)} | baseline: {fmt_float(bl_tokens.get('mean'), 0)}"
+        ))
+
+    # Time
+    ws_time = ws.get("time", {})
+    bl_time = bl.get("time", {})
+    if ws_time.get("mean") is not None:
+        cards.append(stat_card(
+            "Time (with skill)",
+            f"{fmt_float(ws_time.get('mean'))}s",
+            f"\u00b1{fmt_float(ws_time.get('stddev'))}s | baseline: {fmt_float(bl_time.get('mean'))}s"
+        ))
+
+    if not cards:
+        return ""
+
+    return (
+        '<div class="summary-section">'
+        '<h2>Summary</h2>'
+        '<div class="summary-grid">' + "".join(cards) + '</div>'
+        '</div>'
+    )
+
+
 def build_scenario_rows(scenarios: List[Dict]) -> str:
-    """Build HTML table rows for scenario assertions."""
+    """Build HTML table rows for scenario assertions with collapsible evidence."""
     if not scenarios:
-        return '<tr><td colspan="4" style="text-align:center;color:var(--text-dim)">No scenarios found</td></tr>'
+        return '<tr><td colspan="5" style="text-align:center;color:var(--text-dim)">No scenarios found</td></tr>'
 
     rows = []
     for scenario in scenarios:
         name = html.escape(scenario.get("name", scenario.get("query", "Unknown")))
         assertions = scenario.get("assertions", [])
+        tokens = scenario.get("tokens")
+        time_s = scenario.get("time")
+        meta_parts = []
+        if tokens is not None:
+            meta_parts.append(f"{tokens} tok")
+        if time_s is not None:
+            meta_parts.append(f"{fmt_float(time_s)}s")
+        meta_str = " | ".join(meta_parts)
+
         if not assertions:
             rows.append(
                 f'<tr><td>{name}</td>'
-                '<td colspan="3" style="color:var(--text-dim)">No assertions</td></tr>'
+                '<td colspan="4" style="color:var(--text-dim)">No assertions</td></tr>'
             )
             continue
 
@@ -88,12 +163,28 @@ def build_scenario_rows(scenarios: List[Dict]) -> str:
             status_cls = "pass" if passed else "fail"
             status_text = "PASS" if passed else "FAIL"
             detail = html.escape(assertion.get("detail", assertion.get("message", "")))
-            scenario_cell = f"<td rowspan=\"{len(assertions)}\">{name}</td>" if i == 0 else ""
+
+            # Collapsible evidence
+            evidence = assertion.get("evidence", "")
+            evidence_html = ""
+            if evidence:
+                esc_ev = html.escape(str(evidence))
+                evidence_html = (
+                    f'<details class="evidence"><summary>Evidence</summary>'
+                    f'<pre>{esc_ev}</pre></details>'
+                )
+
+            scenario_cell = (
+                f'<td rowspan="{len(assertions)}">{name}'
+                f'{"<br><span class=meta-inline>" + html.escape(meta_str) + "</span>" if meta_str and i == 0 else ""}'
+                f'</td>'
+            ) if i == 0 else ""
+
             rows.append(
                 f'<tr>{scenario_cell}'
                 f'<td>{label}</td>'
                 f'<td class="status-{status_cls}">{status_text}</td>'
-                f'<td class="detail">{detail}</td></tr>'
+                f'<td class="detail">{detail}{evidence_html}</td></tr>'
             )
 
     return "\n".join(rows)
@@ -136,7 +227,10 @@ def build_comparison_section(
 
 
 def build_previous_comparison(
-    current_dir: Path, previous_dir: Path
+    current_dir: Path,
+    previous_dir: Path,
+    current_benchmark: Optional[Dict] = None,
+    previous_benchmark: Optional[Dict] = None,
 ) -> str:
     """Build a delta section comparing current vs previous iteration."""
     curr = discover_results(current_dir)
@@ -153,10 +247,27 @@ def build_previous_comparison(
     pass_cls = "delta-positive" if pass_delta >= 0 else "delta-negative"
     fail_cls = "delta-negative" if fail_delta >= 0 else "delta-positive"
 
+    # Pass rate delta from benchmark data
+    rate_html = ""
+    if current_benchmark and previous_benchmark:
+        curr_rate = current_benchmark.get("with_skill", {}).get("pass_rate")
+        prev_rate = previous_benchmark.get("with_skill", {}).get("pass_rate")
+        if curr_rate is not None and prev_rate is not None:
+            rate_delta = curr_rate - prev_rate
+            rate_sign = "+" if rate_delta >= 0 else ""
+            rate_cls = "delta-positive" if rate_delta >= 0 else "delta-negative"
+            rate_html = f"""
+            <div class="delta-card">
+              <div class="delta-label">Pass Rate</div>
+              <div class="delta-value {rate_cls}">{rate_sign}{fmt_float(rate_delta, 1)}%</div>
+              <div class="delta-detail">{fmt_float(prev_rate, 1)}% &rarr; {fmt_float(curr_rate, 1)}%</div>
+            </div>"""
+
     return f"""
     <div class="delta-section">
       <h2>Delta vs Previous Iteration</h2>
       <div class="delta-stats">
+        {rate_html}
         <div class="delta-card">
           <div class="delta-label">Pass</div>
           <div class="delta-value {pass_cls}">{pass_sign}{pass_delta}</div>
@@ -174,11 +285,15 @@ def build_previous_comparison(
 def generate_html(
     skill_name: str,
     iteration_dir: Path,
+    benchmark: Optional[Dict] = None,
     previous_dir: Optional[Path] = None,
+    previous_benchmark: Optional[Dict] = None,
 ) -> str:
     """Generate the complete HTML review page."""
     results = discover_results(iteration_dir)
     iteration_name = iteration_dir.name
+
+    summary_html = build_summary_section(benchmark)
 
     comparison_html = build_comparison_section(
         results["with_skill"], results["baseline"]
@@ -186,14 +301,16 @@ def generate_html(
 
     delta_html = ""
     if previous_dir and previous_dir.is_dir():
-        delta_html = build_previous_comparison(iteration_dir, previous_dir)
+        delta_html = build_previous_comparison(
+            iteration_dir, previous_dir, benchmark, previous_benchmark
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Benchmark Review — {html.escape(skill_name)}</title>
+<title>Benchmark Review \u2014 {html.escape(skill_name)}</title>
 <style>
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
 :root{{
@@ -211,6 +328,13 @@ h2{{font-size:1.2rem;font-weight:600;margin:2rem 0 1rem;padding-bottom:.5rem;bor
 h3{{font-size:1rem;font-weight:600;margin-bottom:.75rem}}
 .subtitle{{color:var(--text-dim);margin-bottom:1.5rem;font-size:.9rem}}
 
+.summary-section{{margin-bottom:2rem}}
+.summary-grid{{display:flex;gap:1rem;flex-wrap:wrap}}
+.summary-card{{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;min-width:180px}}
+.summary-label{{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em}}
+.summary-value{{font-size:1.4rem;font-weight:700;font-family:var(--font-mono);margin:.25rem 0}}
+.summary-sub{{font-size:.8rem;color:var(--text-dim)}}
+
 .comparison{{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}}
 @media(max-width:900px){{.comparison{{grid-template-columns:1fr}}}}
 .comp-panel{{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}}
@@ -226,9 +350,15 @@ h3{{font-size:1rem;font-weight:600;margin-bottom:.75rem}}
 .status-pass{{color:var(--pass);font-weight:700;font-family:var(--font-mono)}}
 .status-fail{{color:var(--fail);font-weight:700;font-family:var(--font-mono)}}
 .detail{{color:var(--text-dim);font-size:.8rem}}
+.meta-inline{{font-size:.75rem;color:var(--text-dim);font-family:var(--font-mono)}}
+
+details.evidence{{margin-top:.4rem}}
+details.evidence summary{{cursor:pointer;color:var(--accent);font-size:.8rem}}
+details.evidence summary:hover{{color:var(--accent-hover)}}
+details.evidence pre{{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:.5rem;margin-top:.3rem;font-size:.75rem;overflow-x:auto;white-space:pre-wrap;word-break:break-word}}
 
 .delta-section{{margin-bottom:2rem}}
-.delta-stats{{display:flex;gap:1rem}}
+.delta-stats{{display:flex;gap:1rem;flex-wrap:wrap}}
 .delta-card{{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;min-width:140px}}
 .delta-label{{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em}}
 .delta-value{{font-size:1.6rem;font-weight:700;font-family:var(--font-mono)}}
@@ -248,9 +378,10 @@ h3{{font-size:1rem;font-weight:600;margin-bottom:.75rem}}
 </head>
 <body>
 
-<h1>Benchmark Review — {html.escape(skill_name)}</h1>
+<h1>Benchmark Review \u2014 {html.escape(skill_name)}</h1>
 <p class="subtitle">Iteration: {html.escape(iteration_name)} | Generated from: {html.escape(str(iteration_dir))}</p>
 
+{summary_html}
 {delta_html}
 
 <h2>Side-by-Side Comparison</h2>
@@ -307,6 +438,12 @@ def main() -> int:
         help="Name of the skill being benchmarked",
     )
     parser.add_argument(
+        "--benchmark",
+        type=Path,
+        default=None,
+        help="Path to benchmark.json with statistics (pass_rate, tokens, time)",
+    )
+    parser.add_argument(
         "--previous-workspace",
         type=Path,
         default=None,
@@ -325,10 +462,23 @@ def main() -> int:
         print(f"Error: {args.iteration_dir} is not a directory", file=sys.stderr)
         return 1
 
+    benchmark = None
+    if args.benchmark:
+        benchmark = load_json(args.benchmark)
+        if benchmark is None:
+            print(f"Warning: could not load {args.benchmark}", file=sys.stderr)
+
+    previous_benchmark = None
+    if args.previous_workspace:
+        prev_bench_path = args.previous_workspace / "benchmark.json"
+        previous_benchmark = load_json(prev_bench_path)
+
     html_content = generate_html(
         skill_name=args.skill_name,
         iteration_dir=args.iteration_dir,
+        benchmark=benchmark,
         previous_dir=args.previous_workspace,
+        previous_benchmark=previous_benchmark,
     )
 
     if args.static:
