@@ -1,6 +1,7 @@
 ---
 name: code-explanation
 description: Use when explaining complex code to new team members, conducting code reviews, onboarding, or understanding unfamiliar codebases. Provides structured analysis from high-level overview to implementation details.
+argument-hint: [file-or-symbol]
 ---
 
 # Code Explanation
