@@ -91,6 +91,12 @@ export { ContextDocumentHandler } from './context-document.handler';
 export { TuiHandler } from './tui.handler';
 
 /**
+ * Handler for parallel validation tools (validate_parallel_issues)
+ * @see {@link ParallelValidationHandler}
+ */
+export { ParallelValidationHandler } from '../../parallel-validation/parallel-validation.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

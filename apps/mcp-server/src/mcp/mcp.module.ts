@@ -27,6 +27,7 @@ import {
   ConventionsHandler,
   ContextDocumentHandler,
   TuiHandler,
+  ParallelValidationHandler,
 } from './handlers';
 
 const handlers = [
@@ -39,6 +40,7 @@ const handlers = [
   ConventionsHandler,
   ContextDocumentHandler,
   TuiHandler,
+  ParallelValidationHandler,
 ];
 
 @Module({
