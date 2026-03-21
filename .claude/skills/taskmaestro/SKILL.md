@@ -5,7 +5,7 @@ description: >-
   with git worktree isolation. Provides wave-transition automation,
   readiness detection via capture-pane polling, and trust/terms
   prompt auto-handling.
-argument-hint: [wave-transition <issues> | launch <count> | status]
+argument-hint: "wave-transition <issues> | launch <count> | status | stop | cleanup [--force]"
 allowed-tools: Bash, Read, Grep, Glob
 user-invocable: true
 disable-model-invocation: true
@@ -430,6 +430,147 @@ status_check() {
 }
 ```
 
+### `/taskmaestro stop`
+
+Stop all active workers without removing worktrees:
+
+```bash
+# Example: stop workers but keep worktrees for inspection
+/taskmaestro stop
+```
+
+Execute `stop_workers` only. Worktrees and branches remain intact for manual inspection or resumption.
+
+### `/taskmaestro cleanup [--force]`
+
+Full post-parallel cleanup: stop workers, remove worktrees, kill tmux session, delete branches.
+
+```bash
+# Clean up after a completed wave
+/taskmaestro cleanup
+
+# Force cleanup even with uncommitted changes
+/taskmaestro cleanup --force
+```
+
+#### Uncommitted Changes Detection
+
+Before removing worktrees, check for uncommitted or unpushed work:
+
+```bash
+check_uncommitted() {
+  local base_dir="${WORKTREE_BASE}"
+  local issues=()
+
+  for wt_dir in "${base_dir}"/wt-*; do
+    [ -d "$wt_dir" ] || continue
+
+    local branch
+    branch=$(git -C "$wt_dir" branch --show-current 2>/dev/null || echo "detached")
+    local has_issues=false
+
+    # Check uncommitted changes
+    local status
+    status=$(git -C "$wt_dir" status --porcelain 2>/dev/null)
+    if [ -n "$status" ]; then
+      echo "WARNING: Uncommitted changes in ${wt_dir} (${branch}):" >&2
+      echo "$status" | head -5 >&2
+      has_issues=true
+    fi
+
+    # Check unpushed commits
+    local unpushed
+    unpushed=$(git -C "$wt_dir" log --oneline @{upstream}..HEAD 2>/dev/null)
+    if [ -n "$unpushed" ]; then
+      echo "WARNING: Unpushed commits in ${wt_dir} (${branch}):" >&2
+      echo "$unpushed" | head -5 >&2
+      has_issues=true
+    fi
+
+    if [ "$has_issues" = true ]; then
+      issues+=("${wt_dir}")
+    fi
+  done
+
+  if [ ${#issues[@]} -gt 0 ]; then
+    echo "" >&2
+    echo "DANGER: ${#issues[@]} worktree(s) have unsaved work." >&2
+    echo "Use --force to cleanup anyway, or commit/push changes first." >&2
+    return 1
+  fi
+
+  return 0
+}
+```
+
+**Detection covers:**
+
+| Check | What It Catches |
+|-------|-----------------|
+| `git status --porcelain` | Uncommitted/unstaged changes, untracked files |
+| `git log @{upstream}..HEAD` | Commits not pushed to remote |
+
+#### Cleanup Process
+
+```bash
+cleanup_all() {
+  local force="${1:-false}"
+
+  echo "=== Post-Parallel Cleanup ==="
+
+  # Step 1: Check for uncommitted changes
+  echo "[1/4] Checking for uncommitted changes..."
+  if ! check_uncommitted; then
+    if [ "$force" != "true" ]; then
+      echo "ABORT: Use --force to override." >&2
+      return 1
+    fi
+    echo "WARNING: Proceeding with --force, unsaved work will be lost."
+  fi
+
+  # Step 2: Stop workers and kill tmux session
+  echo "[2/4] Stopping workers..."
+  stop_workers
+  tmux kill-session -t "$SESSION" 2>/dev/null || true
+
+  # Step 3: Remove worktrees and branches
+  echo "[3/4] Removing worktrees and branches..."
+  for wt_dir in "${WORKTREE_BASE}"/wt-*; do
+    [ -d "$wt_dir" ] || continue
+
+    local branch
+    branch=$(git -C "$wt_dir" branch --show-current 2>/dev/null)
+
+    git worktree remove "$wt_dir" --force 2>/dev/null || rm -rf "$wt_dir"
+
+    # Delete the associated branch
+    if [ -n "$branch" ]; then
+      git branch -D "$branch" 2>/dev/null || true
+    fi
+  done
+  git worktree prune
+
+  # Step 4: Clean base directory
+  echo "[4/4] Cleaning up..."
+  if [ -d "$WORKTREE_BASE" ] && [ -z "$(ls -A "$WORKTREE_BASE" 2>/dev/null)" ]; then
+    rmdir "$WORKTREE_BASE" 2>/dev/null || true
+  fi
+
+  echo "=== Cleanup Complete ==="
+  echo "Removed: worktrees, branches, tmux session"
+}
+```
+
+**Cleanup targets:**
+
+| Target | Action | Reversible? |
+|--------|--------|-------------|
+| Active workers | `/exit` + `C-c` fallback | N/A |
+| tmux session | `kill-session` | Re-create with `/taskmaestro launch` |
+| Worktree dirs | `git worktree remove --force` | No — commit first |
+| Git branches | `git branch -D` | Recover via reflog within 30 days |
+| Base directory | `rmdir` if empty | Re-created on next launch |
+
 ---
 
 ## Error Handling
@@ -441,6 +582,8 @@ status_check() {
 | `git fetch` fails | Continue with local master (warn user) |
 | tmux session missing | Create new session from scratch |
 | Trust/terms prompt not recognized | Log the captured content, wait for manual intervention |
+| Cleanup with uncommitted changes | Abort and list dirty worktrees; user runs `--force` or commits first |
+| Branch deletion fails | Branch may be checked out elsewhere; `git worktree prune` first |
 
 ## Important Notes
 
@@ -448,3 +591,5 @@ status_check() {
 - **Always call `handle_prompts()` before `wait_for_ready()`** — trust/terms prompts block the ready state
 - **Wave transition is atomic** — if any critical step fails (worktree creation, launch), abort and report
 - **Pane indices are 0-based** in tmux but worktree dirs are 1-based (`wt-1`, `wt-2`, ...)
+- **Always run `cleanup` after a wave completes** — leftover worktrees and branches accumulate over time
+- **Never `cleanup --force` without checking** — review warnings first to avoid losing uncommitted work
