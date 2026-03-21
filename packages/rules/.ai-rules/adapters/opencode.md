@@ -184,9 +184,9 @@ Add to your MCP configuration:
 }
 ```
 
-> **Important:** OpenCode/Crush의 `roots/list` MCP capability 지원 여부는 미확인입니다.
-> `CODINGBUDDY_PROJECT_ROOT` 없이는 서버가 프로젝트의 `codingbuddy.config.json`을 찾지 못하여
-> `language` 등 설정이 기본값으로 동작합니다. 항상 이 환경변수를 프로젝트의 절대 경로로 설정하세요.
+> **Important:** Whether OpenCode/Crush supports the `roots/list` MCP capability has not been confirmed.
+> Without `CODINGBUDDY_PROJECT_ROOT`, the server cannot locate your project's `codingbuddy.config.json`,
+> causing settings such as `language` to use default values. Always set this environment variable to your project's absolute path.
 
 #### Available MCP Tools
 
@@ -526,9 +526,9 @@ npx codingbuddy@latest mcp
 
 **4. Project Config Not Detected**
 ```bash
-# CODINGBUDDY_PROJECT_ROOT가 MCP env에 설정되어 있는지 확인
-# 이 환경변수 없이는 codingbuddy.config.json을 찾지 못합니다
-# .opencode.json 또는 crush.json의 mcp 섹션에 추가:
+# Verify that CODINGBUDDY_PROJECT_ROOT is set in MCP env
+# Without this environment variable, codingbuddy.config.json cannot be found
+# Add to the mcp section of .opencode.json or crush.json:
 "env": {
   "CODINGBUDDY_PROJECT_ROOT": "/absolute/path/to/your/project"
 }
@@ -752,7 +752,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Language | Keyword |
 |----------|---------|
 | English | `AUTO` |
-| Korean | `자동` |
+| Korean | `AUTO` |
 | Japanese | `自動` |
 | Chinese | `自动` |
 | Spanish | `AUTOMÁTICO` |

@@ -403,7 +403,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Language | Keyword |
 |----------|---------|
 | English | `AUTO` |
-| Korean | `자동` |
+| Korean | `AUTO` |
 | Japanese | `自動` |
 | Chinese | `自动` |
 | Spanish | `AUTOMATICO` |
@@ -415,7 +415,7 @@ AUTO implement user authentication feature
 ```
 
 ```
-자동 사용자 인증 기능 구현해줘
+AUTO implement user authentication feature
 ```
 
 When AUTO keyword is detected, Cursor calls `parse_mode` MCP tool which returns AUTO mode instructions.

@@ -94,7 +94,7 @@ Step 7: Update existing PR (if exists)
 │   └── "bilingual" → Bilingual Template
 ├── Generate title:
 │   ├── "en"/"bilingual" → English title
-│   └── "ko" → 한국어 title
+│   └── "ko" → Korean title
 ├── Generate body with selected template
 ├── Merge with .github/pull_request_template.md (if exists)
 ├── NO AI signature
@@ -109,7 +109,7 @@ Step 8: Create new PR (if not exists)
 │   └── "bilingual" → Bilingual Template
 ├── Generate title:
 │   ├── "en"/"bilingual" → English (e.g., "feat: add auth")
-│   └── "ko" → 한국어 (e.g., "feat: 인증 추가")
+│   └── "ko" → Korean (e.g., "feat: add authentication")
 ├── Generate body with selected template + commit analysis
 ├── Merge with project template if exists
 ├── NO AI signature
@@ -248,22 +248,22 @@ N/A (no UI changes)
 
 #### When `prLanguage: "ko"`
 
-**Title**: `feat: 사용자 인증 추가`
+**Title**: `feat: add user authentication`
 
 **Body**:
 ```markdown
-## 컨텍스트
+## Context
 
-**관련 링크:**
-- 이슈: [AUTH-123](https://jira.example.com/browse/AUTH-123)
+**Related Links:**
+- Issue: [AUTH-123](https://jira.example.com/browse/AUTH-123)
 
-**상세 설명:**
+**Description Details:**
 
-JWT 기반 인증과 리프레시 토큰 지원을 추가했습니다.
+Added JWT-based authentication with refresh token support.
 
-## 스크린샷 또는 비디오
+## Screenshots or Videos
 
-N/A (UI 변경 없음)
+N/A (no UI changes)
 ```
 
 #### When `prLanguage: "bilingual"`
@@ -283,13 +283,13 @@ Added JWT-based authentication with refresh token support.
 
 ---
 
-**상세 설명:**
+**Description Details (Korean):**
 
-JWT 기반 인증과 리프레시 토큰 지원을 추가했습니다.
+Added JWT-based authentication with refresh token support. (Korean translation here)
 
 ## Screenshots or Videos
 
-N/A (no UI changes / UI 변경 없음)
+N/A (no UI changes)
 ```
 
 ### Template Definitions

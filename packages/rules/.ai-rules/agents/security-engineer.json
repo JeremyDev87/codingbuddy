@@ -32,14 +32,14 @@
   "activation": {
     "trigger": "When user requests security feature implementation, vulnerability fixes, auth flows, or encryption",
     "explicit_patterns": [
-      "security-engineer로",
-      "보안 취약점 수정",
-      "JWT 구현",
-      "인증 구현",
-      "OAuth 구현",
-      "암호화 추가",
-      "SQL injection 방어",
-      "XSS 방어"
+      "as security-engineer",
+      "fix security vulnerability",
+      "implement JWT",
+      "implement authentication",
+      "implement OAuth",
+      "add encryption",
+      "SQL injection defense",
+      "XSS defense"
     ],
     "mandatory_checklist": {
       "🔴 owasp_top10": {

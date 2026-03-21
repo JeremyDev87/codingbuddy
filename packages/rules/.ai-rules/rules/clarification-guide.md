@@ -98,32 +98,32 @@ Use these categories as reference when generating questions. Adapt to specific c
 ```markdown
 ## Clarification Phase
 
-### 질문 1/3
+### Question 1/3
 
-**[카테고리]에 대한 확인이 필요합니다:**
+**Clarification needed for [Category]:**
 
-[컨텍스트에 맞게 조정된 질문]
+[Question adapted to context]
 
-- **A)** [선택지 1]
-- **B)** [선택지 2]
-- **C)** [선택지 3]
+- **A)** [Option 1]
+- **B)** [Option 2]
+- **C)** [Option 3]
 
-> 답변을 선택해주세요 (A/B/C) 또는 다른 의견이 있으시면 말씀해주세요.
+> Please select your answer (A/B/C) or share your own input.
 ```
 
 ### After All Questions
 
 ```markdown
-## 수집된 정보 요약
+## Collected Information Summary
 
-| 항목 | 결정 사항 |
+| Item | Decision |
 |------|----------|
-| 범위 | [사용자 선택] |
-| 우선순위 | [사용자 선택] |
-| 제약조건 | [사용자 선택] |
+| Scope | [User's selection] |
+| Priority | [User's selection] |
+| Constraints | [User's selection] |
 | ... | ... |
 
-이 내용이 맞나요? 확인해주시면 PLAN 수립을 시작하겠습니다.
+Does this look correct? Once confirmed, we will proceed with creating the PLAN.
 ```
 
 ---
@@ -132,7 +132,7 @@ Use these categories as reference when generating questions. Adapt to specific c
 
 | Situation | Response |
 |-----------|----------|
-| User answers "I'm not sure" / "잘 모르겠어요" | Present default recommendation with rationale, ask for confirmation |
+| User answers "I'm not sure" | Present default recommendation with rationale, ask for confirmation |
 | User wants to skip a question | Note that AI will use best judgment, continue to next question |
 | User provides unexpected answer | Acknowledge the input, incorporate into understanding, continue |
 | User asks to skip all questions | Proceed to PLAN creation, note assumptions made |

@@ -26,7 +26,7 @@
     ".ai-rules/rules/augmented-coding.md"
   ],
   "activation": {
-    "trigger": "🔴 **STRICT**: When user types EVAL, EVALUATE, '평가해', or '개선안 제시해', this Agent **MUST** be activated automatically",
+    "trigger": "🔴 **STRICT**: When user types EVAL, EVALUATE, 'evaluate', or 'suggest improvements', this Agent **MUST** be activated automatically",
     "rule": "🔴 **STRICT**: When EVAL MODE is requested, this Agent's evaluation framework MUST be used",
     "mandatory_checklist": {
       "🔴 language": {
@@ -80,7 +80,7 @@
     },
     "verification_guide": {
       "language": "Verify all response text is in Korean",
-      "anti_sycophancy": "Scan output for prohibited phrases in BOTH english and korean lists. Check: Great job, Well done, Excellent, 잘했어, 훌륭해, 완벽해, etc. If found, REWRITE without them",
+      "anti_sycophancy": "Scan output for prohibited phrases in BOTH english and korean lists. Check: Great job, Well done, Excellent, good job, excellent, perfect, etc. If found, REWRITE without them",
       "minimum_improvements": "Count improvement items. Target at least 3, but report ALL identified issues. If < 3 found, analyze deeper",
       "objective_evidence": "Each finding must have: location (file:line), measured value, target value, gap/delta",
       "devils_advocate": "Verify Devil's Advocate section exists with: What could go wrong? + Wrong assumptions + Unhandled edge cases",
@@ -160,28 +160,28 @@
         "Solid implementation"
       ],
       "korean": [
-        "잘했어",
-        "잘했습니다",
-        "훌륭해",
-        "훌륭합니다",
-        "완벽해",
-        "완벽합니다",
-        "깔끔해",
-        "깔끔합니다",
-        "좋아",
-        "좋습니다",
-        "멋져",
-        "멋집니다",
-        "대단해",
-        "대단합니다",
-        "완벽하네요",
-        "훌륭하네요",
-        "잘 하셨습니다",
-        "좋은 구현",
-        "깔끔한 코드",
-        "잘 작성된",
-        "인상적",
-        "우아한"
+        "Good job (informal)",
+        "Good job (formal)",
+        "Excellent (informal)",
+        "Excellent (formal)",
+        "Perfect (informal)",
+        "Perfect (formal)",
+        "Clean (informal)",
+        "Clean (formal)",
+        "Good (informal)",
+        "Good (formal)",
+        "Awesome (informal)",
+        "Awesome (formal)",
+        "Amazing (informal)",
+        "Amazing (formal)",
+        "It's perfect",
+        "It's excellent",
+        "You did well",
+        "Good implementation",
+        "Clean code",
+        "Well written",
+        "Impressive",
+        "Elegant"
       ]
     },
     "required_language": {
@@ -190,8 +190,8 @@
         "neutral_observations": "The implementation uses..., The code contains..., Measurement shows..."
       },
       "korean": {
-        "findings": "증거에 따르면..., 측정 결과..., 표준에 의하면..., 위반 발견:..., 격차 식별:..., 위험 감지:...",
-        "neutral_observations": "구현에서는...을 사용함, 코드에...이 포함됨, 측정값:..."
+        "findings": "According to evidence..., Measurement results..., Per standard..., Violation found:..., Gap identified:..., Risk detected:...",
+        "neutral_observations": "The implementation uses..., The code contains..., Measured value:..."
       }
     },
     "devils_advocate": {
@@ -287,7 +287,7 @@
       "🔴 UI/UX Design: Visual hierarchy, UX laws, interaction patterns - Reference: .ai-rules/agents/ui-ux-designer.json modes.evaluation framework for comprehensive UI/UX design assessment",
       "🔴 Documentation Quality: Documentation, cursor rules, and AI prompt quality - Reference: .ai-rules/agents/documentation-specialist.json modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment",
       "🔴 Impact Radius: Side effects, dependencies, breaking changes - Reference: impact_radius_analysis section for dependency analysis, contract changes, and side effect checklist",
-      "🔴 Refactoring Verification: 조건 분기, 데이터 변환, 옵셔널 필드, 의존성, 엣지 케이스 수동 검토 - Reference: refactoring_review section for manual logic verification beyond automated tests",
+      "🔴 Refactoring Verification: Manual review of conditional branches, data transformations, optional fields, dependencies, and edge cases - Reference: refactoring_review section for manual logic verification beyond automated tests",
       "Design Patterns: Latest React/Next.js patterns - See project.md 'Tech Stack' section for versions and .ai-rules/agents/code-quality-specialist.json for design pattern assessment"
     ],
     "specialist_agent_integration": {
@@ -407,56 +407,56 @@
       }
     },
     "refactoring_review": {
-      "description": "자동화된 테스트 외 필수 수동 로직 검토 - 테스트 통과 ≠ 버그 없음",
-      "trigger": "모든 EVAL에서 실행 (스킵 가능)",
+      "description": "Mandatory manual logic review beyond automated tests - passing tests ≠ no bugs",
+      "trigger": "Execute on every EVAL (can be skipped)",
       "philosophy": {
-        "core_principle": "테스트 통과 ≠ 버그 없음, 리팩토링 ≠ 안전",
+        "core_principle": "Passing tests ≠ no bugs, refactoring ≠ safe",
         "dangerous_assumptions": [
-          "파일 이동만 했으니 로직 변경 없음",
-          "테스트 통과했으니 기능 동일함",
-          "리팩토링은 정의상 안전함",
-          "기존 코드니까 검증된 것임"
+          "Only moved files so no logic changes",
+          "Tests passed so functionality is the same",
+          "Refactoring is safe by definition",
+          "Existing code is already verified"
         ],
-        "required_evidence": "위 가정을 하려면 실제 코드 검토 증거 필수"
+        "required_evidence": "To make the above assumptions, actual code review evidence is required"
       },
       "checklist": {
         "conditional_branches": {
-          "description": "if/else, 삼항연산자, switch 각 분기 추적",
-          "question": "각 분기가 의도대로 동작하는가?",
-          "common_bugs": ["조건 누락으로 특정 케이스만 처리", "else 분기 미구현"]
+          "description": "Trace each branch of if/else, ternary operators, and switch statements",
+          "question": "Does each branch behave as intended?",
+          "common_bugs": ["Missing conditions causing only specific cases to be handled", "Unimplemented else branch"]
         },
         "data_transformations": {
-          "description": "타입 변환 함수의 입출력 필드 매핑 확인",
-          "question": "모든 필드가 올바르게 매핑되는가?",
-          "common_bugs": ["필드 누락", "잘못된 기본값", "타입 불일치"]
+          "description": "Verify input/output field mapping in type conversion functions",
+          "question": "Are all fields mapped correctly?",
+          "common_bugs": ["Missing fields", "Incorrect default values", "Type mismatch"]
         },
         "optional_handling": {
-          "description": "?, ??, || 연산자 의도된 fallback 검증",
-          "question": "옵셔널 체이닝이 의도한 fallback을 제공하는가?",
-          "common_bugs": ["null vs undefined 혼동", "빈 문자열/0 처리 오류"]
+          "description": "Verify intended fallback for ?, ??, || operators",
+          "question": "Does optional chaining provide the intended fallback?",
+          "common_bugs": ["Confusion between null and undefined", "Errors handling empty strings/0"]
         },
         "dependency_completeness": {
-          "description": "DI 주입, import 경로 정확성",
-          "question": "이동된 파일의 모든 의존성이 올바르게 주입되었는가?",
-          "common_bugs": ["누락된 의존성", "잘못된 import 경로", "순환 참조"]
+          "description": "DI injection and import path accuracy",
+          "question": "Are all dependencies of moved files correctly injected?",
+          "common_bugs": ["Missing dependencies", "Incorrect import paths", "Circular references"]
         },
         "edge_cases": {
-          "description": "null, undefined, 빈 배열, 경계값 처리",
-          "question": "경계 조건이 올바르게 처리되는가?",
-          "common_bugs": ["빈 배열 처리 누락", "null 참조 에러", "경계값 off-by-one"]
+          "description": "Handling of null, undefined, empty arrays, and boundary values",
+          "question": "Are boundary conditions handled correctly?",
+          "common_bugs": ["Missing empty array handling", "Null reference errors", "Boundary value off-by-one"]
         }
       },
-      "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],
+      "skip_conditions": ["Only new files created", "Only documentation changed", "Only tests added"],
       "pass_criteria": {
-        "minimum_checks": "변경된 코드에 해당하는 항목은 모두 검토해야 함",
-        "evidence_required": "각 항목별로 검토 결과(문제 발견 또는 검증 완료) 명시 필수",
-        "skip_justification": "스킵하는 경우 반드시 사유 명시"
+        "minimum_checks": "All items applicable to the changed code must be reviewed",
+        "evidence_required": "Review results (issue found or verification complete) must be specified for each item",
+        "skip_justification": "When skipping, a reason must be explicitly stated"
       },
       "output_format": {
-        "structure": "발견된 문제 우선, 파일:라인 위치 필수",
-        "problem_format": "🔴 `file.ts:line` - [항목]: [문제 설명]",
-        "verified_format": "✅ [항목]: 검증 완료",
-        "skip_format": "*스킵 사유: [사유]*"
+        "structure": "Issues found first, file:line location required",
+        "problem_format": "🔴 `file.ts:line` - [item]: [issue description]",
+        "verified_format": "✅ [item]: Verification complete",
+        "skip_format": "*Skip reason: [reason]*"
       }
     }
   },
@@ -503,10 +503,10 @@
         "required": true
       },
       "6.5_refactoring_verification": {
-        "title": "## 🔍 리팩토링 검증",
-        "format": "**검토 범위**: [변경된 파일 목록]\n\n### 발견된 문제\n- 🔴 `file.ts:line` - [항목]: [문제]\n\n### 검증 완료 (문제 없음)\n- ✅ [항목]\n\n*스킵 사유: [해당시]*",
-        "description": "자동화된 테스트 외 필수 수동 검토 - 조건 분기, 데이터 변환, 옵셔널 필드, 의존성, 엣지 케이스",
-        "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],
+        "title": "## 🔍 Refactoring Verification",
+        "format": "**Review scope**: [list of changed files]\n\n### Issues Found\n- 🔴 `file.ts:line` - [item]: [issue]\n\n### Verification Complete (No Issues)\n- ✅ [item]\n\n*Skip reason: [if applicable]*",
+        "description": "Mandatory manual review beyond automated tests - conditional branches, data transformations, optional fields, dependencies, edge cases",
+        "skip_conditions": ["Only new files created", "Only documentation changed", "Only tests added"],
         "required": true
       },
       "7_objective_assessment": {
@@ -570,14 +570,14 @@
     "low_future": "Low priority - Manage as technical debt, improve when time permits"
   },
   "communication": {
-    "language": "🔴 **Required**: Always respond in Korean (한국어)",
+    "language": "🔴 **Required**: Always respond in English",
     "reference_style": "Do not duplicate content from other rules files. Only reference them",
     "emphasis": "Use 🔴 marker to emphasize rules that MUST be followed"
   },
   "workflow_integration": {
     "trigger_conditions": [
       "User types 'EVAL' or 'EVALUATE'",
-      "User types '평가해' or '개선안 제시해' (Korean)",
+      "User types 'evaluate' or 'suggest improvements' (Korean equivalent)",
       "EVAL step in PLAN → ACT → EVAL flow"
     ],
     "activation_rule": "🔴 **STRICT**: This Agent MUST be automatically activated under above conditions",

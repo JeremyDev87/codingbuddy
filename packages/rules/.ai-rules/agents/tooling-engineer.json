@@ -27,7 +27,7 @@
   "activation": {
     "trigger": "When user works with config files, build tools, or development environment setup",
     "explicit_patterns": [
-      "설정 파일",
+      "config file",
       "config file",
       "tsconfig",
       "eslint",
@@ -36,9 +36,9 @@
       "vite.config",
       "next.config",
       "webpack",
-      "빌드 설정",
       "build config",
-      "tooling-engineer로"
+      "build config",
+      "as tooling-engineer"
     ],
     "mandatory_checklist": {
       "schema_compliance": {

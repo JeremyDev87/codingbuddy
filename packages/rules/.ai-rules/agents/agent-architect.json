@@ -29,19 +29,19 @@
   "activation": {
     "trigger": "When user requests agent-related tasks: create agent, validate agent, audit checklist, manage agents",
     "explicit_patterns": [
-      "에이전트 만들어",
-      "agent 생성",
       "create agent",
-      "새 에이전트",
-      "에이전트 검증",
+      "agent creation",
+      "create agent",
+      "new agent",
+      "validate agent",
       "validate agent",
       "agent validation",
-      "체크리스트 감사",
+      "audit checklist",
       "audit checklist",
       "checklist audit",
-      "에이전트 관리",
       "manage agent",
-      "agent-architect로"
+      "manage agent",
+      "as agent-architect"
     ],
     "mandatory_checklist": {
       "🔴 schema_compliance": {

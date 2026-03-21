@@ -26,7 +26,7 @@
   },
   "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
   "activation": {
-    "trigger": "🔴 **STRICT**: When user types 'EVAL', 'EVALUATE' or equivalent (Korean: 평가해/개선안 제시해, Japanese: 評価, Chinese: 评估, Spanish: EVALUAR)",
+    "trigger": "🔴 **STRICT**: When user types 'EVAL', 'EVALUATE' or equivalent (Korean: evaluate/suggest improvements, Japanese: 評価, Chinese: 评估, Spanish: EVALUAR)",
     "rule": "🔴 **STRICT**: EVAL MODE request must activate this Agent automatically",
     "mandatory_checklist": {
       "🔴 language": {
@@ -93,17 +93,17 @@
     "devils_advocate": "What could go wrong? Wrong assumptions? Unhandled edge cases?",
     "impact_radius": "Dependencies affected, contract changes, side effects analysis",
     "refactoring_verification": {
-      "description": "자동화된 테스트 외 필수 수동 검토 항목 (모든 EVAL에서 실행)",
+      "description": "Mandatory manual review items beyond automated tests (execute on every EVAL)",
       "mandatory": true,
-      "skip_conditions": ["신규 파일만 생성", "문서만 변경", "테스트만 추가"],
+      "skip_conditions": ["Only new files created", "Only documentation changed", "Only tests added"],
       "checklist": {
-        "conditional_branches": "if/else, 삼항연산자, switch 각 분기가 의도대로 동작하는가?",
-        "data_transformations": "타입 변환 함수가 모든 필드를 올바르게 매핑하는가?",
-        "optional_handling": "?, ??, || 연산자가 의도한 fallback을 제공하는가?",
-        "dependency_completeness": "이동된 파일의 모든 의존성이 올바르게 주입되었는가?",
-        "edge_cases": "null, undefined, 빈 배열 등 경계 조건이 처리되는가?"
+        "conditional_branches": "Do if/else, ternary operators, and switch branches behave as intended?",
+        "data_transformations": "Does the type conversion function map all fields correctly?",
+        "optional_handling": "Do ?, ??, || operators provide the intended fallback?",
+        "dependency_completeness": "Are all dependencies of moved files correctly injected?",
+        "edge_cases": "Are boundary conditions such as null, undefined, empty arrays handled?"
       },
-      "output_format": "발견된 문제 우선, 파일:라인 위치 필수, 문제 없으면 '검증 완료' 표시"
+      "output_format": "Issues found first, file:line location required, show 'Verification complete' if no issues"
     },
     "objective_assessment": "Measurable metrics vs targets (coverage, complexity, etc.)",
     "improvement_opportunities": "Prioritized recommendations with evidence and locations",
@@ -121,14 +121,14 @@
         "Outstanding"
       ],
       "korean": [
-        "잘했어",
-        "훌륭해",
-        "완벽해",
-        "멋져",
-        "훌륭한 작업",
-        "좋은 구현",
-        "잘 만들어",
-        "괜찮은 코드"
+        "Good job",
+        "Excellent",
+        "Perfect",
+        "Awesome",
+        "Excellent work",
+        "Good implementation",
+        "Well made",
+        "Decent code"
       ]
     },
     "mandatory_rules": [
@@ -140,7 +140,7 @@
     ],
     "dangerous_assumptions": {
       "reference": "See code-reviewer.json refactoring_review.philosophy.dangerous_assumptions for full list",
-      "warning": "아래 가정을 하려면 실제 코드 검토 증거 필수"
+      "warning": "To make the assumptions below, actual code review evidence is required"
     },
     "verification_checklist": [
       "No prohibited phrases used",
@@ -171,7 +171,7 @@
       "✅ Critical Findings table (with objective metrics)",
       "✅ Devil's Advocate Analysis (failure scenarios, wrong assumptions)",
       "✅ Impact Radius Analysis (dependencies, contract changes, side effects)",
-      "✅ Refactoring Verification (조건 분기, 데이터 변환, 옵셔널 필드, 의존성, 엣지 케이스)",
+      "✅ Refactoring Verification (conditional branches, data transformations, optional fields, dependencies, edge cases)",
       "✅ Objective Assessment table (measured vs target)",
       "✅ Improvement opportunities by priority (Critical/High/Medium/Low)",
       "✅ Evidence-based recommendations (web search links/references)"

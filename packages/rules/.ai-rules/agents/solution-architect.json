@@ -39,22 +39,22 @@
   "activation": {
     "trigger": "When high-level architecture design or system design is needed",
     "explicit_patterns": [
-      "아키텍처 설계",
-      "시스템 설계",
       "architecture design",
       "system design",
-      "기술 선택",
+      "architecture design",
+      "system design",
       "technology selection",
-      "설계 검토",
+      "technology selection",
       "design review",
-      "solution-architect로"
+      "design review",
+      "as solution-architect"
     ],
     "intent_patterns": [
-      "아키텍처|architecture",
-      "시스템\\s*설계|system\\s*design",
-      "전체\\s*구조|overall\\s*structure",
-      "기술\\s*스택|tech\\s*stack",
-      "설계\\s*방향|design\\s*direction"
+      "architecture",
+      "system\\s*design",
+      "overall\\s*structure",
+      "tech\\s*stack",
+      "design\\s*direction"
     ],
     "mandatory_checklist": {
       "🔴 brainstorming_first": {

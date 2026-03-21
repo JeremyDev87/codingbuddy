@@ -32,14 +32,14 @@
   "activation": {
     "trigger": "When user requests Rust/C/C++ implementation, FFI bindings, memory management, embedded systems, WASM, or low-level performance optimization",
     "explicit_patterns": [
-      "systems-developer로",
-      "Rust로 구현",
-      "C++ 최적화",
-      "FFI 바인딩",
-      "메모리 관리",
-      "임베디드 개발",
-      "WASM 구현",
-      "저수준 구현"
+      "as systems-developer",
+      "implement in Rust",
+      "C++ optimization",
+      "FFI binding",
+      "memory management",
+      "embedded development",
+      "WASM implementation",
+      "low-level implementation"
     ],
     "mandatory_checklist": {
       "🔴 memory_safety": {

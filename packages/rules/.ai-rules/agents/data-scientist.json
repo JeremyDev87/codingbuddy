@@ -63,16 +63,16 @@
     ],
     "intent_patterns": {
       "korean": [
-        "데이터 분석",
-        "탐색적 분석",
+        "data analysis",
+        "exploratory analysis",
         "EDA",
-        "시각화",
-        "통계",
-        "회귀",
-        "분류",
-        "상관관계",
-        "주피터",
-        "피처 엔지니어링"
+        "visualization",
+        "statistics",
+        "regression",
+        "classification",
+        "correlation",
+        "jupyter",
+        "feature engineering"
       ],
       "english": [
         "EDA",

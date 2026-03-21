@@ -215,7 +215,7 @@
           "pattern": "locales/{locale}/{namespace}.json",
           "example": {
             "locales/en/common.json": "{ \"welcome\": \"Welcome\" }",
-            "locales/ko/common.json": "{ \"welcome\": \"환영합니다\" }"
+            "locales/ko/common.json": "{ \"welcome\": \"Welcome\" }"
           }
         },
         "rtl_css_patterns": {

@@ -305,7 +305,7 @@
         "auto_activate_conditions": [
           "UI component development or modifications",
           "Form component creation",
-          "User explicitly requests accessibility review (A11Y, 접근성 검토)",
+          "User explicitly requests accessibility review (A11Y, accessibility review)",
           "Code Reviewer identifies accessibility concerns"
         ],
         "mandatory_checklist": {

@@ -165,9 +165,9 @@ Primary Agent is dynamically determined based on the following priority:
 
 **Korean:**
 ```
-backend-developer로 작업해      # "Work with backend-developer" (~로 작업해 = "work with ~")
-agent-architect으로 해줘        # "Do it with agent-architect" (~으로 해줘 = "do with ~")
-devops-engineer로 개발해        # "Develop with devops-engineer" (~로 개발해 = "develop with ~")
+backend-developer work with      # "Work with backend-developer"
+agent-architect do with          # "Do it with agent-architect"
+devops-engineer develop with     # "Develop with devops-engineer"
 ```
 
 **English:**
@@ -637,7 +637,7 @@ Unified specialist agents organized by domain:
 **Activation Patterns:**
 
 - Files: `*.tf`, `*.tfvars`, `Chart.yaml`, `kustomization.yaml`, `Pulumi.yaml`, `argocd/`, `flux-system/`
-- Korean: "인프라 코드", "쿠버네티스", "테라폼", "비용 최적화", "재해 복구"
+- Korean: "infrastructure code", "Kubernetes", "Terraform", "cost optimization", "disaster recovery"
 - English: "terraform", "kubernetes", "k8s", "helm", "pulumi", "gitops", "argocd", "infrastructure as code"
 
 **Auto-Activation:** Supported via MCP server. Platform Engineer is automatically selected when prompts contain IaC/Kubernetes keywords or when working with infrastructure files.
@@ -684,7 +684,7 @@ Unified specialist agents organized by domain:
 **Activation Patterns:**
 
 - Config files: `codingbuddy.config`, `tsconfig`, `eslint`, `prettier`, `vite.config`, `next.config`
-- Korean: "설정 파일", "빌드 설정", "패키지 관리", "린터 설정"
+- Korean: "config file", "build config", "package management", "linter config"
 - English: "config file", "build config", "package management"
 
 ---
@@ -767,7 +767,7 @@ Unified specialist agents organized by domain:
 
 **Activation Patterns:**
 
-- Korean: "LLM 통합", "RAG 구현", "프롬프트 엔지니어링", "AI 안전"
+- Korean: "LLM integration", "RAG implementation", "prompt engineering", "AI safety"
 - English: "LLM integration", "RAG implementation", "prompt engineering", "AI safety"
 
 ---
@@ -812,7 +812,7 @@ Unified specialist agents organized by domain:
 **Activation Patterns:**
 
 - Files: `*.ipynb`, `*eda*.py`, `*analysis*.py`, `*model*.py`, `notebooks/`
-- Korean: "데이터 분석", "탐색적 분석", "EDA", "시각화", "회귀", "분류", "주피터"
+- Korean: "data analysis", "exploratory analysis", "EDA", "visualization", "regression", "classification", "Jupyter"
 - English: "EDA", "exploratory", "data analysis", "visualization", "regression", "classification", "pandas", "scikit-learn", "jupyter"
 
 ---
@@ -860,7 +860,7 @@ Unified specialist agents organized by domain:
 
 **Activation Patterns:**
 
-- Korean: "Rust로 구현", "C++ 최적화", "FFI 바인딩", "메모리 관리", "임베디드 개발", "WASM 구현"
+- Korean: "Rust implementation", "C++ optimization", "FFI binding", "memory management", "embedded development", "WASM implementation"
 - English: "rust implementation", "FFI binding", "memory management", "embedded", "WASM", "low-level", "systems programming"
 
 ---
@@ -957,7 +957,7 @@ Software Engineer is the **fallback of last resort** — it has no intent patter
 **Activation Patterns:**
 
 - Files: API clients, webhook handlers, OAuth implementations, external service integrations
-- Korean: "외부 서비스 연동", "웹훅", "API 통합", "서킷 브레이커"
+- Korean: "external service integration", "webhook", "API integration", "circuit breaker"
 - English: "external API", "webhook", "integration", "circuit breaker", "third-party service"
 
 **Auto-Activation:** Supported via MCP server. Integration Specialist is automatically selected when prompts contain external service integration keywords or when working with API client/webhook files.
@@ -1013,7 +1013,7 @@ Software Engineer is the **fallback of last resort** — it has no intent patter
 **Activation Patterns:**
 
 - Files: `**/events/**`, `**/kafka/**`, `**/rabbitmq/**`, `**/sqs/**`, `**/eventgrid/**`, `**/pubsub/**`, `**/eventbridge/**`, `**/*producer*.ts`, `**/*consumer*.ts`, `**/*saga*.ts`, `**/*event-store*.ts`, `**/websocket/**`
-- Korean: "이벤트 아키텍처", "메시지 큐", "카프카", "사가 패턴", "이벤트 소싱"
+- Korean: "event architecture", "message queue", "Kafka", "saga pattern", "event sourcing"
 - English: "event-driven", "message queue", "kafka", "rabbitmq", "saga pattern", "event sourcing", "CQRS", "websocket"
 
 **Auto-Activation:** Supported via MCP server. Event Architecture Specialist is automatically selected when prompts contain event-driven architecture keywords or when working with message queue/event sourcing files.
@@ -1079,7 +1079,7 @@ Software Engineer is the **fallback of last resort** — it has no intent patter
 **Activation Patterns:**
 
 - Keywords: "observability", "distributed tracing", "OpenTelemetry", "SLI", "SLO", "error budget", "structured logging", "Prometheus", "Grafana", "Jaeger"
-- Korean: "관측 가능성", "분산 추적", "SLI/SLO", "에러 버짓"
+- Korean: "observability", "distributed tracing", "SLI/SLO", "error budget"
 - English: "observability", "distributed tracing", "SLI/SLO", "error budget", "OpenTelemetry"
 
 **Auto-Activation:** Supported via MCP server. Observability Specialist is automatically selected when prompts contain observability-related keywords or when working with tracing/monitoring files.
@@ -1156,7 +1156,7 @@ Software Engineer is the **fallback of last resort** — it has no intent patter
 **Activation Patterns:**
 
 - Keywords: "migration", "migrate", "legacy", "upgrade", "strangler fig", "rollback", "cutover", "deprecation", "backward compatibility"
-- Korean: "마이그레이션", "이전", "레거시", "업그레이드", "롤백", "호환성", "전환"
+- Korean: "migration", "transfer", "legacy", "upgrade", "rollback", "compatibility", "transition"
 - English: "migration", "legacy modernization", "framework upgrade", "zero-downtime", "api versioning"
 
 **Auto-Activation:** Supported via MCP server. Migration Specialist is automatically selected when prompts contain migration-related keywords or when working with migration/upgrade files.
@@ -1723,7 +1723,7 @@ Add a regex pattern to detect specialist-relevant keywords in user prompts:
 // apps/mcp-server/src/keyword/keyword.service.ts
 {
   pattern:
-    /keyword1|keyword2|한국어키워드|english\s*pattern/i,
+    /keyword1|keyword2|korean_keyword|english\s*pattern/i,
   specialist: '{domain}-specialist',
 },
 ```
@@ -1810,8 +1810,8 @@ describe('{domain}-specialist pattern', () => {
   });
 
   it.each([
-    '한국어 키워드 1',
-    '한국어 키워드 2',
+    'Korean keyword 1',
+    'Korean keyword 2',
     // ... more Korean patterns
   ])('detects {domain}-specialist for Korean: %s', async prompt => {
     const result = await service.parseMode(`PLAN ${prompt}`);
@@ -1869,7 +1869,7 @@ When modifying an existing specialist's integration:
 pattern: /existing|keywords/i,
 
 // After
-pattern: /existing|keywords|new_keyword|새키워드/i,
+pattern: /existing|keywords|new_keyword|new_korean_keyword/i,
 ```
 
 #### Adding New File Patterns

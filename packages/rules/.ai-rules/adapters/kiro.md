@@ -30,9 +30,9 @@ End users access rules **only through MCP tools**. No local rule files needed.
 }
 ```
 
-> **Important:** Kiro의 `roots/list` MCP capability 지원 여부는 미확인입니다.
-> `CODINGBUDDY_PROJECT_ROOT` 없이는 서버가 프로젝트의 `codingbuddy.config.json`을 찾지 못하여
-> `language` 등 설정이 기본값으로 동작합니다. 항상 이 환경변수를 프로젝트의 절대 경로로 설정하세요.
+> **Important:** Whether Kiro supports the `roots/list` MCP capability has not been confirmed.
+> Without `CODINGBUDDY_PROJECT_ROOT`, the server cannot locate your project's `codingbuddy.config.json`,
+> causing settings such as `language` to use default values. Always set this environment variable to your project's absolute path.
 
 Optional: Create `.kiro/rules/guidelines.md` for basic integration:
 
@@ -85,8 +85,8 @@ MCP server configuration for codingbuddy tools:
 }
 ```
 
-> **Note:** Kiro는 `${VARIABLE}` 문법으로 환경변수 확장을 지원합니다.
-> `${workspaceFolder}` 가 지원되는 경우 절대 경로 대신 사용할 수 있습니다.
+> **Note:** Kiro supports environment variable expansion using the `${VARIABLE}` syntax.
+> If `${workspaceFolder}` is supported, you can use it instead of an absolute path.
 
 **MCP configuration paths:**
 - **Project-level**: `.kiro/settings/mcp.json`
@@ -526,7 +526,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Language | Keyword |
 |----------|---------|
 | English | `AUTO` |
-| Korean | `자동` |
+| Korean | `AUTO` |
 | Japanese | `自動` |
 | Chinese | `自动` |
 | Spanish | `AUTOMÁTICO` |
@@ -538,7 +538,7 @@ AUTO implement user authentication feature
 ```
 
 ```
-자동 사용자 인증 기능 구현해줘
+AUTO implement user authentication feature
 ```
 
 When AUTO keyword is detected, Kiro calls `parse_mode` MCP tool which returns AUTO mode instructions.
@@ -571,7 +571,7 @@ module.exports = {
 - Bug fixes needing comprehensive testing
 - Code quality improvements with measurable criteria
 
-> **Kiro limitation:** AUTO mode에는 강제 루프 메커니즘이 없습니다. 자세한 내용은 [Known Limitations](#known-limitations)를 참조하세요.
+> **Kiro limitation:** AUTO mode has no enforcement loop mechanism. See [Known Limitations](#known-limitations) for details.
 
 ## Context Document Management
 

@@ -50,14 +50,14 @@
     },
     "intent_patterns": {
       "korean": [
-        "모바일",
-        "앱",
-        "리액트 네이티브",
-        "플러터",
+        "mobile",
+        "app",
+        "react native",
+        "flutter",
         "iOS",
-        "안드로이드",
-        "스위프트",
-        "코틀린"
+        "android",
+        "swift",
+        "kotlin"
       ],
       "english": ["mobile", "app", "react native", "flutter", "iOS", "android", "swift", "kotlin"]
     },

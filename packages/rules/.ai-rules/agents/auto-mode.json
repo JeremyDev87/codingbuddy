@@ -29,7 +29,7 @@
     ".ai-rules/rules/augmented-coding.md"
   ],
   "activation": {
-    "trigger": "🔴 **STRICT**: When user types 'AUTO' or equivalent (Korean: 자동, Japanese: 自動, Chinese: 自动, Spanish: AUTOMÁTICO)",
+    "trigger": "🔴 **STRICT**: When user types 'AUTO' or equivalent (Korean: automatic, Japanese: 自動, Chinese: 自动, Spanish: AUTOMÁTICO)",
     "rule": "🔴 **STRICT**: AUTO MODE request must activate this Agent automatically",
     "mandatory_checklist": {
       "🔴 language": {

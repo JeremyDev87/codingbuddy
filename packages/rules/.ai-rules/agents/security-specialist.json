@@ -292,7 +292,7 @@
         "rule": "When security review is needed, this Agent's security framework MUST be used",
         "auto_activate_conditions": [
           "Authentication/authorization code changes detected",
-          "User explicitly requests security review (SECURITY, 보안 검토)",
+          "User explicitly requests security review (SECURITY, security review)",
           "Code Reviewer identifies security vulnerabilities",
           "OAuth/JWT/token management code modifications"
         ],

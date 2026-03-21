@@ -64,7 +64,7 @@ PLAN → (user: ACT) → ACT → PLAN → (user: EVAL) → EVAL → Improved PLA
 
 ```
 # Communication (follows language setting, e.g., "ko")
-"이 함수는 사용자 인증을 처리합니다. 다음 단계로 넘어가겠습니다."
+"This function handles user authentication. Let's move on to the next step."
 
 # Artifacts (always English)
 /** Validates user authentication token and returns session data. */

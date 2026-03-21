@@ -28,13 +28,13 @@
   "activation": {
     "trigger": "When user requests test writing, TDD implementation, coverage improvement, or test strategy",
     "explicit_patterns": [
-      "테스트 코드 작성",
-      "단위 테스트",
+      "write test code",
       "unit test",
-      "TDD로",
-      "test-engineer로",
-      "e2e 테스트",
-      "커버리지 개선",
+      "unit test",
+      "with TDD",
+      "as test-engineer",
+      "e2e test",
+      "coverage improvement",
       "coverage improvement"
     ],
     "mandatory_checklist": {

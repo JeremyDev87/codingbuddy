@@ -191,8 +191,8 @@ Use `recommend_skills` MCP tool to get skill recommendations based on user promp
 recommend_skills({ prompt: "There is a bug in the login" })
 // => recommends: systematic-debugging
 
-recommend_skills({ prompt: "로그인에 버그가 있어" })
-// => recommends: systematic-debugging (Korean support)
+recommend_skills({ prompt: "There is a bug in the login" })
+// => recommends: systematic-debugging (multi-language support)
 
 recommend_skills({ prompt: "Build a dashboard component" })
 // => recommends: frontend-design
@@ -621,7 +621,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Language | Keyword |
 |----------|---------|
 | English | `AUTO` |
-| Korean | `자동` |
+| Korean | `AUTO` |
 | Japanese | `自動` |
 | Chinese | `自动` |
 | Spanish | `AUTOMATICO` |
@@ -633,7 +633,7 @@ AUTO implement user authentication with JWT tokens
 ```
 
 ```
-자동 사용자 인증 기능을 JWT로 구현해줘
+AUTO implement user authentication with JWT
 ```
 
 ### Expected Behavior

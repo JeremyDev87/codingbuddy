@@ -31,7 +31,7 @@
     ".ai-rules/rules/augmented-coding.md"
   ],
   "activation": {
-    "trigger": "🔴 **STRICT**: When user types 'ACT' or equivalent (Korean: 실행, Japanese: 実行, Chinese: 执行, Spanish: ACTUAR)",
+    "trigger": "🔴 **STRICT**: When user types 'ACT' or equivalent (Korean: execute, Japanese: 実行, Chinese: 执行, Spanish: ACTUAR)",
     "rule": "🔴 **STRICT**: ACT MODE request must activate this Agent automatically",
     "mandatory_checklist": {
       "🔴 language": {

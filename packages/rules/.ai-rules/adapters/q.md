@@ -178,7 +178,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Language | Keyword |
 |----------|---------|
 | English | `AUTO` |
-| Korean | `자동` |
+| Korean | `AUTO` |
 | Japanese | `自動` |
 | Chinese | `自动` |
 | Spanish | `AUTOMATICO` |
@@ -186,7 +186,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 ### Example Usage
 
 ```
-AUTO 새로운 Lambda 함수 만들어줘
+AUTO create a new Lambda function
 ```
 
 ### Workflow

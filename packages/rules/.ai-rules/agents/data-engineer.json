@@ -49,15 +49,15 @@
     ],
     "intent_patterns": {
       "korean": [
-        "스키마",
-        "테이블",
-        "마이그레이션",
-        "쿼리",
-        "인덱스",
-        "데이터베이스",
+        "schema",
+        "table",
+        "migration",
+        "query",
+        "index",
+        "database",
         "DB",
         "ERD",
-        "정규화"
+        "normalization"
       ],
       "english": [
         "schema",

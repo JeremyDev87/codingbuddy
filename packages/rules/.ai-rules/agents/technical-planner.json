@@ -49,22 +49,22 @@
   "activation": {
     "trigger": "When detailed implementation planning with TDD is needed",
     "explicit_patterns": [
-      "구현 계획",
       "implementation plan",
-      "태스크 분해",
+      "implementation plan",
       "task breakdown",
-      "작업 계획",
+      "task breakdown",
       "work plan",
-      "TDD 계획",
+      "work plan",
       "TDD plan",
-      "technical-planner로"
+      "TDD plan",
+      "as technical-planner"
     ],
     "intent_patterns": [
-      "구현\\s*계획|implementation\\s*plan",
-      "작업\\s*분해|task\\s*breakdown",
-      "단계별|step.?by.?step",
-      "TDD|테스트\\s*먼저|test.?first",
-      "bite.?sized|작은\\s*단위"
+      "implementation\\s*plan",
+      "task\\s*breakdown",
+      "step.?by.?step",
+      "TDD|test.?first",
+      "bite.?sized"
     ],
     "mandatory_checklist": {
       "🔴 writing_plans_skill": {

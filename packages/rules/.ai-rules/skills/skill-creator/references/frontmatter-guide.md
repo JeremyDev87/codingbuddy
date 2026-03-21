@@ -1,6 +1,6 @@
 # Skill Frontmatter v2.0 Field Guide
 
-스킬 SKILL.md 파일의 YAML 프론트매터 필드 레퍼런스.
+Reference for YAML frontmatter fields in skill SKILL.md files.
 
 ## Table of Contents
 
@@ -26,24 +26,24 @@
 
 ## Overview
 
-모든 스킬은 `SKILL.md` 파일에 YAML 프론트매터를 포함한다. 프론트매터는 스킬의 메타데이터를 정의하며, codingbuddy MCP 서버와 각 AI 도구가 스킬을 검색, 로드, 실행하는 데 사용한다.
+Every skill includes YAML frontmatter in its `SKILL.md` file. The frontmatter defines the skill's metadata and is used by the codingbuddy MCP server and each AI tool to search, load, and execute skills.
 
-**프론트매터 구조:**
+**Frontmatter structure:**
 ```yaml
 ---
 name: skill-name
 description: Use when [trigger condition]. [What it does].
-# ... 추가 필드 (선택)
+# ... additional fields (optional)
 ---
 
 # Skill Content (Markdown)
 ...
 ```
 
-**v2.0 변경사항:**
-- `model` 필드 추가: 권장 AI 모델 지정
-- `effort` 필드 추가: 추론 노력 수준 제어 (`low/medium/high/max`)
-- `hooks` 필드 추가: 이벤트 기반 자동 실행 (object 타입)
+**v2.0 changes:**
+- Added `model` field: Specifies recommended AI model
+- Added `effort` field: Controls reasoning effort level (`low/medium/high/max`)
+- Added `hooks` field: Event-driven automatic execution (object type)
 
 ---
 
@@ -51,17 +51,17 @@ description: Use when [trigger condition]. [What it does].
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `name` | `string` | **Yes** | 디렉토리명 | 슬래시 커맨드명 (소문자, 숫자, 하이픈, 최대 64자) |
-| `description` | `string` | **Yes** | 첫 번째 문단 | 용도 + 자동 트리거 조건 (200자 권장, 최대 1024자) |
-| `argument-hint` | `string` | No | — | 자동완성 인수 힌트 |
-| `allowed-tools` | `string` | No | all | 사용 가능한 도구 목록 |
-| `model` | `string` | No | 세션 기본값 | 모델 오버라이드 |
-| `effort` | `string` | No | 세션 기본값 | `low` / `medium` / `high` / `max` |
-| `context` | `string` | No | inline | `fork`: 격리된 서브에이전트 |
-| `agent` | `string` | No | general-purpose | 서브에이전트 타입 |
-| `disable-model-invocation` | `boolean` | No | `false` | AI 자동 호출 차단 |
-| `user-invocable` | `boolean` | No | `true` | `/` 메뉴에 표시 여부 |
-| `hooks` | `object` | No | — | 스킬 라이프사이클 훅 |
+| `name` | `string` | **Yes** | Directory name | Slash command name (lowercase, digits, hyphens, max 64 chars) |
+| `description` | `string` | **Yes** | First paragraph | Purpose + auto-trigger condition (200 chars recommended, max 1024 chars) |
+| `argument-hint` | `string` | No | — | Autocomplete argument hint |
+| `allowed-tools` | `string` | No | all | List of available tools |
+| `model` | `string` | No | Session default | Model override |
+| `effort` | `string` | No | Session default | `low` / `medium` / `high` / `max` |
+| `context` | `string` | No | inline | `fork`: Isolated sub-agent |
+| `agent` | `string` | No | general-purpose | Sub-agent type |
+| `disable-model-invocation` | `boolean` | No | `false` | Block AI auto-invocation |
+| `user-invocable` | `boolean` | No | `true` | Whether to show in `/` menu |
+| `hooks` | `object` | No | — | Skill lifecycle hooks |
 
 ---
 
@@ -69,22 +69,22 @@ description: Use when [trigger condition]. [What it does].
 
 ### name
 
-스킬의 고유 식별자. 디렉토리명과 일치해야 하며 슬래시 커맨드(`/name`)로 사용된다.
+The skill's unique identifier. Must match the directory name and is used as a slash command (`/name`).
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | **Yes** |
-| Default | 디렉토리명 |
+| Default | Directory name |
 | Pattern | `^[a-z][a-z0-9-]*$` |
-| Max Length | 64자 |
+| Max Length | 64 chars |
 
-**규칙:**
-- 소문자, 숫자, 하이픈만 사용
-- 스킬 디렉토리명과 동일해야 함
-- 단어 2-4개 권장
+**Rules:**
+- Use only lowercase letters, digits, and hyphens
+- Must be identical to the skill directory name
+- 2-4 words recommended
 
-**예시:**
+**Examples:**
 ```yaml
 name: test-driven-development
 name: security-audit
@@ -95,39 +95,39 @@ name: pr-all-in-one
 
 ### description
 
-스킬의 용도와 자동 트리거 조건을 설명한다. `recommend_skills` 검색의 핵심 매칭 필드.
+Describes the skill's purpose and auto-trigger conditions. This is the key matching field for `recommend_skills` search.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | **Yes** |
-| Default | SKILL.md 첫 번째 문단 |
-| Recommended Length | 200자 |
-| Max Length | 1024자 |
+| Default | First paragraph of SKILL.md |
+| Recommended Length | 200 chars |
+| Max Length | 1024 chars |
 
-**규칙:**
-- 구체적인 트리거 문구 포함 ("Use when...", "Use this skill when the user asks to...")
-- 3인칭 서술 ("Explains code..." not "Explain code...")
-- 200자 권장, 최대 1024자
+**Rules:**
+- Include specific trigger phrases ("Use when...", "Use this skill when the user asks to...")
+- Use third-person narration ("Explains code..." not "Explain code...")
+- 200 chars recommended, max 1024 chars
 
-**예시:**
+**Examples:**
 ```yaml
-# Good - 트리거 조건이 명확, 3인칭 서술
+# Good - Clear trigger condition, third-person narration
 description: Use when implementing any feature or bugfix, before writing implementation code
 
-# Good - 여러 상황 + 결과 기술
+# Good - Multiple situations + result description
 description: Use before deploying to staging or production. Covers pre-deploy validation, environment verification, rollback planning, health checks, and post-deploy monitoring.
 
-# Good - 3인칭으로 동작 기술
+# Good - Third-person action description
 description: Explains code structure, logic flow, and design decisions with context-appropriate detail.
 
-# Bad - 너무 모호
+# Bad - Too vague
 description: A skill for testing
 
-# Bad - 1인칭/명령형 (2인칭도 피할 것)
+# Bad - First-person/imperative (also avoid second-person)
 description: Explain the code to me
 
-# Bad - 1024자 초과
+# Bad - Exceeds 1024 chars
 description: This comprehensive skill provides detailed guidance for implementing test-driven development...
 ```
 
@@ -135,21 +135,21 @@ description: This comprehensive skill provides detailed guidance for implementin
 
 ### argument-hint
 
-사용자가 스킬 호출 시 전달할 수 있는 위치 인수를 안내한다. 자동완성 UI에 표시된다.
+Guides positional arguments that users can pass when invoking the skill. Displayed in the autocomplete UI.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Format | `[arg1] [arg2]` (대괄호로 감싼 인수명) |
+| Format | `[arg1] [arg2]` (argument names wrapped in brackets) |
 
-**규칙:**
-- 대괄호 `[]`로 각 인수를 감싸기
-- 복수 인수는 공백으로 구분
-- 인수명은 kebab-case
-- 모든 인수는 선택적
+**Rules:**
+- Wrap each argument in brackets `[]`
+- Separate multiple arguments with spaces
+- Use kebab-case for argument names
+- All arguments are optional
 
-**예시:**
+**Examples:**
 ```yaml
 argument-hint: [file-or-symbol]
 argument-hint: [pr-url-or-number]
@@ -159,9 +159,9 @@ argument-hint: [capability-name]
 argument-hint: [target-module-or-path]
 ```
 
-**사용 패턴:**
+**Usage pattern:**
 ```bash
-# 사용자 호출
+# User invocation
 /code-explanation src/auth/login.ts
 /pr-review 123
 /pr-all-in-one main 741
@@ -171,142 +171,142 @@ argument-hint: [target-module-or-path]
 
 ### allowed-tools
 
-스킬 실행 시 사용 가능한 도구를 제한한다. 미지정 시 모든 도구 사용 가능.
+Restricts which tools can be used during skill execution. If not specified, all tools are available.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Default | 모든 도구 허용 |
-| Format | 쉼표+공백 구분 도구 목록 |
+| Default | All tools allowed |
+| Format | Comma+space separated tool list |
 
-**사용 가능한 도구:**
-- `Read` — 파일 읽기
-- `Write` — 파일 쓰기
-- `Edit` — 파일 편집
-- `Grep` — 내용 검색
-- `Glob` — 파일 패턴 검색
-- `Bash` — 셸 명령 실행
-- `Agent` — 서브에이전트 실행
+**Available tools:**
+- `Read` — Read files
+- `Write` — Write files
+- `Edit` — Edit files
+- `Grep` — Content search
+- `Glob` — File pattern search
+- `Bash` — Execute shell commands
+- `Agent` — Execute sub-agents
 
-**Bash 필터링 (Claude Code 전용):**
+**Bash filtering (Claude Code only):**
 ```yaml
-# Bash 전체 허용
+# Allow all Bash
 allowed-tools: Read, Grep, Glob, Bash
 
-# git 명령만 허용
+# Allow only git commands
 allowed-tools: Read, Grep, Glob, Bash(git:*)
 
-# git과 gh 명령만 허용
+# Allow only git and gh commands
 allowed-tools: Read, Grep, Glob, Bash(gh:*, git:*)
 ```
 
-> **주의:** Bash 필터(`Bash(git:*)`)는 Claude Code에서만 지원된다. 다른 도구에서는 기본 도구명만 인식한다.
+> **Note:** Bash filters (`Bash(git:*)`) are only supported in Claude Code. Other tools recognize only basic tool names.
 
-**예시 패턴:**
+**Example patterns:**
 
-| 스킬 유형 | 권장 allowed-tools |
-|-----------|-------------------|
-| 읽기 전용 분석 | `Read, Grep, Glob` |
-| 코드 분석 + git | `Read, Grep, Glob, Bash(git:*)` |
-| PR 리뷰 | `Read, Grep, Glob, Bash(gh:*, git:*)` |
-| 성능 분석 | `Read, Grep, Glob, Bash` |
-| 리팩토링 | `Read, Write, Edit, Grep, Glob, Bash` |
+| Skill type | Recommended allowed-tools |
+|------------|--------------------------|
+| Read-only analysis | `Read, Grep, Glob` |
+| Code analysis + git | `Read, Grep, Glob, Bash(git:*)` |
+| PR review | `Read, Grep, Glob, Bash(gh:*, git:*)` |
+| Performance analysis | `Read, Grep, Glob, Bash` |
+| Refactoring | `Read, Write, Edit, Grep, Glob, Bash` |
 
 ---
 
 ### model
 
-스킬 실행에 권장되는 AI 모델을 지정한다. v2.0에서 추가.
+Specifies the recommended AI model for skill execution. Added in v2.0.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Default | 세션 기본 모델 |
+| Default | Session default model |
 
-**사용 가능한 값:**
-- `opus` — 복잡한 추론이 필요한 스킬
-- `sonnet` — 일반적인 코딩 스킬
-- `haiku` — 간단한 분류/변환 스킬
+**Available values:**
+- `opus` — Skills requiring complex reasoning
+- `sonnet` — General coding skills
+- `haiku` — Simple classification/transformation skills
 
-**사용 시점:**
-- 높은 추론 능력이 필요한 스킬: `opus`
-- 빠른 응답이 중요한 스킬: `haiku`
-- 대부분의 스킬: 미지정 (세션 기본값 사용)
+**When to use:**
+- Skills requiring high reasoning ability: `opus`
+- Skills where fast response is important: `haiku`
+- Most skills: Leave unspecified (uses session default)
 
-**예시:**
+**Examples:**
 ```yaml
-model: opus    # 복잡한 아키텍처 분석
-model: sonnet  # 일반 코드 작성
-model: haiku   # 간단한 코드 설명
+model: opus    # Complex architecture analysis
+model: sonnet  # General code writing
+model: haiku   # Simple code explanation
 ```
 
-> **호환성:** Claude Code에서만 자동 전환. 다른 도구에서는 힌트로만 사용.
+> **Compatibility:** Auto-switching only in Claude Code. Used as a hint only in other tools.
 
 ---
 
 ### effort
 
-AI 모델의 추론 노력 수준을 제어한다. v2.0에서 추가.
+Controls the AI model's reasoning effort level. Added in v2.0.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Default | 세션 기본값 |
+| Default | Session default |
 | Values | `low`, `medium`, `high`, `max` |
 
-**각 수준의 의미:**
-- `low` — 빠른 분류, 간단한 변환. 최소 추론
-- `medium` — 일반적인 코딩 작업 (기본)
-- `high` — 깊은 분석, 복잡한 문제 해결
-- `max` — 최대 추론. 보안 감사, 아키텍처 설계 등 가장 까다로운 작업
+**Meaning of each level:**
+- `low` — Quick classification, simple transformations. Minimal reasoning
+- `medium` — General coding tasks (default)
+- `high` — Deep analysis, complex problem solving
+- `max` — Maximum reasoning. Security audits, architecture design, and other most demanding tasks
 
-**예시:**
+**Examples:**
 ```yaml
-effort: max    # 보안 감사 - 최대 추론
-effort: high   # 아키텍처 분석 - 깊은 분석
-effort: low    # 코드 포맷팅 - 빠른 처리
+effort: max    # Security audit - maximum reasoning
+effort: high   # Architecture analysis - deep analysis
+effort: low    # Code formatting - fast processing
 ```
 
-> **호환성:** Claude Code에서만 자동 적용. 다른 도구에서는 무시.
+> **Compatibility:** Auto-applied only in Claude Code. Ignored in other tools.
 
 ---
 
 ### context
 
-스킬의 실행 컨텍스트를 지정한다. 격리된 환경에서 실행해야 하는 스킬에 사용.
+Specifies the skill's execution context. Used for skills that need to run in an isolated environment.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Default | `inline` (메인 컨텍스트에서 실행) |
+| Default | `inline` (runs in main context) |
 | Values | `fork` |
 
-**`fork`의 의미:**
-- 독립된 서브에이전트에서 실행
-- 메인 대화 컨텍스트에 영향 없음
-- 읽기 전용 분석 작업에 적합
+**What `fork` means:**
+- Runs in an independent sub-agent
+- Does not affect the main conversation context
+- Suitable for read-only analysis tasks
 
-**사용 시점:**
-- 코드 분석/리뷰 스킬 (메인 컨텍스트 오염 방지)
-- 대량 파일 읽기가 필요한 스킬
-- 독립적인 결과 보고가 필요한 스킬
+**When to use:**
+- Code analysis/review skills (to prevent main context pollution)
+- Skills requiring large-scale file reading
+- Skills that need independent result reporting
 
-**예시:**
+**Examples:**
 ```yaml
-context: fork  # 격리된 환경에서 PR 리뷰 실행
+context: fork  # Run PR review in isolated environment
 ```
 
-> **호환성:** Claude Code에서만 지원. 다른 도구에서는 무시 (inline으로 실행).
+> **Compatibility:** Only supported in Claude Code. Ignored in other tools (runs inline).
 
 ---
 
 ### agent
 
-스킬 실행에 권장되는 에이전트 타입을 지정한다. `context: fork`와 함께 사용.
+Specifies the recommended agent type for skill execution. Used together with `context: fork`.
 
 | Property | Value |
 |----------|-------|
@@ -315,34 +315,34 @@ context: fork  # 격리된 환경에서 PR 리뷰 실행
 | Default | `general-purpose` |
 | Values | `Explore`, `general-purpose` |
 
-**에이전트 타입:**
-- `Explore` — 빠른 코드 탐색/검색 특화 (읽기 전용)
-- `general-purpose` — 전체 도구 접근 (읽기+쓰기+Bash)
+**Agent types:**
+- `Explore` — Specialized for fast code exploration/search (read-only)
+- `general-purpose` — Full tool access (read+write+Bash)
 
-**사용 시점:**
-- 코드 설명, PR 리뷰 등 읽기 전용: `Explore`
-- 성능 분석, 보안 감사 등 Bash 필요: `general-purpose`
+**When to use:**
+- Read-only tasks like code explanation, PR review: `Explore`
+- Tasks requiring Bash like performance analysis, security audit: `general-purpose`
 
-**예시:**
+**Examples:**
 ```yaml
-# 코드 설명 스킬 - Explore로 빠른 검색
+# Code explanation skill - Fast search with Explore
 context: fork
 agent: Explore
 allowed-tools: Read, Grep, Glob
 
-# 보안 감사 - general-purpose로 git 접근
+# Security audit - git access with general-purpose
 context: fork
 agent: general-purpose
 allowed-tools: Read, Grep, Glob, Bash(git:*)
 ```
 
-> **호환성:** Claude Code에서만 지원. 다른 도구에서는 무시.
+> **Compatibility:** Only supported in Claude Code. Ignored in other tools.
 
 ---
 
 ### disable-model-invocation
 
-`true`로 설정하면 AI 모델이 스킬을 자동으로 호출하지 않는다. 사용자가 명시적으로 `/skill-name`으로 호출해야만 실행된다.
+When set to `true`, the AI model will not automatically invoke the skill. The skill will only run when the user explicitly calls it with `/skill-name`.
 
 | Property | Value |
 |----------|-------|
@@ -350,33 +350,33 @@ allowed-tools: Read, Grep, Glob, Bash(git:*)
 | Required | No |
 | Default | `false` |
 
-**사용 시점:**
-- 부작용(side effect)이 있는 스킬: 커밋, 배포, 푸시, DB 마이그레이션
-- 위험한 작업을 포함하는 스킬: 데이터 삭제, 프로덕션 변경
-- 사용자의 명시적 의도가 필요한 스킬
+**When to use:**
+- Skills with side effects: commits, deployments, pushes, DB migrations
+- Skills involving dangerous operations: data deletion, production changes
+- Skills requiring explicit user intent
 
-**예시:**
+**Examples:**
 ```yaml
-# 배포 체크리스트 - 사용자가 명시적으로 호출해야 함
+# Deployment checklist - must be explicitly invoked by user
 disable-model-invocation: true
 
-# DB 마이그레이션 - 위험한 작업 포함
+# DB migration - involves dangerous operations
 disable-model-invocation: true
 ```
 
-**현재 사용 중인 스킬:**
+**Currently used by:**
 - `deployment-checklist`
 - `database-migration`
 - `incident-response`
 - `pr-all-in-one`
 
-> **호환성:** 모든 도구에서 지원.
+> **Compatibility:** Supported by all tools.
 
 ---
 
 ### user-invocable
 
-`false`로 설정하면 사용자가 `/` 메뉴에서 스킬을 볼 수 없고 직접 호출할 수 없다. 시스템 내부에서만 사용된다.
+When set to `false`, the skill is not visible in the `/` menu and cannot be directly invoked by users. Used only internally by the system.
 
 | Property | Value |
 |----------|-------|
@@ -384,34 +384,34 @@ disable-model-invocation: true
 | Required | No |
 | Default | `true` |
 
-**사용 시점:**
-- 배경 지식 스킬: 다른 스킬이나 에이전트가 참조하는 정보
-- 내부 전용 스킬: `parse_mode`에서 자동 로드되는 컨텍스트
+**When to use:**
+- Background knowledge skills: Information referenced by other skills or agents
+- Internal-only skills: Context auto-loaded by `parse_mode`
 
-**예시:**
+**Examples:**
 ```yaml
-# 내부 전용 - 사용자에게 표시하지 않음
+# Internal only - not shown to users
 user-invocable: false
 ```
 
-**현재 사용 중인 스킬:**
+**Currently used by:**
 - `context-management`
 - `widget-slot-architecture`
 
-> **호환성:** 모든 도구에서 지원.
+> **Compatibility:** Supported by all tools.
 
 ---
 
 ### hooks
 
-이벤트 기반으로 스킬을 자동 실행하는 트리거를 설정한다. v2.0에서 추가.
+Sets up triggers to automatically execute skills based on events. Added in v2.0.
 
 | Property | Value |
 |----------|-------|
 | Type | `object` |
 | Required | No |
 
-**훅 이벤트:**
+**Hook events:**
 
 ```yaml
 hooks:
@@ -425,14 +425,14 @@ hooks:
     action: "load"
 ```
 
-**지원 이벤트:**
-- `PreToolUse` — 도구 호출 전 실행
-- `PostToolUse` — 도구 호출 후 실행
-- `session-start` — 세션 시작 시 자동 로드
+**Supported events:**
+- `PreToolUse` — Execute before tool invocation
+- `PostToolUse` — Execute after tool invocation
+- `session-start` — Auto-load at session start
 
-**예시:**
+**Examples:**
 ```yaml
-# 커밋 전 자동 리뷰
+# Automatic review before commit
 hooks:
   PreToolUse:
     - matcher: "Bash"
@@ -440,73 +440,73 @@ hooks:
       action: "invoke"
 ```
 
-> **호환성:** Claude Code에서 완전 지원. Kiro에서 이벤트 기반 훅 지원. 다른 도구에서는 무시.
+> **Compatibility:** Fully supported in Claude Code. Event-based hooks supported in Kiro. Ignored in other tools.
 
 ---
 
 ## Decision Tree
 
-스킬 프론트매터 필드를 결정하기 위한 의사결정 트리:
+Decision tree for determining skill frontmatter fields:
 
 ```
-스킬에 부작용(side effect)이 있는가? (커밋, 푸시, 배포 등)
+Does the skill have side effects? (commits, pushes, deployments, etc.)
 ├── YES → disable-model-invocation: true
-└── NO → 배경 지식 스킬인가? (아키텍처 참조 등)
+└── NO → Is it a background knowledge skill? (architecture reference, etc.)
     ├── YES → user-invocable: false
-    └── NO → 기본값 유지
+    └── NO → Keep defaults
 
-읽기 전용 분석 스킬인가?
+Is it a read-only analysis skill?
 ├── YES → context: fork, agent: Explore
-└── NO → Bash 실행이 필요한 분석 스킬인가?
+└── NO → Is it an analysis skill that needs Bash execution?
     ├── YES → context: fork, agent: general-purpose
-    └── NO → 기본 컨텍스트 (inline)
+    └── NO → Default context (inline)
 
-특정 도구만 사용해야 하는가?
-├── YES → allowed-tools: [필요한 도구 목록]
-└── NO → allowed-tools 생략 (전체 허용)
+Should only specific tools be used?
+├── YES → allowed-tools: [required tool list]
+└── NO → Omit allowed-tools (allow all)
 ```
 
-**의사결정 요약표:**
+**Decision summary table:**
 
-| 질문 | 조건 | 설정할 필드 |
-|------|------|-------------|
-| 부작용 있음? | 커밋/배포/DB 변경 | `disable-model-invocation: true` |
-| 내부 전용? | 사용자 미호출 | `user-invocable: false` |
-| 인수 있음? | CLI에서 인수 전달 | `argument-hint: [arg-name]` |
-| 도구 제한? | 특정 도구만 허용 | `allowed-tools: [도구 목록]` |
-| 격리 필요? | 독립 실행, 읽기 전용 | `context: fork` |
-| 에이전트 유형? | fork 시 | `agent: Explore` 또는 `general-purpose` |
-| 모델 지정? | 특수 모델 필요 | `model: opus` 등 |
-| 노력 조정? | 분석 깊이 조절 | `effort: low/medium/high/max` |
-| 자동 실행? | 이벤트 트리거 | `hooks: { ... }` |
+| Question | Condition | Field to set |
+|----------|-----------|-------------|
+| Has side effects? | Commits/deployments/DB changes | `disable-model-invocation: true` |
+| Internal only? | Not user-invoked | `user-invocable: false` |
+| Has arguments? | CLI argument passing | `argument-hint: [arg-name]` |
+| Tool restriction? | Only specific tools allowed | `allowed-tools: [tool list]` |
+| Needs isolation? | Independent execution, read-only | `context: fork` |
+| Agent type? | When using fork | `agent: Explore` or `general-purpose` |
+| Specific model? | Special model needed | `model: opus` etc. |
+| Effort adjustment? | Adjust analysis depth | `effort: low/medium/high/max` |
+| Auto-execution? | Event trigger | `hooks: { ... }` |
 
 ---
 
 ## Description Writing Guide
 
-`description`은 `recommend_skills`의 매칭에 직접 영향을 미치는 핵심 필드다.
+`description` is the key field that directly affects `recommend_skills` matching.
 
-### 작성 원칙
+### Writing Principles
 
-1. **트리거 문구 포함** — "Use when...", "Use this skill when..."
-2. **3인칭 서술** — "Explains code..." (O), "Explain code..." (X)
-3. **200자 권장, 최대 1024자** — 검색 최적화, 간결함 유지
-4. **구체적 상황 기술** — "코딩할 때"가 아닌 "feature 구현 전"
+1. **Include trigger phrases** — "Use when...", "Use this skill when..."
+2. **Third-person narration** — "Explains code..." (O), "Explain code..." (X)
+3. **200 chars recommended, max 1024 chars** — Search optimization, maintain brevity
+4. **Describe specific situations** — Not "when coding" but "before implementing a feature"
 
-### 트리거 문구 패턴
+### Trigger Phrase Patterns
 
-| 패턴 | 사용 시점 | 예시 |
-|------|----------|------|
-| `Use when [동작]ing` | 진행 중 활동 | `Use when implementing any feature` |
-| `Use before [동작]ing` | 사전 준비 | `Use before deploying to production` |
-| `Use after [동작]ing` | 사후 검증 | `Use after completing a development branch` |
-| `Use when encountering` | 문제 대응 | `Use when encountering any bug or test failure` |
-| `Use this skill when the user asks to` | 사용자 요청 | `Use this skill when the user asks to review a PR` |
+| Pattern | When to use | Example |
+|---------|------------|---------|
+| `Use when [action]ing` | During an activity | `Use when implementing any feature` |
+| `Use before [action]ing` | Pre-activity preparation | `Use before deploying to production` |
+| `Use after [action]ing` | Post-activity verification | `Use after completing a development branch` |
+| `Use when encountering` | Problem response | `Use when encountering any bug or test failure` |
+| `Use this skill when the user asks to` | User request | `Use this skill when the user asks to review a PR` |
 
-### 3인칭 서술 가이드
+### Third-Person Narration Guide
 
-| Good (3인칭) | Bad (명령형/2인칭) |
-|-------------|------------------|
+| Good (Third-person) | Bad (Imperative/Second-person) |
+|---------------------|-------------------------------|
 | Explains code structure and logic flow | Explain the code |
 | Generates comprehensive test suites | Generate tests |
 | Analyzes security vulnerabilities | Analyze security |
@@ -516,40 +516,40 @@ hooks:
 
 **Good:**
 ```yaml
-# 트리거 + 3인칭 서술
+# Trigger + third-person narration
 description: Use when implementing any feature or bugfix, before writing implementation code
 
-# 여러 상황 + 커버리지 기술
+# Multiple situations + coverage description
 description: Use before deploying to staging or production. Covers pre-deploy validation, environment verification, rollback planning, health checks, and post-deploy monitoring.
 
-# 3인칭으로 동작 기술
+# Third-person action description
 description: Explains code structure, logic flow, and design decisions with context-appropriate detail.
 ```
 
 **Bad:**
 ```yaml
-# 너무 모호
+# Too vague
 description: A testing skill
 
-# 명령형 (1인칭/2인칭)
+# Imperative (first-person/second-person)
 description: Explain the code to me
 
-# 트리거 조건 없음
+# No trigger condition
 description: Helps with code quality
 
-# 1024자 초과
+# Exceeds 1024 chars
 description: This comprehensive skill provides detailed guidance for implementing test-driven development practices including red-green-refactor cycles with support for multiple testing frameworks and assertion libraries across various programming languages and environments with special attention to edge cases and boundary conditions and performance optimization and integration testing and end-to-end testing and mutation testing and property-based testing and snapshot testing and visual regression testing...
 ```
 
-### 키워드 매칭 최적화
+### Keyword Matching Optimization
 
-`recommend_skills`는 사용자 프롬프트와 description을 매칭한다. 관련 키워드를 포함하면 매칭 정확도가 높아진다:
+`recommend_skills` matches user prompts against descriptions. Including relevant keywords improves matching accuracy:
 
 ```yaml
-# "test", "tdd", "feature", "bugfix" 키워드 매칭 가능
+# Matchable against "test", "tdd", "feature", "bugfix" keywords
 description: Use when implementing any feature or bugfix, before writing implementation code
 
-# "deploy", "staging", "production", "validation" 매칭 가능
+# Matchable against "deploy", "staging", "production", "validation"
 description: Use before deploying to staging or production. Covers pre-deploy validation...
 ```
 
@@ -557,7 +557,7 @@ description: Use before deploying to staging or production. Covers pre-deploy va
 
 ## Complete Examples
 
-### 읽기 전용 분석 스킬
+### Read-Only Analysis Skill
 
 ```yaml
 ---
@@ -570,7 +570,7 @@ argument-hint: [file-or-symbol]
 ---
 ```
 
-### 부작용 있는 체크리스트 스킬
+### Skill with Side Effects (Checklist)
 
 ```yaml
 ---
@@ -580,7 +580,7 @@ disable-model-invocation: true
 ---
 ```
 
-### 복잡한 분석 스킬 (v2.0)
+### Complex Analysis Skill (v2.0)
 
 ```yaml
 ---
@@ -595,7 +595,7 @@ effort: max
 ---
 ```
 
-### CLI 인수 + 부작용 스킬
+### CLI Arguments + Side Effects Skill
 
 ```yaml
 ---
@@ -606,7 +606,7 @@ argument-hint: [target-branch] [issue-id]
 ---
 ```
 
-### 내부 전용 배경 지식 스킬
+### Internal-Only Background Knowledge Skill
 
 ```yaml
 ---
@@ -616,7 +616,7 @@ user-invocable: false
 ---
 ```
 
-### 이벤트 기반 자동 실행 스킬 (v2.0)
+### Event-Driven Auto-Execution Skill (v2.0)
 
 ```yaml
 ---

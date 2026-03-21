@@ -42,7 +42,7 @@ The skill uses an interactive 4-step configuration flow:
   [3/4] PR Language
   ┌──────────────────────────┐
   │ PR description language  │
-  │ [English] [한국어]        │
+  │ [English] [Korean]        │
   │ [Bilingual] (EN + KO)    │
   └──────────────────────────┘
        ⬇
@@ -78,7 +78,7 @@ Selects which issue tracking system is used:
 
 Determines the language for PR descriptions:
 - **English**: PRs written in English only
-- **한국어**: PRs written in Korean only
+- **Korean**: PRs written in Korean only
 - **Bilingual**: PRs include both English and Korean
 
 ##### Detailed Language Behavior
@@ -86,7 +86,7 @@ Determines the language for PR descriptions:
 | Value | PR Title | PR Body | Use Case |
 |-------|----------|---------|----------|
 | `en` | English | English only | International teams, open source projects |
-| `ko` | 한국어 | 한국어만 | Korean-only teams, internal projects |
+| `ko` | Korean | Korean only | Korean-only teams, internal projects |
 | `bilingual` | English | English + Korean | Mixed teams, global + local collaboration |
 
 ##### Language Examples
@@ -97,14 +97,14 @@ Determines the language for PR descriptions:
 - Best for: Open source, international collaboration
 
 **`ko` (Korean)**:
-- Title: `feat: 사용자 인증 추가`
-- Body: 한국어만 사용한 설명
-- Best for: 한국어 기반 팀, 내부 프로젝트
+- Title: `feat: add user authentication`
+- Body: Korean-only description
+- Best for: Korean-speaking teams, internal projects
 
 **`bilingual` (Both)**:
 - Title: `feat: add user authentication` (English)
 - Body: English description followed by Korean translation
-- Best for: 글로벌 팀과 한국 팀이 함께 협업하는 프로젝트
+- Best for: Projects where global and Korean teams collaborate together
 
 #### Step 4: Issue URL Template
 Optional template for auto-generating issue links in PR bodies. Use `{id}` placeholder for the issue ID.

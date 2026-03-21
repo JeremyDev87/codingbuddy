@@ -4,12 +4,12 @@
 
 PR templates are automatically selected based on the `prLanguage` setting:
 
-(PR 템플릿은 `prLanguage` 설정에 따라 자동 선택됩니다)
+(PR templates are automatically selected based on the `prLanguage` setting)
 
 | `prLanguage` | Template Used | PR Title | PR Body |
 |--------------|---------------|----------|---------|
 | `en` | English Template | English | English only |
-| `ko` | Korean Template | 한국어 | 한국어만 |
+| `ko` | Korean Template | Korean | Korean only |
 | `bilingual` | Bilingual Template | English | English + Korean |
 
 ### Selection Flow
@@ -52,19 +52,19 @@ PR templates are automatically selected based on the `prLanguage` setting:
 {screenshots_section}
 ```
 
-### Korean Template (한국어)
+### Korean Template
 <!-- Used when `prLanguage: "ko"` - for Korean-only teams -->
 ```markdown
-## 컨텍스트
+## Context
 
-**관련 링크:**
-- 이슈: [{issue_id}]({issue_url})
+**Related Links:**
+- Issue: [{issue_id}]({issue_url})
 
-**상세 설명:**
+**Description Details:**
 
 {description}
 
-## 스크린샷 또는 비디오
+## Screenshots or Videos
 
 {screenshots_section}
 ```
@@ -83,7 +83,7 @@ PR templates are automatically selected based on the `prLanguage` setting:
 
 ---
 
-**상세 설명:**
+**Description Details (Korean):**
 
 {description_ko}
 
@@ -142,7 +142,7 @@ Added JWT-based authentication with refresh token support. Includes:
 ## Title Format
 
 - English: `{type}: {short description}` (max 70 chars)
-- Korean: `{type}: {간단한 설명}` (max 70 chars)
+- Korean: `{type}: {short description}` (max 70 chars)
 
 Example: `feat: add user authentication flow`
 

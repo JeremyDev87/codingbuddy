@@ -30,10 +30,10 @@ End users access rules **only through MCP tools**. No local rule files needed.
 }
 ```
 
-> **Important:** Codex(GitHub Copilot)의 `roots/list` MCP capability 지원 여부는 미확인입니다.
-> `CODINGBUDDY_PROJECT_ROOT` 없이는 서버가 프로젝트의 `codingbuddy.config.json`을 찾지 못하여
-> `language` 등 설정이 기본값으로 동작합니다. 항상 이 환경변수를 프로젝트의 절대 경로로 설정하세요.
-> Codex가 `${workspaceFolder}` 변수 확장을 지원하는 경우, 절대 경로 대신 사용할 수 있습니다.
+> **Important:** Whether Codex (GitHub Copilot) supports the `roots/list` MCP capability has not been confirmed.
+> Without `CODINGBUDDY_PROJECT_ROOT`, the server cannot locate your project's `codingbuddy.config.json`,
+> causing settings such as `language` to use default values. Always set this environment variable to your project's absolute path.
+> If Codex supports `${workspaceFolder}` variable expansion, you can use it instead of an absolute path.
 
 ### Monorepo Contributors
 
@@ -599,7 +599,7 @@ Use the `AUTO` keyword (or localized versions) at the start of your message:
 | Language | Keyword |
 |----------|---------|
 | English | `AUTO` |
-| Korean | `자동` |
+| Korean | `AUTO` |
 | Japanese | `自動` |
 | Chinese | `自动` |
 | Spanish | `AUTOMATICO` |
