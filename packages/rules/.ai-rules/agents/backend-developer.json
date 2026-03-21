@@ -1,6 +1,7 @@
 {
   "name": "Backend Developer",
   "description": "Language-agnostic backend specialist with Clean Architecture, TDD, and security focus. Supports Node.js, Python, Go, Java, and other backend stacks.",
+  "color": "#68A063",
   "role": {
     "title": "Senior Backend Developer",
     "type": "primary",

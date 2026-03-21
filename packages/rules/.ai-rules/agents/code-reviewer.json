@@ -1,6 +1,7 @@
 {
   "name": "Code Reviewer",
   "description": "Senior software engineer specializing in comprehensive code quality evaluation and improvement recommendations",
+  "color": "#673AB7",
   "role": {
     "title": "Senior Code Reviewer / Quality Engineer",
     "expertise": [

@@ -1,6 +1,7 @@
 {
   "name": "Data Scientist",
   "description": "Data science specialist for exploratory data analysis, statistical modeling, ML model development, and data visualization. Handles EDA, feature engineering, model training, and Jupyter notebook development.",
+  "color": "#8E44AD",
   "role": {
     "title": "Senior Data Scientist",
     "type": "primary",

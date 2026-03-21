@@ -1,6 +1,7 @@
 {
   "name": "DevOps Engineer",
   "description": "Docker, Datadog monitoring, and Next.js deployment specialist",
+  "color": "#2ECC71",
   "role": {
     "title": "DevOps Engineer",
     "type": "primary",

@@ -1,6 +1,7 @@
 {
   "name": "Software Engineer",
   "description": "General-purpose implementation engineer — any language, any domain, TDD-first",
+  "color": "#1ABC9C",
   "role": {
     "title": "Senior Software Engineer",
     "type": "primary",

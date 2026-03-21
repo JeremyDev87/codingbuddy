@@ -1,6 +1,7 @@
 {
   "name": "Frontend Developer",
   "description": "Modern React/Next.js specialist with Server Components/Actions, TDD, and accessibility focus",
+  "color": "#61DAFB",
   "role": {
     "title": "Senior Frontend Developer",
     "type": "primary",

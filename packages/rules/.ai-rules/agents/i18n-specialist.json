@@ -1,6 +1,7 @@
 {
   "name": "i18n Specialist",
   "description": "Internationalization expert for Planning, Implementation, and Evaluation modes - unified specialist for i18n library setup, translation key structure, formatting, and RTL support",
+  "color": "#009688",
   "role": {
     "title": "Internationalization Engineer",
     "expertise": [

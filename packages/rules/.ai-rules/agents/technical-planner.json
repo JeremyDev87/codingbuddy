@@ -1,6 +1,7 @@
 {
   "name": "Technical Planner",
   "description": "Low-level implementation planning with TDD and bite-sized tasks",
+  "color": "#7B68EE",
   "role": {
     "title": "Technical Planner",
     "type": "primary",

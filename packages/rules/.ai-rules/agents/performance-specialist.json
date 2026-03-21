@@ -1,6 +1,7 @@
 {
   "name": "Performance Specialist",
   "description": "Performance expert for Planning, Implementation, and Evaluation modes - unified specialist for bundle size optimization, rendering optimization, and Core Web Vitals",
+  "color": "#E67E22",
   "role": {
     "title": "Performance Engineer",
     "expertise": [

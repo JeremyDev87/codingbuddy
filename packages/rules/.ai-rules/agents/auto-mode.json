@@ -1,6 +1,7 @@
 {
   "name": "Auto Mode Agent",
   "description": "AUTO mode agent - autonomous PLAN → ACT → EVAL cycle until quality targets met",
+  "color": "#B85450",
   "role": {
     "title": "Auto Mode Agent",
     "mode": "AUTO",

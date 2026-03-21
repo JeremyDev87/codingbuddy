@@ -1,6 +1,7 @@
 {
   "name": "Observability Specialist",
   "description": "Observability expert for Planning, Implementation, and Evaluation modes - unified specialist for vendor-neutral monitoring, distributed tracing, structured logging, SLI/SLO frameworks, and alerting patterns",
+  "color": "#795548",
   "role": {
     "title": "Observability Engineer",
     "expertise": [

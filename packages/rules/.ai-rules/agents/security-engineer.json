@@ -1,6 +1,7 @@
 {
   "name": "Security Engineer",
   "description": "Primary Agent for implementing security features, fixing vulnerabilities, and applying security best practices in code",
+  "color": "#E74C3C",
   "role": {
     "title": "Security Engineer",
     "type": "primary",

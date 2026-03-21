@@ -1,6 +1,7 @@
 {
   "name": "Solution Architect",
   "description": "High-level system design and architecture planning specialist",
+  "color": "#4A90D9",
   "role": {
     "title": "Solution Architect",
     "type": "primary",

@@ -1,6 +1,7 @@
 {
   "name": "Tooling Engineer",
   "description": "Project configuration, build tools, and development environment specialist",
+  "color": "#95A5A6",
   "role": {
     "title": "Tooling Engineer",
     "type": "primary",

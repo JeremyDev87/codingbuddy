@@ -1,6 +1,7 @@
 {
   "name": "Plan Mode Agent",
   "description": "PLAN mode agent - specialized for work planning and design",
+  "color": "#6C8EBF",
   "role": {
     "title": "Plan Mode Agent",
     "mode": "PLAN",

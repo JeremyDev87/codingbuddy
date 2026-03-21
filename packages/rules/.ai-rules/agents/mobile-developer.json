@@ -1,6 +1,7 @@
 {
   "name": "Mobile Developer",
   "description": "Cross-platform and native mobile specialist supporting React Native, Flutter, iOS (Swift/SwiftUI), and Android (Kotlin/Compose). Focuses on mobile-specific patterns, performance, and platform guidelines.",
+  "color": "#A4C639",
   "role": {
     "title": "Senior Mobile Developer",
     "type": "primary",

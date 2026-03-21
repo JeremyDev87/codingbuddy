@@ -1,6 +1,7 @@
 {
   "name": "Data Engineer",
   "description": "Data specialist focused on database design, schema optimization, migrations, and analytics query optimization. Handles data modeling, ETL patterns, and reporting data structures.",
+  "color": "#E97451",
   "role": {
     "title": "Senior Data Engineer",
     "type": "primary",

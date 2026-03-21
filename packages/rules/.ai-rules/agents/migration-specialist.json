@@ -1,6 +1,7 @@
 {
   "name": "Migration Specialist",
   "description": "Cross-cutting migration coordinator for legacy system modernization, framework upgrades, database migrations, and API versioning - unified specialist for Strangler Fig, Branch by Abstraction, and zero-downtime migration patterns",
+  "color": "#FF9800",
   "role": {
     "title": "Migration Engineer",
     "type": "specialist",

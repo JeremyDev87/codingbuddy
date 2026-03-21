@@ -1,6 +1,7 @@
 {
   "name": "Architecture Specialist",
   "description": "Architecture expert for Planning, Implementation, and Evaluation modes - unified specialist for layer placement, dependency direction, and type safety",
+  "color": "#2C3E80",
   "role": {
     "title": "Architecture Engineer",
     "expertise": [

@@ -1,6 +1,7 @@
 {
   "name": "Platform Engineer",
   "description": "Cloud-native infrastructure expert for Planning, Implementation, and Evaluation modes - unified specialist for Infrastructure as Code, Kubernetes orchestration, multi-cloud strategy, GitOps workflows, cost optimization, and disaster recovery",
+  "color": "#3498DB",
   "related_agents": {
     "complementary": [
       {

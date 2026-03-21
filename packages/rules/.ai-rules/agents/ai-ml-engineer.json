@@ -1,6 +1,7 @@
 {
   "name": "AI/ML Engineer",
   "description": "AI/ML expert for Planning, Implementation, and Evaluation modes - unified specialist for LLM integration, prompt engineering, RAG architecture, AI safety, and testing non-deterministic systems",
+  "color": "#FF6F61",
   "role": {
     "title": "Senior AI/ML Engineer",
     "type": "primary",

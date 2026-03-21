@@ -1631,6 +1631,8 @@ Some specialist agents define **delegation rules** to clarify when work should b
 Each agent JSON contains:
 
 - **name**: Agent identifier
+- **description**: Brief description of the agent
+- **color**: Unique hex color code for visual identification (e.g., `#61DAFB`)
 - **role**: Title and expertise areas
 - **context_files**: Rules to reference
 - **modes**: Planning, implementation, and evaluation frameworks (for unified specialists)
@@ -1641,6 +1643,52 @@ Each agent JSON contains:
 - **commit_rules**: Structural vs behavioral changes
 - **design_system**: UI component guidelines
 - **communication**: Response language and style
+
+### Color Reference
+
+Each agent has a unique `color` field (hex code) for visual identification in UIs and dashboards.
+
+| Agent | Color | Hex |
+|-------|-------|-----|
+| **Mode Agents** | | |
+| Plan Mode | ![#6C8EBF](https://via.placeholder.com/12/6C8EBF/6C8EBF.png) Steel Blue | `#6C8EBF` |
+| Act Mode | ![#82B366](https://via.placeholder.com/12/82B366/82B366.png) Sage Green | `#82B366` |
+| Eval Mode | ![#D4A843](https://via.placeholder.com/12/D4A843/D4A843.png) Golden | `#D4A843` |
+| Auto Mode | ![#B85450](https://via.placeholder.com/12/B85450/B85450.png) Rust Red | `#B85450` |
+| **Primary Agents** | | |
+| Solution Architect | ![#4A90D9](https://via.placeholder.com/12/4A90D9/4A90D9.png) Royal Blue | `#4A90D9` |
+| Technical Planner | ![#7B68EE](https://via.placeholder.com/12/7B68EE/7B68EE.png) Slate Blue | `#7B68EE` |
+| Frontend Developer | ![#61DAFB](https://via.placeholder.com/12/61DAFB/61DAFB.png) React Cyan | `#61DAFB` |
+| Backend Developer | ![#68A063](https://via.placeholder.com/12/68A063/68A063.png) Node Green | `#68A063` |
+| Mobile Developer | ![#A4C639](https://via.placeholder.com/12/A4C639/A4C639.png) Android Green | `#A4C639` |
+| Data Engineer | ![#E97451](https://via.placeholder.com/12/E97451/E97451.png) Burnt Sienna | `#E97451` |
+| Agent Architect | ![#9B59B6](https://via.placeholder.com/12/9B59B6/9B59B6.png) Amethyst | `#9B59B6` |
+| Platform Engineer | ![#3498DB](https://via.placeholder.com/12/3498DB/3498DB.png) Dodger Blue | `#3498DB` |
+| Tooling Engineer | ![#95A5A6](https://via.placeholder.com/12/95A5A6/95A5A6.png) Concrete | `#95A5A6` |
+| AI/ML Engineer | ![#FF6F61](https://via.placeholder.com/12/FF6F61/FF6F61.png) Coral | `#FF6F61` |
+| DevOps Engineer | ![#2ECC71](https://via.placeholder.com/12/2ECC71/2ECC71.png) Emerald | `#2ECC71` |
+| Test Engineer | ![#F39C12](https://via.placeholder.com/12/F39C12/F39C12.png) Orange | `#F39C12` |
+| Security Engineer | ![#E74C3C](https://via.placeholder.com/12/E74C3C/E74C3C.png) Alizarin | `#E74C3C` |
+| Software Engineer | ![#1ABC9C](https://via.placeholder.com/12/1ABC9C/1ABC9C.png) Turquoise | `#1ABC9C` |
+| Data Scientist | ![#8E44AD](https://via.placeholder.com/12/8E44AD/8E44AD.png) Wisteria | `#8E44AD` |
+| Systems Developer | ![#D35400](https://via.placeholder.com/12/D35400/D35400.png) Pumpkin | `#D35400` |
+| **Domain Specialists** | | |
+| Architecture | ![#2C3E80](https://via.placeholder.com/12/2C3E80/2C3E80.png) Navy | `#2C3E80` |
+| Test Strategy | ![#F1C40F](https://via.placeholder.com/12/F1C40F/F1C40F.png) Sunflower | `#F1C40F` |
+| Performance | ![#E67E22](https://via.placeholder.com/12/E67E22/E67E22.png) Carrot | `#E67E22` |
+| Security | ![#C0392B](https://via.placeholder.com/12/C0392B/C0392B.png) Pomegranate | `#C0392B` |
+| Accessibility | ![#27AE60](https://via.placeholder.com/12/27AE60/27AE60.png) Nephritis | `#27AE60` |
+| SEO | ![#16A085](https://via.placeholder.com/12/16A085/16A085.png) Green Sea | `#16A085` |
+| UI/UX Designer | ![#E91E63](https://via.placeholder.com/12/E91E63/E91E63.png) Pink | `#E91E63` |
+| Documentation | ![#607D8B](https://via.placeholder.com/12/607D8B/607D8B.png) Blue Gray | `#607D8B` |
+| Integration | ![#00BCD4](https://via.placeholder.com/12/00BCD4/00BCD4.png) Cyan | `#00BCD4` |
+| Event Architecture | ![#FF5722](https://via.placeholder.com/12/FF5722/FF5722.png) Deep Orange | `#FF5722` |
+| Observability | ![#795548](https://via.placeholder.com/12/795548/795548.png) Brown | `#795548` |
+| Migration | ![#FF9800](https://via.placeholder.com/12/FF9800/FF9800.png) Amber | `#FF9800` |
+| i18n | ![#009688](https://via.placeholder.com/12/009688/009688.png) Teal | `#009688` |
+| **Utility Agents** | | |
+| Code Quality | ![#8BC34A](https://via.placeholder.com/12/8BC34A/8BC34A.png) Light Green | `#8BC34A` |
+| Code Reviewer | ![#673AB7](https://via.placeholder.com/12/673AB7/673AB7.png) Deep Purple | `#673AB7` |
 
 ---
 
@@ -1667,6 +1715,7 @@ Create a new JSON file following this structure:
 {
   "name": "Agent Name",
   "description": "Brief description",
+  "color": "#HEXCOD",
   "role": {
     "title": "Role Title",
     "expertise": [],

@@ -1,6 +1,7 @@
 {
   "name": "Integration Specialist",
   "description": "External service integration specialist for Planning, Implementation, and Evaluation modes - unified specialist for API integrations, webhooks, OAuth flows, and failure isolation patterns",
+  "color": "#00BCD4",
   "role": {
     "title": "Integration Engineer",
     "expertise": [

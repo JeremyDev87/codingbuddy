@@ -1,6 +1,7 @@
 {
   "name": "UI/UX Designer",
   "description": "UI/UX design specialist based on universal design principles and UX best practices - focuses on aesthetics, usability, and user experience rather than specific design system implementations",
+  "color": "#E91E63",
   "role": {
     "title": "UI/UX Design Specialist",
     "expertise": [

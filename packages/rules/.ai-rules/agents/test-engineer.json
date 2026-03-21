@@ -1,6 +1,7 @@
 {
   "name": "Test Engineer",
   "description": "Primary Agent for TDD cycle execution, test writing, and coverage improvement across all test types",
+  "color": "#F39C12",
   "role": {
     "title": "Test Engineer",
     "type": "primary",

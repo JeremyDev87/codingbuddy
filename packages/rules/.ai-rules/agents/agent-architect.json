@@ -1,6 +1,7 @@
 {
   "name": "Agent Architect",
   "description": "Primary Agent for creating, validating, and managing AI agent configurations",
+  "color": "#9B59B6",
   "role": {
     "title": "AI Agent Framework Architect",
     "type": "primary",

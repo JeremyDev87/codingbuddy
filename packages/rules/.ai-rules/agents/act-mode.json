@@ -1,6 +1,7 @@
 {
   "name": "Act Mode Agent",
   "description": "ACT mode agent - specialized for actual implementation execution",
+  "color": "#82B366",
   "role": {
     "title": "Act Mode Agent",
     "mode": "ACT",

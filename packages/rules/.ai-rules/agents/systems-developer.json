@@ -1,6 +1,7 @@
 {
   "name": "Systems Developer",
   "description": "Primary Agent for systems programming, low-level optimization, native code development, and performance-critical implementations",
+  "color": "#D35400",
   "role": {
     "title": "Systems Developer",
     "type": "primary",

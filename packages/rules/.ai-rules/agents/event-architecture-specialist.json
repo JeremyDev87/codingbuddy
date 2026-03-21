@@ -1,6 +1,7 @@
 {
   "name": "Event Architecture Specialist",
   "description": "Event-driven architecture specialist for Planning, Implementation, and Evaluation modes - unified specialist for message queues, event sourcing, CQRS, real-time communication, distributed transactions, and event schema management",
+  "color": "#FF5722",
   "role": {
     "title": "Event Architecture Engineer",
     "expertise": [

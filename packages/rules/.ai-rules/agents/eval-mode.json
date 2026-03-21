@@ -1,6 +1,7 @@
 {
   "name": "Eval Mode Agent",
   "description": "EVAL mode agent - specialized for code quality evaluation and improvement suggestions",
+  "color": "#D4A843",
   "role": {
     "title": "Eval Mode Agent",
     "mode": "EVAL",
