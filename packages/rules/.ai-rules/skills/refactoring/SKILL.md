@@ -1,6 +1,7 @@
 ---
 name: refactoring
 description: Use when improving code structure without changing behavior, cleaning up technical debt, or preparing code for new features
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 # Refactoring

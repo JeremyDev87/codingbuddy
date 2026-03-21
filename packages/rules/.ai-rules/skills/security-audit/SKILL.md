@@ -3,6 +3,7 @@ name: security-audit
 description: Use when reviewing code for security vulnerabilities, before shipping features, or conducting security assessments. Covers OWASP Top 10, secrets exposure, authentication, and authorization flaws.
 context: fork
 agent: general-purpose
+allowed-tools: Read, Grep, Glob, Bash(git:*)
 ---
 
 # Security Audit

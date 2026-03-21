@@ -3,6 +3,7 @@ name: code-explanation
 description: Use when explaining complex code to new team members, conducting code reviews, onboarding, or understanding unfamiliar codebases. Provides structured analysis from high-level overview to implementation details.
 context: fork
 agent: Explore
+allowed-tools: Read, Grep, Glob
 ---
 
 # Code Explanation

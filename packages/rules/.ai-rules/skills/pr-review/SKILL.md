@@ -3,6 +3,7 @@ name: pr-review
 description: Use when conducting manual PR reviews - provides structured checklist covering security, performance, maintainability, and code quality dimensions with anti-sycophancy principles
 context: fork
 agent: Explore
+allowed-tools: Read, Grep, Glob, Bash(gh:*, git:*)
 ---
 
 # PR Review

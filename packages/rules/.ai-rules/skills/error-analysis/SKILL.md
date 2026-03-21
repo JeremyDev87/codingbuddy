@@ -1,6 +1,7 @@
 ---
 name: error-analysis
 description: Use when encountering error messages, stack traces, or unexpected application behavior. Provides structured analysis to understand root cause before attempting any fix.
+allowed-tools: Read, Grep, Glob, Bash(git:*)
 ---
 
 # Error Analysis
