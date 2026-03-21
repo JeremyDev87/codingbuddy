@@ -47,7 +47,7 @@ gh label list --json name --jq '.[].name'
 
 Search for existing issues with similar titles to prevent duplicates:
 ```bash
-gh issue list --state open --search "<plan-title-keywords>" --json number,title
+gh issue list --state open --search "<plan-title-keywords>" --json number,title --jq '.[] | "#\(.number) \(.title)"'
 ```
 
 If duplicates found, inform the user and ask whether to continue or update existing issues.
@@ -234,7 +234,7 @@ SUB_ID=$(gh api /repos/$REPO/issues/$SUB_NUM --jq .id)
 
 # Create native sub-issue relationship
 gh api /repos/$REPO/issues/$PARENT_NUM/sub_issues \
-  -X POST -F sub_issue_id=$SUB_ID
+  -X POST -F sub_issue_id=$SUB_ID --jq '.id'
 ```
 
 Repeat for every sub-issue.
@@ -273,3 +273,34 @@ Hierarchy: GitHub native sub-issues linked
 ```
 
 Print all issue URLs.
+
+## Step 7b: Update Context Document
+
+Record the created issues in `docs/codingbuddy/context.md` for cross-session continuity.
+
+Collect all sub-issue numbers from Step 6 into a space-separated variable `SUB_NUMS`.
+
+```bash
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+mkdir -p docs/codingbuddy
+
+cat >> docs/codingbuddy/context.md <<EOF
+
+## Plan-to-Issues Result (${TIMESTAMP})
+
+- **Parent Issue**: #${PARENT_NUM}
+- **Sub-issues**: $(for n in $SUB_NUMS; do printf "#%s " "$n"; done)
+- **Created At**: ${TIMESTAMP}
+- **Total**: $(echo $SUB_NUMS | wc -w | tr -d ' ') sub-issues
+EOF
+```
+
+If the `codingbuddy` MCP server is available, prefer calling `update_context` instead:
+
+```
+update_context({
+  mode: <current_mode>,
+  progress: ["Plan-to-Issues: parent #PARENT_NUM, sub-issues #N1 #N2 ..."],
+  notes: ["Issues created at TIMESTAMP via plan-to-issues skill"]
+})
+```
