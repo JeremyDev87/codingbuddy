@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eval Review — __SKILL_NAME_PLACEHOLDER__</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--text-dim:#8b949e;
+  --trigger:#238636;--trigger-bg:rgba(35,134,54,.15);
+  --no-trigger:#da3633;--no-trigger-bg:rgba(218,54,51,.15);
+  --accent:#58a6ff;--accent-hover:#79c0ff;
+  --warn:#d29922;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.3);
+  --font-mono:'SF Mono','Cascadia Code','Fira Code',monospace;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;padding:2rem;max-width:1200px;margin:0 auto}
+h1{font-size:1.6rem;font-weight:700;margin-bottom:.25rem}
+.subtitle{color:var(--text-dim);margin-bottom:1.5rem;font-size:.9rem}
+.stats{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1.25rem;min-width:120px}
+.stat-label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em}
+.stat-value{font-size:1.4rem;font-weight:700;font-family:var(--font-mono)}
+.stat-trigger .stat-value{color:var(--trigger)}
+.stat-no-trigger .stat-value{color:var(--no-trigger)}
+.stat-total .stat-value{color:var(--accent)}
+
+.toolbar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.btn{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.45rem 1rem;cursor:pointer;font-size:.85rem;font-family:var(--font-sans);transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--accent);background:#1c2129}
+.btn-primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-danger{color:var(--no-trigger)}
+.btn-danger:hover{background:var(--no-trigger-bg);border-color:var(--no-trigger)}
+.filter-group{display:flex;gap:0}
+.filter-btn{border-radius:0;margin-left:-1px}
+.filter-btn:first-child{border-radius:6px 0 0 6px;margin-left:0}
+.filter-btn:last-child{border-radius:0 6px 6px 0}
+.filter-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.spacer{flex:1}
+
+.cards{display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:border-color .15s;position:relative}
+.card:hover{border-color:var(--text-dim)}
+.card.trigger{border-left:3px solid var(--trigger)}
+.card.no-trigger{border-left:3px solid var(--no-trigger)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.card-query{font-size:1rem;font-weight:500;flex:1}
+.card-badge{font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.badge-trigger{background:var(--trigger-bg);color:var(--trigger)}
+.badge-no-trigger{background:var(--no-trigger-bg);color:var(--no-trigger)}
+.card-meta{display:flex;gap:1rem;color:var(--text-dim);font-size:.8rem;margin-bottom:.5rem;flex-wrap:wrap}
+.card-meta span{display:flex;align-items:center;gap:.25rem}
+.card-reason{color:var(--text-dim);font-size:.85rem;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.card-actions{display:flex;gap:.5rem;margin-top:.75rem;justify-content:flex-end}
+.card-actions .btn{padding:.3rem .75rem;font-size:.8rem}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:90%;max-width:560px;box-shadow:var(--shadow)}
+.modal h2{font-size:1.1rem;margin-bottom:1rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.85rem;color:var(--text-dim);margin-bottom:.3rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.5rem .75rem;font-size:.9rem;font-family:var(--font-sans)}
+.form-group textarea{min-height:80px;resize:vertical}
+.form-group select{cursor:pointer}
+.modal-footer{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.25rem}
+
+.empty{text-align:center;padding:3rem;color:var(--text-dim)}
+.count-badge{font-size:.75rem;color:var(--text-dim);margin-left:.25rem}
+</style>
+</head>
+<body>
+
+<h1>Eval Review — <span id="skillName">__SKILL_NAME_PLACEHOLDER__</span></h1>
+<p class="subtitle" id="skillDesc">__SKILL_DESCRIPTION_PLACEHOLDER__</p>
+
+<div class="stats" id="stats"></div>
+
+<div class="toolbar">
+  <div class="filter-group">
+    <button class="btn filter-btn active" data-filter="all">All <span class="count-badge" id="countAll"></span></button>
+    <button class="btn filter-btn" data-filter="trigger">Trigger <span class="count-badge" id="countTrigger"></span></button>
+    <button class="btn filter-btn" data-filter="no-trigger">No Trigger <span class="count-badge" id="countNoTrigger"></span></button>
+  </div>
+  <span class="spacer"></span>
+  <button class="btn" onclick="openModal('add')">+ Add Query</button>
+  <button class="btn btn-primary" onclick="downloadJSON()">Download eval_set.json</button>
+</div>
+
+<div class="cards" id="cardContainer"></div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Add Query</h2>
+    <div class="form-group">
+      <label for="inputQuery">User Query</label>
+      <textarea id="inputQuery" placeholder="Enter user prompt / query..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="inputTrigger">Should Trigger?</label>
+      <select id="inputTrigger">
+        <option value="true">Yes — should trigger this skill</option>
+        <option value="false">No — should NOT trigger this skill</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="inputReason">Reason (optional)</label>
+      <input type="text" id="inputReason" placeholder="Why this query should/shouldn't trigger">
+    </div>
+    <div class="form-group">
+      <label for="inputCategory">Category (optional)</label>
+      <input type="text" id="inputCategory" placeholder="e.g. happy-path, edge-case, adversarial">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // --- Data ---
+  var rawData = __EVAL_DATA_PLACEHOLDER__;
+  var evalSet = Array.isArray(rawData) ? rawData : (rawData && rawData.queries ? rawData.queries : []);
+  var currentFilter = "all";
+  var editIndex = -1;
+
+  // --- Render ---
+  function render(){
+    renderStats();
+    renderCards();
+    updateCounts();
+  }
+
+  function renderStats(){
+    var total = evalSet.length;
+    var triggers = evalSet.filter(function(q){return q.should_trigger;}).length;
+    var noTriggers = total - triggers;
+    document.getElementById("stats").innerHTML =
+      '<div class="stat stat-total"><div class="stat-label">Total</div><div class="stat-value">'+total+'</div></div>'+
+      '<div class="stat stat-trigger"><div class="stat-label">Should Trigger</div><div class="stat-value">'+triggers+'</div></div>'+
+      '<div class="stat stat-no-trigger"><div class="stat-label">Should Not</div><div class="stat-value">'+noTriggers+'</div></div>';
+  }
+
+  function renderCards(){
+    var container = document.getElementById("cardContainer");
+    var filtered = evalSet.filter(function(q, i){
+      q._index = i;
+      if(currentFilter === "trigger") return q.should_trigger;
+      if(currentFilter === "no-trigger") return !q.should_trigger;
+      return true;
+    });
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div class="empty">No queries to display. Click "+ Add Query" to create one.</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(function(q){
+      var cls = q.should_trigger ? "trigger" : "no-trigger";
+      var badge = q.should_trigger
+        ? '<span class="card-badge badge-trigger">Should Trigger</span>'
+        : '<span class="card-badge badge-no-trigger">Should Not Trigger</span>';
+      var meta = '';
+      if(q.category) meta += '<span>Category: '+esc(q.category)+'</span>';
+      if(q.confidence) meta += '<span>Confidence: '+q.confidence+'</span>';
+      var reason = q.reason ? '<div class="card-reason">'+esc(q.reason)+'</div>' : '';
+      return '<div class="card '+cls+'">'+
+        '<div class="card-header"><div class="card-query">'+esc(q.query)+'</div>'+badge+'</div>'+
+        (meta ? '<div class="card-meta">'+meta+'</div>' : '')+
+        reason+
+        '<div class="card-actions">'+
+          '<button class="btn" onclick="openModal(\'edit\','+q._index+')">Edit</button>'+
+          '<button class="btn btn-danger" onclick="deleteEntry('+q._index+')">Delete</button>'+
+        '</div></div>';
+    }).join("");
+  }
+
+  function updateCounts(){
+    var total = evalSet.length;
+    var triggers = evalSet.filter(function(q){return q.should_trigger;}).length;
+    document.getElementById("countAll").textContent = total;
+    document.getElementById("countTrigger").textContent = triggers;
+    document.getElementById("countNoTrigger").textContent = total - triggers;
+  }
+
+  function esc(s){
+    if(!s) return "";
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // --- Filters ---
+  document.querySelectorAll(".filter-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll(".filter-btn").forEach(function(b){b.classList.remove("active");});
+      btn.classList.add("active");
+      currentFilter = btn.getAttribute("data-filter");
+      renderCards();
+    });
+  });
+
+  // --- Modal ---
+  window.openModal = function(mode, idx){
+    editIndex = (mode === "edit") ? idx : -1;
+    document.getElementById("modalTitle").textContent = mode === "edit" ? "Edit Query" : "Add Query";
+    if(mode === "edit" && idx >= 0){
+      var q = evalSet[idx];
+      document.getElementById("inputQuery").value = q.query || "";
+      document.getElementById("inputTrigger").value = q.should_trigger ? "true" : "false";
+      document.getElementById("inputReason").value = q.reason || "";
+      document.getElementById("inputCategory").value = q.category || "";
+    } else {
+      document.getElementById("inputQuery").value = "";
+      document.getElementById("inputTrigger").value = "true";
+      document.getElementById("inputReason").value = "";
+      document.getElementById("inputCategory").value = "";
+    }
+    document.getElementById("modalOverlay").classList.add("open");
+    document.getElementById("inputQuery").focus();
+  };
+
+  window.closeModal = function(){
+    document.getElementById("modalOverlay").classList.remove("open");
+    editIndex = -1;
+  };
+
+  window.saveEntry = function(){
+    var query = document.getElementById("inputQuery").value.trim();
+    if(!query){ alert("Query is required."); return; }
+    var entry = {
+      query: query,
+      should_trigger: document.getElementById("inputTrigger").value === "true"
+    };
+    var reason = document.getElementById("inputReason").value.trim();
+    var category = document.getElementById("inputCategory").value.trim();
+    if(reason) entry.reason = reason;
+    if(category) entry.category = category;
+
+    if(editIndex >= 0){
+      evalSet[editIndex] = entry;
+    } else {
+      evalSet.push(entry);
+    }
+    closeModal();
+    render();
+  };
+
+  window.deleteEntry = function(idx){
+    if(!confirm("Delete this query?")) return;
+    evalSet.splice(idx, 1);
+    render();
+  };
+
+  // --- Download ---
+  window.downloadJSON = function(){
+    var out = {
+      skill_name: document.getElementById("skillName").textContent,
+      description: document.getElementById("skillDesc").textContent,
+      queries: evalSet
+    };
+    var blob = new Blob([JSON.stringify(out, null, 2)], {type:"application/json"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "eval_set.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  // --- Keyboard ---
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeModal();
+  });
+
+  // --- Init ---
+  render();
+})();
+</script>
+</body>
+</html>
