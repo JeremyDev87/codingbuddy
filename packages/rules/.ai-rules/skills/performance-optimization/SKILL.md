@@ -1,6 +1,8 @@
 ---
 name: performance-optimization
 description: Use when optimizing code performance, addressing slowness complaints, or measuring application speed improvements
+context: fork
+agent: general-purpose
 ---
 
 # Performance Optimization
