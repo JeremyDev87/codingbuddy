@@ -29,7 +29,7 @@ CodingBuddy supports only JSON configuration format:
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `language` | `string` | Response language for AI | `'ko'`, `'en'`, `'ja'` |
+| `language` | `string` | Communication language for AI responses (conversation only — all generated artifacts like code, comments, docs, and commit messages are always in English) | `'ko'`, `'en'`, `'ja'` |
 | `projectName` | `string` | Project name | `'my-app'` |
 | `description` | `string` | Project description | `'E-commerce platform'` |
 | `repository` | `string` | Repository URL | `'https://github.com/...'` |

@@ -46,6 +46,39 @@ PLAN → (user: ACT) → ACT → PLAN → (user: EVAL) → EVAL → Improved PLA
 
 ---
 
+### Output Language
+
+**Rule:** The `language` setting in `codingbuddy.config.json` controls **communication language only** (conversation, explanations, questions). All generated **artifacts** must always be written in **English**, regardless of the `language` setting.
+
+| Category | Language | Examples |
+|----------|----------|----------|
+| **Communication** | `codingbuddy.config.json` `language` setting | Conversation, explanations, status updates, questions |
+| **Artifacts** | Always English | Code, comments, variable names, documentation, commit messages, PR titles/descriptions, branch names, TODO items, error messages in code, log messages, JSDoc/TSDoc, type names |
+
+**Why:**
+- Code and documentation in English ensures global readability and collaboration
+- Mixed-language codebases create maintenance burden and hinder onboarding
+- Commit history and PR descriptions must be searchable in a common language
+
+**Examples:**
+
+```
+# Communication (follows language setting, e.g., "ko")
+"이 함수는 사용자 인증을 처리합니다. 다음 단계로 넘어가겠습니다."
+
+# Artifacts (always English)
+/** Validates user authentication token and returns session data. */
+function validateAuthToken(token: string): SessionData { ... }
+
+# Commit message (always English)
+feat(auth): add token validation with session management
+
+# Code comments (always English)
+// Check token expiration before proceeding
+```
+
+---
+
 ### Plan Mode
 
 **Important:**
