@@ -1,6 +1,7 @@
 ---
 name: database-migration
 description: Use when performing database schema changes, data migrations, large table modifications, or when zero-downtime deployment is required - guides systematic, reversible database changes with rollback planning
+disable-model-invocation: true
 ---
 
 # Database Migration

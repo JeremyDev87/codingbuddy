@@ -1,6 +1,7 @@
 ---
 name: deployment-checklist
 description: Use before deploying to staging or production. Covers pre-deploy validation, environment verification, rollback planning, health checks, and post-deploy monitoring.
+disable-model-invocation: true
 ---
 
 # Deployment Checklist

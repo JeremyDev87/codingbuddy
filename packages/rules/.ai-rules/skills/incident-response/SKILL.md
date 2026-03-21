@@ -1,6 +1,7 @@
 ---
 name: incident-response
 description: Use when production incident occurs, alerts fire, service degradation detected, or on-call escalation needed - guides systematic organizational response before technical fixes
+disable-model-invocation: true
 ---
 
 # Incident Response

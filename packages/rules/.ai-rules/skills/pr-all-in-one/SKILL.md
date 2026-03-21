@@ -1,6 +1,7 @@
 ---
 name: pr-all-in-one
 description: Unified commit and PR workflow. Auto-commits changes, creates/updates PRs with smart issue linking and multi-language support.
+disable-model-invocation: true
 ---
 
 # PR All-in-One
