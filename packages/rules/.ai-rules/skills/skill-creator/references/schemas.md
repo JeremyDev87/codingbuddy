@@ -1,6 +1,6 @@
 # Skill Evaluation Schemas Reference
 
-JSON 스키마 정의 및 작업 디렉토리 구조 레퍼런스.
+스킬 평가 시스템의 JSON 스키마 정의 및 작업 디렉토리 구조 레퍼런스.
 
 ## Table of Contents
 
@@ -20,161 +20,122 @@ JSON 스키마 정의 및 작업 디렉토리 구조 레퍼런스.
 
 ## Workspace Directory Structure
 
-스킬 개발 및 평가 시 사용하는 작업 디렉토리 구조:
+스킬 평가 시 사용하는 작업 디렉토리 구조. 각 iteration은 스킬 수정 사이클을 나타내며, 각 eval은 `with_skill`(스킬 적용)과 `without_skill`(베이스라인) 비교 실행을 포함한다.
 
 ```
 workspace/
-├── trigger_eval.json              # 자동 평가 트리거 설정
-├── iteration-1/                   # 첫 번째 개발 반복
-│   ├── eval-1/                    # 첫 번째 평가 실행
-│   │   ├── evals.json             # 평가 결과
-│   │   ├── eval_metadata.json     # 평가 메타데이터
-│   │   ├── grading.json           # 채점 결과
-│   │   ├── timing.json            # 실행 시간 측정
-│   │   ├── feedback.json          # 피드백 기록
-│   │   └── benchmark.json         # 벤치마크 비교
-│   └── eval-2/                    # 두 번째 평가 실행
-│       └── ...
-├── iteration-2/                   # 두 번째 개발 반복
-│   └── eval-1/
-│       └── ...
-└── iteration-N/
-    └── eval-N/
-        └── ...
+├── evals.json                     # 평가 시나리오 정의 (전체 iteration 공유)
+├── trigger_eval.json              # 트리거 평가 케이스 (벤치마크 모드)
+└── iteration-N/                   # N번째 스킬 수정 사이클
+    ├── eval-0/                    # 첫 번째 평가 (0-based)
+    │   ├── with_skill/            # 스킬 적용 실행
+    │   │   ├── outputs/           # 생성된 출력 파일
+    │   │   ├── eval_metadata.json # 평가 메타데이터
+    │   │   ├── grading.json       # 채점 결과
+    │   │   └── timing.json        # 실행 시간 측정
+    │   └── without_skill/         # 베이스라인 실행 (스킬 미적용)
+    │       ├── outputs/           # 생성된 출력 파일
+    │       ├── eval_metadata.json # 평가 메타데이터
+    │       ├── grading.json       # 채점 결과
+    │       └── timing.json        # 실행 시간 측정
+    ├── eval-1/                    # 두 번째 평가
+    │   ├── with_skill/
+    │   │   └── ...
+    │   └── without_skill/
+    │       └── ...
+    ├── benchmark.json             # iteration 벤치마크 종합 결과
+    ├── benchmark.md               # 벤치마크 마크다운 리포트
+    └── feedback.json              # 사용자 피드백
 ```
 
 **디렉토리 명명 규칙:**
-- `iteration-N`: 1-based 순차 번호. 스킬 SKILL.md 수정 시마다 새 iteration 생성
-- `eval-N`: 1-based 순차 번호. 동일 iteration 내 재평가 시 증가
-- `trigger_eval.json`: workspace 루트에 위치 (iteration 독립)
+- `iteration-N`: 1-based 순차 번호. SKILL.md 수정 시마다 새 iteration 생성
+- `eval-N`: 0-based 순차 번호. `evals.json`의 각 시나리오에 대응
+- `with_skill/`: 스킬을 적용한 상태에서 평가 실행
+- `without_skill/`: 스킬 없이 베이스라인 실행 (비교 대상)
+- `outputs/`: 각 실행에서 생성된 파일 (코드, 문서 등)
+
+**파일 위치 규칙:**
+- `evals.json`, `trigger_eval.json`: workspace 루트 (iteration 독립)
+- `eval_metadata.json`, `grading.json`, `timing.json`: 각 eval의 `with_skill/` 또는 `without_skill/` 내부
+- `benchmark.json`, `benchmark.md`, `feedback.json`: iteration 루트
 
 ---
 
 ## Schema Definitions
 
-모든 스키마는 JSON Schema Draft 2020-12 기준.
-
 ### 1. evals.json
 
-개별 평가 시나리오의 실행 결과를 기록한다.
+평가 시나리오 목록을 정의한다. workspace 루트에 위치하며 모든 iteration에서 공유된다.
+
+**스키마:**
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://codingbuddy.dev/schemas/skill-eval/evals.json",
-  "title": "Skill Evaluation Results",
-  "description": "개별 스킬 평가 시나리오의 실행 결과",
+  "title": "Skill Evaluation Scenarios",
+  "description": "스킬 평가 시나리오 정의",
   "type": "object",
-  "required": ["skill_name", "eval_id", "scenarios", "summary"],
+  "required": ["skill_name", "evals"],
   "properties": {
     "skill_name": {
       "type": "string",
-      "description": "평가 대상 스킬의 name (kebab-case)",
+      "description": "평가 대상 스킬명 (kebab-case)",
       "pattern": "^[a-z][a-z0-9-]*$"
     },
-    "eval_id": {
-      "type": "string",
-      "description": "고유 평가 식별자",
-      "pattern": "^eval-[0-9]+$"
-    },
-    "scenarios": {
+    "evals": {
       "type": "array",
       "description": "평가 시나리오 목록",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "status", "assertions"],
+        "required": ["id", "prompt", "expected_output", "files"],
         "properties": {
           "id": {
-            "type": "string",
-            "description": "시나리오 식별자"
+            "type": "integer",
+            "minimum": 1,
+            "description": "시나리오 ID (1-based)"
           },
-          "name": {
+          "prompt": {
             "type": "string",
-            "description": "시나리오 설명"
+            "description": "사용자 작업 프롬프트"
           },
-          "status": {
+          "expected_output": {
             "type": "string",
-            "enum": ["pass", "fail", "skip", "error"],
-            "description": "실행 결과 상태"
+            "description": "기대 결과 설명"
           },
-          "assertions": {
+          "files": {
             "type": "array",
-            "description": "검증 항목 목록",
-            "items": {
-              "type": "object",
-              "required": ["check", "expected", "actual", "passed"],
-              "properties": {
-                "check": {
-                  "type": "string",
-                  "description": "검증 항목명"
-                },
-                "expected": {
-                  "description": "기대값 (any type)"
-                },
-                "actual": {
-                  "description": "실제값 (any type)"
-                },
-                "passed": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "output": {
-            "type": "string",
-            "description": "시나리오 실행 시 생성된 출력 (선택)"
-          },
-          "error_message": {
-            "type": "string",
-            "description": "status=error 시 에러 메시지"
+            "items": { "type": "string" },
+            "description": "입력 파일 경로 목록 (없으면 빈 배열)"
           }
         }
-      }
-    },
-    "summary": {
-      "type": "object",
-      "required": ["total", "passed", "failed", "skipped", "errored"],
-      "properties": {
-        "total": { "type": "integer", "minimum": 0 },
-        "passed": { "type": "integer", "minimum": 0 },
-        "failed": { "type": "integer", "minimum": 0 },
-        "skipped": { "type": "integer", "minimum": 0 },
-        "errored": { "type": "integer", "minimum": 0 }
       }
     }
   }
 }
 ```
 
-**사용 예시:**
+**예시:**
 
 ```json
 {
   "skill_name": "test-driven-development",
-  "eval_id": "eval-1",
-  "scenarios": [
+  "evals": [
     {
-      "id": "scenario-1",
-      "name": "RED phase에서 실패 테스트 작성 확인",
-      "status": "pass",
-      "assertions": [
-        {
-          "check": "test_file_created",
-          "expected": true,
-          "actual": true,
-          "passed": true
-        },
-        {
-          "check": "test_initially_fails",
-          "expected": true,
-          "actual": true,
-          "passed": true
-        }
-      ]
+      "id": 1,
+      "prompt": "Add a function that validates email addresses",
+      "expected_output": "Test file created first with failing test, then implementation, then refactor",
+      "files": ["src/utils/validators.ts"]
+    },
+    {
+      "id": 2,
+      "prompt": "Fix the login timeout bug",
+      "expected_output": "Failing test reproducing the bug, then minimal fix, then cleanup",
+      "files": ["src/auth/login.ts", "src/auth/login.test.ts"]
     }
-  ],
-  "summary": { "total": 1, "passed": 1, "failed": 0, "skipped": 0, "errored": 0 }
+  ]
 }
 ```
 
@@ -182,90 +143,80 @@ workspace/
 
 ### 2. eval_metadata.json
 
-평가 실행의 환경 및 컨텍스트 메타데이터를 기록한다.
+개별 평가 실행의 메타데이터를 기록한다. 각 `with_skill/` 및 `without_skill/` 디렉토리에 위치한다.
+
+**스키마:**
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://codingbuddy.dev/schemas/skill-eval/eval_metadata.json",
   "title": "Evaluation Metadata",
-  "description": "평가 실행 환경 및 컨텍스트 메타데이터",
+  "description": "개별 평가 실행의 메타데이터",
   "type": "object",
-  "required": ["eval_id", "iteration", "skill_version", "timestamp", "evaluator"],
+  "required": ["eval_id", "eval_name", "prompt", "assertions"],
   "properties": {
     "eval_id": {
-      "type": "string",
-      "pattern": "^eval-[0-9]+$"
-    },
-    "iteration": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "iteration 번호"
-    },
-    "skill_version": {
-      "type": "string",
-      "description": "평가 시점의 SKILL.md 해시 또는 버전"
-    },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time",
-      "description": "평가 시작 시각 (ISO 8601)"
-    },
-    "duration_ms": {
       "type": "integer",
       "minimum": 0,
-      "description": "전체 평가 소요 시간 (밀리초)"
+      "description": "평가 ID (0-based, evals.json의 id-1에 대응)"
     },
-    "evaluator": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["human", "ai", "automated"],
-          "description": "평가 주체 유형"
-        },
-        "model": {
-          "type": "string",
-          "description": "AI 평가 시 사용된 모델 (예: claude-opus-4-20250514)"
-        },
-        "name": {
-          "type": "string",
-          "description": "평가자 이름 또는 식별자"
-        }
-      }
-    },
-    "environment": {
-      "type": "object",
-      "description": "평가 실행 환경 정보",
-      "properties": {
-        "tool": {
-          "type": "string",
-          "description": "사용된 AI 도구 (예: claude-code, cursor)",
-          "enum": ["claude-code", "cursor", "codex", "amazon-q", "kiro", "antigravity"]
-        },
-        "tool_version": {
-          "type": "string"
-        },
-        "os": {
-          "type": "string"
-        },
-        "node_version": {
-          "type": "string"
-        }
-      }
-    },
-    "trigger": {
+    "eval_name": {
       "type": "string",
-      "enum": ["manual", "auto", "ci"],
-      "description": "평가 트리거 방식"
+      "description": "평가의 설명적 이름"
     },
-    "tags": {
+    "prompt": {
+      "type": "string",
+      "description": "사용자 작업 프롬프트 (evals.json에서 복사)"
+    },
+    "assertions": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "분류 태그"
+      "description": "검증 항목 목록",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "검증 가능한 항목명"
+          },
+          "description": {
+            "type": "string",
+            "description": "통과 기준 설명"
+          }
+        }
+      }
     }
   }
+}
+```
+
+**예시:**
+
+```json
+{
+  "eval_id": 0,
+  "eval_name": "Email Validation TDD Cycle",
+  "prompt": "Add a function that validates email addresses",
+  "assertions": [
+    {
+      "name": "test_file_created_first",
+      "description": "테스트 파일이 구현 파일보다 먼저 생성됨"
+    },
+    {
+      "name": "test_initially_fails",
+      "description": "구현 전 테스트 실행 시 실패함"
+    },
+    {
+      "name": "minimal_implementation",
+      "description": "테스트를 통과하는 최소한의 코드만 작성됨"
+    },
+    {
+      "name": "refactor_step_present",
+      "description": "GREEN 이후 리팩토링 단계가 수행됨"
+    }
+  ]
 }
 ```
 
@@ -273,441 +224,482 @@ workspace/
 
 ### 3. grading.json
 
-평가 시나리오의 채점 기준 및 점수를 정의한다.
+평가 실행의 채점 결과를 기록한다. 각 assertion에 대한 통과/실패 판정과 근거를 포함한다.
+
+**스키마:**
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://codingbuddy.dev/schemas/skill-eval/grading.json",
   "title": "Grading Results",
-  "description": "스킬 평가 채점 기준 및 점수",
+  "description": "평가 채점 결과",
   "type": "object",
-  "required": ["eval_id", "dimensions", "overall_score", "grade"],
+  "required": ["expectations"],
   "properties": {
-    "eval_id": {
-      "type": "string",
-      "pattern": "^eval-[0-9]+$"
-    },
-    "dimensions": {
+    "expectations": {
       "type": "array",
-      "description": "채점 차원 목록",
+      "description": "assertion별 채점 결과",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "weight", "score", "max_score"],
+        "required": ["text", "passed", "evidence"],
         "properties": {
-          "name": {
+          "text": {
             "type": "string",
-            "description": "채점 차원명",
-            "enum": [
-              "correctness",
-              "completeness",
-              "clarity",
-              "structure",
-              "tool-compatibility",
-              "frontmatter-validity",
-              "reference-quality"
-            ]
+            "description": "assertion 설명 (eval_metadata.json의 assertion.description에 대응)"
           },
-          "weight": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "description": "가중치 (전체 합=1.0)"
+          "passed": {
+            "type": "boolean",
+            "description": "통과 여부"
           },
-          "score": {
-            "type": "number",
-            "minimum": 0,
-            "description": "획득 점수"
-          },
-          "max_score": {
-            "type": "number",
-            "minimum": 1,
-            "description": "최대 점수"
-          },
-          "rationale": {
+          "evidence": {
             "type": "string",
-            "description": "점수 사유"
+            "description": "판정 근거 (구체적 증거)"
           }
         }
       }
-    },
-    "overall_score": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 100,
-      "description": "가중 평균 종합 점수 (0-100)"
-    },
-    "grade": {
-      "type": "string",
-      "enum": ["A", "B", "C", "D", "F"],
-      "description": "등급 (A: 90+, B: 80+, C: 70+, D: 60+, F: <60)"
-    },
-    "pass": {
-      "type": "boolean",
-      "description": "합격 여부 (grade C 이상)"
     }
   }
 }
 ```
 
-**채점 차원:**
+**예시:**
 
-| Dimension | Description | Weight (권장) |
-|-----------|-------------|---------------|
-| `correctness` | 스킬 로직이 의도대로 동작하는가 | 0.25 |
-| `completeness` | 모든 요구사항을 충족하는가 | 0.20 |
-| `clarity` | 지시사항이 명확하고 모호하지 않은가 | 0.15 |
-| `structure` | SKILL.md 구조가 표준을 따르는가 | 0.15 |
-| `tool-compatibility` | 6개 도구에서 정상 동작하는가 | 0.10 |
-| `frontmatter-validity` | 프론트매터가 스키마에 맞는가 | 0.10 |
-| `reference-quality` | 레퍼런스 파일이 정확하고 유용한가 | 0.05 |
+```json
+{
+  "expectations": [
+    {
+      "text": "테스트 파일이 구현 파일보다 먼저 생성됨",
+      "passed": true,
+      "evidence": "validators.test.ts가 validators.ts보다 2분 먼저 생성됨 (git log 확인)"
+    },
+    {
+      "text": "구현 전 테스트 실행 시 실패함",
+      "passed": true,
+      "evidence": "RED 단계에서 'Expected isValidEmail to be defined' 에러 확인"
+    },
+    {
+      "text": "테스트를 통과하는 최소한의 코드만 작성됨",
+      "passed": false,
+      "evidence": "초기 구현에서 불필요한 도메인 검증 로직이 포함됨 (asserting 범위 초과)"
+    }
+  ]
+}
+```
+
+**통과율 계산:**
+
+```
+pass_rate = expectations.filter(e => e.passed).length / expectations.length
+```
 
 ---
 
 ### 4. timing.json
 
-평가 및 스킬 실행의 시간 측정 데이터를 기록한다.
+평가 실행의 시간 및 토큰 사용량을 기록한다.
+
+**스키마:**
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://codingbuddy.dev/schemas/skill-eval/timing.json",
   "title": "Timing Data",
-  "description": "스킬 평가 시간 측정 데이터",
+  "description": "평가 실행 시간 및 토큰 사용량",
   "type": "object",
-  "required": ["eval_id", "total_ms", "phases"],
+  "required": ["total_tokens", "duration_ms", "total_duration_seconds"],
   "properties": {
-    "eval_id": {
-      "type": "string",
-      "pattern": "^eval-[0-9]+$"
-    },
-    "total_ms": {
+    "total_tokens": {
       "type": "integer",
       "minimum": 0,
-      "description": "전체 소요 시간 (밀리초)"
+      "description": "총 토큰 사용량 (input + output)"
     },
-    "phases": {
-      "type": "array",
-      "description": "단계별 시간 측정",
-      "items": {
-        "type": "object",
-        "required": ["name", "start_ms", "end_ms"],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "단계명 (예: skill_load, scenario_exec, grading)"
-          },
-          "start_ms": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "시작 오프셋 (밀리초)"
-          },
-          "end_ms": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "종료 오프셋 (밀리초)"
-          },
-          "duration_ms": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "단계 소요 시간 (end_ms - start_ms)"
-          }
-        }
-      }
-    },
-    "token_usage": {
-      "type": "object",
-      "description": "AI 토큰 사용량 (AI 평가 시)",
-      "properties": {
-        "input_tokens": { "type": "integer", "minimum": 0 },
-        "output_tokens": { "type": "integer", "minimum": 0 },
-        "total_tokens": { "type": "integer", "minimum": 0 }
-      }
-    },
-    "tool_calls": {
+    "duration_ms": {
       "type": "integer",
       "minimum": 0,
-      "description": "총 도구 호출 횟수"
+      "description": "실행 시간 (밀리초)"
+    },
+    "total_duration_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "총 실행 시간 (초, 소수점 포함)"
     }
   }
 }
 ```
+
+**예시:**
+
+```json
+{
+  "total_tokens": 45230,
+  "duration_ms": 32150,
+  "total_duration_seconds": 32.15
+}
+```
+
+**벤치마크 비교 시 사용:**
+- `with_skill`과 `without_skill`의 timing.json을 비교하여 스킬 적용에 따른 토큰/시간 오버헤드를 측정
 
 ---
 
 ### 5. feedback.json
 
-평가자 또는 사용자의 정성적 피드백을 기록한다.
+평가에 대한 사용자 피드백을 기록한다. iteration 루트에 위치하며, 여러 eval 실행에 대한 피드백을 통합 관리한다.
+
+**스키마:**
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://codingbuddy.dev/schemas/skill-eval/feedback.json",
   "title": "Evaluation Feedback",
-  "description": "스킬 평가에 대한 정성적 피드백",
+  "description": "평가에 대한 사용자 피드백",
   "type": "object",
-  "required": ["eval_id", "entries"],
+  "required": ["reviews", "status"],
   "properties": {
-    "eval_id": {
-      "type": "string",
-      "pattern": "^eval-[0-9]+$"
-    },
-    "entries": {
+    "reviews": {
       "type": "array",
       "description": "피드백 항목 목록",
       "items": {
         "type": "object",
-        "required": ["severity", "category", "message"],
+        "required": ["run_id", "feedback", "timestamp"],
         "properties": {
-          "severity": {
+          "run_id": {
             "type": "string",
-            "enum": ["critical", "high", "medium", "low", "info"],
-            "description": "심각도"
+            "description": "실행 식별자 (예: eval-0-with_skill, eval-1-without_skill)",
+            "pattern": "^eval-[0-9]+-(?:with_skill|without_skill)$"
           },
-          "category": {
+          "feedback": {
             "type": "string",
-            "enum": [
-              "correctness",
-              "usability",
-              "compatibility",
-              "performance",
-              "documentation",
-              "security",
-              "accessibility"
-            ],
-            "description": "피드백 카테고리"
+            "description": "사용자 피드백 내용"
           },
-          "message": {
+          "timestamp": {
             "type": "string",
-            "description": "피드백 내용"
-          },
-          "scenario_id": {
-            "type": "string",
-            "description": "관련 시나리오 ID (선택)"
-          },
-          "suggestion": {
-            "type": "string",
-            "description": "개선 제안 (선택)"
-          },
-          "line_ref": {
-            "type": "string",
-            "description": "SKILL.md 내 관련 라인 참조 (선택)"
+            "format": "date-time",
+            "description": "피드백 작성 시각 (ISO 8601)"
           }
         }
       }
     },
-    "overall_comment": {
+    "status": {
       "type": "string",
-      "description": "종합 코멘트"
+      "enum": ["in_progress", "complete"],
+      "description": "피드백 수집 상태"
     }
   }
 }
 ```
+
+**예시:**
+
+```json
+{
+  "reviews": [
+    {
+      "run_id": "eval-0-with_skill",
+      "feedback": "TDD 사이클이 잘 지켜졌으나, RED 단계에서 에러 메시지 확인이 생략됨",
+      "timestamp": "2026-03-21T14:30:00.000Z"
+    },
+    {
+      "run_id": "eval-0-without_skill",
+      "feedback": "스킬 없이 실행 시 테스트를 나중에 작성하는 경향이 있음",
+      "timestamp": "2026-03-21T14:35:00.000Z"
+    }
+  ],
+  "status": "in_progress"
+}
+```
+
+**run_id 형식:**
+- `eval-{eval_id}-with_skill`: 스킬 적용 실행에 대한 피드백
+- `eval-{eval_id}-without_skill`: 베이스라인 실행에 대한 피드백
 
 ---
 
 ### 6. benchmark.json
 
-스킬 버전 간 또는 기준선 대비 성능을 비교한다.
+iteration 단위의 벤치마크 종합 결과를 기록한다. 모든 eval의 `with_skill` vs `without_skill` 비교 데이터를 집계한다.
+
+**스키마:**
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://codingbuddy.dev/schemas/skill-eval/benchmark.json",
-  "title": "Benchmark Comparison",
-  "description": "스킬 버전 간 벤치마크 비교 데이터",
+  "title": "Benchmark Results",
+  "description": "iteration 벤치마크 종합 결과",
   "type": "object",
-  "required": ["eval_id", "baseline", "current", "comparison"],
-  "properties": {
-    "eval_id": {
-      "type": "string",
-      "pattern": "^eval-[0-9]+$"
-    },
-    "baseline": {
-      "type": "object",
-      "required": ["iteration", "eval_id", "overall_score"],
-      "description": "비교 기준 (이전 평가)",
-      "properties": {
-        "iteration": { "type": "integer", "minimum": 1 },
-        "eval_id": { "type": "string" },
-        "overall_score": { "type": "number", "minimum": 0, "maximum": 100 }
-      }
-    },
-    "current": {
-      "type": "object",
-      "required": ["iteration", "eval_id", "overall_score"],
-      "description": "현재 평가",
-      "properties": {
-        "iteration": { "type": "integer", "minimum": 1 },
-        "eval_id": { "type": "string" },
-        "overall_score": { "type": "number", "minimum": 0, "maximum": 100 }
-      }
-    },
-    "comparison": {
-      "type": "object",
-      "required": ["score_delta", "improved_dimensions", "regressed_dimensions"],
-      "properties": {
-        "score_delta": {
-          "type": "number",
-          "description": "점수 변화 (current - baseline)"
-        },
-        "improved_dimensions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name", "delta"],
-            "properties": {
-              "name": { "type": "string" },
-              "delta": { "type": "number", "exclusiveMinimum": 0 }
-            }
-          }
-        },
-        "regressed_dimensions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name", "delta"],
-            "properties": {
-              "name": { "type": "string" },
-              "delta": { "type": "number", "exclusiveMaximum": 0 }
-            }
-          }
-        },
-        "verdict": {
-          "type": "string",
-          "enum": ["improved", "regressed", "stable"],
-          "description": "종합 판정"
-        }
-      }
-    }
-  }
-}
-```
-
----
-
-### 7. trigger_eval.json
-
-자동 평가 트리거 조건을 설정한다. workspace 루트에 위치하며 iteration과 독립적으로 관리된다.
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://codingbuddy.dev/schemas/skill-eval/trigger_eval.json",
-  "title": "Evaluation Trigger Configuration",
-  "description": "자동 평가 트리거 조건 설정",
-  "type": "object",
-  "required": ["skill_name", "triggers"],
+  "required": ["skill_name", "iteration", "summary", "eval_results"],
   "properties": {
     "skill_name": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$",
-      "description": "대상 스킬명"
+      "description": "평가 대상 스킬명",
+      "pattern": "^[a-z][a-z0-9-]*$"
     },
-    "triggers": {
+    "iteration": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "iteration 번호 (1-based)"
+    },
+    "summary": {
+      "type": "object",
+      "description": "전체 eval 통합 요약 통계",
+      "required": ["pass_rate", "tokens", "duration_seconds"],
+      "properties": {
+        "pass_rate": {
+          "type": "object",
+          "required": ["mean", "stddev"],
+          "properties": {
+            "mean": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "평균 통과율 (0.0~1.0)"
+            },
+            "stddev": {
+              "type": "number",
+              "minimum": 0,
+              "description": "통과율 표준편차"
+            }
+          }
+        },
+        "tokens": {
+          "type": "object",
+          "required": ["mean", "stddev"],
+          "properties": {
+            "mean": {
+              "type": "number",
+              "minimum": 0,
+              "description": "평균 토큰 사용량"
+            },
+            "stddev": {
+              "type": "number",
+              "minimum": 0,
+              "description": "토큰 표준편차"
+            }
+          }
+        },
+        "duration_seconds": {
+          "type": "object",
+          "required": ["mean", "stddev"],
+          "properties": {
+            "mean": {
+              "type": "number",
+              "minimum": 0,
+              "description": "평균 실행 시간 (초)"
+            },
+            "stddev": {
+              "type": "number",
+              "minimum": 0,
+              "description": "시간 표준편차"
+            }
+          }
+        }
+      }
+    },
+    "eval_results": {
       "type": "array",
-      "description": "트리거 조건 목록",
-      "minItems": 1,
+      "description": "개별 eval 비교 결과",
       "items": {
         "type": "object",
-        "required": ["event", "action"],
+        "required": ["eval_id", "with_skill", "baseline"],
         "properties": {
-          "event": {
-            "type": "string",
-            "enum": [
-              "skill_modified",
-              "reference_modified",
-              "frontmatter_changed",
-              "manual",
-              "schedule",
-              "ci"
-            ],
-            "description": "트리거 이벤트"
+          "eval_id": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "평가 ID (0-based)"
           },
-          "action": {
-            "type": "string",
-            "enum": ["full_eval", "quick_eval", "regression_only"],
-            "description": "실행할 평가 유형"
-          },
-          "conditions": {
+          "with_skill": {
             "type": "object",
-            "description": "추가 조건 (선택)",
+            "required": ["pass_rate", "tokens", "duration"],
+            "description": "스킬 적용 결과",
             "properties": {
-              "min_change_lines": {
-                "type": "integer",
-                "minimum": 1,
-                "description": "최소 변경 라인 수"
+              "pass_rate": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "통과율 (0.0~1.0)"
               },
-              "cooldown_minutes": {
+              "tokens": {
                 "type": "integer",
-                "minimum": 1,
-                "description": "동일 트리거 재실행 대기 시간 (분)"
+                "minimum": 0,
+                "description": "토큰 사용량"
               },
-              "require_passing_baseline": {
-                "type": "boolean",
-                "description": "이전 평가 통과 필수 여부"
+              "duration": {
+                "type": "number",
+                "minimum": 0,
+                "description": "실행 시간 (초)"
+              }
+            }
+          },
+          "baseline": {
+            "type": "object",
+            "required": ["pass_rate", "tokens", "duration"],
+            "description": "베이스라인 (스킬 미적용) 결과",
+            "properties": {
+              "pass_rate": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "tokens": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "duration": {
+                "type": "number",
+                "minimum": 0
               }
             }
           }
         }
       }
+    }
+  }
+}
+```
+
+**예시:**
+
+```json
+{
+  "skill_name": "test-driven-development",
+  "iteration": 1,
+  "summary": {
+    "pass_rate": { "mean": 0.85, "stddev": 0.12 },
+    "tokens": { "mean": 42000, "stddev": 5200 },
+    "duration_seconds": { "mean": 35.5, "stddev": 8.3 }
+  },
+  "eval_results": [
+    {
+      "eval_id": 0,
+      "with_skill": { "pass_rate": 0.75, "tokens": 45230, "duration": 32.15 },
+      "baseline": { "pass_rate": 0.50, "tokens": 38400, "duration": 28.90 }
     },
-    "scenarios_path": {
-      "type": "string",
-      "description": "시나리오 정의 파일 경로 (기본: ./scenarios/)"
-    },
-    "notify": {
-      "type": "object",
-      "description": "평가 완료 알림 설정",
-      "properties": {
-        "on_pass": { "type": "boolean", "default": false },
-        "on_fail": { "type": "boolean", "default": true },
-        "on_regression": { "type": "boolean", "default": true }
+    {
+      "eval_id": 1,
+      "with_skill": { "pass_rate": 1.0, "tokens": 38770, "duration": 38.85 },
+      "baseline": { "pass_rate": 0.25, "tokens": 35200, "duration": 25.40 }
+    }
+  ]
+}
+```
+
+**해석 가이드:**
+- `with_skill.pass_rate > baseline.pass_rate`: 스킬이 품질을 향상시킴
+- `with_skill.tokens > baseline.tokens`: 스킬 적용 시 토큰 오버헤드 발생
+- `summary.pass_rate.stddev`가 낮을수록 일관된 성능
+
+---
+
+### 7. trigger_eval.json
+
+스킬 추천 트리거 평가를 위한 테스트 케이스를 정의한다. `recommend_skills`의 트리거 정확도를 측정하는 벤치마크 모드에서 사용된다.
+
+**스키마:**
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://codingbuddy.dev/schemas/skill-eval/trigger_eval.json",
+  "title": "Trigger Evaluation Cases",
+  "description": "스킬 추천 트리거 정확도 테스트 케이스",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": ["query", "should_trigger"],
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "사용자 프롬프트 (테스트 입력)"
+      },
+      "should_trigger": {
+        "type": "boolean",
+        "description": "이 프롬프트에서 스킬이 추천되어야 하는가"
       }
     }
   }
 }
 ```
 
-**트리거 이벤트:**
+**예시:**
 
-| Event | Description | 권장 Action |
-|-------|-------------|-------------|
-| `skill_modified` | SKILL.md 파일 변경 시 | `full_eval` |
-| `reference_modified` | 레퍼런스 파일 변경 시 | `quick_eval` |
-| `frontmatter_changed` | 프론트매터만 변경 시 | `quick_eval` |
-| `manual` | 수동 트리거 | `full_eval` |
-| `schedule` | 정기 실행 (cron) | `regression_only` |
-| `ci` | CI/CD 파이프라인 내 | `full_eval` |
+```json
+[
+  {
+    "query": "Add a new feature to validate user registration",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the null pointer exception in the payment module",
+    "should_trigger": true
+  },
+  {
+    "query": "What does this function do?",
+    "should_trigger": false
+  },
+  {
+    "query": "Deploy the application to production",
+    "should_trigger": false
+  }
+]
+```
+
+**사용 방법:**
+1. `trigger_eval.json`의 각 `query`를 `recommend_skills`에 전달
+2. 결과에 해당 스킬이 포함되었는지 확인
+3. `should_trigger`와 비교하여 정확도 계산
+
+**정확도 지표:**
+- **Precision**: 추천된 것 중 올바른 비율
+- **Recall**: 추천되어야 할 것 중 실제 추천된 비율
+- **F1 Score**: Precision과 Recall의 조화 평균
 
 ---
 
 ## Schema Relationships
 
 ```
-trigger_eval.json ──triggers──▶ eval_metadata.json
-                                     │
-                                     ▼
-                                evals.json ◀──references── grading.json
-                                     │                         │
-                                     ▼                         ▼
-                               feedback.json            benchmark.json
-                                                             │
-                                                             ▼
-                                                        timing.json
+evals.json (workspace 루트)
+    │
+    │ eval.id → eval_id 매핑
+    ▼
+iteration-N/eval-{id}/
+    ├── with_skill/
+    │   ├── eval_metadata.json ◄── evals.json의 prompt, assertions 정의
+    │   ├── grading.json ◄── eval_metadata.json의 assertions 채점
+    │   └── timing.json ── 독립 측정
+    └── without_skill/
+        ├── eval_metadata.json
+        ├── grading.json
+        └── timing.json
+    │
+    ▼ 집계
+iteration-N/
+    ├── benchmark.json ◄── 모든 eval의 with_skill vs without_skill 비교
+    └── feedback.json ◄── 사용자 피드백 (run_id로 eval 참조)
+
+trigger_eval.json (workspace 루트) ── recommend_skills 정확도 측정 (독립)
 ```
 
 **데이터 흐름:**
-1. `trigger_eval.json`이 평가를 트리거
-2. `eval_metadata.json`에 실행 환경 기록
-3. `evals.json`에 시나리오별 결과 저장
-4. `grading.json`에 채점 결과 산출
-5. `timing.json`에 시간 측정 데이터 기록
-6. `feedback.json`에 정성적 피드백 추가
-7. `benchmark.json`에서 이전 iteration과 비교
+1. `evals.json`에 평가 시나리오 정의
+2. 각 eval에 대해 `with_skill/`과 `without_skill/` 실행
+3. `eval_metadata.json`에 실행 정보 기록
+4. `grading.json`에 assertion별 채점 결과 저장
+5. `timing.json`에 토큰/시간 측정
+6. `benchmark.json`에서 모든 eval 결과 집계 및 비교
+7. `feedback.json`에 사용자 피드백 수집
+8. `trigger_eval.json`으로 추천 정확도 별도 측정
 
-**공통 키:** 모든 스키마는 `eval_id` 필드로 연결된다.
+**ID 매핑:**
+- `evals.json`의 `id` (1-based) → `eval-{id-1}/` 디렉토리 (0-based)
+- `eval_metadata.json`의 `eval_id` (0-based) = 디렉토리의 eval 번호
+- `feedback.json`의 `run_id` = `eval-{eval_id}-{with_skill|without_skill}`
 
 ---
 
@@ -716,13 +708,25 @@ trigger_eval.json ──triggers──▶ eval_metadata.json
 ### ajv CLI로 검증
 
 ```bash
-# 단일 파일 검증
-npx ajv validate -s schemas/evals.schema.json -d workspace/iteration-1/eval-1/evals.json
+# evals.json 검증
+npx ajv-cli@5.0.0 validate \
+  -s schemas/evals.schema.json \
+  -d workspace/evals.json \
+  --spec=draft7
 
-# 전체 workspace 검증
-for f in workspace/iteration-*/eval-*/evals.json; do
-  npx ajv validate -s schemas/evals.schema.json -d "$f"
+# iteration 내 모든 grading.json 검증
+for f in workspace/iteration-*/eval-*/*/grading.json; do
+  npx ajv-cli@5.0.0 validate \
+    -s schemas/grading.schema.json \
+    -d "$f" \
+    --spec=draft7
 done
+
+# trigger_eval.json 검증
+npx ajv-cli@5.0.0 validate \
+  -s schemas/trigger_eval.schema.json \
+  -d workspace/trigger_eval.json \
+  --spec=draft7
 ```
 
 ### 프로그래밍 방식 검증
@@ -734,11 +738,47 @@ import addFormats from 'ajv-formats';
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
+// 스키마 로드
 const evalsSchema = require('./schemas/evals.schema.json');
-const validate = ajv.compile(evalsSchema);
+const gradingSchema = require('./schemas/grading.schema.json');
+const timingSchema = require('./schemas/timing.schema.json');
 
-const data = require('./workspace/iteration-1/eval-1/evals.json');
-if (!validate(data)) {
-  console.error('Validation errors:', validate.errors);
+// 검증 함수 컴파일
+const validateEvals = ajv.compile(evalsSchema);
+const validateGrading = ajv.compile(gradingSchema);
+const validateTiming = ajv.compile(timingSchema);
+
+// 데이터 검증
+const evalsData = require('./workspace/evals.json');
+if (!validateEvals(evalsData)) {
+  console.error('evals.json validation errors:', validateEvals.errors);
+}
+```
+
+### 일관성 검증
+
+스키마 간 참조 무결성을 확인하는 추가 검증:
+
+```typescript
+// evals.json의 id와 eval 디렉토리 매핑 확인
+function validateConsistency(workspacePath: string): string[] {
+  const errors: string[] = [];
+  const evals = require(`${workspacePath}/evals.json`);
+
+  for (const eval of evals.evals) {
+    const evalDir = `${workspacePath}/iteration-1/eval-${eval.id - 1}`;
+
+    // with_skill 디렉토리 존재 확인
+    if (!fs.existsSync(`${evalDir}/with_skill/eval_metadata.json`)) {
+      errors.push(`Missing: ${evalDir}/with_skill/eval_metadata.json`);
+    }
+
+    // without_skill 디렉토리 존재 확인
+    if (!fs.existsSync(`${evalDir}/without_skill/eval_metadata.json`)) {
+      errors.push(`Missing: ${evalDir}/without_skill/eval_metadata.json`);
+    }
+  }
+
+  return errors;
 }
 ```

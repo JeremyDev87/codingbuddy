@@ -5,7 +5,7 @@
 ## Table of Contents
 
 - [Compatibility Matrix](#compatibility-matrix)
-  - [Feature Support](#feature-support)
+  - [Skill Loading Feature Support](#skill-loading-feature-support)
   - [Frontmatter Field Support](#frontmatter-field-support)
 - [Skill Loading Methods](#skill-loading-methods)
   - [Loading Flow by Tool](#loading-flow-by-tool)
@@ -16,6 +16,7 @@
   - [Core MCP Tools](#core-mcp-tools)
   - [Specialist Agent Execution](#specialist-agent-execution)
   - [Context Document Management](#context-document-management)
+- [Per-Tool Guide](#per-tool-guide)
 - [Tool-Specific Limitations](#tool-specific-limitations)
 - [Cross-Tool Skill Writing Guide](#cross-tool-skill-writing-guide)
 
@@ -23,31 +24,30 @@
 
 ## Compatibility Matrix
 
-### Feature Support
+### Skill Loading Feature Support
 
-6개 도구의 스킬 관련 기능 지원 현황:
+각 도구의 스킬 로딩 관련 기능 지원 현황:
 
 | Feature | Claude Code | Cursor | Codex | Amazon Q | Kiro | Antigravity |
 |---------|:-----------:|:------:|:-----:|:--------:|:----:|:-----------:|
-| MCP 도구 호출 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 네이티브 Skill 도구 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `recommend_skills` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `get_skill` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `parse_mode` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 병렬 에이전트 실행 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Task tool (background) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 세션 훅 (hooks) | ✅ | ⚠️ | ❌ | ❌ | ✅ | ❌ |
-| AUTO 모드 루프 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 컨텍스트 문서 강제 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Glob 기반 규칙 활성화 | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `task_boundary` 추적 | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
-| 이벤트 기반 훅 | ✅ | ⚠️ | ❌ | ❌ | ✅ | ⚠️ |
+| SKILL.md 자동 탐색 | ✅ `.claude/skills/` | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 프론트매터 파싱 | ✅ Full | ⚠️ name/description | ❌ | ❌ | ⚠️ | ❌ |
+| `disable-model-invocation` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `context: fork` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `allowed-tools` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 레퍼런스 파일 접근 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| MCP 기반 로딩 (`get_skill`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **범례:** ✅ 지원 | ⚠️ 부분 지원 | ❌ 미지원
 
+**핵심 차이:**
+- **Claude Code**만 네이티브 SKILL.md 파싱을 지원 (프론트매터, 레퍼런스 파일 포함)
+- **다른 5개 도구**는 codingbuddy MCP 서버의 `get_skill` 도구를 통해 스킬을 로드
+- MCP 기반 로딩은 모든 도구에서 동일하게 동작
+
 ### Frontmatter Field Support
 
-각 프론트매터 필드의 도구별 지원 현황:
+각 프론트매터 필드의 도구별 자동 적용 현황:
 
 | Field | Claude Code | Cursor | Codex | Amazon Q | Kiro | Antigravity |
 |-------|:-----------:|:------:|:-----:|:--------:|:----:|:-----------:|
@@ -65,10 +65,11 @@
 
 **⚠️ 부분 지원 상세:**
 - **Cursor `allowed-tools`**: 도구명은 인식하나 Bash 필터(`Bash(git:*)`)는 미지원
-- **Cursor `model`**: 모델 전환은 가능하나 프론트매터에서 자동 적용되지 않음
-- **Codex `allowed-tools`/`model`**: 시스템 프롬프트에서 참고 가능하나 자동 적용 미지원
+- **Cursor `model`**: 모델 전환 가능하나 프론트매터에서 자동 적용되지 않음
 - **Cursor `hooks`**: `.mdc` 규칙의 glob 패턴으로 유사 기능 구현 가능
+- **Codex `allowed-tools`/`model`**: 시스템 프롬프트에서 참고 가능하나 자동 적용 미지원
 - **Kiro `allowed-tools`**: 도구 제한 인식하나 Bash 필터 미지원
+- **Kiro `hooks`**: 이벤트 기반 훅 (`onFileChange`, `onSave`) 지원
 - **Antigravity `allowed-tools`**: 도구명 인식하나 자동 적용 미지원
 
 ---
@@ -82,8 +83,8 @@
 ```
 사용자: /skill-name [args]
   │
-  ├─ (1) 네이티브 Skill 도구 직접 호출
-  │     └─ SKILL.md 로드 → 프론트매터 파싱 → 실행
+  ├─ (1) 네이티브 Skill 도구 직접 호출 (우선)
+  │     └─ SKILL.md 로드 → 프론트매터 파싱 → 레퍼런스 파일 접근 → 실행
   │
   └─ (2) MCP 체인 (대체 경로)
         └─ recommend_skills → get_skill → 내용 반환
@@ -94,6 +95,7 @@
 - `context: fork` 시 자동으로 서브에이전트 생성
 - `allowed-tools` 자동 적용
 - `model`/`effort` 자동 전환
+- 레퍼런스 파일(`references/`) 직접 접근 가능
 
 #### Cursor
 
@@ -128,8 +130,8 @@
 ```
 사용자: 스킬 요청
   │
-  └─ MCP 체인 (설정 시)
-        └─ recommend_skills → get_skill → 내용 참조
+  ├─ MCP 체인 (설정 시)
+  │     └─ recommend_skills → get_skill → 내용 참조
   │
   └─ 직접 참조 (대체)
         └─ .ai-rules/ 디렉토리 직접 읽기
@@ -257,7 +259,7 @@
 #### Amazon Q
 
 ```json
-// AWS Q MCP 설정 (설정 방식은 AWS 문서 참조)
+// AWS Q MCP 설정
 {
   "mcpServers": {
     "codingbuddy": {
@@ -324,7 +326,7 @@
 | `get_agent_details` | 에이전트 프로필 조회 | 에이전트 정보 필요 시 |
 | `get_project_config` | 프로젝트 설정 조회 | 기술 스택/언어 확인 시 |
 | `update_context` | 컨텍스트 문서 업데이트 | 각 모드 완료 시 |
-| `dispatch_agents` | 에이전트 디스패치 파라미터 | 병렬 실행 시 |
+| `dispatch_agents` | 에이전트 디스패치 파라미터 | 병렬/순차 실행 시 |
 | `prepare_parallel_agents` | 병렬 에이전트 프롬프트 준비 | 순차 실행 시 |
 | `generate_checklist` | 도메인별 체크리스트 생성 | 품질 검증 시 |
 | `analyze_task` | 사전 분석 및 리스크 평가 | PLAN 시작 시 |
@@ -374,43 +376,76 @@ parse_mode → dispatchReady
 
 ---
 
+## Per-Tool Guide
+
+각 도구에서 skill-creator를 사용하는 방법:
+
+### Claude Code
+
+```bash
+# 직접 호출 (네이티브)
+/skill-creator create my-skill
+
+# MCP 경유
+# recommend_skills → get_skill 자동 체인
+```
+
+- 프론트매터 모든 필드 자동 적용
+- 레퍼런스 파일 직접 접근 (`references/` 디렉토리)
+- `context: fork`로 격리 실행 가능
+
+### Cursor, Codex, Amazon Q, Kiro, Antigravity
+
+```
+# MCP 체인으로 스킬 로드
+1. recommend_skills({ prompt: "create a new skill" })
+2. get_skill("skill-creator") → SKILL.md 본문 반환
+3. 반환된 지시사항을 따라 스킬 작성
+```
+
+- SKILL.md 본문만 반환 (레퍼런스 파일은 별도 `get_skill` 요청 필요)
+- 프론트매터는 가이드로 참조 (자동 적용 아님)
+- 순차 실행만 지원
+
+---
+
 ## Tool-Specific Limitations
 
 ### Claude Code
-- **강점**: 유일한 병렬 에이전트 실행, 훅 강제, 네이티브 Skill 도구
+- **강점**: 유일한 네이티브 SKILL.md 파싱, 병렬 에이전트, 훅 강제, 모든 프론트매터 지원
 - **제한**: 없음 (모든 기능 지원)
 
 ### Cursor
 - **강점**: glob 기반 규칙 자동 활성화, `.mdc` 규칙 시스템
-- **제한**: 병렬 실행 불가, `context`/`agent` 프론트매터 무시, Bash 필터 미지원
+- **제한**: 병렬 실행 불가, `context`/`agent`/`effort` 미지원, Bash 필터 미지원
 
 ### Codex
 - **강점**: 시스템 프롬프트 기반 심층 통합, 한국어/영어 이중 지원
-- **제한**: 병렬 실행 불가, 세션 훅 미지원, `model`/`effort` 자동 적용 불가
+- **제한**: 병렬 실행 불가, 세션 훅 미지원, 프론트매터 자동 적용 불가
 
 ### Amazon Q
 - **강점**: AWS 서비스 네이티브 통합
-- **제한**: MCP 설정 선택적, 고급 프론트매터 필드 미지원, 문서 최소
+- **제한**: MCP 설정 선택적, 프론트매터 자동 적용 미지원
 
 ### Kiro
 - **강점**: 이벤트 기반 훅, steering 통합, `${workspaceFolder}` 변수 지원
-- **제한**: 병렬 실행 불가, `context`/`agent` 미지원
+- **제한**: 병렬 실행 불가, `context`/`agent`/`effort` 미지원
 
 ### Antigravity
 - **강점**: `task_boundary` 진행 추적, artifact 관리
-- **제한**: 병렬 실행 불가, 훅 미지원, `model`/`effort` 미지원
+- **제한**: 병렬 실행 불가, 훅 미지원, 프론트매터 자동 적용 미지원
 
 ---
 
 ## Cross-Tool Skill Writing Guide
 
-모든 6개 도구에서 호환되는 스킬을 작성하기 위한 가이드라인:
+모든 6개 도구에서 호환되는 스킬을 작성하기 위한 가이드라인.
 
 ### 필수 규칙
 
 1. **`name`과 `description`은 항상 포함** — 모든 도구에서 필수
 2. **마크다운 표준 문법 사용** — 도구별 확장 문법 사용 금지
-3. **도구 특정 API 참조 금지** — `Task tool`, `Agent tool` 등 Claude Code 전용 용어 사용 금지
+3. **도구 특정 API 참조 금지** — 스킬 본문에서 `Task tool`, `Agent tool` 등 Claude Code 전용 용어 사용 금지
 
 ### 권장 규칙
 
@@ -427,14 +462,19 @@ parse_mode → dispatchReady
 - [ ] 도구 특정 기능에 의존하지 않는가?
 - [ ] 순차 실행에서도 동작하는가? (병렬 가정 금지)
 - [ ] Bash 필터 없이도 보안이 유지되는가?
-- [ ] 영어와 한국어 키워드가 모두 포함되었는가? (다국어 지원 시)
+- [ ] 3인칭 서술로 description이 작성되었는가?
 ```
 
 ### 프론트매터 호환성 티어
 
-| Tier | Fields | 지원 도구 |
-|------|--------|----------|
+| Tier | Fields | 자동 적용 도구 수 |
+|------|--------|-----------------|
 | **Universal** | `name`, `description`, `disable-model-invocation`, `user-invocable` | 6/6 |
-| **Broad** | `argument-hint`, `allowed-tools` (기본) | 5-6/6 |
-| **Limited** | `model`, `hooks` | 1-2/6 |
+| **Broad** | `argument-hint` | 6/6 (UI 표시만) |
+| **Moderate** | `allowed-tools` (기본), `model`, `hooks` | 1-3/6 |
 | **Claude Code Only** | `context`, `agent`, `effort`, `allowed-tools` (Bash 필터) | 1/6 |
+
+**스킬 작성 시 권장 전략:**
+- **Universal 티어 필드로 핵심 동작 보장**
+- **상위 티어 필드는 선택적 향상으로 추가**
+- **Claude Code Only 필드는 해당 도구에서의 UX 최적화용**

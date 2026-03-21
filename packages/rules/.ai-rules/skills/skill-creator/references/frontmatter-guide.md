@@ -42,8 +42,8 @@ description: Use when [trigger condition]. [What it does].
 
 **v2.0 변경사항:**
 - `model` 필드 추가: 권장 AI 모델 지정
-- `effort` 필드 추가: 추론 노력 수준 제어
-- `hooks` 필드 추가: 이벤트 기반 자동 실행
+- `effort` 필드 추가: 추론 노력 수준 제어 (`low/medium/high/max`)
+- `hooks` 필드 추가: 이벤트 기반 자동 실행 (object 타입)
 
 ---
 
@@ -51,17 +51,17 @@ description: Use when [trigger condition]. [What it does].
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `name` | `string` | **Yes** | — | 스킬 고유 식별자 (kebab-case) |
-| `description` | `string` | **Yes** | — | 스킬 용도 및 트리거 조건 설명 |
-| `argument-hint` | `string` | No | — | CLI 인수 힌트 (예: `[file-path]`) |
-| `allowed-tools` | `string` | No | all | 사용 가능한 도구 목록 (쉼표 구분) |
-| `model` | `string` | No | inherit | 권장 AI 모델 |
-| `effort` | `string` | No | inherit | 추론 노력 수준 |
-| `context` | `string` | No | — | 실행 컨텍스트 모드 |
-| `agent` | `string` | No | — | 권장 에이전트 타입 |
-| `disable-model-invocation` | `boolean` | No | `false` | AI 모델 추론 비활성화 |
-| `user-invocable` | `boolean` | No | `true` | 사용자 직접 호출 가능 여부 |
-| `hooks` | `string` | No | — | 이벤트 기반 자동 실행 훅 |
+| `name` | `string` | **Yes** | 디렉토리명 | 슬래시 커맨드명 (소문자, 숫자, 하이픈, 최대 64자) |
+| `description` | `string` | **Yes** | 첫 번째 문단 | 용도 + 자동 트리거 조건 (200자 권장, 최대 1024자) |
+| `argument-hint` | `string` | No | — | 자동완성 인수 힌트 |
+| `allowed-tools` | `string` | No | all | 사용 가능한 도구 목록 |
+| `model` | `string` | No | 세션 기본값 | 모델 오버라이드 |
+| `effort` | `string` | No | 세션 기본값 | `low` / `medium` / `high` / `max` |
+| `context` | `string` | No | inline | `fork`: 격리된 서브에이전트 |
+| `agent` | `string` | No | general-purpose | 서브에이전트 타입 |
+| `disable-model-invocation` | `boolean` | No | `false` | AI 자동 호출 차단 |
+| `user-invocable` | `boolean` | No | `true` | `/` 메뉴에 표시 여부 |
+| `hooks` | `object` | No | — | 스킬 라이프사이클 훅 |
 
 ---
 
@@ -69,17 +69,18 @@ description: Use when [trigger condition]. [What it does].
 
 ### name
 
-스킬의 고유 식별자. 디렉토리명과 일치해야 한다.
+스킬의 고유 식별자. 디렉토리명과 일치해야 하며 슬래시 커맨드(`/name`)로 사용된다.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | **Yes** |
+| Default | 디렉토리명 |
 | Pattern | `^[a-z][a-z0-9-]*$` |
-| Max Length | 50자 권장 |
+| Max Length | 64자 |
 
 **규칙:**
-- kebab-case만 사용 (`test-driven-development`, 아니면 `testDrivenDevelopment`)
+- 소문자, 숫자, 하이픈만 사용
 - 스킬 디렉토리명과 동일해야 함
 - 단어 2-4개 권장
 
@@ -94,39 +95,47 @@ name: pr-all-in-one
 
 ### description
 
-스킬의 용도, 트리거 조건, 동작을 설명한다. `recommend_skills` 검색의 핵심 매칭 필드.
+스킬의 용도와 자동 트리거 조건을 설명한다. `recommend_skills` 검색의 핵심 매칭 필드.
 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
 | Required | **Yes** |
-| Max Length | 200자 권장 |
+| Default | SKILL.md 첫 번째 문단 |
+| Recommended Length | 200자 |
+| Max Length | 1024자 |
 
 **규칙:**
-- "Use when"으로 시작 권장 (트리거 조건 명시)
-- 구체적인 상황/동작 기술
-- 200자 이내 권장 (검색 최적화)
+- 구체적인 트리거 문구 포함 ("Use when...", "Use this skill when the user asks to...")
+- 3인칭 서술 ("Explains code..." not "Explain code...")
+- 200자 권장, 최대 1024자
 
 **예시:**
 ```yaml
-# Good - 트리거 조건이 명확
+# Good - 트리거 조건이 명확, 3인칭 서술
 description: Use when implementing any feature or bugfix, before writing implementation code
 
-# Good - 여러 트리거 포함
+# Good - 여러 상황 + 결과 기술
 description: Use before deploying to staging or production. Covers pre-deploy validation, environment verification, rollback planning, health checks, and post-deploy monitoring.
+
+# Good - 3인칭으로 동작 기술
+description: Explains code structure, logic flow, and design decisions with context-appropriate detail.
 
 # Bad - 너무 모호
 description: A skill for testing
 
-# Bad - 너무 김
-description: This skill helps developers write better tests by following TDD principles and ensuring code quality through comprehensive test coverage with multiple assertion strategies and edge case handling across different environments and frameworks...
+# Bad - 1인칭/명령형 (2인칭도 피할 것)
+description: Explain the code to me
+
+# Bad - 1024자 초과
+description: This comprehensive skill provides detailed guidance for implementing test-driven development...
 ```
 
 ---
 
 ### argument-hint
 
-사용자가 스킬 호출 시 전달할 수 있는 위치 인수를 안내한다.
+사용자가 스킬 호출 시 전달할 수 있는 위치 인수를 안내한다. 자동완성 UI에 표시된다.
 
 | Property | Value |
 |----------|-------|
@@ -138,7 +147,7 @@ description: This skill helps developers write better tests by following TDD pri
 - 대괄호 `[]`로 각 인수를 감싸기
 - 복수 인수는 공백으로 구분
 - 인수명은 kebab-case
-- 필수 인수와 선택 인수 구분 없음 (모두 선택)
+- 모든 인수는 선택적
 
 **예시:**
 ```yaml
@@ -180,7 +189,7 @@ argument-hint: [target-module-or-path]
 - `Bash` — 셸 명령 실행
 - `Agent` — 서브에이전트 실행
 
-**Bash 필터링:**
+**Bash 필터링 (Claude Code 전용):**
 ```yaml
 # Bash 전체 허용
 allowed-tools: Read, Grep, Glob, Bash
@@ -191,6 +200,8 @@ allowed-tools: Read, Grep, Glob, Bash(git:*)
 # git과 gh 명령만 허용
 allowed-tools: Read, Grep, Glob, Bash(gh:*, git:*)
 ```
+
+> **주의:** Bash 필터(`Bash(git:*)`)는 Claude Code에서만 지원된다. 다른 도구에서는 기본 도구명만 인식한다.
 
 **예시 패턴:**
 
@@ -212,17 +223,17 @@ allowed-tools: Read, Grep, Glob, Bash(gh:*, git:*)
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Default | 부모 세션 모델 상속 |
+| Default | 세션 기본 모델 |
 
 **사용 가능한 값:**
 - `opus` — 복잡한 추론이 필요한 스킬
-- `sonnet` — 일반적인 코딩 스킬 (기본)
+- `sonnet` — 일반적인 코딩 스킬
 - `haiku` — 간단한 분류/변환 스킬
 
 **사용 시점:**
 - 높은 추론 능력이 필요한 스킬: `opus`
 - 빠른 응답이 중요한 스킬: `haiku`
-- 대부분의 스킬: 미지정 (기본값 사용)
+- 대부분의 스킬: 미지정 (세션 기본값 사용)
 
 **예시:**
 ```yaml
@@ -230,6 +241,8 @@ model: opus    # 복잡한 아키텍처 분석
 model: sonnet  # 일반 코드 작성
 model: haiku   # 간단한 코드 설명
 ```
+
+> **호환성:** Claude Code에서만 자동 전환. 다른 도구에서는 힌트로만 사용.
 
 ---
 
@@ -241,23 +254,23 @@ AI 모델의 추론 노력 수준을 제어한다. v2.0에서 추가.
 |----------|-------|
 | Type | `string` |
 | Required | No |
-| Default | 부모 세션 설정 상속 |
+| Default | 세션 기본값 |
+| Values | `low`, `medium`, `high`, `max` |
 
-**사용 가능한 값:**
+**각 수준의 의미:**
+- `low` — 빠른 분류, 간단한 변환. 최소 추론
+- `medium` — 일반적인 코딩 작업 (기본)
 - `high` — 깊은 분석, 복잡한 문제 해결
-- `medium` — 일반적인 작업 (기본)
-- `low` — 빠른 분류, 간단한 변환
-
-**사용 시점:**
-- 보안 감사, 아키텍처 분석: `high`
-- 대부분의 스킬: 미지정 (기본값)
-- 단순 포맷팅, 분류: `low`
+- `max` — 최대 추론. 보안 감사, 아키텍처 설계 등 가장 까다로운 작업
 
 **예시:**
 ```yaml
-effort: high   # 보안 감사 - 철저한 분석 필요
+effort: max    # 보안 감사 - 최대 추론
+effort: high   # 아키텍처 분석 - 깊은 분석
 effort: low    # 코드 포맷팅 - 빠른 처리
 ```
+
+> **호환성:** Claude Code에서만 자동 적용. 다른 도구에서는 무시.
 
 ---
 
@@ -269,6 +282,7 @@ effort: low    # 코드 포맷팅 - 빠른 처리
 |----------|-------|
 | Type | `string` |
 | Required | No |
+| Default | `inline` (메인 컨텍스트에서 실행) |
 | Values | `fork` |
 
 **`fork`의 의미:**
@@ -286,6 +300,8 @@ effort: low    # 코드 포맷팅 - 빠른 처리
 context: fork  # 격리된 환경에서 PR 리뷰 실행
 ```
 
+> **호환성:** Claude Code에서만 지원. 다른 도구에서는 무시 (inline으로 실행).
+
 ---
 
 ### agent
@@ -296,11 +312,12 @@ context: fork  # 격리된 환경에서 PR 리뷰 실행
 |----------|-------|
 | Type | `string` |
 | Required | No |
+| Default | `general-purpose` |
 | Values | `Explore`, `general-purpose` |
 
 **에이전트 타입:**
 - `Explore` — 빠른 코드 탐색/검색 특화 (읽기 전용)
-- `general-purpose` — 전체 도구 접근 (읽기+쓰기)
+- `general-purpose` — 전체 도구 접근 (읽기+쓰기+Bash)
 
 **사용 시점:**
 - 코드 설명, PR 리뷰 등 읽기 전용: `Explore`
@@ -319,11 +336,13 @@ agent: general-purpose
 allowed-tools: Read, Grep, Glob, Bash(git:*)
 ```
 
+> **호환성:** Claude Code에서만 지원. 다른 도구에서는 무시.
+
 ---
 
 ### disable-model-invocation
 
-`true`로 설정하면 AI 모델이 스킬 내용을 자체적으로 해석하지 않고, 사용자에게 체크리스트/가이드로 직접 제시한다.
+`true`로 설정하면 AI 모델이 스킬을 자동으로 호출하지 않는다. 사용자가 명시적으로 `/skill-name`으로 호출해야만 실행된다.
 
 | Property | Value |
 |----------|-------|
@@ -332,13 +351,13 @@ allowed-tools: Read, Grep, Glob, Bash(git:*)
 | Default | `false` |
 
 **사용 시점:**
-- 부작용(side effect)이 있는 스킬: 커밋, 배포, DB 마이그레이션
-- 체크리스트 기반 스킬: 사람이 직접 확인해야 하는 항목
+- 부작용(side effect)이 있는 스킬: 커밋, 배포, 푸시, DB 마이그레이션
 - 위험한 작업을 포함하는 스킬: 데이터 삭제, 프로덕션 변경
+- 사용자의 명시적 의도가 필요한 스킬
 
 **예시:**
 ```yaml
-# 배포 체크리스트 - 사람이 직접 확인
+# 배포 체크리스트 - 사용자가 명시적으로 호출해야 함
 disable-model-invocation: true
 
 # DB 마이그레이션 - 위험한 작업 포함
@@ -351,11 +370,13 @@ disable-model-invocation: true
 - `incident-response`
 - `pr-all-in-one`
 
+> **호환성:** 모든 도구에서 지원.
+
 ---
 
 ### user-invocable
 
-`false`로 설정하면 사용자가 직접 호출할 수 없고, 시스템 내부에서만 사용된다.
+`false`로 설정하면 사용자가 `/` 메뉴에서 스킬을 볼 수 없고 직접 호출할 수 없다. 시스템 내부에서만 사용된다.
 
 | Property | Value |
 |----------|-------|
@@ -364,18 +385,20 @@ disable-model-invocation: true
 | Default | `true` |
 
 **사용 시점:**
-- 배경 지식 스킬: 다른 스킬이 참조하는 정보
-- 내부 전용 스킬: `parse_mode`에서 자동 로드
+- 배경 지식 스킬: 다른 스킬이나 에이전트가 참조하는 정보
+- 내부 전용 스킬: `parse_mode`에서 자동 로드되는 컨텍스트
 
 **예시:**
 ```yaml
-# 내부 전용 스킬
+# 내부 전용 - 사용자에게 표시하지 않음
 user-invocable: false
 ```
 
 **현재 사용 중인 스킬:**
 - `context-management`
 - `widget-slot-architecture`
+
+> **호환성:** 모든 도구에서 지원.
 
 ---
 
@@ -385,25 +408,39 @@ user-invocable: false
 
 | Property | Value |
 |----------|-------|
-| Type | `string` |
+| Type | `object` |
 | Required | No |
-| Format | `event:action` |
 
-**사용 가능한 이벤트:**
-- `PreToolUse` — 도구 호출 전
-- `PostToolUse` — 도구 호출 후
-- `session-start` — 세션 시작 시
+**훅 이벤트:**
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      action: "invoke"
+  PostToolUse:
+    - matcher: "Write"
+      action: "invoke"
+  session-start:
+    action: "load"
+```
+
+**지원 이벤트:**
+- `PreToolUse` — 도구 호출 전 실행
+- `PostToolUse` — 도구 호출 후 실행
+- `session-start` — 세션 시작 시 자동 로드
 
 **예시:**
 ```yaml
 # 커밋 전 자동 리뷰
-hooks: PreToolUse:commit
-
-# 세션 시작 시 자동 로드
-hooks: session-start
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      pattern: "git commit"
+      action: "invoke"
 ```
 
-> **주의:** hooks는 Claude Code에서만 지원된다. 다른 도구에서는 무시된다.
+> **호환성:** Claude Code에서 완전 지원. Kiro에서 이벤트 기반 훅 지원. 다른 도구에서는 무시.
 
 ---
 
@@ -412,61 +449,36 @@ hooks: session-start
 스킬 프론트매터 필드를 결정하기 위한 의사결정 트리:
 
 ```
-스킬 작성 시작
-│
-├─ name, description 작성 (필수)
-│
-├─ 사용자가 직접 호출하는가?
-│  ├─ No → user-invocable: false
-│  └─ Yes
-│     └─ CLI 인수를 받는가?
-│        ├─ Yes → argument-hint: [arg-name]
-│        └─ No → (생략)
-│
-├─ 부작용(side effect)이 있는가?
-│  │  (커밋, 배포, DB 변경, 파일 생성/삭제)
-│  ├─ Yes → disable-model-invocation: true
-│  └─ No
-│     └─ 도구 접근을 제한해야 하는가?
-│        ├─ Yes → allowed-tools: [도구 목록]
-│        └─ No → (전체 도구 허용)
-│
-├─ 격리된 환경이 필요한가?
-│  │  (대량 읽기, 메인 컨텍스트 보호)
-│  ├─ Yes → context: fork
-│  │  └─ 어떤 에이전트가 적합한가?
-│  │     ├─ 읽기 전용 → agent: Explore
-│  │     └─ 쓰기/Bash 필요 → agent: general-purpose
-│  └─ No → (기본 컨텍스트)
-│
-├─ 특정 모델이 필요한가?
-│  ├─ 복잡한 추론 → model: opus
-│  ├─ 간단한 작업 → model: haiku
-│  └─ 일반적 → (기본값 상속)
-│
-├─ 추론 노력을 조정해야 하는가?
-│  ├─ 철저한 분석 → effort: high
-│  ├─ 빠른 처리 → effort: low
-│  └─ 일반적 → (기본값 상속)
-│
-└─ 이벤트 기반 자동 실행이 필요한가?
-   ├─ Yes → hooks: [event:action]
-   └─ No → (수동 실행)
+스킬에 부작용(side effect)이 있는가? (커밋, 푸시, 배포 등)
+├── YES → disable-model-invocation: true
+└── NO → 배경 지식 스킬인가? (아키텍처 참조 등)
+    ├── YES → user-invocable: false
+    └── NO → 기본값 유지
+
+읽기 전용 분석 스킬인가?
+├── YES → context: fork, agent: Explore
+└── NO → Bash 실행이 필요한 분석 스킬인가?
+    ├── YES → context: fork, agent: general-purpose
+    └── NO → 기본 컨텍스트 (inline)
+
+특정 도구만 사용해야 하는가?
+├── YES → allowed-tools: [필요한 도구 목록]
+└── NO → allowed-tools 생략 (전체 허용)
 ```
 
 **의사결정 요약표:**
 
 | 질문 | 조건 | 설정할 필드 |
 |------|------|-------------|
-| 내부 전용? | 사용자 미호출 | `user-invocable: false` |
-| 인수 있음? | CLI에서 인수 전달 | `argument-hint` |
 | 부작용 있음? | 커밋/배포/DB 변경 | `disable-model-invocation: true` |
-| 도구 제한? | 특정 도구만 허용 | `allowed-tools` |
-| 격리 필요? | 독립 실행 | `context: fork` |
-| 에이전트 유형? | fork 시 | `agent` |
-| 모델 지정? | 특수 모델 필요 | `model` |
-| 노력 조정? | 분석 깊이 조절 | `effort` |
-| 자동 실행? | 이벤트 트리거 | `hooks` |
+| 내부 전용? | 사용자 미호출 | `user-invocable: false` |
+| 인수 있음? | CLI에서 인수 전달 | `argument-hint: [arg-name]` |
+| 도구 제한? | 특정 도구만 허용 | `allowed-tools: [도구 목록]` |
+| 격리 필요? | 독립 실행, 읽기 전용 | `context: fork` |
+| 에이전트 유형? | fork 시 | `agent: Explore` 또는 `general-purpose` |
+| 모델 지정? | 특수 모델 필요 | `model: opus` 등 |
+| 노력 조정? | 분석 깊이 조절 | `effort: low/medium/high/max` |
+| 자동 실행? | 이벤트 트리거 | `hooks: { ... }` |
 
 ---
 
@@ -476,10 +488,10 @@ hooks: session-start
 
 ### 작성 원칙
 
-1. **"Use when"으로 시작** — 트리거 조건을 명확히 함
-2. **200자 이내** — 검색 최적화, 간결함 유지
-3. **구체적 상황 기술** — "코딩할 때"가 아닌 "feature 구현 전"
-4. **동작 결과 포함** — 스킬이 무엇을 하는지 기술
+1. **트리거 문구 포함** — "Use when...", "Use this skill when..."
+2. **3인칭 서술** — "Explains code..." (O), "Explain code..." (X)
+3. **200자 권장, 최대 1024자** — 검색 최적화, 간결함 유지
+4. **구체적 상황 기술** — "코딩할 때"가 아닌 "feature 구현 전"
 
 ### 트리거 문구 패턴
 
@@ -489,20 +501,29 @@ hooks: session-start
 | `Use before [동작]ing` | 사전 준비 | `Use before deploying to production` |
 | `Use after [동작]ing` | 사후 검증 | `Use after completing a development branch` |
 | `Use when encountering` | 문제 대응 | `Use when encountering any bug or test failure` |
-| `Use when [조건]` | 조건부 | `Use when starting feature work that needs isolation` |
+| `Use this skill when the user asks to` | 사용자 요청 | `Use this skill when the user asks to review a PR` |
+
+### 3인칭 서술 가이드
+
+| Good (3인칭) | Bad (명령형/2인칭) |
+|-------------|------------------|
+| Explains code structure and logic flow | Explain the code |
+| Generates comprehensive test suites | Generate tests |
+| Analyzes security vulnerabilities | Analyze security |
+| Covers validation, rollback, monitoring | Cover all cases |
 
 ### Good vs Bad Examples
 
 **Good:**
 ```yaml
-# 구체적 트리거 + 동작
+# 트리거 + 3인칭 서술
 description: Use when implementing any feature or bugfix, before writing implementation code
 
-# 여러 상황 + 결과
+# 여러 상황 + 커버리지 기술
 description: Use before deploying to staging or production. Covers pre-deploy validation, environment verification, rollback planning, health checks, and post-deploy monitoring.
 
-# 명확한 적용 범위
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+# 3인칭으로 동작 기술
+description: Explains code structure, logic flow, and design decisions with context-appropriate detail.
 ```
 
 **Bad:**
@@ -510,11 +531,14 @@ description: Use when encountering any bug, test failure, or unexpected behavior
 # 너무 모호
 description: A testing skill
 
+# 명령형 (1인칭/2인칭)
+description: Explain the code to me
+
 # 트리거 조건 없음
 description: Helps with code quality
 
-# 너무 김 (200자 초과)
-description: This comprehensive skill provides detailed guidance for implementing test-driven development practices including red-green-refactor cycles with support for multiple testing frameworks and assertion libraries across various programming languages and environments with special attention to edge cases...
+# 1024자 초과
+description: This comprehensive skill provides detailed guidance for implementing test-driven development practices including red-green-refactor cycles with support for multiple testing frameworks and assertion libraries across various programming languages and environments with special attention to edge cases and boundary conditions and performance optimization and integration testing and end-to-end testing and mutation testing and property-based testing and snapshot testing and visual regression testing...
 ```
 
 ### 키워드 매칭 최적화
@@ -567,7 +591,7 @@ agent: general-purpose
 allowed-tools: Read, Grep, Glob, Bash(git:*)
 argument-hint: [scope-or-path]
 model: opus
-effort: high
+effort: max
 ---
 ```
 
@@ -587,7 +611,7 @@ argument-hint: [target-branch] [issue-id]
 ```yaml
 ---
 name: context-management
-description: Background knowledge for managing conversation context and memory across sessions. Not directly invocable.
+description: Background knowledge for managing conversation context and memory across sessions. Not directly invocable by users.
 user-invocable: false
 ---
 ```
@@ -598,7 +622,11 @@ user-invocable: false
 ---
 name: pre-commit-review
 description: Use to automatically review code before committing. Checks for common issues, security vulnerabilities, and code quality.
-hooks: PreToolUse:commit
 allowed-tools: Read, Grep, Glob
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      pattern: "git commit"
+      action: "invoke"
 ---
 ```
