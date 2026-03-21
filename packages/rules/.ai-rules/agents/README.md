@@ -202,6 +202,7 @@ as agent-architect, design new agent
 | Data Scientist | `primary` | EDA, ML modeling, Jupyter notebooks, data analysis and visualization |
 | Systems Developer | `primary` | Rust/C/C++, FFI bindings, embedded systems, low-level performance optimization |
 | Software Engineer | `primary` | Universal fallback — any language, any domain, when no specific agent matches |
+| Parallel Orchestrator | `primary` | Parallel issue execution, taskMaestro orchestration, Wave planning |
 
 ### EVAL Mode
 
