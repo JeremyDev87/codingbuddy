@@ -57,6 +57,7 @@ Reusable workflows for consistent development practices.
 | agent-design | Design new specialist agent JSON definitions with schema, expertise, and system prompts | Adding new agents to codingbuddy |
 | mcp-builder | NestJS-based MCP server development with Tools/Resources/Prompts design | Building or extending MCP servers |
 | rule-authoring | Write unambiguous AI coding rules compatible across multiple AI tools | Creating rules for .ai-rules/ directories |
+| skill-creator | Create, eval, improve, and benchmark skills with measurable behavior-change tests | Creating new skills, testing skill effectiveness, optimizing underperforming skills |
 
 ## Skill Format
 
@@ -219,6 +220,8 @@ EOF
     │   └── SKILL.md
     ├── mcp-builder/
     │   └── SKILL.md
-    └── rule-authoring/
+    ├── rule-authoring/
+    │   └── SKILL.md
+    └── skill-creator/
         └── SKILL.md
 ```
