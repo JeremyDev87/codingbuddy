@@ -1,0 +1,393 @@
+# OpenAPI 3.1 Template
+# Copy and adapt this template when creating new API specifications.
+# Replace all placeholder values (marked with <angle-brackets>).
+
+openapi: 3.1.0
+info:
+  title: <Service Name> API
+  version: 1.0.0
+  description: |
+    <Brief description of what this API does and who it serves.>
+  contact:
+    name: <Team Name>
+    email: <team@example.com>
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: https://api-staging.example.com/v1
+    description: Staging
+
+# ──────────────────────────────────────────
+# Paths
+# ──────────────────────────────────────────
+
+paths:
+  /items:
+    get:
+      summary: List items
+      operationId: listItems
+      tags: [Items]
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: status
+          in: query
+          description: Filter by item status
+          schema:
+            type: string
+            enum: [active, archived, draft]
+        - name: search
+          in: query
+          description: Full-text search across name and description
+          schema:
+            type: string
+            maxLength: 200
+      responses:
+        '200':
+          description: Paginated list of items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create an item
+      operationId: createItem
+      tags: [Items]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemRequest'
+      responses:
+        '201':
+          description: Item created
+          headers:
+            Location:
+              description: URL of the newly created item
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /items/{itemId}:
+    parameters:
+      - name: itemId
+        in: path
+        required: true
+        description: Unique item identifier
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      summary: Get an item by ID
+      operationId: getItem
+      tags: [Items]
+      responses:
+        '200':
+          description: Item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update an item
+      operationId: updateItem
+      tags: [Items]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateItemRequest'
+      responses:
+        '200':
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    delete:
+      summary: Delete an item
+      operationId: deleteItem
+      tags: [Items]
+      responses:
+        '204':
+          description: Item deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ──────────────────────────────────────────
+# Components
+# ──────────────────────────────────────────
+
+components:
+  # --- Schemas ---
+
+  schemas:
+    Item:
+      type: object
+      required: [id, name, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier
+          examples: ['550e8400-e29b-41d4-a716-446655440000']
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Display name
+        description:
+          type: string
+          maxLength: 2000
+          description: Detailed description
+        status:
+          type: string
+          enum: [active, archived, draft]
+          description: Current item status
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateItemRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 2000
+        status:
+          type: string
+          enum: [active, draft]
+          default: draft
+
+    UpdateItemRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 2000
+        status:
+          type: string
+          enum: [active, archived, draft]
+
+    ItemResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: '#/components/schemas/Item'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ItemListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        meta:
+          allOf:
+            - $ref: '#/components/schemas/ResponseMeta'
+            - $ref: '#/components/schemas/PaginationMeta'
+
+    # --- Shared Schemas ---
+
+    ResponseMeta:
+      type: object
+      required: [requestId, timestamp]
+      properties:
+        requestId:
+          type: string
+          format: uuid
+          description: Unique request trace ID
+        timestamp:
+          type: string
+          format: date-time
+
+    PaginationMeta:
+      type: object
+      required: [total, page, pageSize, hasNext]
+      properties:
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+        hasNext:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      required: [error, meta]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              examples: ['VALIDATION_ERROR']
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: array
+              items:
+                type: object
+                required: [message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                  code:
+                    type: string
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  # --- Parameters ---
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSizeParam:
+      name: pageSize
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  # --- Responses ---
+
+  responses:
+    ValidationError:
+      description: Input validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: Invalid input data
+              details:
+                - field: name
+                  message: Name is required
+                  code: REQUIRED
+            meta:
+              requestId: '550e8400-e29b-41d4-a716-446655440000'
+              timestamp: '2024-01-15T10:30:00Z'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: The requested resource was not found
+            meta:
+              requestId: '550e8400-e29b-41d4-a716-446655440000'
+              timestamp: '2024-01-15T10:30:00Z'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Authentication is required
+            meta:
+              requestId: '550e8400-e29b-41d4-a716-446655440000'
+              timestamp: '2024-01-15T10:30:00Z'
+
+    Conflict:
+      description: State conflict (duplicate or version mismatch)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: CONFLICT
+              message: An item with this name already exists
+            meta:
+              requestId: '550e8400-e29b-41d4-a716-446655440000'
+              timestamp: '2024-01-15T10:30:00Z'
+
+  # --- Security ---
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Items
+    description: Item management endpoints

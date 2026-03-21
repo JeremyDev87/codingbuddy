@@ -355,3 +355,9 @@ Server:
 | No error handling in tools | Always catch and return isError: true |
 | Breaking stdio with console.log | Use stderr for logs: `process.stderr.write(...)` |
 | Hardcoded paths | Use env vars or config injection |
+
+## Additional resources
+
+- [Tool implementation example](examples/tool-example.ts) — Complete MCP Tool handler with schema, validation, and error handling
+- [Resource implementation example](examples/resource-example.ts) — Complete MCP Resource handler with URI routing and templates
+- [MCP protocol quick reference](references/protocol-spec.md) — JSON-RPC message formats, capability methods, transport modes, and error codes

@@ -457,3 +457,8 @@ node        The actual object
 cursor      Pagination cursor
 pageInfo    hasNextPage, etc.
 ```
+
+## Additional resources
+
+- [OpenAPI 3.1 template](examples/openapi-template.yaml) — Copy-and-adapt template with CRUD endpoints, pagination, error responses, and security schemes
+- [Error response examples](examples/error-response.json) — Standard error format for all HTTP status codes with machine-readable error code registry

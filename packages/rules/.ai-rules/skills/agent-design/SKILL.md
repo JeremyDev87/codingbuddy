@@ -267,3 +267,8 @@ ALL    → Cross-cutting agents (code-reviewer)
 - [ ] README.md updated with new agent
 - [ ] Added to relevant adapter configurations
 ```
+
+## Additional resources
+
+- [Agent JSON template](examples/agent-template.json) — Copy-and-adapt template with all required/optional fields and a design checklist
+- [Expertise definition guidelines](references/expertise-guidelines.md) — How to write differentiated expertise items, avoid overlaps, and validate quality

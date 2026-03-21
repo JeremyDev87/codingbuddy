@@ -739,3 +739,8 @@ Key Rules
 4. Always Define default.tsx
 5. Widgets Must Be Portable
 ```
+
+## Additional resources
+
+- [Parallel route setup](examples/parallel-route-setup.tsx) — Complete dashboard layout with multiple slots, loading, error, and default states
+- [Widget component](examples/widget-component.tsx) — Full TaskBoard widget with Server/Client Component split, actions, and barrel exports

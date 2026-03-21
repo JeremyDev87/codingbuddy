@@ -1,0 +1,159 @@
+{
+  "_comment": "Standard API error response examples. Use these as templates for consistent error formatting.",
+
+  "validation_error": {
+    "status": 400,
+    "body": {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid input data",
+        "details": [
+          {
+            "field": "email",
+            "message": "Must be a valid email address",
+            "code": "INVALID_FORMAT"
+          },
+          {
+            "field": "name",
+            "message": "Name is required",
+            "code": "REQUIRED"
+          },
+          {
+            "field": "age",
+            "message": "Must be between 1 and 150",
+            "code": "OUT_OF_RANGE"
+          }
+        ]
+      },
+      "meta": {
+        "requestId": "req_abc123",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "unauthorized": {
+    "status": 401,
+    "body": {
+      "error": {
+        "code": "UNAUTHORIZED",
+        "message": "Authentication is required to access this resource"
+      },
+      "meta": {
+        "requestId": "req_def456",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "forbidden": {
+    "status": 403,
+    "body": {
+      "error": {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to perform this action",
+        "details": [
+          {
+            "field": "role",
+            "message": "Requires 'admin' role",
+            "code": "INSUFFICIENT_PERMISSIONS"
+          }
+        ]
+      },
+      "meta": {
+        "requestId": "req_ghi789",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "not_found": {
+    "status": 404,
+    "body": {
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found"
+      },
+      "meta": {
+        "requestId": "req_jkl012",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "conflict": {
+    "status": 409,
+    "body": {
+      "error": {
+        "code": "CONFLICT",
+        "message": "A resource with this identifier already exists",
+        "details": [
+          {
+            "field": "email",
+            "message": "An account with this email already exists",
+            "code": "DUPLICATE"
+          }
+        ]
+      },
+      "meta": {
+        "requestId": "req_mno345",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "rate_limited": {
+    "status": 429,
+    "headers": {
+      "Retry-After": "60",
+      "X-RateLimit-Limit": "100",
+      "X-RateLimit-Remaining": "0",
+      "X-RateLimit-Reset": "1705312260"
+    },
+    "body": {
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "Too many requests. Please retry after 60 seconds."
+      },
+      "meta": {
+        "requestId": "req_pqr678",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "internal_error": {
+    "status": 500,
+    "body": {
+      "error": {
+        "code": "INTERNAL_ERROR",
+        "message": "An unexpected error occurred. Please try again later."
+      },
+      "meta": {
+        "requestId": "req_stu901",
+        "timestamp": "2024-01-15T10:30:00Z"
+      }
+    }
+  },
+
+  "_error_code_registry": {
+    "_comment": "Machine-readable error codes used across the API. Keep this list updated.",
+    "codes": {
+      "VALIDATION_ERROR": "Request body or parameters failed validation",
+      "UNAUTHORIZED": "Missing or invalid authentication credentials",
+      "FORBIDDEN": "Valid credentials but insufficient permissions",
+      "NOT_FOUND": "Requested resource does not exist",
+      "CONFLICT": "Request conflicts with current server state",
+      "RATE_LIMITED": "Client exceeded rate limit quota",
+      "INTERNAL_ERROR": "Unexpected server-side failure",
+      "SERVICE_UNAVAILABLE": "Upstream dependency is unavailable",
+      "REQUIRED": "A required field is missing",
+      "INVALID_FORMAT": "Field value does not match expected format",
+      "OUT_OF_RANGE": "Numeric value outside allowed range",
+      "DUPLICATE": "Value must be unique but already exists",
+      "INSUFFICIENT_PERMISSIONS": "Specific permission check failed",
+      "EXPIRED": "Token or resource has expired",
+      "IMMUTABLE": "Attempted to modify a read-only field"
+    }
+  }
+}

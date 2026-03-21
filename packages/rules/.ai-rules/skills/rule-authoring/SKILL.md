@@ -271,3 +271,8 @@ NEVER / MUST NOT  → Prohibited
 | "The existing rule covers this" | Check carefully — overlap causes conflicts |
 | "Rules don't need testing" | Test with each target AI tool |
 | "Abstract rules are more flexible" | Abstract rules are ignored or misapplied |
+
+## Additional resources
+
+- [Rule template](examples/rule-template.md) — Copy-and-adapt template with filled example and pre-commit checklist
+- [Trigger patterns](examples/trigger-patterns.md) — Catalog of clear trigger patterns, ambiguity antipatterns, and strength vocabulary

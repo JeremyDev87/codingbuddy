@@ -1,0 +1,58 @@
+{
+  "_template_instructions": "Copy this file and replace all <placeholder> values. Remove this _template_instructions field. Save as packages/rules/.ai-rules/agents/<agent-name>.json (kebab-case filename).",
+
+  "name": "<Display Name>",
+  "description": "<One-sentence description of what this agent specializes in — be specific, not broad>",
+
+  "role": {
+    "title": "<Official Role Title>",
+    "type": "specialist",
+    "expertise": [
+      "<Specific Domain Expertise 1 — e.g., 'Zero-Downtime Schema Migrations'>",
+      "<Specific Domain Expertise 2 — e.g., 'Expand-Contract Migration Pattern'>",
+      "<Specific Domain Expertise 3 — e.g., 'Rollback Strategy Design'>",
+      "<Specific Domain Expertise 4 (optional)>",
+      "<Specific Domain Expertise 5 (optional)>"
+    ],
+    "responsibilities": [
+      "<Key responsibility 1 — what this agent actively does>",
+      "<Key responsibility 2 — what this agent actively does>",
+      "<Key responsibility 3 — what this agent actively does>"
+    ]
+  },
+
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
+
+  "modes": {
+    "planning": {
+      "activation": {
+        "trigger": "<When this agent activates in PLAN mode — e.g., 'When planning database schema migrations'>",
+        "auto_activate_conditions": [
+          "<Condition 1 — e.g., 'Schema change planning'>",
+          "<Condition 2 — e.g., 'Migration strategy design'>"
+        ]
+      }
+    },
+    "evaluation": {
+      "activation": {
+        "trigger": "<When this agent activates in EVAL mode — e.g., 'When evaluating migration safety and rollback readiness'>"
+      }
+    }
+  },
+
+  "_design_checklist": {
+    "_comment": "Remove this section from the final agent file. Use it during design to verify quality.",
+    "checks": [
+      "Domain is specific, not broad (e.g., 'Zero-Downtime Migrations' not 'Databases')",
+      "No significant overlap with existing agents (< 2 shared expertise items)",
+      "System prompt includes what this agent does NOT handle",
+      "3-7 expertise items, all specific and measurable",
+      "Filename follows kebab-case convention",
+      "Modes reflect actual usage patterns (PLAN, ACT, EVAL, or ALL)",
+      "JSON validates with: cat <file>.json | jq ."
+    ]
+  }
+}
