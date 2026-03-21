@@ -82,6 +82,7 @@
     "allCategories": "전체",
     "noResults": "조건에 맞는 에이전트를 찾을 수 없습니다",
     "viewAll": "모든 에이전트 보기",
+    "showLess": "접기",
     "categories": {
       "Planning": "기획",
       "Development": "개발",

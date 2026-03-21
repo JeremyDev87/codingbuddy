@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
+import { useCallback, useSyncExternalStore } from 'react';
+import { ArrowRight, ChevronUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { AgentCategory, WidgetProps } from '@/types';
 import { agents } from './data/agents';
@@ -9,11 +10,32 @@ import { AgentCard } from './ui/AgentCard';
 import { FilterBar } from './ui/FilterBar';
 
 const MAX_VISIBLE_AGENTS = 8;
+const AGENTS_ALL_HASH = '#agents-all';
+
+const hashSubscribe = (cb: () => void) => {
+  window.addEventListener('hashchange', cb);
+  return () => window.removeEventListener('hashchange', cb);
+};
+const getHashSnapshot = () => window.location.hash;
+const getServerSnapshot = () => '';
 
 export const AgentsShowcase = ({ locale }: WidgetProps) => {
   const t = useTranslations('agents');
+  const hash = useSyncExternalStore(hashSubscribe, getHashSnapshot, getServerSnapshot);
+  const showAllFromHash = hash === AGENTS_ALL_HASH;
 
   const { filteredAgents, category, setCategory } = useAgentFilter(agents);
+
+  const handleViewAll = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.location.hash = AGENTS_ALL_HASH;
+  }, []);
+
+  const handleShowLess = useCallback(() => {
+    window.history.replaceState(null, '', window.location.pathname);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    document.getElementById('agents')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   const translations = {
     filter: t('filter'),
@@ -27,8 +49,10 @@ export const AgentsShowcase = ({ locale }: WidgetProps) => {
     } as Record<AgentCategory, string>,
   };
 
-  const visibleAgents = filteredAgents.slice(0, MAX_VISIBLE_AGENTS);
   const hasMore = filteredAgents.length > MAX_VISIBLE_AGENTS;
+  const visibleAgents = showAllFromHash
+    ? filteredAgents
+    : filteredAgents.slice(0, MAX_VISIBLE_AGENTS);
 
   return (
     <section
@@ -54,7 +78,7 @@ export const AgentsShowcase = ({ locale }: WidgetProps) => {
       </p>
 
       {visibleAgents.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div id="agents-all" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {visibleAgents.map(agent => (
             <AgentCard
               key={agent.id}
@@ -69,15 +93,29 @@ export const AgentsShowcase = ({ locale }: WidgetProps) => {
         </p>
       )}
 
-      {hasMore && (
+      {hasMore && !showAllFromHash && (
         <div className="mt-8 text-center">
           <a
             href="#agents-all"
+            onClick={handleViewAll}
             className="text-primary hover:text-primary/80 inline-flex items-center gap-1 text-sm font-medium transition-colors"
           >
             {t('viewAll')}
             <ArrowRight className="size-4" />
           </a>
+        </div>
+      )}
+
+      {showAllFromHash && hasMore && (
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            onClick={handleShowLess}
+            className="text-primary hover:text-primary/80 inline-flex items-center gap-1 text-sm font-medium transition-colors"
+          >
+            {t('showLess')}
+            <ChevronUp className="size-4" />
+          </button>
         </div>
       )}
     </section>

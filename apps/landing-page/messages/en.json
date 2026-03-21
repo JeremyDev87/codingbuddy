@@ -82,6 +82,7 @@
     "allCategories": "All",
     "noResults": "No agents found matching your criteria",
     "viewAll": "View All Agents",
+    "showLess": "Show Less",
     "categories": {
       "Planning": "Planning",
       "Development": "Development",

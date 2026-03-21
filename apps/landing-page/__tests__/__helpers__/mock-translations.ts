@@ -29,6 +29,7 @@ export const mockTranslations: Record<string, Record<string, string>> = {
     allCategories: 'All',
     noResults: 'No agents found matching your criteria',
     viewAll: 'View All Agents',
+    showLess: 'Show Less',
     'categories.Planning': 'Planning',
     'categories.Development': 'Development',
     'categories.Review': 'Review',

@@ -1,10 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@/__tests__/__helpers__/next-intl-mock';
 import { AgentsShowcase } from '@/widgets/AgentsShowcase';
 
 describe('AgentsShowcase', () => {
+  beforeEach(() => {
+    window.location.hash = '';
+  });
+
   it('should render with locale prop', () => {
     render(<AgentsShowcase locale="en" />);
     expect(screen.getByTestId('agents-showcase')).toBeInTheDocument();
@@ -23,6 +27,11 @@ describe('AgentsShowcase', () => {
   it('should have id attribute for anchor navigation', () => {
     render(<AgentsShowcase locale="en" />);
     expect(screen.getByTestId('agents-showcase')).toHaveAttribute('id', 'agents');
+  });
+
+  it('should have agents-all id on the grid for anchor target', () => {
+    render(<AgentsShowcase locale="en" />);
+    expect(document.getElementById('agents-all')).toBeInTheDocument();
   });
 
   it('should have aria-labelledby linking to heading', () => {
@@ -84,5 +93,40 @@ describe('AgentsShowcase', () => {
     await user.click(screen.getByRole('button', { name: 'Security' }));
 
     expect(screen.queryByText('View All Agents')).not.toBeInTheDocument();
+  });
+
+  it('should show all agents when View All is clicked', async () => {
+    const user = userEvent.setup();
+    render(<AgentsShowcase locale="en" />);
+
+    await user.click(screen.getByText('View All Agents'));
+
+    // Should now show more than 8 agents
+    const agentIcons = screen.getAllByRole('img', { hidden: true });
+    expect(agentIcons.length).toBeGreaterThan(8);
+    // View All link should be hidden, Show Less should appear
+    expect(screen.queryByText('View All Agents')).not.toBeInTheDocument();
+    expect(screen.getByText('Show Less')).toBeInTheDocument();
+  });
+
+  it('should collapse agents when Show Less is clicked', async () => {
+    const user = userEvent.setup();
+    render(<AgentsShowcase locale="en" />);
+
+    await user.click(screen.getByText('View All Agents'));
+    await user.click(screen.getByText('Show Less'));
+
+    const agentIcons = screen.getAllByRole('img', { hidden: true });
+    expect(agentIcons.length).toBeLessThanOrEqual(8);
+    expect(screen.getByText('View All Agents')).toBeInTheDocument();
+  });
+
+  it('should auto-expand when URL hash is #agents-all', () => {
+    window.location.hash = '#agents-all';
+    render(<AgentsShowcase locale="en" />);
+
+    const agentIcons = screen.getAllByRole('img', { hidden: true });
+    expect(agentIcons.length).toBeGreaterThan(8);
+    expect(screen.getByText('Show Less')).toBeInTheDocument();
   });
 });

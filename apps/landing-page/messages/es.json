@@ -82,6 +82,7 @@
     "allCategories": "Todos",
     "noResults": "No se encontraron agentes que coincidan con los criterios",
     "viewAll": "Ver Todos los Agentes",
+    "showLess": "Mostrar menos",
     "categories": {
       "Planning": "Planificación",
       "Development": "Desarrollo",

@@ -82,6 +82,7 @@
     "allCategories": "全部",
     "noResults": "未找到符合条件的代理",
     "viewAll": "查看所有代理",
+    "showLess": "收起",
     "categories": {
       "Planning": "规划",
       "Development": "开发",

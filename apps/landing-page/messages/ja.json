@@ -82,6 +82,7 @@
     "allCategories": "すべて",
     "noResults": "条件に一致するエージェントが見つかりません",
     "viewAll": "すべてのエージェントを見る",
+    "showLess": "折りたたむ",
     "categories": {
       "Planning": "企画",
       "Development": "開発",
