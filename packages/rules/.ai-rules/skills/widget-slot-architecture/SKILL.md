@@ -1,6 +1,7 @@
 ---
 name: widget-slot-architecture
 description: Architecture guide using Next.js App Router's Parallel Routes for Widget-Slot pattern. Separates static layouts from dynamic widgets to achieve separation of concerns, fault isolation, and plug-and-play development.
+user-invocable: false
 ---
 
 # Widget-Slot Architecture (WSA)

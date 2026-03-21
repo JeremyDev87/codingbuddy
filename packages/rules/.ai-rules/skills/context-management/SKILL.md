@@ -1,6 +1,7 @@
 ---
 name: context-management
 description: Use when working on long tasks that span multiple sessions, when context compaction is a concern, or when decisions from PLAN mode need to persist through ACT and EVAL modes.
+user-invocable: false
 ---
 
 # Context Management
