@@ -1,6 +1,7 @@
 ---
 name: performance-optimization
 description: Use when optimizing code performance, addressing slowness complaints, or measuring application speed improvements
+allowed-tools: Read, Grep, Glob, Bash
 ---
 
 # Performance Optimization

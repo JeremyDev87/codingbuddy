@@ -1,6 +1,7 @@
 ---
 name: tech-debt
 description: Use when identifying, prioritizing, and planning resolution of technical debt. Provides structured assessment, ROI-based prioritization, and incremental paydown strategies.
+allowed-tools: Read, Grep, Glob
 ---
 
 # Tech Debt
