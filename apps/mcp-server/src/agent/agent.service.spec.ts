@@ -681,4 +681,113 @@ describe('AgentService', () => {
       expect(result.executionStrategy).toBe('subagent');
     });
   });
+
+  describe('execution strategy integration', () => {
+    it('subagent strategy returns parallelAgents with dispatchParams and run_in_background', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'subagent',
+        includeParallel: true,
+      });
+
+      expect(result.executionStrategy).toBe('subagent');
+      expect(result.parallelAgents).toBeDefined();
+      expect(result.parallelAgents!.length).toBe(2);
+      result.parallelAgents!.forEach(agent => {
+        expect(agent.dispatchParams).toBeDefined();
+        expect(agent.dispatchParams.subagent_type).toBe('general-purpose');
+        expect(agent.dispatchParams.run_in_background).toBe(true);
+        expect(agent.dispatchParams.prompt).toBeTruthy();
+      });
+      expect(result.taskmaestro).toBeUndefined();
+    });
+
+    it('taskmaestro strategy returns assignments without dispatchParams', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+
+      expect(result.executionStrategy).toBe('taskmaestro');
+      expect(result.taskmaestro).toBeDefined();
+      expect(result.taskmaestro!.paneCount).toBe(2);
+      expect(result.taskmaestro!.assignments).toHaveLength(2);
+      result.taskmaestro!.assignments.forEach(assignment => {
+        expect(assignment.name).toBeTruthy();
+        expect(assignment.displayName).toBeTruthy();
+        expect(assignment.prompt).toBeTruthy();
+      });
+      expect(result.parallelAgents).toBeUndefined();
+    });
+
+    it('backward compatibility: no executionStrategy defaults to subagent behavior', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        includeParallel: true,
+        // NO executionStrategy — must default to subagent
+      });
+
+      expect(result.executionStrategy).toBe('subagent');
+      expect(result.parallelAgents).toBeDefined();
+      expect(result.taskmaestro).toBeUndefined();
+    });
+
+    it('taskmaestro sessionName reflects the mode', async () => {
+      const modes = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
+      for (const mode of modes) {
+        vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+        const result = await service.dispatchAgents({
+          mode,
+          specialists: ['security-specialist'],
+          executionStrategy: 'taskmaestro',
+        });
+        expect(result.taskmaestro!.sessionName).toBe(`${mode.toLowerCase()}-specialists`);
+      }
+    });
+
+    it('taskmaestro prompt includes Output Format instructions', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+
+      const prompt = result.taskmaestro!.assignments[0].prompt;
+      expect(prompt).toContain('Severity: CRITICAL / HIGH / MEDIUM / LOW / INFO');
+      expect(prompt).toContain('File reference');
+      expect(prompt).toContain('Recommendation');
+    });
+
+    it('taskmaestro executionHint includes all required commands', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+
+      expect(result.executionHint).toContain('/taskmaestro start --panes 2');
+      expect(result.executionHint).toContain('/taskmaestro assign');
+      expect(result.executionHint).toContain('/taskmaestro status');
+      expect(result.executionHint).toContain('/taskmaestro stop all');
+    });
+  });
 });
