@@ -30,6 +30,7 @@ Reusable workflows for consistent development practices.
 
 | Skill | Description | When to Use |
 |-------|-------------|-------------|
+| agent-discussion | Terminal formatter for multi-agent debate output with severity badges and consensus indicators | Rendering parallel agent findings, code review debates, EVAL summaries |
 | context-management | Preserve critical decisions across sessions and context compaction | Long tasks, multi-session work, PLAN→ACT→EVAL transitions |
 | deployment-checklist | Pre-deploy validation, health checks, rollback planning | Before every staging/production deployment |
 | dispatching-parallel-agents | Handle 2+ independent tasks without shared state | Parallel task execution |
@@ -183,6 +184,8 @@ EOF
 │   └── SKILL.md
 │
 ├── [Workflow & Process]
+├── agent-discussion/
+│   └── SKILL.md
 ├── context-management/
 │   └── SKILL.md
 ├── deployment-checklist/
