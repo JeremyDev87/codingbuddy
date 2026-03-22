@@ -523,6 +523,70 @@ Each workflow mode activates different specialist agents:
 
 **Important:** Specialists from one mode do NOT carry over to the next mode. Each mode has its own recommended specialist set.
 
+### Auto-Dispatch Enforcement
+
+When `parse_mode` returns `dispatch="auto"` or `dispatchReady` with specialist agents, dispatching is **mandatory** — not optional.
+
+**Rule:** Every listed specialist MUST be dispatched. Skipping any specialist is a protocol violation.
+
+#### Teams-Based Specialist Dispatch (Preferred)
+
+Teams are preferred over the Agent tool for specialist dispatch because they enable structured coordination and message-based reporting:
+
+```
+1. TeamCreate({ team_name: "<task>-specialists" })
+2. Spawn specialists as teammates:
+   Agent({ team_name, name: "security-specialist", subagent_type: "general-purpose", prompt: ... })
+   Agent({ team_name, name: "code-quality-specialist", subagent_type: "general-purpose", prompt: ... })
+3. Create and assign tasks:
+   TaskCreate({ subject: "Security review of auth module" })
+   TaskUpdate({ taskId, owner: "security-specialist" })
+4. Specialists work autonomously, report via SendMessage:
+   SendMessage({ to: "team-lead", message: "## Security Findings\n- ...", summary: "Security review done" })
+5. Team lead collects all findings
+6. Shutdown: SendMessage({ to: "security-specialist", message: { type: "shutdown_request" } })
+```
+
+#### SendMessage-Based Reporting
+
+Specialists report findings through `SendMessage` to the team lead. This enables:
+- Structured collection of all specialist outputs
+- Consolidated summary for the user
+- Clear audit trail of what each specialist found
+
+**Report format:**
+```markdown
+## [Specialist Name] Findings
+
+### Critical
+- [finding]
+
+### High
+- [finding]
+
+### Medium
+- [finding]
+
+### Recommendations
+- [recommendation]
+```
+
+#### Fallback: Agent Tool
+
+If Teams-based dispatch fails, fall back to the Agent tool:
+- Use `run_in_background: true` for each specialist
+- Collect results via `TaskOutput`
+- Document the fallback reason in your response
+
+#### Red Flags
+
+| Thought | Reality |
+|---------|---------|
+| "I can handle this analysis myself" | Specialists have domain expertise. Dispatch them. |
+| "It's just a small change" | dispatch="auto" means the system determined specialists are needed. |
+| "I'll save time by skipping" | Skipping causes missed issues that cost more later. |
+| "I'll dispatch later" | Dispatch IMMEDIATELY when dispatch="auto" is returned. |
+
 ### Execution Strategy Selection (MANDATORY)
 
 When `parse_mode` returns `availableStrategies`:

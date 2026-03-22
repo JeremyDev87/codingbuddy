@@ -156,6 +156,67 @@ Examples:
 
 </PARALLEL_EXECUTION_MANDATORY_RULE>
 
+## 🔴 MANDATORY: Auto-Dispatch Enforcement
+
+<AUTO_DISPATCH_ENFORCEMENT_RULE>
+
+**When `parse_mode` returns `dispatch="auto"`, you MUST dispatch all recommended specialists. No exceptions.**
+
+### Core Rule
+
+If the `parse_mode` response contains `dispatch="auto"` or `dispatchReady` with specialist agents:
+1. **MUST** dispatch every listed specialist — skipping any is a protocol violation
+2. **Teams preferred** over Agent tool for specialist dispatch (use `TeamCreate` + `SendMessage`)
+3. **Report results** via `SendMessage` back to team lead, not just text output
+
+### Teams-Based Dispatch Workflow
+
+```
+parse_mode returns dispatch="auto"
+     ↓
+TeamCreate({ team_name: "<task>-specialists" })
+     ↓
+Spawn each specialist as teammate via Agent tool (team_name, name)
+     ↓
+Assign tasks via TaskCreate + TaskUpdate (owner)
+     ↓
+Specialists report findings via SendMessage
+     ↓
+Team lead collects and summarizes all findings
+     ↓
+Shutdown teammates via SendMessage({ type: "shutdown_request" })
+```
+
+### SendMessage-Based Reporting
+
+Specialists MUST report findings through `SendMessage`, not just tool output:
+
+```
+SendMessage({
+  to: "team-lead",
+  message: "## [Specialist] Findings\n- Finding 1\n- Finding 2\n...",
+  summary: "[specialist-name] analysis complete"
+})
+```
+
+The team lead collects all specialist messages and presents a consolidated summary.
+
+### Red Flags (STOP if you think these)
+
+| Thought | Reality |
+|---------|---------|
+| "I can handle this analysis myself" | NO. Specialists have domain expertise you lack. Dispatch them. |
+| "It's just a small change, no need for specialists" | NO. dispatch="auto" means the system determined specialists are needed. |
+| "I'll save time by skipping dispatch" | NO. Skipping specialists causes missed issues that cost more time later. |
+| "The specialists will just repeat what I already know" | NO. Specialists catch domain-specific issues you would miss. |
+| "I'll dispatch them later after I look at the code" | NO. Dispatch IMMEDIATELY when dispatch="auto" is returned. |
+
+### Fallback
+
+If Teams-based dispatch fails (e.g., team creation error), fall back to Agent tool with `run_in_background: true` for each specialist. Document the fallback in your response.
+
+</AUTO_DISPATCH_ENFORCEMENT_RULE>
+
 ## 🔴 MANDATORY: Context Document Management
 
 <CONTEXT_DOCUMENT_RULE>
