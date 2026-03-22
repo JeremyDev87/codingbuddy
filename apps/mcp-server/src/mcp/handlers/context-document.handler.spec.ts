@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ContextDocumentHandler } from './context-document.handler';
 import { ContextDocumentService } from '../../context/context-document.service';
+import { CONTEXT_FILE_PATH, getSessionContextFilePath } from '../../context/context-document.types';
 
 describe('ContextDocumentHandler', () => {
   let handler: ContextDocumentHandler;
@@ -337,7 +338,7 @@ describe('ContextDocumentHandler', () => {
         const result = await handler.handle('cleanup_context', {});
 
         expect(result?.isError).toBeFalsy();
-        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5);
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5, undefined);
         const responseData = JSON.parse(result!.content[0].text);
         expect(responseData.success).toBe(true);
       });
@@ -349,14 +350,14 @@ describe('ContextDocumentHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(3, 10);
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(3, 10, undefined);
       });
 
       it('should cleanup with undefined args using defaults', async () => {
         const result = await handler.handle('cleanup_context', undefined);
 
         expect(result?.isError).toBeFalsy();
-        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5);
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5, undefined);
       });
 
       it('should accept keepRecentSectionsFull of 0 as valid boundary', async () => {
@@ -366,7 +367,7 @@ describe('ContextDocumentHandler', () => {
         });
 
         expect(result?.isError).toBeFalsy();
-        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(0, 1);
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(0, 1, undefined);
       });
 
       it('should return error for negative keepRecentSectionsFull', async () => {
@@ -419,6 +420,206 @@ describe('ContextDocumentHandler', () => {
       const definitions = handler.getToolDefinitions();
       const readContext = definitions.find(d => d.name === 'read_context');
       expect(readContext?.inputSchema.required).toEqual([]);
+    });
+
+    it('should include sessionId in update_context schema', () => {
+      const definitions = handler.getToolDefinitions();
+      const updateContext = definitions.find(d => d.name === 'update_context');
+      expect(updateContext?.inputSchema.properties.sessionId).toBeDefined();
+      const sessionIdProp = updateContext?.inputSchema.properties.sessionId as { type: string };
+      expect(sessionIdProp.type).toBe('string');
+    });
+
+    it('should include sessionId in read_context schema', () => {
+      const definitions = handler.getToolDefinitions();
+      const readContext = definitions.find(d => d.name === 'read_context');
+      expect(readContext?.inputSchema.properties.sessionId).toBeDefined();
+    });
+
+    it('should include sessionId in cleanup_context schema', () => {
+      const definitions = handler.getToolDefinitions();
+      const cleanupContext = definitions.find(d => d.name === 'cleanup_context');
+      expect(cleanupContext?.inputSchema.properties.sessionId).toBeDefined();
+    });
+  });
+
+  describe('session isolation', () => {
+    describe('update_context with sessionId', () => {
+      it('should pass sessionId to resetContext in PLAN mode', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Session Test',
+          sessionId: 'session-abc-123',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: 'session-abc-123' }),
+        );
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(getSessionContextFilePath('session-abc-123'));
+      });
+
+      it('should pass sessionId to appendContext in ACT mode', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'ACT',
+          sessionId: 'session-abc-123',
+          progress: ['Step 1'],
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.appendContext).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: 'session-abc-123' }),
+        );
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(getSessionContextFilePath('session-abc-123'));
+      });
+
+      it('should reject invalid sessionId with path traversal', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Attack Test',
+          sessionId: '../../../etc/passwd',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid sessionId');
+      });
+
+      it('should reject sessionId with dots', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Dot Test',
+          sessionId: 'session.evil',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid sessionId');
+      });
+
+      it('should reject sessionId with slashes', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Slash Test',
+          sessionId: 'path/traversal',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid sessionId');
+      });
+
+      it('should reject sessionId exceeding 64 characters', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Long Test',
+          sessionId: 'a'.repeat(65),
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid sessionId');
+      });
+    });
+
+    describe('read_context with sessionId', () => {
+      it('should pass sessionId in read options', async () => {
+        const result = await handler.handle('read_context', {
+          sessionId: 'my-session',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.readContext).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: 'my-session' }),
+        );
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(getSessionContextFilePath('my-session'));
+      });
+
+      it('should reject invalid sessionId in read', async () => {
+        const result = await handler.handle('read_context', {
+          sessionId: '../malicious',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid sessionId');
+      });
+
+      it('should combine sessionId with verbosity options', async () => {
+        const result = await handler.handle('read_context', {
+          sessionId: 'my-session',
+          verbosity: 'full',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.readContext).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: 'my-session' }),
+        );
+      });
+    });
+
+    describe('cleanup_context with sessionId', () => {
+      it('should pass sessionId to performCleanup', async () => {
+        const result = await handler.handle('cleanup_context', {
+          sessionId: 'cleanup-session',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5, 'cleanup-session');
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(getSessionContextFilePath('cleanup-session'));
+      });
+
+      it('should reject invalid sessionId in cleanup', async () => {
+        const result = await handler.handle('cleanup_context', {
+          sessionId: 'bad..id',
+        });
+
+        expect(result?.isError).toBe(true);
+        expect(result?.content[0].text).toContain('Invalid sessionId');
+      });
+    });
+
+    describe('backward compatibility', () => {
+      it('should use legacy path when no sessionId in update_context PLAN', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'PLAN',
+          title: 'Legacy Test',
+        });
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+          expect.not.objectContaining({ sessionId: expect.anything() }),
+        );
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(CONTEXT_FILE_PATH);
+      });
+
+      it('should use legacy path when no sessionId in update_context ACT', async () => {
+        const result = await handler.handle('update_context', {
+          mode: 'ACT',
+          progress: ['Step 1'],
+        });
+
+        expect(result?.isError).toBeFalsy();
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(CONTEXT_FILE_PATH);
+      });
+
+      it('should use legacy path when no sessionId in read_context', async () => {
+        const result = await handler.handle('read_context', {});
+
+        expect(result?.isError).toBeFalsy();
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(CONTEXT_FILE_PATH);
+      });
+
+      it('should use legacy path when no sessionId in cleanup_context', async () => {
+        const result = await handler.handle('cleanup_context', {});
+
+        expect(result?.isError).toBeFalsy();
+        expect(mockContextDocService.performCleanup).toHaveBeenCalledWith(2, 5, undefined);
+        const responseData = JSON.parse(result!.content[0].text);
+        expect(responseData.filePath).toBe(CONTEXT_FILE_PATH);
+      });
     });
   });
 });

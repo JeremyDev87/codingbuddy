@@ -5,7 +5,11 @@ import { AbstractHandler } from './abstract-handler';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
 import { extractRequiredString, extractOptionalString } from '../../shared/validation.constants';
-import { CONTEXT_FILE_PATH } from '../../context/context-document.types';
+import {
+  CONTEXT_FILE_PATH,
+  isValidSessionId,
+  getSessionContextFilePath,
+} from '../../context/context-document.types';
 import type { Mode } from '../../keyword/keyword.types';
 import { isValidVerbosity, getVerbosityConfig } from '../../shared/verbosity.types';
 
@@ -58,6 +62,11 @@ export class ContextDocumentHandler extends AbstractHandler {
               enum: ['minimal', 'standard', 'full'],
               description:
                 'Control response size: minimal (most recent section only), standard (2 most recent), full (all sections). Default: standard',
+            },
+            sessionId: {
+              type: 'string',
+              description:
+                'Optional session ID for session-isolated context. Each session writes to its own file. Omit for legacy single-file behavior.',
             },
           },
           required: [],
@@ -128,6 +137,11 @@ Call this at the end of each mode to persist decisions and notes.`,
               enum: ['in_progress', 'completed', 'blocked'],
               description: 'Status of this mode section',
             },
+            sessionId: {
+              type: 'string',
+              description:
+                'Optional session ID for session-isolated context. Each session writes to its own file (sessions/ctx-{sessionId}.md). Omit for legacy single-file behavior.',
+            },
           },
           required: ['mode'],
         },
@@ -147,6 +161,11 @@ Call this at the end of each mode to persist decisions and notes.`,
               description:
                 'Number of recent items to keep in summarized section arrays (default: 5)',
             },
+            sessionId: {
+              type: 'string',
+              description:
+                'Optional session ID for session-isolated context cleanup. Omit for legacy single-file behavior.',
+            },
           },
           required: [],
         },
@@ -154,26 +173,63 @@ Call this at the end of each mode to persist decisions and notes.`,
     ];
   }
 
+  /**
+   * Validate and extract sessionId from args.
+   * SEC: Prevents path traversal by validating against SESSION_ID_PATTERN.
+   */
+  private validateSessionId(args: Record<string, unknown> | undefined): {
+    sessionId?: string;
+    error?: ToolResponse;
+  } {
+    const sessionId = extractOptionalString(args, 'sessionId');
+    if (sessionId && !isValidSessionId(sessionId)) {
+      return {
+        error: createErrorResponse(
+          `Invalid sessionId: "${sessionId}". Must contain only alphanumeric characters and hyphens (1-64 chars).`,
+        ),
+      };
+    }
+    return { sessionId: sessionId || undefined };
+  }
+
+  /**
+   * Get the appropriate file path based on sessionId presence.
+   */
+  private getFilePath(sessionId?: string): string {
+    return sessionId ? getSessionContextFilePath(sessionId) : CONTEXT_FILE_PATH;
+  }
+
   private async handleReadContext(
     args: Record<string, unknown> | undefined,
   ): Promise<ToolResponse> {
+    // Validate sessionId
+    const { sessionId, error } = this.validateSessionId(args);
+    if (error) return error;
+
     // Extract verbosity level (defaults to 'standard')
     const verbosityStr = extractOptionalString(args, 'verbosity') || 'standard';
     const verbosity = isValidVerbosity(verbosityStr) ? verbosityStr : 'standard';
     const verbosityConfig = getVerbosityConfig(verbosity);
 
     // Apply verbosity settings to read options
-    const readOptions =
-      verbosityConfig.maxContextSections === -1
-        ? undefined
-        : { maxSections: verbosityConfig.maxContextSections };
+    const readOptions: { maxSections?: number; sessionId?: string } = {};
+    if (verbosityConfig.maxContextSections !== -1) {
+      readOptions.maxSections = verbosityConfig.maxContextSections;
+    }
+    if (sessionId) {
+      readOptions.sessionId = sessionId;
+    }
 
-    const result = await this.contextDocService.readContext(readOptions);
+    const result = await this.contextDocService.readContext(
+      Object.keys(readOptions).length > 0 ? readOptions : undefined,
+    );
+
+    const filePath = this.getFilePath(sessionId);
 
     if (!result.exists) {
       return createJsonResponse({
         exists: false,
-        filePath: CONTEXT_FILE_PATH,
+        filePath,
         message: 'No context document found. Run PLAN mode to create one.',
         hint: 'Start with PLAN keyword to initialize context.',
       });
@@ -196,7 +252,7 @@ Call this at the end of each mode to persist decisions and notes.`,
 
     return createJsonResponse({
       exists: true,
-      filePath: CONTEXT_FILE_PATH,
+      filePath,
       document,
       summary: {
         title: document.metadata.title,
@@ -229,7 +285,12 @@ Call this at the end of each mode to persist decisions and notes.`,
       return createErrorResponse(`Invalid mode: ${mode}. Must be PLAN, ACT, EVAL, or AUTO`);
     }
 
+    // Validate sessionId
+    const { sessionId, error } = this.validateSessionId(args);
+    if (error) return error;
+
     const typedMode = mode as Mode;
+    const filePath = this.getFilePath(sessionId);
 
     // For PLAN mode, title is required
     if (typedMode === 'PLAN') {
@@ -245,6 +306,7 @@ Call this at the end of each mode to persist decisions and notes.`,
             : undefined,
         decisions: Array.isArray(args?.decisions) ? (args.decisions as string[]) : undefined,
         notes: Array.isArray(args?.notes) ? (args.notes as string[]) : undefined,
+        sessionId,
       });
 
       if (!result.success) {
@@ -253,7 +315,7 @@ Call this at the end of each mode to persist decisions and notes.`,
 
       return createJsonResponse({
         success: true,
-        filePath: CONTEXT_FILE_PATH,
+        filePath,
         message: 'Context document reset (PLAN mode)',
         document: result.document,
       });
@@ -279,6 +341,7 @@ Call this at the end of each mode to persist decisions and notes.`,
       status:
         (extractOptionalString(args, 'status') as 'in_progress' | 'completed' | 'blocked') ??
         undefined,
+      sessionId,
     });
 
     if (!result.success) {
@@ -287,7 +350,7 @@ Call this at the end of each mode to persist decisions and notes.`,
 
     return createJsonResponse({
       success: true,
-      filePath: CONTEXT_FILE_PATH,
+      filePath,
       message: `Context document updated (${typedMode} mode)`,
       document: result.document,
     });
@@ -296,6 +359,10 @@ Call this at the end of each mode to persist decisions and notes.`,
   private async handleCleanupContext(
     args: Record<string, unknown> | undefined,
   ): Promise<ToolResponse> {
+    // Validate sessionId
+    const { sessionId, error } = this.validateSessionId(args);
+    if (error) return error;
+
     // Extract optional parameters
     const keepRecentSectionsFull =
       typeof args?.keepRecentSectionsFull === 'number' ? args.keepRecentSectionsFull : 2;
@@ -309,9 +376,12 @@ Call this at the end of each mode to persist decisions and notes.`,
       return createErrorResponse('keepRecentItems must be >= 1');
     }
 
+    const filePath = this.getFilePath(sessionId);
+
     const result = await this.contextDocService.performCleanup(
       keepRecentSectionsFull,
       keepRecentItems,
+      sessionId,
     );
 
     if (!result.success) {
@@ -320,7 +390,7 @@ Call this at the end of each mode to persist decisions and notes.`,
 
     return createJsonResponse({
       success: true,
-      filePath: CONTEXT_FILE_PATH,
+      filePath,
       message: result.message,
       document: result.document,
     });

@@ -7,6 +7,42 @@ import type { Mode } from '../keyword/keyword.types';
 export const CONTEXT_FILE_PATH = 'docs/codingbuddy/context.md';
 
 /**
+ * Directory for session-isolated context files.
+ * Each session gets its own file: ctx-{sessionId}.md
+ */
+export const CONTEXT_SESSIONS_DIR = 'docs/codingbuddy/sessions';
+
+/**
+ * Path for cross-session shared decisions (append-only).
+ */
+export const SHARED_DECISIONS_PATH = 'docs/codingbuddy/shared/decisions.md';
+
+/**
+ * Session ID validation pattern.
+ * SEC: Allows only alphanumeric characters and hyphens (1-64 chars).
+ * Prevents path traversal attacks by disallowing dots, slashes, etc.
+ */
+export const SESSION_ID_PATTERN = /^[a-zA-Z0-9-]{1,64}$/;
+
+/**
+ * Validate a session ID string.
+ * @param sessionId - Session ID to validate
+ * @returns True if valid (alphanumeric + hyphens, 1-64 chars)
+ */
+export function isValidSessionId(sessionId: string): boolean {
+  return SESSION_ID_PATTERN.test(sessionId);
+}
+
+/**
+ * Get the file path for a session-isolated context document.
+ * @param sessionId - Validated session ID
+ * @returns Relative path like 'docs/codingbuddy/sessions/ctx-{sessionId}.md'
+ */
+export function getSessionContextFilePath(sessionId: string): string {
+  return `${CONTEXT_SESSIONS_DIR}/ctx-${sessionId}.md`;
+}
+
+/**
  * Timeout for context file operations in milliseconds (5 seconds).
  */
 export const CONTEXT_FILE_TIMEOUT_MS = 5000;
@@ -109,6 +145,8 @@ export interface ResetContextData {
   decisions?: string[];
   /** Initial notes */
   notes?: string[];
+  /** Session ID for session-isolated context (optional, omit for legacy behavior) */
+  sessionId?: string;
 }
 
 /**
@@ -137,6 +175,8 @@ export interface AppendContextData {
   recommendedActAgentConfidence?: number;
   /** Section status */
   status?: 'in_progress' | 'completed' | 'blocked';
+  /** Session ID for session-isolated context (optional, omit for legacy behavior) */
+  sessionId?: string;
 }
 
 /**
@@ -161,6 +201,8 @@ export interface ContextOperationResult {
 export interface ContextReadOptions {
   /** Maximum number of sections to return (-1 = all) */
   maxSections?: number;
+  /** Session ID for session-isolated context (optional, omit for legacy behavior) */
+  sessionId?: string;
 }
 
 /**

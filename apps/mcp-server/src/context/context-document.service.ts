@@ -409,6 +409,7 @@ export class ContextDocumentService {
   async performCleanup(
     keepRecentSectionsFull: number = 2,
     keepRecentItems: number = 5,
+    _sessionId?: string,
   ): Promise<ContextOperationResult> {
     try {
       const readResult = await this.readContext();
