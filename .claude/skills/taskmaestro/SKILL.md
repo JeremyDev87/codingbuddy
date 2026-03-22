@@ -137,6 +137,11 @@ CONDUCTOR_BG="#1a1a2e"          # dark navy background
 CONDUCTOR_BORDER="#E67E22"      # orange border
 WORKER_ERROR_BORDER="#E74C3C"   # red border (error state)
 WORKER_DONE_BORDER="#27AE60"    # green border (complete state)
+# Watch & Nudge
+WATCH_INTERVAL=30              # seconds between watch cycles
+MAX_NUDGE_COUNT=3              # nudges before escalation to conductor
+IDLE_CYCLES_BEFORE_NUDGE=2     # consecutive idle cycles before auto-nudge
+STATUS_PREV_DIR="/tmp/taskmaestro_status"  # duration tracking state
 ```
 
 ---
@@ -704,7 +709,7 @@ Execute steps 3-7 only (create worktrees, launch, conductor layout, wait, but no
 
 ### `/taskmaestro status`
 
-Check the status of all active panes:
+Check the status of all active panes using **2-pass analysis with duration tracking**:
 
 ```bash
 status_check() {
@@ -716,6 +721,9 @@ status_check() {
     return 1
   fi
 
+  # Ensure status tracking directory exists
+  mkdir -p "$STATUS_PREV_DIR"
+
   for pane in $panes; do
     local target="${SESSION}:0.${pane}"
     local wt_dir="${WORKTREE_BASE}/wt-$((pane + 1))"
@@ -724,25 +732,30 @@ status_check() {
       branch=$(git -C "$wt_dir" branch --show-current 2>/dev/null || echo "detached")
     fi
 
-    # --- 3-Factor Analysis (30-line scan) ---
+    # --- Pass 1: 3-Factor Analysis (30-line scan) ---
     local content
     content=$(tmux capture-pane -t "$target" -p 2>/dev/null | tail -30)
 
-    # Factor 1: Error scan (30 lines, not 8)
+    # Factor 1: Error scan — specific patterns (not broad "error|fail")
     local has_error=false
-    if echo "$content" | grep -qiE 'error|fail|exception|panic|FATAL'; then
+    if echo "$content" | grep -qE 'FAIL|Error:|Cannot find|fatal:|ENOENT|EPERM|ERR!|panic|FATAL'; then
       has_error=true
     fi
 
-    # Factor 2: Active spinner detection (animating characters)
+    # Factor 2: Active spinner detection
+    # Animating braille characters OR Claude's active progress indicator
     local has_active_spinner=false
     if echo "$content" | grep -qE '[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]'; then
+      has_active_spinner=true
+    fi
+    # Claude Code active format: "… (Xm · ↓X ↑X)" — NOT "Crunched for" (completed)
+    if echo "$content" | grep -qE '… \([0-9]+[sm] ·' && ! echo "$content" | grep -qE 'Crunched for'; then
       has_active_spinner=true
     fi
 
     # Factor 3: Completed spinner detection (static ✓ or ✗)
     local has_completed_spinner=false
-    if echo "$content" | grep -qE '[✓✗✔✘]'; then
+    if echo "$content" | grep -qE '[✓✗✔✘]|Crunched for'; then
       has_completed_spinner=true
     fi
 
@@ -753,7 +766,7 @@ status_check() {
     elif [ "$has_error" = true ] && [ "$has_active_spinner" = false ]; then
       state="error"
     elif [ "$has_error" = true ] && [ "$has_active_spinner" = true ]; then
-      state="stuck (errors + thinking)"
+      state="error_idle"
     elif [ "$has_active_spinner" = true ]; then
       state="working"
     elif [ "$has_completed_spinner" = true ]; then
@@ -762,6 +775,28 @@ status_check() {
       state="unknown"
     fi
 
+    # --- Pass 2: Duration Tracking (stall detection) ---
+    local prev_file="${STATUS_PREV_DIR}/pane-${pane}.prev"
+    local content_hash
+    content_hash=$(echo "$content" | md5sum | cut -d' ' -f1 2>/dev/null || echo "$content" | md5 -q 2>/dev/null)
+    local stall_count=0
+
+    if [ -f "$prev_file" ]; then
+      local prev_hash prev_stall
+      prev_hash=$(head -1 "$prev_file")
+      prev_stall=$(tail -1 "$prev_file")
+
+      if [ "$content_hash" = "$prev_hash" ] && [ "$state" = "working" ]; then
+        stall_count=$((prev_stall + 1))
+        if [ "$stall_count" -ge 2 ]; then
+          state="STALLED"
+        fi
+      fi
+    fi
+
+    # Save current state for next cycle
+    printf '%s\n%s\n' "$content_hash" "$stall_count" > "$prev_file"
+
     # --- RESULT.json Validation ---
     local result_status=""
     local result_file="${wt_dir}/RESULT.json"
@@ -769,27 +804,262 @@ status_check() {
       local result_issue
       result_issue=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).issue||'')}catch(e){console.log('')}" 2>/dev/null)
 
-      # Check if RESULT.json issue matches assigned task
-      # Extract assigned issue from branch name (taskmaestro/<ts>/pane-N)
+      # Extract assigned issue from TASK.md if available
       local assigned_issue=""
-      # If result_issue is empty or mismatched, flag as stale
+      if [ -f "${wt_dir}/TASK.md" ]; then
+        assigned_issue=$(head -1 "${wt_dir}/TASK.md" | grep -oE '#[0-9]+' | head -1)
+      fi
+
       if [ -z "$result_issue" ]; then
         result_status="(no issue field)"
+      elif [ -n "$assigned_issue" ] && [ "#${result_issue}" != "$assigned_issue" ] && ! echo "$result_issue" | grep -qF "${assigned_issue#\#}"; then
+        # Stale RESULT.json — issue mismatch, auto-remove
+        rm -f "$result_file"
+        result_status="(STALE — removed)"
       else
         result_status="(issue: ${result_issue})"
       fi
-
-      # Auto-remove stale RESULT.json if status is not from current task
-      # (conductor should verify issue match against Wave assignment)
     fi
 
     echo "pane-${pane}: ${state} | branch: ${branch} ${result_status}"
     if [ "$has_error" = true ]; then
       echo "  ⚠ errors detected in 30-line scan"
     fi
+    if [ "$state" = "STALLED" ]; then
+      echo "  🛑 STALLED: same output for ${stall_count}+ cycles — intervene"
+    fi
   done
 }
 ```
+
+**2-pass analysis:**
+
+| Pass | Purpose | Method |
+|------|---------|--------|
+| Pass 1 | 3-factor state detection | Error patterns, active/completed spinners |
+| Pass 2 | Duration-based stall detection | Content hash comparison across cycles |
+
+**Enhanced error patterns (#864):**
+
+| Pattern | Catches |
+|---------|---------|
+| `FAIL` | Test failures |
+| `Error:` | Node.js/TypeScript errors |
+| `Cannot find` | Missing module/package |
+| `fatal:` | Git fatal errors |
+| `ENOENT\|EPERM` | File system errors |
+| `ERR!` | npm/yarn errors |
+| `panic\|FATAL` | System-level panics |
+
+**Active vs Completed spinner discrimination:**
+
+| Pattern | Type | Example |
+|---------|------|---------|
+| `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏` | Active (braille animation) | Thinking/processing |
+| `… (Xm ·` | Active (Claude progress) | `… (2m · ↓5 ↑3)` |
+| `Crunched for` | Completed | `Crunched for 1m 23s` |
+| `✓✗✔✘` | Completed (static) | Step done |
+
+**Stall detection flow:**
+
+```
+Cycle N: capture content → hash → compare with prev
+  Same hash + "working" state → stall_count++
+  stall_count >= 2 → state = "STALLED"
+  Different hash → stall_count = 0
+```
+
+**RESULT.json validation (#864):**
+
+| Check | Action |
+|-------|--------|
+| No issue field | Flag `(no issue field)` |
+| Issue matches TASK.md | Show `(issue: #N)` |
+| Issue mismatches TASK.md | Auto-remove + flag `(STALE — removed)` |
+
+### `/taskmaestro watch`
+
+Continuous monitoring loop with **auto-nudge** for stuck workers and **permission prompt auto-handling**:
+
+```bash
+# Example: start watching all workers
+/taskmaestro watch
+```
+
+#### Nudge Worker
+
+Send a contextual nudge message to a stuck worker:
+
+```bash
+nudge_worker() {
+  local pane="$1"
+  local state="$2"  # "idle" or "error_idle"
+  local nudge_count="$3"
+
+  local nudge_msg
+  if [ "$state" = "error_idle" ]; then
+    nudge_msg="You appear stuck with errors. Follow the ERROR RECOVERY PROTOCOL: read the error, diagnose with git status, apply minimal fix, retry. If 3 retries fail, write RESULT.json with status failure."
+  else
+    nudge_msg="You appear idle without RESULT.json. Continue your task: read TASK.md, complete implementation, use /ship, then write RESULT.json. Do not idle without RESULT.json."
+  fi
+
+  tmux send-keys -t "$pane" "$nudge_msg" Enter
+  echo "NUDGE (${nudge_count}/${MAX_NUDGE_COUNT}): pane $pane — ${state}"
+}
+```
+
+#### Permission Prompt Auto-Handling
+
+Detect and auto-approve permission prompts during worker execution:
+
+```bash
+handle_permission_prompts() {
+  local pane="$1"
+  local content="$2"
+  local handled=0
+
+  # Edit/proceed permission prompts
+  if echo "$content" | grep -qiE 'Do you want to (make this edit|proceed|allow|run)|Allow this|Approve this'; then
+    tmux send-keys -t "$pane" Enter
+    sleep 1
+    handled=$((handled + 1))
+    echo "AUTO-APPROVED: permission prompt in pane $pane"
+  fi
+
+  # Yes/No tool permission prompts
+  if echo "$content" | grep -qiE 'Allow tool|permission.*\(y/n\)|proceed.*\[Y/n\]'; then
+    tmux send-keys -t "$pane" "y" Enter
+    sleep 1
+    handled=$((handled + 1))
+    echo "AUTO-APPROVED: tool permission in pane $pane"
+  fi
+
+  return "$handled"
+}
+```
+
+#### Watch Loop
+
+Main monitoring loop combining status checks, auto-nudge, and permission handling:
+
+```bash
+watch_workers() {
+  echo "=== Watch Mode Started (interval: ${WATCH_INTERVAL}s) ==="
+  echo "Press Ctrl+C to stop watching."
+
+  # Initialize per-pane tracking
+  declare -A idle_cycles
+  declare -A nudge_counts
+  mkdir -p "$STATUS_PREV_DIR"
+
+  while true; do
+    local panes
+    panes=$(tmux list-panes -t "$SESSION" -F '#{pane_index}' 2>/dev/null)
+
+    if [ -z "$panes" ]; then
+      echo "No active taskMaestro session — stopping watch"
+      break
+    fi
+
+    echo "--- $(date '+%H:%M:%S') ---"
+
+    for pane in $panes; do
+      local target="${SESSION}:0.${pane}"
+      local wt_dir="${WORKTREE_BASE}/wt-$((pane + 1))"
+
+      # Capture pane content
+      local content
+      content=$(tmux capture-pane -t "$target" -p 2>/dev/null | tail -30)
+
+      # --- Permission Prompt Auto-Handling (#869) ---
+      handle_permission_prompts "$target" "$content"
+
+      # --- Status Detection (reuses status_check logic) ---
+      local has_error=false
+      if echo "$content" | grep -qE 'FAIL|Error:|Cannot find|fatal:|ENOENT|EPERM|ERR!|panic|FATAL'; then
+        has_error=true
+      fi
+
+      local has_active_spinner=false
+      if echo "$content" | grep -qE '[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]'; then
+        has_active_spinner=true
+      fi
+      if echo "$content" | grep -qE '… \([0-9]+[sm] ·' && ! echo "$content" | grep -qE 'Crunched for'; then
+        has_active_spinner=true
+      fi
+
+      local state="unknown"
+      local result_file="${wt_dir}/RESULT.json"
+      local has_result=false
+      [ -f "$result_file" ] && has_result=true
+
+      if echo "$content" | grep -qE "$PROMPT_PATTERN"; then
+        if [ "$has_result" = true ]; then
+          state="done"
+          set_worker_status "$target" "complete"
+        elif [ "$has_error" = true ]; then
+          state="error_idle"
+          set_worker_status "$target" "error"
+        else
+          state="idle"
+        fi
+      elif [ "$has_error" = true ] && [ "$has_active_spinner" = false ]; then
+        state="error"
+        set_worker_status "$target" "error"
+      elif [ "$has_active_spinner" = true ]; then
+        state="working"
+        idle_cycles[$pane]=0  # Reset idle counter
+      fi
+
+      echo "pane-${pane}: ${state}"
+
+      # --- Auto-Nudge Logic (#861) ---
+      if [ "$state" = "idle" ] || [ "$state" = "error_idle" ]; then
+        local prev_idle=${idle_cycles[$pane]:-0}
+        idle_cycles[$pane]=$((prev_idle + 1))
+        local current_nudges=${nudge_counts[$pane]:-0}
+
+        if [ "${idle_cycles[$pane]}" -ge "$IDLE_CYCLES_BEFORE_NUDGE" ]; then
+          if [ "$current_nudges" -lt "$MAX_NUDGE_COUNT" ]; then
+            nudge_counts[$pane]=$((current_nudges + 1))
+            nudge_worker "$target" "$state" "${nudge_counts[$pane]}"
+            idle_cycles[$pane]=0  # Reset after nudge
+          else
+            echo "⚠ ESCALATE: pane-${pane} unresponsive after ${MAX_NUDGE_COUNT} nudges — conductor intervention needed"
+            set_worker_status "$target" "error"
+          fi
+        fi
+      elif [ "$state" = "done" ]; then
+        idle_cycles[$pane]=0
+        nudge_counts[$pane]=0
+      fi
+    done
+
+    sleep "$WATCH_INTERVAL"
+  done
+}
+```
+
+**Watch cycle per pane:**
+
+| Check | Action |
+|-------|--------|
+| Permission prompt detected | Auto-send Enter/y to approve (#869) |
+| State = `idle` (no RESULT.json) | Increment idle counter → nudge after 2 cycles (#861) |
+| State = `error_idle` (errors + prompt) | Nudge with error recovery instructions (#861) |
+| State = `done` (RESULT.json exists) | Mark complete, reset counters |
+| State = `working` | Reset idle counter, continue |
+| Nudge count >= 3 | Escalate — conductor alert (#861) |
+
+**Nudge escalation:**
+
+| Idle Cycles | Nudge Count | Action |
+|-------------|-------------|--------|
+| < 2 | — | No action (worker may be pausing normally) |
+| >= 2 | 1 | First nudge — contextual message |
+| >= 2 | 2 | Second nudge — more urgent |
+| >= 2 | 3 | Third and final nudge |
+| >= 2 | > 3 | Escalate to conductor — manual intervention |
 
 ### `/taskmaestro stop`
 
