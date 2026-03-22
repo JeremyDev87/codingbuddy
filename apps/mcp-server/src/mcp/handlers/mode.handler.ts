@@ -48,6 +48,16 @@ interface DeepThinkingInstructions {
   detailLevel: string;
 }
 
+/** Plan review gate recommendation included in PLAN/AUTO mode responses */
+interface PlanReviewGate {
+  /** Whether the plan review gate is enabled */
+  enabled: boolean;
+  /** Agent name for plan review */
+  agent: string;
+  /** Dispatch strength for the gate */
+  dispatch: string;
+}
+
 /** Result type for context document handling */
 interface ContextResult {
   /** Path to the context file */
@@ -215,9 +225,11 @@ export class ModeHandler extends AbstractHandler {
       // Persist state for context recovery after compaction
       await this.persistModeState(result.mode);
 
+      // Load settings once for dispatch strength and plan review gate
+      const settings = await this.configService.getSettings();
+
       // Enrich parallelAgentsRecommendation with dispatch strength
       if (result.parallelAgentsRecommendation) {
-        const settings = await this.configService.getSettings();
         const configDispatch = settings.ai?.dispatchStrength as DispatchStrength | undefined;
         result.parallelAgentsRecommendation.dispatch =
           configDispatch ?? MODE_DISPATCH_DEFAULTS[result.mode as Mode] ?? 'recommend';
@@ -235,6 +247,9 @@ export class ModeHandler extends AbstractHandler {
       // Build deep thinking instructions for PLAN/AUTO modes
       const deepThinkingInstructions = this.buildDeepThinkingInstructions(result.mode as Mode);
 
+      // Build plan review gate for PLAN/AUTO modes
+      const planReviewGate = this.buildPlanReviewGate(result.mode as Mode, settings?.ai?.planReviewGate);
+
       return createJsonResponse({
         ...result,
         language,
@@ -244,6 +259,8 @@ export class ModeHandler extends AbstractHandler {
         ...(dispatchReady && { dispatchReady }),
         // Include deep thinking instructions for PLAN/AUTO modes
         ...(deepThinkingInstructions && { deepThinkingInstructions }),
+        // Include plan review gate for PLAN/AUTO modes
+        ...(planReviewGate && { planReviewGate }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -440,6 +457,27 @@ export class ModeHandler extends AbstractHandler {
         'Before including any file path, function name, class name, or API reference in your plan, verify it exists in the codebase. Do not assume or guess — use search tools to confirm.',
       detailLevel:
         'Every step must include exact file paths, code snippets or signatures, and runnable commands. Avoid vague references like "update the handler" — specify which handler, which method, and what change.',
+    };
+  }
+
+  /**
+   * Build plan review gate for PLAN/AUTO modes.
+   * Returns undefined for ACT/EVAL modes (not applicable).
+   */
+  private buildPlanReviewGate(
+    mode: Mode,
+    configValue?: boolean,
+  ): PlanReviewGate | undefined {
+    if (mode !== 'PLAN' && mode !== 'AUTO') {
+      return undefined;
+    }
+
+    const enabled = configValue !== false;
+
+    return {
+      enabled,
+      agent: 'plan-reviewer',
+      dispatch: 'recommend',
     };
   }
 

@@ -112,6 +112,19 @@ const AIConfigSchema = z.object({
    * ```
    */
   maxIncludedSkills: z.number().int().min(0).max(10).optional(),
+  /**
+   * Enable/disable automatic plan-reviewer gate after PLAN completion.
+   * When enabled, parse_mode PLAN response includes a planReviewGate recommendation.
+   * Default: true (enabled)
+   *
+   * @example
+   * ```javascript
+   * ai: {
+   *   planReviewGate: false, // disable plan review gate
+   * }
+   * ```
+   */
+  planReviewGate: z.boolean().optional(),
 });
 
 const AutoConfigSchema = z.object({

@@ -1014,4 +1014,103 @@ describe('ModeHandler', () => {
       expect(parsed.deepThinkingInstructions).toBeUndefined();
     });
   });
+
+  describe('planReviewGate in PLAN mode', () => {
+    it('should include planReviewGate in PLAN mode response by default', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.planReviewGate).toBeDefined();
+      expect(parsed.planReviewGate).toEqual({
+        enabled: true,
+        agent: 'plan-reviewer',
+        dispatch: 'recommend',
+      });
+    });
+
+    it('should include planReviewGate in AUTO mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: 'implement dashboard',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO implement dashboard',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.planReviewGate).toBeDefined();
+      expect(parsed.planReviewGate.enabled).toBe(true);
+      expect(parsed.planReviewGate.agent).toBe('plan-reviewer');
+    });
+
+    it('should NOT include planReviewGate in ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.planReviewGate).toBeUndefined();
+    });
+
+    it('should NOT include planReviewGate in EVAL mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.planReviewGate).toBeUndefined();
+    });
+
+    it('should disable planReviewGate when config ai.planReviewGate is false', async () => {
+      (mockConfigService.getSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ai: { planReviewGate: false },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.planReviewGate).toBeDefined();
+      expect(parsed.planReviewGate.enabled).toBe(false);
+    });
+
+    it('should enable planReviewGate when config ai.planReviewGate is true', async () => {
+      (mockConfigService.getSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ai: { planReviewGate: true },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.planReviewGate).toBeDefined();
+      expect(parsed.planReviewGate.enabled).toBe(true);
+      expect(parsed.planReviewGate.agent).toBe('plan-reviewer');
+      expect(parsed.planReviewGate.dispatch).toBe('recommend');
+    });
+  });
 });
