@@ -50,6 +50,12 @@ Reusable workflows for consistent development practices.
 | pr-review | Systematic, evidence-based PR review with anti-sycophancy principles | Conducting manual PR reviews |
 | prompt-engineering | Write and optimize prompts for AI tools and agent system prompts | AI tool instructions, MCP tool descriptions, agent prompts |
 
+### DevOps & Infrastructure
+
+| Skill | Description | When to Use |
+|-------|-------------|-------------|
+| tmux-master | Background knowledge for tmux session/window/pane lifecycle, layout, communication, styling, and troubleshooting | Parallel agent execution, taskMaestro workflows, tmux automation |
+
 ### codingbuddy Specific
 
 | Skill | Description | When to Use |
@@ -213,6 +219,10 @@ EOF
 ├── pr-review/
 │   └── SKILL.md
 ├── prompt-engineering/
+│   └── SKILL.md
+│
+├── [DevOps & Infrastructure]
+├── tmux-master/
 │   └── SKILL.md
 │
 └── [codingbuddy Specific]
