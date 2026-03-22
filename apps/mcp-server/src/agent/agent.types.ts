@@ -111,6 +111,25 @@ export interface TeamsDispatch {
 }
 
 /**
+ * SendMessage-based progress reporting instructions for specialist visibility
+ */
+export interface VisibilityMessages {
+  onStart: string;
+  onFinding: string;
+  onComplete: string;
+}
+
+/**
+ * Configuration for real-time specialist execution visibility via Teams messaging
+ */
+export interface VisibilityConfig {
+  reportTo: string;
+  format: string;
+  includeProgress: boolean;
+  messages?: VisibilityMessages;
+}
+
+/**
  * Result of dispatching agents for execution
  */
 export interface DispatchResult {
@@ -125,6 +144,8 @@ export interface DispatchResult {
   teams?: TeamsDispatch;
   /** Execution strategy used for this dispatch */
   executionStrategy?: string;
+  /** Real-time specialist execution visibility configuration */
+  visibility?: VisibilityConfig;
 }
 
 /**

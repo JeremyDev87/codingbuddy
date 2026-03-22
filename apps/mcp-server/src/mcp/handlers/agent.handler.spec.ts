@@ -537,6 +537,112 @@ describe('AgentHandler', () => {
           );
         });
       });
+
+      describe('visibility field', () => {
+        it('should include visibility in dispatch response', async () => {
+          const dispatchResultWithVisibility = {
+            ...mockDispatchResult,
+            visibility: {
+              reportTo: 'team-lead',
+              format: 'structured',
+              includeProgress: true,
+            },
+          };
+          mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(dispatchResultWithVisibility);
+
+          const result = await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+          });
+
+          expect(result?.isError).toBeFalsy();
+          const content = JSON.parse(result?.content[0]?.text as string);
+          expect(content.visibility).toBeDefined();
+          expect(content.visibility.reportTo).toBe('team-lead');
+          expect(content.visibility.format).toBe('structured');
+          expect(content.visibility.includeProgress).toBe(true);
+        });
+
+        it('should add visibility with SendMessage instructions when specialists are dispatched', async () => {
+          const resultWithSpecialists = {
+            primaryAgent: mockDispatchResult.primaryAgent,
+            parallelAgents: [
+              {
+                name: 'accessibility-specialist',
+                displayName: 'Accessibility Specialist',
+                description: 'Accessibility review',
+                dispatchParams: {
+                  subagent_type: 'general-purpose' as const,
+                  prompt: 'You are an accessibility specialist...',
+                  description: 'Accessibility review',
+                  run_in_background: true as const,
+                },
+              },
+            ],
+            executionHint: 'Use Task tool...',
+          };
+          mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(resultWithSpecialists);
+
+          const result = await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+            specialists: ['accessibility-specialist'],
+            includeParallel: true,
+          });
+
+          expect(result?.isError).toBeFalsy();
+          const content = JSON.parse(result?.content[0]?.text as string);
+          expect(content.visibility).toBeDefined();
+          expect(content.visibility.reportTo).toBe('team-lead');
+          expect(content.visibility.format).toBe('structured');
+          expect(content.visibility.includeProgress).toBe(true);
+        });
+
+        it('should include visibility with messaging instructions for each specialist', async () => {
+          const resultWithVisibility = {
+            ...mockDispatchResult,
+            visibility: {
+              reportTo: 'team-lead',
+              format: 'structured',
+              includeProgress: true,
+              messages: {
+                onStart: 'Report start via SendMessage to team-lead',
+                onFinding: 'Report each finding via SendMessage to team-lead',
+                onComplete: 'Report completion summary via SendMessage to team-lead',
+              },
+            },
+          };
+          mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(resultWithVisibility);
+
+          const result = await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+          });
+
+          expect(result?.isError).toBeFalsy();
+          const content = JSON.parse(result?.content[0]?.text as string);
+          expect(content.visibility.messages).toBeDefined();
+          expect(content.visibility.messages.onStart).toContain('SendMessage');
+          expect(content.visibility.messages.onFinding).toContain('SendMessage');
+          expect(content.visibility.messages.onComplete).toContain('SendMessage');
+        });
+
+        it('should include visibility even when no specialists are dispatched', async () => {
+          const resultMinimal = {
+            executionHint: 'Use Task tool...',
+          };
+          mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(resultMinimal);
+
+          const result = await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+          });
+
+          expect(result?.isError).toBeFalsy();
+          const content = JSON.parse(result?.content[0]?.text as string);
+          expect(content.visibility).toBeDefined();
+          expect(content.visibility.reportTo).toBe('team-lead');
+        });
+      });
     });
   });
 

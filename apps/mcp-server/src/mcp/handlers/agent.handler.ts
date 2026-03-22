@@ -201,6 +201,24 @@ export class AgentHandler extends AbstractHandler {
         includeParallel,
         executionStrategy,
       });
+
+      // Ensure visibility is always present for real-time specialist execution tracking
+      if (!result.visibility) {
+        result.visibility = {
+          reportTo: 'team-lead',
+          format: 'structured',
+          includeProgress: true,
+          messages: {
+            onStart:
+              'Report start via SendMessage to team-lead with specialist name and task scope',
+            onFinding:
+              'Report each finding via SendMessage to team-lead with severity and description',
+            onComplete:
+              'Report completion summary via SendMessage to team-lead with total findings count',
+          },
+        };
+      }
+
       return createJsonResponse(result);
     } catch (error) {
       return createErrorResponse(
