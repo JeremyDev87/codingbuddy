@@ -7,11 +7,15 @@
   "bin": {
     "codingbuddy": "./bin/cli.js"
   },
+  "scripts": {
+    "test": "node --test __tests__/**/*.test.js"
+  },
   "files": [
     "index.js",
     "index.d.ts",
     ".ai-rules",
-    "bin"
+    "bin",
+    "lib"
   ],
   "keywords": [
     "ai",

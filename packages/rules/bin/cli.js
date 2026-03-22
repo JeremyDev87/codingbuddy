@@ -139,11 +139,11 @@ function validate() {
 }
 
 function init() {
-  console.log(
-    'codingbuddy init is not yet implemented.\n' +
-      'See https://github.com/JeremyDev87/codingbuddy/issues/813 for progress.',
-  );
-  process.exit(0);
+  const { run } = require('../lib/init');
+  run().catch((err) => {
+    console.error('Error:', err.message);
+    process.exit(1);
+  });
 }
 
 // --- Main ---
