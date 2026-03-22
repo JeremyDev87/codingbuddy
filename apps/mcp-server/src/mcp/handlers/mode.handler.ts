@@ -30,6 +30,24 @@ import { AgentService } from '../../agent/agent.service';
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
 
+/** Deep thinking reasoning step */
+interface DeepThinkingStep {
+  /** Step identifier */
+  step: 'decompose' | 'alternatives' | 'devils_advocate';
+  /** Instruction for this reasoning step */
+  instruction: string;
+}
+
+/** Deep thinking instructions for structured reasoning in PLAN/AUTO modes */
+interface DeepThinkingInstructions {
+  /** Structured reasoning steps */
+  reasoning: DeepThinkingStep[];
+  /** Instruction to prevent hallucinated references */
+  hallucinationPrevention: string;
+  /** Instruction for required detail level */
+  detailLevel: string;
+}
+
 /** Result type for context document handling */
 interface ContextResult {
   /** Path to the context file */
@@ -214,6 +232,9 @@ export class ModeHandler extends AbstractHandler {
         result.originalPrompt,
       );
 
+      // Build deep thinking instructions for PLAN/AUTO modes
+      const deepThinkingInstructions = this.buildDeepThinkingInstructions(result.mode as Mode);
+
       return createJsonResponse({
         ...result,
         language,
@@ -221,6 +242,8 @@ export class ModeHandler extends AbstractHandler {
         resolvedModel,
         // Include dispatch-ready data when available
         ...(dispatchReady && { dispatchReady }),
+        // Include deep thinking instructions for PLAN/AUTO modes
+        ...(deepThinkingInstructions && { deepThinkingInstructions }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -384,6 +407,40 @@ export class ModeHandler extends AbstractHandler {
     }
 
     return dispatchReady;
+  }
+
+  /**
+   * Build deep thinking instructions for PLAN/AUTO modes.
+   * Returns undefined for ACT/EVAL modes (not applicable).
+   */
+  private buildDeepThinkingInstructions(mode: Mode): DeepThinkingInstructions | undefined {
+    if (mode !== 'PLAN' && mode !== 'AUTO') {
+      return undefined;
+    }
+
+    return {
+      reasoning: [
+        {
+          step: 'decompose',
+          instruction:
+            'Break the problem into sub-problems. Identify each distinct concern, dependency, and boundary. List them explicitly before proposing a solution.',
+        },
+        {
+          step: 'alternatives',
+          instruction:
+            'For each non-trivial decision, consider at least 2 alternative approaches. Compare trade-offs (complexity, performance, maintainability) and justify your choice.',
+        },
+        {
+          step: 'devils_advocate',
+          instruction:
+            'Argue against your own plan. Identify weaknesses, edge cases, and assumptions that could fail. Address each weakness or document it as a known risk.',
+        },
+      ],
+      hallucinationPrevention:
+        'Before including any file path, function name, class name, or API reference in your plan, verify it exists in the codebase. Do not assume or guess — use search tools to confirm.',
+      detailLevel:
+        'Every step must include exact file paths, code snippets or signatures, and runnable commands. Avoid vague references like "update the handler" — specify which handler, which method, and what change.',
+    };
   }
 
   /**

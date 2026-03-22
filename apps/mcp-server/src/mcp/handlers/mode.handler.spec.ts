@@ -927,4 +927,91 @@ describe('ModeHandler', () => {
       expect(parsed.parallelAgentsRecommendation).toBeUndefined();
     });
   });
+
+  describe('deep thinking instructions in PLAN mode', () => {
+    it('should include deepThinkingInstructions in PLAN mode response', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.deepThinkingInstructions).toBeDefined();
+    });
+
+    it('should include deepThinkingInstructions in AUTO mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: 'implement dashboard',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO implement dashboard',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.deepThinkingInstructions).toBeDefined();
+    });
+
+    it('should have correct structure with 3 reasoning steps', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      const parsed = JSON.parse(result!.content[0].text as string);
+      const dti = parsed.deepThinkingInstructions;
+
+      // reasoning array with 3 steps
+      expect(dti.reasoning).toHaveLength(3);
+      expect(dti.reasoning[0].step).toBe('decompose');
+      expect(dti.reasoning[1].step).toBe('alternatives');
+      expect(dti.reasoning[2].step).toBe('devils_advocate');
+
+      // Each step has an instruction string
+      for (const r of dti.reasoning) {
+        expect(typeof r.instruction).toBe('string');
+        expect(r.instruction.length).toBeGreaterThan(0);
+      }
+
+      // hallucinationPrevention and detailLevel
+      expect(typeof dti.hallucinationPrevention).toBe('string');
+      expect(dti.hallucinationPrevention.length).toBeGreaterThan(0);
+      expect(typeof dti.detailLevel).toBe('string');
+      expect(dti.detailLevel.length).toBeGreaterThan(0);
+    });
+
+    it('should NOT include deepThinkingInstructions in ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.deepThinkingInstructions).toBeUndefined();
+    });
+
+    it('should NOT include deepThinkingInstructions in EVAL mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.deepThinkingInstructions).toBeUndefined();
+    });
+  });
 });
