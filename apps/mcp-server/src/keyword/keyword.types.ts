@@ -262,9 +262,22 @@ export interface AgentInfo {
   expertise: string[];
 }
 
+/** Dispatch strength for parallel agent execution */
+export type DispatchStrength = 'auto' | 'recommend' | 'skip';
+
+/** Default dispatch strength by mode */
+export const MODE_DISPATCH_DEFAULTS: Record<Mode, DispatchStrength> = {
+  EVAL: 'auto',
+  PLAN: 'recommend',
+  ACT: 'recommend',
+  AUTO: 'recommend',
+};
+
 export interface ParallelAgentRecommendation {
   specialists: string[];
   hint: string;
+  /** Dispatch strength: "auto" (must dispatch), "recommend" (suggested), "skip" (do not dispatch) */
+  dispatch?: DispatchStrength;
 }
 
 /**

@@ -71,6 +71,22 @@ const AIConfigSchema = z.object({
   defaultModel: z.string().optional(),
   primaryAgent: z.string().optional(),
   /**
+   * Override default dispatch strength for parallel specialist agents.
+   * - "auto": Always dispatch specialists automatically
+   * - "recommend": Suggest dispatch (default for PLAN/ACT)
+   * - "skip": Do not dispatch specialists
+   *
+   * Default varies by mode: EVAL="auto", PLAN/ACT="recommend"
+   *
+   * @example
+   * ```javascript
+   * ai: {
+   *   dispatchStrength: 'auto',
+   * }
+   * ```
+   */
+  dispatchStrength: z.enum(['auto', 'recommend', 'skip']).optional(),
+  /**
    * List of agent names to exclude from automatic resolution.
    * Useful for project-specific exclusions (e.g., exclude mobile-developer for backend-only projects).
    *

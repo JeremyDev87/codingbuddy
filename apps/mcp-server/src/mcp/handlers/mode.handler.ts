@@ -15,12 +15,14 @@ import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import { CONTEXT_FILE_PATH, type ContextDocument } from '../../context/context-document.types';
 import { LOCALIZED_KEYWORD_MAP } from '../../keyword/keyword.types';
-import type {
-  Mode,
-  DispatchReady,
-  DispatchReadyAgent,
-  IncludedAgent,
-  ParallelAgentRecommendation,
+import {
+  MODE_DISPATCH_DEFAULTS,
+  type Mode,
+  type DispatchReady,
+  type DispatchReadyAgent,
+  type DispatchStrength,
+  type IncludedAgent,
+  type ParallelAgentRecommendation,
 } from '../../keyword/keyword.types';
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { AgentService } from '../../agent/agent.service';
@@ -194,6 +196,14 @@ export class ModeHandler extends AbstractHandler {
 
       // Persist state for context recovery after compaction
       await this.persistModeState(result.mode);
+
+      // Enrich parallelAgentsRecommendation with dispatch strength
+      if (result.parallelAgentsRecommendation) {
+        const settings = await this.configService.getSettings();
+        const configDispatch = settings.ai?.dispatchStrength as DispatchStrength | undefined;
+        result.parallelAgentsRecommendation.dispatch =
+          configDispatch ?? MODE_DISPATCH_DEFAULTS[result.mode as Mode] ?? 'recommend';
+      }
 
       // Build dispatchReady from included_agent and parallelAgentsRecommendation
       // Only include parallel agent prompts when verbosity is 'full' (token efficiency)

@@ -43,6 +43,7 @@ describe('ModeHandler', () => {
       getProjectRootSource: vi.fn().mockReturnValue('env'),
       isConfigLoaded: vi.fn().mockReturnValue(true),
       reload: vi.fn().mockResolvedValue({}),
+      getSettings: vi.fn().mockResolvedValue({}),
     } as unknown as ConfigService;
 
     mockLanguageService = {
@@ -840,6 +841,90 @@ describe('ModeHandler', () => {
       const parsed = JSON.parse(result!.content[0].text as string);
       expect(parsed.availableStrategies).toEqual(['subagent']);
       expect(parsed.taskmaestroInstallHint).toContain('TaskMaestro skill not found');
+    });
+  });
+
+  describe('dispatch strength in parallelAgentsRecommendation', () => {
+    it('should set dispatch to "auto" for EVAL mode by default', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+        parallelAgentsRecommendation: {
+          specialists: ['security-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', { prompt: 'EVAL evaluate implementation' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.parallelAgentsRecommendation.dispatch).toBe('auto');
+    });
+
+    it('should set dispatch to "recommend" for PLAN mode by default', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        parallelAgentsRecommendation: {
+          specialists: ['architecture-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', { prompt: 'PLAN design feature' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.parallelAgentsRecommendation.dispatch).toBe('recommend');
+    });
+
+    it('should set dispatch to "recommend" for ACT mode by default', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+        parallelAgentsRecommendation: {
+          specialists: ['code-quality-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', { prompt: 'ACT implement feature' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.parallelAgentsRecommendation.dispatch).toBe('recommend');
+    });
+
+    it('should override dispatch with config value when set', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        parallelAgentsRecommendation: {
+          specialists: ['architecture-specialist'],
+          hint: 'Use Task tool...',
+        },
+      });
+      (mockConfigService.getSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ai: { dispatchStrength: 'skip' },
+      });
+
+      const result = await handler.handle('parse_mode', { prompt: 'PLAN design feature' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.parallelAgentsRecommendation.dispatch).toBe('skip');
+    });
+
+    it('should not add dispatch when parallelAgentsRecommendation is absent', async () => {
+      // mockParseModeResult has no parallelAgentsRecommendation
+      const result = await handler.handle('parse_mode', { prompt: 'PLAN test task' });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.parallelAgentsRecommendation).toBeUndefined();
     });
   });
 });
