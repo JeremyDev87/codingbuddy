@@ -41,8 +41,56 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Tech Stack:** [Key technologies/libraries]
 
+## Alternatives
+
+### [Decision: e.g. State Management Approach]
+
+| Criteria | Approach A: [Name] | Approach B: [Name] |
+|---|---|---|
+| Performance | ... | ... |
+| Complexity | ... | ... |
+| Maintainability | ... | ... |
+
+**Decision:** [Chosen approach] — [One-line rationale]
+
 ---
 ```
+
+## Alternatives Exploration
+
+Every non-trivial decision in the plan MUST include at least two approaches with trade-off analysis.
+
+**What counts as non-trivial:**
+- Architecture choices (e.g. where to put new code)
+- Data flow design (e.g. state management approach)
+- API design (e.g. endpoint structure, payload shape)
+- Testing strategy (e.g. unit vs integration)
+
+**What does NOT need alternatives:**
+- File naming that follows existing conventions
+- Import statements
+- Trivial implementation details
+
+**Format for each decision:**
+
+```markdown
+### [Decision: Short Description]
+
+| Criteria | Approach A: [Name] | Approach B: [Name] |
+|---|---|---|
+| Performance | ... | ... |
+| Complexity | ... | ... |
+| Maintainability | ... | ... |
+
+**Decision:** [Chosen approach] — [One-line rationale]
+```
+
+**Rules:**
+- Minimum 2 approaches per non-trivial decision
+- Always include performance, complexity, and maintainability rows
+- Add extra criteria rows when relevant (e.g. security, testability, migration cost)
+- State the chosen approach with a clear rationale
+- If only one viable approach exists, explain why alternatives were ruled out
 
 ## Task Structure
 
@@ -93,6 +141,18 @@ git commit -m "feat: add specific feature"
 - Exact commands with expected output
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
+
+## Self-Review Gate
+
+**Before submitting the plan, verify ALL items pass:**
+
+- [ ] All file paths verified (existing files confirmed, new files marked as `Create:`)
+- [ ] Steps are bite-sized (2-5 minutes each, one action per step)
+- [ ] Risks identified with mitigation (what could go wrong and how to handle it)
+- [ ] TDD applied where appropriate (test-first for core logic, test-after for UI)
+- [ ] No over-engineering (YAGNI check — remove anything not directly needed)
+
+**If any item fails:** Fix the plan before proceeding. Do not hand off an incomplete plan.
 
 ## Execution Handoff
 
