@@ -447,6 +447,47 @@ create_worktrees() {
 }
 ```
 
+#### Step 3.5: Install Worktree Dependencies
+
+Pre-install dependencies in each worktree. Zero overhead when `node_modules` already exists.
+
+```bash
+install_worktree_deps() {
+  local count="$1"
+
+  for i in $(seq 1 "$count"); do
+    local wt_dir="${WORKTREE_BASE}/wt-${i}"
+
+    # Skip if no package.json or node_modules already present
+    [ -f "${wt_dir}/package.json" ] || continue
+    [ -d "${wt_dir}/node_modules" ] && continue
+
+    # Monorepo (yarn workspaces) → symlink node_modules from repo root
+    if [ -d "node_modules" ] && grep -q '"workspaces"' package.json 2>/dev/null; then
+      ln -s "$(pwd)/node_modules" "${wt_dir}/node_modules"
+      echo "SYMLINKED: node_modules -> wt-${i}"
+    # Standalone → yarn install in background
+    elif command -v yarn &>/dev/null; then
+      (cd "${wt_dir}" && yarn install --frozen-lockfile &>/dev/null &)
+      echo "INSTALLING: yarn install in wt-${i} (background)"
+    # Fallback → warn worker
+    else
+      echo "WARNING: wt-${i} has no node_modules — install manually"
+    fi
+  done
+}
+```
+
+**Dependency resolution strategy:**
+
+| Condition | Action | Overhead |
+|-----------|--------|----------|
+| `node_modules` exists | Skip | Zero |
+| No `package.json` | Skip | Zero |
+| Monorepo (yarn workspaces) | Symlink from repo root | ~0s |
+| Standalone project | `yarn install --frozen-lockfile` (background) | Non-blocking |
+| No yarn available | Warn worker to install manually | Zero |
+
 #### Step 4: Launch Claude Code Instances
 
 Launch Claude Code in each pane, pointing to the corresponding worktree:
@@ -502,7 +543,7 @@ wait_all_ready() {
 
 #### Step 6: Assign Tasks
 
-Send the work prompt to each ready pane:
+Send the work prompt to each ready pane. The prompt includes the **IRON LAW** for RESULT.json completion and the **ERROR RECOVERY PROTOCOL** for self-healing:
 
 ```bash
 assign_tasks() {
@@ -512,8 +553,32 @@ assign_tasks() {
     local pane="${SESSION}:0.${i}"
     local issue="${issues[$i]}"
 
-    # Worker prompt includes git add safety rules and artifact commit ban
-    local prompt="Read the file TASK.md in this directory carefully and execute ALL instructions exactly as written. Follow codingbuddy PLAN→ACT→EVAL. Run 'yarn install' first if node_modules missing. NEVER use 'git add -A' — always stage specific files. If errors occur, diagnose and fix yourself. Use /ship to create PR, then write RESULT.json. Start now."
+    # Worker prompt: task execution + IRON LAW + ERROR RECOVERY
+    local prompt
+    read -r -d '' prompt << 'WORKER_PROMPT' || true
+Read TASK.md and execute ALL instructions. Follow codingbuddy PLAN→ACT→EVAL. Run 'yarn install' if node_modules missing. NEVER use 'git add -A'. If errors occur, fix yourself. Use /ship to create PR, then write RESULT.json. Start now.
+
+[IRON LAW: RESULT.json]
+RESULT.json MUST be the LAST action before idle.
+1. Complete implementation
+2. Create PR via /ship
+3. Write RESULT.json ← MANDATORY
+4. Go idle
+
+If /ship fails: write RESULT.json with status "failure" and error details.
+NEVER go idle without RESULT.json.
+
+[ERROR RECOVERY PROTOCOL]
+If any command fails:
+1. DO NOT STOP. Read the error message.
+2. Diagnose: run git status, check paths, verify deps
+3. Fix: apply minimal fix
+4. Retry (max 3 attempts)
+5. If 3 retries fail: write RESULT.json with status "failure"
+
+NEVER use 'git add -A' — always stage specific files.
+RESULT.json and TASK.md must NEVER be committed.
+WORKER_PROMPT
 
     # Verify pane is ready before sending
     if ! tmux capture-pane -t "$pane" -p | grep -qE "$PROMPT_PATTERN"; then
@@ -525,6 +590,33 @@ assign_tasks() {
     echo "ASSIGNED: pane ${i} <- issue #${issue}"
   done
 }
+```
+
+**Worker prompt components:**
+
+| Component | Purpose | Source |
+|-----------|---------|--------|
+| Task execution | Read TASK.md, follow PLAN→ACT→EVAL, use /ship | Base prompt |
+| IRON LAW: RESULT.json | Guarantee RESULT.json is always written before idle | #868 |
+| ERROR RECOVERY PROTOCOL | Self-diagnose and retry on failures (max 3 attempts) | #870 |
+
+**IRON LAW enforcement:**
+
+| Scenario | Required Action |
+|----------|----------------|
+| /ship succeeds | Write RESULT.json with `status: "success"` + PR details |
+| /ship fails | Write RESULT.json with `status: "failure"` + error details |
+| Implementation fails after 3 retries | Write RESULT.json with `status: "failure"` |
+| Any other exit path | RESULT.json **must** still be written — no exceptions |
+
+**Error recovery flow:**
+
+```
+Command fails → Read error → Diagnose (git status, paths, deps) → Minimal fix → Retry
+                                                                         ↓
+                                                              Max 3 retries reached?
+                                                              Yes → RESULT.json (failure)
+                                                              No  → Retry command
 ```
 
 ### Full Wave Transition
@@ -543,27 +635,31 @@ wave_transition() {
   echo "=== Wave Transition: ${count} issues ==="
 
   # Step 1: Stop current workers
-  echo "[1/7] Stopping current workers..."
+  echo "[1/8] Stopping current workers..."
   stop_workers
 
   # Step 2: Clean worktrees
-  echo "[2/7] Cleaning worktrees..."
+  echo "[2/8] Cleaning worktrees..."
   clean_worktrees
 
   # Step 3: Create new worktrees
-  echo "[3/7] Creating ${count} worktrees..."
+  echo "[3/8] Creating ${count} worktrees..."
   create_worktrees "$count"
 
+  # Step 3.5: Install dependencies
+  echo "[4/8] Installing worktree dependencies..."
+  install_worktree_deps "$count"
+
   # Step 4: Launch Claude Code
-  echo "[4/7] Launching Claude Code instances..."
+  echo "[5/8] Launching Claude Code instances..."
   launch_workers "$count"
 
   # Step 5: Setup conductor layout
-  echo "[5/7] Setting up conductor layout..."
+  echo "[6/8] Setting up conductor layout..."
   setup_conductor_layout "$count"
 
   # Step 6: Wait for readiness
-  echo "[6/7] Waiting for readiness..."
+  echo "[7/8] Waiting for readiness..."
   local failed
   wait_all_ready "$count"
   failed=$?
@@ -572,7 +668,7 @@ wave_transition() {
   fi
 
   # Step 7: Assign tasks
-  echo "[7/7] Assigning tasks..."
+  echo "[8/8] Assigning tasks..."
   assign_tasks "${ISSUES[@]}"
 
   echo "=== Wave Transition Complete ==="
