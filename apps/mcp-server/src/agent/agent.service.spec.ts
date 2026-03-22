@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentService } from './agent.service';
 import type { RulesService } from '../rules/rules.service';
+import type { CustomService } from '../custom';
+import type { ConfigService } from '../config/config.service';
 import type { AgentProfile } from '../rules/rules.types';
 import type { AgentContext, DispatchResult } from './agent.types';
 
 describe('AgentService', () => {
   let service: AgentService;
   let mockRulesService: Partial<RulesService>;
+  let mockCustomService: Partial<CustomService>;
+  let mockConfigService: Partial<ConfigService>;
 
   const mockSecurityAgent: AgentProfile = {
     name: 'Security Specialist',
@@ -42,8 +46,18 @@ describe('AgentService', () => {
     mockRulesService = {
       getAgent: vi.fn(),
     };
+    mockCustomService = {
+      listCustomAgents: vi.fn().mockResolvedValue([]),
+    };
+    mockConfigService = {
+      getProjectRoot: vi.fn().mockReturnValue('/test/project'),
+    };
 
-    service = new AgentService(mockRulesService as RulesService);
+    service = new AgentService(
+      mockRulesService as RulesService,
+      mockCustomService as CustomService,
+      mockConfigService as ConfigService,
+    );
   });
 
   describe('getAgentSystemPrompt', () => {

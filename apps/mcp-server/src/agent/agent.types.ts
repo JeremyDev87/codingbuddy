@@ -149,6 +149,26 @@ export interface DispatchResult {
 }
 
 /**
+ * Inline agent definition passed directly in dispatch params.
+ * Compatible with AgentProfile for unified resolution.
+ */
+export interface InlineAgentDefinition {
+  name: string;
+  description: string;
+  role: {
+    title: string;
+    expertise: string[];
+    responsibilities?: string[];
+  };
+  communication?: {
+    language?: string;
+    style?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
  * Input parameters for the dispatch_agents tool
  */
 export interface DispatchAgentsInput {
@@ -160,6 +180,8 @@ export interface DispatchAgentsInput {
   primaryAgent?: string;
   /** Execution strategy: 'subagent' (default), 'taskmaestro', or 'teams' */
   executionStrategy?: 'subagent' | 'taskmaestro' | 'teams';
+  /** Inline agent definitions keyed by agent ID, highest priority in resolution */
+  inlineAgents?: Record<string, InlineAgentDefinition>;
 }
 
 /**

@@ -3,6 +3,7 @@ import type { ToolDefinition } from './base.handler';
 import type { ToolResponse } from '../response.utils';
 import { AbstractHandler } from './abstract-handler';
 import { AgentService } from '../../agent/agent.service';
+import type { InlineAgentDefinition } from '../../agent/agent.types';
 import type { Mode } from '../../keyword/keyword.types';
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
@@ -164,6 +165,27 @@ export class AgentHandler extends AbstractHandler {
               description:
                 'Execution strategy for specialist agents. "subagent" (default) uses Claude Code Agent tool with run_in_background. "taskmaestro" returns tmux pane assignments for /taskmaestro skill. "teams" uses Claude Code native teams with shared TaskList coordination.',
             },
+            inlineAgents: {
+              type: 'object',
+              description:
+                'Inline agent definitions keyed by agent ID. These take highest priority in resolution (inline > custom local > primary). Each value must have name, description, and role fields.',
+              additionalProperties: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  role: {
+                    type: 'object',
+                    properties: {
+                      title: { type: 'string' },
+                      expertise: { type: 'array', items: { type: 'string' } },
+                    },
+                    required: ['title', 'expertise'],
+                  },
+                },
+                required: ['name', 'description', 'role'],
+              },
+            },
           },
           required: ['mode'],
         },
@@ -190,6 +212,7 @@ export class AgentHandler extends AbstractHandler {
     const includeParallel = args?.includeParallel === true;
     const executionStrategy =
       (args?.executionStrategy as 'subagent' | 'taskmaestro' | 'teams' | undefined) ?? 'subagent';
+    const inlineAgents = this.extractInlineAgents(args);
 
     try {
       const result = await this.agentService.dispatchAgents({
@@ -200,6 +223,7 @@ export class AgentHandler extends AbstractHandler {
         taskDescription,
         includeParallel,
         executionStrategy,
+        inlineAgents,
       });
 
       // Ensure visibility is always present for real-time specialist execution tracking
@@ -254,13 +278,18 @@ export class AgentHandler extends AbstractHandler {
 
     const targetFiles = extractStringArray(context, 'targetFiles');
     const taskDescription = extractOptionalString(context, 'taskDescription');
+    const inlineAgents = this.extractInlineAgents(args);
 
     try {
-      const result = await this.agentService.getAgentSystemPrompt(agentName, {
-        mode: mode as Mode,
-        targetFiles,
-        taskDescription,
-      });
+      const result = await this.agentService.getAgentSystemPrompt(
+        agentName,
+        {
+          mode: mode as Mode,
+          targetFiles,
+          taskDescription,
+        },
+        inlineAgents,
+      );
       return createJsonResponse(result);
     } catch (error) {
       return createErrorResponse(
@@ -295,6 +324,7 @@ export class AgentHandler extends AbstractHandler {
         : isValidVerbosity(verbosityStr)
           ? verbosityStr
           : 'standard';
+    const inlineAgents = this.extractInlineAgents(args);
 
     try {
       const result = await this.agentService.prepareParallelAgents(
@@ -303,6 +333,7 @@ export class AgentHandler extends AbstractHandler {
         targetFiles,
         sharedContext,
         verbosity,
+        inlineAgents,
       );
       return createJsonResponse(result);
     } catch (error) {
@@ -310,5 +341,17 @@ export class AgentHandler extends AbstractHandler {
         `Failed to prepare parallel agents: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
+  }
+
+  /**
+   * Extract and validate inlineAgents from tool args.
+   * Returns undefined if not present or not a valid object.
+   */
+  private extractInlineAgents(
+    args: Record<string, unknown> | undefined,
+  ): Record<string, InlineAgentDefinition> | undefined {
+    const raw = args?.inlineAgents;
+    if (!isRecordObject(raw)) return undefined;
+    return raw as Record<string, InlineAgentDefinition>;
   }
 }

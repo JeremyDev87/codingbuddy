@@ -2315,9 +2315,11 @@ describe('McpService', () => {
         expect(parsed.displayName).toBe('Security Specialist');
         expect(parsed.systemPrompt).toContain('Security Specialist');
         expect(parsed.description).toBeDefined();
-        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith('security-specialist', {
-          mode: 'PLAN',
-        });
+        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
+          'security-specialist',
+          { mode: 'PLAN' },
+          undefined,
+        );
       });
 
       it('should pass targetFiles and taskDescription to service', async () => {
@@ -2345,6 +2347,7 @@ describe('McpService', () => {
             targetFiles: ['src/components/Button.tsx'],
             taskDescription: 'Review component accessibility',
           },
+          undefined,
         );
       });
     });
@@ -2501,6 +2504,7 @@ describe('McpService', () => {
           undefined,
           undefined,
           undefined,
+          undefined,
         );
       });
 
@@ -2525,6 +2529,7 @@ describe('McpService', () => {
           ['security-specialist'],
           ['src/api/auth.ts', 'src/api/login.ts'],
           'Review authentication implementation',
+          undefined,
           undefined,
         );
       });

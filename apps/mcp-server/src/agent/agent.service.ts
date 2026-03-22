@@ -1,9 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RulesService } from '../rules/rules.service';
+import { CustomService } from '../custom';
+import { ConfigService } from '../config/config.service';
 import type { Mode } from '../keyword/keyword.types';
+import type { AgentProfile } from '../rules/rules.types';
 import type {
   AgentContext,
   AgentSystemPrompt,
+  InlineAgentDefinition,
   ParallelAgentSet,
   PreparedAgent,
   FailedAgent,
@@ -27,13 +31,21 @@ import { getVerbosityConfig } from '../shared/verbosity.types';
 export class AgentService {
   private readonly logger = new Logger(AgentService.name);
 
-  constructor(private readonly rulesService: RulesService) {}
+  constructor(
+    private readonly rulesService: RulesService,
+    private readonly customService: CustomService,
+    private readonly configService: ConfigService,
+  ) {}
 
   /**
    * Get complete system prompt for a single agent to be executed as subagent
    */
-  async getAgentSystemPrompt(agentName: string, context: AgentContext): Promise<AgentSystemPrompt> {
-    const agentProfile = await this.rulesService.getAgent(agentName);
+  async getAgentSystemPrompt(
+    agentName: string,
+    context: AgentContext,
+    inlineAgents?: Record<string, InlineAgentDefinition>,
+  ): Promise<AgentSystemPrompt> {
+    const agentProfile = await this.resolveAgent(agentName, inlineAgents);
 
     const systemPrompt = buildAgentSystemPrompt(agentProfile, context);
     const description = buildTaskDescription(agentProfile, context);
@@ -61,6 +73,7 @@ export class AgentService {
     targetFiles?: string[],
     sharedContext?: string,
     verbosity?: VerbosityLevel,
+    inlineAgents?: Record<string, InlineAgentDefinition>,
   ): Promise<ParallelAgentSet> {
     const uniqueSpecialists = Array.from(new Set(specialists));
     const context: AgentContext = {
@@ -75,6 +88,7 @@ export class AgentService {
       uniqueSpecialists,
       context,
       verbosityConfig.includeAgentPrompt,
+      inlineAgents,
     );
 
     return this.buildParallelAgentSet(agents, failedAgents);
@@ -84,9 +98,10 @@ export class AgentService {
     specialists: string[],
     context: AgentContext,
     includeFullPrompt: boolean,
+    inlineAgents?: Record<string, InlineAgentDefinition>,
   ): Promise<{ agents: PreparedAgent[]; failedAgents: FailedAgent[] }> {
     const results = await Promise.all(
-      specialists.map(name => this.tryLoadAgent(name, context, includeFullPrompt)),
+      specialists.map(name => this.tryLoadAgent(name, context, includeFullPrompt, inlineAgents)),
     );
 
     const agents: PreparedAgent[] = [];
@@ -116,9 +131,10 @@ export class AgentService {
     specialistName: string,
     context: AgentContext,
     includeFullPrompt: boolean,
+    inlineAgents?: Record<string, InlineAgentDefinition>,
   ): Promise<{ success: true; agent: PreparedAgent } | { success: false; error: FailedAgent }> {
     try {
-      const profile = await this.rulesService.getAgent(specialistName);
+      const profile = await this.resolveAgent(specialistName, inlineAgents);
       const agent: PreparedAgent = {
         id: specialistName,
         displayName: profile.name,
@@ -206,7 +222,11 @@ export class AgentService {
     // Dispatch primary agent
     if (input.primaryAgent) {
       try {
-        const agentPrompt = await this.getAgentSystemPrompt(input.primaryAgent, context);
+        const agentPrompt = await this.getAgentSystemPrompt(
+          input.primaryAgent,
+          context,
+          input.inlineAgents,
+        );
         result.primaryAgent = {
           name: input.primaryAgent,
           displayName: agentPrompt.displayName,
@@ -227,7 +247,12 @@ export class AgentService {
     // Dispatch taskmaestro strategy
     if (input.executionStrategy === 'taskmaestro' && input.specialists?.length) {
       const uniqueSpecialists = Array.from(new Set(input.specialists));
-      const { agents, failedAgents } = await this.loadAgents(uniqueSpecialists, context, true);
+      const { agents, failedAgents } = await this.loadAgents(
+        uniqueSpecialists,
+        context,
+        true,
+        input.inlineAgents,
+      );
 
       const assignments: TaskmaestroAssignment[] = agents.map(agent => ({
         name: agent.id,
@@ -252,7 +277,12 @@ export class AgentService {
     if (input.executionStrategy === 'teams' && input.specialists?.length) {
       const uniqueSpecialists = Array.from(new Set(input.specialists));
       const teamName = `${(input.mode ?? 'eval').toLowerCase()}-specialists`;
-      const { agents, failedAgents } = await this.loadAgents(uniqueSpecialists, context, true);
+      const { agents, failedAgents } = await this.loadAgents(
+        uniqueSpecialists,
+        context,
+        true,
+        input.inlineAgents,
+      );
 
       const teammates: TeamsTeammate[] = agents.map(agent => ({
         name: agent.id,
@@ -281,6 +311,7 @@ export class AgentService {
         uniqueSpecialists,
         context,
         true, // always include full prompt for dispatch
+        input.inlineAgents,
       );
 
       result.parallelAgents = agents.map(
@@ -342,5 +373,50 @@ When done, provide a summary of all findings.`;
 4. Monitor via TaskList — teammates coordinate via shared task list
 5. Collect results when all teammates go idle
 6. Shutdown teammates via SendMessage with shutdown_request`;
+  }
+
+  /**
+   * Resolve an agent by name using the unified registry.
+   * Resolution order: inline > custom local > primary (override chain).
+   */
+  async resolveAgent(
+    agentName: string,
+    inlineAgents?: Record<string, InlineAgentDefinition>,
+  ): Promise<AgentProfile> {
+    // 1. Highest priority: inline agent definitions
+    if (inlineAgents?.[agentName]) {
+      const inline = inlineAgents[agentName];
+      this.logger.debug(`Resolved agent '${agentName}' from inline definition`);
+      return {
+        name: inline.name,
+        description: inline.description,
+        role: inline.role,
+        communication: inline.communication,
+        source: 'custom',
+      };
+    }
+
+    // 2. Medium priority: custom local agents (.codingbuddy/agents/)
+    try {
+      const projectRoot = this.configService.getProjectRoot();
+      const customAgents = await this.customService.listCustomAgents(projectRoot);
+      const customAgent = customAgents.find(a => a.name === `${agentName}.json`);
+      if (customAgent) {
+        this.logger.debug(`Resolved agent '${agentName}' from custom local`);
+        return {
+          name: customAgent.parsed.name,
+          description: customAgent.parsed.description,
+          role: customAgent.parsed.role,
+          source: 'custom',
+        };
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to check custom agents for '${agentName}': ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+
+    // 3. Lowest priority: primary agents (packages/rules/.ai-rules/agents/)
+    return this.rulesService.getAgent(agentName);
   }
 }

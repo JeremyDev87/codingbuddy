@@ -42,6 +42,7 @@ describe('AgentHandler', () => {
         expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
           'security-specialist',
           expect.objectContaining({ mode: 'EVAL' }),
+          undefined,
         );
       });
 
@@ -110,6 +111,7 @@ describe('AgentHandler', () => {
             targetFiles: ['src/app.ts'],
             taskDescription: 'Review security',
           }),
+          undefined,
         );
       });
 
@@ -181,6 +183,7 @@ describe('AgentHandler', () => {
           undefined,
           undefined,
           undefined,
+          undefined,
         );
       });
 
@@ -245,6 +248,7 @@ describe('AgentHandler', () => {
           ['src/app.ts'],
           'Review code',
           undefined,
+          undefined,
         );
       });
 
@@ -279,6 +283,7 @@ describe('AgentHandler', () => {
           undefined,
           undefined,
           'minimal',
+          undefined,
         );
       });
 
@@ -296,6 +301,7 @@ describe('AgentHandler', () => {
           undefined,
           undefined,
           'standard',
+          undefined,
         );
       });
 
@@ -309,6 +315,7 @@ describe('AgentHandler', () => {
         expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
           'EVAL',
           ['security-specialist'],
+          undefined,
           undefined,
           undefined,
           undefined,
@@ -331,6 +338,7 @@ describe('AgentHandler', () => {
           ['src/app.ts'],
           'Review code',
           'full',
+          undefined,
         );
       });
     });
@@ -680,6 +688,181 @@ describe('AgentHandler', () => {
 
       const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
       expect(dispatchAgents?.inputSchema.required).toEqual(['mode']);
+    });
+
+    it('should include inlineAgents in dispatch_agents schema', () => {
+      const definitions = handler.getToolDefinitions();
+      const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
+      const properties = dispatchAgents?.inputSchema.properties as Record<string, unknown>;
+      expect(properties).toHaveProperty('inlineAgents');
+    });
+  });
+
+  describe('unified agent registry (inlineAgents)', () => {
+    const inlineAgent = {
+      name: 'My Custom Agent',
+      description: 'A custom inline agent',
+      role: {
+        title: 'Custom Specialist',
+        expertise: ['custom-domain'],
+      },
+    };
+
+    const mockDispatchResult = {
+      primaryAgent: {
+        name: 'my-inline-agent',
+        displayName: 'My Custom Agent',
+        description: 'A custom inline agent',
+        dispatchParams: {
+          subagent_type: 'general-purpose' as const,
+          prompt: 'You are a custom specialist...',
+          description: 'A custom inline agent',
+        },
+      },
+      executionHint: 'Use Task tool...',
+    };
+
+    beforeEach(() => {
+      mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(mockDispatchResult);
+    });
+
+    describe('dispatch_agents with inlineAgents', () => {
+      it('should pass inlineAgents to service', async () => {
+        const inlineAgents = { 'my-inline-agent': inlineAgent };
+
+        await handler.handle('dispatch_agents', {
+          mode: 'EVAL',
+          primaryAgent: 'my-inline-agent',
+          inlineAgents,
+        });
+
+        expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'EVAL',
+            primaryAgent: 'my-inline-agent',
+            inlineAgents,
+          }),
+        );
+      });
+
+      it('should work without inlineAgents (backwards compatible)', async () => {
+        await handler.handle('dispatch_agents', {
+          mode: 'EVAL',
+          primaryAgent: 'security-specialist',
+        });
+
+        expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+          }),
+        );
+
+        const callArgs = (mockAgentService.dispatchAgents as ReturnType<typeof vi.fn>).mock
+          .calls[0][0];
+        expect(callArgs.inlineAgents).toBeUndefined();
+      });
+
+      it('should pass inlineAgents with multiple agents', async () => {
+        const multipleInline = {
+          'agent-a': inlineAgent,
+          'agent-b': { ...inlineAgent, name: 'Agent B', description: 'Second agent' },
+        };
+
+        await handler.handle('dispatch_agents', {
+          mode: 'PLAN',
+          primaryAgent: 'agent-a',
+          specialists: ['agent-b'],
+          inlineAgents: multipleInline,
+          includeParallel: true,
+        });
+
+        expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            inlineAgents: multipleInline,
+          }),
+        );
+      });
+
+      it('should ignore non-object inlineAgents', async () => {
+        await handler.handle('dispatch_agents', {
+          mode: 'EVAL',
+          primaryAgent: 'security-specialist',
+          inlineAgents: 'not-an-object',
+        });
+
+        const callArgs = (mockAgentService.dispatchAgents as ReturnType<typeof vi.fn>).mock
+          .calls[0][0];
+        expect(callArgs.inlineAgents).toBeUndefined();
+      });
+    });
+
+    describe('get_agent_system_prompt with inlineAgents', () => {
+      it('should pass inlineAgents to service', async () => {
+        const inlineAgents = { 'my-inline-agent': inlineAgent };
+
+        await handler.handle('get_agent_system_prompt', {
+          agentName: 'my-inline-agent',
+          context: { mode: 'EVAL' },
+          inlineAgents,
+        });
+
+        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
+          'my-inline-agent',
+          expect.objectContaining({ mode: 'EVAL' }),
+          inlineAgents,
+        );
+      });
+
+      it('should work without inlineAgents (backwards compatible)', async () => {
+        await handler.handle('get_agent_system_prompt', {
+          agentName: 'security-specialist',
+          context: { mode: 'EVAL' },
+        });
+
+        expect(mockAgentService.getAgentSystemPrompt).toHaveBeenCalledWith(
+          'security-specialist',
+          expect.objectContaining({ mode: 'EVAL' }),
+          undefined,
+        );
+      });
+    });
+
+    describe('prepare_parallel_agents with inlineAgents', () => {
+      it('should pass inlineAgents to service', async () => {
+        const inlineAgents = { 'my-inline-agent': inlineAgent };
+
+        await handler.handle('prepare_parallel_agents', {
+          mode: 'EVAL',
+          specialists: ['my-inline-agent'],
+          inlineAgents,
+        });
+
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['my-inline-agent'],
+          undefined,
+          undefined,
+          undefined,
+          inlineAgents,
+        );
+      });
+
+      it('should work without inlineAgents (backwards compatible)', async () => {
+        await handler.handle('prepare_parallel_agents', {
+          mode: 'EVAL',
+          specialists: ['security-specialist'],
+        });
+
+        expect(mockAgentService.prepareParallelAgents).toHaveBeenCalledWith(
+          'EVAL',
+          ['security-specialist'],
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        );
+      });
     });
   });
 });
