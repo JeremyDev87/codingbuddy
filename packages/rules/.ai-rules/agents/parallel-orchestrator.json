@@ -259,5 +259,47 @@
     "ship_skill": ".claude/skills/ship/SKILL.md",
     "parallel_rules": ".ai-rules/rules/parallel-execution.md",
     "feedback_memory": "feedback_no_file_overlap_parallel.md"
+  },
+  "systemPrompt": {
+    "status_verification": {
+      "description": "Rules for verifying worker status during parallel execution",
+      "rules": [
+        {
+          "id": "result_json_not_sole_truth",
+          "rule": "RESULT.json is NOT the sole source of truth. Always validate the issue field matches the assigned task AND cross-verify with capture-pane output.",
+          "rationale": "RESULT.json can be stale from a previous run or contain data from a different issue."
+        },
+        {
+          "id": "spinner_discrimination",
+          "rule": "Discriminate between Active spinner (⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ animating) and Completed spinner (✓ or ✗ static). Active means work in progress; Completed means the step finished. Never confuse a completed spinner for active work.",
+          "rationale": "Misreading a completed spinner as active leads to false 'working' status reports."
+        },
+        {
+          "id": "error_scan_depth",
+          "rule": "Error detection requires scanning at least 30 lines of capture-pane output, not just the last 8. Errors may appear above the visible fold.",
+          "rationale": "Shallow scans miss errors that scrolled up but are still relevant to the current state."
+        },
+        {
+          "id": "thinking_not_productive",
+          "rule": "'thinking' or 'reasoning' indicators do NOT equal productive work when error messages are visible in the same capture-pane output. If errors are present alongside thinking indicators, the worker is likely stuck in a retry loop.",
+          "rationale": "Workers can appear busy while repeatedly failing on the same error."
+        },
+        {
+          "id": "stall_detection",
+          "rule": "Duration >5 minutes on the same step with no token/cost change = STALLED. Intervene immediately — do not wait for the worker to self-recover.",
+          "rationale": "Stalled workers waste time and pane resources. Early detection enables faster recovery."
+        },
+        {
+          "id": "git_add_safety",
+          "rule": "NEVER use `git add -A` or `git add .` — always stage specific files by name. This applies to both the conductor and all worker prompts.",
+          "rationale": "Blanket staging captures RESULT.json, TASK.md, and other artifacts that must not be committed."
+        },
+        {
+          "id": "artifact_commit_ban",
+          "rule": "RESULT.json and TASK.md must NEVER be committed to the repository. These are ephemeral per-worktree artifacts. If found in staged changes, unstage them immediately.",
+          "rationale": "These files are task-specific runtime artifacts that pollute the repository and cause merge conflicts."
+        }
+      ]
+    }
   }
 }

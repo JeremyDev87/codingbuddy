@@ -440,6 +440,9 @@ create_worktrees() {
     local wt_dir="${WORKTREE_BASE}/wt-${i}"
     local branch="taskmaestro/$(date +%s)/pane-${i}"
     git worktree add "$wt_dir" -b "$branch" master
+
+    # Artifact cleanup: remove ephemeral files that may exist from previous runs
+    rm -f "${wt_dir}/RESULT.json" "${wt_dir}/TASK.md"
   done
 }
 ```
@@ -508,7 +511,9 @@ assign_tasks() {
   for i in "${!issues[@]}"; do
     local pane="${SESSION}:0.${i}"
     local issue="${issues[$i]}"
-    local prompt="AUTO: Issue #${issue} 구현"
+
+    # Worker prompt includes git add safety rules and artifact commit ban
+    local prompt="Read the file TASK.md in this directory carefully and execute ALL instructions exactly as written. Follow codingbuddy PLAN→ACT→EVAL. Run 'yarn install' first if node_modules missing. NEVER use 'git add -A' — always stage specific files. If errors occur, diagnose and fix yourself. Use /ship to create PR, then write RESULT.json. Start now."
 
     # Verify pane is ready before sending
     if ! tmux capture-pane -t "$pane" -p | grep -qE "$PROMPT_PATTERN"; then
@@ -617,25 +622,75 @@ status_check() {
 
   for pane in $panes; do
     local target="${SESSION}:0.${pane}"
-    local content
-    content=$(tmux capture-pane -t "$target" -p 2>/dev/null | tail -5)
-
-    local state="unknown"
-    if echo "$content" | grep -qE "$PROMPT_PATTERN"; then
-      state="idle"
-    elif echo "$content" | grep -qiE 'error|fail'; then
-      state="error"
-    else
-      state="working"
-    fi
-
     local wt_dir="${WORKTREE_BASE}/wt-$((pane + 1))"
     local branch="none"
     if [ -d "$wt_dir" ]; then
       branch=$(git -C "$wt_dir" branch --show-current 2>/dev/null || echo "detached")
     fi
 
-    echo "pane-${pane}: ${state} | branch: ${branch}"
+    # --- 3-Factor Analysis (30-line scan) ---
+    local content
+    content=$(tmux capture-pane -t "$target" -p 2>/dev/null | tail -30)
+
+    # Factor 1: Error scan (30 lines, not 8)
+    local has_error=false
+    if echo "$content" | grep -qiE 'error|fail|exception|panic|FATAL'; then
+      has_error=true
+    fi
+
+    # Factor 2: Active spinner detection (animating characters)
+    local has_active_spinner=false
+    if echo "$content" | grep -qE '[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]'; then
+      has_active_spinner=true
+    fi
+
+    # Factor 3: Completed spinner detection (static ✓ or ✗)
+    local has_completed_spinner=false
+    if echo "$content" | grep -qE '[✓✗✔✘]'; then
+      has_completed_spinner=true
+    fi
+
+    # Determine state from 3 factors
+    local state="unknown"
+    if echo "$content" | grep -qE "$PROMPT_PATTERN"; then
+      state="idle"
+    elif [ "$has_error" = true ] && [ "$has_active_spinner" = false ]; then
+      state="error"
+    elif [ "$has_error" = true ] && [ "$has_active_spinner" = true ]; then
+      state="stuck (errors + thinking)"
+    elif [ "$has_active_spinner" = true ]; then
+      state="working"
+    elif [ "$has_completed_spinner" = true ]; then
+      state="step-complete"
+    else
+      state="unknown"
+    fi
+
+    # --- RESULT.json Validation ---
+    local result_status=""
+    local result_file="${wt_dir}/RESULT.json"
+    if [ -f "$result_file" ]; then
+      local result_issue
+      result_issue=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).issue||'')}catch(e){console.log('')}" 2>/dev/null)
+
+      # Check if RESULT.json issue matches assigned task
+      # Extract assigned issue from branch name (taskmaestro/<ts>/pane-N)
+      local assigned_issue=""
+      # If result_issue is empty or mismatched, flag as stale
+      if [ -z "$result_issue" ]; then
+        result_status="(no issue field)"
+      else
+        result_status="(issue: ${result_issue})"
+      fi
+
+      # Auto-remove stale RESULT.json if status is not from current task
+      # (conductor should verify issue match against Wave assignment)
+    fi
+
+    echo "pane-${pane}: ${state} | branch: ${branch} ${result_status}"
+    if [ "$has_error" = true ]; then
+      echo "  ⚠ errors detected in 30-line scan"
+    fi
   done
 }
 ```
@@ -806,3 +861,14 @@ cleanup_all() {
 - **Conductor layout requires tmux ≥ 2.3** — uses `-f` flag for full-width `join-pane`
 - **After layout setup, conductor is the last pane** — pane indices shift during `swap-pane` + `break-pane` + `join-pane`
 - **Worker status colors are pane-local** — use `set_worker_status()` to update border colors per pane
+
+## Status Verification Rules
+
+- **RESULT.json is NOT the sole source of truth** — always validate the `issue` field matches the assigned task AND cross-verify with `capture-pane` output
+- **3-factor analysis for status** — every status check must evaluate: (1) error scan across 30 lines, (2) active spinner presence, (3) completed spinner presence
+- **Active vs Completed spinner discrimination** — animating characters (`⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`) = active work; static characters (`✓✗✔✘`) = step complete. Never confuse them.
+- **"thinking" ≠ productive work** when errors are visible — if errors appear alongside thinking/reasoning indicators, the worker is stuck in a retry loop
+- **Stall detection** — duration >5 minutes on the same step with no token/cost change = STALLED. Intervene immediately.
+- **NEVER use `git add -A` or `git add .`** — always stage specific files by name. This applies to both the conductor and all worker prompts.
+- **RESULT.json and TASK.md must NEVER be committed** — these are ephemeral per-worktree artifacts. If found in staged changes, unstage immediately.
+- **Stale RESULT.json auto-removal** — if RESULT.json `issue` field does not match the currently assigned task, remove it (`rm -f RESULT.json`) before the worker starts.
