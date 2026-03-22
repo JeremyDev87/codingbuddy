@@ -56,6 +56,7 @@ Reusable workflows for consistent development practices.
 
 | Skill | Description | When to Use |
 |-------|-------------|-------------|
+| cost-budget | Cost budget management with threshold alerts and auto-pause for autonomous workflows | Managing AI session costs, budget limits, taskMaestro wave budgets |
 | tmux-master | Background knowledge for tmux session/window/pane lifecycle, layout, communication, styling, and troubleshooting | Parallel agent execution, taskMaestro workflows, tmux automation |
 
 ### codingbuddy Specific
@@ -228,6 +229,8 @@ EOF
 │   └── SKILL.md
 │
 ├── [DevOps & Infrastructure]
+├── cost-budget/
+│   └── SKILL.md
 ├── tmux-master/
 │   └── SKILL.md
 │
