@@ -170,7 +170,7 @@ Proceed with creating issue in <upstream-repo>? (y/n)
 Discovered in downstream repo: <your-repo-url>
 ```
 
-2. **Create the issue**
+1. **Create the issue**
 
 ```bash
 gh issue create -R <owner/repo> \
@@ -178,7 +178,7 @@ gh issue create -R <owner/repo> \
   --body "<body>"
 ```
 
-3. **Link back to current repo (optional)**
+1. **Link back to current repo (optional)**
    - Create a tracking issue in current repo referencing the upstream issue
    - Add label: `blocked-upstream` or `waiting-upstream`
 
