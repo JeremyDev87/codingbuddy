@@ -5452,6 +5452,8 @@ __metadata:
 "codingbuddy-rules@workspace:*, codingbuddy-rules@workspace:packages/rules":
   version: 0.0.0-use.local
   resolution: "codingbuddy-rules@workspace:packages/rules"
+  bin:
+    codingbuddy: ./bin/cli.js
   languageName: unknown
   linkType: soft
 
