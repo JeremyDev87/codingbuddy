@@ -148,7 +148,8 @@
         "Acceptance criteria: every prompt includes verifiable checklist",
         "AUTO mode: every prompt includes PLAN→ACT→EVAL iteration methodology",
         "Exit condition: Critical/High=0 before /ship, Medium/Low in PR description",
-        "No ambiguity: exact file paths, exact field values, exact commands"
+        "No ambiguity: exact file paths, exact field values, exact commands",
+        "Plan validation: complex workers should use plan-and-review skill to validate plans before ACT"
       ]
     },
     "worker_troubleshooting": {
