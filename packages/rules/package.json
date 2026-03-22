@@ -4,10 +4,14 @@
   "description": "AI coding rules for consistent practices across AI assistants",
   "main": "index.js",
   "types": "index.d.ts",
+  "bin": {
+    "codingbuddy": "./bin/cli.js"
+  },
   "files": [
     "index.js",
     "index.d.ts",
-    ".ai-rules"
+    ".ai-rules",
+    "bin"
   ],
   "keywords": [
     "ai",
