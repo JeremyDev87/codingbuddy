@@ -17,11 +17,111 @@ Orchestrate parallel Claude Code workers in tmux panes with git worktree isolati
 
 Follow every step in order. Stop and report if any step fails.
 
-## Prerequisites
+## Step 0: Prerequisite Check
 
-- `tmux` installed and a session active
-- Git repository with a clean working tree
-- `claude` CLI available in PATH
+Run these checks at the start of every command. Each check is idempotent — zero overhead when already satisfied.
+
+```bash
+check_prerequisites() {
+  # --- 1. tmux installed? ---
+  if ! command -v tmux &>/dev/null; then
+    echo "ERROR: tmux is not installed." >&2
+
+    # Detect OS and suggest install command
+    case "$(uname -s)" in
+      Darwin)
+        if command -v brew &>/dev/null; then
+          echo "Detected macOS with Homebrew." >&2
+          echo "Run: brew install tmux" >&2
+          # Safe to auto-execute (no sudo required)
+          # Use AskUserQuestion to confirm before running
+          return 1
+        else
+          echo "Detected macOS without Homebrew." >&2
+          echo "Install Homebrew first: https://brew.sh" >&2
+          echo "Then run: brew install tmux" >&2
+          return 1
+        fi
+        ;;
+      Linux)
+        if [ -f /etc/os-release ]; then
+          . /etc/os-release
+          case "$ID" in
+            ubuntu|debian)
+              echo "Detected $PRETTY_NAME." >&2
+              echo "Run: sudo apt install -y tmux" >&2
+              ;;
+            alpine)
+              echo "Detected Alpine Linux." >&2
+              echo "Run: apk add tmux" >&2
+              ;;
+            fedora|rhel|centos)
+              echo "Detected $PRETTY_NAME." >&2
+              echo "Run: sudo dnf install -y tmux" >&2
+              ;;
+            arch|manjaro)
+              echo "Detected $PRETTY_NAME." >&2
+              echo "Run: sudo pacman -S tmux" >&2
+              ;;
+            *)
+              echo "Detected Linux ($PRETTY_NAME)." >&2
+              echo "Install tmux using your package manager." >&2
+              ;;
+          esac
+        else
+          echo "Detected Linux (unknown distro)." >&2
+          echo "Install tmux using your package manager." >&2
+        fi
+        return 1
+        ;;
+      *)
+        echo "Unsupported OS: $(uname -s)" >&2
+        echo "Install tmux manually: https://github.com/tmux/tmux/wiki/Installing" >&2
+        return 1
+        ;;
+    esac
+  fi
+
+  # --- 2. Running inside tmux session? ---
+  if [ -z "$TMUX" ]; then
+    echo "WARNING: Not inside a tmux session." >&2
+    echo "Creating new tmux session '${SESSION}'..." >&2
+    tmux new-session -d -s "$SESSION" 2>/dev/null || true
+    echo "Re-enter with: tmux attach -t $SESSION" >&2
+    return 1
+  fi
+
+  # --- 3. Git repository? ---
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "ERROR: Not inside a git repository." >&2
+    echo "Run this command from a git project root." >&2
+    return 1
+  fi
+
+  return 0
+}
+```
+
+**Check summary:**
+
+| Check | Pass | Fail |
+|-------|------|------|
+| `command -v tmux` | Continue | Detect OS → suggest install command |
+| `$TMUX` set | Continue | Create session → ask user to re-enter |
+| `git rev-parse` | Continue | Error and abort |
+
+**Install commands by OS:**
+
+| OS | Command | Auto-executable? |
+|----|---------|-------------------|
+| macOS (Homebrew) | `brew install tmux` | Yes — no sudo, confirm via AskUserQuestion |
+| Ubuntu / Debian | `sudo apt install -y tmux` | No — show command for user |
+| Alpine | `apk add tmux` | No — show command for user |
+| Fedora / RHEL | `sudo dnf install -y tmux` | No — show command for user |
+| Arch / Manjaro | `sudo pacman -S tmux` | No — show command for user |
+| Other | Manual install | No — link to tmux wiki |
+
+**Integration:** Call `check_prerequisites` at the top of `wave_transition()`, `launch_workers()`, and `status_check()` before any tmux operations.
 
 ## Constants
 
