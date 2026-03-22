@@ -248,7 +248,10 @@ export class ModeHandler extends AbstractHandler {
       const deepThinkingInstructions = this.buildDeepThinkingInstructions(result.mode as Mode);
 
       // Build plan review gate for PLAN/AUTO modes
-      const planReviewGate = this.buildPlanReviewGate(result.mode as Mode, settings?.ai?.planReviewGate);
+      const planReviewGate = this.buildPlanReviewGate(
+        result.mode as Mode,
+        settings?.ai?.planReviewGate,
+      );
 
       return createJsonResponse({
         ...result,
@@ -464,10 +467,7 @@ export class ModeHandler extends AbstractHandler {
    * Build plan review gate for PLAN/AUTO modes.
    * Returns undefined for ACT/EVAL modes (not applicable).
    */
-  private buildPlanReviewGate(
-    mode: Mode,
-    configValue?: boolean,
-  ): PlanReviewGate | undefined {
+  private buildPlanReviewGate(mode: Mode, configValue?: boolean): PlanReviewGate | undefined {
     if (mode !== 'PLAN' && mode !== 'AUTO') {
       return undefined;
     }
