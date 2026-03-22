@@ -610,6 +610,33 @@ To preserve this implementation session for future reference:
 - In monorepo subdirectories, use git -C "$REPO_ROOT" flag for git commands
 - After using cd, ensure relative paths are not double-applied in subsequent commands
 
+### Working Directory Safety
+
+After any operation that changes directory (cd, clone, worktree operations):
+
+- Verify current working directory is the project root before running project-scoped commands
+- Use absolute paths for critical operations (version control, CI tools, package managers)
+- If working directory drifted, return immediately: `cd /path/to/project`
+- Never assume the working directory is correct after directory-changing operations
+
+### Skill Invocation Safety
+
+Before invoking any skill via a tool:
+
+- Check the skill file frontmatter for `disable-model-invocation: true`
+- Skills with this flag cannot be invoked via tool-based invocation
+- Instead, read the skill content and execute the workflow steps directly
+- This applies to all AI assistants, not just specific tool implementations
+
+### Issue Deduplication
+
+Before creating any issue in the project tracker:
+
+- Search for existing similar issues using relevant keywords (e.g., `gh issue list --search "<keywords>"`)
+- If a duplicate or closely related issue is found, update it instead of creating a new one
+- Track all issues created in the current session to prevent same-session duplicates
+- Include cross-references when creating related but distinct issues
+
 ---
 
 ### Eval Mode
