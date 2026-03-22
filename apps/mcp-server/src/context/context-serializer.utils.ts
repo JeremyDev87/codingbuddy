@@ -2,7 +2,12 @@
  * Pure serialization functions for context documents.
  * These functions are stateless and have no side effects.
  */
-import type { ContextDocument, ContextMetadata, ContextSection } from './context-document.types';
+import type {
+  ContextDocument,
+  ContextMetadata,
+  ContextSection,
+  ContextIssue,
+} from './context-document.types';
 import { CONTEXT_MARKDOWN } from './context-document.types';
 
 /**
@@ -21,6 +26,15 @@ export function serializeContextDocument(document: ContextDocument): string {
   for (const section of document.sections) {
     lines.push('');
     lines.push(...serializeSection(section));
+  }
+
+  // Serialize document-level issues (persist across mode changes)
+  if (document.issues && document.issues.length > 0) {
+    lines.push('');
+    lines.push(CONTEXT_MARKDOWN.ISSUES_HEADER);
+    for (const issue of document.issues) {
+      lines.push(`- #${issue.number}: ${issue.title} (${issue.status}) - ${issue.url}`);
+    }
   }
 
   return lines.join('\n');
@@ -148,6 +162,7 @@ export function createNewContextDocument(
   title: string,
   planSection: ContextSection,
   isoTimestamp: string,
+  issues?: ContextIssue[],
 ): ContextDocument {
   return {
     metadata: {
@@ -158,6 +173,7 @@ export function createNewContextDocument(
       status: 'active',
     },
     sections: [planSection],
+    issues: issues && issues.length > 0 ? issues : undefined,
   };
 }
 
@@ -240,6 +256,29 @@ export function mergeSection(
     recommendations: mergeArraysUnique(existing.recommendations, newData.recommendations),
     status: newData.status || existing.status,
   };
+}
+
+/**
+ * Merge issues arrays with deduplication by issue number.
+ * Newer issues (from newIssues) take precedence for duplicate numbers.
+ *
+ * @param existing - Existing issues
+ * @param newIssues - New issues to merge
+ * @returns Merged issues without duplicates, or undefined if both empty
+ */
+export function mergeIssues(
+  existing: ContextIssue[] | undefined,
+  newIssues: ContextIssue[] | undefined,
+): ContextIssue[] | undefined {
+  if (!existing && !newIssues) return undefined;
+  if (!existing) return newIssues;
+  if (!newIssues) return existing;
+
+  const map = new Map<number, ContextIssue>();
+  for (const issue of existing) map.set(issue.number, issue);
+  for (const issue of newIssues) map.set(issue.number, issue);
+  const merged = Array.from(map.values());
+  return merged.length > 0 ? merged : undefined;
 }
 
 /**

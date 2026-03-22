@@ -60,6 +60,21 @@ const MAX_CONTEXT_ARRAY_ITEMS = 100;
 const MAX_CONTEXT_ITEM_LENGTH = 2000;
 
 /**
+ * Issue tracked during a session.
+ * Persists across PLAN→ACT→EVAL mode changes (not reset on mode change).
+ */
+export interface ContextIssue {
+  /** GitHub issue number */
+  number: number;
+  /** Issue title */
+  title: string;
+  /** Issue URL */
+  url: string;
+  /** Issue status (e.g., 'open', 'closed') */
+  status: string;
+}
+
+/**
  * Context document metadata stored in the header.
  */
 export interface ContextMetadata {
@@ -125,6 +140,8 @@ export interface ContextDocument {
   metadata: ContextMetadata;
   /** Mode sections (PLAN, ACT, EVAL) */
   sections: ContextSection[];
+  /** Issues tracked during session (persists across mode changes) */
+  issues?: ContextIssue[];
 }
 
 /**
@@ -145,6 +162,8 @@ export interface ResetContextData {
   decisions?: string[];
   /** Initial notes */
   notes?: string[];
+  /** Issues to track (persists across mode changes) */
+  issues?: ContextIssue[];
   /** Session ID for session-isolated context (optional, omit for legacy behavior) */
   sessionId?: string;
 }
@@ -175,6 +194,8 @@ export interface AppendContextData {
   recommendedActAgentConfidence?: number;
   /** Section status */
   status?: 'in_progress' | 'completed' | 'blocked';
+  /** Issues to track (merged with existing, dedup by number) */
+  issues?: ContextIssue[];
   /** Session ID for session-isolated context (optional, omit for legacy behavior) */
   sessionId?: string;
 }
@@ -236,6 +257,7 @@ export const CONTEXT_MARKDOWN = {
   PROGRESS_HEADER: '### Progress',
   FINDINGS_HEADER: '### Findings',
   RECOMMENDATIONS_HEADER: '### Recommendations',
+  ISSUES_HEADER: '### Issues',
   PRIMARY_AGENT_PREFIX: '**Primary Agent**:',
   RECOMMENDED_ACT_AGENT_PREFIX: '**Recommended ACT Agent**:',
 } as const;

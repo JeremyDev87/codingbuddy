@@ -11,6 +11,7 @@ import {
   getSessionContextFilePath,
 } from '../../context/context-document.types';
 import type { Mode } from '../../keyword/keyword.types';
+import type { ContextIssue } from '../../context/context-document.types';
 import { isValidVerbosity, getVerbosityConfig } from '../../shared/verbosity.types';
 
 /**
@@ -137,6 +138,21 @@ Call this at the end of each mode to persist decisions and notes.`,
               enum: ['in_progress', 'completed', 'blocked'],
               description: 'Status of this mode section',
             },
+            issues: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  number: { type: 'number', description: 'GitHub issue number' },
+                  title: { type: 'string', description: 'Issue title' },
+                  url: { type: 'string', description: 'Issue URL' },
+                  status: { type: 'string', description: 'Issue status (open, closed)' },
+                },
+                required: ['number', 'title', 'url', 'status'],
+              },
+              description:
+                'Issues created/referenced during session. Persists across PLAN→ACT→EVAL modes.',
+            },
             sessionId: {
               type: 'string',
               description:
@@ -197,6 +213,35 @@ Call this at the end of each mode to persist decisions and notes.`,
    */
   private getFilePath(sessionId?: string): string {
     return sessionId ? getSessionContextFilePath(sessionId) : CONTEXT_FILE_PATH;
+  }
+
+  /**
+   * Extract and validate issues from args.
+   * Filters out items that don't match the ContextIssue shape.
+   */
+  private extractIssues(args: Record<string, unknown> | undefined): ContextIssue[] | undefined {
+    if (!Array.isArray(args?.issues)) return undefined;
+
+    const issues: ContextIssue[] = [];
+    for (const item of args.issues) {
+      if (
+        typeof item === 'object' &&
+        item !== null &&
+        typeof (item as Record<string, unknown>).number === 'number' &&
+        typeof (item as Record<string, unknown>).title === 'string' &&
+        typeof (item as Record<string, unknown>).url === 'string' &&
+        typeof (item as Record<string, unknown>).status === 'string'
+      ) {
+        issues.push({
+          number: (item as Record<string, unknown>).number as number,
+          title: (item as Record<string, unknown>).title as string,
+          url: (item as Record<string, unknown>).url as string,
+          status: (item as Record<string, unknown>).status as string,
+        });
+      }
+    }
+
+    return issues.length > 0 ? issues : undefined;
   }
 
   private async handleReadContext(
@@ -269,6 +314,7 @@ Call this at the end of each mode to persist decisions and notes.`,
           : null,
         allDecisions,
         allNotes,
+        sessionIssues: document.issues || [],
       },
     });
   }
@@ -292,6 +338,9 @@ Call this at the end of each mode to persist decisions and notes.`,
     const typedMode = mode as Mode;
     const filePath = this.getFilePath(sessionId);
 
+    // Extract validated issues
+    const issues = this.extractIssues(args);
+
     // For PLAN mode, title is required
     if (typedMode === 'PLAN') {
       const title = extractOptionalString(args, 'title') || 'Untitled Task';
@@ -306,6 +355,7 @@ Call this at the end of each mode to persist decisions and notes.`,
             : undefined,
         decisions: Array.isArray(args?.decisions) ? (args.decisions as string[]) : undefined,
         notes: Array.isArray(args?.notes) ? (args.notes as string[]) : undefined,
+        issues,
         sessionId,
       });
 
@@ -341,6 +391,7 @@ Call this at the end of each mode to persist decisions and notes.`,
       status:
         (extractOptionalString(args, 'status') as 'in_progress' | 'completed' | 'blocked') ??
         undefined,
+      issues,
       sessionId,
     });
 

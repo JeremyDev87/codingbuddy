@@ -3,7 +3,12 @@
  * These functions are stateless and have no side effects.
  */
 import type { Mode } from '../keyword/keyword.types';
-import type { ContextDocument, ContextMetadata, ContextSection } from './context-document.types';
+import type {
+  ContextDocument,
+  ContextMetadata,
+  ContextSection,
+  ContextIssue,
+} from './context-document.types';
 import {
   CONTEXT_MARKDOWN,
   CONTEXT_SECTION_HEADER_PATTERN,
@@ -78,6 +83,8 @@ interface ParseContext {
   sections: ContextSection[];
   currentSection: Partial<ContextSection> | null;
   currentListType: SectionListType | null;
+  issues: ContextIssue[];
+  parsingIssues: boolean;
 }
 
 /**
@@ -99,6 +106,8 @@ export function parseContextDocument(content: string): ContextDocument {
     sections: [],
     currentSection: null,
     currentListType: null,
+    issues: [],
+    parsingIssues: false,
   };
 
   for (const line of lines) {
@@ -113,6 +122,7 @@ export function parseContextDocument(content: string): ContextDocument {
   return {
     metadata: ctx.metadata as ContextMetadata,
     sections: ctx.sections,
+    issues: ctx.issues.length > 0 ? ctx.issues : undefined,
   };
 }
 
@@ -120,6 +130,40 @@ export function parseContextDocument(content: string): ContextDocument {
  * Parse a single line and update context.
  */
 function parseLine(line: string, ctx: ParseContext): void {
+  // Check for document-level issues header
+  if (line === CONTEXT_MARKDOWN.ISSUES_HEADER) {
+    // Save current section if any
+    if (ctx.currentSection && ctx.currentSection.mode) {
+      ctx.sections.push(ctx.currentSection as ContextSection);
+      ctx.currentSection = null;
+    }
+    ctx.parsingIssues = true;
+    ctx.currentListType = null;
+    return;
+  }
+
+  // Parse issue items when in issues mode
+  if (ctx.parsingIssues) {
+    if (line.startsWith('- #')) {
+      const issueMatch = line.match(/^- #(\d+): (.+) \(([^)]+)\) - (.+)$/);
+      if (issueMatch) {
+        ctx.issues.push({
+          number: parseInt(issueMatch[1], 10),
+          title: issueMatch[2],
+          status: issueMatch[3],
+          url: issueMatch[4],
+        });
+      }
+      return;
+    }
+    // Non-issue line ends issues parsing
+    if (line.trim().length > 0 && !line.startsWith('- #')) {
+      ctx.parsingIssues = false;
+    } else {
+      return;
+    }
+  }
+
   // Try parsing metadata first (only before sections start)
   if (!ctx.currentSection && parseMetadataLine(line, ctx)) {
     return;

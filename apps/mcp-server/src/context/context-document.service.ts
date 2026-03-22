@@ -25,6 +25,7 @@ import {
   createNewContextDocument,
   createPlanSection,
   mergeSection,
+  mergeIssues,
   generateTimestamp,
   estimateDocumentSize,
   cleanupContextDocument,
@@ -172,6 +173,11 @@ export class ContextDocumentService {
       const timestamp = generateTimestamp();
       const limits = await this.getContextLimits();
 
+      // Preserve existing issues across PLAN reset
+      const existingResult = await this.readContext();
+      const existingIssues = existingResult.document?.issues;
+      const mergedIssues = mergeIssues(existingIssues, data.issues);
+
       // Create PLAN section (with DoS protection via truncation)
       const planSection = createPlanSection(
         {
@@ -187,7 +193,12 @@ export class ContextDocumentService {
 
       // Create new document with explicit timestamp (pure function)
       const isoTimestamp = new Date().toISOString();
-      const document = createNewContextDocument(data.title, planSection, isoTimestamp);
+      const document = createNewContextDocument(
+        data.title,
+        planSection,
+        isoTimestamp,
+        mergedIssues,
+      );
 
       // Serialize and write
       const content = serializeContextDocument(document);
@@ -259,6 +270,9 @@ export class ContextDocumentService {
         // Add new section
         document.sections.push(newSection);
       }
+
+      // Merge issues at document level (persist across modes)
+      document.issues = mergeIssues(document.issues, data.issues);
 
       // Update metadata
       document.metadata.lastUpdatedAt = new Date().toISOString();

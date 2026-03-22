@@ -398,6 +398,114 @@ describe('ContextDocumentHandler', () => {
     });
   });
 
+  describe('issues tracking', () => {
+    const sampleIssues = [
+      {
+        number: 42,
+        title: 'Fix login bug',
+        url: 'https://github.com/org/repo/issues/42',
+        status: 'open',
+      },
+      {
+        number: 99,
+        title: 'Add search',
+        url: 'https://github.com/org/repo/issues/99',
+        status: 'closed',
+      },
+    ];
+
+    it('should pass issues to resetContext in PLAN mode', async () => {
+      await handler.handle('update_context', {
+        mode: 'PLAN',
+        title: 'Issue Test',
+        issues: sampleIssues,
+      });
+
+      expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+        expect.objectContaining({ issues: sampleIssues }),
+      );
+    });
+
+    it('should pass issues to appendContext in ACT mode', async () => {
+      await handler.handle('update_context', {
+        mode: 'ACT',
+        issues: sampleIssues,
+      });
+
+      expect(mockContextDocService.appendContext).toHaveBeenCalledWith(
+        expect.objectContaining({ issues: sampleIssues }),
+      );
+    });
+
+    it('should ignore non-array issues', async () => {
+      await handler.handle('update_context', {
+        mode: 'PLAN',
+        title: 'Bad Issues',
+        issues: 'not-an-array',
+      });
+
+      expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+        expect.objectContaining({ issues: undefined }),
+      );
+    });
+
+    it('should filter out invalid issue objects', async () => {
+      await handler.handle('update_context', {
+        mode: 'PLAN',
+        title: 'Mixed Issues',
+        issues: [
+          { number: 1, title: 'Valid', url: 'https://example.com/1', status: 'open' },
+          { number: 'bad', title: 'Invalid number' },
+          { title: 'Missing number', url: 'https://example.com/2', status: 'open' },
+        ],
+      });
+
+      expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          issues: [{ number: 1, title: 'Valid', url: 'https://example.com/1', status: 'open' }],
+        }),
+      );
+    });
+
+    it('should return undefined issues when all items are invalid', async () => {
+      await handler.handle('update_context', {
+        mode: 'PLAN',
+        title: 'All Bad',
+        issues: [{ bad: true }, 'string-item'],
+      });
+
+      expect(mockContextDocService.resetContext).toHaveBeenCalledWith(
+        expect.objectContaining({ issues: undefined }),
+      );
+    });
+
+    it('should include sessionIssues in read_context response', async () => {
+      const docWithIssues = {
+        exists: true,
+        document: {
+          metadata: mockReadResult.document.metadata,
+          sections: mockReadResult.document.sections,
+          issues: sampleIssues,
+        },
+      };
+      mockContextDocService.readContext = vi.fn().mockResolvedValue(docWithIssues);
+
+      const result = await handler.handle('read_context', {});
+
+      expect(result?.isError).toBeFalsy();
+      const responseData = JSON.parse(result!.content[0].text);
+      expect(responseData.summary.sessionIssues).toEqual(sampleIssues);
+    });
+
+    it('should return empty sessionIssues when no issues exist', async () => {
+      const result = await handler.handle('read_context', {});
+
+      expect(result?.isError).toBeFalsy();
+      const responseData = JSON.parse(result!.content[0].text);
+      expect(responseData.summary.sessionIssues).toEqual([]);
+    });
+  });
+
   describe('getToolDefinitions', () => {
     it('should return tool definitions', () => {
       const definitions = handler.getToolDefinitions();
@@ -420,6 +528,14 @@ describe('ContextDocumentHandler', () => {
       const definitions = handler.getToolDefinitions();
       const readContext = definitions.find(d => d.name === 'read_context');
       expect(readContext?.inputSchema.required).toEqual([]);
+    });
+
+    it('should include issues in update_context schema', () => {
+      const definitions = handler.getToolDefinitions();
+      const updateContext = definitions.find(d => d.name === 'update_context');
+      expect(updateContext?.inputSchema.properties.issues).toBeDefined();
+      const issuesProp = updateContext?.inputSchema.properties.issues as { type: string };
+      expect(issuesProp.type).toBe('array');
     });
 
     it('should include sessionId in update_context schema', () => {
