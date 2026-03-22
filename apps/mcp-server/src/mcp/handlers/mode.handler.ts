@@ -48,6 +48,16 @@ interface DeepThinkingInstructions {
   detailLevel: string;
 }
 
+/** Agent discussion configuration for EVAL mode responses */
+interface AgentDiscussionConfig {
+  /** Whether agent discussion is enabled */
+  enabled: boolean;
+  /** Format for structuring specialist findings */
+  format: 'structured';
+  /** Whether to include consensus analysis */
+  includeConsensus: boolean;
+}
+
 /** Plan review gate recommendation included in PLAN/AUTO mode responses */
 interface PlanReviewGate {
   /** Whether the plan review gate is enabled */
@@ -253,6 +263,12 @@ export class ModeHandler extends AbstractHandler {
         settings?.ai?.planReviewGate,
       );
 
+      // Build agent discussion config for EVAL mode
+      const agentDiscussion = this.buildAgentDiscussion(
+        result.mode as Mode,
+        settings?.ai?.agentDiscussion,
+      );
+
       return createJsonResponse({
         ...result,
         language,
@@ -264,6 +280,8 @@ export class ModeHandler extends AbstractHandler {
         ...(deepThinkingInstructions && { deepThinkingInstructions }),
         // Include plan review gate for PLAN/AUTO modes
         ...(planReviewGate && { planReviewGate }),
+        // Include agent discussion config for EVAL mode
+        ...(agentDiscussion && { agentDiscussion }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -478,6 +496,27 @@ export class ModeHandler extends AbstractHandler {
       enabled,
       agent: 'plan-reviewer',
       dispatch: 'recommend',
+    };
+  }
+
+  /**
+   * Build agent discussion config for EVAL mode.
+   * Returns undefined for PLAN/ACT/AUTO modes (not applicable).
+   */
+  private buildAgentDiscussion(
+    mode: Mode,
+    configValue?: boolean,
+  ): AgentDiscussionConfig | undefined {
+    if (mode !== 'EVAL') {
+      return undefined;
+    }
+
+    const enabled = configValue !== false;
+
+    return {
+      enabled,
+      format: 'structured',
+      includeConsensus: true,
     };
   }
 

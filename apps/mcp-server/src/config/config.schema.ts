@@ -125,6 +125,13 @@ const AIConfigSchema = z.object({
    * ```
    */
   planReviewGate: z.boolean().optional(),
+  /**
+   * Enable/disable agent discussion integration in EVAL mode.
+   * When enabled, parse_mode EVAL response includes agentDiscussion config
+   * for structuring specialist findings as AgentOpinion protocol.
+   * Default: true (enabled)
+   */
+  agentDiscussion: z.boolean().optional(),
 });
 
 const AutoConfigSchema = z.object({

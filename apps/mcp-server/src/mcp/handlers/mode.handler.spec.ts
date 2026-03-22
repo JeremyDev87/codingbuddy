@@ -1113,4 +1113,87 @@ describe('ModeHandler', () => {
       expect(parsed.planReviewGate.dispatch).toBe('recommend');
     });
   });
+
+  describe('agentDiscussion in EVAL mode', () => {
+    it('should include agentDiscussion in EVAL mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.agentDiscussion).toBeDefined();
+      expect(parsed.agentDiscussion.enabled).toBe(true);
+      expect(parsed.agentDiscussion.format).toBe('structured');
+      expect(parsed.agentDiscussion.includeConsensus).toBe(true);
+    });
+
+    it('should disable agentDiscussion when config sets it to false', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+      });
+      (mockConfigService.getSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ai: { agentDiscussion: false },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.agentDiscussion).toBeDefined();
+      expect(parsed.agentDiscussion.enabled).toBe(false);
+    });
+
+    it('should NOT include agentDiscussion in PLAN mode', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.agentDiscussion).toBeUndefined();
+    });
+
+    it('should NOT include agentDiscussion in ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.agentDiscussion).toBeUndefined();
+    });
+
+    it('should NOT include agentDiscussion in AUTO mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: 'implement dashboard',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO implement dashboard',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.agentDiscussion).toBeUndefined();
+    });
+  });
 });
