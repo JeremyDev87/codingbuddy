@@ -168,6 +168,9 @@ export const CodingBuddyConfigSchema = z.object({
   // Context document limits (DoS prevention)
   context: ContextConfigSchema.optional(),
 
+  // Upstream Repository Mapping (for cross-repo issue creation)
+  upstreamRepos: z.record(z.string(), z.string()).optional(),
+
   // Additional Context
   keyFiles: z.array(z.string()).optional(),
   avoid: z.array(z.string()).optional(),

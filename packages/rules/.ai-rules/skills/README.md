@@ -40,6 +40,7 @@ Reusable workflows for consistent development practices.
 | legacy-modernization | Strangler fig pattern for incremental migration of legacy code | Modernizing old patterns, major version upgrades |
 | subagent-driven-development | Execute plans with independent tasks in current session | In-session plan execution |
 | systematic-debugging | Systematic approach before proposing fixes | Encountering bugs or failures |
+| cross-repo-issues | Detect, confirm, and create issues in upstream/related repositories with safety checks | Bug belongs upstream, dependency issue, fork-to-upstream reporting |
 | writing-plans | Create implementation plans before coding | Multi-step tasks with specs |
 
 ### Documentation & Communication
@@ -185,6 +186,8 @@ EOF
 │
 ├── [Workflow & Process]
 ├── agent-discussion/
+│   └── SKILL.md
+├── cross-repo-issues/
 │   └── SKILL.md
 ├── context-management/
 │   └── SKILL.md
