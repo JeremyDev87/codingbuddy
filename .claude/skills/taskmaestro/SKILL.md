@@ -132,6 +132,11 @@ PROMPT_PATTERN='⏵⏵|⏵ |❯'   # ERE pattern for grep -qE
 MAX_READY_WAIT=90              # seconds to wait for Claude readiness
 POLL_INTERVAL=2                # seconds between capture-pane checks
 MAX_PROMPT_WAIT=30             # seconds to wait for trust/terms prompts
+# Layout & Colors
+CONDUCTOR_BG="#1a1a2e"          # dark navy background
+CONDUCTOR_BORDER="#E67E22"      # orange border
+WORKER_ERROR_BORDER="#E74C3C"   # red border (error state)
+WORKER_DONE_BORDER="#27AE60"    # green border (complete state)
 ```
 
 ---
@@ -253,6 +258,107 @@ wait_for_startup() {
   return 0
 }
 ```
+
+### Conductor Layout
+
+Rearrange panes so the conductor (pane 0) occupies the bottom 25% of the window and workers fill the upper 75% in a tiled grid. Must run after `launch_workers()`.
+
+```bash
+setup_conductor_layout() {
+  local count="$1"  # total pane count
+
+  if [ "$count" -lt 2 ]; then
+    # Single pane — apply conductor styling only
+    tmux select-pane -t "${SESSION}:0.0" -P "bg=${CONDUCTOR_BG}"
+    tmux set-option -p -t "${SESSION}:0.0" \
+      pane-border-style "fg=${CONDUCTOR_BORDER}"
+    tmux set-option -p -t "${SESSION}:0.0" \
+      pane-active-border-style "fg=${CONDUCTOR_BORDER}"
+    return 0
+  fi
+
+  local last=$((count - 1))
+
+  # Move conductor (pane 0) to full-width bottom at 25% height
+  tmux swap-pane -s "${SESSION}:0.0" -t "${SESSION}:0.${last}"
+  tmux break-pane -t "${SESSION}:0.${last}" -d
+  [ "$last" -gt 1 ] && tmux select-layout -t "${SESSION}:0" tiled
+  tmux join-pane -fv -s "${SESSION}:1" -t "${SESSION}:0" -l "25%"
+
+  # Conductor is now the last pane after rejoin
+  local cond
+  cond=$(tmux list-panes -t "${SESSION}:0" -F '#{pane_index}' | tail -1)
+
+  # Session continuity: resume Claude if interrupted by pane move
+  sleep 1
+  if ! tmux capture-pane -t "${SESSION}:0.${cond}" -p 2>/dev/null \
+       | grep -qE "${PROMPT_PATTERN}"; then
+    tmux send-keys -t "${SESSION}:0.${cond}" "claude --resume" Enter
+  fi
+
+  # Apply conductor color scheme
+  tmux select-pane -t "${SESSION}:0.${cond}" -P "bg=${CONDUCTOR_BG}"
+  tmux set-option -p -t "${SESSION}:0.${cond}" \
+    pane-border-style "fg=${CONDUCTOR_BORDER}"
+  tmux set-option -p -t "${SESSION}:0.${cond}" \
+    pane-active-border-style "fg=${CONDUCTOR_BORDER}"
+}
+```
+
+**Layout procedure:**
+
+| Step | tmux Command | Effect |
+|------|-------------|--------|
+| 1. Swap | `swap-pane -s :0.0 -t :0.$last` | Move conductor content to last position |
+| 2. Break | `break-pane -t :0.$last -d` | Isolate conductor in temporary window |
+| 3. Tile | `select-layout tiled` | Arrange workers in grid |
+| 4. Join | `join-pane -fv -l 25%` | Conductor rejoins at full-width bottom |
+| 5. Resume | `claude --resume` | Restore Claude session if interrupted |
+| 6. Style | `select-pane -P`, `set-option -p` | Apply conductor colors |
+
+**Color scheme:**
+
+| Element | Property | Value | Visual |
+|---------|----------|-------|--------|
+| Conductor background | `bg` | `#1a1a2e` | Dark navy |
+| Conductor border | `pane-border-style fg` | `#E67E22` | Orange |
+| Worker (normal) | — | terminal default | — |
+| Worker (error) | `pane-border-style fg` | `#E74C3C` | Red |
+| Worker (complete) | `pane-border-style fg` | `#27AE60` | Green |
+
+### Worker Status Colors
+
+Update a worker pane's border color to reflect its current state:
+
+```bash
+set_worker_status() {
+  local pane="$1"   # target pane (e.g., "${SESSION}:0.2")
+  local status="$2" # "error", "complete", or "normal"
+
+  case "$status" in
+    error)
+      tmux set-option -p -t "$pane" pane-border-style "fg=${WORKER_ERROR_BORDER}"
+      tmux set-option -p -t "$pane" pane-active-border-style "fg=${WORKER_ERROR_BORDER}"
+      ;;
+    complete)
+      tmux set-option -p -t "$pane" pane-border-style "fg=${WORKER_DONE_BORDER}"
+      tmux set-option -p -t "$pane" pane-active-border-style "fg=${WORKER_DONE_BORDER}"
+      ;;
+    normal|*)
+      tmux set-option -p -t "$pane" -u pane-border-style
+      tmux set-option -p -t "$pane" -u pane-active-border-style
+      ;;
+  esac
+}
+```
+
+**Status transitions:**
+
+| Status | Border Color | When |
+|--------|-------------|------|
+| `normal` | terminal default | Initial state / reset |
+| `error` | `#E74C3C` (red) | Worker hits error or test failure |
+| `complete` | `#27AE60` (green) | Worker finishes successfully |
 
 ---
 
@@ -432,23 +538,27 @@ wave_transition() {
   echo "=== Wave Transition: ${count} issues ==="
 
   # Step 1: Stop current workers
-  echo "[1/6] Stopping current workers..."
+  echo "[1/7] Stopping current workers..."
   stop_workers
 
   # Step 2: Clean worktrees
-  echo "[2/6] Cleaning worktrees..."
+  echo "[2/7] Cleaning worktrees..."
   clean_worktrees
 
   # Step 3: Create new worktrees
-  echo "[3/6] Creating ${count} worktrees..."
+  echo "[3/7] Creating ${count} worktrees..."
   create_worktrees "$count"
 
   # Step 4: Launch Claude Code
-  echo "[4/6] Launching Claude Code instances..."
+  echo "[4/7] Launching Claude Code instances..."
   launch_workers "$count"
 
-  # Step 5: Wait for readiness
-  echo "[5/6] Waiting for readiness..."
+  # Step 5: Setup conductor layout
+  echo "[5/7] Setting up conductor layout..."
+  setup_conductor_layout "$count"
+
+  # Step 6: Wait for readiness
+  echo "[6/7] Waiting for readiness..."
   local failed
   wait_all_ready "$count"
   failed=$?
@@ -456,8 +566,8 @@ wave_transition() {
     echo "WARNING: ${failed} pane(s) failed to initialize"
   fi
 
-  # Step 6: Assign tasks
-  echo "[6/6] Assigning tasks..."
+  # Step 7: Assign tasks
+  echo "[7/7] Assigning tasks..."
   assign_tasks "${ISSUES[@]}"
 
   echo "=== Wave Transition Complete ==="
@@ -489,7 +599,7 @@ Launch fresh workers without stopping existing ones:
 /taskmaestro launch 3
 ```
 
-Execute steps 3-6 only (create worktrees, launch, wait, but no task assignment).
+Execute steps 3-7 only (create worktrees, launch, conductor layout, wait, but no task assignment).
 
 ### `/taskmaestro status`
 
@@ -693,3 +803,6 @@ cleanup_all() {
 - **Pane indices are 0-based** in tmux but worktree dirs are 1-based (`wt-1`, `wt-2`, ...)
 - **Always run `cleanup` after a wave completes** — leftover worktrees and branches accumulate over time
 - **Never `cleanup --force` without checking** — review warnings first to avoid losing uncommitted work
+- **Conductor layout requires tmux ≥ 2.3** — uses `-f` flag for full-width `join-pane`
+- **After layout setup, conductor is the last pane** — pane indices shift during `swap-pane` + `break-pane` + `join-pane`
+- **Worker status colors are pane-local** — use `set_worker_status()` to update border colors per pane
