@@ -27,6 +27,7 @@ import {
   ConventionsHandler,
   ContextDocumentHandler,
   TuiHandler,
+  DiscussionHandler,
   ParallelValidationHandler,
 } from './handlers';
 
@@ -40,6 +41,7 @@ const handlers = [
   ConventionsHandler,
   ContextDocumentHandler,
   TuiHandler,
+  DiscussionHandler,
   ParallelValidationHandler,
 ];
 

@@ -91,6 +91,12 @@ export { ContextDocumentHandler } from './context-document.handler';
 export { TuiHandler } from './tui.handler';
 
 /**
+ * Handler for agent discussion tools (agent_discussion)
+ * @see {@link DiscussionHandler}
+ */
+export { DiscussionHandler } from './discussion.handler';
+
+/**
  * Handler for parallel validation tools (validate_parallel_issues)
  * @see {@link ParallelValidationHandler}
  */
