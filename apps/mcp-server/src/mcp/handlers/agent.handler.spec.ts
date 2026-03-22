@@ -466,6 +466,76 @@ describe('AgentHandler', () => {
             expect.objectContaining({ executionStrategy: 'subagent' }),
           );
         });
+
+        it('should pass executionStrategy "teams" to service', async () => {
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            specialists: ['security-specialist', 'accessibility-specialist'],
+            executionStrategy: 'teams',
+          });
+          expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+            expect.objectContaining({ executionStrategy: 'teams' }),
+          );
+        });
+
+        it('should return teams dispatch data when strategy is "teams"', async () => {
+          const teamsResult = {
+            primaryAgent: mockDispatchResult.primaryAgent,
+            teams: {
+              team_name: 'eval-specialists',
+              description: 'EVAL mode specialist team',
+              teammates: [
+                {
+                  name: 'security-specialist',
+                  subagent_type: 'general-purpose',
+                  team_name: 'eval-specialists',
+                  prompt: 'You are a security specialist...',
+                },
+              ],
+            },
+            executionStrategy: 'teams',
+            executionHint: 'Teams execution hint',
+          };
+          mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(teamsResult);
+
+          const result = await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+            specialists: ['security-specialist'],
+            executionStrategy: 'teams',
+          });
+
+          expect(result?.isError).toBeFalsy();
+          const content = JSON.parse(result?.content[0]?.text as string);
+          expect(content.teams).toBeDefined();
+          expect(content.teams.team_name).toBe('eval-specialists');
+          expect(content.teams.teammates).toHaveLength(1);
+          expect(content.teams.teammates[0].name).toBe('security-specialist');
+          expect(content.executionStrategy).toBe('teams');
+        });
+
+        it('should pass all parameters with teams strategy', async () => {
+          await handler.handle('dispatch_agents', {
+            mode: 'PLAN',
+            primaryAgent: 'solution-architect',
+            specialists: ['security-specialist', 'performance-specialist'],
+            targetFiles: ['src/app.ts'],
+            taskDescription: 'Review architecture',
+            includeParallel: true,
+            executionStrategy: 'teams',
+          });
+          expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mode: 'PLAN',
+              primaryAgent: 'solution-architect',
+              specialists: ['security-specialist', 'performance-specialist'],
+              targetFiles: ['src/app.ts'],
+              taskDescription: 'Review architecture',
+              includeParallel: true,
+              executionStrategy: 'teams',
+            }),
+          );
+        });
       });
     });
   });
@@ -480,6 +550,17 @@ describe('AgentHandler', () => {
         'prepare_parallel_agents',
         'dispatch_agents',
       ]);
+    });
+
+    it('should include teams in executionStrategy enum', () => {
+      const definitions = handler.getToolDefinitions();
+      const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
+      const strategyEnum = (
+        dispatchAgents?.inputSchema.properties as Record<string, { enum?: string[] }>
+      )?.executionStrategy?.enum;
+      expect(strategyEnum).toContain('teams');
+      expect(strategyEnum).toContain('subagent');
+      expect(strategyEnum).toContain('taskmaestro');
     });
 
     it('should have correct required parameters', () => {

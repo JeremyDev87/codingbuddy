@@ -160,9 +160,9 @@ export class AgentHandler extends AbstractHandler {
             },
             executionStrategy: {
               type: 'string',
-              enum: ['subagent', 'taskmaestro'],
+              enum: ['subagent', 'taskmaestro', 'teams'],
               description:
-                'Execution strategy for specialist agents. "subagent" (default) uses Claude Code Agent tool with run_in_background. "taskmaestro" returns tmux pane assignments for /taskmaestro skill.',
+                'Execution strategy for specialist agents. "subagent" (default) uses Claude Code Agent tool with run_in_background. "taskmaestro" returns tmux pane assignments for /taskmaestro skill. "teams" uses Claude Code native teams with shared TaskList coordination.',
             },
           },
           required: ['mode'],
@@ -189,7 +189,7 @@ export class AgentHandler extends AbstractHandler {
     const taskDescription = extractOptionalString(args, 'taskDescription');
     const includeParallel = args?.includeParallel === true;
     const executionStrategy =
-      (args?.executionStrategy as 'subagent' | 'taskmaestro' | undefined) ?? 'subagent';
+      (args?.executionStrategy as 'subagent' | 'taskmaestro' | 'teams' | undefined) ?? 'subagent';
 
     try {
       const result = await this.agentService.dispatchAgents({

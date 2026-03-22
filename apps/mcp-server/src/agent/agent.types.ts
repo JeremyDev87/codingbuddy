@@ -92,6 +92,25 @@ export interface TaskmaestroDispatch {
 }
 
 /**
+ * A single teammate in a Teams dispatch configuration
+ */
+export interface TeamsTeammate {
+  name: string;
+  subagent_type: 'general-purpose';
+  team_name: string;
+  prompt: string;
+}
+
+/**
+ * Teams dispatch configuration for Claude Code native team coordination
+ */
+export interface TeamsDispatch {
+  team_name: string;
+  description: string;
+  teammates: TeamsTeammate[];
+}
+
+/**
  * Result of dispatching agents for execution
  */
 export interface DispatchResult {
@@ -102,6 +121,8 @@ export interface DispatchResult {
   failedAgents?: FailedAgent[];
   /** TaskMaestro dispatch data when executionStrategy is 'taskmaestro' */
   taskmaestro?: TaskmaestroDispatch;
+  /** Teams dispatch data when executionStrategy is 'teams' */
+  teams?: TeamsDispatch;
   /** Execution strategy used for this dispatch */
   executionStrategy?: string;
 }
@@ -116,8 +137,8 @@ export interface DispatchAgentsInput {
   specialists?: string[];
   includeParallel?: boolean;
   primaryAgent?: string;
-  /** Execution strategy: 'subagent' (default) or 'taskmaestro' */
-  executionStrategy?: 'subagent' | 'taskmaestro';
+  /** Execution strategy: 'subagent' (default), 'taskmaestro', or 'teams' */
+  executionStrategy?: 'subagent' | 'taskmaestro' | 'teams';
 }
 
 /**

@@ -11,6 +11,7 @@ import type {
   DispatchResult,
   DispatchedAgent,
   TaskmaestroAssignment,
+  TeamsTeammate,
 } from './agent.types';
 import { FILE_PATTERN_SPECIALISTS } from './agent.types';
 import {
@@ -247,6 +248,32 @@ export class AgentService {
       };
     }
 
+    // Dispatch teams strategy
+    if (input.executionStrategy === 'teams' && input.specialists?.length) {
+      const uniqueSpecialists = Array.from(new Set(input.specialists));
+      const teamName = `${(input.mode ?? 'eval').toLowerCase()}-specialists`;
+      const { agents, failedAgents } = await this.loadAgents(uniqueSpecialists, context, true);
+
+      const teammates: TeamsTeammate[] = agents.map(agent => ({
+        name: agent.id,
+        subagent_type: 'general-purpose' as const,
+        team_name: teamName,
+        prompt: agent.taskPrompt || `Perform ${agent.displayName} analysis in ${input.mode} mode`,
+      }));
+
+      return {
+        primaryAgent: result.primaryAgent,
+        teams: {
+          team_name: teamName,
+          description: `${input.mode} mode specialist team`,
+          teammates,
+        },
+        executionStrategy: 'teams',
+        executionHint: this.buildTeamsHint(teamName, teammates.length),
+        failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
+      };
+    }
+
     // Dispatch parallel agents (subagent strategy)
     if (input.includeParallel && input.specialists?.length) {
       const uniqueSpecialists = Array.from(new Set(input.specialists));
@@ -305,5 +332,15 @@ When done, provide a summary of all findings.`;
 4. /taskmaestro status — monitor progress
 5. When all panes show idle: collect results
 6. /taskmaestro stop all — cleanup`;
+  }
+
+  private buildTeamsHint(teamName: string, teammateCount: number): string {
+    return `Teams execution:
+1. TeamCreate: { team_name: "${teamName}" }
+2. Spawn ${teammateCount} teammate(s) via Agent tool with team_name: "${teamName}"
+3. Create tasks via TaskCreate and assign with TaskUpdate
+4. Monitor via TaskList — teammates coordinate via shared task list
+5. Collect results when all teammates go idle
+6. Shutdown teammates via SendMessage with shutdown_request`;
   }
 }
