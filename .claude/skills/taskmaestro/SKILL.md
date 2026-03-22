@@ -142,6 +142,7 @@ WATCH_INTERVAL=30              # seconds between watch cycles
 MAX_NUDGE_COUNT=3              # nudges before escalation to conductor
 IDLE_CYCLES_BEFORE_NUDGE=2     # consecutive idle cycles before auto-nudge
 STATUS_PREV_DIR="/tmp/taskmaestro_status"  # duration tracking state
+WAVE_PLAN_FILE=".taskmaestro/wave-plan.json"  # wave sequence definition
 ```
 
 ---
@@ -938,9 +939,194 @@ handle_permission_prompts() {
 }
 ```
 
+#### Wave Plan Structure
+
+Define a wave plan as a JSON file at `.taskmaestro/wave-plan.json` to enable auto-transition between waves:
+
+```json
+{
+  "waves": [
+    {
+      "name": "Wave 1",
+      "issues": ["867", "868", "870"],
+      "started_at": null,
+      "completed_at": null
+    },
+    {
+      "name": "Wave 2",
+      "issues": ["861", "864", "869"],
+      "started_at": null,
+      "completed_at": null
+    }
+  ],
+  "current_wave": 0
+}
+```
+
+**Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `waves` | array | Ordered list of waves to execute |
+| `waves[].name` | string | Human-readable wave label |
+| `waves[].issues` | string[] | Issue numbers assigned to this wave |
+| `waves[].started_at` | string\|null | ISO timestamp when wave was assigned |
+| `waves[].completed_at` | string\|null | ISO timestamp when all workers completed |
+| `current_wave` | number | 0-based index of the active wave |
+
+#### Wave Completion Report
+
+Generate a cost/time summary when a wave completes:
+
+```bash
+generate_wave_report() {
+  local wave_name="$1"
+  local wave_start="$2"  # ISO timestamp
+  local pane_count="$3"
+
+  local wave_end
+  wave_end=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  # Calculate wave duration
+  local start_epoch end_epoch duration_s
+  start_epoch=$(date -d "$wave_start" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$wave_start" +%s 2>/dev/null)
+  end_epoch=$(date +%s)
+  duration_s=$((end_epoch - start_epoch))
+  local duration_m=$((duration_s / 60))
+  local duration_rem=$((duration_s % 60))
+
+  local total_cost=0
+  local success_count=0
+  local total_workers=0
+
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  ${wave_name} Complete Report                               ║"
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Duration: ${duration_m}m ${duration_rem}s                  ║"
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+  printf "| %-8s | %-12s | %-10s | %-8s | %-6s |\n" "Worker" "Issue" "Status" "Cost" "PR"
+  printf "|----------|--------------|------------|----------|--------|\n"
+
+  for i in $(seq 1 "$pane_count"); do
+    local wt_dir="${WORKTREE_BASE}/wt-${i}"
+    local result_file="${wt_dir}/RESULT.json"
+    total_workers=$((total_workers + 1))
+
+    if [ -f "$result_file" ]; then
+      local r_status r_issue r_cost r_pr
+      r_status=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).status||'unknown')}catch(e){console.log('error')}" 2>/dev/null)
+      r_issue=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).issue||'?')}catch(e){console.log('?')}" 2>/dev/null)
+      r_cost=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).cost||'N/A')}catch(e){console.log('N/A')}" 2>/dev/null)
+      r_pr=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).pr_number||'—')}catch(e){console.log('—')}" 2>/dev/null)
+
+      [ "$r_status" = "success" ] && success_count=$((success_count + 1))
+
+      # Accumulate cost if numeric
+      if echo "$r_cost" | grep -qE '^[0-9.]+$'; then
+        total_cost=$(node -e "console.log(($total_cost + $r_cost).toFixed(2))" 2>/dev/null)
+      fi
+
+      printf "| pane-%-3s | %-12s | %-10s | %-8s | #%-5s |\n" "$i" "$r_issue" "$r_status" "\$${r_cost}" "$r_pr"
+    else
+      printf "| pane-%-3s | %-12s | %-10s | %-8s | %-6s |\n" "$i" "?" "no-result" "N/A" "—"
+    fi
+  done
+
+  echo ""
+  local avg_cost="N/A"
+  if [ "$total_workers" -gt 0 ] && echo "$total_cost" | grep -qE '^[0-9.]+$'; then
+    avg_cost=$(node -e "console.log(($total_cost / $total_workers).toFixed(2))" 2>/dev/null)
+  fi
+  echo "Workers: ${success_count}/${total_workers} success"
+  echo "Total cost: ~\$${total_cost} | Avg: \$${avg_cost}/worker"
+  echo ""
+}
+```
+
+**Report fields:**
+
+| Column | Source | Description |
+|--------|--------|-------------|
+| Worker | pane index | Which worktree pane |
+| Issue | `RESULT.json → issue` | Issue number(s) |
+| Status | `RESULT.json → status` | success/failure/error |
+| Cost | `RESULT.json → cost` | API cost if available |
+| PR | `RESULT.json → pr_number` | Pull request number |
+
+#### Wave Auto-Transition
+
+Automatically transition to the next wave when all workers complete successfully:
+
+```bash
+auto_wave_transition() {
+  local plan_file="$WAVE_PLAN_FILE"
+
+  if [ ! -f "$plan_file" ]; then
+    echo "No wave plan found — skipping auto-transition"
+    return 1
+  fi
+
+  # Read current wave index
+  local current_wave
+  current_wave=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${plan_file}','utf8')).current_wave)" 2>/dev/null)
+  local total_waves
+  total_waves=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${plan_file}','utf8')).waves.length)" 2>/dev/null)
+
+  # Mark current wave as completed
+  node -e "
+    const fs = require('fs');
+    const plan = JSON.parse(fs.readFileSync('${plan_file}', 'utf8'));
+    plan.waves[${current_wave}].completed_at = new Date().toISOString();
+    plan.current_wave = ${current_wave} + 1;
+    fs.writeFileSync('${plan_file}', JSON.stringify(plan, null, 2));
+  " 2>/dev/null
+
+  local next_wave=$((current_wave + 1))
+
+  if [ "$next_wave" -ge "$total_waves" ]; then
+    echo "=== All waves complete! No more waves in plan. ==="
+    return 0
+  fi
+
+  # Read next wave issues
+  local next_issues
+  next_issues=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${plan_file}','utf8')).waves[${next_wave}].issues.join(','))" 2>/dev/null)
+  local next_name
+  next_name=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${plan_file}','utf8')).waves[${next_wave}].name)" 2>/dev/null)
+
+  echo "=== Auto-Transition: ${next_name} (issues: ${next_issues}) ==="
+
+  # Mark next wave as started
+  node -e "
+    const fs = require('fs');
+    const plan = JSON.parse(fs.readFileSync('${plan_file}', 'utf8'));
+    plan.waves[${next_wave}].started_at = new Date().toISOString();
+    fs.writeFileSync('${plan_file}', JSON.stringify(plan, null, 2));
+  " 2>/dev/null
+
+  # Execute wave transition
+  wave_transition "$next_issues"
+}
+```
+
+**Auto-transition flow:**
+
+```
+All workers done (RESULT.json exists)
+     ↓
+generate_wave_report()  — print summary
+     ↓
+auto_wave_transition()
+     ├── No wave plan? → skip, stay idle
+     ├── Last wave? → "All waves complete!"
+     └── Next wave exists? → wave_transition(next_issues)
+```
+
 #### Watch Loop
 
-Main monitoring loop combining status checks, auto-nudge, and permission handling:
+Main monitoring loop combining status checks, auto-nudge, permission handling, **wave completion detection**, and **auto-transition**:
 
 ```bash
 watch_workers() {
@@ -952,6 +1138,16 @@ watch_workers() {
   declare -A nudge_counts
   mkdir -p "$STATUS_PREV_DIR"
 
+  # Wave timing: record start time for cost/duration tracking (#872)
+  local wave_start
+  wave_start=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  local wave_name="Current Wave"
+  if [ -f "$WAVE_PLAN_FILE" ]; then
+    local cw
+    cw=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${WAVE_PLAN_FILE}','utf8')).current_wave||0)" 2>/dev/null)
+    wave_name=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${WAVE_PLAN_FILE}','utf8')).waves[${cw}].name||'Wave ${cw}')" 2>/dev/null)
+  fi
+
   while true; do
     local panes
     panes=$(tmux list-panes -t "$SESSION" -F '#{pane_index}' 2>/dev/null)
@@ -961,9 +1157,13 @@ watch_workers() {
       break
     fi
 
+    local pane_count=0
+    local done_count=0
+
     echo "--- $(date '+%H:%M:%S') ---"
 
     for pane in $panes; do
+      pane_count=$((pane_count + 1))
       local target="${SESSION}:0.${pane}"
       local wt_dir="${WORKTREE_BASE}/wt-$((pane + 1))"
 
@@ -1032,8 +1232,34 @@ watch_workers() {
       elif [ "$state" = "done" ]; then
         idle_cycles[$pane]=0
         nudge_counts[$pane]=0
+        done_count=$((done_count + 1))
       fi
     done
+
+    # --- Wave Completion Detection (#871 + #872) ---
+    if [ "$pane_count" -gt 0 ] && [ "$done_count" -eq "$pane_count" ]; then
+      echo ""
+      echo "🎉 ALL ${pane_count} workers completed!"
+
+      # Generate wave report (#872)
+      generate_wave_report "$wave_name" "$wave_start" "$pane_count"
+
+      # Attempt auto-transition to next wave (#871)
+      if auto_wave_transition; then
+        # New wave started — reset tracking
+        wave_start=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        idle_cycles=()
+        nudge_counts=()
+        if [ -f "$WAVE_PLAN_FILE" ]; then
+          local cw
+          cw=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${WAVE_PLAN_FILE}','utf8')).current_wave||0)" 2>/dev/null)
+          wave_name=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${WAVE_PLAN_FILE}','utf8')).waves[${cw}].name||'Wave ${cw}')" 2>/dev/null)
+        fi
+      else
+        echo "Watch complete — no more waves. Exiting."
+        break
+      fi
+    fi
 
     sleep "$WATCH_INTERVAL"
   done
