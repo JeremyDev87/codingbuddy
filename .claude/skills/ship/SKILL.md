@@ -47,6 +47,27 @@ Run `git diff --name-only` (include both staged and unstaged changes) and classi
 
 If changed files don't match any pattern (e.g., docs-only, root config), skip CI checks entirely and proceed to Step 5.
 
+## Step 3.5: Verify Dependencies
+
+Before running CI checks, ensure project dependencies are available:
+
+```bash
+# Check if node_modules exists
+if [ ! -d "node_modules" ]; then
+  echo "node_modules missing, installing dependencies..."
+  yarn install --frozen-lockfile
+fi
+
+# Verify npx is available
+npx --version
+```
+
+- If `node_modules` does not exist, run `yarn install --frozen-lockfile`
+- If install fails → **STOP**. Do NOT proceed to CI checks or PR creation.
+- Verify `npx` is available by running `npx --version`
+
+**Iron Law:** Never skip CI checks due to missing dependencies.
+
 ## Step 4: Run Local CI Checks
 
 Run checks **only for affected workspaces**. Execute checks sequentially within each workspace. Stop at first failure.
