@@ -1191,7 +1191,24 @@ watch_workers() {
       local state="unknown"
       local result_file="${wt_dir}/RESULT.json"
       local has_result=false
-      [ -f "$result_file" ] && has_result=true
+
+      # --- RESULT.json Issue Validation (#887) ---
+      if [ -f "$result_file" ]; then
+        local result_issue
+        result_issue=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).issue||'')}catch(e){console.log('')}" 2>/dev/null)
+
+        local assigned_issue=""
+        if [ -f "${wt_dir}/TASK.md" ]; then
+          assigned_issue=$(head -1 "${wt_dir}/TASK.md" | grep -oE '#[0-9]+' | head -1)
+        fi
+
+        if [ -n "$assigned_issue" ] && [ -n "$result_issue" ] && [ "#${result_issue}" != "$assigned_issue" ] && ! echo "$result_issue" | grep -qF "${assigned_issue#\#}"; then
+          rm -f "$result_file"
+          echo "  🗑 STALE RESULT.json removed (issue: ${result_issue}, expected: ${assigned_issue})"
+        else
+          has_result=true
+        fi
+      fi
 
       if echo "$content" | grep -qE "$PROMPT_PATTERN"; then
         if [ "$has_result" = true ]; then
@@ -1271,9 +1288,10 @@ watch_workers() {
 | Check | Action |
 |-------|--------|
 | Permission prompt detected | Auto-send Enter/y to approve (#869) |
+| RESULT.json issue mismatch | Auto-remove stale RESULT.json + log (#887) |
 | State = `idle` (no RESULT.json) | Increment idle counter → nudge after 2 cycles (#861) |
 | State = `error_idle` (errors + prompt) | Nudge with error recovery instructions (#861) |
-| State = `done` (RESULT.json exists) | Mark complete, reset counters |
+| State = `done` (RESULT.json valid) | Mark complete, reset counters |
 | State = `working` | Reset idle counter, continue |
 | Nudge count >= 3 | Escalate — conductor alert (#861) |
 
