@@ -143,6 +143,8 @@ MAX_NUDGE_COUNT=3              # nudges before escalation to conductor
 IDLE_CYCLES_BEFORE_NUDGE=2     # consecutive idle cycles before auto-nudge
 STATUS_PREV_DIR="/tmp/taskmaestro_status"  # duration tracking state
 WAVE_PLAN_FILE=".taskmaestro/wave-plan.json"  # wave sequence definition
+# Push Protocol
+TM_MSG_PATTERN='\[TM:(DONE|ERROR|PROGRESS)\]'  # ERE pattern for worker push messages
 ```
 
 ---
@@ -549,7 +551,7 @@ wait_all_ready() {
 
 #### Step 6: Assign Tasks
 
-Send the work prompt to each ready pane. The prompt includes the **IRON LAW** for RESULT.json completion and the **ERROR RECOVERY PROTOCOL** for self-healing:
+Send the work prompt to each ready pane. The prompt includes the **IRON LAW** for RESULT.json completion, the **ERROR RECOVERY PROTOCOL** for self-healing, and the **PUSH PROTOCOL** for structured status reporting:
 
 ```bash
 assign_tasks() {
@@ -559,9 +561,9 @@ assign_tasks() {
     local pane="${SESSION}:0.${i}"
     local issue="${issues[$i]}"
 
-    # Worker prompt: task execution + IRON LAW + ERROR RECOVERY
+    # Worker prompt: task execution + IRON LAW + ERROR RECOVERY + PUSH PROTOCOL
     local prompt
-    read -r -d '' prompt << 'WORKER_PROMPT' || true
+    read -r -d '' prompt << WORKER_PROMPT || true
 Read TASK.md and execute ALL instructions. Follow codingbuddy PLAN→ACT→EVAL. Run 'yarn install' if node_modules missing. NEVER use 'git add -A'. If errors occur, fix yourself. Use /ship to create PR, then write RESULT.json. Start now.
 
 [IRON LAW: RESULT.json]
@@ -584,6 +586,25 @@ If any command fails:
 
 NEVER use 'git add -A' — always stage specific files.
 RESULT.json and TASK.md must NEVER be committed.
+
+[PUSH PROTOCOL]
+You are pane=${i}, assigned issue=#${issue}.
+After each major milestone, emit a status message via Bash:
+
+Phase transition (PLAN→ACT, ACT→EVAL):
+  echo '[TM:PROGRESS] pane=${i} issue=#${issue} phase=ACT step=starting-implementation'
+
+Successful completion (AFTER writing RESULT.json):
+  echo '[TM:DONE] pane=${i} issue=#${issue} pr=<PR_NUMBER> status=success'
+
+Unrecoverable error (AFTER writing RESULT.json with failure):
+  echo '[TM:ERROR] pane=${i} issue=#${issue} error=<SHORT_MSG>'
+
+Rules:
+- Use EXACT format — these are machine-parsed by the conductor
+- PROGRESS: emit at each mode transition
+- DONE/ERROR: emit AFTER writing RESULT.json, BEFORE going idle
+- Replace <PR_NUMBER> and <SHORT_MSG> with actual values
 WORKER_PROMPT
 
     # Verify pane is ready before sending
@@ -605,6 +626,7 @@ WORKER_PROMPT
 | Task execution | Read TASK.md, follow PLAN→ACT→EVAL, use /ship | Base prompt |
 | IRON LAW: RESULT.json | Guarantee RESULT.json is always written before idle | #868 |
 | ERROR RECOVERY PROTOCOL | Self-diagnose and retry on failures (max 3 attempts) | #870 |
+| PUSH PROTOCOL | Emit `[TM:DONE]`, `[TM:ERROR]`, `[TM:PROGRESS]` messages for conductor | #886 |
 
 **IRON LAW enforcement:**
 
@@ -1174,20 +1196,8 @@ watch_workers() {
       # --- Permission Prompt Auto-Handling (#869) ---
       handle_permission_prompts "$target" "$content"
 
-      # --- Status Detection (reuses status_check logic) ---
-      local has_error=false
-      if echo "$content" | grep -qE 'FAIL|Error:|Cannot find|fatal:|ENOENT|EPERM|ERR!|panic|FATAL'; then
-        has_error=true
-      fi
-
-      local has_active_spinner=false
-      if echo "$content" | grep -qE '[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]'; then
-        has_active_spinner=true
-      fi
-      if echo "$content" | grep -qE '… \([0-9]+[sm] ·' && ! echo "$content" | grep -qE 'Crunched for'; then
-        has_active_spinner=true
-      fi
-
+      # --- Push Protocol: TM Message Detection (primary) (#886) ---
+      local tm_handled=false
       local state="unknown"
       local result_file="${wt_dir}/RESULT.json"
       local has_result=false
@@ -1210,25 +1220,70 @@ watch_workers() {
         fi
       fi
 
-      if echo "$content" | grep -qE "$PROMPT_PATTERN"; then
-        if [ "$has_result" = true ]; then
-          state="done"
-          set_worker_status "$target" "complete"
-        elif [ "$has_error" = true ]; then
-          state="error_idle"
-          set_worker_status "$target" "error"
-        else
-          state="idle"
-        fi
-      elif [ "$has_error" = true ] && [ "$has_active_spinner" = false ]; then
-        state="error"
+      local tm_done tm_error tm_progress
+      tm_done=$(echo "$content" | grep -oE '\[TM:DONE\] pane=[0-9]+ issue=#[0-9]+ pr=[^ ]+ status=[a-z]+' | tail -1)
+      tm_error=$(echo "$content" | grep -oE '\[TM:ERROR\] pane=[0-9]+ issue=#[0-9]+ error=.+' | tail -1)
+      tm_progress=$(echo "$content" | grep -oE '\[TM:PROGRESS\] pane=[0-9]+ issue=#[0-9]+ phase=[A-Z]+ step=.+' | tail -1)
+
+      if [ -n "$tm_done" ]; then
+        state="done"
+        set_worker_status "$target" "complete"
+        local tm_pr
+        tm_pr=$(echo "$tm_done" | grep -oE 'pr=[^ ]+' | cut -d= -f2)
+        echo "pane-${pane}: DONE (push) pr=${tm_pr}"
+        tm_handled=true
+      elif [ -n "$tm_error" ]; then
+        state="error_idle"
         set_worker_status "$target" "error"
-      elif [ "$has_active_spinner" = true ]; then
+        local tm_err_msg
+        tm_err_msg=$(echo "$tm_error" | sed 's/.*error=//')
+        echo "pane-${pane}: ERROR (push) ${tm_err_msg}"
+        tm_handled=true
+      elif [ -n "$tm_progress" ]; then
+        local tm_phase tm_step
+        tm_phase=$(echo "$tm_progress" | grep -oE 'phase=[A-Z]+' | cut -d= -f2)
+        tm_step=$(echo "$tm_progress" | sed 's/.*step=//')
+        echo "pane-${pane}: ${tm_phase} (push) ${tm_step}"
         state="working"
-        idle_cycles[$pane]=0  # Reset idle counter
+        idle_cycles[$pane]=0
+        tm_handled=true
       fi
 
-      echo "pane-${pane}: ${state}"
+      # --- Polling Fallback: 3-Factor Analysis (when no push message) ---
+      if [ "$tm_handled" = false ]; then
+        local has_error=false
+        if echo "$content" | grep -qE 'FAIL|Error:|Cannot find|fatal:|ENOENT|EPERM|ERR!|panic|FATAL'; then
+          has_error=true
+        fi
+
+        local has_active_spinner=false
+        if echo "$content" | grep -qE '[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]'; then
+          has_active_spinner=true
+        fi
+        if echo "$content" | grep -qE '… \([0-9]+[sm] ·' && ! echo "$content" | grep -qE 'Crunched for'; then
+          has_active_spinner=true
+        fi
+
+        if echo "$content" | grep -qE "$PROMPT_PATTERN"; then
+          if [ "$has_result" = true ]; then
+            state="done"
+            set_worker_status "$target" "complete"
+          elif [ "$has_error" = true ]; then
+            state="error_idle"
+            set_worker_status "$target" "error"
+          else
+            state="idle"
+          fi
+        elif [ "$has_error" = true ] && [ "$has_active_spinner" = false ]; then
+          state="error"
+          set_worker_status "$target" "error"
+        elif [ "$has_active_spinner" = true ]; then
+          state="working"
+          idle_cycles[$pane]=0  # Reset idle counter
+        fi
+
+        echo "pane-${pane}: ${state} (poll)"
+      fi
 
       # --- Auto-Nudge Logic (#861) ---
       if [ "$state" = "idle" ] || [ "$state" = "error_idle" ]; then
@@ -1283,17 +1338,36 @@ watch_workers() {
 }
 ```
 
-**Watch cycle per pane:**
+**Watch cycle per pane (hybrid: push primary, polling fallback):**
 
-| Check | Action |
-|-------|--------|
-| Permission prompt detected | Auto-send Enter/y to approve (#869) |
-| RESULT.json issue mismatch | Auto-remove stale RESULT.json + log (#887) |
-| State = `idle` (no RESULT.json) | Increment idle counter → nudge after 2 cycles (#861) |
-| State = `error_idle` (errors + prompt) | Nudge with error recovery instructions (#861) |
-| State = `done` (RESULT.json valid) | Mark complete, reset counters |
-| State = `working` | Reset idle counter, continue |
-| Nudge count >= 3 | Escalate — conductor alert (#861) |
+| Priority | Check | Action |
+|----------|-------|--------|
+| 0 | Permission prompt detected | Auto-send Enter/y to approve (#869) |
+| 0.5 | RESULT.json issue mismatch | Auto-remove stale RESULT.json + log (#887) |
+| 1 (push) | `[TM:DONE]` message found | Mark done, extract PR number (#886) |
+| 1 (push) | `[TM:ERROR]` message found | Mark error, extract error message (#886) |
+| 1 (push) | `[TM:PROGRESS]` message found | Log phase/step, reset idle counter (#886) |
+| 2 (poll) | No `[TM:*]` → 3-factor analysis | Fallback for crashed/legacy workers |
+| 3 | State = `idle` (no RESULT.json) | Increment idle counter → nudge after 2 cycles (#861) |
+| 3 | State = `error_idle` (errors + prompt) | Nudge with error recovery instructions (#861) |
+| 3 | State = `done` (RESULT.json valid) | Mark complete, reset counters |
+| 3 | State = `working` | Reset idle counter, continue |
+| 4 | Nudge count >= 3 | Escalate — conductor alert (#861) |
+
+**Push protocol message format (#886):**
+
+| Message | Format | When |
+|---------|--------|------|
+| `[TM:PROGRESS]` | `pane=N issue=#NNN phase=PHASE step=DESC` | Phase transitions (PLAN→ACT, ACT→EVAL) |
+| `[TM:DONE]` | `pane=N issue=#NNN pr=NNN status=success` | After RESULT.json written (success) |
+| `[TM:ERROR]` | `pane=N issue=#NNN error=MSG` | After RESULT.json written (failure) |
+
+**Hybrid detection priority (#886):**
+
+| Priority | Source | Trigger | Reliability |
+|----------|--------|---------|-------------|
+| Primary | `[TM:*]` push messages | Worker actively emits status | High — explicit signal |
+| Fallback | 3-factor polling | No push messages in 30-line scan | Medium — UI pattern inference |
 
 **Nudge escalation:**
 
@@ -1471,11 +1545,14 @@ cleanup_all() {
 - **Conductor layout requires tmux ≥ 2.3** — uses `-f` flag for full-width `join-pane`
 - **After layout setup, conductor is the last pane** — pane indices shift during `swap-pane` + `break-pane` + `join-pane`
 - **Worker status colors are pane-local** — use `set_worker_status()` to update border colors per pane
+- **Push protocol is primary, polling is fallback** — watch loop checks `[TM:*]` messages first; 3-factor analysis only runs when no push messages found (#886)
+- **Workers must emit `[TM:DONE]` or `[TM:ERROR]` after writing RESULT.json** — this enables immediate conductor detection without waiting for next poll cycle
+- **`[TM:PROGRESS]` is optional but recommended** — helps conductor track phase transitions in real-time
 
 ## Status Verification Rules
 
-- **RESULT.json is NOT the sole source of truth** — always validate the `issue` field matches the assigned task AND cross-verify with `capture-pane` output
-- **3-factor analysis for status** — every status check must evaluate: (1) error scan across 30 lines, (2) active spinner presence, (3) completed spinner presence
+- **RESULT.json is NOT the sole source of truth** — always validate the `issue` field matches the assigned task AND cross-verify with `capture-pane` output (or `[TM:*]` push messages)
+- **3-factor analysis is the polling fallback** — only used when no `[TM:*]` push messages are detected in the 30-line scan. Push messages take priority when present.
 - **Active vs Completed spinner discrimination** — animating characters (`⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`) = active work; static characters (`✓✗✔✘`) = step complete. Never confuse them.
 - **"thinking" ≠ productive work** when errors are visible — if errors appear alongside thinking/reasoning indicators, the worker is stuck in a retry loop
 - **Stall detection** — duration >5 minutes on the same step with no token/cost change = STALLED. Intervene immediately.
