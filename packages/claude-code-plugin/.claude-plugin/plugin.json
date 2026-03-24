@@ -5,8 +5,5 @@
   "author": {
     "name": "JeremyDev87",
     "email": "soundbrokaz@kakao.com"
-  },
-  "hooks": {
-    "SessionStart": "hooks/session-start.py"
   }
 }
