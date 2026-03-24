@@ -56,7 +56,8 @@ codingbuddy.config.json
 custom.mdc
 .serena/
 .codingbuddy/
-docs/codingbuddy/
+docs/codingbuddy/*
+!docs/codingbuddy/wiki/
 .omc/
 .taskmaestro/
 RESULT.json
