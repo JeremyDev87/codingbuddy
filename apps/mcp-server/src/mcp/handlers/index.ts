@@ -103,6 +103,12 @@ export { DiscussionHandler } from './discussion.handler';
 export { ParallelValidationHandler } from '../../parallel-validation/parallel-validation.handler';
 
 /**
+ * Handler for pipeline tools (run_pipeline, pipeline_status, resume_pipeline)
+ * @see {@link PipelineHandler}
+ */
+export { PipelineHandler } from './pipeline.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
