@@ -94,6 +94,18 @@ feat(auth): add token validation with session management
 **Purpose:**
 Create actionable implementation plans following TDD and augmented coding principles
 
+### API Assumption Verification (PLAN mode)
+
+When a plan references external API fields, schemas, or behaviors:
+1. **Cite source**: Include the official documentation URL for every API assumption
+2. **Mark unverified**: Tag any assumption without a verified source as `[UNVERIFIED]`
+3. **Verify before ACT**: All `[UNVERIFIED]` items must be verified (via WebFetch/WebSearch) before transitioning to ACT mode
+4. **No fabricated schemas**: Never assume API input/output fields exist without documentation proof
+
+Example:
+- ✅ "Hook stdin includes `tool_name` field ([source](https://code.claude.com/docs/en/hooks))"
+- ❌ "Hook stdin includes `session_cost` field" (no source → will cause implementation failure)
+
 ---
 
 ### Structured Reasoning Process (SRP)
