@@ -397,6 +397,24 @@ def main():
         except Exception:
             pass  # Never block session start
 
+        # Step 4: Initialize operational stats (#825)
+        try:
+            _hooks_dir = os.path.dirname(os.path.abspath(__file__))
+            _lib_dir = os.path.join(_hooks_dir, "lib")
+            if _lib_dir not in sys.path:
+                sys.path.insert(0, _lib_dir)
+
+            from stats import SessionStats
+
+            session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+            SessionStats(session_id=session_id)
+            SessionStats.cleanup_stale(
+                os.environ.get("CLAUDE_PLUGIN_DATA",
+                               os.path.join(str(home), ".codingbuddy"))
+            )
+        except Exception:
+            pass  # Never block session start
+
         sys.exit(0)
 
     except PermissionError as e:

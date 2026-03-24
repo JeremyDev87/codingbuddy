@@ -23,10 +23,19 @@ from safe_main import safe_main
 def handle_post_tool_use(data: dict):
     """Entry point for PostToolUse hook.
 
-    Currently a skeleton — returns None for all tools.
-    Future: wire stats (#825) and history (#827) here.
+    Records tool call stats (#825).
+    Future: history tracking (#827).
     """
-    # TODO: stats collection (#825)
+    try:
+        from stats import SessionStats
+
+        session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+        stats = SessionStats(session_id=session_id)
+        tool_name = data.get("tool_name", "unknown")
+        stats.record_tool_call(tool_name, success=True)
+    except Exception:
+        pass  # Never block tool execution
+
     # TODO: history tracking (#827)
     return None
 
