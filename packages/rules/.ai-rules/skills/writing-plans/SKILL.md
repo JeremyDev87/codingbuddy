@@ -104,8 +104,8 @@ When the plan references external APIs, SDKs, or protocols:
 | Hook stdin has `tool_name` | ✅ | [Hooks Reference](url) |
 | Hook stdin has `session_cost` | ❌ UNVERIFIED | — |
 
-3. **All assumptions must be verified before ACT phase**
-4. **WebFetch/WebSearch the official docs** — never rely on memory or guesses
+1. **All assumptions must be verified before ACT phase**
+2. **WebFetch/WebSearch the official docs** — never rely on memory or guesses
 
 ### Why This Matters
 Unverified API assumptions propagate into implementation, causing features to be unimplementable as designed. Verification at PLAN time costs minutes; rework at ACT time costs hours.
