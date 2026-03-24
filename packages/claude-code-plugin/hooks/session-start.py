@@ -415,6 +415,24 @@ def main():
         except Exception:
             pass  # Never block session start
 
+        # Step 5: Record session in history database (#823)
+        try:
+            _hooks_dir = os.path.dirname(os.path.abspath(__file__))
+            _lib_dir = os.path.join(_hooks_dir, "lib")
+            if _lib_dir not in sys.path:
+                sys.path.insert(0, _lib_dir)
+
+            from history_db import HistoryDB
+
+            session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+            cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
+            model = os.environ.get("CLAUDE_MODEL", "unknown")
+            db = HistoryDB()
+            db.start_session(session_id, cwd, model)
+            db.close()
+        except Exception:
+            pass  # Never block session start
+
         sys.exit(0)
 
     except PermissionError as e:

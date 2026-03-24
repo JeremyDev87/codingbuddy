@@ -36,7 +36,19 @@ def handle_post_tool_use(data: dict):
     except Exception:
         pass  # Never block tool execution
 
-    # TODO: history tracking (#827)
+    # Record tool call in history database (#823)
+    try:
+        from history_db import HistoryDB
+
+        db = HistoryDB()
+        tool_name = data.get("tool_name", "unknown")
+        input_summary = str(data.get("tool_input", {}))[:200]
+        session_id = os.environ.get("CLAUDE_SESSION_ID", "")
+        db.record_tool_call(session_id, tool_name, input_summary, success=True)
+        db.close()
+    except Exception:
+        pass  # Never block tool execution
+
     return None
 
 

@@ -30,6 +30,16 @@ def handle_stop(data: dict):
         summary = stats.format_summary()
         stats.finalize()
 
+        # End session in history database (#823)
+        try:
+            from history_db import HistoryDB
+
+            db = HistoryDB()
+            db.end_session(session_id, outcome="completed")
+            db.close()
+        except Exception:
+            pass  # Never block session stop
+
         if summary:
             return {
                 "systemMessage": summary,
