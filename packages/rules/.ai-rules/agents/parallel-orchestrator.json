@@ -298,6 +298,46 @@
           "id": "artifact_commit_ban",
           "rule": "RESULT.json and TASK.md must NEVER be committed to the repository. These are ephemeral per-worktree artifacts. If found in staged changes, unstage them immediately.",
           "rationale": "These files are task-specific runtime artifacts that pollute the repository and cause merge conflicts."
+        },
+        {
+          "id": "no_merge_ever",
+          "rule": "NEVER merge PRs (gh pr merge, git merge, git pull origin master/main). Report PR URLs to user and wait for user to merge. Only git fetch origin is allowed for read-only remote access.",
+          "rationale": "PR merge is the user's exclusive authority. Conductor must never modify the default branch."
+        },
+        {
+          "id": "shared_file_prediction",
+          "rule": "Before wave assignment, predict full file footprint including implicit shared files (package.json, config.schema.ts, index.ts barrel exports, README.md, .gitignore). Check all issue pairs for file overlap.",
+          "rationale": "Issues often modify shared files not listed in the issue body, causing unexpected merge conflicts."
+        },
+        {
+          "id": "array_indexing_ban",
+          "rule": "NEVER use array indexing in scripts. Use explicit key:value string mapping (e.g., '1:#888' '2:#811'). zsh is 1-indexed, bash is 0-indexed.",
+          "rationale": "Index mismatch between shells caused wrong issue mapping and deletion of valid RESULT.json files."
+        },
+        {
+          "id": "status_evidence_required",
+          "rule": "Every status report must include parenthetical evidence. Never report bare completion (✅) without RESULT.json validation + pane state cross-verification.",
+          "rationale": "Bare status reports without evidence led to false completion reports from stale data."
+        },
+        {
+          "id": "compact_cadence",
+          "rule": "Recommend compact after every 2 waves. Save state to docs/codingbuddy/context.md via update_context before compact.",
+          "rationale": "Long sessions (6+ hours) degrade response quality and increase cost without compaction."
+        },
+        {
+          "id": "continuous_execution",
+          "rule": "Worker prompts must include CONTINUOUS EXECUTION DIRECTIVE: DO NOT stop between steps, complete ALL tasks without waiting for user input, only stop after writing RESULT.json.",
+          "rationale": "Workers repeatedly stopped between tasks waiting for user input, requiring manual nudging."
+        },
+        {
+          "id": "auto_nudge",
+          "rule": "Watch cron must auto-nudge idle workers: 1st idle → 'continue', 2nd → 'continue with next task', 3rd → explicit instruction. Track nudge count per pane.",
+          "rationale": "Manual nudging is repetitive and delays wave completion."
+        },
+        {
+          "id": "pre_flight_verification",
+          "rule": "Before launching Claude Code in worktrees: remove stale RESULT.json/TASK.md, copy settings.local.json for permissions, verify git status clean.",
+          "rationale": "Stale artifacts, missing permissions, and dirty state cause worker failures."
         }
       ]
     }

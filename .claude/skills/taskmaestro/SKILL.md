@@ -520,6 +520,24 @@ launch_workers() {
 }
 ```
 
+#### Step 4.5: Worker Pre-Flight Verification
+
+Before launching Claude Code, verify each worktree:
+
+```bash
+for PANE_IDX in $WORKER_PANES; do
+  WT_PATH="$DIR/.taskmaestro/wt-$PANE_IDX"
+  rm -f "$WT_PATH/RESULT.json" "$WT_PATH/TASK.md"
+  if [ -f "$REPO/.claude/settings.local.json" ]; then
+    mkdir -p "$WT_PATH/.claude"
+    cp "$REPO/.claude/settings.local.json" "$WT_PATH/.claude/settings.local.json"
+  fi
+  if ! git -C "$WT_PATH" diff --quiet 2>/dev/null; then
+    echo "WARNING: wt-$PANE_IDX has uncommitted changes"
+  fi
+done
+```
+
 #### Step 5: Wait for All Workers Ready
 
 Poll each pane for readiness using `wait_for_startup`:
@@ -605,6 +623,10 @@ Rules:
 - PROGRESS: emit at each mode transition
 - DONE/ERROR: emit AFTER writing RESULT.json, BEFORE going idle
 - Replace <PR_NUMBER> and <SHORT_MSG> with actual values
+[CONTINUOUS EXECUTION DIRECTIVE]
+DO NOT stop between steps. Complete ALL tasks without waiting for user input.
+Only stop AFTER writing RESULT.json.
+If you encounter an error, try to fix it yourself before stopping.
 WORKER_PROMPT
 
     # Verify pane is ready before sending
@@ -1379,6 +1401,15 @@ watch_workers() {
 | >= 2 | 3 | Third and final nudge |
 | >= 2 | > 3 | Escalate to conductor — manual intervention |
 
+### Auto-Nudge Protocol
+
+When idle pane detected (❯ visible) but task status is "working":
+
+1. **1st idle**: `tmux send-keys "continue" Enter`
+2. **2nd idle**: `tmux send-keys "continue with the next incomplete task" Enter`
+3. **3rd idle**: Send explicit instruction with task context
+4. Track nudge count per pane in watch report
+
 ### `/taskmaestro stop`
 
 Stop all active workers without removing worktrees:
@@ -1534,6 +1565,19 @@ cleanup_all() {
 | Cleanup with uncommitted changes | Abort and list dirty worktrees; user runs `--force` or commits first |
 | Branch deletion fails | Branch may be checked out elsewhere; `git worktree prune` first |
 
+## Status Report Format (with evidence)
+
+Every status line MUST include parenthetical evidence:
+
+```
+패널 1: ✅ done - "task" → PR #N (RESULT.json: issue match ✓, pane idle ✓)
+패널 2: 🔄 working - "task" (active: ✽ Implementing… · ↓ 5.3k tokens)
+패널 3: ⚠️ uncertain - "task" (RESULT.json exists BUT pane active — cross-verify)
+패널 4: ❌ error - "task" (error in last 10 lines: "ModuleNotFoundError")
+```
+
+Rules: Never bare ✅ without evidence. "thinking" alone ≠ working.
+
 ## Important Notes
 
 - **Never use fixed `sleep` for readiness** — always use `wait_for_ready()` with capture-pane polling
@@ -1559,3 +1603,73 @@ cleanup_all() {
 - **NEVER use `git add -A` or `git add .`** — always stage specific files by name. This applies to both the conductor and all worker prompts.
 - **RESULT.json and TASK.md must NEVER be committed** — these are ephemeral per-worktree artifacts. If found in staged changes, unstage immediately.
 - **Stale RESULT.json auto-removal** — if RESULT.json `issue` field does not match the currently assigned task, remove it (`rm -f RESULT.json`) before the worker starts.
+
+---
+
+## Merge Policy (MANDATORY)
+
+**The conductor MUST NEVER merge PRs or modify the master/main branch.**
+
+Prohibited commands:
+- `gh pr merge` (all flags: --squash, --merge, --rebase, --admin, --auto)
+- `git merge`
+- `git pull origin master` / `git pull origin main` (includes merge)
+
+Allowed:
+- `git fetch origin` (read-only)
+- `gh pr create` (create PR, not merge)
+- `gh pr view` (read-only)
+
+**Protocol:**
+1. Worker creates PR → reports PR URL
+2. Conductor reports PR URL to user
+3. User merges at their discretion
+4. User notifies conductor
+5. Conductor runs `git fetch origin` to verify, then proceeds
+
+**Wave transition:** Report all PR URLs, wait for user merge confirmation before next wave.
+
+---
+
+## Wave Analysis: Shared File Prediction
+
+Before wave assignment, predict FULL file footprint per issue:
+
+1. **Explicit files**: Listed in issue body
+2. **Implicit shared files** (always check):
+   - `package.json`, `config.schema.ts`, `index.ts` barrel exports, `README.md`, `.gitignore`
+3. **MCP server issues**: Always flag `config.schema.ts`
+
+**Overlap check:** For each issue pair, if shared_files is not empty → move one to next wave.
+
+---
+
+## Shell Script Safety Rules
+
+### Array Indexing Ban
+
+**NEVER use array indexing.** zsh=1-indexed, bash=0-indexed.
+
+```bash
+# ❌ BANNED
+EXPECTED=("#888" "#811")
+echo ${EXPECTED[$IDX]}
+
+# ✅ REQUIRED
+for PANE_INFO in "1:#888" "2:#811"; do
+  N="${PANE_INFO%%:*}"
+  EXP="${PANE_INFO##*:}"
+done
+```
+
+---
+
+## Session Management
+
+### Compact Cadence
+
+- **Compact after every 2 waves**
+- **Save state** to `docs/codingbuddy/context.md` before compact
+- **After compact**: re-read taskmaestro-state.json
+
+Warning signs: cost > $2, context > 50%, duration > 2 hours
