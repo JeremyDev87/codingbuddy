@@ -23,6 +23,7 @@ import {
   META_AGENT_DISCUSSION_PATTERNS,
   type IntentPattern,
 } from '../patterns';
+import { matchExplicitPatterns } from '../explicit-pattern-matcher';
 import type {
   ResolutionStrategy,
   StrategyContext,
@@ -152,6 +153,17 @@ export class ActAgentStrategy implements ResolutionStrategy {
     if (explicit) {
       this.logger.debug(`Explicit ACT agent request: ${explicit.agentName}`);
       return explicit;
+    }
+
+    // 1.5. Check explicit_patterns from agent JSON activation fields
+    if (ctx.explicitPatternsMap && ctx.explicitPatternsMap.size > 0) {
+      const patternMatch = matchExplicitPatterns(prompt, ctx.explicitPatternsMap, availableAgents);
+      if (patternMatch) {
+        this.logger.debug(
+          `Explicit pattern match: ${patternMatch.agentName} (${patternMatch.reason})`,
+        );
+        return patternMatch;
+      }
     }
 
     // 2. Use recommended agent from PLAN mode if provided

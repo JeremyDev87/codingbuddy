@@ -63,6 +63,77 @@ describe('ActAgentStrategy', () => {
     });
   });
 
+  describe('explicit_patterns matching', () => {
+    const explicitPatternsMap = new Map([
+      ['agent-architect', ['create agent', 'new agent', 'agent creation']],
+      ['test-engineer', ['write test code', 'unit test', 'with TDD']],
+      ['security-engineer', ['fix security vulnerability', 'implement JWT']],
+    ]);
+
+    it('should match explicit_patterns from agent JSON', async () => {
+      const result = await strategy.resolve(
+        createActContext({
+          prompt: 'We need to create agent for the new workflow',
+          explicitPatternsMap,
+        }),
+      );
+
+      expect(result.agentName).toBe('agent-architect');
+      expect(result.source).toBe('explicit_patterns');
+      expect(result.confidence).toBeGreaterThanOrEqual(0.9);
+    });
+
+    it('should prefer explicit request over explicit_patterns', async () => {
+      const result = await strategy.resolve(
+        createActContext({
+          prompt: 'use backend-developer to create agent definitions',
+          explicitPatternsMap,
+        }),
+      );
+
+      expect(result.agentName).toBe('backend-developer');
+      expect(result.source).toBe('explicit');
+    });
+
+    it('should prefer explicit_patterns over recommended agent', async () => {
+      const result = await strategy.resolve(
+        createActContext({
+          prompt: 'implement JWT authentication for the API',
+          recommendedActAgent: 'backend-developer',
+          explicitPatternsMap,
+        }),
+      );
+
+      expect(result.agentName).toBe('security-engineer');
+      expect(result.source).toBe('explicit_patterns');
+    });
+
+    it('should skip unavailable agents in explicit_patterns', async () => {
+      const result = await strategy.resolve(
+        createActContext({
+          prompt: 'create agent for the workflow',
+          availableAgents: ['backend-developer', 'software-engineer'],
+          explicitPatternsMap,
+        }),
+      );
+
+      // agent-architect not available, should fall through
+      expect(result.agentName).not.toBe('agent-architect');
+    });
+
+    it('should fall through when no explicit_patterns match', async () => {
+      const result = await strategy.resolve(
+        createActContext({
+          prompt: 'refactor the login page',
+          explicitPatternsMap,
+        }),
+      );
+
+      // No pattern matches, should fall through to other resolution steps
+      expect(result.source).not.toBe('explicit_patterns');
+    });
+  });
+
   describe('recommended agent from PLAN mode', () => {
     it('should use recommended agent when available', async () => {
       const result = await strategy.resolve(

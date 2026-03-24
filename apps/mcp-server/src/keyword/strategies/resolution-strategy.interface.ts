@@ -6,6 +6,7 @@
  */
 
 import type { PrimaryAgentResolutionResult, ResolutionContext } from '../keyword.types';
+import type { ExplicitPatternsMap } from '../explicit-pattern-matcher';
 
 /**
  * Project config interface for Primary Agent configuration.
@@ -26,6 +27,12 @@ export type GetProjectConfigFn = () => Promise<ProjectConfig | null>;
 export type ListPrimaryAgentsFn = () => Promise<string[]>;
 
 /**
+ * Function type for loading explicit patterns from agent JSON files.
+ * Returns a map of agent name → explicit_patterns arrays.
+ */
+export type LoadExplicitPatternsFn = () => Promise<ExplicitPatternsMap>;
+
+/**
  * Context passed to resolution strategies.
  */
 export interface StrategyContext {
@@ -34,6 +41,8 @@ export interface StrategyContext {
   readonly context?: ResolutionContext;
   readonly recommendedActAgent?: string;
   readonly isRecommendation?: boolean;
+  /** Map of agent name → explicit_patterns from agent JSON activation fields */
+  readonly explicitPatternsMap?: ExplicitPatternsMap;
 }
 
 /**

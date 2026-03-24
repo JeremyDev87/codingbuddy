@@ -13,6 +13,7 @@ export type {
   ProjectConfig,
   GetProjectConfigFn,
   ListPrimaryAgentsFn,
+  LoadExplicitPatternsFn,
 } from './resolution-strategy.interface';
 
 // Strategies

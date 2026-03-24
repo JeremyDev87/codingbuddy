@@ -3,10 +3,12 @@
  *
  * Resolves which Primary Agent to use based on:
  * 1. Explicit request in prompt (highest priority)
- * 2. Project configuration
- * 3. Intent analysis (prompt content analysis)
- * 4. Context (file path, project type)
- * 5. Default fallback (software-engineer)
+ * 2. Explicit patterns from agent JSON activation fields
+ * 3. Recommended agent from PLAN mode
+ * 4. Project configuration
+ * 5. Intent analysis (prompt content analysis)
+ * 6. Context (file path, project type)
+ * 7. Default fallback (software-engineer)
  *
  * This is the main entry point for agent resolution.
  * Resolution logic is delegated to mode-specific strategies.
@@ -19,6 +21,7 @@ import {
   type PrimaryAgentResolutionResult,
   type ResolutionContext,
 } from './keyword.types';
+import type { ExplicitPatternsMap } from './explicit-pattern-matcher';
 import {
   EvalAgentStrategy,
   PlanAgentStrategy,
@@ -26,6 +29,7 @@ import {
   type ResolutionStrategy,
   type GetProjectConfigFn,
   type ListPrimaryAgentsFn,
+  type LoadExplicitPatternsFn,
   type StrategyContext,
 } from './strategies';
 
@@ -47,9 +51,13 @@ export class PrimaryAgentResolver {
   private readonly planStrategy: ResolutionStrategy;
   private readonly actStrategy: ResolutionStrategy;
 
+  /** Cached explicit patterns map (loaded once, reused across calls) */
+  private explicitPatternsCache: ExplicitPatternsMap | null = null;
+
   constructor(
     private readonly getProjectConfig: GetProjectConfigFn,
     private readonly listPrimaryAgents: ListPrimaryAgentsFn,
+    private readonly loadExplicitPatterns?: LoadExplicitPatternsFn,
   ) {
     this.evalStrategy = new EvalAgentStrategy();
     this.planStrategy = new PlanAgentStrategy();
@@ -81,6 +89,9 @@ export class PrimaryAgentResolver {
     const allAgents = await this.safeListPrimaryAgents();
     const availableAgents = await this.filterExcludedAgents(allAgents);
 
+    // Load explicit patterns (cached after first call)
+    const explicitPatternsMap = await this.safeLoadExplicitPatterns();
+
     // Build strategy context
     const strategyContext: StrategyContext = {
       prompt,
@@ -88,6 +99,7 @@ export class PrimaryAgentResolver {
       context,
       recommendedActAgent,
       isRecommendation,
+      explicitPatternsMap,
     };
 
     // Delegate to mode-specific strategy
@@ -166,6 +178,31 @@ export class PrimaryAgentResolver {
           `Using fallback list.`,
       );
       return [...ALL_PRIMARY_AGENTS];
+    }
+  }
+
+  /**
+   * Safely load explicit patterns with caching.
+   * Returns empty map on error or if no loader is provided.
+   */
+  private async safeLoadExplicitPatterns(): Promise<ExplicitPatternsMap> {
+    if (this.explicitPatternsCache) {
+      return this.explicitPatternsCache;
+    }
+
+    if (!this.loadExplicitPatterns) {
+      return new Map();
+    }
+
+    try {
+      this.explicitPatternsCache = await this.loadExplicitPatterns();
+      this.logger.debug(`Loaded explicit patterns for ${this.explicitPatternsCache.size} agents`);
+      return this.explicitPatternsCache;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to load explicit patterns: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return new Map();
     }
   }
 }

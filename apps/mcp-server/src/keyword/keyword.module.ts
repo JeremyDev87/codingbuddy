@@ -9,6 +9,7 @@ import { AgentModule } from '../agent/agent.module';
 import { AgentService } from '../agent/agent.service';
 import { normalizeAgentName } from '../shared/agent.utils';
 import { resolveClientType } from '../shared/client-type';
+import type { ExplicitPatternsMap } from './explicit-pattern-matcher';
 import {
   KeywordService,
   type KeywordServiceOptions,
@@ -85,7 +86,30 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           return primaryAgents;
         };
 
-        const primaryAgentResolver = new PrimaryAgentResolver(getProjectConfig, listPrimaryAgents);
+        const loadExplicitPatterns = async (): Promise<ExplicitPatternsMap> => {
+          const patternsMap: ExplicitPatternsMap = new Map();
+          const agentNames = await rulesService.listAgents();
+
+          for (const name of agentNames) {
+            try {
+              const agent = await rulesService.getAgent(name);
+              const activation = agent.activation as { explicit_patterns?: string[] } | undefined;
+              if (activation?.explicit_patterns && activation.explicit_patterns.length > 0) {
+                patternsMap.set(normalizeAgentName(agent.name), activation.explicit_patterns);
+              }
+            } catch {
+              // Skip agents that fail to load
+            }
+          }
+
+          return patternsMap;
+        };
+
+        const primaryAgentResolver = new PrimaryAgentResolver(
+          getProjectConfig,
+          listPrimaryAgents,
+          loadExplicitPatterns,
+        );
 
         const loadAutoConfig = async () => {
           try {
