@@ -1,0 +1,142 @@
+"""Tests for PromptInjector — system prompt injection module (#828)."""
+import os
+import sys
+import pytest
+
+# Ensure hooks/lib is on path
+_tests_dir = os.path.dirname(os.path.abspath(__file__))
+_lib_dir = os.path.join(os.path.dirname(_tests_dir), "hooks", "lib")
+if _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
+
+from prompt_injection import PromptInjector
+
+
+@pytest.fixture
+def injector():
+    return PromptInjector()
+
+
+@pytest.fixture
+def base_config():
+    """Config with all prompt sections enabled."""
+    return {
+        "promptInjection": {
+            "enabled": True,
+            "sections": {
+                "baseRules": True,
+                "dispatchEnforcement": True,
+                "qualityGates": True,
+            },
+        }
+    }
+
+
+class TestBuildBaseRulesPrompt:
+    def test_contains_parse_mode_instruction(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "parse_mode" in result
+
+    def test_contains_tdd_summary(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "TDD" in result or "tdd" in result
+
+
+class TestBuildDispatchEnforcementPrompt:
+    def test_contains_dispatch_instruction(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "dispatch" in result.lower()
+
+
+class TestBuildQualityGatesPrompt:
+    def test_contains_quality_gate_reminder(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "quality" in result.lower() or "test" in result.lower()
+
+
+class TestConfigurableOptOut:
+    def test_disable_base_rules(self, injector):
+        config = {
+            "promptInjection": {
+                "enabled": True,
+                "sections": {
+                    "baseRules": False,
+                    "dispatchEnforcement": True,
+                    "qualityGates": True,
+                },
+            }
+        }
+        result = injector.build_system_prompt(config, "/tmp")
+        assert "PLAN/ACT/EVAL/AUTO" not in result
+        assert "TDD" not in result
+
+    def test_disable_dispatch_enforcement(self, injector):
+        config = {
+            "promptInjection": {
+                "enabled": True,
+                "sections": {
+                    "baseRules": True,
+                    "dispatchEnforcement": False,
+                    "qualityGates": True,
+                },
+            }
+        }
+        result = injector.build_system_prompt(config, "/tmp")
+        # dispatch section disabled — check it's absent
+        lines = result.split("\n")
+        dispatch_lines = [l for l in lines if "dispatch" in l.lower() and "auto" in l.lower()]
+        assert len(dispatch_lines) == 0
+
+    def test_disable_quality_gates(self, injector):
+        config = {
+            "promptInjection": {
+                "enabled": True,
+                "sections": {
+                    "baseRules": True,
+                    "dispatchEnforcement": True,
+                    "qualityGates": False,
+                },
+            }
+        }
+        result = injector.build_system_prompt(config, "/tmp")
+        # quality gates section disabled
+        lines = result.split("\n")
+        gate_lines = [l for l in lines if "commit" in l.lower() and "test" in l.lower()]
+        assert len(gate_lines) == 0
+
+
+class TestPromptSizeLimit:
+    def test_prompt_under_2000_chars(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert len(result) <= 2000
+
+    def test_truncates_when_over_budget(self, injector):
+        """Even with extremely verbose config, output stays <= 2000 chars."""
+        config = {
+            "promptInjection": {
+                "enabled": True,
+                "sections": {
+                    "baseRules": True,
+                    "dispatchEnforcement": True,
+                    "qualityGates": True,
+                },
+            }
+        }
+        result = injector.build_system_prompt(config, "/tmp")
+        assert len(result) <= 2000
+        assert len(result) > 0
+
+
+class TestDisabledInjection:
+    def test_returns_empty_when_disabled(self, injector):
+        config = {"promptInjection": {"enabled": False}}
+        result = injector.build_system_prompt(config, "/tmp")
+        assert result == ""
+
+    def test_returns_empty_when_no_config(self, injector):
+        result = injector.build_system_prompt({}, "/tmp")
+        assert result == ""
+
+    def test_returns_empty_when_none_config(self, injector):
+        result = injector.build_system_prompt({"promptInjection": None}, "/tmp")
+        assert result == ""

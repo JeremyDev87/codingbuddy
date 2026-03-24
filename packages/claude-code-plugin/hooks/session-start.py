@@ -376,6 +376,27 @@ def main():
             print(msg("installed"))
             print(msg("patterns"))
 
+        # Step 3: System prompt injection (#828)
+        # SessionStart uses plain stdout for context injection (NOT JSON)
+        try:
+            # Add hooks/lib to path for imports
+            _hooks_dir = os.path.dirname(os.path.abspath(__file__))
+            _lib_dir = os.path.join(_hooks_dir, "lib")
+            if _lib_dir not in sys.path:
+                sys.path.insert(0, _lib_dir)
+
+            from prompt_injection import PromptInjector
+            from config import get_config
+
+            cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
+            cfg = get_config(cwd)
+            injector = PromptInjector()
+            system_msg = injector.build_system_prompt(cfg, cwd)
+            if system_msg:
+                print(system_msg)
+        except Exception:
+            pass  # Never block session start
+
         sys.exit(0)
 
     except PermissionError as e:
