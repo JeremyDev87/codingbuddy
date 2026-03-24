@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""CodingBuddy PostToolUse Hook (skeleton).
+
+Placeholder for future wiring:
+- Stats collection (#825)
+- History tracking (#827)
+
+Currently returns None (no output) for all tools.
+"""
+import os
+import sys
+
+# Resolve hooks/lib and add to path
+_hooks_dir = os.path.dirname(os.path.abspath(__file__))
+_lib_dir = os.path.join(_hooks_dir, "lib")
+if _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
+
+from safe_main import safe_main
+
+
+@safe_main
+def handle_post_tool_use(data: dict):
+    """Entry point for PostToolUse hook.
+
+    Currently a skeleton — returns None for all tools.
+    Future: wire stats (#825) and history (#827) here.
+    """
+    # TODO: stats collection (#825)
+    # TODO: history tracking (#827)
+    return None
+
+
+if __name__ == "__main__":
+    handle_post_tool_use()
