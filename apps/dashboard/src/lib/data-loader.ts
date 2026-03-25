@@ -1,13 +1,6 @@
 import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
-import type {
-  Session,
-  ToolCall,
-  CostEntry,
-  AgentActivity,
-  SkillUsage,
-  PREntry,
-} from './types';
+import type { Session, ToolCall, CostEntry, AgentActivity, SkillUsage, PREntry } from './types';
 import {
   generateMockSessions,
   generateMockCostEntries,
@@ -39,7 +32,7 @@ interface RawToolCallRow {
 }
 
 export function sessionsFromRows(rows: RawSessionRow[]): Session[] {
-  return rows.map((row) => ({
+  return rows.map(row => ({
     sessionId: row.session_id,
     startedAt: row.started_at,
     endedAt: row.ended_at,
@@ -69,7 +62,7 @@ export function aggregateCostEntries(sessions: Session[]): CostEntry[] {
     .map(([date, data]) => ({
       date,
       cost: parseFloat(
-        (data.toolCalls * COST_PER_TOOL_CALL + data.sessions * COST_PER_SESSION).toFixed(2)
+        (data.toolCalls * COST_PER_TOOL_CALL + data.sessions * COST_PER_SESSION).toFixed(2),
       ),
       sessions: data.sessions,
       toolCalls: data.toolCalls,
@@ -125,12 +118,14 @@ export function aggregateSkillUsage(toolCalls: ToolCall[]): SkillUsage[] {
     .map(([skill, count]) => ({ skill, count }));
 }
 
-function openDatabase(dbPath: string) {
+export function openDatabase(dbPath: string) {
   try {
     if (!existsSync(dbPath)) return null;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const Database = require('better-sqlite3');
-    return new Database(dbPath, { readonly: true });
+    const db = new Database(dbPath, { readonly: true });
+    db.pragma('busy_timeout = 5000');
+    return db;
   } catch {
     return null;
   }
@@ -138,16 +133,18 @@ function openDatabase(dbPath: string) {
 
 export async function loadSessions(
   dbPath: string = `${process.env.HOME}/.codingbuddy/history.db`,
-  days = 30
+  days = 30,
 ): Promise<Session[]> {
   const db = openDatabase(dbPath);
   if (!db) return generateMockSessions(days);
 
   try {
     const cutoff = Date.now() / 1000 - days * 86400;
-    const rows = db.prepare(
-      'SELECT session_id, started_at, ended_at, project, model, tool_call_count, error_count, outcome FROM sessions WHERE started_at >= ? ORDER BY started_at DESC'
-    ).all(cutoff) as RawSessionRow[];
+    const rows = db
+      .prepare(
+        'SELECT session_id, started_at, ended_at, project, model, tool_call_count, error_count, outcome FROM sessions WHERE started_at >= ? ORDER BY started_at DESC',
+      )
+      .all(cutoff) as RawSessionRow[];
     return sessionsFromRows(rows);
   } catch {
     return generateMockSessions(days);
@@ -158,16 +155,18 @@ export async function loadSessions(
 
 export async function loadCostEntries(
   dbPath: string = `${process.env.HOME}/.codingbuddy/history.db`,
-  days = 30
+  days = 30,
 ): Promise<CostEntry[]> {
   const db = openDatabase(dbPath);
   if (!db) return generateMockCostEntries(days);
 
   try {
     const cutoff = Date.now() / 1000 - days * 86400;
-    const rows = db.prepare(
-      'SELECT session_id, started_at, ended_at, project, model, tool_call_count, error_count, outcome FROM sessions WHERE started_at >= ? ORDER BY started_at'
-    ).all(cutoff) as RawSessionRow[];
+    const rows = db
+      .prepare(
+        'SELECT session_id, started_at, ended_at, project, model, tool_call_count, error_count, outcome FROM sessions WHERE started_at >= ? ORDER BY started_at',
+      )
+      .all(cutoff) as RawSessionRow[];
     const sessions = sessionsFromRows(rows);
     return aggregateCostEntries(sessions);
   } catch {
@@ -178,16 +177,16 @@ export async function loadCostEntries(
 }
 
 export async function loadAgentActivity(
-  dbPath: string = `${process.env.HOME}/.codingbuddy/history.db`
+  dbPath: string = `${process.env.HOME}/.codingbuddy/history.db`,
 ): Promise<AgentActivity[]> {
   const db = openDatabase(dbPath);
   if (!db) return generateMockAgentActivity();
 
   try {
-    const rows = db.prepare(
-      'SELECT session_id, timestamp, tool_name, input_summary, success FROM tool_calls'
-    ).all() as RawToolCallRow[];
-    const toolCalls: ToolCall[] = rows.map((r) => ({
+    const rows = db
+      .prepare('SELECT session_id, timestamp, tool_name, input_summary, success FROM tool_calls')
+      .all() as RawToolCallRow[];
+    const toolCalls: ToolCall[] = rows.map(r => ({
       sessionId: r.session_id,
       timestamp: r.timestamp,
       toolName: r.tool_name,
@@ -203,16 +202,16 @@ export async function loadAgentActivity(
 }
 
 export async function loadSkillUsage(
-  dbPath: string = `${process.env.HOME}/.codingbuddy/history.db`
+  dbPath: string = `${process.env.HOME}/.codingbuddy/history.db`,
 ): Promise<SkillUsage[]> {
   const db = openDatabase(dbPath);
   if (!db) return generateMockSkillUsage();
 
   try {
-    const rows = db.prepare(
-      'SELECT session_id, timestamp, tool_name, input_summary, success FROM tool_calls'
-    ).all() as RawToolCallRow[];
-    const toolCalls: ToolCall[] = rows.map((r) => ({
+    const rows = db
+      .prepare('SELECT session_id, timestamp, tool_name, input_summary, success FROM tool_calls')
+      .all() as RawToolCallRow[];
+    const toolCalls: ToolCall[] = rows.map(r => ({
       sessionId: r.session_id,
       timestamp: r.timestamp,
       toolName: r.tool_name,
@@ -227,18 +226,16 @@ export async function loadSkillUsage(
   }
 }
 
-export async function loadPREntries(
-  repoPath?: string,
-  days = 30
-): Promise<PREntry[]> {
+export async function loadPREntries(repoPath?: string, days = 30): Promise<PREntry[]> {
   try {
     const cwd = repoPath ?? process.cwd();
     const since = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
 
-    const gitLog = execSync(
-      `git log --since="${since}" --pretty=format:"%ad|%s" --date=short`,
-      { cwd, encoding: 'utf-8', timeout: 5000 }
-    );
+    const gitLog = execSync(`git log --since="${since}" --pretty=format:"%ad|%s" --date=short`, {
+      cwd,
+      encoding: 'utf-8',
+      timeout: 5000,
+    });
 
     if (!gitLog.trim()) return generateMockPREntries(days);
 
