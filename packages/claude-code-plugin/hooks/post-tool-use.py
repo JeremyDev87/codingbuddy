@@ -36,16 +36,15 @@ def handle_post_tool_use(data: dict):
     except Exception:
         pass  # Never block tool execution
 
-    # Record tool call in history database (#823)
+    # Record tool call in history database (#823) — singleton reuse (#931)
     try:
         from history_db import HistoryDB
 
-        db = HistoryDB()
+        db = HistoryDB.get_instance()
         tool_name = data.get("tool_name", "unknown")
         input_summary = str(data.get("tool_input", {}))[:200]
         session_id = os.environ.get("CLAUDE_SESSION_ID", "")
         db.record_tool_call(session_id, tool_name, input_summary, success=True)
-        db.close()
     except Exception:
         pass  # Never block tool execution
 
@@ -71,6 +70,14 @@ def _maybe_notify_pr_created(data: dict):
     if "gh pr create" not in command:
         return
 
+    # Check config before importing notification modules (#931)
+    from config import get_config
+
+    config = get_config(os.getcwd())
+    notifications_config = config.get("notifications", {})
+    if not notifications_config.get("enabled", True):
+        return
+
     # Extract PR URL from output (gh pr create prints the URL)
     pr_url = ""
     if isinstance(tool_output, str):
@@ -80,10 +87,8 @@ def _maybe_notify_pr_created(data: dict):
                 pr_url = line
                 break
 
-    from config import get_config
     from notifications import NotificationEvent, notify
 
-    config = get_config(os.getcwd())
     event = NotificationEvent(
         event_type="pr_created",
         title="PR Created",

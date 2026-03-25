@@ -110,6 +110,7 @@ class TestRoundtrip:
         s1 = SessionStats(session_id="rt-test", data_dir=data_dir)
         s1.record_tool_call("Bash")
         s1.record_tool_call("Edit")
+        s1.flush()  # Flush to disk before new instance reads
 
         # New instance same session
         s2 = SessionStats(session_id="rt-test", data_dir=data_dir)
@@ -128,6 +129,70 @@ class TestLocking:
             s.record_tool_call(f"Tool{i % 5}")
         result = s.finalize()
         assert result["tool_count"] == 50
+
+
+class TestInMemoryAccumulation:
+    """Tests for in-memory accumulation with periodic flush (#931)."""
+
+    def test_record_does_not_write_immediately(self, data_dir):
+        """record_tool_call should NOT write to disk on every call."""
+        s = SessionStats(session_id="lazy-test", data_dir=data_dir, flush_interval=10)
+        # Read initial file content
+        with open(s.stats_file, "r") as f:
+            initial = json.load(f)
+        initial_count = initial.get("tool_count", 0)
+
+        s.record_tool_call("Bash")
+        # File should still have initial count (not flushed yet)
+        with open(s.stats_file, "r") as f:
+            on_disk = json.load(f)
+        assert on_disk["tool_count"] == initial_count
+
+    def test_flush_writes_accumulated_data(self, data_dir):
+        """flush() should persist all accumulated stats to disk."""
+        s = SessionStats(session_id="flush-test", data_dir=data_dir, flush_interval=100)
+        s.record_tool_call("Bash")
+        s.record_tool_call("Edit")
+        s.record_tool_call("Read")
+        s.flush()
+
+        with open(s.stats_file, "r") as f:
+            on_disk = json.load(f)
+        assert on_disk["tool_count"] == 3
+        assert on_disk["tool_names"]["Bash"] == 1
+        assert on_disk["tool_names"]["Edit"] == 1
+
+    def test_auto_flush_at_interval(self, data_dir):
+        """Should auto-flush when flush_interval calls are reached."""
+        s = SessionStats(session_id="auto-flush", data_dir=data_dir, flush_interval=3)
+        s.record_tool_call("Bash")
+        s.record_tool_call("Edit")
+        # Not yet flushed (2 < 3)
+        with open(s.stats_file, "r") as f:
+            on_disk = json.load(f)
+        assert on_disk["tool_count"] == 0
+
+        s.record_tool_call("Read")  # 3rd call -> auto-flush
+        with open(s.stats_file, "r") as f:
+            on_disk = json.load(f)
+        assert on_disk["tool_count"] == 3
+
+    def test_finalize_flushes_pending(self, data_dir):
+        """finalize() should flush pending stats before returning."""
+        s = SessionStats(session_id="fin-flush", data_dir=data_dir, flush_interval=100)
+        s.record_tool_call("Bash")
+        s.record_tool_call("Edit")
+        result = s.finalize()
+        assert result["tool_count"] == 2
+
+    def test_format_summary_uses_memory_data(self, data_dir):
+        """format_summary() should reflect in-memory state, not just disk."""
+        s = SessionStats(session_id="mem-summary", data_dir=data_dir, flush_interval=100)
+        s.record_tool_call("Bash")
+        s.record_tool_call("Bash")
+        summary = s.format_summary()
+        assert "2 tools" in summary
+        assert "Bash:2" in summary
 
 
 class TestCleanup:

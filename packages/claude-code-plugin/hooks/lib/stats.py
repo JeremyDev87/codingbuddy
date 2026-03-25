@@ -20,15 +20,19 @@ DEFAULT_DATA_DIR = os.path.join(os.path.expanduser("~"), ".codingbuddy")
 class SessionStats:
     """Track operational metrics for a Claude Code session."""
 
-    def __init__(self, session_id: str, data_dir: Optional[str] = None):
+    def __init__(self, session_id: str, data_dir: Optional[str] = None, flush_interval: int = 10):
         """Initialize stats tracker.
 
         Args:
             session_id: Unique session identifier.
             data_dir: Directory for stats files.
                       Uses CLAUDE_PLUGIN_DATA env or ~/.codingbuddy.
+            flush_interval: Number of record_tool_call() invocations between
+                           automatic disk flushes. Default 10.
         """
         self.session_id = session_id
+        self._flush_interval = flush_interval
+        self._pending_count = 0
 
         if data_dir is None:
             data_dir = os.environ.get("CLAUDE_PLUGIN_DATA", DEFAULT_DATA_DIR)
@@ -50,24 +54,55 @@ class SessionStats:
                 "tool_names": {},
             })
 
+        # In-memory accumulator — deltas since last flush
+        self._mem_tool_count = 0
+        self._mem_error_count = 0
+        self._mem_tool_names: Dict[str, int] = {}
+
     def record_tool_call(self, tool_name: str, success: bool = True) -> None:
-        """Record a tool call.
+        """Record a tool call in memory. Flushes to disk every flush_interval calls.
 
         Args:
             tool_name: Name of the tool called.
             success: Whether the tool call succeeded.
         """
-        data = self._locked_read()
-        data["tool_count"] = data.get("tool_count", 0) + 1
-
+        self._mem_tool_count += 1
         if not success:
-            data["error_count"] = data.get("error_count", 0) + 1
+            self._mem_error_count += 1
+        self._mem_tool_names[tool_name] = self._mem_tool_names.get(tool_name, 0) + 1
 
+        self._pending_count += 1
+        if self._pending_count >= self._flush_interval:
+            self.flush()
+
+    def flush(self) -> None:
+        """Flush accumulated in-memory stats to disk."""
+        if self._pending_count == 0:
+            return
+        data = self._locked_read()
+        data["tool_count"] = data.get("tool_count", 0) + self._mem_tool_count
+        data["error_count"] = data.get("error_count", 0) + self._mem_error_count
         tool_names = data.get("tool_names", {})
-        tool_names[tool_name] = tool_names.get(tool_name, 0) + 1
+        for name, count in self._mem_tool_names.items():
+            tool_names[name] = tool_names.get(name, 0) + count
         data["tool_names"] = tool_names
-
         self._locked_write(data)
+        # Reset in-memory accumulators
+        self._mem_tool_count = 0
+        self._mem_error_count = 0
+        self._mem_tool_names = {}
+        self._pending_count = 0
+
+    def _merged_data(self) -> Dict[str, Any]:
+        """Return disk data merged with in-memory deltas (read-only)."""
+        data = self._locked_read()
+        data["tool_count"] = data.get("tool_count", 0) + self._mem_tool_count
+        data["error_count"] = data.get("error_count", 0) + self._mem_error_count
+        tool_names = dict(data.get("tool_names", {}))
+        for name, count in self._mem_tool_names.items():
+            tool_names[name] = tool_names.get(name, 0) + count
+        data["tool_names"] = tool_names
+        return data
 
     def format_summary(self) -> str:
         """Format a human-readable summary.
@@ -75,7 +110,7 @@ class SessionStats:
         Returns:
             String like '[CB] Xm | Y tools | Z errors | Bash:N Edit:M'
         """
-        data = self._locked_read()
+        data = self._merged_data()
         duration = time.time() - data.get("started_at", time.time())
         minutes = int(duration // 60)
         tool_count = data.get("tool_count", 0)
@@ -96,6 +131,7 @@ class SessionStats:
         Returns:
             Dict with session stats.
         """
+        self.flush()
         data = self._locked_read()
         duration = time.time() - data.get("started_at", time.time())
         data["duration_seconds"] = duration

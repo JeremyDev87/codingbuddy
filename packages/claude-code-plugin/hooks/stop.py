@@ -27,6 +27,10 @@ def handle_stop(data: dict):
 
         session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
         stats = SessionStats(session_id=session_id)
+
+        # Flush pending in-memory stats before finalize (#931)
+        stats.flush()
+
         summary = stats.format_summary()
         stats.finalize()
 
@@ -36,6 +40,8 @@ def handle_stop(data: dict):
 
             db = HistoryDB()
             db.end_session(session_id, outcome="completed")
+            # Close singleton connection (#931)
+            HistoryDB.close_instance()
             db.close()
         except Exception:
             pass  # Never block session stop

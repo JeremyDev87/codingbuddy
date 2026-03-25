@@ -13,6 +13,22 @@ DEFAULT_DB_PATH = os.path.expanduser("~/.codingbuddy/history.db")
 class HistoryDB:
     """Persistent SQLite database for execution history."""
 
+    _instance: "HistoryDB | None" = None
+
+    @classmethod
+    def get_instance(cls, db_path: str = DEFAULT_DB_PATH) -> "HistoryDB":
+        """Return the singleton instance, creating it on first call."""
+        if cls._instance is None:
+            cls._instance = cls(db_path=db_path)
+        return cls._instance
+
+    @classmethod
+    def close_instance(cls) -> None:
+        """Close and clear the singleton instance."""
+        if cls._instance is not None:
+            cls._instance.close()
+            cls._instance = None
+
     def __init__(self, db_path: str = DEFAULT_DB_PATH):
         self._db_path = db_path
         self._ensure_directory()

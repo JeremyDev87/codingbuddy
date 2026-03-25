@@ -105,6 +105,36 @@ class TestSessionEndNotification:
         mock_notify.assert_not_called()
 
 
+class TestStopFlush:
+    """Tests for pending stats flush and DB singleton close at stop (#931)."""
+
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_stop_flushes_pending_stats(self, mock_stats_cls, mock_db_cls, monkeypatch, capsys):
+        """Stop hook should call flush() on SessionStats before finalize."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 5 tools"
+        mock_stats_cls.return_value = mock_stats
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        mock_stats.flush.assert_called()
+
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_stop_closes_db_singleton(self, mock_stats_cls, mock_db_cls, monkeypatch, capsys):
+        """Stop hook should call HistoryDB.close_instance() at the end."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 3 tools"
+        mock_stats_cls.return_value = mock_stats
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        mock_db_cls.close_instance.assert_called()
+
+
 class TestAutoLearningSuggestions:
     """Tests for auto-learning pattern detection wiring (#929)."""
 

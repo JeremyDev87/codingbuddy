@@ -197,3 +197,41 @@ class TestCleanupAndConcurrency:
         db2.close()
 
         assert len(errors) == 0, f"Concurrent access errors: {errors}"
+
+
+class TestSingleton:
+    """Tests for HistoryDB singleton pattern (#931)."""
+
+    def test_get_instance_returns_same_object(self, db_path):
+        """get_instance() should return the same HistoryDB across calls."""
+        try:
+            inst1 = HistoryDB.get_instance(db_path=db_path)
+            inst2 = HistoryDB.get_instance(db_path=db_path)
+            assert inst1 is inst2
+        finally:
+            HistoryDB.close_instance()
+
+    def test_get_instance_reuses_connection(self, db_path):
+        """Singleton should reuse the same SQLite connection."""
+        try:
+            inst1 = HistoryDB.get_instance(db_path=db_path)
+            conn1 = inst1._conn
+            inst2 = HistoryDB.get_instance(db_path=db_path)
+            conn2 = inst2._conn
+            assert conn1 is conn2
+        finally:
+            HistoryDB.close_instance()
+
+    def test_close_instance_clears_singleton(self, db_path):
+        """close_instance() should clear the singleton so next get_instance creates new."""
+        try:
+            inst1 = HistoryDB.get_instance(db_path=db_path)
+            HistoryDB.close_instance()
+            inst2 = HistoryDB.get_instance(db_path=db_path)
+            assert inst1 is not inst2
+        finally:
+            HistoryDB.close_instance()
+
+    def test_close_instance_noop_when_no_instance(self):
+        """close_instance() should not raise when no instance exists."""
+        HistoryDB.close_instance()  # Should not raise

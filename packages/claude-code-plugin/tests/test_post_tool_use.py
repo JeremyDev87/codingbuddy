@@ -135,3 +135,82 @@ class TestPrCreatedNotification:
         )
         assert result is None
         mock_notify.assert_not_called()
+
+
+class TestSingletonWiring:
+    """Tests for HistoryDB singleton usage in post-tool-use (#931)."""
+
+    @patch("history_db.HistoryDB")
+    def test_uses_get_instance_not_constructor(self, mock_db_cls, monkeypatch, capsys):
+        """post-tool-use should use HistoryDB.get_instance() instead of HistoryDB()."""
+        mock_instance = MagicMock()
+        mock_db_cls.get_instance.return_value = mock_instance
+
+        _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "ls"}},
+            monkeypatch, capsys,
+        )
+
+        mock_db_cls.get_instance.assert_called()
+        # Constructor should NOT be called directly
+        mock_db_cls.assert_not_called()
+
+    @patch("history_db.HistoryDB")
+    def test_does_not_close_db_after_each_call(self, mock_db_cls, monkeypatch, capsys):
+        """post-tool-use should NOT close the DB connection (stop hook does that)."""
+        mock_instance = MagicMock()
+        mock_db_cls.get_instance.return_value = mock_instance
+
+        _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "ls"}},
+            monkeypatch, capsys,
+        )
+
+        mock_instance.close.assert_not_called()
+
+
+class TestConditionalNotification:
+    """Tests for conditional notification skip (#931)."""
+
+    @patch("config.get_config")
+    def test_skips_notify_call_when_disabled(self, mock_config, monkeypatch, capsys):
+        """_maybe_notify_pr_created should not call notify when notifications disabled."""
+        mock_config.return_value = {
+            "notifications": {
+                "enabled": False,
+            }
+        }
+        ptu = _load_module()
+        # Call _maybe_notify_pr_created directly with a PR-creating payload
+        data = {
+            "tool_name": "Bash",
+            "tool_input": {"command": 'gh pr create --title "test"'},
+            "tool_output": "https://github.com/org/repo/pull/99\n",
+        }
+        with patch("notifications.notify") as mock_notify:
+            ptu._maybe_notify_pr_created(data)
+            mock_notify.assert_not_called()
+
+    @patch("notifications.notify")
+    @patch("config.get_config")
+    def test_still_notifies_when_enabled(self, mock_config, mock_notify, monkeypatch, capsys):
+        """Should still notify when notifications are enabled."""
+        mock_config.return_value = {
+            "notifications": {
+                "enabled": True,
+                "events": {"pr_created": True},
+                "platforms": ["slack"],
+            }
+        }
+        mock_notify.return_value = {"slack": True}
+
+        result = _run_hook(
+            {
+                "tool_name": "Bash",
+                "tool_input": {"command": 'gh pr create --title "test"'},
+                "tool_output": "https://github.com/org/repo/pull/99\n",
+            },
+            monkeypatch, capsys,
+        )
+        assert result is None
+        mock_notify.assert_called_once()
