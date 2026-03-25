@@ -114,6 +114,18 @@ After all workers in a wave complete:
 
 ---
 
+## Continuous Execution Rule
+
+Workers MUST complete all assigned tasks in a single uninterrupted flow.
+Stopping between tasks to wait for user input is a protocol violation.
+
+- DO NOT stop between steps
+- Complete ALL tasks without waiting for user input
+- Only stop after writing RESULT.json
+- Auto-nudge from conductor is a fallback safety net, not the primary mechanism
+
+---
+
 ## AUTO Mode Iteration Methodology
 
 When using AUTO mode with parallel execution:

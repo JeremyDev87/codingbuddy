@@ -149,7 +149,8 @@
         "AUTO mode: every prompt includes PLAN→ACT→EVAL iteration methodology",
         "Exit condition: Critical/High=0 before /ship, Medium/Low in PR description",
         "No ambiguity: exact file paths, exact field values, exact commands",
-        "Plan validation: complex workers should use plan-and-review skill to validate plans before ACT"
+        "Plan validation: complex workers should use plan-and-review skill to validate plans before ACT",
+        "Continuous execution: workers MUST complete all tasks in a single uninterrupted flow without stopping for user input. Only stop after writing RESULT.json."
       ]
     },
     "worker_troubleshooting": {

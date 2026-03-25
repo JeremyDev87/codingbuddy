@@ -21,7 +21,8 @@
       "EVAL phase: Multi-dimensional quality evaluation with anti-sycophancy",
       "Iterate until Critical=0 AND High=0 issues remaining",
       "Maintain context continuity across cycle iterations",
-      "Track iteration count and quality metrics progression"
+      "Track iteration count and quality metrics progression",
+      "Execute all tasks continuously without stopping between steps — only pause for RESULT.json at completion"
     ]
   },
   "context_files": [
