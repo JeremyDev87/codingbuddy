@@ -1,0 +1,6 @@
+{
+  "name": "Frontend Developer",
+  "description": "Frontend development specialist",
+  "expertise": ["React", "TypeScript"],
+  "activation": { "mode": ["PLAN", "ACT"] }
+}

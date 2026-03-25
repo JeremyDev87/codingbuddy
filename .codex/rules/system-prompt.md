@@ -34,10 +34,47 @@ You have four modes of operation:
 - **Frontend Developer** (`packages/rules/.ai-rules/agents/frontend-developer.json`): PLAN/ACT modes
 - **Code Reviewer** (`packages/rules/.ai-rules/agents/code-reviewer.json`): EVAL mode
 
-**Specialist Agents** (35 available):
-- Architecture, Test Strategy, Performance, Security
-- Accessibility, SEO, i18n, Documentation
-- Code Quality, and more
+**Specialist Agents** (37 available):
+
+| Agent | Description | Expertise |
+|-------|-------------|-----------|
+| Accessibility Specialist | Accessibility expert for Planning, Implementation, and Evaluation modes - unified specialist for WCAG 2.1 AA compliance, ARIA attributes, and keyboard navigation |  |
+| Act Mode Agent | ACT mode agent - specialized for actual implementation execution |  |
+| Agent Architect | Primary Agent for creating, validating, and managing AI agent configurations |  |
+| AI/ML Engineer | AI/ML expert for Planning, Implementation, and Evaluation modes - unified specialist for LLM integration, prompt engineering, RAG architecture, AI safety, and testing non-deterministic systems |  |
+| Architecture Specialist | Architecture expert for Planning, Implementation, and Evaluation modes - unified specialist for layer placement, dependency direction, and type safety |  |
+| Auto Mode Agent | AUTO mode agent - autonomous PLAN → ACT → EVAL cycle until quality targets met |  |
+| Backend Developer | Language-agnostic backend specialist with Clean Architecture, TDD, and security focus. Supports Node.js, Python, Go, Java, and other backend stacks. |  |
+| Code Quality Specialist | Code quality expert for Planning, Implementation, and Evaluation modes - unified specialist for SOLID principles, DRY, complexity analysis, and design patterns |  |
+| Code Reviewer | Senior software engineer specializing in comprehensive code quality evaluation and improvement recommendations |  |
+| Data Engineer | Data specialist focused on database design, schema optimization, migrations, and analytics query optimization. Handles data modeling, ETL patterns, and reporting data structures. |  |
+| Data Scientist | Data science specialist for exploratory data analysis, statistical modeling, ML model development, and data visualization. Handles EDA, feature engineering, model training, and Jupyter notebook development. |  |
+| DevOps Engineer | Docker, Datadog monitoring, and Next.js deployment specialist |  |
+| Documentation Specialist | Documentation expert for Planning, Implementation, and Evaluation modes - unified specialist for documentation planning, code comments, type definitions, and documentation quality assessment |  |
+| Eval Mode Agent | EVAL mode agent - specialized for code quality evaluation and improvement suggestions |  |
+| Event Architecture Specialist | Event-driven architecture specialist for Planning, Implementation, and Evaluation modes - unified specialist for message queues, event sourcing, CQRS, real-time communication, distributed transactions, and event schema management |  |
+| Frontend Developer | Modern React/Next.js specialist with Server Components/Actions, TDD, and accessibility focus |  |
+| i18n Specialist | Internationalization expert for Planning, Implementation, and Evaluation modes - unified specialist for i18n library setup, translation key structure, formatting, and RTL support |  |
+| Integration Specialist | External service integration specialist for Planning, Implementation, and Evaluation modes - unified specialist for API integrations, webhooks, OAuth flows, and failure isolation patterns |  |
+| Migration Specialist | Cross-cutting migration coordinator for legacy system modernization, framework upgrades, database migrations, and API versioning - unified specialist for Strangler Fig, Branch by Abstraction, and zero-downtime migration patterns |  |
+| Mobile Developer | Cross-platform and native mobile specialist supporting React Native, Flutter, iOS (Swift/SwiftUI), and Android (Kotlin/Compose). Focuses on mobile-specific patterns, performance, and platform guidelines. |  |
+| Observability Specialist | Observability expert for Planning, Implementation, and Evaluation modes - unified specialist for vendor-neutral monitoring, distributed tracing, structured logging, SLI/SLO frameworks, and alerting patterns |  |
+| Parallel Orchestrator | Orchestrates parallel execution of multiple GitHub issues using taskMaestro with file-overlap validation, Wave grouping, and AUTO mode workers |  |
+| Performance Specialist | Performance expert for Planning, Implementation, and Evaluation modes - unified specialist for bundle size optimization, rendering optimization, and Core Web Vitals |  |
+| Plan Mode Agent | PLAN mode agent - specialized for work planning and design |  |
+| Plan Reviewer | Reviews implementation plans for quality, completeness, and feasibility before execution |  |
+| Platform Engineer | Cloud-native infrastructure expert for Planning, Implementation, and Evaluation modes - unified specialist for Infrastructure as Code, Kubernetes orchestration, multi-cloud strategy, GitOps workflows, cost optimization, and disaster recovery |  |
+| Security Engineer | Primary Agent for implementing security features, fixing vulnerabilities, and applying security best practices in code |  |
+| Security Specialist | Security expert for Planning, Implementation, and Evaluation modes - unified specialist for authentication, authorization, and security vulnerability prevention |  |
+| SEO Specialist | SEO expert for Planning, Implementation, and Evaluation modes - unified specialist for metadata, structured data, and search engine optimization |  |
+| Software Engineer | General-purpose implementation engineer — any language, any domain, TDD-first |  |
+| Solution Architect | High-level system design and architecture planning specialist |  |
+| Systems Developer | Primary Agent for systems programming, low-level optimization, native code development, and performance-critical implementations |  |
+| Technical Planner | Low-level implementation planning with TDD and bite-sized tasks |  |
+| Test Engineer | Primary Agent for TDD cycle execution, test writing, and coverage improvement across all test types |  |
+| Test Strategy Specialist | Test strategy expert for Planning, Implementation, and Evaluation modes - unified specialist for TDD vs Test-After decisions, test coverage planning, and test quality assessment |  |
+| Tooling Engineer | Project configuration, build tools, and development environment specialist |  |
+| UI/UX Designer | UI/UX design specialist based on universal design principles and UX best practices - focuses on aesthetics, usability, and user experience rather than specific design system implementations |  |
 
 For complete workflow details, see [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
 
@@ -95,7 +132,6 @@ Follow the **Red → Green → Refactor** cycle:
 - DRY (Don't Repeat Yourself)
 - Keep methods small (10-20 lines max)
 - Minimize state, prefer pure functions
-- Tidy First: Separate structural vs behavioral changes
 
 For complete augmented coding guide, see [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
 
@@ -105,19 +141,6 @@ For complete augmented coding guide, see [packages/rules/.ai-rules/rules/augment
 
 **Source**: [packages/rules/.ai-rules/agents/](../../packages/rules/.ai-rules/agents/)
 
-All specialist agents are defined in `packages/rules/.ai-rules/agents/` directory:
-
-| Agent | Expertise | Use Cases |
-|-------|-----------|-----------|
-| Frontend Developer | React/Next.js, TDD, design system | Component implementation, Server Actions |
-| Code Reviewer | Quality evaluation, architecture | Code review, production readiness |
-| Security Specialist | OAuth 2.0, JWT, XSS/CSRF | Authentication, security audit |
-| Accessibility Specialist | WCAG 2.1 AA, ARIA | A11y compliance, screen readers |
-| Performance Specialist | Bundle size, Core Web Vitals | Performance tuning, optimization |
-| +7 more specialists | Various domains | See agents README |
-
-For complete agent documentation, see [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
-
 ### Specialist Execution
 
 When `parse_mode` returns `parallelAgentsRecommendation` or `dispatchReady`, execute specialists **sequentially**:
@@ -125,12 +148,6 @@ When `parse_mode` returns `parallelAgentsRecommendation` or `dispatchReady`, exe
 1. Announce specialists being analyzed
 2. For each specialist: apply its system prompt as analysis context, analyze, record findings
 3. Consolidate all findings into a unified summary
-
-**Preferred workflow:**
-- If `dispatchReady.parallelAgents[]` exists: use `dispatchParams.prompt` directly
-- Otherwise: call `prepare_parallel_agents` MCP tool to get system prompts
-
-**Note:** `subagent_type` and `run_in_background` are Claude Code-specific parameters — ignore them in Codex.
 
 See [packages/rules/.ai-rules/adapters/codex.md](../../packages/rules/.ai-rules/adapters/codex.md#specialist-agents-execution) for the full workflow.
 
@@ -199,14 +216,6 @@ codingbuddy MCP 서버 사용 시 `CODINGBUDDY_PROJECT_ROOT` 환경변수를 프
 }
 ```
 
-**Project root resolution priority:**
-1. `CODINGBUDDY_PROJECT_ROOT` environment variable (highest priority)
-2. `roots/list` MCP capability (support unconfirmed in Codex)
-3. `findProjectRoot()` automatic detection (fallback)
-
-> `CODINGBUDDY_PROJECT_ROOT` 없이는 서버가 프로젝트의 `codingbuddy.config.json`을 찾지 못하여
-> `language` 등 설정이 기본값으로 동작합니다.
-
 자세한 설정 방법: [packages/rules/.ai-rules/adapters/codex.md](../../packages/rules/.ai-rules/adapters/codex.md)
 
 ---
@@ -228,73 +237,28 @@ codingbuddy MCP 서버 사용 시 `CODINGBUDDY_PROJECT_ROOT` 환경변수를 프
 | `get_agent_details` | Get detailed profile of a specific AI agent | Need agent expertise info |
 | `get_agent_system_prompt` | Get complete system prompt for a specialist agent | Before specialist analysis |
 | `prepare_parallel_agents` | Prepare specialist agents for sequential execution | EVAL mode specialist analysis |
-| `dispatch_agents` | Get dispatch params (Claude Code optimized — use `prepare_parallel_agents` instead) | Not recommended for Codex |
-| `analyze_task` | Task risk assessment, specialist recommendations, and workflow suggestions | Start of PLAN mode |
+| `dispatch_agents` | Get dispatch params (Claude Code optimized) | Not recommended for Codex |
+| `analyze_task` | Task risk assessment, specialist recommendations | Start of PLAN mode |
 | `generate_checklist` | Contextual checklists (security, accessibility, performance, testing, code-quality, SEO) | Before completing ACT/EVAL |
 | `get_project_config` | Get project tech stack, architecture, conventions, and language settings | Need project context |
 | `get_code_conventions` | Get project code conventions from tsconfig, eslint, prettier, editorconfig | Before implementing code changes |
-| `suggest_config_updates` | Analyze project and suggest config updates based on detected changes | After project setup changes |
-| `recommend_skills` | Recommend skills based on user prompt with multi-language support | Detect skill-worthy intent |
-| `get_skill` | Get full skill content by name (definition + instructions) | After recommend_skills or slash-command |
-| `list_skills` | List all available skills with optional priority filtering | Browse skill catalog |
-| `read_context` | Read context document (docs/codingbuddy/context.md) with verbosity control | Check previous mode decisions |
+| `recommend_skills` | Recommend skills based on user prompt | Detect skill-worthy intent |
+| `get_skill` | Get full skill content by name | After recommend_skills or slash-command |
+| `list_skills` | List all available skills | Browse skill catalog |
+| `read_context` | Read context document | Check previous mode decisions |
 | `update_context` | Persist decisions, notes, progress to context document | **MANDATORY** before completing each mode |
-| `cleanup_context` | Summarize older context sections to reduce document size | Context document too large |
-| `set_project_root` | ~~Set project root~~ **(deprecated — will be removed in v2.0.0)** | Use `CODINGBUDDY_PROJECT_ROOT` env var |
-| `restart_tui` | Restart TUI client when unresponsive (Claude Code only) | Not applicable in Codex |
 
 ---
 
-## 🛠️ Skills
-
-> **Note:** For the complete MCP tools reference, see the [Available MCP Tools](#-available-mcp-tools) section above. This section focuses on skill usage patterns.
-
-Skills are structured AI instructions for specialized tasks (brainstorming, TDD, debugging, planning, etc.).
-
-### Skill Access Methods
-
-**Primary (MCP Tool — works with npm install):**
-
-| Tool | Description |
-|------|-------------|
-| `recommend_skills` | Recommend skills based on user prompt with multi-language support |
-| `get_skill` | Load full skill content by name |
-| `list_skills` | List all available skills with optional filtering |
-
-**Usage pattern:**
-```
-User prompt → recommend_skills(prompt) → get_skill(recommended skillName) → follow instructions
-```
-
-**Fallback (Monorepo contributors only):**
-```bash
-cat .ai-rules/skills/<skill-name>/SKILL.md
-```
-
-> **Note:** `parse_mode` already embeds matched skill content in `included_skills` — no separate `get_skill` call needed when using mode keywords (PLAN/ACT/EVAL/AUTO).
-
-### Available Skills
-
-Highlighted skills (use `list_skills()` for the complete list):
-
-- `brainstorming` - Explore requirements before implementation
-- `test-driven-development` - TDD workflow
-- `systematic-debugging` - Debug methodically
-- `writing-plans` - Create implementation plans
-- `executing-plans` - Execute plans with checkpoints
-- `subagent-driven-development` - In-session plan execution
-- `dispatching-parallel-agents` - Handle parallel tasks
-- `frontend-design` - Build production-grade UI
-- `pr-all-in-one` - Unified commit and PR workflow
-
----
-
-## 📖 Full Documentation
+## Full Documentation
 
 For comprehensive guides:
-- **Core Rules**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
-- **Project Setup**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
-- **Augmented Coding**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
+- **augmented-coding**: [packages/rules/.ai-rules/rules/augmented-coding.md](../../packages/rules/.ai-rules/rules/augmented-coding.md)
+- **clarification-guide**: [packages/rules/.ai-rules/rules/clarification-guide.md](../../packages/rules/.ai-rules/rules/clarification-guide.md)
+- **core**: [packages/rules/.ai-rules/rules/core.md](../../packages/rules/.ai-rules/rules/core.md)
+- **parallel-execution**: [packages/rules/.ai-rules/rules/parallel-execution.md](../../packages/rules/.ai-rules/rules/parallel-execution.md)
+- **project**: [packages/rules/.ai-rules/rules/project.md](../../packages/rules/.ai-rules/rules/project.md)
+- **structured-reasoning-guide**: [packages/rules/.ai-rules/rules/structured-reasoning-guide.md](../../packages/rules/.ai-rules/rules/structured-reasoning-guide.md)
 - **Agents System**: [packages/rules/.ai-rules/agents/README.md](../../packages/rules/.ai-rules/agents/README.md)
 - **Integration Guide**: [packages/rules/.ai-rules/adapters/codex.md](../../packages/rules/.ai-rules/adapters/codex.md)
 

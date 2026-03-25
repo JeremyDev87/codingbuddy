@@ -55,6 +55,10 @@ Key skill triggers:
 
 All details in Single Source of Truth:
 
-- [`packages/rules/.ai-rules/rules/core.md`](../../packages/rules/.ai-rules/rules/core.md)
 - [`packages/rules/.ai-rules/rules/augmented-coding.md`](../../packages/rules/.ai-rules/rules/augmented-coding.md)
+- [`packages/rules/.ai-rules/rules/clarification-guide.md`](../../packages/rules/.ai-rules/rules/clarification-guide.md)
+- [`packages/rules/.ai-rules/rules/core.md`](../../packages/rules/.ai-rules/rules/core.md)
+- [`packages/rules/.ai-rules/rules/parallel-execution.md`](../../packages/rules/.ai-rules/rules/parallel-execution.md)
+- [`packages/rules/.ai-rules/rules/project.md`](../../packages/rules/.ai-rules/rules/project.md)
+- [`packages/rules/.ai-rules/rules/structured-reasoning-guide.md`](../../packages/rules/.ai-rules/rules/structured-reasoning-guide.md)
 - [`packages/rules/.ai-rules/agents/README.md`](../../packages/rules/.ai-rules/agents/README.md)

@@ -1,0 +1,6 @@
+{
+  "name": "Backend Developer",
+  "description": "Backend development specialist",
+  "expertise": ["Node.js", "REST APIs"],
+  "activation": { "mode": ["PLAN", "ACT"] }
+}
