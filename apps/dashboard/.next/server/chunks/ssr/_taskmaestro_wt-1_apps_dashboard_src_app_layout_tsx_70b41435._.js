@@ -1,3 +1,0 @@
-module.exports=[10619,a=>{"use strict";var b=a.i(58430);function c({children:a}){return(0,b.jsx)("html",{lang:"en",children:(0,b.jsx)("body",{className:"min-h-screen antialiased",children:a})})}a.s(["default",()=>c,"metadata",0,{title:"Codingbuddy Dashboard",description:"Execution history, cost tracking, and agent activity dashboard"}])}];
-
-//# sourceMappingURL=_taskmaestro_wt-1_apps_dashboard_src_app_layout_tsx_70b41435._.js.map
