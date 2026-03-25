@@ -60,6 +60,7 @@ export function createInitialDashboardState(): DashboardState {
     contextNotes: [],
     contextMode: null,
     contextStatus: null,
+    discussionRounds: [],
   };
 }
 

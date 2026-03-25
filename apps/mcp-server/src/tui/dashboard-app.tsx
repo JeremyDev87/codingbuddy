@@ -7,6 +7,7 @@ import { useTick } from './hooks/use-tick';
 import { useDashboardState } from './hooks/use-dashboard-state';
 import { HeaderBar } from './components/HeaderBar';
 import { FlowMap } from './components/FlowMap';
+import { AgentDiscussionPanel } from './components/AgentDiscussionPanel';
 import { FocusedAgentPanel } from './components/FocusedAgentPanel';
 import { ChecklistPanel } from './components/ChecklistPanel';
 import { StageHealthBar } from './components/StageHealthBar';
@@ -77,24 +78,13 @@ export function DashboardApp({
             tick={tick}
             now={now}
           />
-          <FlowMap
-            agents={state.agents}
-            edges={state.edges}
-            layoutMode={layoutMode}
-            width={grid.flowMap.width}
-            height={grid.flowMap.height}
-            activeStage={state.currentMode}
-            tick={tick}
-            now={now}
-          />
-        </Box>
-      ) : (
-        <Box
-          flexDirection="row"
-          width={grid.total.width}
-          height={grid.checklistPanel.height + grid.focusedAgent.height}
-        >
-          <Box flexDirection="column" width={grid.flowMap.width}>
+          {state.discussionRounds.length > 0 ? (
+            <AgentDiscussionPanel
+              rounds={state.discussionRounds}
+              width={grid.flowMap.width}
+              height={grid.flowMap.height}
+            />
+          ) : (
             <FlowMap
               agents={state.agents}
               edges={state.edges}
@@ -105,6 +95,33 @@ export function DashboardApp({
               tick={tick}
               now={now}
             />
+          )}
+        </Box>
+      ) : (
+        <Box
+          flexDirection="row"
+          width={grid.total.width}
+          height={grid.checklistPanel.height + grid.focusedAgent.height}
+        >
+          <Box flexDirection="column" width={grid.flowMap.width}>
+            {state.discussionRounds.length > 0 ? (
+              <AgentDiscussionPanel
+                rounds={state.discussionRounds}
+                width={grid.flowMap.width}
+                height={grid.flowMap.height}
+              />
+            ) : (
+              <FlowMap
+                agents={state.agents}
+                edges={state.edges}
+                layoutMode={layoutMode}
+                width={grid.flowMap.width}
+                height={grid.flowMap.height}
+                activeStage={state.currentMode}
+                tick={tick}
+                now={now}
+              />
+            )}
             <ActivityVisualizer
               currentMode={state.currentMode}
               focusedAgent={focusedAgent}

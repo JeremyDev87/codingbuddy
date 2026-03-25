@@ -196,6 +196,7 @@ describe('tui/dashboard-types', () => {
         contextNotes: [],
         contextMode: null,
         contextStatus: null,
+        discussionRounds: [],
       };
       expect(state.toolInvokeCount).toBe(0);
       expect(state.outputStats).toEqual({ files: 0, commits: 0 });
@@ -224,6 +225,7 @@ describe('tui/dashboard-types', () => {
         contextNotes: [],
         contextMode: null,
         contextStatus: null,
+        discussionRounds: [],
       };
       expect(state.agentActivateCount).toBe(0);
       expect(state.skillInvokeCount).toBe(0);

@@ -7,6 +7,14 @@ export {
   layoutStageColumns,
   layoutAgentNodes,
 } from './flow-map.pure';
+export { AgentDiscussionPanel, type AgentDiscussionPanelProps } from './AgentDiscussionPanel';
+export {
+  renderDiscussionPanel,
+  renderOpinionLine,
+  renderCrossReviewLine,
+  renderConsensusLine,
+  renderStanceHistory,
+} from './agent-discussion-panel.pure';
 export { FocusedAgentPanel, type FocusedAgentPanelProps } from './FocusedAgentPanel';
 export { ChecklistPanel, type ChecklistPanelProps } from './ChecklistPanel';
 export { resolveChecklistTasks } from './checklist-panel.pure';

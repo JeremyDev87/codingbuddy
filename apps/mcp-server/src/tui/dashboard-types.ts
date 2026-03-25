@@ -5,6 +5,7 @@
  * task progress, stage health, and event logs.
  */
 import type { Mode } from './types';
+import type { DiscussionRound } from '../collaboration/types';
 
 /**
  * Layout breakpoints based on terminal column width.
@@ -178,6 +179,7 @@ export interface DashboardState {
   contextNotes: string[];
   contextMode: string | null;
   contextStatus: string | null;
+  discussionRounds: DiscussionRound[];
 }
 
 /**
