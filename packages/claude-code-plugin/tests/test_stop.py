@@ -103,3 +103,97 @@ class TestSessionEndNotification:
         _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
 
         mock_notify.assert_not_called()
+
+
+class TestAutoLearningSuggestions:
+    """Tests for auto-learning pattern detection wiring (#929)."""
+
+    @patch("rule_suggester.RuleSuggester")
+    @patch("pattern_detector.PatternDetector")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_suggestions_included_in_summary(
+        self, mock_stats_cls, mock_db_cls, mock_detector_cls, mock_suggester_cls,
+        monkeypatch, capsys,
+    ):
+        """Should include auto-learning suggestions in systemMessage."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 5 tools"
+        mock_stats_cls.return_value = mock_stats
+
+        mock_db = MagicMock()
+        mock_db_cls.return_value = mock_db
+
+        mock_detector = MagicMock()
+        mock_detector.detect_patterns.return_value = [
+            {"tool_name": "Bash", "input_summary": "rm -rf", "failure_count": 5, "session_count": 3}
+        ]
+        mock_detector_cls.return_value = mock_detector
+
+        mock_suggester = MagicMock()
+        mock_suggester.suggest_rules.return_value = [
+            {"title": "Repeated Bash failure: rm -rf", "description": "Failed 5 times"}
+        ]
+        mock_suggester_cls.return_value = mock_suggester
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        result = _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        assert result is not None
+        msg = result["systemMessage"]
+        assert "Auto-Learning Suggestions" in msg
+        assert "Repeated Bash failure: rm -rf" in msg
+        mock_detector.detect_patterns.assert_called_once()
+        mock_suggester.suggest_rules.assert_called_once()
+
+    @patch("rule_suggester.RuleSuggester")
+    @patch("pattern_detector.PatternDetector")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_no_suggestions_when_no_patterns(
+        self, mock_stats_cls, mock_db_cls, mock_detector_cls, mock_suggester_cls,
+        monkeypatch, capsys,
+    ):
+        """Should not add suggestions section when no patterns detected."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 3 tools"
+        mock_stats_cls.return_value = mock_stats
+
+        mock_db = MagicMock()
+        mock_db_cls.return_value = mock_db
+
+        mock_detector = MagicMock()
+        mock_detector.detect_patterns.return_value = []
+        mock_detector_cls.return_value = mock_detector
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        result = _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        assert result is not None
+        assert "Auto-Learning" not in result["systemMessage"]
+        mock_suggester_cls.assert_not_called()
+
+    @patch("pattern_detector.PatternDetector")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_analysis_failure_does_not_block_stop(
+        self, mock_stats_cls, mock_db_cls, mock_detector_cls,
+        monkeypatch, capsys,
+    ):
+        """Should never block session stop even if pattern analysis fails."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 2 tools"
+        mock_stats_cls.return_value = mock_stats
+
+        mock_db = MagicMock()
+        mock_db_cls.return_value = mock_db
+
+        mock_detector_cls.side_effect = RuntimeError("DB corrupted")
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        result = _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        # Hook should still return summary without suggestions
+        assert result is not None
+        assert "Session: 2 tools" in result["systemMessage"]
+        assert "Auto-Learning" not in result["systemMessage"]

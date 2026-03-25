@@ -40,6 +40,30 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Auto-learning: analyze session patterns (#929)
+        try:
+            from pattern_detector import PatternDetector
+            from history_db import HistoryDB
+
+            al_db = HistoryDB()
+            detector = PatternDetector(db=al_db)
+            patterns = detector.detect_patterns()
+            if patterns:
+                from rule_suggester import RuleSuggester
+
+                suggester = RuleSuggester()
+                suggestions = suggester.suggest_rules(patterns)
+                if suggestions:
+                    summary += "\n\n--- Auto-Learning Suggestions ---\n"
+                    for s in suggestions:
+                        summary += f"- {s['title']}\n"
+            try:
+                al_db.close()
+            except Exception:
+                pass
+        except Exception:
+            pass  # Never block session stop
+
         # Notify on session end (#829)
         try:
             _maybe_notify_session_end(summary)
