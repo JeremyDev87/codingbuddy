@@ -62,3 +62,8 @@ docs/codingbuddy/*
 .taskmaestro/
 RESULT.json
 TASK.md
+
+# Runtime artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
