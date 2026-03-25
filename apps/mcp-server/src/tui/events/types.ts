@@ -6,6 +6,7 @@
  */
 import type { Mode } from '../types';
 import type { EdgeType } from '../dashboard-types';
+import type { DiscussionRound } from '../../collaboration/types';
 import type { AgentMetadata } from './agent-metadata.types';
 
 /**
@@ -26,6 +27,7 @@ export const TUI_EVENTS = Object.freeze({
   OBJECTIVE_SET: 'objective:set',
   SESSION_RESET: 'session:reset',
   CONTEXT_UPDATED: 'context:updated',
+  DISCUSSION_ROUND_ADDED: 'discussion:round-added',
 } as const);
 
 export type TuiEventName = (typeof TUI_EVENTS)[keyof typeof TUI_EVENTS];
@@ -113,6 +115,11 @@ export interface ContextUpdatedEvent {
   status: string | null;
 }
 
+/** Payload when a discussion round is added from specialist results */
+export interface DiscussionRoundAddedEvent {
+  round: DiscussionRound;
+}
+
 /**
  * Maps event names to their payload types for type-safe emit/subscribe.
  */
@@ -130,4 +137,5 @@ export interface TuiEventMap {
   [TUI_EVENTS.OBJECTIVE_SET]: ObjectiveSetEvent;
   [TUI_EVENTS.SESSION_RESET]: SessionResetEvent;
   [TUI_EVENTS.CONTEXT_UPDATED]: ContextUpdatedEvent;
+  [TUI_EVENTS.DISCUSSION_ROUND_ADDED]: DiscussionRoundAddedEvent;
 }

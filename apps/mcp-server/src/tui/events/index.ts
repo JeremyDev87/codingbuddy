@@ -20,6 +20,7 @@ export {
   type ObjectiveSetEvent,
   type SessionResetEvent,
   type ContextUpdatedEvent,
+  type DiscussionRoundAddedEvent,
 } from './types';
 export {
   type AgentMetadata,

@@ -25,3 +25,11 @@ export {
   formatConsensus,
   formatDiscussionRound,
 } from './terminal-formatter';
+export {
+  mapSeverityToStance,
+  convertSpecialistResult,
+  convertSpecialistResults,
+  type FindingSeverity,
+  type SpecialistFinding,
+  type SpecialistResult,
+} from './opinion-adapter';

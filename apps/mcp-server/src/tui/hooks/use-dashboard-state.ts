@@ -24,6 +24,7 @@ import {
   type ObjectiveSetEvent,
   type SessionResetEvent,
   type ContextUpdatedEvent,
+  type DiscussionRoundAddedEvent,
 } from '../events';
 import { selectFocusedAgent } from './use-focus-agent';
 
@@ -78,6 +79,7 @@ export type DashboardAction =
   | { type: 'OBJECTIVE_SET'; payload: ObjectiveSetEvent }
   | { type: 'SESSION_RESET'; payload: SessionResetEvent }
   | { type: 'CONTEXT_UPDATED'; payload: ContextUpdatedEvent }
+  | { type: 'ADD_DISCUSSION_ROUND'; payload: DiscussionRoundAddedEvent }
   | { type: 'CLEANUP_STALE_AGENTS'; payload: { now: number; ttlMs: number } };
 
 function cloneAgents(agents: Map<string, DashboardNode>): Map<string, DashboardNode> {
@@ -301,6 +303,13 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       };
     }
 
+    case 'ADD_DISCUSSION_ROUND': {
+      return {
+        ...state,
+        discussionRounds: [...state.discussionRounds, action.payload.round],
+      };
+    }
+
     case 'SESSION_RESET':
       return createInitialDashboardState();
 
@@ -375,6 +384,8 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       dispatch({ type: 'SESSION_RESET', payload: p });
     const onContextUpdated = (p: ContextUpdatedEvent) =>
       dispatch({ type: 'CONTEXT_UPDATED', payload: p });
+    const onDiscussionRoundAdded = (p: DiscussionRoundAddedEvent) =>
+      dispatch({ type: 'ADD_DISCUSSION_ROUND', payload: p });
 
     eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
     eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, onDeactivated);
@@ -389,6 +400,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
     eventBus.on(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
     eventBus.on(TUI_EVENTS.SESSION_RESET, onSessionReset);
     eventBus.on(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
+    eventBus.on(TUI_EVENTS.DISCUSSION_ROUND_ADDED, onDiscussionRoundAdded);
 
     return () => {
       eventBus.off(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
@@ -404,6 +416,7 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       eventBus.off(TUI_EVENTS.OBJECTIVE_SET, onObjectiveSet);
       eventBus.off(TUI_EVENTS.SESSION_RESET, onSessionReset);
       eventBus.off(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
+      eventBus.off(TUI_EVENTS.DISCUSSION_ROUND_ADDED, onDiscussionRoundAdded);
     };
   }, [eventBus]);
 

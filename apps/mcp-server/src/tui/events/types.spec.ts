@@ -18,7 +18,7 @@ import {
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 13 event names', () => {
+    it('should define all 14 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -33,6 +33,7 @@ describe('tui/events/types', () => {
         OBJECTIVE_SET: 'objective:set',
         SESSION_RESET: 'session:reset',
         CONTEXT_UPDATED: 'context:updated',
+        DISCUSSION_ROUND_ADDED: 'discussion:round-added',
       });
     });
 
@@ -187,6 +188,7 @@ describe('tui/events/types', () => {
         'objective:set': { objective: 'implement auth feature' },
         'session:reset': { reason: 'new-plan-session' },
         'context:updated': { decisions: ['Use JWT'], notes: [], mode: null, status: null },
+        'discussion:round-added': { round: { roundNumber: 1, opinions: [], crossReviews: [] } },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
     });
