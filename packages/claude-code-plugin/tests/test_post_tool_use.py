@@ -1,10 +1,11 @@
-"""Tests for hooks/post-tool-use.py — PostToolUse hook skeleton."""
+"""Tests for hooks/post-tool-use.py — PostToolUse hook with notification wiring."""
 import importlib
 import importlib.util
 import json
 import os
 import sys
 import io
+from unittest.mock import patch, MagicMock
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "hooks", "lib"))
@@ -76,3 +77,61 @@ class TestPostToolUseSkeleton:
         with pytest.raises(SystemExit) as exc_info:
             ptu.handle_post_tool_use()
         assert exc_info.value.code == 0
+
+
+class TestPrCreatedNotification:
+    """Tests for PR creation detection and notification (#829)."""
+
+    @patch("notifications.notify")
+    @patch("config.get_config")
+    def test_detects_gh_pr_create(self, mock_config, mock_notify, monkeypatch, capsys):
+        """Should call notify when gh pr create is detected."""
+        mock_config.return_value = {
+            "notifications": {
+                "events": {"pr_created": True},
+                "platforms": ["slack"],
+            }
+        }
+        mock_notify.return_value = {"slack": True}
+
+        result = _run_hook(
+            {
+                "tool_name": "Bash",
+                "tool_input": {"command": 'gh pr create --title "test" --body "body"'},
+                "tool_output": "https://github.com/org/repo/pull/42\n",
+            },
+            monkeypatch, capsys,
+        )
+        assert result is None
+        mock_notify.assert_called_once()
+        event = mock_notify.call_args[0][0]
+        assert event.event_type == "pr_created"
+        assert event.url == "https://github.com/org/repo/pull/42"
+
+    @patch("notifications.notify")
+    @patch("config.get_config")
+    def test_ignores_non_pr_commands(self, mock_config, mock_notify, monkeypatch, capsys):
+        """Should not notify for non-PR Bash commands."""
+        result = _run_hook(
+            {
+                "tool_name": "Bash",
+                "tool_input": {"command": "git status"},
+            },
+            monkeypatch, capsys,
+        )
+        assert result is None
+        mock_notify.assert_not_called()
+
+    @patch("notifications.notify")
+    @patch("config.get_config")
+    def test_ignores_non_bash_tools(self, mock_config, mock_notify, monkeypatch, capsys):
+        """Should not notify for non-Bash tool calls."""
+        result = _run_hook(
+            {
+                "tool_name": "Read",
+                "tool_input": {"file_path": "/some/file"},
+            },
+            monkeypatch, capsys,
+        )
+        assert result is None
+        mock_notify.assert_not_called()

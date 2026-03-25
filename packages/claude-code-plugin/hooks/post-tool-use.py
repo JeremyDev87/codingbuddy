@@ -49,7 +49,48 @@ def handle_post_tool_use(data: dict):
     except Exception:
         pass  # Never block tool execution
 
+    # Notify on PR creation (#829)
+    try:
+        _maybe_notify_pr_created(data)
+    except Exception:
+        pass  # Never block tool execution
+
     return None
+
+
+def _maybe_notify_pr_created(data: dict):
+    """Detect PR creation and send notification if configured."""
+    tool_name = data.get("tool_name", "")
+    tool_input = data.get("tool_input", {})
+    tool_output = data.get("tool_output", "")
+
+    # Detect: Bash tool running "gh pr create"
+    command = ""
+    if tool_name == "Bash":
+        command = tool_input.get("command", "")
+    if "gh pr create" not in command:
+        return
+
+    # Extract PR URL from output (gh pr create prints the URL)
+    pr_url = ""
+    if isinstance(tool_output, str):
+        for line in tool_output.strip().splitlines():
+            line = line.strip()
+            if line.startswith("https://github.com/") and "/pull/" in line:
+                pr_url = line
+                break
+
+    from config import get_config
+    from notifications import NotificationEvent, notify
+
+    config = get_config(os.getcwd())
+    event = NotificationEvent(
+        event_type="pr_created",
+        title="PR Created",
+        message=f"New PR created: {pr_url or command}",
+        url=pr_url or None,
+    )
+    notify(event, config)
 
 
 if __name__ == "__main__":

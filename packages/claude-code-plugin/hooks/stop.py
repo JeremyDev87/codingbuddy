@@ -40,6 +40,12 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Notify on session end (#829)
+        try:
+            _maybe_notify_session_end(summary)
+        except Exception:
+            pass  # Never block session stop
+
         if summary:
             return {
                 "systemMessage": summary,
@@ -48,6 +54,23 @@ def handle_stop(data: dict):
         pass  # Never block session stop
 
     return None
+
+
+def _maybe_notify_session_end(summary: str):
+    """Send session summary notification if configured."""
+    if not summary:
+        return
+
+    from config import get_config
+    from notifications import NotificationEvent, notify
+
+    config = get_config(os.getcwd())
+    event = NotificationEvent(
+        event_type="session_end",
+        title="Session Complete",
+        message=summary[:500],  # Truncate for webhook limits
+    )
+    notify(event, config)
 
 
 if __name__ == "__main__":
