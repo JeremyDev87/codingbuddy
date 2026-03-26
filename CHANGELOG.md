@@ -5,6 +5,133 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-03-26
+
+### ⚠️ Paradigm Shift: Library → Framework
+
+Codingbuddy v5.0 transitions from an MCP-only rules library to a **full AI coding framework** with Claude Code Plugin as the primary delivery mechanism, harness engineering via hooks, and autonomous execution loops.
+
+**What changed:**
+- **Primary entry point** is now the Claude Code Plugin (MCP server remains for other AI tools)
+- **Harness engineering**: PreToolUse/PostToolUse hooks enforce quality gates automatically
+- **Autonomous loops**: Ralph Loop, Autopilot, and Ultrawork for self-correcting execution
+- **Agent collaboration**: Discussion engine with opinion protocol for multi-agent debates
+- **Observability**: Web dashboard, execution history DB, and Slack/Discord/Telegram notifications
+
+### Added
+
+- **Plugin System**: PreToolUse and PostToolUse hook lifecycle with crash-safe decorator (#824)
+- **Plugin System**: hooks.json registration format with mtime-cached config loader (#824)
+- **Plugin System**: Quality gate enforcement via PreToolUse hook (#824)
+- **Plugin System**: Auto-learning pattern detection engine (#816)
+- **Plugin System**: Per-agent persistent memory across sessions (#947)
+- **Plugin System**: Conflict predictor for git history collision analysis (#946)
+- **Plugin System**: Adaptive hook timeout tracking (#945)
+- **Plugin System**: Smart pre-commit test runner for related test suggestions
+- **Plugin System**: Health check diagnostic module
+- **Plugin System**: System prompt injection module (#828)
+- **Plugin System**: Event-driven notification service for Slack, Discord, Telegram (#829)
+- **Harness**: Wire auto-learning pattern detector into stop hook (#929)
+- **Harness**: File-based event bridge for Plugin→MCP communication
+- **Harness**: Lazy mtime-based file watcher module (#826)
+- **Harness**: SQLite execution history database (#827)
+- **Harness**: Operational statistics tracker (#825)
+- **Harness**: Rule effectiveness tracking with MCP tool (#948)
+- **Dashboard**: Web dashboard for execution history and cost tracking (#822)
+- **TUI**: Agent collaboration visualization with debates and consensus (#831)
+- **TUI**: Collaboration data flow pipeline (EVAL → TUI)
+- **MCP Server**: Unified agent registry in `dispatch_agents`
+- **MCP Server**: AgentOpinion protocol and discussion engine
+- **MCP Server**: Plan-reviewer as automatic gate after PLAN completion
+- **MCP Server**: Real-time specialist execution visibility via Teams messaging
+- **MCP Server**: Session issue tracking in `update_context`
+- **MCP Server**: Deep thinking instructions in `parse_mode` PLAN response
+- **MCP Server**: Teams execution strategy in `dispatch_agents`
+- **MCP Server**: Dispatch strength for specialist recommendations
+- **MCP Server**: `validate_parallel_issues` tool for file-overlap detection
+- **Pipeline**: Sequential task pipeline engine with data passing (#814)
+- **CLI**: `codingbuddy init` project setup wizard
+- **CLI**: npx codingbuddy CLI entry point
+- **Agents**: Plan-reviewer agent and plan-and-review skill
+- **Agents**: Parallel-orchestrator agent definition
+- **Agents**: Unique color identifiers for all 35 agent definitions
+- **Skills**: 40+ new and enhanced skills including taskmaestro, deepsearch, git-master, build-fix, finishing-a-development-branch, verification-before-completion, requesting-code-review, receiving-code-review, using-git-worktrees, writing-plans, skill-creator, parallel-issues, plan-to-issues, test-coverage-gate, cross-repo-issues, retro, tmux-master, agent-discussion-panel, cost-budget-management
+- **Skills**: Argument hints, allowed-tools, and context fork fields for skill metadata
+- **Sync**: Multi-tool settings sync automation (#821)
+- **Wiki**: Auto-generated project wiki with architecture map, API inventory, and decision log
+- **Rules**: Parallel execution guidelines
+- **Rules**: Continuous execution directive for parallel workers
+- **Rules**: Auto-dispatch enforcement rule for specialists
+- **Rules**: Operational safety rules
+- **Rules**: Permission presets for parallel-execution and development workflows
+- **Keyword**: Pattern-based primary agent resolution via `explicit_patterns`
+
+### Changed
+
+- **Architecture**: Primary delivery shifted from MCP-only to Claude Code Plugin + MCP
+- **Agent Discussion**: Wired agent discussion config into EVAL mode
+
+### Fixed
+
+- **Dashboard**: Add PRAGMA busy_timeout and schema integration tests
+- **MCP Server**: Remove yarn prefix from scripts to prevent state file crash
+- **Landing Page**: Make #agents-all anchor link functional
+- **Rules**: Fix markdownlint ordered list prefix in writing-plans SKILL.md (#913)
+- **Skills**: Prevent stale RESULT.json/TASK.md pollution in worktrees
+- **Build**: Remove stale RESULT.json/TASK.md from master and add to gitignore
+
+### Performance
+
+- **Plugin**: Reduce PostToolUse hook per-call I/O with singleton and batching
+
+### Docs
+
+- **Rules**: Translate all Korean text to English in .ai-rules
+- **Rules**: Enforce API documentation verification in PLAN phase (#913)
+- **Rules**: Add Output Language rule for English-only artifacts
+- **Skills**: Batch update taskMaestro process improvements (#901–#916)
+
+---
+
+## [4.5.0] - 2026-03-12
+
+### Added
+
+- **MCP**: TaskMaestro dispatch strategy in `dispatch_agents` tool
+- **MCP**: `executionStrategy` parameter for agent dispatch
+- **MCP**: TaskMaestro installation detection and `availableStrategies` in `parse_mode`
+- **TUI**: `useTick` heartbeat timer hook (#670)
+- **TUI**: 7 pure live display functions (#669)
+- **TUI**: ActivitySample with rawTimestamp and activityHistory (#671)
+- **TUI**: Sparkline + throughput in StageHealthBar (#675)
+- **TUI**: Animated spinner + live clock in HeaderBar (#673)
+- **TUI**: Pulse icons + elapsed labels in FlowMap (#676)
+- **TUI**: Elapsed timer + relative timestamps in FocusedAgentPanel (#674)
+- **Rules**: Path Safety rules for monorepo (#690)
+- **Rules**: Error Recovery policy with recoverable/unrecoverable distinction (#689)
+- **Landing Page**: TUI Dashboard section in README
+
+### Changed
+
+- **TUI**: Deprecate `useClock`, wire `useTick` exports (#672)
+
+### Fixed
+
+- **TUI**: Correct `computeThroughput` timestamp unit from ms to seconds
+- **TUI**: Stabilize `now` via useMemo to prevent non-deterministic re-renders
+- **TUI**: Remove duplicate tick/now props in FocusedAgentPanelProps
+- **TUI**: Mock useTick in integration tests to prevent CI timing issues
+- **MCP**: Replace `require()` with ESM import in sse-auth guard test
+- **MCP**: Improve SseAuthGuard timing-safe token comparison
+- **Landing Page**: Migrate CSP from unsafe-inline to nonce-based
+- **Release**: Add .mcp.json to bump-version and verify-release scripts
+
+### Tests
+
+- TUI coverage for useTick, FlowMap, FocusedAgentPanel
+
+---
+
 ## [4.4.0] - 2026-03-04
 
 ### Added

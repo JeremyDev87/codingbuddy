@@ -83,6 +83,73 @@ AI에게 코드를 요청하면 단일 관점만 얻게 됩니다. 보안 검토
 
 ---
 
+## 빠른 시작
+
+**Node.js 18+ 및 npm 9+ (또는 yarn 4+) 필요**
+
+### Claude Code 플러그인 (권장)
+
+가장 빠른 시작 방법 — 하네스 엔지니어링, 자율 루프, 에이전트 협업을 포함한 전체 프레임워크:
+
+```bash
+# 플러그인 설치
+claude plugin install codingbuddy@jeremydev87
+
+# 전체 기능을 위한 MCP 서버 설치
+npm install -g codingbuddy
+
+# 프로젝트 초기화
+npx codingbuddy init
+```
+
+| 문서 | 설명 |
+|------|------|
+| [플러그인 설정 가이드](docs/plugin-guide.md) | 설치 및 설정 |
+| [빠른 참조](docs/plugin-quick-reference.md) | 명령어와 모드 한눈에 보기 |
+| [아키텍처](docs/plugin-architecture.md) | 플러그인과 MCP 작동 방식 |
+
+### MCP 서버 (기타 AI 도구)
+
+Cursor, GitHub Copilot, Antigravity, Amazon Q, Kiro 등 MCP 호환 도구:
+
+```bash
+# 프로젝트 초기화
+npx codingbuddy init
+```
+
+AI 도구의 MCP 설정에 추가:
+
+```json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### 사용 방법
+
+```
+PLAN: 이메일 인증과 함께 사용자 등록 구현해줘
+→ AI 팀이 아키텍처 계획
+
+ACT
+→ AI 팀이 TDD로 구현
+
+EVAL
+→ AI 팀이 8개 이상 관점에서 검토
+
+AUTO: 완전한 인증 시스템 만들어줘
+→ AI 팀이 품질 달성까지 반복
+```
+
+[전체 시작 가이드 →](docs/ko/getting-started.md)
+
+---
+
 ## 멀티에이전트 아키텍처
 
 ### 3계층 에이전트 시스템
@@ -157,77 +224,6 @@ AUTO: 리프레시 토큰과 JWT 인증 구현해줘
 | 품질 게이트 없음 | Critical=0, High=0 필수 |
 | 수동 검토 필요 | 자동 다차원 검토 |
 | 일관성 없는 품질 | 기준 충족까지 반복 개선 |
-
----
-
-## 빠른 시작
-
-### 전제 조건
-
-- **Node.js** 18.x 이상
-- **npm** 9.x+ 또는 **yarn** 4.x+
-- 지원되는 AI 도구 (Claude Code, Cursor, GitHub Copilot 등)
-
-### 설치
-
-```bash
-# 프로젝트 초기화
-npx codingbuddy init
-
-# Claude Desktop 설정에 추가
-# macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-# Windows: %APPDATA%\Claude\claude_desktop_config.json
-```
-
-```json
-{
-  "mcpServers": {
-    "codingbuddy": {
-      "command": "npx",
-      "args": ["codingbuddy", "mcp"]
-    }
-  }
-}
-```
-
-### 사용 시작
-
-```
-PLAN: 이메일 인증과 함께 사용자 등록 구현해줘
-→ AI 팀이 아키텍처 계획
-
-ACT
-→ AI 팀이 TDD로 구현
-
-EVAL
-→ AI 팀이 8개 이상 관점에서 검토
-
-AUTO: 완전한 인증 시스템 만들어줘
-→ AI 팀이 품질 달성까지 반복
-```
-
-[전체 시작 가이드 →](docs/ko/getting-started.md)
-
-### Claude Code 플러그인 (선택)
-
-Claude Code와의 향상된 통합을 위해:
-
-```bash
-# 마켓플레이스 추가
-claude marketplace add JeremyDev87/codingbuddy
-
-# 플러그인 설치
-claude plugin install codingbuddy@jeremydev87
-
-# 전체 기능을 위한 MCP 서버 설치
-npm install -g codingbuddy
-```
-
-| 문서 | 설명 |
-|------|------|
-| [플러그인 설정 가이드](docs/plugin-guide.md) | 설치 및 설정 |
-| [빠른 참조](docs/plugin-quick-reference.md) | 명령어와 모드 한눈에 보기 |
-| [아키텍처](docs/plugin-architecture.md) | 플러그인과 MCP 작동 방식 |
 
 ---
 

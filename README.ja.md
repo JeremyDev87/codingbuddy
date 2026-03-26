@@ -83,6 +83,73 @@ AIにコードを依頼すると、単一の視点しか得られません。セ
 
 ---
 
+## クイックスタート
+
+**Node.js 18+ および npm 9+（または yarn 4+）が必要です**
+
+### Claude Code プラグイン（推奨）
+
+最速の導入方法 — ハーネスエンジニアリング、自律ループ、エージェントコラボレーションをフル活用：
+
+```bash
+# プラグインのインストール
+claude plugin install codingbuddy@jeremydev87
+
+# フル機能のためのMCPサーバーインストール
+npm install -g codingbuddy
+
+# プロジェクトの初期化
+npx codingbuddy init
+```
+
+| ドキュメント | 説明 |
+|-------------|------|
+| [プラグインセットアップガイド](docs/plugin-guide.md) | インストールと設定 |
+| [クイックリファレンス](docs/plugin-quick-reference.md) | コマンドとモード一覧 |
+| [アーキテクチャ](docs/plugin-architecture.md) | プラグインとMCPの連携 |
+
+### MCP サーバー（その他のAIツール）
+
+Cursor、GitHub Copilot、Antigravity、Amazon Q、Kiroなど、MCP対応ツール向け：
+
+```bash
+# プロジェクトを初期化
+npx codingbuddy init
+```
+
+AIツールのMCP設定に追加：
+
+```json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### 使い方
+
+```
+PLAN: メール認証付きのユーザー登録を実装して
+→ AIチームがアーキテクチャを計画
+
+ACT
+→ AIチームがTDDで実装
+
+EVAL
+→ AIチームが8つ以上の視点からレビュー
+
+AUTO: 完全な認証システムを構築して
+→ AIチームが品質達成まで反復
+```
+
+[詳細なセットアップガイド →](docs/ja/getting-started.md)
+
+---
+
 ## マルチエージェントアーキテクチャ
 
 ### 3層エージェントシステム
@@ -157,77 +224,6 @@ AUTO: リフレッシュトークン付きのJWT認証を実装して
 | 品質ゲートなし | Critical=0, High=0 必須 |
 | 手動レビューが必要 | 自動多次元レビュー |
 | 一貫性のない品質 | 基準達成まで反復改善 |
-
----
-
-## クイックスタート
-
-### 前提条件
-
-- **Node.js** 18.x以上
-- **npm** 9.x+ または **yarn** 4.x+
-- 対応AIツール（Claude Code, Cursor, GitHub Copilotなど）
-
-### インストール
-
-```bash
-# プロジェクトを初期化
-npx codingbuddy init
-
-# Claude Desktop設定に追加
-# macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-# Windows: %APPDATA%\Claude\claude_desktop_config.json
-```
-
-```json
-{
-  "mcpServers": {
-    "codingbuddy": {
-      "command": "npx",
-      "args": ["codingbuddy", "mcp"]
-    }
-  }
-}
-```
-
-### 使い始める
-
-```
-PLAN: メール認証付きのユーザー登録を実装して
-→ AIチームがアーキテクチャを計画
-
-ACT
-→ AIチームがTDDで実装
-
-EVAL
-→ AIチームが8つ以上の視点からレビュー
-
-AUTO: 完全な認証システムを構築して
-→ AIチームが品質達成まで反復
-```
-
-[詳細なセットアップガイド →](docs/ja/getting-started.md)
-
-### Claude Codeプラグイン（オプション）
-
-Claude Codeとの強化された統合のために：
-
-```bash
-# マーケットプレイスを追加
-claude marketplace add JeremyDev87/codingbuddy
-
-# プラグインをインストール
-claude plugin install codingbuddy@jeremydev87
-
-# フル機能のためMCPサーバーをインストール
-npm install -g codingbuddy
-```
-
-| ドキュメント | 説明 |
-|-------------|------|
-| [プラグインセットアップガイド](docs/plugin-guide.md) | インストールと設定 |
-| [クイックリファレンス](docs/plugin-quick-reference.md) | コマンドとモード一覧 |
-| [アーキテクチャ](docs/plugin-architecture.md) | プラグインとMCPの連携 |
 
 ---
 

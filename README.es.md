@@ -83,6 +83,73 @@ En lugar de que una sola IA intente hacerlo todo, Codingbuddy coordina múltiple
 
 ---
 
+## Inicio Rápido
+
+**Requiere Node.js 18+ y npm 9+ (o yarn 4+)**
+
+### Plugin de Claude Code (Recomendado)
+
+La forma más rápida de comenzar — framework completo con ingeniería de harness, bucles autónomos y colaboración de agentes:
+
+```bash
+# Instalar el plugin
+claude plugin install codingbuddy@jeremydev87
+
+# Instalar el servidor MCP para funcionalidad completa
+npm install -g codingbuddy
+
+# Inicializar tu proyecto
+npx codingbuddy init
+```
+
+| Documentación | Descripción |
+|---------------|-------------|
+| [Guía de Configuración del Plugin](docs/plugin-guide.md) | Instalación y configuración |
+| [Referencia Rápida](docs/plugin-quick-reference.md) | Comandos y modos de un vistazo |
+| [Arquitectura](docs/plugin-architecture.md) | Cómo funcionan juntos plugin y MCP |
+
+### Servidor MCP (Otras herramientas de IA)
+
+Para Cursor, GitHub Copilot, Antigravity, Amazon Q, Kiro y otras herramientas compatibles con MCP:
+
+```bash
+# Inicializa tu proyecto
+npx codingbuddy init
+```
+
+Añade a la configuración MCP de tu herramienta de IA:
+
+```json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### Comenzar a Usar
+
+```
+PLAN: Implementar registro de usuario con verificación de email
+→ El equipo IA planifica la arquitectura
+
+ACT
+→ El equipo IA implementa con TDD
+
+EVAL
+→ El equipo IA revisa desde 8+ perspectivas
+
+AUTO: Construir un sistema de autenticación completo
+→ El equipo IA itera hasta alcanzar la calidad
+```
+
+[Guía Completa de Inicio →](docs/es/getting-started.md)
+
+---
+
 ## Arquitectura Multi-Agente
 
 ### Sistema de Agentes de 3 Niveles
@@ -157,77 +224,6 @@ AUTO: Implementar autenticación JWT con tokens de refresco
 | Sin puertas de calidad | Critical=0, High=0 requerido |
 | Revisión manual necesaria | Revisión multidimensional automatizada |
 | Calidad inconsistente | Refinamiento iterativo hasta cumplir estándares |
-
----
-
-## Inicio Rápido
-
-### Prerrequisitos
-
-- **Node.js** 18.x o superior
-- **npm** 9.x+ o **yarn** 4.x+
-- Una herramienta de IA compatible (Claude Code, Cursor, GitHub Copilot, etc.)
-
-### Instalación
-
-```bash
-# Inicializa tu proyecto
-npx codingbuddy init
-
-# Añade a la configuración de Claude Desktop
-# macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-# Windows: %APPDATA%\Claude\claude_desktop_config.json
-```
-
-```json
-{
-  "mcpServers": {
-    "codingbuddy": {
-      "command": "npx",
-      "args": ["codingbuddy", "mcp"]
-    }
-  }
-}
-```
-
-### Comenzar a Usar
-
-```
-PLAN: Implementar registro de usuario con verificación de email
-→ El equipo IA planifica la arquitectura
-
-ACT
-→ El equipo IA implementa con TDD
-
-EVAL
-→ El equipo IA revisa desde 8+ perspectivas
-
-AUTO: Construir un sistema de autenticación completo
-→ El equipo IA itera hasta alcanzar la calidad
-```
-
-[Guía Completa de Inicio →](docs/es/getting-started.md)
-
-### Plugin de Claude Code (Opcional)
-
-Para integración mejorada con Claude Code:
-
-```bash
-# Añadir el marketplace
-claude marketplace add JeremyDev87/codingbuddy
-
-# Instalar el plugin
-claude plugin install codingbuddy@jeremydev87
-
-# Instalar servidor MCP para funcionalidad completa
-npm install -g codingbuddy
-```
-
-| Documentación | Descripción |
-|---------------|-------------|
-| [Guía de Configuración del Plugin](docs/plugin-guide.md) | Instalación y configuración |
-| [Referencia Rápida](docs/plugin-quick-reference.md) | Comandos y modos de un vistazo |
-| [Arquitectura](docs/plugin-architecture.md) | Cómo funcionan juntos plugin y MCP |
 
 ---
 

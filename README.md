@@ -83,6 +83,73 @@ Instead of one AI trying to do everything, Codingbuddy coordinates multiple spec
 
 ---
 
+## Quick Start
+
+**Requires Node.js 18+ and npm 9+ (or yarn 4+)**
+
+### Claude Code Plugin (Recommended)
+
+The fastest way to get started — full framework with harness engineering, autonomous loops, and agent collaboration:
+
+```bash
+# Install the plugin
+claude plugin install codingbuddy@jeremydev87
+
+# Install MCP server for full functionality
+npm install -g codingbuddy
+
+# Initialize your project
+npx codingbuddy init
+```
+
+| Documentation | Description |
+|---------------|-------------|
+| [Plugin Setup Guide](docs/plugin-guide.md) | Installation and configuration |
+| [Quick Reference](docs/plugin-quick-reference.md) | Commands and modes at a glance |
+| [Architecture](docs/plugin-architecture.md) | How plugin and MCP work together |
+
+### MCP Server (Other AI Tools)
+
+For Cursor, GitHub Copilot, Antigravity, Amazon Q, Kiro, and other MCP-compatible tools:
+
+```bash
+# Initialize your project
+npx codingbuddy init
+```
+
+Add to your AI tool's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "npx",
+      "args": ["codingbuddy", "mcp"]
+    }
+  }
+}
+```
+
+### Start Using
+
+```
+PLAN: Implement user registration with email verification
+→ AI team plans the architecture
+
+ACT
+→ AI team implements with TDD
+
+EVAL
+→ AI team reviews from 8+ perspectives
+
+AUTO: Build a complete auth system
+→ AI team iterates until quality achieved
+```
+
+[Full Getting Started Guide →](docs/getting-started.md)
+
+---
+
 ## Multi-Agent Architecture
 
 ### 3-Tier Agent System
@@ -157,77 +224,6 @@ AUTO: Implement JWT authentication with refresh tokens
 | No quality gates | Critical=0, High=0 required |
 | Manual review needed | Automated multi-dimensional review |
 | Inconsistent quality | Iterative refinement until standards met |
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- **Node.js** 18.x or higher
-- **npm** 9.x+ or **yarn** 4.x+
-- A supported AI tool (Claude Code, Cursor, GitHub Copilot, etc.)
-
-### Installation
-
-```bash
-# Initialize your project
-npx codingbuddy init
-
-# Add to Claude Desktop config
-# macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-# Windows: %APPDATA%\Claude\claude_desktop_config.json
-```
-
-```json
-{
-  "mcpServers": {
-    "codingbuddy": {
-      "command": "npx",
-      "args": ["codingbuddy", "mcp"]
-    }
-  }
-}
-```
-
-### Start Using
-
-```
-PLAN: Implement user registration with email verification
-→ AI team plans the architecture
-
-ACT
-→ AI team implements with TDD
-
-EVAL
-→ AI team reviews from 8+ perspectives
-
-AUTO: Build a complete auth system
-→ AI team iterates until quality achieved
-```
-
-[Full Getting Started Guide →](docs/getting-started.md)
-
-### Claude Code Plugin (Optional)
-
-For enhanced integration with Claude Code:
-
-```bash
-# Add the marketplace
-claude marketplace add JeremyDev87/codingbuddy
-
-# Install the plugin
-claude plugin install codingbuddy@jeremydev87
-
-# Install MCP server for full functionality
-npm install -g codingbuddy
-```
-
-| Documentation | Description |
-|---------------|-------------|
-| [Plugin Setup Guide](docs/plugin-guide.md) | Installation and configuration |
-| [Quick Reference](docs/plugin-quick-reference.md) | Commands and modes at a glance |
-| [Architecture](docs/plugin-architecture.md) | How plugin and MCP work together |
 
 ---
 
