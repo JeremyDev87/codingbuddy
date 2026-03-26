@@ -77,6 +77,8 @@ export interface KeywordServiceOptions {
   getMaxIncludedSkillsFn?: () => Promise<number | null>;
   /** Function to get the resolved client type */
   getClientTypeFn?: () => ClientType;
+  /** Non-blocking callback to track rule usage for effectiveness analysis */
+  trackRuleUsageFn?: (ruleNames: string[]) => void;
 }
 
 /**
@@ -239,6 +241,7 @@ export class KeywordService {
   ) => Promise<AgentSystemPromptInfo | null>;
   private readonly getMaxIncludedSkillsFn?: () => Promise<number | null>;
   private readonly getClientTypeFn?: () => ClientType;
+  private readonly trackRuleUsageFn?: (ruleNames: string[]) => void;
 
   /**
    * Context-aware specialist patterns for automatic agent recommendation.
@@ -320,6 +323,7 @@ export class KeywordService {
     this.loadAgentSystemPromptFn = options?.loadAgentSystemPromptFn;
     this.getMaxIncludedSkillsFn = options?.getMaxIncludedSkillsFn;
     this.getClientTypeFn = options?.getClientTypeFn;
+    this.trackRuleUsageFn = options?.trackRuleUsageFn;
 
     // Environment-based TTL: 5 minutes for development, 1 hour for production
     this.cacheTTL = process.env.NODE_ENV === 'production' ? 3600000 : 300000;
@@ -343,6 +347,15 @@ export class KeywordService {
     const modeConfig = config.modes[mode];
     const verbosity = options?.verbosity ?? 'standard';
     const rules = await this.getRulesForMode(mode, verbosity);
+
+    // Non-blocking rule usage tracking for effectiveness analysis
+    if (this.trackRuleUsageFn) {
+      try {
+        this.trackRuleUsageFn(rules.map(r => r.name));
+      } catch {
+        // Tracking failure must not affect parseMode response
+      }
+    }
 
     // Only pass recommendedActAgent for ACT mode
     const effectiveRecommendedAgent = mode === 'ACT' ? options?.recommendedActAgent : undefined;
