@@ -6,7 +6,7 @@ Uses fcntl.flock() for file-level locking on every IO operation.
 import json
 import os
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 try:
     import fcntl
@@ -52,12 +52,26 @@ class SessionStats:
                 "tool_count": 0,
                 "error_count": 0,
                 "tool_names": {},
+                "hook_timings": {},
             })
 
         # In-memory accumulator — deltas since last flush
         self._mem_tool_count = 0
         self._mem_error_count = 0
         self._mem_tool_names: Dict[str, int] = {}
+        self._mem_hook_timings: Dict[str, List[float]] = {}
+
+    def record_hook_timing(self, hook_name: str, elapsed_ms: float) -> None:
+        """Record a hook execution timing in memory.
+
+        Args:
+            hook_name: Name of the hook (e.g. 'PreToolUse').
+            elapsed_ms: Elapsed time in milliseconds.
+        """
+        if hook_name not in self._mem_hook_timings:
+            self._mem_hook_timings[hook_name] = []
+        self._mem_hook_timings[hook_name].append(elapsed_ms)
+        self._pending_count += 1
 
     def record_tool_call(self, tool_name: str, success: bool = True) -> None:
         """Record a tool call in memory. Flushes to disk every flush_interval calls.
@@ -86,11 +100,19 @@ class SessionStats:
         for name, count in self._mem_tool_names.items():
             tool_names[name] = tool_names.get(name, 0) + count
         data["tool_names"] = tool_names
+        # Merge hook timings
+        hook_timings = data.get("hook_timings", {})
+        for name, times in self._mem_hook_timings.items():
+            if name not in hook_timings:
+                hook_timings[name] = []
+            hook_timings[name].extend(times)
+        data["hook_timings"] = hook_timings
         self._locked_write(data)
         # Reset in-memory accumulators
         self._mem_tool_count = 0
         self._mem_error_count = 0
         self._mem_tool_names = {}
+        self._mem_hook_timings = {}
         self._pending_count = 0
 
     def _merged_data(self) -> Dict[str, Any]:
@@ -102,6 +124,13 @@ class SessionStats:
         for name, count in self._mem_tool_names.items():
             tool_names[name] = tool_names.get(name, 0) + count
         data["tool_names"] = tool_names
+        # Merge hook timings
+        hook_timings = dict(data.get("hook_timings", {}))
+        for name, times in self._mem_hook_timings.items():
+            if name not in hook_timings:
+                hook_timings[name] = []
+            hook_timings[name] = hook_timings[name] + times
+        data["hook_timings"] = hook_timings
         return data
 
     def format_summary(self) -> str:
@@ -123,7 +152,18 @@ class SessionStats:
         sorted_tools = sorted(tool_names.items(), key=lambda x: x[1], reverse=True)
         tools_str = " ".join(f"{name}:{count}" for name, count in sorted_tools[:5])
 
-        return f"[CB] {minutes}m | {tool_count} tools | {error_count} {error_word} | {tools_str}"
+        summary = f"[CB] {minutes}m | {tool_count} tools | {error_count} {error_word} | {tools_str}"
+
+        # Append hook timing report if any timings exist
+        hook_timings = data.get("hook_timings", {})
+        if hook_timings:
+            timing_parts = []
+            for name, timings in sorted(hook_timings.items()):
+                avg = sum(timings) / len(timings)
+                timing_parts.append(f"{name}:{avg:.0f}ms")
+            summary += f" | \u23f1 {' '.join(timing_parts)}"
+
+        return summary
 
     def finalize(self) -> Dict[str, Any]:
         """Finalize session stats, return data, and cleanup file.
@@ -135,6 +175,23 @@ class SessionStats:
         data = self._locked_read()
         duration = time.time() - data.get("started_at", time.time())
         data["duration_seconds"] = duration
+
+        # Compute hook timing statistics
+        hook_timings = data.get("hook_timings", {})
+        if hook_timings:
+            hook_timing_stats: Dict[str, Any] = {}
+            for name, timings in hook_timings.items():
+                sorted_t = sorted(timings)
+                count = len(sorted_t)
+                avg_ms = sum(sorted_t) / count
+                p95_idx = min(int(count * 0.95), count - 1)
+                hook_timing_stats[name] = {
+                    "count": count,
+                    "avg_ms": round(avg_ms, 2),
+                    "p95_ms": round(sorted_t[p95_idx], 2),
+                    "max_ms": round(sorted_t[-1], 2),
+                }
+            data["hook_timing_stats"] = hook_timing_stats
 
         # Cleanup stats file
         try:
@@ -190,6 +247,7 @@ class SessionStats:
                 "tool_count": 0,
                 "error_count": 0,
                 "tool_names": {},
+                "hook_timings": {},
             }
 
     def _locked_write(self, data: Dict[str, Any]) -> None:

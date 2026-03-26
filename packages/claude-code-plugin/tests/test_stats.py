@@ -195,6 +195,49 @@ class TestInMemoryAccumulation:
         assert "Bash:2" in summary
 
 
+class TestHookTimingIntegration:
+    """Tests for hook timing integration in SessionStats (#945)."""
+
+    def test_hook_timings_field_initialized(self, stats):
+        """SessionStats should have hook_timings field in stored data."""
+        data = stats._locked_read()
+        assert "hook_timings" in data
+        assert data["hook_timings"] == {}
+
+    def test_record_hook_timing_stores_data(self, stats):
+        """record_hook_timing() should store timing in hook_timings."""
+        stats.record_hook_timing("PreToolUse", 150.0)
+        stats.record_hook_timing("PreToolUse", 200.0)
+        stats.record_hook_timing("PostToolUse", 50.0)
+        stats.flush()
+        data = stats._locked_read()
+        assert data["hook_timings"]["PreToolUse"] == [150.0, 200.0]
+        assert data["hook_timings"]["PostToolUse"] == [50.0]
+
+    def test_finalize_includes_hook_timing_stats(self, stats):
+        """finalize() should include computed hook timing statistics."""
+        stats.record_hook_timing("PreToolUse", 100.0)
+        stats.record_hook_timing("PreToolUse", 200.0)
+        stats.record_hook_timing("PreToolUse", 300.0)
+        result = stats.finalize()
+        assert "hook_timing_stats" in result
+        ht = result["hook_timing_stats"]["PreToolUse"]
+        assert ht["count"] == 3
+        assert ht["avg_ms"] == pytest.approx(200.0, abs=0.01)
+        assert ht["max_ms"] == pytest.approx(300.0, abs=0.01)
+
+    def test_format_summary_includes_timing_report(self, stats):
+        """format_summary() should include hook timing info when present."""
+        stats.record_hook_timing("PreToolUse", 8500.0)
+        summary = stats.format_summary()
+        assert "PreToolUse" in summary
+
+    def test_format_summary_no_timing_when_empty(self, stats):
+        """format_summary() should not include timing section when no timings."""
+        summary = stats.format_summary()
+        assert "⏱" not in summary
+
+
 class TestCleanup:
     def test_cleanup_stale_removes_old_files(self, data_dir):
         # Create a stale file
