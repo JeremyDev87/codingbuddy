@@ -3,13 +3,15 @@
 
 Intercepts Bash tool calls to enforce quality gates on git commit commands.
 Detects .ai-rules/config changes via FileWatcher (#823).
+Suggests related tests for staged files via SmartTestRunner (#944).
 Uses safe_main decorator to ensure Claude Code is never blocked.
 """
 import json
 import os
 import re
+import subprocess
 import sys
-from typing import Optional
+from typing import List, Optional
 
 # Resolve hooks/lib and add to path
 _hooks_dir = os.path.dirname(os.path.abspath(__file__))
@@ -123,6 +125,33 @@ def _is_git_commit(command: str) -> bool:
     return bool(_GIT_COMMIT_RE.search(command))
 
 
+def _get_staged_files() -> List[str]:
+    """Return list of staged file paths via git diff --cached."""
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--cached", "--name-only"],
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+        )
+        return [f for f in output.decode("utf-8", errors="replace").strip().split("\n") if f]
+    except Exception:
+        return []
+
+
+def _get_test_suggestion(staged_files: List[str]) -> Optional[str]:
+    """Use SmartTestRunner to build a test-run suggestion for staged files."""
+    try:
+        from smart_test_runner import SmartTestRunner
+
+        runner = SmartTestRunner()
+        related = runner.find_related_tests(staged_files)
+        if not related:
+            return None
+        return runner.format_suggestion(related)
+    except Exception:
+        return None
+
+
 def _handle(data: dict) -> Optional[dict]:
     """Core PreToolUse logic.
 
@@ -147,12 +176,19 @@ def _handle(data: dict) -> Optional[dict]:
 
     command = data.get("tool_input", {}).get("command", "")
 
-    # Check git commit quality gates
+    # Check git commit quality gates and smart test suggestion (#944)
     if _is_git_commit(command):
         config = _get_hook_config()
         quality_gates = config.get("qualityGates", {})
         if quality_gates.get("enabled", False):
             contexts.append(QUALITY_GATE_CONTEXT)
+
+        # Smart test runner — suggest related tests for staged files
+        staged = _get_staged_files()
+        if staged:
+            suggestion = _get_test_suggestion(staged)
+            if suggestion:
+                contexts.append(suggestion)
 
     if not contexts:
         return None

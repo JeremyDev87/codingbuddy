@@ -154,3 +154,88 @@ class TestPreToolUseGitCommitQualityGates:
             monkeypatch, capsys, config=config,
         )
         assert result is None
+
+
+class TestPreToolUseSmartTestRunner:
+    """Tests for SmartTestRunner integration in pre-tool-use hook."""
+
+    def test_git_commit_injects_test_suggestion(self, monkeypatch, capsys, tmp_path):
+        """git commit should inject related test suggestion into additionalContext."""
+        # Create a fake staged file list
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"src/foo.ts\n",
+        )
+        config = {"qualityGates": {"enabled": False}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'feat: add foo'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        assert "Consider running" in ctx
+        assert "foo.spec.ts" in ctx
+
+    def test_git_commit_no_staged_files_no_suggestion(self, monkeypatch, capsys):
+        """git commit with no staged files should not inject suggestion."""
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"",
+        )
+        config = {"qualityGates": {"enabled": False}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'test'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is None
+
+    def test_git_commit_config_files_only_no_suggestion(self, monkeypatch, capsys):
+        """git commit with only config files should not inject suggestion."""
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"package.json\n.gitignore\n",
+        )
+        config = {"qualityGates": {"enabled": False}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'chore: config'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is None
+
+    def test_git_commit_combines_quality_gate_and_test_suggestion(self, monkeypatch, capsys):
+        """When both quality gates and test suggestion active, both in context."""
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"src/bar.ts\n",
+        )
+        config = {"qualityGates": {"enabled": True}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'feat: bar'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        assert "Consider running" in ctx
+        assert "Quality Gate" in ctx
+
+    def test_non_git_commit_no_test_suggestion(self, monkeypatch, capsys):
+        """Non-commit commands should not trigger test suggestion."""
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git push origin main"}},
+            monkeypatch, capsys,
+        )
+        assert result is None
+
+    def test_subprocess_failure_graceful(self, monkeypatch, capsys):
+        """If subprocess fails, hook should not crash — graceful degradation."""
+        import subprocess
+        def _raise(*a, **kw):
+            raise subprocess.CalledProcessError(1, "git")
+        monkeypatch.setattr("subprocess.check_output", _raise)
+        config = {"qualityGates": {"enabled": False}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'test'"}},
+            monkeypatch, capsys, config=config,
+        )
+        # Should not crash — returns None (no suggestion)
+        assert result is None
