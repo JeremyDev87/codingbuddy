@@ -31,6 +31,7 @@ import { filterRulesByMode } from './rule-filter';
 import { truncateSkillContent } from '../skill/skill-content.utils';
 import { createAgentSummary } from '../agent/agent-summary.utils';
 import { truncateRuleContent } from '../rules/rules-content.utils';
+import { RuleTracker } from '../rules/rule-tracker';
 import { getDefaultModeConfig } from '../shared/keyword-core';
 import { isTaskmaestroAvailable } from './taskmaestro-detector';
 import { type ClientType } from '../shared/client-type';
@@ -239,6 +240,7 @@ export class KeywordService {
   ) => Promise<AgentSystemPromptInfo | null>;
   private readonly getMaxIncludedSkillsFn?: () => Promise<number | null>;
   private readonly getClientTypeFn?: () => ClientType;
+  private ruleTracker?: RuleTracker;
 
   /**
    * Context-aware specialist patterns for automatic agent recommendation.
@@ -323,6 +325,13 @@ export class KeywordService {
 
     // Environment-based TTL: 5 minutes for development, 1 hour for production
     this.cacheTTL = process.env.NODE_ENV === 'production' ? 3600000 : 300000;
+
+    // Rule effectiveness tracking (#948)
+    try {
+      this.ruleTracker = new RuleTracker();
+    } catch {
+      // Graceful degradation - never block KeywordService init
+    }
   }
 
   async parseMode(prompt: string, options?: ParseModeOptions): Promise<ParseModeResult> {
@@ -519,6 +528,14 @@ export class KeywordService {
     rules: RuleContent[],
   ): ParseModeResult {
     const filteredRules = filterRulesByMode(rules, mode);
+
+    // Track rule usage (#948)
+    try {
+      const ruleNames = filteredRules.map((r) => r.name);
+      this.ruleTracker?.recordUsage(ruleNames, mode);
+    } catch {
+      // Never block parseMode
+    }
 
     const result: ParseModeResult = {
       mode,
