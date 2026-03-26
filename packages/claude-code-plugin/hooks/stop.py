@@ -70,6 +70,22 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Agent memory: record session agent activity (#947)
+        try:
+            from agent_memory import AgentMemory
+
+            agent_name = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
+            if agent_name:
+                mem = AgentMemory()
+                # Record session summary as a finding
+                if summary:
+                    mem.add_finding(agent_name, {
+                        "session_id": session_id,
+                        "summary": summary[:200],
+                    })
+        except Exception:
+            pass  # Never block session stop
+
         # Notify on session end (#829)
         try:
             _maybe_notify_session_end(summary)
