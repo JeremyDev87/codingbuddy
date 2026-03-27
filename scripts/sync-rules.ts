@@ -86,10 +86,7 @@ export async function diffFiles(
 /**
  * Write generated files to disk.
  */
-export async function writeFiles(
-  projectRoot: string,
-  files: GeneratedFile[],
-): Promise<void> {
+export async function writeFiles(projectRoot: string, files: GeneratedFile[]): Promise<void> {
   for (const file of files) {
     const absPath = path.join(projectRoot, file.relativePath);
     await fs.mkdir(path.dirname(absPath), { recursive: true });

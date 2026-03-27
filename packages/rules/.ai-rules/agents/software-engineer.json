@@ -43,10 +43,7 @@
       ]
     }
   },
-  "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/augmented-coding.md"
-  ],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
   "activation": {
     "note": "software-engineer intentionally has no intent patterns. It only activates as the fallback of last resort when all other agents fail to match.",
     "trigger": "Automatic fallback when no domain-specific intent is detected",

@@ -15,11 +15,7 @@ import { createJsonResponse } from '../response.utils';
 import type { ToolDefinition } from './base.handler';
 `;
     const result = parseImports(source);
-    expect(result).toEqual([
-      '../../rules/rules.service',
-      '../response.utils',
-      './base.handler',
-    ]);
+    expect(result).toEqual(['../../rules/rules.service', '../response.utils', './base.handler']);
   });
 
   it('should handle dynamic imports', () => {

@@ -28,10 +28,7 @@ export function EvalModeScreen({
   width,
   height,
 }: EvalModeScreenProps): React.ReactElement {
-  const lines = useMemo(
-    () => renderEvalScreen(results, width - 2),
-    [results, width],
-  );
+  const lines = useMemo(() => renderEvalScreen(results, width - 2), [results, width]);
 
   const maxLines = Math.max(0, height - 2);
   const visibleLines = lines.slice(0, maxLines);

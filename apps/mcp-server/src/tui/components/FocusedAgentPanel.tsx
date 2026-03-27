@@ -115,9 +115,7 @@ export function FocusedAgentPanel({
           </Text>
         )}
         <Text color={statusColor}>{statusLabel}</Text>
-        {showElapsed && (
-          <Text dimColor>{formatElapsed(agent.startedAt!, now!)}</Text>
-        )}
+        {showElapsed && <Text dimColor>{formatElapsed(agent.startedAt!, now!)}</Text>}
         <Text dimColor>{agent.stage}</Text>
       </Box>
 

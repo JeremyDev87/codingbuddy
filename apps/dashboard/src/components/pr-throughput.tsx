@@ -29,10 +29,7 @@ export function PRThroughput({ entries }: PRThroughputProps) {
               tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
               tickFormatter={(v: string) => v.slice(5)}
             />
-            <YAxis
-              tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-              allowDecimals={false}
-            />
+            <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} allowDecimals={false} />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'var(--color-surface)',
@@ -42,21 +39,14 @@ export function PRThroughput({ entries }: PRThroughputProps) {
               }}
               labelFormatter={(label: string) => `Date: ${label}`}
             />
-            <Legend
-              wrapperStyle={{ color: 'var(--color-text-muted)', fontSize: 12 }}
-            />
+            <Legend wrapperStyle={{ color: 'var(--color-text-muted)', fontSize: 12 }} />
             <Bar
               dataKey="created"
               name="Created"
               fill="var(--color-accent)"
               radius={[4, 4, 0, 0]}
             />
-            <Bar
-              dataKey="merged"
-              name="Merged"
-              fill="var(--color-success)"
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar dataKey="merged" name="Merged" fill="var(--color-success)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

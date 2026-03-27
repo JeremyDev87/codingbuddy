@@ -6,11 +6,7 @@ export const metadata: Metadata = {
   description: 'Execution history, cost tracking, and agent activity dashboard',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">{children}</body>

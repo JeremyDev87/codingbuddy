@@ -21,7 +21,12 @@ describe('generateConfig', () => {
     const options = {
       language: 'en',
       primaryAgent: 'software-engineer',
-      techStack: { runtime: 'node', language: 'typescript', frameworks: ['next'], category: 'fullstack' },
+      techStack: {
+        runtime: 'node',
+        language: 'typescript',
+        frameworks: ['next'],
+        category: 'fullstack',
+      },
     };
     generateConfig(tmpDir, options);
 
@@ -38,10 +43,17 @@ describe('generateConfig', () => {
     generateConfig(tmpDir, {
       language: 'ko',
       primaryAgent: 'backend-developer',
-      techStack: { runtime: 'python', language: 'python', frameworks: ['django'], category: 'backend' },
+      techStack: {
+        runtime: 'python',
+        language: 'python',
+        frameworks: ['django'],
+        category: 'backend',
+      },
     });
 
-    const config = JSON.parse(fs.readFileSync(path.join(tmpDir, 'codingbuddy.config.json'), 'utf-8'));
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, 'codingbuddy.config.json'), 'utf-8'),
+    );
     assert.ok('language' in config);
     assert.ok('primaryAgent' in config);
     assert.ok('techStack' in config);
@@ -68,7 +80,12 @@ describe('generateConfig', () => {
     generateConfig(tmpDir, {
       language: 'en',
       primaryAgent: 'frontend-developer',
-      techStack: { runtime: 'node', language: 'typescript', frameworks: ['react'], category: 'frontend' },
+      techStack: {
+        runtime: 'node',
+        language: 'typescript',
+        frameworks: ['react'],
+        category: 'frontend',
+      },
     });
 
     const raw = fs.readFileSync(path.join(tmpDir, 'codingbuddy.config.json'), 'utf-8');

@@ -154,8 +154,11 @@ function generateApiInventory(): string {
   lines.push('|------|-------------|---------|');
 
   if (fs.existsSync(HANDLERS_DIR)) {
-    const handlerFiles = fs.readdirSync(HANDLERS_DIR)
-      .filter(f => f.endsWith('.handler.ts') && f !== 'base.handler.ts' && f !== 'abstract-handler.ts');
+    const handlerFiles = fs
+      .readdirSync(HANDLERS_DIR)
+      .filter(
+        f => f.endsWith('.handler.ts') && f !== 'base.handler.ts' && f !== 'abstract-handler.ts',
+      );
 
     const allTools: Array<ToolInfo & { handler: string }> = [];
 
@@ -189,18 +192,30 @@ function generateApiInventory(): string {
   lines.push('## Resources', '');
   lines.push('| URI | Name | Description |');
   lines.push('|-----|------|-------------|');
-  lines.push('| `config://project` | Project Configuration | Project-specific configuration including tech stack, architecture, and conventions |');
-  lines.push('| `rules://rules/core.md` | Core Rules | Core workflow rules (modes, error recovery) |');
-  lines.push('| `rules://rules/project.md` | Project Setup | Project structure and tech stack template |');
-  lines.push('| `rules://rules/augmented-coding.md` | Augmented Coding | TDD cycle, code quality principles |');
-  lines.push('| `rules://agents/{name}.json` | Agent Definitions | Agent profiles (dynamically listed) |');
+  lines.push(
+    '| `config://project` | Project Configuration | Project-specific configuration including tech stack, architecture, and conventions |',
+  );
+  lines.push(
+    '| `rules://rules/core.md` | Core Rules | Core workflow rules (modes, error recovery) |',
+  );
+  lines.push(
+    '| `rules://rules/project.md` | Project Setup | Project structure and tech stack template |',
+  );
+  lines.push(
+    '| `rules://rules/augmented-coding.md` | Augmented Coding | TDD cycle, code quality principles |',
+  );
+  lines.push(
+    '| `rules://agents/{name}.json` | Agent Definitions | Agent profiles (dynamically listed) |',
+  );
   lines.push('');
 
   // --- Prompts ---
   lines.push('## Prompts', '');
   lines.push('| Prompt | Description | Arguments |');
   lines.push('|--------|-------------|-----------|');
-  lines.push('| `activate_agent` | Activate a specific specialist agent with project context | `role` (required) — Role name (e.g. frontend-developer) |');
+  lines.push(
+    '| `activate_agent` | Activate a specific specialist agent with project context | `role` (required) — Role name (e.g. frontend-developer) |',
+  );
   lines.push('');
 
   // --- Summary ---

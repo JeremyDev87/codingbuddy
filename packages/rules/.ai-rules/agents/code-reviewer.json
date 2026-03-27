@@ -432,28 +432,17 @@
         "data_transformations": {
           "description": "Verify input/output field mapping in type conversion functions",
           "question": "Are all fields mapped correctly?",
-          "common_bugs": [
-            "Missing fields",
-            "Incorrect default values",
-            "Type mismatch"
-          ]
+          "common_bugs": ["Missing fields", "Incorrect default values", "Type mismatch"]
         },
         "optional_handling": {
           "description": "Verify intended fallback for ?, ??, || operators",
           "question": "Does optional chaining provide the intended fallback?",
-          "common_bugs": [
-            "Confusion between null and undefined",
-            "Errors handling empty strings/0"
-          ]
+          "common_bugs": ["Confusion between null and undefined", "Errors handling empty strings/0"]
         },
         "dependency_completeness": {
           "description": "DI injection and import path accuracy",
           "question": "Are all dependencies of moved files correctly injected?",
-          "common_bugs": [
-            "Missing dependencies",
-            "Incorrect import paths",
-            "Circular references"
-          ]
+          "common_bugs": ["Missing dependencies", "Incorrect import paths", "Circular references"]
         },
         "edge_cases": {
           "description": "Handling of null, undefined, empty arrays, and boundary values",

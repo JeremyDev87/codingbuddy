@@ -6,8 +6,13 @@ const path = require('node:path');
 const FRONTEND_FRAMEWORKS = ['react', 'vue', 'angular', 'svelte', 'solid-js'];
 const FULLSTACK_FRAMEWORKS = ['next', 'nuxt', 'remix', 'sveltekit', 'astro'];
 const BACKEND_FRAMEWORKS = [
-  '@nestjs/core', 'express', 'fastify', 'koa', 'hapi',
-  '@hono/node-server', 'hono',
+  '@nestjs/core',
+  'express',
+  'fastify',
+  'koa',
+  'hapi',
+  '@hono/node-server',
+  'hono',
 ];
 const MOBILE_FRAMEWORKS = ['react-native', 'expo', '@capacitor/core', 'ionic'];
 
@@ -17,7 +22,12 @@ const MOBILE_FRAMEWORKS = ['react-native', 'expo', '@capacitor/core', 'ionic'];
  * @returns {{ runtime: string, language: string, frameworks: string[], category: string }}
  */
 function detectStack(cwd) {
-  const result = { runtime: 'unknown', language: 'javascript', frameworks: [], category: 'unknown' };
+  const result = {
+    runtime: 'unknown',
+    language: 'javascript',
+    frameworks: [],
+    category: 'unknown',
+  };
 
   if (tryDetectNode(cwd, result)) return result;
   if (tryDetectPython(cwd, result)) return result;
@@ -79,7 +89,11 @@ function tryDetectNode(cwd, result) {
     result.category = 'fullstack';
   } else if (detected.some(f => FRONTEND_FRAMEWORKS.includes(f))) {
     result.category = 'frontend';
-  } else if (detected.some(f => ['nestjs', ...BACKEND_FRAMEWORKS.map(b => b.startsWith('@') ? 'nestjs' : b)].includes(f))) {
+  } else if (
+    detected.some(f =>
+      ['nestjs', ...BACKEND_FRAMEWORKS.map(b => (b.startsWith('@') ? 'nestjs' : b))].includes(f),
+    )
+  ) {
     result.category = 'backend';
   } else {
     result.category = 'backend'; // default for Node without frameworks

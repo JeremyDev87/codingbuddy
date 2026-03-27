@@ -86,9 +86,7 @@ export function parseContextDecisions(content: string): DecisionEntry[] {
     const sectionContent = content.slice(section.startIndex, nextStart);
 
     // Find **Decisions:** block and extract list items
-    const decisionsMatch = sectionContent.match(
-      /\*\*Decisions:\*\*\s*\n((?:\s*-\s+.+\n?)*)/,
-    );
+    const decisionsMatch = sectionContent.match(/\*\*Decisions:\*\*\s*\n((?:\s*-\s+.+\n?)*)/);
     if (decisionsMatch) {
       const items = decisionsMatch[1].match(/^\s*-\s+(.+)$/gm);
       if (items) {

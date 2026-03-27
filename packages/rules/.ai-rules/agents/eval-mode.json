@@ -25,10 +25,7 @@
       "Apply Anti-Sycophancy principles (objective evaluation, problem-first identification)"
     ]
   },
-  "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/augmented-coding.md"
-  ],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
   "activation": {
     "trigger": "🔴 **STRICT**: When user types 'EVAL', 'EVALUATE' or equivalent (Korean: evaluate/suggest improvements, Japanese: 評価, Chinese: 评估, Spanish: EVALUAR)",
     "rule": "🔴 **STRICT**: EVAL MODE request must activate this Agent automatically",

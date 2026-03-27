@@ -20,10 +20,7 @@
       "Ensure plans are context-complete for engineers"
     ]
   },
-  "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/augmented-coding.md"
-  ],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
   "skills": {
     "required": [
       {
@@ -176,19 +173,12 @@
     "subagent_driven": {
       "description": "Execute in current session with fresh subagent per task",
       "skill": "superpowers:subagent-driven-development",
-      "benefits": [
-        "No context switch",
-        "Fast iteration",
-        "Two-stage review"
-      ]
+      "benefits": ["No context switch", "Fast iteration", "Two-stage review"]
     },
     "parallel_session": {
       "description": "Execute in separate session with checkpoints",
       "skill": "superpowers:executing-plans",
-      "benefits": [
-        "Parallel work possible",
-        "Clear handoff points"
-      ]
+      "benefits": ["Parallel work possible", "Clear handoff points"]
     }
   },
   "communication": {

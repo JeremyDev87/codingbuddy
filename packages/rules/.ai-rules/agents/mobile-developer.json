@@ -17,14 +17,8 @@
     ],
     "supported_platforms": {
       "note": "This agent supports multiple mobile platforms. See project.md 'Tech Stack' for your project's specific platform.",
-      "cross_platform": [
-        "React Native (with Expo or bare workflow)",
-        "Flutter"
-      ],
-      "native": [
-        "iOS (Swift, SwiftUI, UIKit)",
-        "Android (Kotlin, Jetpack Compose, XML Views)"
-      ]
+      "cross_platform": ["React Native (with Expo or bare workflow)", "Flutter"],
+      "native": ["iOS (Swift, SwiftUI, UIKit)", "Android (Kotlin, Jetpack Compose, XML Views)"]
     },
     "tech_stack_reference": "See project.md 'Tech Stack' section for your project's mobile framework and version information",
     "responsibilities": [
@@ -51,43 +45,13 @@
         "app\\.json$",
         "expo.*\\.json$"
       ],
-      "flutter": [
-        "pubspec\\.yaml$",
-        "\\.dart$"
-      ],
-      "ios": [
-        "\\.xcodeproj",
-        "\\.xcworkspace",
-        "Podfile$",
-        "\\.swift$"
-      ],
-      "android": [
-        "build\\.gradle(\\.kts)?$",
-        "AndroidManifest\\.xml$",
-        "\\.kt$"
-      ]
+      "flutter": ["pubspec\\.yaml$", "\\.dart$"],
+      "ios": ["\\.xcodeproj", "\\.xcworkspace", "Podfile$", "\\.swift$"],
+      "android": ["build\\.gradle(\\.kts)?$", "AndroidManifest\\.xml$", "\\.kt$"]
     },
     "intent_patterns": {
-      "korean": [
-        "mobile",
-        "app",
-        "react native",
-        "flutter",
-        "iOS",
-        "android",
-        "swift",
-        "kotlin"
-      ],
-      "english": [
-        "mobile",
-        "app",
-        "react native",
-        "flutter",
-        "iOS",
-        "android",
-        "swift",
-        "kotlin"
-      ]
+      "korean": ["mobile", "app", "react native", "flutter", "iOS", "android", "swift", "kotlin"],
+      "english": ["mobile", "app", "react native", "flutter", "iOS", "android", "swift", "kotlin"]
     },
     "mandatory_checklist": {
       "🔴 language": {
@@ -184,11 +148,7 @@
     },
     "ui_components": {
       "approach": "Test-After",
-      "applies_to": [
-        "Screens/Pages",
-        "Widgets/Components",
-        "Navigation setup"
-      ],
+      "applies_to": ["Screens/Pages", "Widgets/Components", "Navigation setup"],
       "reference": "See augmented-coding.md 'UI Components (Test-After)' section"
     }
   },
@@ -221,89 +181,32 @@
   },
   "platform_patterns": {
     "react_native": {
-      "state_management": [
-        "Redux Toolkit",
-        "Zustand",
-        "Jotai",
-        "React Query"
-      ],
+      "state_management": ["Redux Toolkit", "Zustand", "Jotai", "React Query"],
       "navigation": "React Navigation",
-      "styling": [
-        "StyleSheet",
-        "NativeWind",
-        "Tamagui"
-      ],
-      "testing": [
-        "Jest",
-        "React Native Testing Library"
-      ],
+      "styling": ["StyleSheet", "NativeWind", "Tamagui"],
+      "testing": ["Jest", "React Native Testing Library"],
       "native_modules": "Turbo Modules (New Architecture)"
     },
     "flutter": {
-      "state_management": [
-        "Riverpod",
-        "BLoC",
-        "Provider",
-        "GetX"
-      ],
-      "navigation": [
-        "go_router",
-        "auto_route"
-      ],
+      "state_management": ["Riverpod", "BLoC", "Provider", "GetX"],
+      "navigation": ["go_router", "auto_route"],
       "styling": "Theme + Custom Widgets",
-      "testing": [
-        "flutter_test",
-        "integration_test",
-        "mockito"
-      ],
+      "testing": ["flutter_test", "integration_test", "mockito"],
       "platform_channels": "MethodChannel for native code"
     },
     "ios_native": {
-      "architecture": [
-        "MVVM",
-        "Clean Architecture",
-        "TCA (Composable Architecture)"
-      ],
-      "ui": [
-        "SwiftUI",
-        "UIKit"
-      ],
-      "async": [
-        "async/await",
-        "Combine"
-      ],
-      "testing": [
-        "XCTest",
-        "Quick/Nimble"
-      ],
-      "dependency_injection": [
-        "Swinject",
-        "Factory"
-      ]
+      "architecture": ["MVVM", "Clean Architecture", "TCA (Composable Architecture)"],
+      "ui": ["SwiftUI", "UIKit"],
+      "async": ["async/await", "Combine"],
+      "testing": ["XCTest", "Quick/Nimble"],
+      "dependency_injection": ["Swinject", "Factory"]
     },
     "android_native": {
-      "architecture": [
-        "MVVM",
-        "Clean Architecture",
-        "MVI"
-      ],
-      "ui": [
-        "Jetpack Compose",
-        "XML Views + ViewBinding"
-      ],
-      "async": [
-        "Kotlin Coroutines",
-        "Flow"
-      ],
-      "testing": [
-        "JUnit",
-        "Espresso",
-        "Robolectric"
-      ],
-      "dependency_injection": [
-        "Hilt",
-        "Koin"
-      ]
+      "architecture": ["MVVM", "Clean Architecture", "MVI"],
+      "ui": ["Jetpack Compose", "XML Views + ViewBinding"],
+      "async": ["Kotlin Coroutines", "Flow"],
+      "testing": ["JUnit", "Espresso", "Robolectric"],
+      "dependency_injection": ["Hilt", "Koin"]
     }
   },
   "code_quality_checklist": [

@@ -24,10 +24,7 @@
       "Produce severity-rated findings (Critical/High/Medium/Low)"
     ]
   },
-  "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/augmented-coding.md"
-  ],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
   "activation": {
     "trigger": "When an implementation plan needs quality review before execution",
     "explicit_patterns": [
@@ -134,12 +131,7 @@
   },
   "output_format": {
     "findings_table": {
-      "columns": [
-        "Finding",
-        "Location",
-        "Severity",
-        "Recommendation"
-      ],
+      "columns": ["Finding", "Location", "Severity", "Recommendation"],
       "severity_levels": {
         "Critical": "Plan cannot be executed — missing files, impossible tasks, contradictions",
         "High": "Plan will produce low-quality results — vague criteria, missing TDD, scope gaps",

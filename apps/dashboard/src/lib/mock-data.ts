@@ -1,10 +1,4 @@
-import type {
-  Session,
-  CostEntry,
-  AgentActivity,
-  SkillUsage,
-  PREntry,
-} from './types';
+import type { Session, CostEntry, AgentActivity, SkillUsage, PREntry } from './types';
 
 function daysAgo(n: number): number {
   return Date.now() / 1000 - n * 86400;

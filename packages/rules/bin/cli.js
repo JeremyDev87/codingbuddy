@@ -8,7 +8,8 @@ const path = require('path');
 const RULES_DIR = path.resolve(__dirname, '..', '.ai-rules');
 
 function showHelp() {
-  console.log(`
+  console.log(
+    `
 codingbuddy - AI coding rules CLI
 
 Usage:
@@ -22,13 +23,12 @@ Commands:
 Options:
   --help, -h    Show this help message
   --version, -v Show version
-`.trim());
+`.trim(),
+  );
 }
 
 function showVersion() {
-  const pkg = JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf8'),
-  );
+  const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf8'));
   console.log(pkg.version);
 }
 
@@ -41,15 +41,13 @@ function listAgents() {
 
   const files = fs
     .readdirSync(agentsDir)
-    .filter((f) => f.endsWith('.json'))
+    .filter(f => f.endsWith('.json'))
     .sort();
 
   console.log(`Available agents (${files.length}):\n`);
   for (const file of files) {
     try {
-      const agent = JSON.parse(
-        fs.readFileSync(path.join(agentsDir, file), 'utf8'),
-      );
+      const agent = JSON.parse(fs.readFileSync(path.join(agentsDir, file), 'utf8'));
       const name = agent.name || path.basename(file, '.json');
       const desc = agent.description || '';
       console.log(`  ${name.padEnd(30)} ${desc}`);
@@ -71,9 +69,7 @@ function validate() {
   // Validate agents JSON
   const agentsDir = path.join(RULES_DIR, 'agents');
   if (fs.existsSync(agentsDir)) {
-    const jsonFiles = fs
-      .readdirSync(agentsDir)
-      .filter((f) => f.endsWith('.json'));
+    const jsonFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith('.json'));
     for (const file of jsonFiles) {
       try {
         JSON.parse(fs.readFileSync(path.join(agentsDir, file), 'utf8'));
@@ -88,9 +84,7 @@ function validate() {
   // Validate rules markdown files exist
   const rulesDir = path.join(RULES_DIR, 'rules');
   if (fs.existsSync(rulesDir)) {
-    const mdFiles = fs
-      .readdirSync(rulesDir)
-      .filter((f) => f.endsWith('.md'));
+    const mdFiles = fs.readdirSync(rulesDir).filter(f => f.endsWith('.md'));
     if (mdFiles.length === 0) {
       console.error('FAIL  rules/ - no markdown files found');
       errors++;
@@ -105,9 +99,7 @@ function validate() {
   // Validate schemas directory
   const schemasDir = path.join(RULES_DIR, 'schemas');
   if (fs.existsSync(schemasDir)) {
-    const schemaFiles = fs
-      .readdirSync(schemasDir)
-      .filter((f) => f.endsWith('.json'));
+    const schemaFiles = fs.readdirSync(schemasDir).filter(f => f.endsWith('.json'));
     for (const file of schemaFiles) {
       try {
         JSON.parse(fs.readFileSync(path.join(schemasDir, file), 'utf8'));
@@ -140,7 +132,7 @@ function validate() {
 
 function init() {
   const { run } = require('../lib/init');
-  run().catch((err) => {
+  run().catch(err => {
     console.error('Error:', err.message);
     process.exit(1);
   });

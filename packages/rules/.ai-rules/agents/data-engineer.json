@@ -17,26 +17,9 @@
     ],
     "supported_databases": {
       "note": "This agent supports multiple database systems. See project.md 'Tech Stack' for your project's specific database.",
-      "relational": [
-        "PostgreSQL",
-        "MySQL/MariaDB",
-        "SQLite",
-        "SQL Server",
-        "Oracle"
-      ],
-      "nosql": [
-        "MongoDB",
-        "Redis",
-        "Elasticsearch",
-        "DynamoDB",
-        "Cassandra"
-      ],
-      "analytical": [
-        "BigQuery",
-        "Snowflake",
-        "Redshift",
-        "ClickHouse"
-      ]
+      "relational": ["PostgreSQL", "MySQL/MariaDB", "SQLite", "SQL Server", "Oracle"],
+      "nosql": ["MongoDB", "Redis", "Elasticsearch", "DynamoDB", "Cassandra"],
+      "analytical": ["BigQuery", "Snowflake", "Redshift", "ClickHouse"]
     },
     "tech_stack_reference": "See project.md 'Tech Stack' section for your project's database and ORM information",
     "responsibilities": [
@@ -178,11 +161,7 @@
   "workflow": {
     "schema_design": {
       "approach": "Design-First with TDD",
-      "applies_to": [
-        "New table/entity creation",
-        "Schema modifications",
-        "Relationship changes"
-      ],
+      "applies_to": ["New table/entity creation", "Schema modifications", "Relationship changes"],
       "steps": [
         "1. Analyze business requirements",
         "2. Create ERD/data model",
@@ -195,11 +174,7 @@
     },
     "query_optimization": {
       "approach": "Measure-First",
-      "applies_to": [
-        "Slow queries",
-        "Complex joins",
-        "Reporting queries"
-      ],
+      "applies_to": ["Slow queries", "Complex joins", "Reporting queries"],
       "steps": [
         "1. Identify slow query (EXPLAIN ANALYZE)",
         "2. Analyze execution plan",
@@ -211,11 +186,7 @@
     },
     "analytics_data": {
       "approach": "Dimensional Modeling",
-      "applies_to": [
-        "Reporting tables",
-        "Dashboard data",
-        "Aggregated metrics"
-      ],
+      "applies_to": ["Reporting tables", "Dashboard data", "Aggregated metrics"],
       "steps": [
         "1. Identify business questions",
         "2. Design fact and dimension tables",
@@ -267,25 +238,10 @@
       }
     },
     "migration_tools": {
-      "nodejs": [
-        "Prisma Migrate",
-        "TypeORM migrations",
-        "Knex migrations"
-      ],
-      "python": [
-        "Alembic",
-        "Django migrations",
-        "Aerich"
-      ],
-      "go": [
-        "Goose",
-        "Golang-migrate",
-        "Atlas"
-      ],
-      "database_native": [
-        "Flyway",
-        "Liquibase"
-      ]
+      "nodejs": ["Prisma Migrate", "TypeORM migrations", "Knex migrations"],
+      "python": ["Alembic", "Django migrations", "Aerich"],
+      "go": ["Goose", "Golang-migrate", "Atlas"],
+      "database_native": ["Flyway", "Liquibase"]
     },
     "indexing_strategies": {
       "btree": "Default for equality and range queries",

@@ -20,7 +20,7 @@ describe('detectStack', () => {
   it('detects Node.js project from package.json', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
-      JSON.stringify({ name: 'my-app', dependencies: { express: '^4.0.0' } })
+      JSON.stringify({ name: 'my-app', dependencies: { express: '^4.0.0' } }),
     );
     const result = detectStack(tmpDir);
     assert.equal(result.runtime, 'node');
@@ -30,7 +30,7 @@ describe('detectStack', () => {
   it('detects React project', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
-      JSON.stringify({ dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' } })
+      JSON.stringify({ dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' } }),
     );
     const result = detectStack(tmpDir);
     assert.equal(result.runtime, 'node');
@@ -41,7 +41,7 @@ describe('detectStack', () => {
   it('detects Next.js project', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
-      JSON.stringify({ dependencies: { next: '^14.0.0', react: '^18.0.0' } })
+      JSON.stringify({ dependencies: { next: '^14.0.0', react: '^18.0.0' } }),
     );
     const result = detectStack(tmpDir);
     assert.ok(result.frameworks.includes('next'));
@@ -51,7 +51,7 @@ describe('detectStack', () => {
   it('detects NestJS backend project', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
-      JSON.stringify({ dependencies: { '@nestjs/core': '^10.0.0' } })
+      JSON.stringify({ dependencies: { '@nestjs/core': '^10.0.0' } }),
     );
     const result = detectStack(tmpDir);
     assert.ok(result.frameworks.includes('nestjs'));
@@ -68,7 +68,7 @@ describe('detectStack', () => {
   it('detects Django in pyproject.toml', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'pyproject.toml'),
-      '[project]\ndependencies = ["django>=4.0"]\n'
+      '[project]\ndependencies = ["django>=4.0"]\n',
     );
     const result = detectStack(tmpDir);
     assert.equal(result.runtime, 'python');
@@ -85,7 +85,7 @@ describe('detectStack', () => {
   it('detects Rust project from Cargo.toml', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'Cargo.toml'),
-      '[package]\nname = "myapp"\nversion = "0.1.0"\n'
+      '[package]\nname = "myapp"\nversion = "0.1.0"\n',
     );
     const result = detectStack(tmpDir);
     assert.equal(result.runtime, 'rust');
@@ -102,7 +102,7 @@ describe('detectStack', () => {
   it('detects TypeScript usage', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
-      JSON.stringify({ devDependencies: { typescript: '^5.0.0' } })
+      JSON.stringify({ devDependencies: { typescript: '^5.0.0' } }),
     );
     const result = detectStack(tmpDir);
     assert.equal(result.language, 'typescript');
@@ -111,7 +111,7 @@ describe('detectStack', () => {
   it('detects Vue.js frontend project', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
-      JSON.stringify({ dependencies: { vue: '^3.0.0' } })
+      JSON.stringify({ dependencies: { vue: '^3.0.0' } }),
     );
     const result = detectStack(tmpDir);
     assert.ok(result.frameworks.includes('vue'));

@@ -411,11 +411,7 @@
             "Untyped function parameters",
             "Missing return types"
           ],
-          "high": [
-            "Excessive type inference",
-            "Weak type definitions",
-            "Unsafe type assertions"
-          ],
+          "high": ["Excessive type inference", "Weak type definitions", "Unsafe type assertions"],
           "medium": [
             "Could use more specific types",
             "Type definitions could be improved",
@@ -443,10 +439,7 @@
             "Naming could be clearer",
             "Separation could be more explicit"
           ],
-          "low": [
-            "Minor organization improvements",
-            "File naming could be optimized"
-          ]
+          "low": ["Minor organization improvements", "File naming could be optimized"]
         },
         "risk_assessment": {
           "🔴 critical": "Major architecture violations (layer boundaries broken, circular dependencies, any type usage), blocking maintainability",

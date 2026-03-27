@@ -10,9 +10,12 @@ import {
 describe('keyword.types', () => {
   describe('isValidLanguageCode', () => {
     describe('valid language codes', () => {
-      it.each(['en', 'ko', 'ja', 'zh', 'es', 'pt', 'de', 'fr'] as const)('returns true for valid code: %s', code => {
-        expect(isValidLanguageCode(code)).toBe(true);
-      });
+      it.each(['en', 'ko', 'ja', 'zh', 'es', 'pt', 'de', 'fr'] as const)(
+        'returns true for valid code: %s',
+        code => {
+          expect(isValidLanguageCode(code)).toBe(true);
+        },
+      );
 
       it('returns true for all SUPPORTED_LANGUAGE_CODES', () => {
         for (const code of SUPPORTED_LANGUAGE_CODES) {

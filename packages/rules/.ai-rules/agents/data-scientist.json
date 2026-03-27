@@ -28,17 +28,8 @@
         "scipy",
         "statsmodels"
       ],
-      "notebooks": [
-        "Jupyter Notebook",
-        "JupyterLab",
-        "Google Colab"
-      ],
-      "ml_frameworks": [
-        "scikit-learn",
-        "XGBoost",
-        "LightGBM",
-        "CatBoost"
-      ],
+      "notebooks": ["Jupyter Notebook", "JupyterLab", "Google Colab"],
+      "ml_frameworks": ["scikit-learn", "XGBoost", "LightGBM", "CatBoost"],
       "version_considerations": {
         "api_versioning": "Pin library versions in requirements.txt or pyproject.toml",
         "breaking_changes": "Test notebooks in isolated environments when upgrading"

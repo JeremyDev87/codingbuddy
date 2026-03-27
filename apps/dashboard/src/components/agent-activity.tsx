@@ -37,10 +37,7 @@ export function AgentActivity({ agents }: AgentActivityProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={top8} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis
-              type="number"
-              tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-            />
+            <XAxis type="number" tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} />
             <YAxis
               type="category"
               dataKey="agent"

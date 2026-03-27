@@ -12,7 +12,15 @@ const RUNTIME_AGENTS = {
   python: 'backend-developer',
 };
 
-const DATA_SCIENCE_FRAMEWORKS = ['pandas', 'numpy', 'scipy', 'jupyter', 'tensorflow', 'pytorch', 'scikit-learn'];
+const DATA_SCIENCE_FRAMEWORKS = [
+  'pandas',
+  'numpy',
+  'scipy',
+  'jupyter',
+  'tensorflow',
+  'pytorch',
+  'scikit-learn',
+];
 
 /**
  * Suggest the best primary agent based on detected tech stack.
@@ -21,7 +29,10 @@ const DATA_SCIENCE_FRAMEWORKS = ['pandas', 'numpy', 'scipy', 'jupyter', 'tensorf
  */
 function suggestAgent(stack) {
   // Data science detection for Python
-  if (stack.runtime === 'python' && stack.frameworks.some(f => DATA_SCIENCE_FRAMEWORKS.includes(f))) {
+  if (
+    stack.runtime === 'python' &&
+    stack.frameworks.some(f => DATA_SCIENCE_FRAMEWORKS.includes(f))
+  ) {
     return 'data-scientist';
   }
 

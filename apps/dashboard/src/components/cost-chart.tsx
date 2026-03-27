@@ -16,14 +16,11 @@ interface CostChartProps {
 }
 
 export function CostChart({ entries }: CostChartProps) {
-  const cumulative = entries.reduce<(CostEntry & { cumCost: number })[]>(
-    (acc, entry) => {
-      const prev = acc.length > 0 ? acc[acc.length - 1].cumCost : 0;
-      acc.push({ ...entry, cumCost: parseFloat((prev + entry.cost).toFixed(2)) });
-      return acc;
-    },
-    []
-  );
+  const cumulative = entries.reduce<(CostEntry & { cumCost: number })[]>((acc, entry) => {
+    const prev = acc.length > 0 ? acc[acc.length - 1].cumCost : 0;
+    acc.push({ ...entry, cumCost: parseFloat((prev + entry.cost).toFixed(2)) });
+    return acc;
+  }, []);
 
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">

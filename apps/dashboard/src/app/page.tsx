@@ -11,14 +11,13 @@ import { DashboardContent } from '@/components/dashboard-content';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const [sessions, costEntries, agentActivity, skillUsage, prEntries] =
-    await Promise.all([
-      loadSessions(),
-      loadCostEntries(),
-      loadAgentActivity(),
-      loadSkillUsage(),
-      loadPREntries(),
-    ]);
+  const [sessions, costEntries, agentActivity, skillUsage, prEntries] = await Promise.all([
+    loadSessions(),
+    loadCostEntries(),
+    loadAgentActivity(),
+    loadSkillUsage(),
+    loadPREntries(),
+  ]);
 
   const isUsingMockData = sessions.length > 0 && sessions[0].sessionId.startsWith('session-');
 

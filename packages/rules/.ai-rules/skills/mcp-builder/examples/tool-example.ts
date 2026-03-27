@@ -105,10 +105,7 @@ export class FileAnalyzerHandler {
     }
   }
 
-  private async analyze(
-    filePath: string,
-    metrics?: string[],
-  ): Promise<FileAnalysis> {
+  private async analyze(filePath: string, metrics?: string[]): Promise<FileAnalysis> {
     const content = await this.fileService.read(filePath);
     const lines = content.split('\n');
     const selected = new Set(metrics ?? ['complexity', 'lines', 'dependencies', 'exports']);
@@ -133,22 +130,20 @@ export class FileAnalyzerHandler {
   private extractDependencies(lines: string[]): string[] {
     const importPattern = /^import\s+.*from\s+['"]([^'"]+)['"]/;
     return lines
-      .map((line) => line.match(importPattern)?.[1])
+      .map(line => line.match(importPattern)?.[1])
       .filter((dep): dep is string => dep !== undefined);
   }
 
   private extractExports(lines: string[]): string[] {
-    const exportPattern = /^export\s+(?:default\s+)?(?:class|function|const|interface|type|enum)\s+(\w+)/;
+    const exportPattern =
+      /^export\s+(?:default\s+)?(?:class|function|const|interface|type|enum)\s+(\w+)/;
     return lines
-      .map((line) => line.match(exportPattern)?.[1])
+      .map(line => line.match(exportPattern)?.[1])
       .filter((name): name is string => name !== undefined);
   }
 
   private formatAnalysis(analysis: FileAnalysis, includeSource?: boolean): string {
-    const sections: string[] = [
-      `## File Analysis: ${analysis.filePath}`,
-      '',
-    ];
+    const sections: string[] = [`## File Analysis: ${analysis.filePath}`, ''];
 
     if (analysis.lineCount >= 0) {
       sections.push(`**Lines:** ${analysis.lineCount}`);
@@ -158,11 +153,11 @@ export class FileAnalyzerHandler {
     }
     if (analysis.dependencies.length > 0) {
       sections.push('', '**Dependencies:**');
-      analysis.dependencies.forEach((dep) => sections.push(`- \`${dep}\``));
+      analysis.dependencies.forEach(dep => sections.push(`- \`${dep}\``));
     }
     if (analysis.exports.length > 0) {
       sections.push('', '**Exports:**');
-      analysis.exports.forEach((exp) => sections.push(`- \`${exp}\``));
+      analysis.exports.forEach(exp => sections.push(`- \`${exp}\``));
     }
 
     return sections.join('\n');

@@ -24,20 +24,8 @@
         "AWS Bedrock",
         "Azure OpenAI"
       ],
-      "local_models": [
-        "Ollama",
-        "llama.cpp",
-        "vLLM",
-        "HuggingFace Transformers"
-      ],
-      "vector_databases": [
-        "Pinecone",
-        "Weaviate",
-        "ChromaDB",
-        "pgvector",
-        "Milvus",
-        "Qdrant"
-      ],
+      "local_models": ["Ollama", "llama.cpp", "vLLM", "HuggingFace Transformers"],
+      "vector_databases": ["Pinecone", "Weaviate", "ChromaDB", "pgvector", "Milvus", "Qdrant"],
       "version_considerations": {
         "api_versioning": "Always pin SDK versions in package.json; API behavior may change between versions",
         "deprecation_monitoring": "Monitor provider changelogs for deprecated endpoints and models",
@@ -286,10 +274,7 @@
             "Missing caching layer",
             "No streaming support"
           ],
-          "low": [
-            "Minor optimization opportunities",
-            "Documentation improvements"
-          ]
+          "low": ["Minor optimization opportunities", "Documentation improvements"]
         }
       }
     },
@@ -396,15 +381,8 @@
             "Insufficient test coverage",
             "Type safety violations"
           ],
-          "medium": [
-            "Suboptimal performance",
-            "Missing caching",
-            "Inconsistent error messages"
-          ],
-          "low": [
-            "Code style issues",
-            "Documentation gaps"
-          ]
+          "medium": ["Suboptimal performance", "Missing caching", "Inconsistent error messages"],
+          "low": ["Code style issues", "Documentation gaps"]
         }
       }
     },
@@ -664,20 +642,9 @@
         }
       },
       "evaluation_metrics": {
-        "quality_metrics": [
-          "BLEU",
-          "ROUGE",
-          "BERTScore",
-          "Custom relevance"
-        ],
-        "safety_metrics": [
-          "Injection resistance rate",
-          "PII detection rate"
-        ],
-        "performance_metrics": [
-          "Latency p50/p95/p99",
-          "Token efficiency"
-        ]
+        "quality_metrics": ["BLEU", "ROUGE", "BERTScore", "Custom relevance"],
+        "safety_metrics": ["Injection resistance rate", "PII detection rate"],
+        "performance_metrics": ["Latency p50/p95/p99", "Token efficiency"]
       }
     }
   },

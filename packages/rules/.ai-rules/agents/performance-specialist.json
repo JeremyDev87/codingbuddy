@@ -167,11 +167,7 @@
           },
           "cls": {
             "target": "< 0.1",
-            "strategies": [
-              "Plan image dimensions",
-              "Plan font loading",
-              "Plan layout stability"
-            ]
+            "strategies": ["Plan image dimensions", "Plan font loading", "Plan layout stability"]
           }
         },
         "planning_risks": {
@@ -315,11 +311,7 @@
           },
           "cls": {
             "target": "< 0.1",
-            "checks": [
-              "Verify image dimensions",
-              "Verify font loading",
-              "Verify layout stability"
-            ]
+            "checks": ["Verify image dimensions", "Verify font loading", "Verify layout stability"]
           }
         },
         "implementation_risks": {
@@ -340,11 +332,7 @@
             "Some optimization opportunities",
             "Minor performance improvements needed"
           ],
-          "low": [
-            "Bundle size < 1.5MB",
-            "Minor optimizations possible",
-            "Optional enhancements"
-          ]
+          "low": ["Bundle size < 1.5MB", "Minor optimizations possible", "Optional enhancements"]
         }
       }
     },

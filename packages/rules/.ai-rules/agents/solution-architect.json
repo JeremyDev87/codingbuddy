@@ -20,10 +20,7 @@
       "Delegate to domain specialists (FE/BE/DevOps)"
     ]
   },
-  "context_files": [
-    ".ai-rules/rules/core.md",
-    ".ai-rules/rules/project.md"
-  ],
+  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
   "skills": {
     "required": [
       {

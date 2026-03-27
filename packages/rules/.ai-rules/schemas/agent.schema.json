@@ -315,7 +315,16 @@
         },
         "group": {
           "type": "string",
-          "enum": ["workflow", "architecture", "quality", "security", "frontend", "backend", "integration", "specialist"],
+          "enum": [
+            "workflow",
+            "architecture",
+            "quality",
+            "security",
+            "frontend",
+            "backend",
+            "integration",
+            "specialist"
+          ],
           "description": "Domain group for visual categorization"
         }
       },

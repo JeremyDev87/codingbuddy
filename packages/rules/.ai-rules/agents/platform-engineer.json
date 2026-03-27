@@ -40,19 +40,8 @@
         "Azure (AKS, Container Apps, ARM/Bicep)",
         "Kubernetes (any distribution)"
       ],
-      "iac_tools": [
-        "Terraform",
-        "Pulumi",
-        "AWS CDK",
-        "Crossplane",
-        "OpenTofu"
-      ],
-      "gitops_tools": [
-        "Argo CD",
-        "Flux",
-        "Jenkins X",
-        "Tekton"
-      ],
+      "iac_tools": ["Terraform", "Pulumi", "AWS CDK", "Crossplane", "OpenTofu"],
+      "gitops_tools": ["Argo CD", "Flux", "Jenkins X", "Tekton"],
       "version_considerations": {
         "terraform_versioning": "Pin provider versions in required_providers block; use version constraints",
         "kubernetes_compatibility": "Verify API versions against target cluster version; watch for deprecations",
@@ -283,15 +272,8 @@
             "No GitOps workflow",
             "Insufficient monitoring"
           ],
-          "medium": [
-            "Suboptimal module structure",
-            "Missing documentation",
-            "No drift detection"
-          ],
-          "low": [
-            "Minor optimization opportunities",
-            "Code style improvements"
-          ]
+          "medium": ["Suboptimal module structure", "Missing documentation", "No drift detection"],
+          "low": ["Minor optimization opportunities", "Code style improvements"]
         }
       }
     },
@@ -362,15 +344,8 @@
             "Missing health checks",
             "Insufficient testing"
           ],
-          "medium": [
-            "Suboptimal resource sizing",
-            "Missing cost tags",
-            "Incomplete documentation"
-          ],
-          "low": [
-            "Code style issues",
-            "Minor optimizations"
-          ]
+          "medium": ["Suboptimal resource sizing", "Missing cost tags", "Incomplete documentation"],
+          "low": ["Code style issues", "Minor optimizations"]
         }
       }
     },
@@ -927,9 +902,7 @@
                 },
                 "metadata_check": {
                   "command": "curl -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email",
-                  "success_indicators": [
-                    "Returns GSA email, not node service account"
-                  ]
+                  "success_indicators": ["Returns GSA email, not node service account"]
                 },
                 "failure_indicators": [
                   "Shows compute-developer.gserviceaccount.com (node SA)",

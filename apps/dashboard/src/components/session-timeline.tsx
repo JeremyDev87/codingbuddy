@@ -46,7 +46,7 @@ export function SessionTimeline({ sessions }: SessionTimelineProps) {
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
       <h2 className="mb-4 text-lg font-semibold">Session Timeline</h2>
       <div className="space-y-3">
-        {displayed.map((session) => (
+        {displayed.map(session => (
           <div
             key={session.sessionId}
             className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] p-3 transition-colors hover:bg-[var(--color-surface-hover)]"
@@ -69,9 +69,7 @@ export function SessionTimeline({ sessions }: SessionTimelineProps) {
                 <span>{formatDuration(session.startedAt, session.endedAt)}</span>
                 <span>{session.toolCallCount} calls</span>
                 {session.errorCount > 0 && (
-                  <span className="text-[var(--color-error)]">
-                    {session.errorCount} errors
-                  </span>
+                  <span className="text-[var(--color-error)]">{session.errorCount} errors</span>
                 )}
               </div>
             </div>

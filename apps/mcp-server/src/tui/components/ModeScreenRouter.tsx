@@ -119,11 +119,7 @@ export function ModeScreenRouter({
         />
       )}
       {screen === 'eval' && (
-        <EvalModeScreen
-          results={state.reviewResults}
-          width={width}
-          height={contentHeight}
-        />
+        <EvalModeScreen results={state.reviewResults} width={width} height={contentHeight} />
       )}
       {screen === 'flow' && (
         <FlowMap

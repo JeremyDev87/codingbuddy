@@ -22,9 +22,7 @@ function StatCard({ label, value, icon, subtitle }: StatCardProps) {
         <span className="text-[var(--color-accent)]">{icon}</span>
       </div>
       <p className="mt-2 text-2xl font-semibold">{value}</p>
-      {subtitle && (
-        <p className="mt-1 text-xs text-[var(--color-text-muted)]">{subtitle}</p>
-      )}
+      {subtitle && <p className="mt-1 text-xs text-[var(--color-text-muted)]">{subtitle}</p>}
     </div>
   );
 }
@@ -32,10 +30,7 @@ function StatCard({ label, value, icon, subtitle }: StatCardProps) {
 export function DashboardHeader({ data }: DashboardHeaderProps) {
   const totalSessions = data.sessions.length;
   const totalCost = data.costEntries.reduce((sum, e) => sum + e.cost, 0);
-  const totalToolCalls = data.sessions.reduce(
-    (sum, s) => sum + s.toolCallCount,
-    0
-  );
+  const totalToolCalls = data.sessions.reduce((sum, s) => sum + s.toolCallCount, 0);
   const totalPRs = data.prEntries.reduce((sum, e) => sum + e.merged, 0);
 
   return (

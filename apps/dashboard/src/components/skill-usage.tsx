@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { SkillUsage as SkillUsageType } from '@/lib/types';
 
 interface SkillUsageProps {
@@ -25,10 +17,7 @@ export function SkillUsage({ skills }: SkillUsageProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={top10} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis
-              type="number"
-              tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-            />
+            <XAxis type="number" tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} />
             <YAxis
               type="category"
               dataKey="skill"
@@ -44,11 +33,7 @@ export function SkillUsage({ skills }: SkillUsageProps) {
               }}
               formatter={(value: number) => [`${value} invocations`, 'Usage']}
             />
-            <Bar
-              dataKey="count"
-              fill="var(--color-accent-light)"
-              radius={[0, 4, 4, 0]}
-            />
+            <Bar dataKey="count" fill="var(--color-accent-light)" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

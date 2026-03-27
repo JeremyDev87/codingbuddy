@@ -2,13 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import {
-  syncRules,
-  readSourceData,
-  generateFiles,
-  diffFiles,
-  writeFiles,
-} from '../sync-rules';
+import { syncRules, readSourceData, generateFiles, diffFiles, writeFiles } from '../sync-rules';
 
 describe('sync-rules', () => {
   let tmpDir: string;
@@ -131,10 +125,7 @@ describe('sync-rules', () => {
       expect(result.changes.some(c => c.status === 'added')).toBe(true);
 
       // Verify files were actually written
-      const content = await fs.readFile(
-        path.join(tmpDir, '.cursor/rules/auto-agent.mdc'),
-        'utf-8',
-      );
+      const content = await fs.readFile(path.join(tmpDir, '.cursor/rules/auto-agent.mdc'), 'utf-8');
       expect(content).toContain('frontend-developer');
     });
 
@@ -180,16 +171,10 @@ describe('sync-rules', () => {
 
     it('is idempotent — running twice produces same result', async () => {
       await syncRules(tmpDir);
-      const first = await fs.readFile(
-        path.join(tmpDir, '.cursor/rules/auto-agent.mdc'),
-        'utf-8',
-      );
+      const first = await fs.readFile(path.join(tmpDir, '.cursor/rules/auto-agent.mdc'), 'utf-8');
 
       await syncRules(tmpDir);
-      const second = await fs.readFile(
-        path.join(tmpDir, '.cursor/rules/auto-agent.mdc'),
-        'utf-8',
-      );
+      const second = await fs.readFile(path.join(tmpDir, '.cursor/rules/auto-agent.mdc'), 'utf-8');
 
       expect(first).toBe(second);
     });

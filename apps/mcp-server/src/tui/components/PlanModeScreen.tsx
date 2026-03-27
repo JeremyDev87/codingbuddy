@@ -63,11 +63,7 @@ export function PlanModeScreen({
         ))}
       </Box>
       {rounds.length > 0 && discussionHeight > 3 && (
-        <AgentDiscussionPanel
-          rounds={rounds}
-          width={width}
-          height={discussionHeight}
-        />
+        <AgentDiscussionPanel rounds={rounds} width={width} height={discussionHeight} />
       )}
     </Box>
   );

@@ -15,7 +15,11 @@ describe('suggestAgent', () => {
   });
 
   it('suggests software-engineer for Next.js fullstack', () => {
-    const result = suggestAgent({ runtime: 'node', category: 'fullstack', frameworks: ['next', 'react'] });
+    const result = suggestAgent({
+      runtime: 'node',
+      category: 'fullstack',
+      frameworks: ['next', 'react'],
+    });
     assert.equal(result, 'software-engineer');
   });
 
@@ -40,7 +44,11 @@ describe('suggestAgent', () => {
   });
 
   it('suggests mobile-developer for React Native', () => {
-    const result = suggestAgent({ runtime: 'node', category: 'mobile', frameworks: ['react-native'] });
+    const result = suggestAgent({
+      runtime: 'node',
+      category: 'mobile',
+      frameworks: ['react-native'],
+    });
     assert.equal(result, 'mobile-developer');
   });
 
