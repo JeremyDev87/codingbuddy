@@ -542,27 +542,38 @@ def main():
 
         # Step 6: Buddy greeting + project scan + agent recommendations (#968)
         # Enhanced with returning session context (#975)
+        # Adaptive performance mode (#1002): skip heavy scan in lightweight mode
         try:
             _ensure_lib_path()
 
             from config import get_config as _get_config
-            from project_scanner import scan_project, get_agent_recommendations
             from buddy_renderer import render_session_start
+            from adaptive_perf import get_monitor, format_lightweight_notice
 
             cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
             cfg = _get_config(cwd)
             tone = cfg.get("tone", "casual")
             language = cfg.get("language", "en")
 
-            # Scan project
-            scan_data = scan_project(cwd)
+            perf_monitor = get_monitor(cfg)
 
-            # Load agent visuals
-            agents_dir = _find_agents_dir()
-            agents = load_agent_visuals(agents_dir) if agents_dir else {}
+            scan_data = {}
+            recommendations = []
 
-            # Generate recommendations
-            recommendations = get_agent_recommendations(scan_data, agents)
+            if not perf_monitor.should_skip("full_project_scan"):
+                from project_scanner import scan_project
+                perf_monitor.start_timing("project_scan")
+                scan_data = scan_project(cwd)
+                elapsed = perf_monitor.stop_timing("project_scan")
+
+                if not perf_monitor.should_skip("agent_recommendations"):
+                    agents_dir = _find_agents_dir()
+                    agents = load_agent_visuals(agents_dir) if agents_dir else {}
+                    from project_scanner import get_agent_recommendations
+                    recommendations = get_agent_recommendations(scan_data, agents)
+            else:
+                # Lightweight mode: notify user
+                print(format_lightweight_notice(language), file=sys.stderr)
 
             # Detect returning session (#975)
             previous_session = None

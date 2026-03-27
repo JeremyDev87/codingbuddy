@@ -24,6 +24,7 @@ if _lib_dir not in sys.path:
 from safe_main import safe_main
 from config import get_config
 from agent_status import build_status_message
+from adaptive_perf import get_monitor
 
 # Pattern to detect git commit in a command string
 _GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
@@ -181,12 +182,17 @@ def _handle(data: dict) -> Optional[dict]:
     tool_name = data.get("tool_name", "")
     contexts = []
 
+    # Initialize adaptive performance monitor (#1002)
+    perf_config = _get_hook_config()
+    perf_monitor = get_monitor(perf_config)
+
     # Bash-specific checks
     if tool_name == "Bash":
-        # Check for file changes (#823)
-        file_change_msg = _check_file_changes(data)
-        if file_change_msg:
-            contexts.append(file_change_msg)
+        # Check for file changes (#823) — skip in lightweight mode (#1002)
+        if not perf_monitor.should_skip("file_watcher"):
+            file_change_msg = _check_file_changes(data)
+            if file_change_msg:
+                contexts.append(file_change_msg)
 
         command = data.get("tool_input", {}).get("command", "")
 
