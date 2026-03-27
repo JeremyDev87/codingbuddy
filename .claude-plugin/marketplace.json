@@ -1,6 +1,8 @@
 {
   "name": "jeremydev87",
-  "description": "JeremyDev87's Claude Code plugins - AI coding assistants for systematic development",
+  "metadata": {
+    "description": "JeremyDev87's Claude Code plugins - AI coding assistants for systematic development"
+  },
   "owner": {
     "name": "JeremyDev87",
     "email": "soundbrokaz@kakao.com"
