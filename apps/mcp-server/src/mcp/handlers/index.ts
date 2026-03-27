@@ -109,6 +109,12 @@ export { ParallelValidationHandler } from '../../parallel-validation/parallel-va
 export { PipelineHandler } from './pipeline.handler';
 
 /**
+ * Handler for context archive tools (get_context_history, search_context_archives, cleanup_context_archives)
+ * @see {@link ContextArchiveHandler}
+ */
+export { ContextArchiveHandler } from './context-archive.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

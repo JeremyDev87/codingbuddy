@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { ContextDocumentService } from './context-document.service';
 import type { ConfigService } from '../config/config.service';
+import type { ContextArchiveService } from './context-archive.service';
 import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
 import { CONTEXT_FILE_PATH, DEFAULT_CONTEXT_LIMITS } from './context-document.types';
@@ -234,6 +235,7 @@ Second implementation
 describe('ContextDocumentService', () => {
   let service: ContextDocumentService;
   let mockConfigService: ConfigService;
+  let mockArchiveService: ContextArchiveService;
 
   beforeEach(() => {
     // Create mock ConfigService
@@ -242,7 +244,12 @@ describe('ContextDocumentService', () => {
       getContextLimits: vi.fn().mockResolvedValue(DEFAULT_CONTEXT_LIMITS),
     } as unknown as ConfigService;
 
-    service = new ContextDocumentService(mockConfigService);
+    // Create mock ContextArchiveService
+    mockArchiveService = {
+      archiveContext: vi.fn().mockResolvedValue('docs/codingbuddy/archive/2024-01-01-1000.md'),
+    } as unknown as ContextArchiveService;
+
+    service = new ContextDocumentService(mockConfigService, mockArchiveService);
     vi.clearAllMocks();
   });
 

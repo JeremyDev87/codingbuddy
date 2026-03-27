@@ -31,6 +31,7 @@ import {
   cleanupContextDocument,
 } from './context-serializer.utils';
 import { ConfigService } from '../config/config.service';
+import { ContextArchiveService } from './context-archive.service';
 import { withTimeout } from '../shared/async.utils';
 
 /**
@@ -45,7 +46,10 @@ import { withTimeout } from '../shared/async.utils';
 export class ContextDocumentService {
   private readonly logger = new Logger(ContextDocumentService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly archiveService: ContextArchiveService,
+  ) {}
 
   /**
    * Handle context operation errors uniformly.
@@ -173,8 +177,25 @@ export class ContextDocumentService {
       const timestamp = generateTimestamp();
       const limits = await this.getContextLimits();
 
-      // Preserve existing issues across PLAN reset
+      // Archive existing context before reset
       const existingResult = await this.readContext();
+      if (existingResult.exists && existingResult.document) {
+        try {
+          const contextPath = this.getContextPath();
+          const existingContent = await withTimeout(fs.readFile(contextPath, 'utf-8'), {
+            timeoutMs: CONTEXT_FILE_TIMEOUT_MS,
+            operationName: 'read context for archive',
+          });
+          await this.archiveService.archiveContext(existingContent);
+        } catch (error) {
+          // Archive failure should not block reset
+          this.logger.warn(
+            `Failed to archive context before reset: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          );
+        }
+      }
+
+      // Preserve existing issues across PLAN reset
       const existingIssues = existingResult.document?.issues;
       const mergedIssues = mergeIssues(existingIssues, data.issues);
 
