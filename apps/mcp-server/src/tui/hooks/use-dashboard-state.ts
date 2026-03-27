@@ -8,7 +8,6 @@ import type {
   ToolCallRecord,
   ActivitySample,
   ModeTransition,
-  FileChangeStats,
 } from '../dashboard-types';
 import type { TuiEventBus } from '../events';
 import {

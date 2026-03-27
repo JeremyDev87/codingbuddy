@@ -277,9 +277,7 @@ describe('tui/components/FocusedAgentPanel', () => {
           agent={mockAgent}
           activeSkills={[]}
           objectives={[]}
-          eventLog={[
-            { timestamp: '10:12:01', message: 'ACT start', level: 'info' },
-          ]}
+          eventLog={[{ timestamp: '10:12:01', message: 'ACT start', level: 'info' }]}
         />,
       );
       const frame = lastFrame() ?? '';

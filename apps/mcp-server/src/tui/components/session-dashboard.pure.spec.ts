@@ -12,13 +12,7 @@ import {
   renderSessionDashboard,
   formatDurationMs,
 } from './session-dashboard.pure';
-import type {
-  ToolCallRecord,
-  TddStep,
-  DashboardNode,
-  FileChangeStats,
-  ModeTransition,
-} from '../dashboard-types';
+import type { ToolCallRecord, TddStep, DashboardNode, ModeTransition } from '../dashboard-types';
 
 function makeToolCall(name: string, timestamp = 1000): ToolCallRecord {
   return { agentId: 'a1', toolName: name, timestamp, status: 'completed' };
