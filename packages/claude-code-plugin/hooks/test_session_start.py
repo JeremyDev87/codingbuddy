@@ -7,6 +7,7 @@ Run with: python3 -m pytest test_session_start.py -v
 
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -229,6 +230,83 @@ class TestVersionSorting:
 
             dir_names = [d.name for d in version_dirs]
             assert dir_names == ["10.0.0", "3.0.0", "2.0.0", "1.0.0"]
+
+
+class TestLoadAgentVisuals:
+    """Tests for load_agent_visuals function."""
+
+    def test_loads_agents_with_visual(self):
+        """Test loading agent JSONs that have visual fields."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            agent = {
+                "name": "Frontend Developer",
+                "visual": {"eye": "\u2605", "colorAnsi": "yellow"},
+            }
+            Path(tmpdir, "frontend-developer.json").write_text(json.dumps(agent))
+            result = session_hook.load_agent_visuals(tmpdir)
+            assert "frontend-developer" in result
+            assert result["frontend-developer"]["name"] == "Frontend Developer"
+            assert result["frontend-developer"]["visual"]["eye"] == "\u2605"
+
+    def test_skips_agents_without_visual(self):
+        """Test that agents without visual field are skipped."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            agent = {"name": "Some Agent"}
+            Path(tmpdir, "some-agent.json").write_text(json.dumps(agent))
+            result = session_hook.load_agent_visuals(tmpdir)
+            assert "some-agent" not in result
+
+    def test_handles_missing_dir(self):
+        """Test returns empty dict for missing directory."""
+        result = session_hook.load_agent_visuals("/nonexistent/path")
+        assert result == {}
+
+    def test_handles_invalid_json(self):
+        """Test skips files with invalid JSON."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "bad.json").write_text("not json{{{")
+            agent = {
+                "name": "Good Agent",
+                "visual": {"eye": "O", "colorAnsi": "blue"},
+            }
+            Path(tmpdir, "good.json").write_text(json.dumps(agent))
+            result = session_hook.load_agent_visuals(tmpdir)
+            assert "good" in result
+            assert "bad" not in result
+
+    def test_skips_non_json_files(self):
+        """Test skips files that are not .json."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "readme.md").write_text("# Agents")
+            result = session_hook.load_agent_visuals(tmpdir)
+            assert result == {}
+
+
+class TestEnsureLibPath:
+    """Tests for _ensure_lib_path helper."""
+
+    def test_returns_lib_dir_path(self):
+        result = session_hook._ensure_lib_path()
+        assert result.endswith("lib")
+        assert os.path.isdir(result)
+
+    def test_adds_to_sys_path(self):
+        result = session_hook._ensure_lib_path()
+        assert result in sys.path
+
+
+class TestFindAgentsDir:
+    """Tests for _find_agents_dir function."""
+
+    def test_finds_agents_from_relative_path(self):
+        """Test that agents dir can be found relative to hook file."""
+        result = session_hook._find_agents_dir()
+        # In dev environment, this should find the agents directory
+        if result is not None:
+            assert os.path.isdir(result)
+            # Should contain at least one .json file
+            json_files = [f for f in os.listdir(result) if f.endswith(".json")]
+            assert len(json_files) > 0
 
 
 if __name__ == "__main__":

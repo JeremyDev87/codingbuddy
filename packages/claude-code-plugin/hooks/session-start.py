@@ -343,6 +343,74 @@ def register_hook_in_settings(settings_file: Path) -> bool:
     return True
 
 
+def _ensure_lib_path():
+    """Ensure hooks/lib is on sys.path (idempotent)."""
+    _hooks_dir = os.path.dirname(os.path.abspath(__file__))
+    _lib_dir = os.path.join(_hooks_dir, "lib")
+    if _lib_dir not in sys.path:
+        sys.path.insert(0, _lib_dir)
+    return _lib_dir
+
+
+def load_agent_visuals(agents_dir: str) -> Dict[str, dict]:
+    """Load agent definitions with visual fields from JSON files.
+
+    Args:
+        agents_dir: Path to agents directory containing *.json files.
+
+    Returns:
+        Dict mapping agent-id to {name, visual} data.
+    """
+    agents: Dict[str, dict] = {}
+    if not os.path.isdir(agents_dir):
+        return agents
+
+    try:
+        for fname in os.listdir(agents_dir):
+            if not fname.endswith(".json"):
+                continue
+            agent_id = fname[:-5]  # strip .json
+            fpath = os.path.join(agents_dir, fname)
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if "visual" in data:
+                    agents[agent_id] = {
+                        "name": data.get("name", agent_id),
+                        "visual": data["visual"],
+                    }
+            except (json.JSONDecodeError, OSError):
+                continue
+    except OSError:
+        pass
+
+    return agents
+
+
+def _find_agents_dir() -> Optional[str]:
+    """Find the .ai-rules/agents directory relative to plugin source."""
+    # Try CLAUDE_PLUGIN_DIR first
+    plugin_dir = os.environ.get("CLAUDE_PLUGIN_DIR", "")
+    if plugin_dir:
+        candidate = os.path.join(plugin_dir, "..", "rules", ".ai-rules", "agents")
+        resolved = os.path.realpath(candidate)
+        if os.path.isdir(resolved):
+            return resolved
+
+    # Try relative to this file (dev mode)
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(this_dir, "..", "..", "rules", ".ai-rules", "agents"),
+        os.path.join(this_dir, "..", "..", "..", "packages", "rules", ".ai-rules", "agents"),
+    ]
+    for candidate in candidates:
+        resolved = os.path.realpath(candidate)
+        if os.path.isdir(resolved):
+            return resolved
+
+    return None
+
+
 def main():
     """Main entry point for the session start hook."""
     try:
@@ -379,11 +447,7 @@ def main():
         # Step 3: System prompt injection (#828)
         # SessionStart uses plain stdout for context injection (NOT JSON)
         try:
-            # Add hooks/lib to path for imports
-            _hooks_dir = os.path.dirname(os.path.abspath(__file__))
-            _lib_dir = os.path.join(_hooks_dir, "lib")
-            if _lib_dir not in sys.path:
-                sys.path.insert(0, _lib_dir)
+            _ensure_lib_path()
 
             from prompt_injection import PromptInjector
             from config import get_config
@@ -399,10 +463,7 @@ def main():
 
         # Step 4: Initialize operational stats (#825)
         try:
-            _hooks_dir = os.path.dirname(os.path.abspath(__file__))
-            _lib_dir = os.path.join(_hooks_dir, "lib")
-            if _lib_dir not in sys.path:
-                sys.path.insert(0, _lib_dir)
+            _ensure_lib_path()
 
             from stats import SessionStats
 
@@ -417,10 +478,7 @@ def main():
 
         # Step 5: Record session in history database (#823)
         try:
-            _hooks_dir = os.path.dirname(os.path.abspath(__file__))
-            _lib_dir = os.path.join(_hooks_dir, "lib")
-            if _lib_dir not in sys.path:
-                sys.path.insert(0, _lib_dir)
+            _ensure_lib_path()
 
             from history_db import HistoryDB
 
@@ -430,6 +488,36 @@ def main():
             db = HistoryDB()
             db.start_session(session_id, cwd, model)
             db.close()
+        except Exception:
+            pass  # Never block session start
+
+        # Step 6: Buddy greeting + project scan + agent recommendations (#968)
+        try:
+            _ensure_lib_path()
+
+            from config import get_config as _get_config
+            from project_scanner import scan_project, get_agent_recommendations
+            from buddy_renderer import render_session_start
+
+            cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
+            cfg = _get_config(cwd)
+            tone = cfg.get("tone", "casual")
+            language = cfg.get("language", "en")
+
+            # Scan project
+            scan_data = scan_project(cwd)
+
+            # Load agent visuals
+            agents_dir = _find_agents_dir()
+            agents = load_agent_visuals(agents_dir) if agents_dir else {}
+
+            # Generate recommendations
+            recommendations = get_agent_recommendations(scan_data, agents)
+
+            # Render and output
+            output = render_session_start(scan_data, recommendations, tone, language)
+            if output:
+                print(output)
         except Exception:
             pass  # Never block session start
 
