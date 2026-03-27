@@ -1255,12 +1255,11 @@ describe('KeywordService', () => {
 
       expect(result.mode).toBe('ACT');
       expect(result.delegates_to).toBe('backend-developer');
-      expect(mockResolver.resolve).toHaveBeenCalledWith(
-        'ACT',
-        'implement login API',
-        undefined,
-        'backend-developer',
-      );
+      const call = mockResolver.resolve.mock.calls[0];
+      expect(call[0]).toBe('ACT');
+      expect(call[1]).toBe('implement login API');
+      expect(call[2]).toBeUndefined(); // context
+      expect(call[3]).toBe('backend-developer'); // recommendedActAgent
     });
 
     it('ignores recommendedActAgent in PLAN mode', async () => {
@@ -1288,7 +1287,11 @@ describe('KeywordService', () => {
       expect(result.mode).toBe('PLAN');
       expect(result.delegates_to).toBe('solution-architect');
       // Should not pass recommendedActAgent for PLAN mode
-      expect(mockResolver.resolve).toHaveBeenCalledWith('PLAN', 'design API', undefined, undefined);
+      const call = mockResolver.resolve.mock.calls[0];
+      expect(call[0]).toBe('PLAN');
+      expect(call[1]).toBe('design API');
+      expect(call[2]).toBeUndefined(); // context
+      expect(call[3]).toBeUndefined(); // recommendedActAgent
     });
 
     it('ignores recommendedActAgent in EVAL mode', async () => {
@@ -1338,12 +1341,11 @@ describe('KeywordService', () => {
       const result = await serviceWithResolver.parseMode('ACT implement feature');
 
       expect(result.delegates_to).toBe('frontend-developer');
-      expect(mockResolver.resolve).toHaveBeenCalledWith(
-        'ACT',
-        'implement feature',
-        undefined,
-        undefined,
-      );
+      const call = mockResolver.resolve.mock.calls[0];
+      expect(call[0]).toBe('ACT');
+      expect(call[1]).toBe('implement feature');
+      expect(call[2]).toBeUndefined(); // context
+      expect(call[3]).toBeUndefined(); // recommendedActAgent
     });
 
     it('treats empty string recommendedActAgent as undefined', async () => {
@@ -1371,12 +1373,11 @@ describe('KeywordService', () => {
 
       expect(result.delegates_to).toBe('frontend-developer');
       // Should be called with undefined, not empty string
-      expect(mockResolver.resolve).toHaveBeenCalledWith(
-        'ACT',
-        'implement',
-        undefined,
-        '', // Empty string is passed through (MCP layer handles trim)
-      );
+      const call = mockResolver.resolve.mock.calls[0];
+      expect(call[0]).toBe('ACT');
+      expect(call[1]).toBe('implement');
+      expect(call[2]).toBeUndefined(); // context
+      expect(call[3]).toBe(''); // Empty string is passed through (MCP layer handles trim)
     });
 
     it('treats whitespace-only recommendedActAgent as undefined', async () => {

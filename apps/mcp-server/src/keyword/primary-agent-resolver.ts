@@ -22,6 +22,7 @@ import {
   type ResolutionContext,
 } from './keyword.types';
 import type { ExplicitPatternsMap } from './explicit-pattern-matcher';
+import type { DiffAnalysisResult } from './diff-analyzer';
 import {
   EvalAgentStrategy,
   PlanAgentStrategy,
@@ -84,6 +85,7 @@ export class PrimaryAgentResolver {
     context?: ResolutionContext,
     recommendedActAgent?: string,
     isRecommendation?: boolean,
+    diffAnalysis?: DiffAnalysisResult,
   ): Promise<PrimaryAgentResolutionResult> {
     // Get available agents and filter out excluded ones
     const allAgents = await this.safeListPrimaryAgents();
@@ -100,6 +102,7 @@ export class PrimaryAgentResolver {
       recommendedActAgent,
       isRecommendation,
       explicitPatternsMap,
+      diffAnalysis,
     };
 
     // Delegate to mode-specific strategy

@@ -34,6 +34,7 @@ import { truncateRuleContent } from '../rules/rules-content.utils';
 import { getDefaultModeConfig } from '../shared/keyword-core';
 import { isTaskmaestroAvailable } from './taskmaestro-detector';
 import { type ClientType } from '../shared/client-type';
+import { getDiffFiles, analyzeDiffFiles, type DiffAnalysisResult } from './diff-analyzer';
 
 /**
  * Options for parseMode method
@@ -476,6 +477,12 @@ export class KeywordService {
     // 1. Build base result object
     const result = this.buildBaseResult(mode, originalPrompt, warnings, modeConfig, rules);
 
+    // 1.5. Run optional diff analysis (secondary signal for agent recommendation)
+    const diffAnalysis = await this.runDiffAnalysis();
+    if (diffAnalysis && diffAnalysis.scores.length > 0) {
+      result.diffAnalysis = diffAnalysis;
+    }
+
     // 2. Resolve and add Primary Agent information
     const resolvedAgent = await this.resolvePrimaryAgent(
       mode,
@@ -483,6 +490,7 @@ export class KeywordService {
       modeConfig.delegates_to,
       options?.context,
       recommendedActAgent,
+      diffAnalysis ?? undefined,
     );
     await this.addAgentInfoToResult(result, resolvedAgent);
 
@@ -580,6 +588,31 @@ export class KeywordService {
     const recommendation = this.getParallelAgentsRecommendation(mode, config, originalPrompt);
     if (recommendation) {
       result.parallelAgentsRecommendation = recommendation;
+    }
+  }
+
+  /**
+   * Run optional git diff analysis for file-based agent recommendation.
+   * Returns null if no changes or git is unavailable.
+   */
+  private async runDiffAnalysis(): Promise<DiffAnalysisResult | null> {
+    try {
+      const files = await getDiffFiles();
+      if (files.length === 0) {
+        return null;
+      }
+      const analysis = analyzeDiffFiles(files);
+      if (analysis.topAgent) {
+        this.logger.debug(
+          `Diff analysis: top agent=${analysis.topAgent.agent} (score=${analysis.topAgent.score.toFixed(2)}, files=${analysis.files.length})`,
+        );
+      }
+      return analysis;
+    } catch (error) {
+      this.logger.debug(
+        `Diff analysis skipped: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return null;
     }
   }
 
@@ -1091,6 +1124,7 @@ export class KeywordService {
     staticDelegatesTo?: string,
     context?: ResolutionContext,
     recommendedActAgent?: string,
+    diffAnalysis?: DiffAnalysisResult,
   ): Promise<{
     agentName: string;
     source: PrimaryAgentSource;
@@ -1102,6 +1136,8 @@ export class KeywordService {
         prompt,
         context,
         recommendedActAgent,
+        undefined, // isRecommendation
+        diffAnalysis,
       );
       return { agentName: result.agentName, source: result.source };
     }

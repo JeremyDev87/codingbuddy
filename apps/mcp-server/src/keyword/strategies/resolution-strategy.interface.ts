@@ -7,6 +7,7 @@
 
 import type { PrimaryAgentResolutionResult, ResolutionContext } from '../keyword.types';
 import type { ExplicitPatternsMap } from '../explicit-pattern-matcher';
+import type { DiffAnalysisResult } from '../diff-analyzer';
 
 /**
  * Project config interface for Primary Agent configuration.
@@ -43,6 +44,8 @@ export interface StrategyContext {
   readonly isRecommendation?: boolean;
   /** Map of agent name → explicit_patterns from agent JSON activation fields */
   readonly explicitPatternsMap?: ExplicitPatternsMap;
+  /** Diff analysis result for file-based agent score adjustment */
+  readonly diffAnalysis?: DiffAnalysisResult;
 }
 
 /**

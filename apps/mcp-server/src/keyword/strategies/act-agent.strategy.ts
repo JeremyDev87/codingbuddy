@@ -200,6 +200,21 @@ export class ActAgentStrategy implements ResolutionStrategy {
       }
     }
 
+    // 11.5. Check diff-based suggestion (secondary signal)
+    if (ctx.diffAnalysis?.topAgent) {
+      const { agent: diffAgent, score, reason } = ctx.diffAnalysis.topAgent;
+      if (availableAgents.includes(diffAgent) && score >= 0.4) {
+        const confidence = Math.min(0.75, 0.5 + score * 0.25);
+        this.logger.debug(`Diff-based agent: ${diffAgent} (score: ${score.toFixed(2)})`);
+        return createResult(
+          diffAgent,
+          'context',
+          confidence,
+          `Diff analysis: ${reason}`,
+        );
+      }
+    }
+
     // 12. Check context-based suggestion
     if (context) {
       const fromContext = inferFromContext(context.filePath, context.projectType, availableAgents);

@@ -469,6 +469,12 @@ export interface ParseModeResult {
    * When present, AI clients can render agent characters and collaboration format.
    */
   visual?: VisualData;
+  /**
+   * @apiProperty External API - do not rename.
+   * Git diff-based analysis result used as secondary signal for agent recommendation.
+   * Present when staged or unstaged changes exist in the working directory.
+   */
+  diffAnalysis?: DiffAnalysisResult;
 }
 
 /**
@@ -542,6 +548,9 @@ export interface VisualData {
   /** Collaboration display configuration */
   collaboration: CollaborationConfig;
 }
+
+/** Re-export DiffAnalysisResult for consumers */
+export type { DiffAnalysisResult } from './diff-analyzer';
 
 export interface ModeConfig {
   description: string;
