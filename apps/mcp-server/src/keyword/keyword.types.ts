@@ -159,6 +159,21 @@ export const LOCALIZED_KEYWORD_MAP: Record<string, Mode> = {
   ACTUAR: 'ACT',
   EVALUAR: 'EVAL',
   AUTOMÁTICO: 'AUTO',
+  // Portuguese (Português) - stored uppercase, matched case-insensitively
+  PLANEJAR: 'PLAN',
+  EXECUTAR: 'ACT',
+  AVALIAR: 'EVAL',
+  AUTOMÁTICO_PT: 'AUTO',
+  // German (Deutsch) - stored uppercase, matched case-insensitively
+  PLANEN: 'PLAN',
+  AUSFÜHREN: 'ACT',
+  BEWERTEN: 'EVAL',
+  AUTOMATISCH: 'AUTO',
+  // French (Français) - stored uppercase, matched case-insensitively
+  PLANIFIER: 'PLAN',
+  EXÉCUTER: 'ACT',
+  ÉVALUER: 'EVAL',
+  AUTOMATIQUE: 'AUTO',
 } as const;
 
 /**
@@ -204,6 +219,21 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageDisplayInfo> = {
     name: 'Spanish',
     nativeName: 'Español',
     description: 'AI responses will be in Spanish',
+  },
+  pt: {
+    name: 'Portuguese',
+    nativeName: 'Português',
+    description: 'AI responses will be in Portuguese',
+  },
+  de: {
+    name: 'German',
+    nativeName: 'Deutsch',
+    description: 'AI responses will be in German',
+  },
+  fr: {
+    name: 'French',
+    nativeName: 'Français',
+    description: 'AI responses will be in French',
   },
 } as const;
 

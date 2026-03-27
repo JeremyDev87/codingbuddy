@@ -1,14 +1,14 @@
 /**
  * Supported languages for skill keyword matching
  */
-export type SupportedLanguage = 'en' | 'ko' | 'ja' | 'zh' | 'es';
+export type SupportedLanguage = 'en' | 'ko' | 'ja' | 'zh' | 'es' | 'pt' | 'de' | 'fr';
 
 /**
  * Keywords for a single concept across all supported languages
  */
 export type ConceptKeywords = {
-  [lang in SupportedLanguage]: string[];
-};
+  [lang in SupportedLanguage]?: string[];
+} & { en: string[] };
 
 /**
  * Skill keyword configuration
@@ -31,4 +31,7 @@ export const LANGUAGE_OPTIONS: Record<SupportedLanguage, { useWordBoundary: bool
   ja: { useWordBoundary: false }, // 교착어
   zh: { useWordBoundary: false }, // 고립어
   es: { useWordBoundary: true },
+  pt: { useWordBoundary: true },
+  de: { useWordBoundary: true },
+  fr: { useWordBoundary: true },
 };

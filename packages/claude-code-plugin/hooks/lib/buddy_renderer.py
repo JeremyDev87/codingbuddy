@@ -26,6 +26,9 @@ GREETINGS: Dict[str, Dict[str, str]] = {
         "ja": "\u3084\u3042\uff01\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u3092\u30b9\u30ad\u30e3\u30f3\u3057\u307e\u3059...",
         "zh": "\u55e8\uff01\u8ba9\u6211\u626b\u63cf\u4f60\u7684\u9879\u76ee...",
         "es": "\u00a1Hola! Voy a escanear tu proyecto...",
+        "pt": "Oi! Vou escanear seu projeto...",
+        "de": "Hallo! Ich scanne dein Projekt...",
+        "fr": "Salut\u202f! Je scanne ton projet...",
     },
     "formal": {
         "en": "Scanning project environment...",
@@ -33,6 +36,9 @@ GREETINGS: Dict[str, Dict[str, str]] = {
         "ja": "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u74b0\u5883\u3092\u30b9\u30ad\u30e3\u30f3\u4e2d...",
         "zh": "\u6b63\u5728\u626b\u63cf\u9879\u76ee\u73af\u5883...",
         "es": "Escaneando el entorno del proyecto...",
+        "pt": "Escaneando o ambiente do projeto...",
+        "de": "Projektumgebung wird gescannt...",
+        "fr": "Analyse de l\u2019environnement du projet...",
     },
 }
 
@@ -43,6 +49,9 @@ HEADERS: Dict[str, Dict[str, str]] = {
     "ja": {"recommendations": "\u30d0\u30c7\u30a3\u63a8\u85a6"},
     "zh": {"recommendations": "\u4f19\u4f34\u63a8\u8350"},
     "es": {"recommendations": "Recomendaciones de Buddy"},
+    "pt": {"recommendations": "Recomenda\u00e7\u00f5es do Buddy"},
+    "de": {"recommendations": "Buddy-Empfehlungen"},
+    "fr": {"recommendations": "Recommandations de Buddy"},
 }
 
 # Scan result labels by language
@@ -128,6 +137,9 @@ RETURNING_GREETINGS: Dict[str, Dict[str, str]] = {
         "ja": "\u304a\u304b\u3048\u308a\u306a\u3055\u3044\uff01\u524d\u56de\u306e\u7d9a\u304d\u3092\u3057\u307e\u3057\u3087\u3046\u304b\uff1f",
         "zh": "\u4f60\u56de\u6765\u4e86\uff01\u8981\u7ee7\u7eed\u4e0a\u6b21\u7684\u5de5\u4f5c\u5417\uff1f",
         "es": "\u00a1Has vuelto! \u00bfQuieres continuar donde lo dejaste?",
+        "pt": "Voc\u00ea voltou! Quer continuar de onde parou?",
+        "de": "Du bist zur\u00fcck! Weitermachen wo wir aufgeh\u00f6rt haben?",
+        "fr": "Te revoil\u00e0\u202f! On reprend o\u00f9 on s\u2019\u00e9tait arr\u00eat\u00e9\u202f?",
     },
     "formal": {
         "en": "Welcome back. Resuming previous session context.",
@@ -135,6 +147,9 @@ RETURNING_GREETINGS: Dict[str, Dict[str, str]] = {
         "ja": "\u304a\u5e30\u308a\u306a\u3055\u3044\u3002\u524d\u56de\u306e\u30bb\u30c3\u30b7\u30e7\u30f3\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002",
         "zh": "\u6b22\u8fce\u56de\u6765\u3002\u6b63\u5728\u6062\u590d\u4e0a\u6b21\u7684\u4f1a\u8bdd\u3002",
         "es": "Bienvenido de vuelta. Restaurando el contexto anterior.",
+        "pt": "Bem-vindo de volta. Restaurando o contexto anterior.",
+        "de": "Willkommen zur\u00fcck. Vorheriger Sitzungskontext wird wiederhergestellt.",
+        "fr": "Bon retour. Restauration du contexte pr\u00e9c\u00e9dent.",
     },
 }
 
@@ -145,6 +160,9 @@ RETURNING_HEADERS: Dict[str, Dict[str, str]] = {
     "ja": {"last_session": "\u524d\u56de\u306e\u30bb\u30c3\u30b7\u30e7\u30f3", "pending": "\u672a\u5b8c\u4e86\u306e\u4f5c\u696d"},
     "zh": {"last_session": "\u4e0a\u6b21\u4f1a\u8bdd\u6458\u8981", "pending": "\u672a\u5b8c\u6210\u5de5\u4f5c"},
     "es": {"last_session": "Resumen de sesi\u00f3n anterior", "pending": "Trabajo pendiente"},
+    "pt": {"last_session": "Resumo da sess\u00e3o anterior", "pending": "Trabalho pendente"},
+    "de": {"last_session": "Letzte Sitzungs\u00fcbersicht", "pending": "Ausstehende Arbeit"},
+    "fr": {"last_session": "R\u00e9sum\u00e9 de la derni\u00e8re session", "pending": "Travail en attente"},
 }
 
 # Farewell greetings by tone and language (stop hook)
@@ -155,6 +173,9 @@ FAREWELL_GREETINGS: Dict[str, Dict[str, str]] = {
         "ja": "\u304a\u75b2\u308c\u69d8\uff01",
         "zh": "\u4eca\u5929\u8f9b\u82e6\u4e86\uff01",
         "es": "\u00a1Buen trabajo hoy!",
+        "pt": "\u00d3timo trabalho hoje!",
+        "de": "Gute Arbeit heute!",
+        "fr": "Bon travail aujourd\u2019hui\u202f!",
     },
     "formal": {
         "en": "Session complete.",
@@ -162,6 +183,9 @@ FAREWELL_GREETINGS: Dict[str, Dict[str, str]] = {
         "ja": "\u30bb\u30c3\u30b7\u30e7\u30f3\u5b8c\u4e86\u3002",
         "zh": "\u4f1a\u8bdd\u5b8c\u6210\u3002",
         "es": "Sesi\u00f3n completada.",
+        "pt": "Sess\u00e3o conclu\u00edda.",
+        "de": "Sitzung abgeschlossen.",
+        "fr": "Session termin\u00e9e.",
     },
 }
 
@@ -172,6 +196,9 @@ FAREWELL_MESSAGES: Dict[str, Dict[str, str]] = {
         "ja": "\u307e\u305f\u6b21\u56de\uff01",
         "zh": "\u4e0b\u6b21\u518d\u89c1\uff01",
         "es": "\u00a1Hasta la pr\u00f3xima!",
+        "pt": "At\u00e9 a pr\u00f3xima!",
+        "de": "Bis zum n\u00e4chsten Mal!",
+        "fr": "\u00c0 la prochaine\u202f!",
     },
     "formal": {
         "en": "Session ended.",
@@ -179,6 +206,9 @@ FAREWELL_MESSAGES: Dict[str, Dict[str, str]] = {
         "ja": "\u30bb\u30c3\u30b7\u30e7\u30f3\u7d42\u4e86\u3002",
         "zh": "\u4f1a\u8bdd\u5df2\u7ed3\u675f\u3002",
         "es": "Sesi\u00f3n finalizada.",
+        "pt": "Sess\u00e3o encerrada.",
+        "de": "Sitzung beendet.",
+        "fr": "Session termin\u00e9e.",
     },
 }
 
@@ -188,6 +218,9 @@ SUMMARY_HEADERS: Dict[str, Dict[str, str]] = {
     "ja": {"summary": "\u30bb\u30c3\u30b7\u30e7\u30f3\u6982\u8981", "agents": "\u30a2\u30af\u30c6\u30a3\u30d6\u30a8\u30fc\u30b8\u30a7\u30f3\u30c8"},
     "zh": {"summary": "\u4f1a\u8bdd\u6458\u8981", "agents": "\u6d3b\u8dc3\u4ee3\u7406"},
     "es": {"summary": "Resumen de sesi\u00f3n", "agents": "Agentes activos"},
+    "pt": {"summary": "Resumo da sess\u00e3o", "agents": "Agentes ativos"},
+    "de": {"summary": "Sitzungs\u00fcbersicht", "agents": "Aktive Agenten"},
+    "fr": {"summary": "R\u00e9sum\u00e9 de session", "agents": "Agents actifs"},
 }
 
 
