@@ -463,6 +463,12 @@ export interface ParseModeResult {
   availableStrategies?: string[];
   /** @apiProperty External API - do not rename. Hint for installing TaskMaestro when not available */
   taskmaestroInstallHint?: string;
+  /**
+   * @apiProperty External API - do not rename.
+   * Visual data for agent visualization (banner, agent faces, collaboration config).
+   * When present, AI clients can render agent characters and collaboration format.
+   */
+  visual?: VisualData;
 }
 
 /**
@@ -493,6 +499,48 @@ export interface DispatchReadyAgent {
 export interface DispatchReady {
   primaryAgent?: DispatchReadyAgent;
   parallelAgents?: DispatchReadyAgent[];
+}
+
+// ============================================================================
+// Visual Data Types (for parse_mode response agent visualization)
+// ============================================================================
+
+/** Raw visual data from agent JSON files */
+export interface AgentVisualRaw {
+  eye?: string;
+  eyeFallback?: string;
+  colorAnsi?: string;
+  group?: string;
+}
+
+/** Visual information for an agent in parse_mode response */
+export interface AgentVisualInfo {
+  /** Agent display name */
+  name: string;
+  /** Face expression using eye symbols (e.g., "⬡‿⬡") */
+  face: string;
+  /** Display color name */
+  color: string;
+  /** Agent status in current mode */
+  status: 'analyzing' | 'waiting' | 'active';
+}
+
+/** Collaboration display configuration */
+export interface CollaborationConfig {
+  /** Display format: "minimal" (eco) or "discussion" (full) */
+  format: 'minimal' | 'discussion';
+  /** Render hint for AI clients */
+  renderHint: string;
+}
+
+/** Visual data included in parse_mode response for agent visualization */
+export interface VisualData {
+  /** ASCII art banner with mode character */
+  banner: string;
+  /** Agent visual information */
+  agents: AgentVisualInfo[];
+  /** Collaboration display configuration */
+  collaboration: CollaborationConfig;
 }
 
 export interface ModeConfig {

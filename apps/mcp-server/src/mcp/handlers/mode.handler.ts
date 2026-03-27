@@ -18,12 +18,15 @@ import { LOCALIZED_KEYWORD_MAP } from '../../keyword/keyword.types';
 import {
   MODE_DISPATCH_DEFAULTS,
   type Mode,
+  type AgentVisualRaw,
+  type VisualData,
   type DispatchReady,
   type DispatchReadyAgent,
   type DispatchStrength,
   type IncludedAgent,
   type ParallelAgentRecommendation,
 } from '../../keyword/keyword.types';
+import { buildVisualData, type AgentVisualInput } from '../../keyword/visual-data.builder';
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { AgentService } from '../../agent/agent.service';
 
@@ -269,6 +272,14 @@ export class ModeHandler extends AbstractHandler {
         settings?.ai?.agentDiscussion,
       );
 
+      // Build visual data for agent visualization
+      const visual = await this.buildVisual(
+        result.mode as Mode,
+        result.delegates_to,
+        result.parallelAgentsRecommendation?.specialists,
+        settings?.eco,
+      );
+
       return createJsonResponse({
         ...result,
         language,
@@ -282,6 +293,8 @@ export class ModeHandler extends AbstractHandler {
         ...(planReviewGate && { planReviewGate }),
         // Include agent discussion config for EVAL mode
         ...(agentDiscussion && { agentDiscussion }),
+        // Include visual data for agent visualization
+        ...(visual && { visual }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -518,6 +531,59 @@ export class ModeHandler extends AbstractHandler {
       format: 'structured',
       includeConsensus: true,
     };
+  }
+
+  /**
+   * Build visual data for agent visualization in response.
+   * Loads visual fields from agent profiles and builds banner/face/collaboration data.
+   * Returns undefined if agent profiles cannot be loaded (graceful degradation).
+   */
+  private async buildVisual(
+    mode: Mode,
+    delegatesTo?: string,
+    specialists?: string[],
+    eco?: boolean,
+  ): Promise<VisualData | undefined> {
+    try {
+      const modeAgentName = `${mode.toLowerCase()}-mode`;
+
+      // Load mode agent profile for banner visual
+      const modeProfile = await this.agentService.resolveAgent(modeAgentName);
+      const modeVisual = modeProfile.visual as AgentVisualRaw | undefined;
+
+      // Load primary agent profile for visual
+      let primaryInput: AgentVisualInput | undefined;
+      if (delegatesTo) {
+        const primaryProfile = await this.agentService.resolveAgent(delegatesTo);
+        primaryInput = {
+          name: primaryProfile.name,
+          visual: primaryProfile.visual as AgentVisualRaw | undefined,
+        };
+      }
+
+      // Load specialist agent profiles for visual (parallel)
+      const specialistInputs: AgentVisualInput[] = [];
+      if (specialists?.length) {
+        const profiles = await Promise.all(
+          specialists.map(async name => {
+            try {
+              const profile = await this.agentService.resolveAgent(name);
+              return { name: profile.name, visual: profile.visual as AgentVisualRaw | undefined };
+            } catch {
+              return { name };
+            }
+          }),
+        );
+        specialistInputs.push(...profiles);
+      }
+
+      return buildVisualData(mode, modeVisual, primaryInput, specialistInputs, eco ?? true);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to build visual data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return undefined;
+    }
   }
 
   /**
