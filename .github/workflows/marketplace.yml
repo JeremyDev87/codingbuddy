@@ -154,6 +154,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -175,3 +177,71 @@ jobs:
           echo "To use this marketplace:"
           echo "  claude marketplace add JeremyDev87/codingbuddy"
           echo "  claude plugin install codingbuddy@jeremydev87"
+
+  verify:
+    # Post-deploy verification — catches silent deployment failures
+    if: github.repository == 'JeremyDev87/codingbuddy'
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Verify deployed URLs
+        env:
+          BASE_URL: ${{ needs.deploy.outputs.page_url }}
+          MARKETPLACE_JSON: .claude-plugin/marketplace.json
+        run: |
+          set -euo pipefail
+
+          # Ensure BASE_URL ends with /
+          BASE_URL="${BASE_URL%/}/"
+
+          echo "Waiting 30s for CDN propagation..."
+          sleep 30
+
+          # Source shared utility functions
+          source .github/scripts/marketplace-utils.sh
+
+          FAILED=0
+
+          verify_url() {
+            local url=$1
+            local description=$2
+            local status
+            status=$(curl -sI -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 "$url")
+            if [ "$status" != "200" ]; then
+              echo "::error::$description returned HTTP $status (expected 200): $url"
+              FAILED=1
+            else
+              echo "✅ $description accessible (HTTP $status)"
+            fi
+          }
+
+          # Verify landing page
+          verify_url "${BASE_URL}" "Landing page"
+
+          # Verify marketplace.json
+          verify_url "${BASE_URL}.claude-plugin/marketplace.json" "marketplace.json"
+
+          # Verify each plugin's plugin.json
+          PLUGIN_COUNT=$(get_plugin_count)
+          echo "Verifying $PLUGIN_COUNT plugin(s)..."
+
+          for ((i=0; i<PLUGIN_COUNT; i++)); do
+            PLUGIN_NAME=$(get_plugin_name "$i")
+            PLUGIN_SOURCE=$(get_plugin_source "$i")
+            # Remove leading ./ from source path
+            PLUGIN_PATH="${PLUGIN_SOURCE#./}"
+            verify_url "${BASE_URL}${PLUGIN_PATH}/.claude-plugin/plugin.json" "Plugin '$PLUGIN_NAME' plugin.json"
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo ""
+            echo "❌ URL verification failed!"
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ All deployed URLs verified successfully!"
