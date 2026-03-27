@@ -180,7 +180,14 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
       const transition: ModeTransition = { from, to: newMode, timestamp: Date.now() };
       const modeTransitions = [...state.modeTransitions, transition];
-      return { ...state, currentMode: newMode, agents, activeSkills: [], focusedAgentId, modeTransitions };
+      return {
+        ...state,
+        currentMode: newMode,
+        agents,
+        activeSkills: [],
+        focusedAgentId,
+        modeTransitions,
+      };
     }
 
     case 'AGENT_RELATIONSHIP': {

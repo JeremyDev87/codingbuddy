@@ -146,10 +146,7 @@ export function formatDurationMs(ms: number): string {
 /**
  * Render agent timeline as text lines.
  */
-export function renderAgentTimeline(
-  entries: AgentTimelineEntry[],
-  width: number,
-): string[] {
+export function renderAgentTimeline(entries: AgentTimelineEntry[], width: number): string[] {
   if (entries.length === 0) return ['  (no agents)'];
 
   const nameWidth = Math.min(20, Math.max(...entries.map(e => e.name.length)));

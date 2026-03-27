@@ -12,7 +12,13 @@ import {
   renderSessionDashboard,
   formatDurationMs,
 } from './session-dashboard.pure';
-import type { ToolCallRecord, TddStep, DashboardNode, FileChangeStats, ModeTransition } from '../dashboard-types';
+import type {
+  ToolCallRecord,
+  TddStep,
+  DashboardNode,
+  FileChangeStats,
+  ModeTransition,
+} from '../dashboard-types';
 
 function makeToolCall(name: string, timestamp = 1000): ToolCallRecord {
   return { agentId: 'a1', toolName: name, timestamp, status: 'completed' };
@@ -363,9 +369,7 @@ describe('tui/components/session-dashboard.pure', () => {
     it('should render complete dashboard in wide mode', () => {
       const result = renderSessionDashboard({
         toolDistribution: [{ name: 'Edit', count: 5, pct: 100 }],
-        agentTimeline: [
-          { name: 'Arch', startedAt: 1000, durationMs: 5000, status: 'done' },
-        ],
+        agentTimeline: [{ name: 'Arch', startedAt: 1000, durationMs: 5000, status: 'done' }],
         tddStats: { red: 0, green: 0, refactor: 0, cycles: 0 },
         fileChanges: { created: 0, modified: 0, deleted: 0 },
         modeTransitions: [],
