@@ -29,7 +29,8 @@ def handle_post_tool_use(data: dict):
     try:
         from stats import SessionStats
 
-        session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+        from session_utils import get_session_id
+        session_id = get_session_id()
         stats = SessionStats(session_id=session_id)
         tool_name = data.get("tool_name", "unknown")
         stats.record_tool_call(tool_name, success=True)
@@ -43,7 +44,8 @@ def handle_post_tool_use(data: dict):
         db = HistoryDB.get_instance()
         tool_name = data.get("tool_name", "unknown")
         input_summary = str(data.get("tool_input", {}))[:200]
-        session_id = os.environ.get("CLAUDE_SESSION_ID", "")
+        from session_utils import get_session_id as _get_sid_db
+        session_id = _get_sid_db()
         db.record_tool_call(session_id, tool_name, input_summary, success=True)
     except Exception:
         pass  # Never block tool execution

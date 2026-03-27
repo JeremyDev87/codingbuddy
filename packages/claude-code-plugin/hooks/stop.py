@@ -25,7 +25,8 @@ def handle_stop(data: dict):
     try:
         from stats import SessionStats
 
-        session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+        from session_utils import get_session_id
+        session_id = get_session_id()
 
         # Clean up companion TUI pane (#970)
         try:

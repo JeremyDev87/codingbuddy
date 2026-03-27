@@ -514,7 +514,8 @@ def main():
 
             from stats import SessionStats
 
-            session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+            from session_utils import get_session_id
+            session_id = get_session_id()
             SessionStats(session_id=session_id)
             SessionStats.cleanup_stale(
                 os.environ.get("CLAUDE_PLUGIN_DATA",
@@ -529,7 +530,8 @@ def main():
 
             from history_db import HistoryDB
 
-            session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+            from session_utils import get_session_id as _get_sid_hist
+            session_id = _get_sid_hist()
             cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
             model = os.environ.get("CLAUDE_MODEL", "unknown")
             db = HistoryDB()
@@ -568,7 +570,8 @@ def main():
             try:
                 from history_db import HistoryDB as _HistoryDB
 
-                session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+                from session_utils import get_session_id as _get_sid_ret
+                session_id = _get_sid_ret()
                 _db = _HistoryDB()
                 previous_session = _db.get_previous_session(session_id, cwd)
                 _db.close()
@@ -596,7 +599,8 @@ def main():
             from tui_launcher import launch as launch_tui
             from config import get_config as _get_tui_cfg
 
-            _tui_sid = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+            from session_utils import get_session_id as _get_sid_tui
+            _tui_sid = _get_sid_tui()
             _tui_cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
             _tui_cfg = _get_tui_cfg(_tui_cwd)
             _tui_ok, _tui_msg = launch_tui(_tui_sid, _tui_cfg)
