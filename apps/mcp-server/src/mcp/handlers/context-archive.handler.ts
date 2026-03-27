@@ -92,9 +92,7 @@ export class ContextArchiveHandler extends AbstractHandler {
     ];
   }
 
-  private async handleGetHistory(
-    args: Record<string, unknown> | undefined,
-  ): Promise<ToolResponse> {
+  private async handleGetHistory(args: Record<string, unknown> | undefined): Promise<ToolResponse> {
     const limit = typeof args?.limit === 'number' ? args.limit : 10;
 
     if (limit < 1) {
@@ -113,9 +111,7 @@ export class ContextArchiveHandler extends AbstractHandler {
     });
   }
 
-  private async handleSearch(
-    args: Record<string, unknown> | undefined,
-  ): Promise<ToolResponse> {
+  private async handleSearch(args: Record<string, unknown> | undefined): Promise<ToolResponse> {
     const keyword = extractOptionalString(args, 'keyword');
     if (!keyword || keyword.trim().length === 0) {
       return createErrorResponse('Missing required parameter: keyword');
@@ -133,9 +129,7 @@ export class ContextArchiveHandler extends AbstractHandler {
     });
   }
 
-  private async handleCleanup(
-    args: Record<string, unknown> | undefined,
-  ): Promise<ToolResponse> {
+  private async handleCleanup(args: Record<string, unknown> | undefined): Promise<ToolResponse> {
     const maxAgeDays = typeof args?.maxAgeDays === 'number' ? args.maxAgeDays : 30;
 
     if (maxAgeDays < 1) {

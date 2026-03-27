@@ -265,9 +265,7 @@ export class ContextArchiveService {
         const doc = parseContextDocument(content);
         const title = doc.metadata.title || 'Untitled';
         const mode = doc.metadata.currentMode || 'PLAN';
-        const decisions = doc.sections
-          .flatMap(s => s.decisions || [])
-          .slice(0, 3);
+        const decisions = doc.sections.flatMap(s => s.decisions || []).slice(0, 3);
 
         summaryLines.push(`## ${filename.replace('.md', '')} — ${title}`);
         summaryLines.push(`- **Mode**: ${mode}`);

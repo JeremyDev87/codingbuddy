@@ -90,10 +90,9 @@ describe('ContextArchiveService', () => {
       expect(result).not.toBeNull();
       expect(result).toContain(ARCHIVE_DIR);
       expect(result).toMatch(/\d{4}-\d{2}-\d{2}-\d{4}\.md$/);
-      expect(mkdirSync).toHaveBeenCalledWith(
-        expect.stringContaining('archive'),
-        { recursive: true },
-      );
+      expect(mkdirSync).toHaveBeenCalledWith(expect.stringContaining('archive'), {
+        recursive: true,
+      });
       expect(fs.writeFile).toHaveBeenCalledWith(
         expect.stringContaining('.md'),
         SAMPLE_CONTEXT,
@@ -113,10 +112,9 @@ describe('ContextArchiveService', () => {
 
       await service.archiveContext(SAMPLE_CONTEXT);
 
-      expect(mkdirSync).toHaveBeenCalledWith(
-        `${mockProjectRoot}/${ARCHIVE_DIR}`,
-        { recursive: true },
-      );
+      expect(mkdirSync).toHaveBeenCalledWith(`${mockProjectRoot}/${ARCHIVE_DIR}`, {
+        recursive: true,
+      });
     });
 
     it('should not recreate archive directory if it exists', async () => {
@@ -147,11 +145,13 @@ describe('ContextArchiveService', () => {
         '2026-03-28-1000.md',
       ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
       vi.mocked(fs.stat).mockResolvedValue({ size: 500 } as Awaited<ReturnType<typeof fs.stat>>);
-      vi.mocked(fs.readFile).mockImplementation(async (filePath: Parameters<typeof fs.readFile>[0]) => {
-        const p = String(filePath);
-        if (p.includes('2026-03-28')) return SAMPLE_CONTEXT;
-        return SAMPLE_CONTEXT_2;
-      });
+      vi.mocked(fs.readFile).mockImplementation(
+        async (filePath: Parameters<typeof fs.readFile>[0]) => {
+          const p = String(filePath);
+          if (p.includes('2026-03-28')) return SAMPLE_CONTEXT;
+          return SAMPLE_CONTEXT_2;
+        },
+      );
 
       const result = await service.getHistory();
 
@@ -206,11 +206,13 @@ describe('ContextArchiveService', () => {
         '2026-03-27-0800.md',
       ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
       vi.mocked(fs.stat).mockResolvedValue({ size: 500 } as Awaited<ReturnType<typeof fs.stat>>);
-      vi.mocked(fs.readFile).mockImplementation(async (filePath: Parameters<typeof fs.readFile>[0]) => {
-        const p = String(filePath);
-        if (p.includes('2026-03-28')) return SAMPLE_CONTEXT;
-        return SAMPLE_CONTEXT_2;
-      });
+      vi.mocked(fs.readFile).mockImplementation(
+        async (filePath: Parameters<typeof fs.readFile>[0]) => {
+          const p = String(filePath);
+          if (p.includes('2026-03-28')) return SAMPLE_CONTEXT;
+          return SAMPLE_CONTEXT_2;
+        },
+      );
 
       const result = await service.searchArchives('jwt');
 
@@ -223,9 +225,9 @@ describe('ContextArchiveService', () => {
 
     it('should return empty for non-matching keyword', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(fs.readdir).mockResolvedValue([
-        '2026-03-28-1000.md',
-      ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+      vi.mocked(fs.readdir).mockResolvedValue(['2026-03-28-1000.md'] as unknown as Awaited<
+        ReturnType<typeof fs.readdir>
+      >);
       vi.mocked(fs.readFile).mockResolvedValue(SAMPLE_CONTEXT);
 
       const result = await service.searchArchives('nonexistent-xyz');
@@ -268,9 +270,9 @@ describe('ContextArchiveService', () => {
       const d = String(now.getDate()).padStart(2, '0');
       const recentFile = `${y}-${m}-${d}-1000.md`;
 
-      vi.mocked(fs.readdir).mockResolvedValue([
-        recentFile,
-      ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+      vi.mocked(fs.readdir).mockResolvedValue([recentFile] as unknown as Awaited<
+        ReturnType<typeof fs.readdir>
+      >);
 
       const result = await service.cleanupOldArchives();
 
@@ -283,7 +285,7 @@ describe('ContextArchiveService', () => {
     it('should summarize and delete old archives', async () => {
       // existsSync: true for archive dir, false for _summary.md first check
       vi.mocked(existsSync)
-        .mockReturnValueOnce(true)   // archive dir check in cleanupOldArchives
+        .mockReturnValueOnce(true) // archive dir check in cleanupOldArchives
         .mockReturnValueOnce(false); // _summary.md check
 
       vi.mocked(fs.readdir).mockResolvedValue([
@@ -306,9 +308,7 @@ describe('ContextArchiveService', () => {
         'utf-8',
       );
       // Should delete old archive
-      expect(fs.unlink).toHaveBeenCalledWith(
-        expect.stringContaining('2025-01-01-1000.md'),
-      );
+      expect(fs.unlink).toHaveBeenCalledWith(expect.stringContaining('2025-01-01-1000.md'));
     });
   });
 });
