@@ -15,12 +15,16 @@ from buddy_renderer import (
     render_recommendations,
     render_session_start,
     render_session_summary,
+    render_returning_session,
+    get_buddy_config,
     GREETINGS,
     FAREWELL_GREETINGS,
     FAREWELL_MESSAGES,
     ANSI_COLORS,
     BUDDY_FACE,
     BUDDY_WRAP_FACE,
+    BUDDY_WINK_FACE,
+    DEFAULT_BUDDY_CONFIG,
 )
 
 
@@ -305,6 +309,159 @@ class TestRenderSessionSummary:
         result = render_session_summary(stats, agents, "casual", "ko")
         assert "\uc138\uc158 \uc694\uc57d" in result  # 세션 요약
         assert "\ud65c\uc57d \uc5d0\uc774\uc804\ud2b8" in result  # 활약 에이전트
+
+
+class TestGetBuddyConfig:
+    """Tests for get_buddy_config — validation and defaults."""
+
+    def test_returns_defaults_when_no_config(self):
+        result = get_buddy_config(None)
+        assert result == DEFAULT_BUDDY_CONFIG
+
+    def test_returns_defaults_when_no_buddy_key(self):
+        result = get_buddy_config({"language": "en"})
+        assert result == DEFAULT_BUDDY_CONFIG
+
+    def test_returns_defaults_when_buddy_not_dict(self):
+        result = get_buddy_config({"buddy": "invalid"})
+        assert result == DEFAULT_BUDDY_CONFIG
+
+    def test_custom_name(self):
+        config = {"buddy": {"name": "CodeBot"}}
+        result = get_buddy_config(config)
+        assert result["name"] == "CodeBot"
+        assert result["face"] == BUDDY_FACE  # default
+
+    def test_custom_face_unicode(self):
+        config = {"buddy": {"face": "\u2606\u203f\u2606"}}
+        result = get_buddy_config(config)
+        assert result["face"] == "\u2606\u203f\u2606"
+
+    def test_rejects_ascii_face(self):
+        config = {"buddy": {"face": "abc"}}
+        result = get_buddy_config(config)
+        assert result["face"] == BUDDY_FACE  # falls back to default
+
+    def test_rejects_empty_face(self):
+        config = {"buddy": {"face": ""}}
+        result = get_buddy_config(config)
+        assert result["face"] == BUDDY_FACE
+
+    def test_rejects_too_long_face(self):
+        config = {"buddy": {"face": "\u2606" * 11}}
+        result = get_buddy_config(config)
+        assert result["face"] == BUDDY_FACE
+
+    def test_custom_greeting(self):
+        config = {"buddy": {"greeting": "Let's code!"}}
+        result = get_buddy_config(config)
+        assert result["greeting"] == "Let's code!"
+
+    def test_custom_farewell(self):
+        config = {"buddy": {"farewell": "Great session!"}}
+        result = get_buddy_config(config)
+        assert result["farewell"] == "Great session!"
+
+    def test_rejects_empty_name(self):
+        config = {"buddy": {"name": "   "}}
+        result = get_buddy_config(config)
+        assert result["name"] == "Buddy"
+
+    def test_rejects_too_long_name(self):
+        config = {"buddy": {"name": "x" * 31}}
+        result = get_buddy_config(config)
+        assert result["name"] == "Buddy"
+
+    def test_rejects_too_long_greeting(self):
+        config = {"buddy": {"greeting": "x" * 101}}
+        result = get_buddy_config(config)
+        assert result["greeting"] == ""
+
+    def test_full_config(self):
+        config = {"buddy": {
+            "name": "Cody",
+            "face": "\u2764\u203f\u2764",
+            "greeting": "Hello world!",
+            "farewell": "Bye bye!",
+        }}
+        result = get_buddy_config(config)
+        assert result["name"] == "Cody"
+        assert result["face"] == "\u2764\u203f\u2764"
+        assert result["greeting"] == "Hello world!"
+        assert result["farewell"] == "Bye bye!"
+
+    def test_non_string_values_ignored(self):
+        config = {"buddy": {"name": 123, "face": True, "greeting": []}}
+        result = get_buddy_config(config)
+        assert result == DEFAULT_BUDDY_CONFIG
+
+
+class TestBuddyCustomFace:
+    """Tests for custom buddy face in render functions."""
+
+    def test_render_buddy_face_custom(self):
+        bc = {"face": "\u2606\u203f\u2606", "greeting": "", "name": "Buddy", "farewell": ""}
+        result = render_buddy_face("casual", "en", buddy_config=bc)
+        assert "\u2606\u203f\u2606" in result
+        assert "Hey!" in result  # default greeting since custom is empty
+
+    def test_render_buddy_face_custom_greeting(self):
+        bc = {"face": BUDDY_FACE, "greeting": "Yo!", "name": "B", "farewell": ""}
+        result = render_buddy_face("casual", "en", buddy_config=bc)
+        assert "Yo!" in result
+        assert "Hey!" not in result
+
+    def test_render_session_summary_custom_face(self):
+        bc = {"face": "\u2605\u203f\u2605", "greeting": "", "name": "Bot", "farewell": ""}
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        result = render_session_summary(stats, [], "casual", "en", buddy_config=bc)
+        assert "\u2605\u203f\u2605" in result
+
+    def test_render_session_summary_custom_farewell(self):
+        bc = {"face": BUDDY_FACE, "greeting": "", "name": "B", "farewell": "Ciao!"}
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        result = render_session_summary(stats, [], "casual", "en", buddy_config=bc)
+        assert "Ciao!" in result
+        assert "See you next time!" not in result
+
+    def test_render_session_summary_default_farewell_without_config(self):
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "See you next time!" in result
+
+    def test_render_returning_session_custom_face(self):
+        bc = {"face": "\u2665\u203f\u2665", "greeting": "", "name": "B", "farewell": ""}
+        prev = {"started_at": 1000, "ended_at": 2000, "tool_call_count": 5, "error_count": 0}
+        result = render_returning_session(prev, None, "casual", "en", buddy_config=bc)
+        assert "\u2665\u203f\u2665" in result
+
+    def test_render_returning_session_custom_greeting(self):
+        bc = {"face": BUDDY_FACE, "greeting": "Welcome back, friend!", "name": "B", "farewell": ""}
+        prev = {"started_at": 1000, "ended_at": 2000, "tool_call_count": 5, "error_count": 0}
+        result = render_returning_session(prev, None, "casual", "en", buddy_config=bc)
+        assert "Welcome back, friend!" in result
+
+    def test_render_session_start_passes_buddy_config(self):
+        bc = {"face": "\u2606\u203f\u2606", "greeting": "Custom!", "name": "X", "farewell": ""}
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en", buddy_config=bc)
+        assert "\u2606\u203f\u2606" in result
+        assert "Custom!" in result
+
+    def test_render_session_start_returning_passes_buddy_config(self):
+        bc = {"face": "\u2665\u203f\u2665", "greeting": "Hi again!", "name": "X", "farewell": ""}
+        scan = {"name": "app"}
+        prev = {"started_at": 1000, "ended_at": 2000, "tool_call_count": 5, "error_count": 0}
+        result = render_session_start(
+            scan, [], "casual", "en",
+            previous_session=prev, buddy_config=bc,
+        )
+        assert "\u2665\u203f\u2665" in result
+        assert "Hi again!" in result
+
+    def test_no_buddy_config_keeps_defaults(self):
+        result = render_buddy_face("casual", "en")
+        assert BUDDY_FACE in result
 
 
 if __name__ == "__main__":

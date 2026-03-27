@@ -3,7 +3,8 @@
 Renders buddy face greeting, project scan results, agent recommendations,
 and session summary with tone/language support and ANSI color output.
 """
-from typing import Any, Dict, List
+import re
+from typing import Any, Dict, List, Optional
 
 # ANSI color codes for terminal output
 ANSI_COLORS: Dict[str, str] = {
@@ -63,6 +64,61 @@ SCAN_LABELS: Dict[str, Dict[str, str]] = {
 BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
 BUDDY_WRAP_FACE = "\u25d5\u2304\u25d5"  # ◕⌄◕
 BUDDY_WINK_FACE = "\u25d5\u2040\u25d5"  # ◕⁀◕
+
+# Default buddy character configuration
+DEFAULT_BUDDY_CONFIG: Dict[str, str] = {
+    "name": "Buddy",
+    "face": BUDDY_FACE,
+    "greeting": "",
+    "farewell": "",
+}
+
+# Max length for custom face field (unicode characters)
+_MAX_FACE_LENGTH = 10
+
+# Pattern: only printable unicode, no control chars or ASCII letters/digits
+_FACE_PATTERN = re.compile(
+    r"^[^\x00-\x1f\x7f A-Za-z0-9]{1,%d}$" % _MAX_FACE_LENGTH
+)
+
+
+def get_buddy_config(config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    """Extract and validate buddy customization from config dict.
+
+    Args:
+        config: Parsed codingbuddy.config.json dict. May contain a 'buddy' key.
+
+    Returns:
+        Validated buddy config with defaults for missing/invalid fields.
+    """
+    result = dict(DEFAULT_BUDDY_CONFIG)
+
+    if not config or not isinstance(config.get("buddy"), dict):
+        return result
+
+    buddy = config["buddy"]
+
+    # name: string, non-empty, max 30 chars
+    name = buddy.get("name")
+    if isinstance(name, str) and 0 < len(name.strip()) <= 30:
+        result["name"] = name.strip()
+
+    # face: unicode-only, no ASCII alphanumerics, max _MAX_FACE_LENGTH chars
+    face = buddy.get("face")
+    if isinstance(face, str) and _FACE_PATTERN.match(face):
+        result["face"] = face
+
+    # greeting: string, max 100 chars
+    greeting = buddy.get("greeting")
+    if isinstance(greeting, str) and 0 < len(greeting.strip()) <= 100:
+        result["greeting"] = greeting.strip()
+
+    # farewell: string, max 100 chars
+    farewell = buddy.get("farewell")
+    if isinstance(farewell, str) and 0 < len(farewell.strip()) <= 100:
+        result["farewell"] = farewell.strip()
+
+    return result
 
 # Returning session greetings by tone and language
 RETURNING_GREETINGS: Dict[str, Dict[str, str]] = {
@@ -154,20 +210,28 @@ def _colorize(text: str, color: str) -> str:
     return f"{ansi}{text}{reset}"
 
 
-def render_buddy_face(tone: str, language: str) -> str:
+def render_buddy_face(
+    tone: str,
+    language: str,
+    buddy_config: Optional[Dict[str, str]] = None,
+) -> str:
     """Render the buddy character face with greeting.
 
     Args:
         tone: 'casual' or 'formal'
         language: Language code (en, ko, ja, zh, es)
+        buddy_config: Optional buddy customization from get_buddy_config().
 
     Returns:
         ASCII art buddy face with greeting message.
     """
-    greeting = _get_greeting(tone, language)
+    bc = buddy_config or DEFAULT_BUDDY_CONFIG
+    face = bc.get("face", BUDDY_FACE)
+    custom_greeting = bc.get("greeting", "")
+    greeting = custom_greeting if custom_greeting else _get_greeting(tone, language)
     lines = [
         "\u256d\u2501\u2501\u2501\u256e",
-        f"\u2503 {BUDDY_FACE} \u2503 {greeting}",
+        f"\u2503 {face} \u2503 {greeting}",
         "\u2570\u2501\u2501\u2501\u256f",
     ]
     return "\n".join(lines)
@@ -255,6 +319,7 @@ def render_session_summary(
     agents: List[Dict[str, Any]],
     tone: str,
     language: str,
+    buddy_config: Optional[Dict[str, str]] = None,
 ) -> str:
     """Render session summary with buddy character for stop hook.
 
@@ -267,18 +332,29 @@ def render_session_summary(
             eye (str), colorAnsi (str)
         tone: 'casual' or 'formal'
         language: Language code (en, ko, ja, zh, es)
+        buddy_config: Optional buddy customization from get_buddy_config().
 
     Returns:
         Formatted session summary string.
     """
+    bc = buddy_config or DEFAULT_BUDDY_CONFIG
+    custom_farewell = bc.get("farewell", "")
+
     greeting = _get_farewell_greeting(tone, language)
-    farewell = _get_farewell_message(tone, language)
+    farewell = custom_farewell if custom_farewell else _get_farewell_message(tone, language)
+
+    # Use custom face for wrap variant: take first char of custom face if set
+    face = bc.get("face", BUDDY_FACE)
+    if face != BUDDY_FACE:
+        wrap_face = face  # custom face used as-is
+    else:
+        wrap_face = BUDDY_WRAP_FACE
 
     parts = []
 
     # Buddy face with farewell greeting
     parts.append("\u256d\u2501\u2501\u2501\u256e")
-    parts.append(f"\u2503 {BUDDY_WRAP_FACE} \u2503 {greeting}")
+    parts.append(f"\u2503 {wrap_face} \u2503 {greeting}")
     parts.append("\u2570\u2501\u2501\u2501\u256f")
 
     # Session stats section (only if data available)
@@ -320,7 +396,7 @@ def render_session_summary(
 
     # Farewell
     parts.append("")
-    parts.append(f"{BUDDY_FACE} {farewell}")
+    parts.append(f"{face} {farewell}")
 
     return "\n".join(parts)
 
@@ -358,6 +434,7 @@ def render_returning_session(
     pending_context: "Dict[str, Any] | None",
     tone: str,
     language: str,
+    buddy_config: Optional[Dict[str, str]] = None,
 ) -> str:
     """Render returning session welcome-back display.
 
@@ -369,17 +446,27 @@ def render_returning_session(
             from docs/codingbuddy/context.md parsing. None if no context.
         tone: 'casual' or 'formal'
         language: Language code (en, ko, ja, zh, es)
+        buddy_config: Optional buddy customization from get_buddy_config().
 
     Returns:
         Formatted returning session greeting string.
     """
-    greeting = _get_returning_greeting(tone, language)
+    bc = buddy_config or DEFAULT_BUDDY_CONFIG
+    face = bc.get("face", BUDDY_FACE)
+    custom_greeting = bc.get("greeting", "")
+    greeting = custom_greeting if custom_greeting else _get_returning_greeting(tone, language)
+
+    # Wink face variant for continue prompt
+    if face != BUDDY_FACE:
+        wink_face = face
+    else:
+        wink_face = BUDDY_WINK_FACE
 
     parts = []
 
     # Buddy face with welcome-back greeting
     parts.append("\u256d\u2501\u2501\u2501\u256e")
-    parts.append(f"\u2503 {BUDDY_FACE} \u2503 {greeting}")
+    parts.append(f"\u2503 {face} \u2503 {greeting}")
     parts.append("\u2570\u2501\u2501\u2501\u256f")
 
     # Last session summary
@@ -427,9 +514,9 @@ def render_returning_session(
     if pending_context and pending_context.get("mode"):
         mode = pending_context["mode"]
         next_mode = "ACT" if mode == "PLAN" else mode
-        parts.append(f"{BUDDY_WINK_FACE}  Type \"{next_mode}\" to continue!")
+        parts.append(f"{wink_face}  Type \"{next_mode}\" to continue!")
     else:
-        parts.append(f"{BUDDY_WINK_FACE}  Ready when you are!")
+        parts.append(f"{wink_face}  Ready when you are!")
 
     return "\n".join(parts)
 
@@ -441,6 +528,7 @@ def render_session_start(
     language: str,
     previous_session: "Dict[str, Any] | None" = None,
     pending_context: "Dict[str, Any] | None" = None,
+    buddy_config: Optional[Dict[str, str]] = None,
 ) -> str:
     """Render complete session-start output.
 
@@ -455,6 +543,7 @@ def render_session_start(
         language: Language code.
         previous_session: Optional previous session data for returning users.
         pending_context: Optional pending work context from context.md.
+        buddy_config: Optional buddy customization from get_buddy_config().
 
     Returns:
         Complete formatted session-start output.
@@ -462,14 +551,17 @@ def render_session_start(
     # Returning session path
     if previous_session:
         parts = [
-            render_returning_session(previous_session, pending_context, tone, language),
+            render_returning_session(
+                previous_session, pending_context, tone, language,
+                buddy_config=buddy_config,
+            ),
             "",
             render_scan_results(scan),
         ]
     else:
         # First visit path (default)
         parts = [
-            render_buddy_face(tone, language),
+            render_buddy_face(tone, language, buddy_config=buddy_config),
             "",
             render_scan_results(scan),
         ]
