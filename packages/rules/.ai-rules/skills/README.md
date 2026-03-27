@@ -41,6 +41,7 @@ Reusable workflows for consistent development practices.
 | subagent-driven-development | Execute plans with independent tasks in current session | In-session plan execution |
 | systematic-debugging | Systematic approach before proposing fixes | Encountering bugs or failures |
 | cross-repo-issues | Detect, confirm, and create issues in upstream/related repositories with safety checks | Bug belongs upstream, dependency issue, fork-to-upstream reporting |
+| retrospective | Analyze session archives for coding patterns, agent usage, and improvement suggestions | Sprint reviews, periodic retrospectives, process improvement |
 | writing-plans | Create implementation plans before coding | Multi-step tasks with specs |
 
 ### Documentation & Communication
@@ -210,6 +211,8 @@ EOF
 ├── legacy-modernization/
 │   └── SKILL.md
 ├── subagent-driven-development/
+│   └── SKILL.md
+├── retrospective/
 │   └── SKILL.md
 ├── systematic-debugging/
 │   └── SKILL.md
