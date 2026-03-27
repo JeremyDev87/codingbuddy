@@ -1,3 +1,5 @@
+import type { DiffAnalysisResult } from './diff-analyzer';
+
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
 export type Mode = (typeof KEYWORDS)[number];
@@ -550,7 +552,7 @@ export interface VisualData {
 }
 
 /** Re-export DiffAnalysisResult for consumers */
-export type { DiffAnalysisResult } from './diff-analyzer';
+export type { DiffAnalysisResult, DiffAgentScore } from './diff-analyzer';
 
 export interface ModeConfig {
   description: string;

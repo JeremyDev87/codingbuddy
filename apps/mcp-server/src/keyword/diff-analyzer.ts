@@ -146,10 +146,7 @@ export function analyzeDiffFiles(files: string[]): DiffAnalysisResult {
   }
 
   // Accumulate scores per agent
-  const agentAccumulator = new Map<
-    string,
-    { totalWeight: number; matchedFiles: string[] }
-  >();
+  const agentAccumulator = new Map<string, { totalWeight: number; matchedFiles: string[] }>();
 
   for (const file of files) {
     for (const { pattern, agent, weight } of DIFF_FILE_PATTERNS) {
@@ -232,7 +229,7 @@ function execGitDiff(args: string[], cwd: string): Promise<string[]> {
       const files = stdout
         .trim()
         .split('\n')
-        .filter((line) => line.length > 0);
+        .filter(line => line.length > 0);
       resolve(files);
     });
   });

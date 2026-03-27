@@ -206,12 +206,7 @@ export class ActAgentStrategy implements ResolutionStrategy {
       if (availableAgents.includes(diffAgent) && score >= 0.4) {
         const confidence = Math.min(0.75, 0.5 + score * 0.25);
         this.logger.debug(`Diff-based agent: ${diffAgent} (score: ${score.toFixed(2)})`);
-        return createResult(
-          diffAgent,
-          'context',
-          confidence,
-          `Diff analysis: ${reason}`,
-        );
+        return createResult(diffAgent, 'context', confidence, `Diff analysis: ${reason}`);
       }
     }
 

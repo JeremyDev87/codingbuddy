@@ -1,10 +1,4 @@
-import {
-  analyzeDiffFiles,
-  getDiffFiles,
-  DIFF_FILE_PATTERNS,
-  type DiffAnalysisResult,
-  type DiffAgentScore,
-} from './diff-analyzer';
+import { analyzeDiffFiles, getDiffFiles, DIFF_FILE_PATTERNS } from './diff-analyzer';
 
 describe('diff-analyzer', () => {
   describe('DIFF_FILE_PATTERNS', () => {
@@ -34,20 +28,14 @@ describe('diff-analyzer', () => {
     });
 
     it('should boost test-engineer for .test.ts files', () => {
-      const result = analyzeDiffFiles([
-        'src/auth/login.test.ts',
-        'src/auth/login.spec.ts',
-      ]);
+      const result = analyzeDiffFiles(['src/auth/login.test.ts', 'src/auth/login.spec.ts']);
       expect(result.topAgent).not.toBeNull();
       expect(result.topAgent!.agent).toBe('test-engineer');
       expect(result.topAgent!.matchedFiles.length).toBe(2);
     });
 
     it('should boost devops-engineer for Dockerfile and .github/ files', () => {
-      const result = analyzeDiffFiles([
-        'Dockerfile',
-        '.github/workflows/ci.yml',
-      ]);
+      const result = analyzeDiffFiles(['Dockerfile', '.github/workflows/ci.yml']);
       expect(result.topAgent).not.toBeNull();
       expect(result.topAgent!.agent).toBe('devops-engineer');
     });
@@ -63,28 +51,19 @@ describe('diff-analyzer', () => {
     });
 
     it('should boost backend-developer for .py files', () => {
-      const result = analyzeDiffFiles([
-        'hooks/pre-commit.py',
-        'scripts/deploy.py',
-      ]);
+      const result = analyzeDiffFiles(['hooks/pre-commit.py', 'scripts/deploy.py']);
       expect(result.topAgent).not.toBeNull();
       expect(result.topAgent!.agent).toBe('backend-developer');
     });
 
     it('should boost platform-engineer for .tf files', () => {
-      const result = analyzeDiffFiles([
-        'infra/main.tf',
-        'infra/variables.tf',
-      ]);
+      const result = analyzeDiffFiles(['infra/main.tf', 'infra/variables.tf']);
       expect(result.topAgent).not.toBeNull();
       expect(result.topAgent!.agent).toBe('platform-engineer');
     });
 
     it('should boost data-engineer for .sql and migration files', () => {
-      const result = analyzeDiffFiles([
-        'migrations/001_create_users.sql',
-        'schema.prisma',
-      ]);
+      const result = analyzeDiffFiles(['migrations/001_create_users.sql', 'schema.prisma']);
       expect(result.topAgent).not.toBeNull();
       expect(result.topAgent!.agent).toBe('data-engineer');
     });
@@ -121,9 +100,7 @@ describe('diff-analyzer', () => {
       ]);
       expect(result.scores.length).toBeGreaterThan(0);
       for (let i = 1; i < result.scores.length; i++) {
-        expect(result.scores[i - 1].score).toBeGreaterThanOrEqual(
-          result.scores[i].score,
-        );
+        expect(result.scores[i - 1].score).toBeGreaterThanOrEqual(result.scores[i].score);
       }
     });
 
@@ -152,16 +129,10 @@ describe('diff-analyzer', () => {
         'src/components/Header.tsx',
         'README.md', // no match
       ]);
-      const frontendScore = result.scores.find(
-        (s) => s.agent === 'frontend-developer',
-      );
+      const frontendScore = result.scores.find(s => s.agent === 'frontend-developer');
       expect(frontendScore).toBeDefined();
-      expect(frontendScore!.matchedFiles).toContain(
-        'src/components/Button.tsx',
-      );
-      expect(frontendScore!.matchedFiles).toContain(
-        'src/components/Header.tsx',
-      );
+      expect(frontendScore!.matchedFiles).toContain('src/components/Button.tsx');
+      expect(frontendScore!.matchedFiles).toContain('src/components/Header.tsx');
       expect(frontendScore!.matchedFiles).not.toContain('README.md');
     });
   });
