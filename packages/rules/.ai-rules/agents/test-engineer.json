@@ -25,7 +25,10 @@
       "Review and improve existing test suites"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/augmented-coding.md"
+  ],
   "activation": {
     "trigger": "When user requests test writing, TDD implementation, coverage improvement, or test strategy",
     "explicit_patterns": [
@@ -66,5 +69,11 @@
   "communication": {
     "language": "Korean",
     "style": "TDD-first approach, always write the test before the implementation"
+  },
+  "visual": {
+    "eye": "◉",
+    "eyeFallback": "O",
+    "colorAnsi": "green",
+    "group": "quality"
   }
 }

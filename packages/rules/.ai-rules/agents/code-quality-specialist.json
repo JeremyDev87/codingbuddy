@@ -572,69 +572,164 @@
       "variables": {
         "boolean": {
           "pattern": "isX, hasX, canX, shouldX, willX",
-          "examples": ["isActive", "hasPermission", "canEdit", "shouldRender"],
-          "anti_patterns": ["active", "permission", "edit", "render"]
+          "examples": [
+            "isActive",
+            "hasPermission",
+            "canEdit",
+            "shouldRender"
+          ],
+          "anti_patterns": [
+            "active",
+            "permission",
+            "edit",
+            "render"
+          ]
         },
         "arrays_collections": {
           "pattern": "Plural nouns (users, items, products)",
-          "examples": ["users", "items", "selectedProducts"],
-          "anti_patterns": ["userList", "itemArray", "productCollection"]
+          "examples": [
+            "users",
+            "items",
+            "selectedProducts"
+          ],
+          "anti_patterns": [
+            "userList",
+            "itemArray",
+            "productCollection"
+          ]
         },
         "objects": {
           "pattern": "Singular nouns describing the entity",
-          "examples": ["user", "config", "authState"],
-          "anti_patterns": ["data", "info", "obj", "item"]
+          "examples": [
+            "user",
+            "config",
+            "authState"
+          ],
+          "anti_patterns": [
+            "data",
+            "info",
+            "obj",
+            "item"
+          ]
         },
         "constants": {
           "pattern": "SCREAMING_SNAKE_CASE for true constants",
-          "examples": ["MAX_RETRY_COUNT", "API_BASE_URL", "DEFAULT_TIMEOUT"],
-          "anti_patterns": ["maxRetryCount", "apiBaseUrl"]
+          "examples": [
+            "MAX_RETRY_COUNT",
+            "API_BASE_URL",
+            "DEFAULT_TIMEOUT"
+          ],
+          "anti_patterns": [
+            "maxRetryCount",
+            "apiBaseUrl"
+          ]
         }
       },
       "functions": {
         "event_handlers": {
           "pattern": "handleX (handleClick, handleSubmit, handleChange)",
-          "examples": ["handleClick", "handleSubmit", "handleInputChange"],
-          "anti_patterns": ["onClick", "clickHandler", "onClickHandler"]
+          "examples": [
+            "handleClick",
+            "handleSubmit",
+            "handleInputChange"
+          ],
+          "anti_patterns": [
+            "onClick",
+            "clickHandler",
+            "onClickHandler"
+          ]
         },
         "getters": {
           "pattern": "getX for data retrieval",
-          "examples": ["getUser", "getUserById", "getConfig"],
-          "anti_patterns": ["fetchUser", "retrieveUser", "user"]
+          "examples": [
+            "getUser",
+            "getUserById",
+            "getConfig"
+          ],
+          "anti_patterns": [
+            "fetchUser",
+            "retrieveUser",
+            "user"
+          ]
         },
         "setters": {
           "pattern": "setX for state updates",
-          "examples": ["setUser", "setIsLoading", "setConfig"],
-          "anti_patterns": ["updateUser", "changeUser"]
+          "examples": [
+            "setUser",
+            "setIsLoading",
+            "setConfig"
+          ],
+          "anti_patterns": [
+            "updateUser",
+            "changeUser"
+          ]
         },
         "validators": {
           "pattern": "validateX or isValidX",
-          "examples": ["validateEmail", "isValidPassword", "validateForm"],
-          "anti_patterns": ["checkEmail", "emailCheck", "emailValidator"]
+          "examples": [
+            "validateEmail",
+            "isValidPassword",
+            "validateForm"
+          ],
+          "anti_patterns": [
+            "checkEmail",
+            "emailCheck",
+            "emailValidator"
+          ]
         },
         "transformers": {
           "pattern": "toX, formatX, parseX for data transformation",
-          "examples": ["toJSON", "formatDate", "parseResponse"],
-          "anti_patterns": ["convertToJSON", "dateFormatter"]
+          "examples": [
+            "toJSON",
+            "formatDate",
+            "parseResponse"
+          ],
+          "anti_patterns": [
+            "convertToJSON",
+            "dateFormatter"
+          ]
         },
         "async_operations": {
           "pattern": "fetchX, loadX for async data fetching",
-          "examples": ["fetchUsers", "loadUserProfile", "fetchData"],
-          "anti_patterns": ["getUsers (if async)", "userData"]
+          "examples": [
+            "fetchUsers",
+            "loadUserProfile",
+            "fetchData"
+          ],
+          "anti_patterns": [
+            "getUsers (if async)",
+            "userData"
+          ]
         }
       },
       "components": {
         "naming": {
           "pattern": "PascalCase, role-based naming",
-          "examples": ["UserProfile", "LoginForm", "NavigationMenu"],
-          "anti_patterns": ["Profile", "Form", "Menu"]
+          "examples": [
+            "UserProfile",
+            "LoginForm",
+            "NavigationMenu"
+          ],
+          "anti_patterns": [
+            "Profile",
+            "Form",
+            "Menu"
+          ]
         },
         "props": {
           "pattern": "Clear intent props",
           "callback_props": "onX pattern (onSubmit, onChange, onClose)",
           "boolean_props": "isX, hasX pattern (isDisabled, isLoading, hasError)",
-          "examples": ["onSubmit", "isDisabled", "hasError"],
-          "anti_patterns": ["submit", "disabled", "error"]
+          "examples": [
+            "onSubmit",
+            "isDisabled",
+            "hasError"
+          ],
+          "anti_patterns": [
+            "submit",
+            "disabled",
+            "error"
+          ]
         }
       },
       "severity_levels": {
@@ -706,5 +801,11 @@
       "project_quality": "See augmented-coding.md 'Code Quality Standards' section"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "●",
+    "eyeFallback": "O",
+    "colorAnsi": "green",
+    "group": "quality"
   }
 }

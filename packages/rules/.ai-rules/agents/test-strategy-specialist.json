@@ -147,12 +147,21 @@
         "coverage_planning": {
           "core_logic": {
             "target": "90%+ coverage",
-            "locations": ["entities/apis/", "entities/models/", "shared/utils/", "shared/hooks/"],
+            "locations": [
+              "entities/apis/",
+              "entities/models/",
+              "shared/utils/",
+              "shared/hooks/"
+            ],
             "plan": "Plan test cases for all code paths, edge cases, and error conditions"
           },
           "ui_components": {
             "target": "Focus on user interactions and state changes",
-            "locations": ["features/", "widgets/", "shared/Components/"],
+            "locations": [
+              "features/",
+              "widgets/",
+              "shared/Components/"
+            ],
             "plan": "Plan tests for user interactions, state changes, and accessibility"
           }
         },
@@ -175,7 +184,12 @@
             "API errors",
             "Timeout errors"
           ],
-          "state_conditions": ["Loading state", "Error state", "Success state", "Initial state"]
+          "state_conditions": [
+            "Loading state",
+            "Error state",
+            "Success state",
+            "Initial state"
+          ]
         },
         "planning_risks": {
           "🔴 critical": [
@@ -409,14 +423,23 @@
         "coverage_requirements": {
           "core_logic": {
             "target": "90%+ coverage",
-            "locations": ["entities/apis/", "entities/models/", "shared/utils/", "shared/hooks/"],
+            "locations": [
+              "entities/apis/",
+              "entities/models/",
+              "shared/utils/",
+              "shared/hooks/"
+            ],
             "acceptable": "85-90%",
             "concerning": "70-85%",
             "critical": "< 70%"
           },
           "ui_components": {
             "target": "Focus on user interactions and state changes",
-            "locations": ["features/", "widgets/", "shared/Components/"],
+            "locations": [
+              "features/",
+              "widgets/",
+              "shared/Components/"
+            ],
             "acceptable": "User interactions covered",
             "concerning": "Missing key interaction tests",
             "critical": "No tests for UI components"
@@ -481,7 +504,12 @@
         "handles network timeout gracefully",
         "displays loading state during API call"
       ],
-      "❌ bad": ["test1", "handles input", "works correctly", "test email validation"]
+      "❌ bad": [
+        "test1",
+        "handles input",
+        "works correctly",
+        "test email validation"
+      ]
     },
     "edge_cases": {
       "boundary_conditions": [
@@ -491,8 +519,18 @@
         "Min values",
         "Zero"
       ],
-      "error_conditions": ["Network errors", "Validation errors", "API errors", "Timeout errors"],
-      "state_conditions": ["Loading state", "Error state", "Success state", "Initial state"]
+      "error_conditions": [
+        "Network errors",
+        "Validation errors",
+        "API errors",
+        "Timeout errors"
+      ],
+      "state_conditions": [
+        "Loading state",
+        "Error state",
+        "Success state",
+        "Initial state"
+      ]
     },
     "best_practices_reference": {
       "tdd": "Test-Driven Development - Kent Beck",
@@ -521,5 +559,11 @@
       "project_testing": "See augmented-coding.md 'Testing Best Practices' section"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "⊙",
+    "eyeFallback": "O",
+    "colorAnsi": "green",
+    "group": "quality"
   }
 }

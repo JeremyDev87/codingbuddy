@@ -539,5 +539,11 @@
       "project_documentation": "See project.md 'Development Rules' section"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "⊕",
+    "eyeFallback": "O",
+    "colorAnsi": "white",
+    "group": "integration"
   }
 }

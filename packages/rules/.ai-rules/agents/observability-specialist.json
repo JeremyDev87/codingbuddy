@@ -165,7 +165,13 @@
               "Sampling strategy",
               "Span attributes"
             ],
-            "backends": ["Jaeger", "Zipkin", "Tempo", "AWS X-Ray", "Datadog APM"]
+            "backends": [
+              "Jaeger",
+              "Zipkin",
+              "Tempo",
+              "AWS X-Ray",
+              "Datadog APM"
+            ]
           },
           "metrics": {
             "description": "Quantitative measurements for system health",
@@ -174,24 +180,49 @@
               "Labels/dimensions",
               "Aggregation"
             ],
-            "backends": ["Prometheus", "Grafana", "InfluxDB", "Victoria Metrics", "Datadog"]
+            "backends": [
+              "Prometheus",
+              "Grafana",
+              "InfluxDB",
+              "Victoria Metrics",
+              "Datadog"
+            ]
           },
           "logs": {
             "description": "Structured event records with context",
-            "components": ["JSON format", "Log levels", "Context injection", "PII masking"],
-            "backends": ["ELK Stack", "Loki", "Splunk", "CloudWatch Logs", "Datadog Logs"]
+            "components": [
+              "JSON format",
+              "Log levels",
+              "Context injection",
+              "PII masking"
+            ],
+            "backends": [
+              "ELK Stack",
+              "Loki",
+              "Splunk",
+              "CloudWatch Logs",
+              "Datadog Logs"
+            ]
           }
         },
         "sli_slo_framework": {
           "availability_sli": {
             "definition": "Percentage of successful requests",
             "formula": "(successful requests / total requests) * 100",
-            "common_targets": ["99.9%", "99.95%", "99.99%"]
+            "common_targets": [
+              "99.9%",
+              "99.95%",
+              "99.99%"
+            ]
           },
           "latency_sli": {
             "definition": "Percentage of requests faster than threshold",
             "formula": "(requests < threshold / total requests) * 100",
-            "common_thresholds": ["p50 < 100ms", "p95 < 500ms", "p99 < 1000ms"]
+            "common_thresholds": [
+              "p50 < 100ms",
+              "p95 < 500ms",
+              "p99 < 1000ms"
+            ]
           },
           "error_budget": {
             "definition": "Allowed downtime/errors within SLO",
@@ -319,8 +350,17 @@
             "service.namespace (optional)",
             "host.name (optional)"
           ],
-          "propagators": ["W3C Trace Context (default)", "W3C Baggage", "B3 (for Zipkin)"],
-          "exporters": ["OTLP (recommended)", "Jaeger", "Zipkin", "Console (dev only)"]
+          "propagators": [
+            "W3C Trace Context (default)",
+            "W3C Baggage",
+            "B3 (for Zipkin)"
+          ],
+          "exporters": [
+            "OTLP (recommended)",
+            "Jaeger",
+            "Zipkin",
+            "Console (dev only)"
+          ]
         },
         "structured_logging_setup": {
           "required_fields": {
@@ -540,7 +580,11 @@
             "Dashboard gaps for key metrics",
             "Alert runbooks incomplete"
           ],
-          "low": ["Minor coverage gaps", "Optional improvements", "Documentation updates needed"]
+          "low": [
+            "Minor coverage gaps",
+            "Optional improvements",
+            "Documentation updates needed"
+          ]
         }
       }
     }
@@ -548,7 +592,16 @@
   "shared_framework": {
     "opentelemetry": {
       "description": "Vendor-neutral observability framework",
-      "sdk_languages": ["Node.js", "Python", "Go", "Java", ".NET", "Ruby", "PHP", "Rust"],
+      "sdk_languages": [
+        "Node.js",
+        "Python",
+        "Go",
+        "Java",
+        ".NET",
+        "Ruby",
+        "PHP",
+        "Rust"
+      ],
       "components": {
         "api": "Stable interfaces for instrumentation",
         "sdk": "Reference implementation for telemetry collection",
@@ -695,5 +748,11 @@
       "structured_logging": "JSON logging best practices"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "◌",
+    "eyeFallback": "O",
+    "colorAnsi": "white",
+    "group": "integration"
   }
 }

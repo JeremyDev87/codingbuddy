@@ -151,5 +151,11 @@
       "✅ Linting errors resolved",
       "✅ Design system components utilized"
     ]
+  },
+  "visual": {
+    "eye": "◆",
+    "eyeFallback": "O",
+    "colorAnsi": "blue",
+    "group": "workflow"
   }
 }

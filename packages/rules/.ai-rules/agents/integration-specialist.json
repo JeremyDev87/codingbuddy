@@ -570,5 +570,11 @@
       "best_practices": "https://docs.stripe.com/webhooks/best-practices"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "○",
+    "eyeFallback": "O",
+    "colorAnsi": "white",
+    "group": "integration"
   }
 }

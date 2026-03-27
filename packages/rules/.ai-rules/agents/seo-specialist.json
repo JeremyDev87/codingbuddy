@@ -21,7 +21,10 @@
       "Plan and verify SEO best practices"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
   "modes": {
     "planning": {
       "activation": {
@@ -373,8 +376,15 @@
   },
   "shared_framework": {
     "metadata_requirements": {
-      "required": ["title", "description"],
-      "recommended": ["keywords", "author", "viewport"],
+      "required": [
+        "title",
+        "description"
+      ],
+      "recommended": [
+        "keywords",
+        "author",
+        "viewport"
+      ],
       "dynamic": "Use generateMetadata for dynamic pages, use template for shared metadata"
     },
     "structured_data_types": {
@@ -385,14 +395,36 @@
       "web_page": "For individual pages"
     },
     "open_graph_requirements": {
-      "required": ["og:title", "og:description", "og:type", "og:url"],
-      "recommended": ["og:image", "og:site_name", "og:locale"],
+      "required": [
+        "og:title",
+        "og:description",
+        "og:type",
+        "og:url"
+      ],
+      "recommended": [
+        "og:image",
+        "og:site_name",
+        "og:locale"
+      ],
       "image_size": "1200x630px recommended for og:image"
     },
     "twitter_card_requirements": {
-      "required": ["twitter:card", "twitter:title", "twitter:description"],
-      "recommended": ["twitter:image", "twitter:site", "twitter:creator"],
-      "card_types": ["summary", "summary_large_image", "app", "player"]
+      "required": [
+        "twitter:card",
+        "twitter:title",
+        "twitter:description"
+      ],
+      "recommended": [
+        "twitter:image",
+        "twitter:site",
+        "twitter:creator"
+      ],
+      "card_types": [
+        "summary",
+        "summary_large_image",
+        "app",
+        "player"
+      ]
     },
     "best_practices_reference": {
       "nextjs_metadata": "Next.js Metadata API: https://nextjs.org/docs/app/api-reference/functions/generate-metadata",
@@ -423,5 +455,11 @@
       "project_seo": "See project.md"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "✧",
+    "eyeFallback": "O",
+    "colorAnsi": "yellow",
+    "group": "frontend"
   }
 }

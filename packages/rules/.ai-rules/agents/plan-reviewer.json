@@ -134,7 +134,12 @@
   },
   "output_format": {
     "findings_table": {
-      "columns": ["Finding", "Location", "Severity", "Recommendation"],
+      "columns": [
+        "Finding",
+        "Location",
+        "Severity",
+        "Recommendation"
+      ],
       "severity_levels": {
         "Critical": "Plan cannot be executed — missing files, impossible tasks, contradictions",
         "High": "Plan will produce low-quality results — vague criteria, missing TDD, scope gaps",
@@ -204,5 +209,11 @@
     "existing_agents": ".ai-rules/agents/*.json",
     "plan_skill": ".ai-rules/skills/plan-and-review/SKILL.md",
     "writing_plans_skill": ".ai-rules/skills/writing-plans/SKILL.md"
+  },
+  "visual": {
+    "eye": "◆",
+    "eyeFallback": "O",
+    "colorAnsi": "bright",
+    "group": "specialist"
   }
 }

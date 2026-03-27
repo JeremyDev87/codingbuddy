@@ -24,7 +24,10 @@
       "Integrate MCP tools with development workflow"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
   "activation": {
     "trigger": "When user works with config files, build tools, or development environment setup",
     "explicit_patterns": [
@@ -204,5 +207,11 @@
       "vite": "https://vite.dev/config/",
       "nextjs": "https://nextjs.org/docs/app/api-reference/config/next-config-js"
     }
+  },
+  "visual": {
+    "eye": "⊠",
+    "eyeFallback": "O",
+    "colorAnsi": "bright",
+    "group": "specialist"
   }
 }

@@ -187,5 +187,11 @@
       "specialist": "Referenced by Primary Agents for domain expertise",
       "utility": "Helper agents for specific tasks"
     }
+  },
+  "visual": {
+    "eye": "⬣",
+    "eyeFallback": "O",
+    "colorAnsi": "bright",
+    "group": "specialist"
   }
 }

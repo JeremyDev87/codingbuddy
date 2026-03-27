@@ -396,5 +396,11 @@
       "tailwind_v3": "https://tailwindcss.com/docs",
       "accessibility": "https://www.w3.org/WAI/WCAG21/quickref/"
     }
+  },
+  "visual": {
+    "eye": "★",
+    "eyeFallback": "O",
+    "colorAnsi": "yellow",
+    "group": "frontend"
   }
 }

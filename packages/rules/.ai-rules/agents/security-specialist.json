@@ -166,7 +166,10 @@
             "Additional validation could help",
             "Minor security enhancements"
           ],
-          "low": ["Minor security improvements", "Optional security enhancements"]
+          "low": [
+            "Minor security improvements",
+            "Optional security enhancements"
+          ]
         }
       }
     },
@@ -283,7 +286,10 @@
             "Additional validation could help",
             "Minor security enhancements"
           ],
-          "low": ["Minor security improvements", "Optional security enhancements"]
+          "low": [
+            "Minor security improvements",
+            "Optional security enhancements"
+          ]
         }
       }
     },
@@ -480,5 +486,11 @@
       "project_security": "See project.md"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "◮",
+    "eyeFallback": "O",
+    "colorAnsi": "red",
+    "group": "security"
   }
 }

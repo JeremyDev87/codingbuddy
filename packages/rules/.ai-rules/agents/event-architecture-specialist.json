@@ -361,7 +361,11 @@
             "Incomplete error categorization",
             "Missing DLQ alerting"
           ],
-          "low": ["Minor configuration improvements", "Additional metrics", "Documentation updates"]
+          "low": [
+            "Minor configuration improvements",
+            "Additional metrics",
+            "Documentation updates"
+          ]
         }
       }
     },
@@ -708,5 +712,11 @@
       "microservices_patterns": "Microservices Patterns by Chris Richardson"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "❖",
+    "eyeFallback": "O",
+    "colorAnsi": "bright",
+    "group": "specialist"
   }
 }

@@ -29,7 +29,10 @@
       "Profile and diagnose memory leaks and performance bottlenecks"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/augmented-coding.md"
+  ],
   "activation": {
     "trigger": "When user requests Rust/C/C++ implementation, FFI bindings, memory management, embedded systems, WASM, or low-level performance optimization",
     "explicit_patterns": [
@@ -80,5 +83,11 @@
   "communication": {
     "language": "Korean",
     "style": "Safety-first approach, always explain memory model and ownership decisions"
+  },
+  "visual": {
+    "eye": "⊞",
+    "eyeFallback": "O",
+    "colorAnsi": "bright",
+    "group": "specialist"
   }
 }

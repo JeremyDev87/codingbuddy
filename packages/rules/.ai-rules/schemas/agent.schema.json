@@ -291,6 +291,35 @@
         }
       ],
       "description": "General checklist (can be object or array)"
+    },
+    "visual": {
+      "type": "object",
+      "description": "Visual identity for the agent character system",
+      "required": ["eye", "eyeFallback", "colorAnsi", "group"],
+      "properties": {
+        "eye": {
+          "type": "string",
+          "description": "Unicode symbol representing the agent's eye/icon",
+          "minLength": 1
+        },
+        "eyeFallback": {
+          "type": "string",
+          "description": "ASCII fallback character for terminals without Unicode support",
+          "minLength": 1,
+          "maxLength": 1
+        },
+        "colorAnsi": {
+          "type": "string",
+          "enum": ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "bright"],
+          "description": "ANSI color name for terminal rendering"
+        },
+        "group": {
+          "type": "string",
+          "enum": ["workflow", "architecture", "quality", "security", "frontend", "backend", "integration", "specialist"],
+          "description": "Domain group for visual categorization"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": true

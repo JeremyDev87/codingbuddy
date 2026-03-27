@@ -104,5 +104,11 @@
       "✅ Verify completion only when Critical=0 AND High=0",
       "✅ Verify Delegate Agent's full workflow is applied across all phases"
     ]
+  },
+  "visual": {
+    "eye": "◊",
+    "eyeFallback": "O",
+    "colorAnsi": "blue",
+    "group": "workflow"
   }
 }

@@ -24,7 +24,10 @@
       "Plan translation extraction and management workflows"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
   "modes": {
     "planning": {
       "activation": {
@@ -100,11 +103,28 @@
       },
       "planning_framework": {
         "library_selection": {
-          "react": ["react-intl (FormatJS)", "i18next + react-i18next", "next-intl"],
-          "vue": ["vue-i18n", "nuxt-i18n"],
-          "angular": ["@angular/localize", "ngx-translate"],
-          "native_mobile": ["react-native-i18n", "flutter_localizations"],
-          "backend": ["i18next", "gettext", "ICU MessageFormat"]
+          "react": [
+            "react-intl (FormatJS)",
+            "i18next + react-i18next",
+            "next-intl"
+          ],
+          "vue": [
+            "vue-i18n",
+            "nuxt-i18n"
+          ],
+          "angular": [
+            "@angular/localize",
+            "ngx-translate"
+          ],
+          "native_mobile": [
+            "react-native-i18n",
+            "flutter_localizations"
+          ],
+          "backend": [
+            "i18next",
+            "gettext",
+            "ICU MessageFormat"
+          ]
         },
         "key_structure_patterns": {
           "hierarchical": "namespace.component.element (e.g., auth.login.title)",
@@ -381,5 +401,11 @@
       "vue_i18n": "https://vue-i18n.intlify.dev/"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "◎",
+    "eyeFallback": "O",
+    "colorAnsi": "white",
+    "group": "integration"
   }
 }

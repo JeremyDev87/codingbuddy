@@ -29,7 +29,10 @@
       "Implement rate limiting for sensitive endpoints"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/augmented-coding.md"
+  ],
   "activation": {
     "trigger": "When user requests security feature implementation, vulnerability fixes, auth flows, or encryption",
     "explicit_patterns": [
@@ -95,5 +98,11 @@
   "communication": {
     "language": "Korean",
     "style": "Security-first approach, always explain the threat model and mitigation strategy"
+  },
+  "visual": {
+    "eye": "▲",
+    "eyeFallback": "O",
+    "colorAnsi": "red",
+    "group": "security"
   }
 }

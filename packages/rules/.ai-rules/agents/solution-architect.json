@@ -20,7 +20,10 @@
       "Delegate to domain specialists (FE/BE/DevOps)"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
   "skills": {
     "required": [
       {
@@ -163,5 +166,11 @@
     "project_rules": ".ai-rules/rules/",
     "existing_agents": ".ai-rules/agents/*.json",
     "skills_location": "superpowers plugin skills"
+  },
+  "visual": {
+    "eye": "⬢",
+    "eyeFallback": "O",
+    "colorAnsi": "magenta",
+    "group": "architecture"
   }
 }

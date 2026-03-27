@@ -213,29 +213,86 @@
       },
       "framework_examples": {
         "nodejs": {
-          "frameworks": ["NestJS", "Express", "Fastify"],
-          "orm": ["Prisma", "TypeORM", "Drizzle"],
-          "validation": ["Zod", "class-validator", "Joi"]
+          "frameworks": [
+            "NestJS",
+            "Express",
+            "Fastify"
+          ],
+          "orm": [
+            "Prisma",
+            "TypeORM",
+            "Drizzle"
+          ],
+          "validation": [
+            "Zod",
+            "class-validator",
+            "Joi"
+          ]
         },
         "python": {
-          "frameworks": ["FastAPI", "Django", "Flask"],
-          "orm": ["SQLAlchemy", "Django ORM", "Tortoise ORM"],
-          "validation": ["Pydantic", "Marshmallow", "Cerberus"]
+          "frameworks": [
+            "FastAPI",
+            "Django",
+            "Flask"
+          ],
+          "orm": [
+            "SQLAlchemy",
+            "Django ORM",
+            "Tortoise ORM"
+          ],
+          "validation": [
+            "Pydantic",
+            "Marshmallow",
+            "Cerberus"
+          ]
         },
         "go": {
-          "frameworks": ["Gin", "Echo", "Fiber"],
-          "orm": ["GORM", "Ent", "sqlc"],
-          "validation": ["go-playground/validator", "ozzo-validation"]
+          "frameworks": [
+            "Gin",
+            "Echo",
+            "Fiber"
+          ],
+          "orm": [
+            "GORM",
+            "Ent",
+            "sqlc"
+          ],
+          "validation": [
+            "go-playground/validator",
+            "ozzo-validation"
+          ]
         },
         "java": {
-          "frameworks": ["Spring Boot", "Quarkus", "Micronaut"],
-          "orm": ["Hibernate", "JPA", "jOOQ"],
-          "validation": ["Jakarta Validation", "Hibernate Validator"]
+          "frameworks": [
+            "Spring Boot",
+            "Quarkus",
+            "Micronaut"
+          ],
+          "orm": [
+            "Hibernate",
+            "JPA",
+            "jOOQ"
+          ],
+          "validation": [
+            "Jakarta Validation",
+            "Hibernate Validator"
+          ]
         },
         "rust": {
-          "frameworks": ["Actix-web", "Axum", "Rocket"],
-          "orm": ["Diesel", "SeaORM", "sqlx"],
-          "validation": ["validator", "garde"]
+          "frameworks": [
+            "Actix-web",
+            "Axum",
+            "Rocket"
+          ],
+          "orm": [
+            "Diesel",
+            "SeaORM",
+            "sqlx"
+          ],
+          "validation": [
+            "validator",
+            "garde"
+          ]
         }
       }
     },
@@ -280,7 +337,11 @@
     },
     "security_standards": {
       "authentication": {
-        "methods": ["JWT", "OAuth 2.0", "Session-based"],
+        "methods": [
+          "JWT",
+          "OAuth 2.0",
+          "Session-based"
+        ],
         "best_practices": [
           "Secure token storage",
           "Token rotation and refresh",
@@ -288,7 +349,11 @@
         ]
       },
       "authorization": {
-        "patterns": ["RBAC", "ABAC", "Policy-based"],
+        "patterns": [
+          "RBAC",
+          "ABAC",
+          "Policy-based"
+        ],
         "implementation": "Use framework-specific guards, middleware, or decorators",
         "examples": {
           "nodejs": "Guards (NestJS), Middleware (Express)",
@@ -301,11 +366,28 @@
       "input_validation": {
         "required": "All user inputs MUST be validated",
         "tools_by_language": {
-          "nodejs": ["Zod", "class-validator", "Joi"],
-          "python": ["Pydantic", "Marshmallow", "Cerberus"],
-          "go": ["go-playground/validator", "ozzo-validation"],
-          "java": ["Jakarta Validation", "Hibernate Validator"],
-          "rust": ["validator", "garde"]
+          "nodejs": [
+            "Zod",
+            "class-validator",
+            "Joi"
+          ],
+          "python": [
+            "Pydantic",
+            "Marshmallow",
+            "Cerberus"
+          ],
+          "go": [
+            "go-playground/validator",
+            "ozzo-validation"
+          ],
+          "java": [
+            "Jakarta Validation",
+            "Hibernate Validator"
+          ],
+          "rust": [
+            "validator",
+            "garde"
+          ]
         },
         "sanitization": "Sanitize inputs to prevent XSS"
       },
@@ -487,5 +569,11 @@
         "grpc": "https://grpc.io/docs"
       }
     }
+  },
+  "visual": {
+    "eye": "◐",
+    "eyeFallback": "O",
+    "colorAnsi": "cyan",
+    "group": "backend"
   }
 }

@@ -21,7 +21,10 @@
       "Collaborate with Accessibility Specialist for inclusive design"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
   "modes": {
     "planning": {
       "activation": {
@@ -479,7 +482,11 @@
     ],
     "responsive_breakpoints": {
       "note": "Define based on content needs, not devices",
-      "common_patterns": ["mobile-first", "desktop-first", "content-based"]
+      "common_patterns": [
+        "mobile-first",
+        "desktop-first",
+        "content-based"
+      ]
     }
   },
   "communication": {
@@ -506,5 +513,11 @@
       "performance": "Consider performance-specialist.json for animation/interaction performance"
     },
     "project_rules": "See .ai-rules/rules/"
+  },
+  "visual": {
+    "eye": "☆",
+    "eyeFallback": "O",
+    "colorAnsi": "yellow",
+    "group": "frontend"
   }
 }

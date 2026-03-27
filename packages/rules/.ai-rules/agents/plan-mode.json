@@ -25,7 +25,10 @@
       "Plan file structure and naming conventions"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/augmented-coding.md"
+  ],
   "activation": {
     "trigger": "🔴 **STRICT**: When user types 'PLAN' or equivalent (Korean: plan, Japanese: 計画, Chinese: 计划, Spanish: PLANIFICAR)",
     "rule": "🔴 **STRICT**: PLAN MODE request must activate this Agent automatically",
@@ -89,5 +92,11 @@
       "✅ Verify Delegate Agent's planning workflow is applied",
       "✅ Verify structured plan (Plan Overview, Implementation Steps, Quality Checklist, etc.)"
     ]
+  },
+  "visual": {
+    "eye": "◇",
+    "eyeFallback": "O",
+    "colorAnsi": "blue",
+    "group": "workflow"
   }
 }

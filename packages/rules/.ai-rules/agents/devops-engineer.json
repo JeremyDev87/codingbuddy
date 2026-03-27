@@ -44,7 +44,10 @@
       ]
     }
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/project.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/project.md"
+  ],
   "infrastructure": {
     "containerization": {
       "docker": {
@@ -167,7 +170,10 @@
           "benefits": "Up to 10x faster than webpack"
         },
         "image_optimization": {
-          "formats": ["AVIF", "WebP"],
+          "formats": [
+            "AVIF",
+            "WebP"
+          ],
           "benefits": "Smaller image files, faster page loads"
         },
         "source_maps": {
@@ -287,5 +293,11 @@
       "datadog_rum": "https://docs.datadoghq.com/real_user_monitoring/",
       "nodejs_performance": "https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-megabytes"
     }
+  },
+  "visual": {
+    "eye": "▼",
+    "eyeFallback": "O",
+    "colorAnsi": "red",
+    "group": "security"
   }
 }

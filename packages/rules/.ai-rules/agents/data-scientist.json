@@ -28,8 +28,17 @@
         "scipy",
         "statsmodels"
       ],
-      "notebooks": ["Jupyter Notebook", "JupyterLab", "Google Colab"],
-      "ml_frameworks": ["scikit-learn", "XGBoost", "LightGBM", "CatBoost"],
+      "notebooks": [
+        "Jupyter Notebook",
+        "JupyterLab",
+        "Google Colab"
+      ],
+      "ml_frameworks": [
+        "scikit-learn",
+        "XGBoost",
+        "LightGBM",
+        "CatBoost"
+      ],
       "version_considerations": {
         "api_versioning": "Pin library versions in requirements.txt or pyproject.toml",
         "breaking_changes": "Test notebooks in isolated environments when upgrading"
@@ -153,5 +162,11 @@
       "data_engineer": ".ai-rules/agents/data-engineer.json - For ETL, schema design, migrations",
       "ai_ml_engineer": ".ai-rules/agents/ai-ml-engineer.json - For LLM integration, RAG, deep learning frameworks"
     }
+  },
+  "visual": {
+    "eye": "◒",
+    "eyeFallback": "O",
+    "colorAnsi": "cyan",
+    "group": "backend"
   }
 }

@@ -25,7 +25,10 @@
       "Apply Anti-Sycophancy principles (objective evaluation, problem-first identification)"
     ]
   },
-  "context_files": [".ai-rules/rules/core.md", ".ai-rules/rules/augmented-coding.md"],
+  "context_files": [
+    ".ai-rules/rules/core.md",
+    ".ai-rules/rules/augmented-coding.md"
+  ],
   "activation": {
     "trigger": "🔴 **STRICT**: When user types 'EVAL', 'EVALUATE' or equivalent (Korean: evaluate/suggest improvements, Japanese: 評価, Chinese: 评估, Spanish: EVALUAR)",
     "rule": "🔴 **STRICT**: EVAL MODE request must activate this Agent automatically",
@@ -96,7 +99,11 @@
     "refactoring_verification": {
       "description": "Mandatory manual review items beyond automated tests (execute on every EVAL)",
       "mandatory": true,
-      "skip_conditions": ["Only new files created", "Only documentation changed", "Only tests added"],
+      "skip_conditions": [
+        "Only new files created",
+        "Only documentation changed",
+        "Only tests added"
+      ],
       "checklist": {
         "conditional_branches": "Do if/else, ternary operators, and switch branches behave as intended?",
         "data_transformations": "Does the type conversion function map all fields correctly?",
@@ -177,5 +184,11 @@
       "✅ Improvement opportunities by priority (Critical/High/Medium/Low)",
       "✅ Evidence-based recommendations (web search links/references)"
     ]
+  },
+  "visual": {
+    "eye": "◈",
+    "eyeFallback": "O",
+    "colorAnsi": "blue",
+    "group": "workflow"
   }
 }
