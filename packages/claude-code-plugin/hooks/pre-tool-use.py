@@ -4,6 +4,7 @@
 Intercepts Bash tool calls to enforce quality gates on git commit commands.
 Detects .ai-rules/config changes via FileWatcher (#823).
 Suggests related tests for staged files via SmartTestRunner (#944).
+Auto-selects relevant checklists for staged files via ChecklistVerifier (#1001).
 Displays active agent status in spinner via statusMessage (#974).
 Uses safe_main decorator to ensure Claude Code is never blocked.
 """
@@ -154,6 +155,17 @@ def _get_test_suggestion(staged_files: List[str]) -> Optional[str]:
         return None
 
 
+def _get_checklist_warning(staged_files: List[str]) -> Optional[str]:
+    """Use ChecklistVerifier to build a checklist warning for staged files (#1001)."""
+    try:
+        from checklist_verifier import ChecklistVerifier
+
+        verifier = ChecklistVerifier()
+        return verifier.verify(staged_files)
+    except Exception:
+        return None
+
+
 def _handle(data: dict) -> Optional[dict]:
     """Core PreToolUse logic.
 
@@ -191,6 +203,11 @@ def _handle(data: dict) -> Optional[dict]:
                 suggestion = _get_test_suggestion(staged)
                 if suggestion:
                     contexts.append(suggestion)
+
+                # Checklist verifier — auto-select relevant checklists (#1001)
+                checklist_warning = _get_checklist_warning(staged)
+                if checklist_warning:
+                    contexts.append(checklist_warning)
 
     # Build response — include statusMessage and/or additionalContext
     if not status_msg and not contexts:
