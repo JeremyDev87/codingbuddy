@@ -115,6 +115,12 @@ export { PipelineHandler } from './pipeline.handler';
 export { ContextArchiveHandler } from './context-archive.handler';
 
 /**
+ * Handler for rule insights tools (get_rule_insights)
+ * @see {@link RuleInsightsHandler}
+ */
+export { RuleInsightsHandler } from './rule-insights.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
