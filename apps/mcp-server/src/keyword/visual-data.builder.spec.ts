@@ -114,13 +114,7 @@ describe('buildVisualData', () => {
   });
 
   it('uses default eye when visual is missing', () => {
-    const result = buildVisualData(
-      'ACT',
-      undefined,
-      { name: 'Engineer' },
-      [],
-      true,
-    );
+    const result = buildVisualData('ACT', undefined, { name: 'Engineer' }, [], true);
 
     expect(result.banner).toContain('●‿●');
     expect(result.agents[0].face).toBe('●‿●');
