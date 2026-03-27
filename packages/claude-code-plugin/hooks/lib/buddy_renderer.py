@@ -1,7 +1,7 @@
-"""Buddy character ASCII rendering utilities for session-start.
+"""Buddy character ASCII rendering utilities for session-start and stop hooks.
 
-Renders buddy face greeting, project scan results, and agent recommendations
-with tone/language support and ANSI color output.
+Renders buddy face greeting, project scan results, agent recommendations,
+and session summary with tone/language support and ANSI color output.
 """
 from typing import Any, Dict, List
 
@@ -61,6 +61,50 @@ SCAN_LABELS: Dict[str, Dict[str, str]] = {
 }
 
 BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
+BUDDY_WRAP_FACE = "\u25d5\u2304\u25d5"  # ◕⌄◕
+
+# Farewell greetings by tone and language (stop hook)
+FAREWELL_GREETINGS: Dict[str, Dict[str, str]] = {
+    "casual": {
+        "en": "Great work today!",
+        "ko": "\uc624\ub298 \uc218\uace0\ud588\uc5b4\uc694!",
+        "ja": "\u304a\u75b2\u308c\u69d8\uff01",
+        "zh": "\u4eca\u5929\u8f9b\u82e6\u4e86\uff01",
+        "es": "\u00a1Buen trabajo hoy!",
+    },
+    "formal": {
+        "en": "Session complete.",
+        "ko": "\uc138\uc158\uc774 \uc644\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        "ja": "\u30bb\u30c3\u30b7\u30e7\u30f3\u5b8c\u4e86\u3002",
+        "zh": "\u4f1a\u8bdd\u5b8c\u6210\u3002",
+        "es": "Sesi\u00f3n completada.",
+    },
+}
+
+FAREWELL_MESSAGES: Dict[str, Dict[str, str]] = {
+    "casual": {
+        "en": "See you next time!",
+        "ko": "\ub2e4\uc74c\uc5d0 \ub610 \ub9cc\ub098\uc694!",
+        "ja": "\u307e\u305f\u6b21\u56de\uff01",
+        "zh": "\u4e0b\u6b21\u518d\u89c1\uff01",
+        "es": "\u00a1Hasta la pr\u00f3xima!",
+    },
+    "formal": {
+        "en": "Session ended.",
+        "ko": "\uc138\uc158\uc774 \uc885\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        "ja": "\u30bb\u30c3\u30b7\u30e7\u30f3\u7d42\u4e86\u3002",
+        "zh": "\u4f1a\u8bdd\u5df2\u7ed3\u675f\u3002",
+        "es": "Sesi\u00f3n finalizada.",
+    },
+}
+
+SUMMARY_HEADERS: Dict[str, Dict[str, str]] = {
+    "en": {"summary": "Session Summary", "agents": "Active Agents"},
+    "ko": {"summary": "\uc138\uc158 \uc694\uc57d", "agents": "\ud65c\uc57d \uc5d0\uc774\uc804\ud2b8"},
+    "ja": {"summary": "\u30bb\u30c3\u30b7\u30e7\u30f3\u6982\u8981", "agents": "\u30a2\u30af\u30c6\u30a3\u30d6\u30a8\u30fc\u30b8\u30a7\u30f3\u30c8"},
+    "zh": {"summary": "\u4f1a\u8bdd\u6458\u8981", "agents": "\u6d3b\u8dc3\u4ee3\u7406"},
+    "es": {"summary": "Resumen de sesi\u00f3n", "agents": "Agentes activos"},
+}
 
 
 def _get_greeting(tone: str, language: str) -> str:
@@ -158,6 +202,99 @@ def render_recommendations(recommendations: List[Dict[str, Any]]) -> str:
         lines.append(f"{colored_face} {agent}  \"{message}\"")
 
     return "\n".join(lines)
+
+
+def _get_farewell_greeting(tone: str, language: str) -> str:
+    """Get farewell greeting for given tone and language."""
+    tone_greetings = FAREWELL_GREETINGS.get(tone, FAREWELL_GREETINGS["casual"])
+    return tone_greetings.get(language, tone_greetings["en"])
+
+
+def _get_farewell_message(tone: str, language: str) -> str:
+    """Get farewell message for given tone and language."""
+    tone_messages = FAREWELL_MESSAGES.get(tone, FAREWELL_MESSAGES["casual"])
+    return tone_messages.get(language, tone_messages["en"])
+
+
+def _get_summary_header(key: str, language: str) -> str:
+    """Get summary section header for given key and language."""
+    lang_headers = SUMMARY_HEADERS.get(language, SUMMARY_HEADERS["en"])
+    return lang_headers.get(key, SUMMARY_HEADERS["en"].get(key, key))
+
+
+def render_session_summary(
+    stats: Dict[str, Any],
+    agents: List[Dict[str, Any]],
+    tone: str,
+    language: str,
+) -> str:
+    """Render session summary with buddy character for stop hook.
+
+    Args:
+        stats: Session statistics dict with keys:
+            duration_minutes (int), tool_count (int),
+            files_changed (int)
+        agents: List of active agent dicts with keys:
+            name (str), message (str, optional),
+            eye (str), colorAnsi (str)
+        tone: 'casual' or 'formal'
+        language: Language code (en, ko, ja, zh, es)
+
+    Returns:
+        Formatted session summary string.
+    """
+    greeting = _get_farewell_greeting(tone, language)
+    farewell = _get_farewell_message(tone, language)
+
+    parts = []
+
+    # Buddy face with farewell greeting
+    parts.append("\u256d\u2501\u2501\u2501\u256e")
+    parts.append(f"\u2503 {BUDDY_WRAP_FACE} \u2503 {greeting}")
+    parts.append("\u2570\u2501\u2501\u2501\u256f")
+
+    # Session stats section (only if data available)
+    duration = stats.get("duration_minutes", 0)
+    tool_count = stats.get("tool_count", 0)
+    files_changed = stats.get("files_changed", 0)
+
+    if duration > 0 or tool_count > 0 or files_changed > 0:
+        header = _get_summary_header("summary", language)
+        parts.append("")
+        parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+
+        stat_items = []
+        if duration > 0:
+            stat_items.append(f"\u23f1  {duration}min")
+        if tool_count > 0:
+            stat_items.append(f"\U0001f527 {tool_count} tools")
+        if files_changed > 0:
+            stat_items.append(f"\U0001f4dd {files_changed} files changed")
+
+        parts.append(" \u2502 ".join(stat_items))
+
+    # Active agents section
+    if agents:
+        header = _get_summary_header("agents", language)
+        parts.append("")
+        parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+        for agent in agents:
+            name = agent.get("name", "Agent")
+            message = agent.get("message", "")
+            eye = agent.get("eye", "\u25cf")
+            color = agent.get("colorAnsi", "white")
+            face = f"{eye}\u2304{eye}"
+            colored_face = _colorize(face, color)
+            line = f"{colored_face} {name}"
+            if message:
+                line += f"  {message}"
+            parts.append(line)
+
+    # Farewell
+    parts.append("")
+    parts.append(f"{BUDDY_FACE} {farewell}")
+
+    return "\n".join(parts)
 
 
 def render_session_start(

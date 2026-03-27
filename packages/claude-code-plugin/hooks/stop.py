@@ -32,7 +32,39 @@ def handle_stop(data: dict):
         stats.flush()
 
         summary = stats.format_summary()
-        stats.finalize()
+        final_data = stats.finalize()
+
+        # Render buddy session summary to stderr (#972)
+        try:
+            from buddy_renderer import render_session_summary
+            from config import get_config
+
+            cwd = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
+            cfg = get_config(cwd)
+            tone = cfg.get("tone", "casual")
+            language = cfg.get("language", "en")
+
+            tool_names = final_data.get("tool_names", {})
+            render_stats = {
+                "duration_minutes": int(final_data.get("duration_seconds", 0) // 60),
+                "tool_count": final_data.get("tool_count", 0),
+                "files_changed": tool_names.get("Edit", 0) + tool_names.get("Write", 0),
+            }
+
+            agents = []
+            active_agent = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
+            if active_agent:
+                agents.append({
+                    "name": active_agent,
+                    "eye": "\u25cf",
+                    "colorAnsi": "cyan",
+                })
+
+            rendered = render_session_summary(render_stats, agents, tone, language)
+            if rendered:
+                print(rendered, file=sys.stderr)
+        except Exception:
+            pass  # Never block session stop
 
         # End session in history database (#823)
         try:

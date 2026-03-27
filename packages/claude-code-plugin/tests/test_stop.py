@@ -227,3 +227,124 @@ class TestAutoLearningSuggestions:
         assert result is not None
         assert "Session: 2 tools" in result["systemMessage"]
         assert "Auto-Learning" not in result["systemMessage"]
+
+
+class TestSessionSummaryRendering:
+    """Tests for buddy session summary rendering in stop hook (#972)."""
+
+    @patch("buddy_renderer.render_session_summary")
+    @patch("config.get_config")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_renders_session_summary_to_stderr(
+        self, mock_stats_cls, mock_db_cls, mock_config, mock_render,
+        monkeypatch, capsys,
+    ):
+        """Should render buddy session summary to stderr."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 10 tools"
+        mock_stats.finalize.return_value = {
+            "duration_seconds": 600,
+            "tool_count": 10,
+            "tool_names": {"Edit": 3, "Read": 5, "Write": 2},
+        }
+        mock_stats_cls.return_value = mock_stats
+        mock_config.return_value = {"tone": "casual", "language": "en"}
+        mock_render.return_value = "BUDDY SUMMARY OUTPUT"
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        mock_render.assert_called_once()
+        call_args = mock_render.call_args
+        stats_arg = call_args[0][0]
+        assert stats_arg["duration_minutes"] == 10
+        assert stats_arg["tool_count"] == 10
+        assert stats_arg["files_changed"] == 5  # Edit:3 + Write:2
+        assert call_args[0][2] == "casual"
+        assert call_args[0][3] == "en"
+
+    @patch("buddy_renderer.render_session_summary")
+    @patch("config.get_config")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_passes_active_agent(
+        self, mock_stats_cls, mock_db_cls, mock_config, mock_render,
+        monkeypatch, capsys,
+    ):
+        """Should include active agent from env var."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 5 tools"
+        mock_stats.finalize.return_value = {
+            "duration_seconds": 300,
+            "tool_count": 5,
+            "tool_names": {},
+        }
+        mock_stats_cls.return_value = mock_stats
+        mock_config.return_value = {"tone": "casual", "language": "en"}
+        mock_render.return_value = "output"
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "Backend Developer")
+        _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        call_args = mock_render.call_args
+        agents_arg = call_args[0][1]
+        assert len(agents_arg) == 1
+        assert agents_arg[0]["name"] == "Backend Developer"
+
+    @patch("buddy_renderer.render_session_summary")
+    @patch("config.get_config")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_no_agent_when_env_not_set(
+        self, mock_stats_cls, mock_db_cls, mock_config, mock_render,
+        monkeypatch, capsys,
+    ):
+        """Should pass empty agents list when no active agent."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 3 tools"
+        mock_stats.finalize.return_value = {
+            "duration_seconds": 120,
+            "tool_count": 3,
+            "tool_names": {},
+        }
+        mock_stats_cls.return_value = mock_stats
+        mock_config.return_value = {"tone": "formal", "language": "ko"}
+        mock_render.return_value = "output"
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        monkeypatch.delenv("CODINGBUDDY_ACTIVE_AGENT", raising=False)
+        _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        call_args = mock_render.call_args
+        agents_arg = call_args[0][1]
+        assert agents_arg == []
+        assert call_args[0][2] == "formal"
+        assert call_args[0][3] == "ko"
+
+    @patch("buddy_renderer.render_session_summary", side_effect=RuntimeError("render failed"))
+    @patch("config.get_config")
+    @patch("history_db.HistoryDB")
+    @patch("stats.SessionStats")
+    def test_render_failure_does_not_block_stop(
+        self, mock_stats_cls, mock_db_cls, mock_config, mock_render,
+        monkeypatch, capsys,
+    ):
+        """Should never block session stop even if rendering fails."""
+        mock_stats = MagicMock()
+        mock_stats.format_summary.return_value = "Session: 2 tools"
+        mock_stats.finalize.return_value = {
+            "duration_seconds": 60,
+            "tool_count": 2,
+            "tool_names": {},
+        }
+        mock_stats_cls.return_value = mock_stats
+        mock_config.return_value = {}
+
+        monkeypatch.setenv("CLAUDE_SESSION_ID", "test-session")
+        result = _run_hook({"stop_hook_active": True}, monkeypatch, capsys)
+
+        # systemMessage should still be returned
+        assert result is not None
+        assert "Session: 2 tools" in result["systemMessage"]

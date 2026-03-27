@@ -14,8 +14,13 @@ from buddy_renderer import (
     render_scan_results,
     render_recommendations,
     render_session_start,
+    render_session_summary,
     GREETINGS,
+    FAREWELL_GREETINGS,
+    FAREWELL_MESSAGES,
     ANSI_COLORS,
+    BUDDY_FACE,
+    BUDDY_WRAP_FACE,
 )
 
 
@@ -184,6 +189,122 @@ class TestRenderSessionStart:
         recs = [{"agent": "Test", "message": "m", "eye": "O", "colorAnsi": "green"}]
         result = render_session_start(scan, recs, "formal", "en")
         assert "Scanning" in result or "Project" in result
+
+
+class TestRenderSessionSummary:
+    """Tests for render_session_summary — stop hook buddy output (#972)."""
+
+    def test_casual_en_farewell_greeting(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "Great work today!" in result
+        assert BUDDY_WRAP_FACE in result
+
+    def test_formal_en_farewell_greeting(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        result = render_session_summary(stats, [], "formal", "en")
+        assert "Session complete." in result
+
+    def test_casual_ko_farewell(self):
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        result = render_session_summary(stats, [], "casual", "ko")
+        assert "\uc218\uace0" in result  # 수고
+        assert "\ub9cc\ub098\uc694" in result  # 만나요
+
+    def test_farewell_message_at_end(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "See you next time!" in result
+        assert BUDDY_FACE in result
+
+    def test_renders_duration(self):
+        stats = {"duration_minutes": 32, "tool_count": 0, "files_changed": 0}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "32min" in result
+
+    def test_renders_tool_count(self):
+        stats = {"duration_minutes": 0, "tool_count": 47, "files_changed": 0}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "47 tools" in result
+
+    def test_renders_files_changed(self):
+        stats = {"duration_minutes": 0, "tool_count": 0, "files_changed": 8}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "8 files changed" in result
+
+    def test_renders_all_stats(self):
+        stats = {"duration_minutes": 32, "tool_count": 47, "files_changed": 8}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "32min" in result
+        assert "47 tools" in result
+        assert "8 files changed" in result
+        assert "Session Summary" in result
+
+    def test_no_stats_graceful(self):
+        """Should render farewell even with no stats data."""
+        result = render_session_summary({}, [], "casual", "en")
+        assert "Great work today!" in result
+        assert "See you next time!" in result
+        # No summary section header when no data
+        assert "Session Summary" not in result
+
+    def test_renders_agent(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        agents = [
+            {"name": "Backend Developer", "message": "JWT service", "eye": "\u25d0", "colorAnsi": "yellow"}
+        ]
+        result = render_session_summary(stats, agents, "casual", "en")
+        assert "Backend Developer" in result
+        assert "JWT service" in result
+        assert "Active Agents" in result
+
+    def test_renders_multiple_agents(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        agents = [
+            {"name": "Backend", "message": "JWT", "eye": "\u25d0", "colorAnsi": "yellow"},
+            {"name": "Security", "message": "XSS verified", "eye": "\u25ee", "colorAnsi": "red"},
+        ]
+        result = render_session_summary(stats, agents, "casual", "en")
+        assert "Backend" in result
+        assert "Security" in result
+
+    def test_agent_uses_ansi_color(self):
+        stats = {}
+        agents = [{"name": "Test", "message": "", "eye": "\u25cf", "colorAnsi": "green"}]
+        result = render_session_summary(stats, agents, "casual", "en")
+        assert ANSI_COLORS["green"] in result
+
+    def test_agent_without_message(self):
+        stats = {}
+        agents = [{"name": "Agent", "eye": "\u25cf", "colorAnsi": "cyan"}]
+        result = render_session_summary(stats, agents, "casual", "en")
+        assert "Agent" in result
+
+    def test_unknown_tone_defaults_casual(self):
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        result = render_session_summary(stats, [], "unknown", "en")
+        assert "Great work today!" in result
+
+    def test_unknown_language_defaults_en(self):
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        result = render_session_summary(stats, [], "casual", "fr")
+        assert "Great work today!" in result
+
+    def test_face_contains_box(self):
+        result = render_session_summary({}, [], "casual", "en")
+        assert "\u256d" in result  # ╭
+        assert "\u2570" in result  # ╰
+
+    def test_formal_farewell_message(self):
+        result = render_session_summary({}, [], "formal", "en")
+        assert "Session ended." in result
+
+    def test_ko_summary_headers(self):
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        agents = [{"name": "Test", "eye": "\u25cf", "colorAnsi": "green"}]
+        result = render_session_summary(stats, agents, "casual", "ko")
+        assert "\uc138\uc158 \uc694\uc57d" in result  # 세션 요약
+        assert "\ud65c\uc57d \uc5d0\uc774\uc804\ud2b8" in result  # 활약 에이전트
 
 
 if __name__ == "__main__":
