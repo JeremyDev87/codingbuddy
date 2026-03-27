@@ -67,3 +67,18 @@ export {
   formatTimeWithSeconds,
 } from './live.pure';
 export type { ActivitySample } from './live.pure';
+export { SessionDashboard } from './SessionDashboard';
+export type { SessionDashboardProps } from './SessionDashboard';
+export {
+  computeToolDistribution,
+  computeAgentTimeline,
+  computeTddCycleStats,
+  renderBar,
+  renderToolDistribution,
+  renderAgentTimeline,
+  renderTddStats,
+  renderFileChangeStats,
+  renderModeTransitions,
+  renderSessionDashboard,
+  formatDurationMs,
+} from './session-dashboard.pure';

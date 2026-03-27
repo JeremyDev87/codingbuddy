@@ -258,6 +258,36 @@ export interface DashboardState {
   tddSteps: TddStep[];
   reviewResults: AgentReviewResult[];
   connectionStatus: ConnectionStatus;
+  sessionStartedAt: number;
+  modeTransitions: ModeTransition[];
+  fileChanges: FileChangeStats;
+}
+
+/**
+ * A recorded mode transition with timestamp.
+ */
+export interface ModeTransition {
+  from: Mode | null;
+  to: Mode;
+  timestamp: number;
+}
+
+/**
+ * File change statistics derived from tool call history.
+ */
+export interface FileChangeStats {
+  created: number;
+  modified: number;
+  deleted: number;
+}
+
+/**
+ * Aggregate session analytics data for the SessionDashboard component.
+ */
+export interface SessionAnalytics {
+  sessionStartedAt: number;
+  modeTransitions: ModeTransition[];
+  fileChanges: FileChangeStats;
 }
 
 /**

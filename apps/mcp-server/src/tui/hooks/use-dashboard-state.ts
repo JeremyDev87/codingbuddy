@@ -7,6 +7,8 @@ import type {
   TaskItem,
   ToolCallRecord,
   ActivitySample,
+  ModeTransition,
+  FileChangeStats,
 } from '../dashboard-types';
 import type { TuiEventBus } from '../events';
 import {
@@ -70,6 +72,9 @@ export function createInitialDashboardState(): DashboardState {
     tddSteps: [],
     reviewResults: [],
     connectionStatus: 'connected',
+    sessionStartedAt: Date.now(),
+    modeTransitions: [],
+    fileChanges: { created: 0, modified: 0, deleted: 0 },
   };
 }
 
@@ -173,7 +178,9 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         }
       }
       const focusedAgentId = selectFocusedAgent(agents, state.focusedAgentId);
-      return { ...state, currentMode: newMode, agents, activeSkills: [], focusedAgentId };
+      const transition: ModeTransition = { from, to: newMode, timestamp: Date.now() };
+      const modeTransitions = [...state.modeTransitions, transition];
+      return { ...state, currentMode: newMode, agents, activeSkills: [], focusedAgentId, modeTransitions };
     }
 
     case 'AGENT_RELATIONSHIP': {
@@ -261,6 +268,15 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         activityHistory = [...history.slice(-59), { timestamp: sec, toolCalls: 1 }];
       }
 
+      // Track file changes based on tool name
+      const toolLower = action.payload.toolName.toLowerCase();
+      let fileChanges = state.fileChanges;
+      if (toolLower === 'write' || toolLower === 'notebookedit') {
+        fileChanges = { ...fileChanges, created: fileChanges.created + 1 };
+      } else if (toolLower === 'edit') {
+        fileChanges = { ...fileChanges, modified: fileChanges.modified + 1 };
+      }
+
       return {
         ...state,
         agents,
@@ -268,6 +284,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         toolCalls: [...toolCallsBase, toolCall],
         activityHistory,
         toolInvokeCount: state.toolInvokeCount + 1,
+        fileChanges,
       };
     }
 
