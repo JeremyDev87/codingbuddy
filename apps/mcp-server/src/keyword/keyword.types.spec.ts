@@ -10,7 +10,7 @@ import {
 describe('keyword.types', () => {
   describe('isValidLanguageCode', () => {
     describe('valid language codes', () => {
-      it.each(['en', 'ko', 'ja', 'zh', 'es'] as const)('returns true for valid code: %s', code => {
+      it.each(['en', 'ko', 'ja', 'zh', 'es', 'pt', 'de', 'fr'] as const)('returns true for valid code: %s', code => {
         expect(isValidLanguageCode(code)).toBe(true);
       });
 
@@ -31,7 +31,7 @@ describe('keyword.types', () => {
     });
 
     describe('invalid language codes', () => {
-      it.each(['fr', 'de', 'pt', 'ru', 'it'])('returns false for unsupported code: %s', code => {
+      it.each(['ru', 'it', 'ar', 'hi', 'th'])('returns false for unsupported code: %s', code => {
         expect(isValidLanguageCode(code)).toBe(false);
       });
 
@@ -55,8 +55,8 @@ describe('keyword.types', () => {
   });
 
   describe('SUPPORTED_LANGUAGE_CODES', () => {
-    it('contains exactly 5 language codes', () => {
-      expect(SUPPORTED_LANGUAGE_CODES).toHaveLength(5);
+    it('contains exactly 8 language codes', () => {
+      expect(SUPPORTED_LANGUAGE_CODES).toHaveLength(8);
     });
 
     it('has English as first entry', () => {
