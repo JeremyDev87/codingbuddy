@@ -155,6 +155,80 @@ export interface ToolCallRecord {
 }
 
 /**
+ * TDD cycle phase for ACT mode screen.
+ */
+export type TddPhase = 'RED' | 'GREEN' | 'REFACTOR';
+
+export const TDD_PHASES: readonly TddPhase[] = Object.freeze(['RED', 'GREEN', 'REFACTOR']);
+
+/**
+ * A single TDD step in the ACT mode screen.
+ */
+export interface TddStep {
+  id: string;
+  label: string;
+  phase: TddPhase;
+  agentId: string | null;
+  status: 'pending' | 'active' | 'done' | 'failed';
+}
+
+/**
+ * Creates a TddStep with defaults.
+ */
+export function createDefaultTddStep(
+  params: Pick<TddStep, 'id' | 'label' | 'phase'> &
+    Partial<Omit<TddStep, 'id' | 'label' | 'phase'>>,
+): TddStep {
+  return {
+    agentId: null,
+    status: 'pending',
+    ...params,
+  };
+}
+
+/**
+ * A category score within an agent's EVAL review result.
+ */
+export interface ReviewCategory {
+  name: string;
+  score: number;
+  maxScore: number;
+}
+
+/**
+ * A single agent's review result in EVAL mode.
+ */
+export interface AgentReviewResult {
+  agentId: string;
+  agentName: string;
+  categories: ReviewCategory[];
+  totalScore: number;
+  maxTotalScore: number;
+  status: 'pending' | 'in-progress' | 'done';
+}
+
+/**
+ * Creates an AgentReviewResult with defaults.
+ */
+export function createDefaultReviewResult(
+  params: Pick<AgentReviewResult, 'agentId' | 'agentName'> &
+    Partial<Omit<AgentReviewResult, 'agentId' | 'agentName'>>,
+): AgentReviewResult {
+  return {
+    categories: [],
+    totalScore: 0,
+    maxTotalScore: 100,
+    status: 'pending',
+    ...params,
+  };
+}
+
+/**
+ * Event bridge connection status.
+ */
+export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
+
+/**
  * Complete dashboard state containing all data needed to render the TUI.
  */
 export interface DashboardState {
@@ -180,6 +254,10 @@ export interface DashboardState {
   contextMode: string | null;
   contextStatus: string | null;
   discussionRounds: DiscussionRound[];
+  tddCurrentPhase: TddPhase | null;
+  tddSteps: TddStep[];
+  reviewResults: AgentReviewResult[];
+  connectionStatus: ConnectionStatus;
 }
 
 /**

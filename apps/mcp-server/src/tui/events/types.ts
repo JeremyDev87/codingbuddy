@@ -5,7 +5,13 @@
  * Each event has a typed payload interface for type-safe emit/subscribe.
  */
 import type { Mode } from '../types';
-import type { EdgeType } from '../dashboard-types';
+import type {
+  EdgeType,
+  TddPhase,
+  TddStep,
+  AgentReviewResult,
+  ConnectionStatus,
+} from '../dashboard-types';
 import type { DiscussionRound } from '../../collaboration/types';
 import type { AgentMetadata } from './agent-metadata.types';
 
@@ -28,6 +34,10 @@ export const TUI_EVENTS = Object.freeze({
   SESSION_RESET: 'session:reset',
   CONTEXT_UPDATED: 'context:updated',
   DISCUSSION_ROUND_ADDED: 'discussion:round-added',
+  TDD_PHASE_CHANGED: 'tdd:phase-changed',
+  TDD_STEP_UPDATED: 'tdd:step-updated',
+  REVIEW_RESULT_ADDED: 'review:result-added',
+  CONNECTION_STATUS_CHANGED: 'connection:status-changed',
 } as const);
 
 export type TuiEventName = (typeof TUI_EVENTS)[keyof typeof TUI_EVENTS];
@@ -120,6 +130,28 @@ export interface DiscussionRoundAddedEvent {
   round: DiscussionRound;
 }
 
+/** Payload when TDD phase changes in ACT mode */
+export interface TddPhaseChangedEvent {
+  phase: TddPhase;
+  previousPhase: TddPhase | null;
+}
+
+/** Payload when a TDD step is updated in ACT mode */
+export interface TddStepUpdatedEvent {
+  step: TddStep;
+}
+
+/** Payload when an agent review result is added in EVAL mode */
+export interface ReviewResultAddedEvent {
+  result: AgentReviewResult;
+}
+
+/** Payload when event bridge connection status changes */
+export interface ConnectionStatusChangedEvent {
+  status: ConnectionStatus;
+  reason?: string;
+}
+
 /**
  * Maps event names to their payload types for type-safe emit/subscribe.
  */
@@ -138,4 +170,8 @@ export interface TuiEventMap {
   [TUI_EVENTS.SESSION_RESET]: SessionResetEvent;
   [TUI_EVENTS.CONTEXT_UPDATED]: ContextUpdatedEvent;
   [TUI_EVENTS.DISCUSSION_ROUND_ADDED]: DiscussionRoundAddedEvent;
+  [TUI_EVENTS.TDD_PHASE_CHANGED]: TddPhaseChangedEvent;
+  [TUI_EVENTS.TDD_STEP_UPDATED]: TddStepUpdatedEvent;
+  [TUI_EVENTS.REVIEW_RESULT_ADDED]: ReviewResultAddedEvent;
+  [TUI_EVENTS.CONNECTION_STATUS_CHANGED]: ConnectionStatusChangedEvent;
 }

@@ -21,6 +21,10 @@ export {
   type SessionResetEvent,
   type ContextUpdatedEvent,
   type DiscussionRoundAddedEvent,
+  type TddPhaseChangedEvent,
+  type TddStepUpdatedEvent,
+  type ReviewResultAddedEvent,
+  type ConnectionStatusChangedEvent,
 } from './types';
 export {
   type AgentMetadata,

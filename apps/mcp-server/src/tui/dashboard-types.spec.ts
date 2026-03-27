@@ -4,12 +4,19 @@ import {
   DASHBOARD_NODE_STATUSES,
   createEmptyStageStats,
   getLayoutMode,
+  createDefaultTddStep,
+  createDefaultReviewResult,
+  TDD_PHASES,
   type DashboardNode,
   type DashboardState,
   type StageStats,
   type GridRegion,
   type DashboardGrid,
   type ToolCallRecord,
+  type TddStep,
+  type AgentReviewResult,
+  type ReviewCategory,
+  type ConnectionStatus,
 } from './dashboard-types';
 import { createInitialDashboardState } from './hooks/use-dashboard-state';
 
@@ -197,6 +204,10 @@ describe('tui/dashboard-types', () => {
         contextMode: null,
         contextStatus: null,
         discussionRounds: [],
+        tddCurrentPhase: null,
+        tddSteps: [],
+        reviewResults: [],
+        connectionStatus: 'connected',
       };
       expect(state.toolInvokeCount).toBe(0);
       expect(state.outputStats).toEqual({ files: 0, commits: 0 });
@@ -226,6 +237,10 @@ describe('tui/dashboard-types', () => {
         contextMode: null,
         contextStatus: null,
         discussionRounds: [],
+        tddCurrentPhase: null,
+        tddSteps: [],
+        reviewResults: [],
+        connectionStatus: 'connected',
       };
       expect(state.agentActivateCount).toBe(0);
       expect(state.skillInvokeCount).toBe(0);
@@ -248,6 +263,97 @@ describe('tui/dashboard-types', () => {
       expect(grid.focusedAgent).toBeDefined();
       expect(grid.stageHealth).toBeDefined();
       expect(grid.total).toBeDefined();
+    });
+  });
+
+  describe('TDD_PHASES', () => {
+    it('should contain RED, GREEN, REFACTOR in order', () => {
+      expect(TDD_PHASES).toEqual(['RED', 'GREEN', 'REFACTOR']);
+    });
+
+    it('should be frozen', () => {
+      expect(Object.isFrozen(TDD_PHASES)).toBe(true);
+    });
+  });
+
+  describe('createDefaultTddStep', () => {
+    it('should apply defaults for optional fields', () => {
+      const step: TddStep = createDefaultTddStep({
+        id: 'step-1',
+        label: 'Write failing test',
+        phase: 'RED',
+      });
+      expect(step).toEqual({
+        id: 'step-1',
+        label: 'Write failing test',
+        phase: 'RED',
+        agentId: null,
+        status: 'pending',
+      });
+    });
+
+    it('should allow overriding defaults', () => {
+      const step: TddStep = createDefaultTddStep({
+        id: 'step-2',
+        label: 'Implement',
+        phase: 'GREEN',
+        agentId: 'test-engineer',
+        status: 'active',
+      });
+      expect(step.agentId).toBe('test-engineer');
+      expect(step.status).toBe('active');
+    });
+  });
+
+  describe('createDefaultReviewResult', () => {
+    it('should apply defaults for optional fields', () => {
+      const result: AgentReviewResult = createDefaultReviewResult({
+        agentId: 'security-specialist',
+        agentName: 'Security Specialist',
+      });
+      expect(result).toEqual({
+        agentId: 'security-specialist',
+        agentName: 'Security Specialist',
+        categories: [],
+        totalScore: 0,
+        maxTotalScore: 100,
+        status: 'pending',
+      });
+    });
+
+    it('should allow overriding defaults', () => {
+      const categories: ReviewCategory[] = [
+        { name: 'Security', score: 85, maxScore: 100 },
+        { name: 'Performance', score: 70, maxScore: 100 },
+      ];
+      const result: AgentReviewResult = createDefaultReviewResult({
+        agentId: 'code-reviewer',
+        agentName: 'Code Reviewer',
+        categories,
+        totalScore: 77,
+        maxTotalScore: 100,
+        status: 'done',
+      });
+      expect(result.categories).toHaveLength(2);
+      expect(result.totalScore).toBe(77);
+      expect(result.status).toBe('done');
+    });
+  });
+
+  describe('ConnectionStatus type', () => {
+    it('should accept valid connection statuses', () => {
+      const statuses: ConnectionStatus[] = ['connected', 'disconnected', 'reconnecting'];
+      expect(statuses).toHaveLength(3);
+    });
+  });
+
+  describe('DashboardState mode-screen fields', () => {
+    it('createInitialDashboardState includes new mode-screen fields', () => {
+      const state = createInitialDashboardState();
+      expect(state.tddCurrentPhase).toBeNull();
+      expect(state.tddSteps).toEqual([]);
+      expect(state.reviewResults).toEqual([]);
+      expect(state.connectionStatus).toBe('connected');
     });
   });
 });

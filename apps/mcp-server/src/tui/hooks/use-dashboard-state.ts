@@ -25,6 +25,10 @@ import {
   type SessionResetEvent,
   type ContextUpdatedEvent,
   type DiscussionRoundAddedEvent,
+  type TddPhaseChangedEvent,
+  type TddStepUpdatedEvent,
+  type ReviewResultAddedEvent,
+  type ConnectionStatusChangedEvent,
 } from '../events';
 import { selectFocusedAgent } from './use-focus-agent';
 
@@ -62,6 +66,10 @@ export function createInitialDashboardState(): DashboardState {
     contextMode: null,
     contextStatus: null,
     discussionRounds: [],
+    tddCurrentPhase: null,
+    tddSteps: [],
+    reviewResults: [],
+    connectionStatus: 'connected',
   };
 }
 
@@ -80,6 +88,10 @@ export type DashboardAction =
   | { type: 'SESSION_RESET'; payload: SessionResetEvent }
   | { type: 'CONTEXT_UPDATED'; payload: ContextUpdatedEvent }
   | { type: 'ADD_DISCUSSION_ROUND'; payload: DiscussionRoundAddedEvent }
+  | { type: 'TDD_PHASE_CHANGED'; payload: TddPhaseChangedEvent }
+  | { type: 'TDD_STEP_UPDATED'; payload: TddStepUpdatedEvent }
+  | { type: 'REVIEW_RESULT_ADDED'; payload: ReviewResultAddedEvent }
+  | { type: 'CONNECTION_STATUS_CHANGED'; payload: ConnectionStatusChangedEvent }
   | { type: 'CLEANUP_STALE_AGENTS'; payload: { now: number; ttlMs: number } };
 
 function cloneAgents(agents: Map<string, DashboardNode>): Map<string, DashboardNode> {
@@ -340,6 +352,34 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
       return { ...state, agents, focusedAgentId };
     }
 
+    case 'TDD_PHASE_CHANGED': {
+      return { ...state, tddCurrentPhase: action.payload.phase };
+    }
+
+    case 'TDD_STEP_UPDATED': {
+      const { step } = action.payload;
+      const existing = state.tddSteps.findIndex(s => s.id === step.id);
+      const tddSteps =
+        existing >= 0
+          ? state.tddSteps.map((s, i) => (i === existing ? step : s))
+          : [...state.tddSteps, step];
+      return { ...state, tddSteps };
+    }
+
+    case 'REVIEW_RESULT_ADDED': {
+      const { result } = action.payload;
+      const idx = state.reviewResults.findIndex(r => r.agentId === result.agentId);
+      const reviewResults =
+        idx >= 0
+          ? state.reviewResults.map((r, i) => (i === idx ? result : r))
+          : [...state.reviewResults, result];
+      return { ...state, reviewResults };
+    }
+
+    case 'CONNECTION_STATUS_CHANGED': {
+      return { ...state, connectionStatus: action.payload.status };
+    }
+
     // Reserved: no emitter currently produces PARALLEL_COMPLETED. Subscription kept for forward compatibility.
     case 'PARALLEL_COMPLETED':
     case 'AGENTS_LOADED':
@@ -386,6 +426,14 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       dispatch({ type: 'CONTEXT_UPDATED', payload: p });
     const onDiscussionRoundAdded = (p: DiscussionRoundAddedEvent) =>
       dispatch({ type: 'ADD_DISCUSSION_ROUND', payload: p });
+    const onTddPhaseChanged = (p: TddPhaseChangedEvent) =>
+      dispatch({ type: 'TDD_PHASE_CHANGED', payload: p });
+    const onTddStepUpdated = (p: TddStepUpdatedEvent) =>
+      dispatch({ type: 'TDD_STEP_UPDATED', payload: p });
+    const onReviewResultAdded = (p: ReviewResultAddedEvent) =>
+      dispatch({ type: 'REVIEW_RESULT_ADDED', payload: p });
+    const onConnectionStatusChanged = (p: ConnectionStatusChangedEvent) =>
+      dispatch({ type: 'CONNECTION_STATUS_CHANGED', payload: p });
 
     eventBus.on(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
     eventBus.on(TUI_EVENTS.AGENT_DEACTIVATED, onDeactivated);
@@ -401,6 +449,10 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
     eventBus.on(TUI_EVENTS.SESSION_RESET, onSessionReset);
     eventBus.on(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
     eventBus.on(TUI_EVENTS.DISCUSSION_ROUND_ADDED, onDiscussionRoundAdded);
+    eventBus.on(TUI_EVENTS.TDD_PHASE_CHANGED, onTddPhaseChanged);
+    eventBus.on(TUI_EVENTS.TDD_STEP_UPDATED, onTddStepUpdated);
+    eventBus.on(TUI_EVENTS.REVIEW_RESULT_ADDED, onReviewResultAdded);
+    eventBus.on(TUI_EVENTS.CONNECTION_STATUS_CHANGED, onConnectionStatusChanged);
 
     return () => {
       eventBus.off(TUI_EVENTS.AGENT_ACTIVATED, onActivated);
@@ -417,6 +469,10 @@ export function useDashboardState(eventBus: TuiEventBus | undefined): DashboardS
       eventBus.off(TUI_EVENTS.SESSION_RESET, onSessionReset);
       eventBus.off(TUI_EVENTS.CONTEXT_UPDATED, onContextUpdated);
       eventBus.off(TUI_EVENTS.DISCUSSION_ROUND_ADDED, onDiscussionRoundAdded);
+      eventBus.off(TUI_EVENTS.TDD_PHASE_CHANGED, onTddPhaseChanged);
+      eventBus.off(TUI_EVENTS.TDD_STEP_UPDATED, onTddStepUpdated);
+      eventBus.off(TUI_EVENTS.REVIEW_RESULT_ADDED, onReviewResultAdded);
+      eventBus.off(TUI_EVENTS.CONNECTION_STATUS_CHANGED, onConnectionStatusChanged);
     };
   }, [eventBus]);
 

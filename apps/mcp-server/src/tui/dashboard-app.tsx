@@ -6,8 +6,7 @@ import { useTerminalSize } from './hooks/use-terminal-size';
 import { useTick } from './hooks/use-tick';
 import { useDashboardState } from './hooks/use-dashboard-state';
 import { HeaderBar } from './components/HeaderBar';
-import { FlowMap } from './components/FlowMap';
-import { AgentDiscussionPanel } from './components/AgentDiscussionPanel';
+import { ModeScreenRouter } from './components/ModeScreenRouter';
 import { FocusedAgentPanel } from './components/FocusedAgentPanel';
 import { ChecklistPanel } from './components/ChecklistPanel';
 import { StageHealthBar } from './components/StageHealthBar';
@@ -78,24 +77,14 @@ export function DashboardApp({
             tick={tick}
             now={now}
           />
-          {state.discussionRounds.length > 0 ? (
-            <AgentDiscussionPanel
-              rounds={state.discussionRounds}
-              width={grid.flowMap.width}
-              height={grid.flowMap.height}
-            />
-          ) : (
-            <FlowMap
-              agents={state.agents}
-              edges={state.edges}
-              layoutMode={layoutMode}
-              width={grid.flowMap.width}
-              height={grid.flowMap.height}
-              activeStage={state.currentMode}
-              tick={tick}
-              now={now}
-            />
-          )}
+          <ModeScreenRouter
+            state={state}
+            layoutMode={layoutMode}
+            width={grid.flowMap.width}
+            height={grid.flowMap.height}
+            tick={tick}
+            now={now}
+          />
         </Box>
       ) : (
         <Box
@@ -104,24 +93,14 @@ export function DashboardApp({
           height={grid.checklistPanel.height + grid.focusedAgent.height}
         >
           <Box flexDirection="column" width={grid.flowMap.width}>
-            {state.discussionRounds.length > 0 ? (
-              <AgentDiscussionPanel
-                rounds={state.discussionRounds}
-                width={grid.flowMap.width}
-                height={grid.flowMap.height}
-              />
-            ) : (
-              <FlowMap
-                agents={state.agents}
-                edges={state.edges}
-                layoutMode={layoutMode}
-                width={grid.flowMap.width}
-                height={grid.flowMap.height}
-                activeStage={state.currentMode}
-                tick={tick}
-                now={now}
-              />
-            )}
+            <ModeScreenRouter
+              state={state}
+              layoutMode={layoutMode}
+              width={grid.flowMap.width}
+              height={grid.flowMap.height}
+              tick={tick}
+              now={now}
+            />
             <ActivityVisualizer
               currentMode={state.currentMode}
               focusedAgent={focusedAgent}

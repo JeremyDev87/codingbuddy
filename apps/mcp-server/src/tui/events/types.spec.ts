@@ -18,7 +18,7 @@ import {
 
 describe('tui/events/types', () => {
   describe('TUI_EVENTS', () => {
-    it('should define all 14 event names', () => {
+    it('should define all 18 event names', () => {
       expect(TUI_EVENTS).toEqual({
         AGENT_ACTIVATED: 'agent:activated',
         AGENT_DEACTIVATED: 'agent:deactivated',
@@ -34,6 +34,10 @@ describe('tui/events/types', () => {
         SESSION_RESET: 'session:reset',
         CONTEXT_UPDATED: 'context:updated',
         DISCUSSION_ROUND_ADDED: 'discussion:round-added',
+        TDD_PHASE_CHANGED: 'tdd:phase-changed',
+        TDD_STEP_UPDATED: 'tdd:step-updated',
+        REVIEW_RESULT_ADDED: 'review:result-added',
+        CONNECTION_STATUS_CHANGED: 'connection:status-changed',
       });
     });
 
@@ -189,6 +193,21 @@ describe('tui/events/types', () => {
         'session:reset': { reason: 'new-plan-session' },
         'context:updated': { decisions: ['Use JWT'], notes: [], mode: null, status: null },
         'discussion:round-added': { round: { roundNumber: 1, opinions: [], crossReviews: [] } },
+        'tdd:phase-changed': { phase: 'RED', previousPhase: null },
+        'tdd:step-updated': {
+          step: { id: 's1', label: 'Write test', phase: 'RED', agentId: null, status: 'pending' },
+        },
+        'review:result-added': {
+          result: {
+            agentId: 'a1',
+            agentName: 'Security',
+            categories: [],
+            totalScore: 0,
+            maxTotalScore: 100,
+            status: 'pending',
+          },
+        },
+        'connection:status-changed': { status: 'connected' },
       };
       expect(map['agent:activated'].agentId).toBe('a1');
     });
