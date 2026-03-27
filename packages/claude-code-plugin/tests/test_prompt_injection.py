@@ -127,6 +127,91 @@ class TestPromptSizeLimit:
         assert len(result) > 0
 
 
+class TestFormatGuideEcoTrue:
+    """eco=true: compact format guide injected."""
+
+    def _make_config(self, tone="casual"):
+        return {
+            "eco": True,
+            "tone": tone,
+            "promptInjection": {
+                "enabled": True,
+                "sections": {
+                    "baseRules": True,
+                    "dispatchEnforcement": True,
+                    "qualityGates": True,
+                    "formatGuide": True,
+                },
+            },
+        }
+
+    def test_eco_true_contains_compact_marker(self, injector):
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "━━ Agents:" in result
+
+    def test_eco_true_contains_consensus_line(self, injector):
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "━━ Consensus:" in result
+
+    def test_eco_true_no_full_discussion(self, injector):
+        """Compact mode should NOT contain the full discussion '│' markers."""
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "│ \"" not in result
+
+    def test_eco_true_mentions_eye_character(self, injector):
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "eye" in result.lower() or "◇" in result or "캐릭터" in result.lower() or "character" in result.lower()
+
+    def test_eco_true_casual_tone(self, injector):
+        result = injector.build_system_prompt(self._make_config(tone="casual"), "/tmp")
+        assert "casual" in result.lower() or "친근" in result
+
+    def test_eco_true_formal_tone(self, injector):
+        result = injector.build_system_prompt(self._make_config(tone="formal"), "/tmp")
+        assert "formal" in result.lower() or "격식" in result
+
+
+class TestFormatGuideEcoFalse:
+    """eco=false: full discussion format guide injected."""
+
+    def _make_config(self, tone="casual"):
+        return {
+            "eco": False,
+            "tone": tone,
+            "promptInjection": {
+                "enabled": True,
+                "sections": {
+                    "baseRules": True,
+                    "dispatchEnforcement": True,
+                    "qualityGates": True,
+                    "formatGuide": True,
+                },
+            },
+        }
+
+    def test_eco_false_contains_full_discussion_marker(self, injector):
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "│ \"" in result or "│" in result
+
+    def test_eco_false_shows_agent_dialogue(self, injector):
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "discussion" in result.lower() or "토론" in result or "dialogue" in result.lower()
+
+    def test_eco_false_mentions_eye_character(self, injector):
+        result = injector.build_system_prompt(self._make_config(), "/tmp")
+        assert "eye" in result.lower() or "◇" in result or "캐릭터" in result.lower() or "character" in result.lower()
+
+
+class TestFormatGuideDisabled:
+    """formatGuide=false: no format guide injected."""
+
+    def test_no_format_guide_when_disabled(self, injector, base_config):
+        """base_config has no formatGuide key → defaults off → no guide markers."""
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "━━ Agents:" not in result
+        assert "│ \"" not in result
+
+
 class TestDisabledInjection:
     def test_returns_empty_when_disabled(self, injector):
         config = {"promptInjection": {"enabled": False}}

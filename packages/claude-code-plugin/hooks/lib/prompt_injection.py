@@ -27,6 +27,56 @@ _QUALITY_GATES = (
     "all tests pass, and changes are self-reviewed."
 )
 
+# --- Format guide templates (eco=true compact / eco=false full) ---
+
+_FORMAT_GUIDE_ECO_COMPACT = (
+    "[CodingBuddy Format Guide] "
+    "Use each agent's visual character (eye + colorAnsi from agent JSON) "
+    "to show collaboration compactly. "
+    "Format — {tone_instruction}\n"
+    "# Mode: {{MODE}}\n"
+    "## {{colorEmoji}} {{eye}}_{{eye}} {{Agent Name}}\n"
+    "\n"
+    "━━ Agents: {{colorEmoji}} {{Name}}, {{colorEmoji}} {{Name}}, ...\n"
+    "━━ Consensus: {{one-line summary of agreed approach}}"
+)
+
+_FORMAT_GUIDE_ECO_FULL = (
+    "[CodingBuddy Format Guide] "
+    "Use each agent's visual character (eye + colorAnsi from agent JSON) "
+    "to show full discussion process. "
+    "Format — {tone_instruction}\n"
+    "{{colorEmoji}} {{eye}}_{{eye}} {{Agent Name}}\n"
+    "│ \"{{agent's opinion or recommendation}}\"\n"
+    "│\n"
+    "{{colorEmoji}} {{eye}}_{{eye}} {{Another Agent}}\n"
+    "│ \"{{response, critique, or agreement}}\"\n"
+    "│\n"
+    "(show full discussion dialogue between agents)"
+)
+
+_TONE_CASUAL = "Use a casual, friendly tone."
+_TONE_FORMAL = "Use a formal, professional tone."
+
+
+def _build_format_guide(config: Dict[str, Any]) -> str:
+    """Build format guide section based on eco and tone settings.
+
+    Args:
+        config: Full codingbuddy config dict.
+
+    Returns:
+        Format guide string, or empty string if not applicable.
+    """
+    eco = config.get("eco", True)
+    tone = config.get("tone", "casual")
+    tone_instruction = _TONE_FORMAL if tone == "formal" else _TONE_CASUAL
+
+    if eco:
+        return _FORMAT_GUIDE_ECO_COMPACT.format(tone_instruction=tone_instruction)
+    else:
+        return _FORMAT_GUIDE_ECO_FULL.format(tone_instruction=tone_instruction)
+
 
 class PromptInjector:
     """Builds a system prompt string from config-driven sections."""
@@ -62,6 +112,11 @@ class PromptInjector:
 
         if sections_cfg.get("qualityGates", True):
             parts.append(_QUALITY_GATES)
+
+        if sections_cfg.get("formatGuide", False):
+            guide = _build_format_guide(config)
+            if guide:
+                parts.append(guide)
 
         if not parts:
             return ""
