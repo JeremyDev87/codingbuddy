@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
             "timeout": 15,
             "statusMessage": "Loading CodingBuddy..."
           }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.py",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.py\"",
             "timeout": 5
           }
         ]
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use.py",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use.py\"",
             "timeout": 5
           }
         ]
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/stop.py",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/stop.py\"",
             "timeout": 10,
             "statusMessage": "Saving session stats..."
           }
