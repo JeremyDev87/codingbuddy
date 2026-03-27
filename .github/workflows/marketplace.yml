@@ -143,7 +143,7 @@ jobs:
           find "$SITE_DIR" -type f
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        uses: actions/upload-pages-artifact@0ca16172ca884f0a37117fed41734f29784cc980 # main (include-hidden-files support)
         with:
           path: '_site'
           include-hidden-files: true
