@@ -41,7 +41,9 @@
     "test:wiki": "yarn workspace codingbuddy exec vitest run --config ../../scripts/wiki/vitest.config.ts --root ../../scripts/wiki",
     "sync:settings": "npx tsx scripts/sync-settings/index.ts",
     "test:sync": "node apps/mcp-server/node_modules/.bin/vitest run --config scripts/sync-settings/vitest.config.ts --root .",
-    "test:hooks": "cd packages/claude-code-plugin && python3 -m pytest tests/ -v"
+    "test:hooks": "cd packages/claude-code-plugin && python3 -m pytest tests/ -v",
+    "sync-rules": "npx tsx scripts/sync-rules.ts",
+    "test:sync-rules": "node apps/mcp-server/node_modules/.bin/vitest run --config scripts/sync-rules.vitest.config.ts --root ."
   },
   "devDependencies": {
     "@eslint/js": "9.39.2",
