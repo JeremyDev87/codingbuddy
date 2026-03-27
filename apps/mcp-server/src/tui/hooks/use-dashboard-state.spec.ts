@@ -1085,6 +1085,7 @@ describe('TOOL_INVOKED — time-based progress', () => {
   it('uses time-based progress when elapsed exceeds tool-based progress', () => {
     // Arrange: agent activated at t=0, tool invoked at t=60_000ms (halfway through 120s)
     const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // createInitialDashboardState sessionStartedAt
     dateSpy.mockReturnValueOnce(0); // activation time
 
     let state = dashboardReducer(createInitialDashboardState(), {
@@ -1108,6 +1109,7 @@ describe('TOOL_INVOKED — time-based progress', () => {
   it('uses tool-based progress (+3) when elapsed is small', () => {
     // Arrange: agent activated at t=0, tool invoked at t=100ms (tiny elapsed)
     const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // createInitialDashboardState sessionStartedAt
     dateSpy.mockReturnValueOnce(0); // activation time
 
     let state = dashboardReducer(createInitialDashboardState(), {
@@ -1151,6 +1153,7 @@ describe('TOOL_INVOKED — time-based progress', () => {
 
   it('caps time-based progress at 90', () => {
     const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // createInitialDashboardState sessionStartedAt
     dateSpy.mockReturnValueOnce(0); // activation
 
     let state = dashboardReducer(createInitialDashboardState(), {
@@ -1172,6 +1175,7 @@ describe('TOOL_INVOKED — time-based progress', () => {
   it('rounds time-based progress to nearest integer (no float labels)', () => {
     // 61s elapsed: (61000/120000)*100 = 50.8333... → rounded to 51
     const dateSpy = vi.spyOn(Date, 'now');
+    dateSpy.mockReturnValueOnce(0); // createInitialDashboardState sessionStartedAt
     dateSpy.mockReturnValueOnce(0); // activation
 
     let state = dashboardReducer(createInitialDashboardState(), {
