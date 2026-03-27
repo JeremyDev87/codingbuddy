@@ -127,6 +127,39 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Check achievements on session stop (#1008)
+        try:
+            from achievement_tracker import (
+                AchievementTracker,
+                render_achievement_celebration,
+                render_achievement_badges,
+            )
+
+            tracker = AchievementTracker()
+            tracker.record_session()
+
+            # Record agent usage if active
+            active_agent = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
+            if active_agent:
+                tracker.record_agent_usage(active_agent)
+
+            newly_unlocked = tracker.check_achievements()
+            if newly_unlocked:
+                for achievement in newly_unlocked:
+                    celebration = render_achievement_celebration(
+                        achievement, language
+                    )
+                    print(celebration, file=sys.stderr)
+
+            # Show badge summary if any unlocked
+            all_unlocked = tracker.get_unlocked()
+            if all_unlocked:
+                badges = render_achievement_badges(all_unlocked, language)
+                if badges:
+                    print(badges, file=sys.stderr)
+        except Exception:
+            pass  # Never block session stop
+
         # Notify on session end (#829)
         try:
             _maybe_notify_session_end(summary)

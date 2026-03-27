@@ -521,6 +521,29 @@ def render_returning_session(
     return "\n".join(parts)
 
 
+def render_badges_section(language: str = "en") -> str:
+    """Render achievement badges section for session display (#1008).
+
+    Loads unlocked achievements and renders them as a badge area.
+
+    Args:
+        language: Language code (en, ko, ja, zh, es).
+
+    Returns:
+        Formatted badge section string, empty if no badges or on error.
+    """
+    try:
+        from achievement_tracker import AchievementTracker, render_achievement_badges
+
+        tracker = AchievementTracker()
+        unlocked = tracker.get_unlocked()
+        if unlocked:
+            return render_achievement_badges(unlocked, language)
+    except Exception:
+        pass
+    return ""
+
+
 def render_session_start(
     scan: Dict[str, Any],
     recommendations: List[Dict[str, Any]],
@@ -571,5 +594,11 @@ def render_session_start(
         parts.append("")
         parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501")
         parts.append(render_recommendations(recommendations))
+
+    # Achievement badges section (#1008)
+    badges = render_badges_section(language)
+    if badges:
+        parts.append("")
+        parts.append(badges)
 
     return "\n".join(parts)
