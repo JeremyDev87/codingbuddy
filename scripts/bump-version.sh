@@ -81,7 +81,17 @@ node -e "
 "
 echo "  ✅ packages/claude-code-plugin/.claude-plugin/plugin.json"
 
-# 6. .mcp.json (if exists — gitignored, local only)
+# 6. .claude-plugin/marketplace.json (plugins[0].version)
+node -e "
+  const fs = require('fs');
+  const p = '.claude-plugin/marketplace.json';
+  const mkt = JSON.parse(fs.readFileSync(p, 'utf-8'));
+  mkt.plugins[0].version = '$NEW_VERSION';
+  fs.writeFileSync(p, JSON.stringify(mkt, null, 2) + '\n');
+"
+echo "  ✅ .claude-plugin/marketplace.json"
+
+# 7. .mcp.json (if exists — gitignored, local only)
 if [ -f ".mcp.json" ]; then
   node -e "
     const fs = require('fs');
