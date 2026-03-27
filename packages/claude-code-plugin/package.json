@@ -28,14 +28,15 @@
   "files": [
     ".claude-plugin",
     ".mcp.json",
-    "README.md"
+    "README.md",
+    "scripts/postinstall.js"
   ],
   "scripts": {
     "build": "ts-node scripts/build.ts --mode=production",
     "build:dev": "ts-node scripts/build.ts --mode=development",
     "sync-version": "node scripts/sync-version.js",
     "prebuild": "npm run sync-version",
-    "postinstall": "echo '\\n[CodingBuddy Plugin] For full MCP tools support, install codingbuddy globally:\\n  npm install -g codingbuddy\\n\\nDocumentation: https://github.com/JeremyDev87/codingbuddy\\n'",
+    "postinstall": "node scripts/postinstall.js",
     "prepublishOnly": "npm run build",
     "lint": "eslint src/ scripts/",
     "typecheck": "tsc --noEmit",
