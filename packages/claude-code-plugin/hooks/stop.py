@@ -26,6 +26,14 @@ def handle_stop(data: dict):
         from stats import SessionStats
 
         session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+
+        # Clean up companion TUI pane (#970)
+        try:
+            from tui_launcher import cleanup as cleanup_tui
+            cleanup_tui(session_id)
+        except Exception:
+            pass  # Never block session stop
+
         stats = SessionStats(session_id=session_id)
 
         # Flush pending in-memory stats before finalize (#931)
