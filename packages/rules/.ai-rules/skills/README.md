@@ -49,6 +49,7 @@ Reusable workflows for consistent development practices.
 |-------|-------------|-------------|
 | documentation-generation | Generate README, API docs, CHANGELOG, and ADRs from code | Creating or updating project documentation |
 | pr-all-in-one | Unified commit and PR workflow with smart issue linking | `/pr-all-in-one [target] [issue]` |
+| ship | Run local CI checks and ship changes — branch, commit, push, and PR | Changes are ready to ship |
 | pr-review | Systematic, evidence-based PR review with anti-sycophancy principles | Conducting manual PR reviews |
 | prompt-engineering | Write and optimize prompts for AI tools and agent system prompts | AI tool instructions, MCP tool descriptions, agent prompts |
 
@@ -226,6 +227,8 @@ EOF
 ├── pr-review/
 │   └── SKILL.md
 ├── prompt-engineering/
+│   └── SKILL.md
+├── ship/
 │   └── SKILL.md
 │
 ├── [DevOps & Infrastructure]
