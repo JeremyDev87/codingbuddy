@@ -239,3 +239,90 @@ class TestPreToolUseSmartTestRunner:
         )
         # Should not crash — returns None (no suggestion)
         assert result is None
+
+
+class TestPreToolUseStatusMessage:
+    """Tests for agent statusMessage in hook output (#974)."""
+
+    def test_no_agent_returns_none_for_non_bash(self, monkeypatch, capsys):
+        """Without active agent, non-Bash tools still return None."""
+        monkeypatch.delenv("CODINGBUDDY_ACTIVE_AGENT", raising=False)
+        result = _run_hook(
+            {"tool_name": "Read", "tool_input": {"file_path": "/foo"}},
+            monkeypatch, capsys,
+        )
+        assert result is None
+
+    def test_active_agent_returns_status_for_non_bash(self, monkeypatch, capsys, tmp_path):
+        """With active agent, non-Bash tools get statusMessage."""
+        # Create agents dir with a test agent
+        agents_dir = tmp_path / ".ai-rules" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "test-agent.json").write_text(json.dumps({
+            "name": "Test Agent",
+            "visual": {"eye": "\u2605", "colorAnsi": "yellow"},
+        }))
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "test-agent")
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+        # Clear agent_status cache
+        from agent_status import clear_cache
+        clear_cache()
+
+        result = _run_hook(
+            {"tool_name": "Read", "tool_input": {"file_path": "/foo"}},
+            monkeypatch, capsys,
+        )
+        assert result is not None
+        status = result["hookSpecificOutput"]["statusMessage"]
+        assert "\u2605" in status  # eye character
+        assert "test-agent" in status
+
+    def test_active_agent_returns_status_for_bash(self, monkeypatch, capsys, tmp_path):
+        """With active agent, Bash tools also get statusMessage."""
+        agents_dir = tmp_path / ".ai-rules" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "my-agent.json").write_text(json.dumps({
+            "name": "My Agent",
+            "visual": {"eye": "\u25cf", "colorAnsi": "green"},
+        }))
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "my-agent")
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+        from agent_status import clear_cache
+        clear_cache()
+
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "ls -la"}},
+            monkeypatch, capsys,
+        )
+        assert result is not None
+        status = result["hookSpecificOutput"]["statusMessage"]
+        assert "my-agent" in status
+        # No additionalContext for non-commit bash
+        assert "additionalContext" not in result["hookSpecificOutput"]
+
+    def test_status_combined_with_quality_gate(self, monkeypatch, capsys, tmp_path):
+        """statusMessage should coexist with additionalContext."""
+        agents_dir = tmp_path / ".ai-rules" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "dev-agent.json").write_text(json.dumps({
+            "name": "Dev Agent",
+            "visual": {"eye": "\u25b2", "colorAnsi": "red"},
+        }))
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "dev-agent")
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+        from agent_status import clear_cache
+        clear_cache()
+
+        config = {"qualityGates": {"enabled": True}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'test'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        hook_out = result["hookSpecificOutput"]
+        assert "statusMessage" in hook_out
+        assert "additionalContext" in hook_out
+        assert "Quality Gate" in hook_out["additionalContext"]

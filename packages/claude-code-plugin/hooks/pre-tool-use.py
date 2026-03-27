@@ -4,6 +4,7 @@
 Intercepts Bash tool calls to enforce quality gates on git commit commands.
 Detects .ai-rules/config changes via FileWatcher (#823).
 Suggests related tests for staged files via SmartTestRunner (#944).
+Displays active agent status in spinner via statusMessage (#974).
 Uses safe_main decorator to ensure Claude Code is never blocked.
 """
 import json
@@ -21,6 +22,7 @@ if _lib_dir not in sys.path:
 
 from safe_main import safe_main
 from config import get_config
+from agent_status import build_status_message
 
 # Pattern to detect git commit in a command string
 _GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
@@ -161,43 +163,46 @@ def _handle(data: dict) -> Optional[dict]:
     Returns:
         Hook output dict or None for no intervention.
     """
+    # Build agent status message for spinner (#974) — applies to ALL tools
+    status_msg = build_status_message()
+
     tool_name = data.get("tool_name", "")
-
-    # Only process Bash tool
-    if tool_name != "Bash":
-        return None
-
     contexts = []
 
-    # Check for file changes (#823)
-    file_change_msg = _check_file_changes(data)
-    if file_change_msg:
-        contexts.append(file_change_msg)
+    # Bash-specific checks
+    if tool_name == "Bash":
+        # Check for file changes (#823)
+        file_change_msg = _check_file_changes(data)
+        if file_change_msg:
+            contexts.append(file_change_msg)
 
-    command = data.get("tool_input", {}).get("command", "")
+        command = data.get("tool_input", {}).get("command", "")
 
-    # Check git commit quality gates and smart test suggestion (#944)
-    if _is_git_commit(command):
-        config = _get_hook_config()
-        quality_gates = config.get("qualityGates", {})
-        if quality_gates.get("enabled", False):
-            contexts.append(QUALITY_GATE_CONTEXT)
+        # Check git commit quality gates and smart test suggestion (#944)
+        if _is_git_commit(command):
+            config = _get_hook_config()
+            quality_gates = config.get("qualityGates", {})
+            if quality_gates.get("enabled", False):
+                contexts.append(QUALITY_GATE_CONTEXT)
 
-        # Smart test runner — suggest related tests for staged files
-        staged = _get_staged_files()
-        if staged:
-            suggestion = _get_test_suggestion(staged)
-            if suggestion:
-                contexts.append(suggestion)
+            # Smart test runner — suggest related tests for staged files
+            staged = _get_staged_files()
+            if staged:
+                suggestion = _get_test_suggestion(staged)
+                if suggestion:
+                    contexts.append(suggestion)
 
-    if not contexts:
+    # Build response — include statusMessage and/or additionalContext
+    if not status_msg and not contexts:
         return None
 
-    return {
-        "hookSpecificOutput": {
-            "additionalContext": "\n\n".join(contexts),
-        }
-    }
+    hook_output: dict = {}
+    if status_msg:
+        hook_output["statusMessage"] = status_msg
+    if contexts:
+        hook_output["additionalContext"] = "\n\n".join(contexts)
+
+    return {"hookSpecificOutput": hook_output}
 
 
 @safe_main
