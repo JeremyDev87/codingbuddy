@@ -9,6 +9,9 @@ from typing import Dict, Any, Optional
 
 DEFAULT_CONFIG: Dict[str, Any] = {
     "language": "en",
+    "eco": True,
+    "tui": True,
+    "tone": "casual",
     "qualityGates": {
         "enabled": False,
     },

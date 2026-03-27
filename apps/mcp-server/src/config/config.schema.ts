@@ -160,6 +160,11 @@ export const CodingBuddyConfigSchema = z.object({
   description: z.string().optional(),
   repository: z.string().url().optional(),
 
+  // Feature Flags
+  eco: z.boolean().default(true).optional(),
+  tui: z.boolean().default(true).optional(),
+  tone: z.enum(['casual', 'formal']).default('casual').optional(),
+
   // Technical Configuration
   techStack: TechStackConfigSchema.optional(),
   architecture: ArchitectureConfigSchema.optional(),

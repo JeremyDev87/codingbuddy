@@ -95,7 +95,7 @@ describe('config.loader', () => {
     it('should accept empty config', () => {
       const result = validateAndTransform({}, '/path/config.json');
 
-      expect(result.config).toEqual({});
+      expect(result.config).toEqual({ eco: true, tui: true, tone: 'casual' });
       expect(result.warnings).toEqual([]);
     });
 

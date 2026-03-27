@@ -12,7 +12,7 @@ describe('CodingBuddyConfigSchema', () => {
     it('should accept empty config (all fields optional)', () => {
       const result = validateConfig({});
       expect(result.success).toBe(true);
-      expect(result.data).toEqual({});
+      expect(result.data).toEqual({ eco: true, tui: true, tone: 'casual' });
     });
 
     it('should accept minimal config with basic fields', () => {
@@ -22,7 +22,7 @@ describe('CodingBuddyConfigSchema', () => {
       };
       const result = validateConfig(config);
       expect(result.success).toBe(true);
-      expect(result.data).toEqual(config);
+      expect(result.data).toMatchObject(config);
     });
 
     it('should accept config with valid repository URL', () => {
@@ -83,7 +83,7 @@ describe('CodingBuddyConfigSchema', () => {
 
       const result = validateConfig(config);
       expect(result.success).toBe(true);
-      expect(result.data).toEqual(config);
+      expect(result.data).toMatchObject(config);
     });
 
     it('should accept config with deep optional fields', () => {
@@ -178,7 +178,7 @@ describe('CodingBuddyConfigSchema', () => {
     it('should return parsed config for valid input', () => {
       const config = { language: 'ko' };
       const result = parseConfig(config);
-      expect(result).toEqual(config);
+      expect(result).toMatchObject(config);
     });
 
     it('should throw for invalid input', () => {
@@ -245,6 +245,87 @@ describe('CodingBuddyConfigSchema', () => {
         ai: {},
       };
       const result = validateConfig(config);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('eco/tui/tone fields', () => {
+    it('should accept config with eco field (boolean)', () => {
+      const result = validateConfig({ eco: true });
+      expect(result.success).toBe(true);
+      expect(result.data?.eco).toBe(true);
+    });
+
+    it('should accept config with eco=false', () => {
+      const result = validateConfig({ eco: false });
+      expect(result.success).toBe(true);
+      expect(result.data?.eco).toBe(false);
+    });
+
+    it('should reject non-boolean eco', () => {
+      const result = validateConfig({ eco: 'yes' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should default eco to true when parsed', () => {
+      const result = CodingBuddyConfigSchema.parse({});
+      expect(result.eco).toBe(true);
+    });
+
+    it('should accept config with tui field (boolean)', () => {
+      const result = validateConfig({ tui: true });
+      expect(result.success).toBe(true);
+      expect(result.data?.tui).toBe(true);
+    });
+
+    it('should accept config with tui=false', () => {
+      const result = validateConfig({ tui: false });
+      expect(result.success).toBe(true);
+      expect(result.data?.tui).toBe(false);
+    });
+
+    it('should reject non-boolean tui', () => {
+      const result = validateConfig({ tui: 'no' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should default tui to true when parsed', () => {
+      const result = CodingBuddyConfigSchema.parse({});
+      expect(result.tui).toBe(true);
+    });
+
+    it('should accept config with tone="casual"', () => {
+      const result = validateConfig({ tone: 'casual' });
+      expect(result.success).toBe(true);
+      expect(result.data?.tone).toBe('casual');
+    });
+
+    it('should accept config with tone="formal"', () => {
+      const result = validateConfig({ tone: 'formal' });
+      expect(result.success).toBe(true);
+      expect(result.data?.tone).toBe('formal');
+    });
+
+    it('should reject invalid tone value', () => {
+      const result = validateConfig({ tone: 'invalid' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should default tone to "casual" when parsed', () => {
+      const result = CodingBuddyConfigSchema.parse({});
+      expect(result.tone).toBe('casual');
+    });
+
+    it('should accept config with all three fields together', () => {
+      const result = validateConfig({ eco: false, tui: true, tone: 'formal' });
+      expect(result.success).toBe(true);
+      expect(result.data?.eco).toBe(false);
+      expect(result.data?.tui).toBe(true);
+      expect(result.data?.tone).toBe('formal');
+    });
+
+    it('should work without new fields (backward compatible)', () => {
+      const result = validateConfig({ language: 'ko', projectName: 'test' });
       expect(result.success).toBe(true);
     });
   });
