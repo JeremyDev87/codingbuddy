@@ -19,9 +19,7 @@ describe('RuleInsightsHandler', () => {
       activeRules: 2,
       staleRules: 1,
     },
-    topRules: [
-      { name: 'core', count: 10, lastUsed: Date.now(), classification: 'high' },
-    ],
+    topRules: [{ name: 'core', count: 10, lastUsed: Date.now(), classification: 'high' }],
     unusedRules: ['old-rule'],
     trends: {
       recentlyActive: ['core'],
@@ -78,9 +76,7 @@ describe('RuleInsightsHandler', () => {
     it('should use default statsPath when not provided', async () => {
       await handler.handle('get_rule_insights', {});
 
-      expect(RuleTracker.fromFile).toHaveBeenCalledWith(
-        expect.stringContaining('rule-stats.json'),
-      );
+      expect(RuleTracker.fromFile).toHaveBeenCalledWith(expect.stringContaining('rule-stats.json'));
     });
 
     it('should extract rule names from search results', async () => {

@@ -135,7 +135,7 @@ describe('RuleInsightsService', () => {
       });
 
       it('should identify declining rules (high count but stale)', () => {
-        const avgCount = (50 + 2) / 2; // 26
+        // avg = (50 + 2) / 2 = 26; 'once-popular' count 50 > avg so it's declining
         const stats: Record<string, RuleStats> = {
           'once-popular': { count: 50, lastUsed: NOW - MONTH_MS - DAY_MS },
           'still-low': { count: 2, lastUsed: NOW - MONTH_MS - DAY_MS },
@@ -150,7 +150,7 @@ describe('RuleInsightsService', () => {
       it('should identify emerging rules (recent but low count)', () => {
         const stats: Record<string, RuleStats> = {
           'new-rule': { count: 2, lastUsed: NOW - DAY_MS },
-          'established': { count: 50, lastUsed: NOW - DAY_MS },
+          established: { count: 50, lastUsed: NOW - DAY_MS },
         };
 
         const result = service.generateInsights(stats, [], NOW);
@@ -171,7 +171,9 @@ describe('RuleInsightsService', () => {
 
         const result = service.generateInsights(stats, [], NOW);
 
-        expect(result.suggestions.some(s => s.includes('core') && s.includes('High-frequency'))).toBe(true);
+        expect(
+          result.suggestions.some(s => s.includes('core') && s.includes('High-frequency')),
+        ).toBe(true);
       });
 
       it('should suggest removing unused rules', () => {
@@ -192,7 +194,9 @@ describe('RuleInsightsService', () => {
 
         const result = service.generateInsights(stats, [], NOW);
 
-        expect(result.suggestions.some(s => s.includes('declining') && s.includes('declined'))).toBe(true);
+        expect(
+          result.suggestions.some(s => s.includes('declining') && s.includes('declined')),
+        ).toBe(true);
       });
 
       it('should suggest starting tracking when no data exists', () => {

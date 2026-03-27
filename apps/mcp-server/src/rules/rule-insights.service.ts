@@ -46,7 +46,12 @@ export class RuleInsightsService {
     const activeRules = entries.filter(([, s]) => now - s.lastUsed <= WEEK_MS).length;
     const staleRules = entries.filter(([, s]) => now - s.lastUsed > MONTH_MS).length;
     const trends = this.analyzeTrends(entries, avgCount, now);
-    const suggestions = this.generateSuggestions(topRules, unusedRules, trends.declining, entries.length);
+    const suggestions = this.generateSuggestions(
+      topRules,
+      unusedRules,
+      trends.declining,
+      entries.length,
+    );
 
     return {
       generatedAt: now,
