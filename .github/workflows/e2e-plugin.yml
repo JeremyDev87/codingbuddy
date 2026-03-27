@@ -1,0 +1,66 @@
+name: e2e-plugin-hooks
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - stag-**
+    paths:
+      - 'packages/claude-code-plugin/hooks/**'
+      - 'tests/e2e/plugin-hooks/**'
+      - .github/workflows/e2e-plugin.yml
+
+permissions:
+  statuses: write
+  contents: read
+
+jobs:
+  e2e-plugin-hooks:
+    if: github.repository == 'JeremyDev87/codingbuddy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24'
+
+      - name: Install Python test dependencies
+        run: pip install -r tests/e2e/plugin-hooks/requirements.txt
+
+      - name: Configure git for tests
+        run: |
+          git config --global user.name "CI Bot"
+          git config --global user.email "ci@test.local"
+          git config --global init.defaultBranch main
+
+      - name: Run E2E plugin hook tests
+        run: python3 -m pytest tests/e2e/plugin-hooks/ -v --timeout=30 --tb=short
+
+  e2e-plugin-docker:
+    if: github.repository == 'JeremyDev87/codingbuddy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Build Docker test image
+        run: docker build -t codingbuddy-e2e-plugin -f tests/e2e/plugin-hooks/Dockerfile .
+
+      - name: Run E2E tests in Docker
+        run: docker run --rm codingbuddy-e2e-plugin
