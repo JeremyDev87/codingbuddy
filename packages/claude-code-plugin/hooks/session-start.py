@@ -411,6 +411,53 @@ def _find_agents_dir() -> Optional[str]:
     return None
 
 
+def _read_pending_context(cwd: str) -> Optional[Dict[str, str]]:
+    """Read pending work context from docs/codingbuddy/context.md.
+
+    Parses the YAML-like frontmatter and last section to extract
+    the most recent mode, task, and status.
+
+    Args:
+        cwd: Project directory to search for context.md.
+
+    Returns:
+        Dict with mode, task, status keys or None if not found.
+    """
+    context_path = os.path.join(cwd, "docs", "codingbuddy", "context.md")
+    if not os.path.isfile(context_path):
+        return None
+
+    try:
+        with open(context_path, "r", encoding="utf-8") as f:
+            content = f.read(8192)  # Read first 8KB only
+    except OSError:
+        return None
+
+    if not content.strip():
+        return None
+
+    result: Dict[str, str] = {}
+
+    # Parse frontmatter for currentMode and status
+    if content.startswith("---"):
+        parts = content.split("---", 2)
+        if len(parts) >= 3:
+            for line in parts[1].strip().splitlines():
+                line = line.strip()
+                if line.startswith("currentMode:"):
+                    result["mode"] = line.split(":", 1)[1].strip().strip('"')
+                elif line.startswith("status:"):
+                    result["status"] = line.split(":", 1)[1].strip().strip('"')
+
+    # Find last section's task line
+    for line in content.splitlines():
+        line = line.strip()
+        if line.lower().startswith("task:"):
+            result["task"] = line.split(":", 1)[1].strip().strip('"')
+
+    return result if result.get("mode") else None
+
+
 def main():
     """Main entry point for the session start hook."""
     try:
@@ -492,6 +539,7 @@ def main():
             pass  # Never block session start
 
         # Step 6: Buddy greeting + project scan + agent recommendations (#968)
+        # Enhanced with returning session context (#975)
         try:
             _ensure_lib_path()
 
@@ -514,8 +562,29 @@ def main():
             # Generate recommendations
             recommendations = get_agent_recommendations(scan_data, agents)
 
+            # Detect returning session (#975)
+            previous_session = None
+            pending_context = None
+            try:
+                from history_db import HistoryDB as _HistoryDB
+
+                session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+                _db = _HistoryDB()
+                previous_session = _db.get_previous_session(session_id, cwd)
+                _db.close()
+
+                # Read pending context from context.md
+                if previous_session:
+                    pending_context = _read_pending_context(cwd)
+            except Exception:
+                pass  # Never block for returning session detection
+
             # Render and output
-            output = render_session_start(scan_data, recommendations, tone, language)
+            output = render_session_start(
+                scan_data, recommendations, tone, language,
+                previous_session=previous_session,
+                pending_context=pending_context,
+            )
             if output:
                 print(output)
         except Exception:

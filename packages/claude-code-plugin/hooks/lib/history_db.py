@@ -129,6 +129,36 @@ class HistoryDB:
         except sqlite3.Error as e:
             logger.error("Failed to end session: %s", e)
 
+    def get_previous_session(
+        self, current_session_id: str, project: str
+    ) -> "dict | None":
+        """Get the most recent previous session for the same project.
+
+        Args:
+            current_session_id: Current session ID to exclude.
+            project: Project path to match.
+
+        Returns:
+            Dict with session info or None if no previous session.
+        """
+        try:
+            cursor = self._conn.execute(
+                "SELECT session_id, started_at, ended_at, project, model, "
+                "tool_call_count, error_count, outcome "
+                "FROM sessions "
+                "WHERE session_id != ? AND project = ? "
+                "ORDER BY started_at DESC LIMIT 1",
+                (current_session_id, project),
+            )
+            row = cursor.fetchone()
+            if row is None:
+                return None
+            columns = [desc[0] for desc in cursor.description]
+            return dict(zip(columns, row))
+        except sqlite3.Error as e:
+            logger.error("Failed to get previous session: %s", e)
+            return None
+
     def query_sessions(self, days: int = 30) -> list:
         """Query sessions from the last N days."""
         try:

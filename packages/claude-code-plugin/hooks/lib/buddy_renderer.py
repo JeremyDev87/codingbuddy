@@ -62,6 +62,34 @@ SCAN_LABELS: Dict[str, Dict[str, str]] = {
 
 BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
 BUDDY_WRAP_FACE = "\u25d5\u2304\u25d5"  # ◕⌄◕
+BUDDY_WINK_FACE = "\u25d5\u2040\u25d5"  # ◕⁀◕
+
+# Returning session greetings by tone and language
+RETURNING_GREETINGS: Dict[str, Dict[str, str]] = {
+    "casual": {
+        "en": "Hey, you are back! Want to continue from last time?",
+        "ko": "\ub3cc\uc544\uc624\uc168\uad70\uc694! \uc9c0\ub09c\ubc88 \uc791\uc5c5 \uc774\uc5b4\uc11c \ud560\uae4c\uc694?",
+        "ja": "\u304a\u304b\u3048\u308a\u306a\u3055\u3044\uff01\u524d\u56de\u306e\u7d9a\u304d\u3092\u3057\u307e\u3057\u3087\u3046\u304b\uff1f",
+        "zh": "\u4f60\u56de\u6765\u4e86\uff01\u8981\u7ee7\u7eed\u4e0a\u6b21\u7684\u5de5\u4f5c\u5417\uff1f",
+        "es": "\u00a1Has vuelto! \u00bfQuieres continuar donde lo dejaste?",
+    },
+    "formal": {
+        "en": "Welcome back. Resuming previous session context.",
+        "ko": "\ub2e4\uc2dc \uc624\uc168\uc2b5\ub2c8\ub2e4. \uc774\uc804 \uc138\uc158 \ub9e5\ub77d\uc744 \ubd88\ub7ec\uc635\ub2c8\ub2e4.",
+        "ja": "\u304a\u5e30\u308a\u306a\u3055\u3044\u3002\u524d\u56de\u306e\u30bb\u30c3\u30b7\u30e7\u30f3\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002",
+        "zh": "\u6b22\u8fce\u56de\u6765\u3002\u6b63\u5728\u6062\u590d\u4e0a\u6b21\u7684\u4f1a\u8bdd\u3002",
+        "es": "Bienvenido de vuelta. Restaurando el contexto anterior.",
+    },
+}
+
+# Last session summary header
+RETURNING_HEADERS: Dict[str, Dict[str, str]] = {
+    "en": {"last_session": "Last Session Summary", "pending": "Pending Work"},
+    "ko": {"last_session": "\uc9c0\ub09c \uc138\uc158 \uc694\uc57d", "pending": "\ubbf8\uc644\ub8cc \uc791\uc5c5"},
+    "ja": {"last_session": "\u524d\u56de\u306e\u30bb\u30c3\u30b7\u30e7\u30f3", "pending": "\u672a\u5b8c\u4e86\u306e\u4f5c\u696d"},
+    "zh": {"last_session": "\u4e0a\u6b21\u4f1a\u8bdd\u6458\u8981", "pending": "\u672a\u5b8c\u6210\u5de5\u4f5c"},
+    "es": {"last_session": "Resumen de sesi\u00f3n anterior", "pending": "Trabajo pendiente"},
+}
 
 # Farewell greetings by tone and language (stop hook)
 FAREWELL_GREETINGS: Dict[str, Dict[str, str]] = {
@@ -297,31 +325,154 @@ def render_session_summary(
     return "\n".join(parts)
 
 
+def _get_returning_greeting(tone: str, language: str) -> str:
+    """Get returning session greeting for given tone and language."""
+    tone_greetings = RETURNING_GREETINGS.get(tone, RETURNING_GREETINGS["casual"])
+    return tone_greetings.get(language, tone_greetings["en"])
+
+
+def _get_returning_header(key: str, language: str) -> str:
+    """Get returning session header for given key and language."""
+    lang_headers = RETURNING_HEADERS.get(language, RETURNING_HEADERS["en"])
+    return lang_headers.get(key, RETURNING_HEADERS["en"].get(key, key))
+
+
+def _format_duration(started_at: float, ended_at: float) -> str:
+    """Format session duration from timestamps."""
+    if not ended_at or not started_at:
+        return ""
+    minutes = int((ended_at - started_at) / 60)
+    if minutes < 1:
+        return "<1min"
+    if minutes < 60:
+        return f"{minutes}min"
+    hours = minutes // 60
+    remaining = minutes % 60
+    if remaining:
+        return f"{hours}h {remaining}min"
+    return f"{hours}h"
+
+
+def render_returning_session(
+    previous_session: Dict[str, Any],
+    pending_context: "Dict[str, Any] | None",
+    tone: str,
+    language: str,
+) -> str:
+    """Render returning session welcome-back display.
+
+    Args:
+        previous_session: Dict from HistoryDB.get_previous_session with keys:
+            session_id, started_at, ended_at, tool_call_count,
+            error_count, outcome
+        pending_context: Optional dict with keys: mode, task, status
+            from docs/codingbuddy/context.md parsing. None if no context.
+        tone: 'casual' or 'formal'
+        language: Language code (en, ko, ja, zh, es)
+
+    Returns:
+        Formatted returning session greeting string.
+    """
+    greeting = _get_returning_greeting(tone, language)
+
+    parts = []
+
+    # Buddy face with welcome-back greeting
+    parts.append("\u256d\u2501\u2501\u2501\u256e")
+    parts.append(f"\u2503 {BUDDY_FACE} \u2503 {greeting}")
+    parts.append("\u2570\u2501\u2501\u2501\u256f")
+
+    # Last session summary
+    header = _get_returning_header("last_session", language)
+    parts.append("")
+    parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+
+    stat_items = []
+
+    duration = _format_duration(
+        previous_session.get("started_at", 0),
+        previous_session.get("ended_at", 0),
+    )
+    if duration:
+        stat_items.append(f"\u23f1  {duration}")
+
+    tool_count = previous_session.get("tool_call_count", 0)
+    if tool_count > 0:
+        stat_items.append(f"\U0001f527 {tool_count} tools")
+
+    error_count = previous_session.get("error_count", 0)
+    if error_count > 0:
+        stat_items.append(f"\u26a0\ufe0f {error_count} errors")
+
+    if stat_items:
+        parts.append(" \u2502 ".join(stat_items))
+
+    # Pending work context
+    if pending_context and pending_context.get("task"):
+        pending_header = _get_returning_header("pending", language)
+        parts.append("")
+        parts.append(f"\u2501\u2501 {pending_header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+
+        mode = pending_context.get("mode", "")
+        task = pending_context.get("task", "")
+        status = pending_context.get("status", "")
+
+        if mode and status == "in_progress":
+            parts.append(f"\U0001f4dd {task} ({mode} pending)")
+        elif mode:
+            parts.append(f"\u2705 {task} ({mode} {status})")
+
+    # Continue prompt
+    parts.append("")
+    if pending_context and pending_context.get("mode"):
+        mode = pending_context["mode"]
+        next_mode = "ACT" if mode == "PLAN" else mode
+        parts.append(f"{BUDDY_WINK_FACE}  Type \"{next_mode}\" to continue!")
+    else:
+        parts.append(f"{BUDDY_WINK_FACE}  Ready when you are!")
+
+    return "\n".join(parts)
+
+
 def render_session_start(
     scan: Dict[str, Any],
     recommendations: List[Dict[str, Any]],
     tone: str,
     language: str,
+    previous_session: "Dict[str, Any] | None" = None,
+    pending_context: "Dict[str, Any] | None" = None,
 ) -> str:
     """Render complete session-start output.
 
     Assembles buddy face, scan results, and recommendations into
-    a single formatted output string.
+    a single formatted output string. If previous_session is provided,
+    renders a returning session greeting instead of the default.
 
     Args:
         scan: Project scan data dict.
         recommendations: Agent recommendation list.
         tone: 'casual' or 'formal'
         language: Language code.
+        previous_session: Optional previous session data for returning users.
+        pending_context: Optional pending work context from context.md.
 
     Returns:
         Complete formatted session-start output.
     """
-    parts = [
-        render_buddy_face(tone, language),
-        "",
-        render_scan_results(scan),
-    ]
+    # Returning session path
+    if previous_session:
+        parts = [
+            render_returning_session(previous_session, pending_context, tone, language),
+            "",
+            render_scan_results(scan),
+        ]
+    else:
+        # First visit path (default)
+        parts = [
+            render_buddy_face(tone, language),
+            "",
+            render_scan_results(scan),
+        ]
 
     if recommendations:
         header = _get_header("recommendations", language)
