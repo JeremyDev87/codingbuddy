@@ -80,11 +80,11 @@ The skill accepts one of:
 
 2. **Validate with MCP tool**
 
-```
-Call: codingbuddy validate_parallel_issues
-  issues: [issue_numbers]
-  issueContents: { "1": "body1", "2": "body2", ... }
-```
+   ```
+   Call: codingbuddy validate_parallel_issues
+     issues: [issue_numbers]
+     issueContents: { "1": "body1", "2": "body2", ... }
+   ```
 
 3. **Apply the Iron Rule**
    - Same file in two deliverables = different waves
