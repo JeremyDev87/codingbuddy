@@ -54,9 +54,7 @@ function SpeechBubble({
             ⚡
           </Text>
         )}
-        {block.stanceHistoryText !== '' && (
-          <Text dimColor> ({block.stanceHistoryText})</Text>
-        )}
+        {block.stanceHistoryText !== '' && <Text dimColor> ({block.stanceHistoryText})</Text>}
       </Box>
       <Box
         borderStyle="round"
@@ -96,9 +94,7 @@ function ConsensusProgressBar({
   return (
     <Box flexDirection="column">
       <Box>
-        <Text bold>
-          {statusIcon} Consensus{' '}
-        </Text>
+        <Text bold>{statusIcon} Consensus </Text>
         <Text color="green">{filled.repeat(approveLen)}</Text>
         <Text color="yellow">{filled.repeat(concernLen)}</Text>
         {block.rejectCount > 0 ? (
@@ -109,22 +105,24 @@ function ConsensusProgressBar({
         <Text bold> {block.percentage}%</Text>
       </Box>
       <Box>
-        <Text color="green">{'\u2705'} {block.approveCount}</Text>
-        <Text>  </Text>
-        <Text color="yellow">{'\u26A0\uFE0F'} {block.concernCount}</Text>
-        <Text>  </Text>
-        <Text color="red">{'\u274C'} {block.rejectCount}</Text>
+        <Text color="green">
+          {'\u2705'} {block.approveCount}
+        </Text>
+        <Text> </Text>
+        <Text color="yellow">
+          {'\u26A0\uFE0F'} {block.concernCount}
+        </Text>
+        <Text> </Text>
+        <Text color="red">
+          {'\u274C'} {block.rejectCount}
+        </Text>
       </Box>
     </Box>
   );
 }
 
 /** Cross-review line with colored agent names. */
-function CrossReviewItem({
-  block,
-}: {
-  block: CrossReviewBlock;
-}): React.ReactElement {
+function CrossReviewItem({ block }: { block: CrossReviewBlock }): React.ReactElement {
   return (
     <Box>
       <Text color={block.fromColor}>
@@ -134,10 +132,7 @@ function CrossReviewItem({
       <Text color={block.toColor}>
         {block.toAvatar} {block.toName}
       </Text>
-      <Text>
-        {' '}
-        {block.verb}:{' '}
-      </Text>
+      <Text> {block.verb}: </Text>
       <Text dimColor>"{block.comment}"</Text>
     </Box>
   );
@@ -156,10 +151,7 @@ export function AgentDiscussionPanel({
   width,
   height,
 }: AgentDiscussionPanelProps): React.ReactElement {
-  const blocks = useMemo(
-    () => renderCollaborationBlocks(rounds, width),
-    [rounds, width],
-  );
+  const blocks = useMemo(() => renderCollaborationBlocks(rounds, width), [rounds, width]);
 
   // Truncate blocks to fit available height (minus 2 for outer border)
   const maxHeight = Math.max(0, height - 2);
@@ -191,19 +183,11 @@ export function AgentDiscussionPanel({
               </Text>
             );
           case 'agent-bubble':
-            return (
-              <SpeechBubble key={i} block={block} maxWidth={innerWidth} />
-            );
+            return <SpeechBubble key={i} block={block} maxWidth={innerWidth} />;
           case 'cross-review-block':
             return <CrossReviewItem key={i} block={block} />;
           case 'consensus-bar':
-            return (
-              <ConsensusProgressBar
-                key={i}
-                block={block}
-                maxWidth={innerWidth}
-              />
-            );
+            return <ConsensusProgressBar key={i} block={block} maxWidth={innerWidth} />;
           case 'empty':
             return (
               <Text key={i} color="gray" dimColor>

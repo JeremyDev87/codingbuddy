@@ -97,9 +97,7 @@ describe('pure/assignAgentColors', () => {
         reasoning: `r${i}`,
       }),
     );
-    const rounds: DiscussionRound[] = [
-      { roundNumber: 1, opinions, crossReviews: [] },
-    ];
+    const rounds: DiscussionRound[] = [{ roundNumber: 1, opinions, crossReviews: [] }];
     const colors = assignAgentColors(rounds);
     // The (PALETTE.length + 1)th agent wraps to palette[0]
     expect(colors[`a${AGENT_PALETTE.length}`]).toBe(AGENT_PALETTE[0]);
@@ -181,9 +179,7 @@ describe('pure/renderCollaborationBlocks', () => {
     const archBubble = bubbles.find(
       b => b.type === 'agent-bubble' && b.agentName === 'architecture',
     );
-    const secBubble = bubbles.find(
-      b => b.type === 'agent-bubble' && b.agentName === 'security',
-    );
+    const secBubble = bubbles.find(b => b.type === 'agent-bubble' && b.agentName === 'security');
 
     expect(archBubble?.type === 'agent-bubble' && archBubble.isConflict).toBe(false);
     expect(secBubble?.type === 'agent-bubble' && secBubble.isConflict).toBe(true);
@@ -251,11 +247,7 @@ describe('tui/components/AgentDiscussionPanel', () => {
 
   it('should highlight conflicts with lightning marker', () => {
     const { lastFrame } = render(
-      <AgentDiscussionPanel
-        rounds={[makeConflictRound()]}
-        width={80}
-        height={30}
-      />,
+      <AgentDiscussionPanel rounds={[makeConflictRound()]} width={80} height={30} />,
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('⚡');
@@ -270,9 +262,7 @@ describe('tui/components/AgentDiscussionPanel', () => {
   });
 
   it('should render empty state when no rounds', () => {
-    const { lastFrame } = render(
-      <AgentDiscussionPanel rounds={[]} width={80} height={10} />,
-    );
+    const { lastFrame } = render(<AgentDiscussionPanel rounds={[]} width={80} height={10} />);
     const frame = lastFrame() ?? '';
     expect(frame).toContain('No agent discussion yet');
   });
@@ -302,9 +292,7 @@ describe('tui/components/AgentDiscussionPanel', () => {
       crossReviews: [],
     };
 
-    const { lastFrame } = render(
-      <AgentDiscussionPanel rounds={[round]} width={80} height={8} />,
-    );
+    const { lastFrame } = render(<AgentDiscussionPanel rounds={[round]} width={80} height={8} />);
     const frame = lastFrame() ?? '';
     const lines = frame.split('\n');
     // Height constraint should limit rendered content

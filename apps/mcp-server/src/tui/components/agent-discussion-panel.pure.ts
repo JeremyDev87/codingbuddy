@@ -113,9 +113,7 @@ export function renderStanceHistory(stances: Stance[]): string {
 }
 
 /** Assign a distinct palette color to each agent by first-appearance order. */
-export function assignAgentColors(
-  rounds: readonly DiscussionRound[],
-): Record<string, string> {
+export function assignAgentColors(rounds: readonly DiscussionRound[]): Record<string, string> {
   const colors: Record<string, string> = {};
   let idx = 0;
   for (const round of rounds) {
@@ -134,9 +132,7 @@ export function assignAgentColors(
  * Conflict = both 'approve' and 'reject' stances coexist.
  * Returns the set of agent IDs holding the 'reject' stance.
  */
-export function detectConflicts(
-  opinions: readonly AgentOpinion[],
-): Set<string> {
+export function detectConflicts(opinions: readonly AgentOpinion[]): Set<string> {
   const hasApprove = opinions.some(o => o.stance === 'approve');
   const hasReject = opinions.some(o => o.stance === 'reject');
   if (!hasApprove || !hasReject) return new Set();
@@ -167,9 +163,7 @@ export function estimateBlockHeight(block: DiscussionBlock): number {
 // ---------------------------------------------------------------------------
 
 /** Build agent name lookup from opinions. */
-function buildAgentNameMap(
-  rounds: readonly DiscussionRound[],
-): Record<string, string> {
+function buildAgentNameMap(rounds: readonly DiscussionRound[]): Record<string, string> {
   const map: Record<string, string> = {};
   for (const round of rounds) {
     for (const opinion of round.opinions) {
@@ -180,9 +174,7 @@ function buildAgentNameMap(
 }
 
 /** Build stance history for each agent across rounds. */
-function buildStanceHistories(
-  rounds: readonly DiscussionRound[],
-): Record<string, Stance[]> {
+function buildStanceHistories(rounds: readonly DiscussionRound[]): Record<string, Stance[]> {
   const histories: Record<string, Stance[]> = {};
   for (const round of rounds) {
     for (const opinion of round.opinions) {
@@ -281,10 +273,7 @@ export function renderCollaborationBlocks(
 // ---------------------------------------------------------------------------
 
 /** Render a single opinion line with stance history. */
-export function renderOpinionLine(
-  opinion: AgentOpinion,
-  stanceHistory?: Stance[],
-): DiscussionLine {
+export function renderOpinionLine(opinion: AgentOpinion, stanceHistory?: Stance[]): DiscussionLine {
   const avatar = getAgentAvatar(opinion.agentName);
   const icon = STANCE_ICONS[opinion.stance];
 
@@ -321,9 +310,7 @@ export function renderCrossReviewLine(
 }
 
 /** Render the consensus summary line. */
-export function renderConsensusLine(
-  consensus: ConsensusResult,
-): DiscussionLine {
+export function renderConsensusLine(consensus: ConsensusResult): DiscussionLine {
   const icon = consensus.reached ? '✅' : '❌';
   return {
     text: `${icon} Consensus: ${consensus.approveCount}/${consensus.totalAgents} | Critical: ${consensus.criticalCount}`,
