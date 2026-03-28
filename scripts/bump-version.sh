@@ -105,6 +105,12 @@ else
   echo "  ⏭️  .mcp.json (not found, skipped)"
 fi
 
+# 8. Update lockfile (peerDependencies changed)
 echo ""
-echo "✅ All files bumped to v$NEW_VERSION"
+echo "🔒 Updating lockfile..."
+yarn install
+echo "  ✅ yarn.lock"
+
+echo ""
+echo "✅ All files bumped to v$NEW_VERSION (including yarn.lock)"
 echo "   Next: git commit -am \"chore(release): prepare v$NEW_VERSION\""
