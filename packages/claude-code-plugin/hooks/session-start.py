@@ -598,6 +598,19 @@ def main():
             buddy_section = cfg.get("buddy") if isinstance(cfg.get("buddy"), dict) else {}
             typing_enabled = buddy_section.get("typingEffect", True) and not os.environ.get("CI")
 
+            # First-run onboarding tour (#1037)
+            try:
+                from onboarding_tour import is_first_run, render_onboarding_tour, mark_onboarded
+                if is_first_run() and not previous_session:
+                    tour_output = render_onboarding_tour(
+                        language=language, buddy_config=buddy_cfg,
+                    )
+                    if tour_output:
+                        print(tour_output, file=sys.stderr)
+                    mark_onboarded()
+            except Exception:
+                pass  # Never block session start for tour
+
             # Render and output
             output = render_session_start(
                 scan_data, recommendations, tone, language,
