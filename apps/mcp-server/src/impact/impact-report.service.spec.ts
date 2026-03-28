@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { ImpactReportService } from './impact-report.service';
 import { ImpactEventService } from './impact-event.service';
-import * as fs from 'fs';
 
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
