@@ -7,6 +7,9 @@ on:
     paths:
       - '.claude-plugin/**'
       - 'packages/claude-code-plugin/.claude-plugin/**'
+      - '.github/workflows/marketplace.yml'
+      - '.github/scripts/marketplace-utils.sh'
+      - '.github/templates/marketplace-index.html'
   release:
     types: [published]
   workflow_dispatch:
