@@ -25,6 +25,7 @@ from safe_main import safe_main
 from config import get_config
 from agent_status import build_status_message
 from adaptive_perf import get_monitor
+from tdd_progress import build_tdd_indicator
 
 # Pattern to detect git commit in a command string
 _GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
@@ -178,6 +179,14 @@ def _handle(data: dict) -> Optional[dict]:
     """
     # Build agent status message for spinner (#974) — applies to ALL tools
     status_msg = build_status_message()
+
+    # Append TDD cycle progress indicator (#1035)
+    tdd_indicator = build_tdd_indicator()
+    if tdd_indicator:
+        if status_msg:
+            status_msg = f"{status_msg} {tdd_indicator}"
+        else:
+            status_msg = tdd_indicator
 
     tool_name = data.get("tool_name", "")
     contexts = []
