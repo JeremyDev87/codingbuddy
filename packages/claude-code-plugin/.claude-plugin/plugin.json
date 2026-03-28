@@ -1,17 +1,9 @@
 {
   "name": "codingbuddy",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "PLAN/ACT/EVAL workflow with auto-detection, specialist agents, and reusable skills for systematic TDD development",
   "author": {
     "name": "JeremyDev87",
     "email": "soundbrokaz@kakao.com"
-  },
-  "commands": [
-    {
-      "name": "buddy",
-      "description": "Show project status, recommended agents, and next actions",
-      "file": "../commands/buddy.md",
-      "user-invocable": true
-    }
-  ]
+  }
 }

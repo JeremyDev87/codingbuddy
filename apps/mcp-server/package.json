@@ -1,6 +1,6 @@
 {
   "name": "codingbuddy",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Multi-AI Rules MCP Server - One source of truth for AI coding rules across all AI assistants",
   "author": "JeremyDev87",
   "license": "MIT",
@@ -103,4 +103,3 @@
   },
   "packageManager": "yarn@4.11.0"
 }
-
