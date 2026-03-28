@@ -15,6 +15,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -343,6 +344,179 @@ def register_hook_in_settings(settings_file: Path) -> bool:
     return True
 
 
+HUD_FILENAME = "codingbuddy-hud.py"
+
+# tmux suggestion messages (i18n)
+TMUX_SUGGESTION: Dict[str, str] = {
+    "en": (
+        "\u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n"
+        "\u2502 \u25d5\u203f\u25d5 Tip: Run Claude Code inside tmux for     \u2502\n"
+        "\u2502     the full CodingBuddy sidebar experience!  \u2502\n"
+        "\u2502                                               \u2502\n"
+        "\u2502     tmux new -s dev                           \u2502\n"
+        "\u2502     claude                                    \u2502\n"
+        "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f"
+    ),
+    "ko": (
+        "\u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n"
+        "\u2502 \u25d5\u203f\u25d5 Tip: tmux \uc548\uc5d0\uc11c Claude Code\ub97c \uc2e4\ud589\ud558\uba74  \u2502\n"
+        "\u2502     CodingBuddy \uc0ac\uc774\ub4dc\ubc14\ub97c \ubcfc \uc218 \uc788\uc5b4\uc694!      \u2502\n"
+        "\u2502                                               \u2502\n"
+        "\u2502     tmux new -s dev                           \u2502\n"
+        "\u2502     claude                                    \u2502\n"
+        "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f"
+    ),
+}
+
+
+def _get_plugin_version() -> str:
+    """Read plugin version from .claude-plugin/plugin.json.
+
+    Falls back to '0.0.0' if not found.
+    """
+    try:
+        this_dir = os.path.dirname(os.path.abspath(__file__))
+        plugin_json = os.path.join(this_dir, "..", ".claude-plugin", "plugin.json")
+        if os.path.isfile(plugin_json):
+            with open(plugin_json, "r", encoding="utf-8") as f:
+                return json.load(f).get("version", "0.0.0")
+    except Exception:
+        pass
+
+    # Try CLAUDE_PLUGIN_DIR
+    plugin_dir = os.environ.get("CLAUDE_PLUGIN_DIR")
+    if plugin_dir:
+        try:
+            pj = os.path.join(plugin_dir, ".claude-plugin", "plugin.json")
+            if os.path.isfile(pj):
+                with open(pj, "r", encoding="utf-8") as f:
+                    return json.load(f).get("version", "0.0.0")
+        except Exception:
+            pass
+
+    return "0.0.0"
+
+
+def _find_hud_source() -> Optional[Path]:
+    """Find the codingbuddy-hud.py source file.
+
+    Same 3-tier search as find_plugin_source() but for the HUD script.
+    """
+    # 1. CLAUDE_PLUGIN_DIR env
+    plugin_dir = os.environ.get("CLAUDE_PLUGIN_DIR")
+    if plugin_dir:
+        try:
+            source = Path(plugin_dir).resolve() / "hooks" / HUD_FILENAME
+            if source.exists() and source.is_file():
+                return source.resolve()
+        except (OSError, ValueError):
+            pass
+
+    home = Path.home()
+
+    # 2. Plugin cache paths
+    cache_paths = [
+        home / ".claude/plugins/cache/jeremydev87/codingbuddy",
+        home / ".claude/plugins/cache/codingbuddy",
+        home / ".claude/plugins/codingbuddy",
+    ]
+    for base_path in cache_paths:
+        try:
+            resolved_base = base_path.resolve()
+            if resolved_base.exists() and resolved_base.is_dir():
+                all_dirs = [d for d in resolved_base.iterdir() if d.is_dir()]
+                for version_dir in sort_version_dirs(all_dirs):
+                    source = version_dir / "hooks" / HUD_FILENAME
+                    if source.resolve().exists():
+                        return source.resolve()
+        except (OSError, ValueError):
+            continue
+
+    # 3. Dev paths
+    dev_patterns = [
+        "workspace/codingbuddy/packages/claude-code-plugin/hooks",
+        "dev/codingbuddy/packages/claude-code-plugin/hooks",
+        "projects/codingbuddy/packages/claude-code-plugin/hooks",
+        "code/codingbuddy/packages/claude-code-plugin/hooks",
+    ]
+    for pattern in dev_patterns:
+        try:
+            source = home / pattern / HUD_FILENAME
+            if source.resolve().exists():
+                return source.resolve()
+        except (OSError, ValueError):
+            continue
+
+    return None
+
+
+def _install_statusline(home: Path, settings_file: Path) -> None:
+    """Install codingbuddy statusLine and set CODINGBUDDY_AUTO_TUI=0 (#1089, #1092)."""
+    # 1. Find and copy HUD script
+    source = _find_hud_source()
+    if not source:
+        return
+
+    hud_dir = home / ".claude" / "hud"
+    hud_dir.mkdir(parents=True, exist_ok=True)
+    target = hud_dir / HUD_FILENAME
+    shutil.copy(source, target)
+    target.chmod(0o755)
+
+    # 2. Update settings.json
+    settings = _read_settings_file(settings_file) if settings_file.exists() else {}
+
+    current_sl = settings.get("statusLine", {}).get("command", "")
+    if "codingbuddy-hud" in current_sl:
+        pass  # already installed
+    elif "omc-hud" in current_sl or not current_sl:
+        settings["statusLine"] = {
+            "type": "command",
+            "command": f'python3 "{home}/.claude/hud/{HUD_FILENAME}"',
+        }
+    # else: custom statusLine — preserve
+
+    # 3. Set CODINGBUDDY_AUTO_TUI=0 (#1092)
+    env = settings.setdefault("env", {})
+    if env.get("CODINGBUDDY_AUTO_TUI") == "1":
+        env["CODINGBUDDY_AUTO_TUI"] = "0"
+
+    _write_settings_file(settings_file, settings)
+
+
+def _sidebar_pane_exists() -> bool:
+    """Check if a codingbuddy TUI pane exists in the current tmux window."""
+    try:
+        result = subprocess.run(
+            ["tmux", "list-panes", "-F", "#{pane_current_command}"],
+            capture_output=True, text=True, timeout=2,
+        )
+        return "codingbuddy" in result.stdout
+    except Exception:
+        return False
+
+
+def _setup_tmux_sidebar() -> None:
+    """Detect tmux and create TUI sidebar pane (#1091)."""
+    if not os.environ.get("TMUX"):
+        lang = _get_cached_language()
+        tip = TMUX_SUGGESTION.get(lang, TMUX_SUGGESTION["en"])
+        print(tip, file=sys.stderr)
+        return
+
+    if _sidebar_pane_exists():
+        return
+
+    subprocess.Popen(
+        ["tmux", "split-window", "-h", "-l", "25%", "-d", "codingbuddy", "tui"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    subprocess.Popen(
+        ["tmux", "select-pane", "-L"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
+
 def _ensure_lib_path():
     """Ensure hooks/lib is on sys.path (idempotent)."""
     _hooks_dir = os.path.dirname(os.path.abspath(__file__))
@@ -491,6 +665,12 @@ def main():
             print(msg("installed"))
             print(msg("patterns"))
 
+        # Step 2.5: Install codingbuddy statusLine (#1089, #1092)
+        try:
+            _install_statusline(home, settings_file)
+        except Exception:
+            pass  # Never block session start
+
         # Step 3: System prompt injection (#828)
         # SessionStart uses plain stdout for context injection (NOT JSON)
         try:
@@ -521,6 +701,18 @@ def main():
                 os.environ.get("CLAUDE_PLUGIN_DATA",
                                os.path.join(str(home), ".codingbuddy"))
             )
+        except Exception:
+            pass  # Never block session start
+
+        # Step 4.5: Initialize HUD state for statusLine (#1089)
+        try:
+            _ensure_lib_path()
+
+            from hud_state import init_hud_state
+
+            from session_utils import get_session_id as _get_sid_hud
+            hud_version = _get_plugin_version()
+            init_hud_state(_get_sid_hud(), hud_version)
         except Exception:
             pass  # Never block session start
 
@@ -621,6 +813,12 @@ def main():
             )
             if output:
                 print(output)
+        except Exception:
+            pass  # Never block session start
+
+        # Step 6.5: tmux sidebar auto-setup (#1091)
+        try:
+            _setup_tmux_sidebar()
         except Exception:
             pass  # Never block session start
 
