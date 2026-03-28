@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-03-28
+
+### Added
+- **Impact Telemetry**: Session impact report on stop hook — track issues prevented, agents dispatched, checklists applied
+- **Impact Module**: ImpactEventService + ImpactReportService with JSONL persistence
+- **get_session_impact MCP tool**: Query session telemetry data
+- **Event logging**: 5 MCP handlers now emit impact events (parse_mode, dispatch_agents, generate_checklist, update_context, search_rules)
+- **Buddy experience**: Typing animation, agent handoff animation, mini bar chart, session summary
+- **First-run onboarding tour**: Interactive walkthrough for new users
+- **Achievement system**: Badges for coding habits
+- **ASCII fallback mode**: Buddy character rendering without Unicode
+- **Adaptive performance mode**: Auto-adjust hook processing based on system load
+- **taskMaestro review agent**: Dedicated review pane with CI-first checklist
+- **taskMaestro conductor review cycle**: Automated PR review before completion
+- **/ship skill**: Built-in local CI checks and PR creation
+- **/onboard skill**: New project setup wizard
+- **/retrospective skill**: Session review and insights
+- **/plan-to-issues skill**: Convert plans to GitHub issues
+- **Context history archive**: Cross-session decision tracking
+- **Diff-based agent recommendation**: Smarter agent selection based on changed files
+- **Rule effectiveness insights**: Track which rules catch issues
+- **i18n expansion**: PT-BR, DE, FR (now 8 languages total)
+- **Windsurf and Aider adapters**: 8 AI tools now supported
+- **Adapter auto-sync**: `yarn sync-rules` mechanism
+- **E2E test pipeline**: Plugin hooks integration testing
+- **Marketplace workflow self-trigger**: CI deploys on workflow changes
+
+### Fixed
+- Security checks now run for all workspaces regardless of affected paths
+- HOOK_COMMAND path quoting for home directories with spaces
+- Backward-compatible hook detection using substring matching
+- Session ID fallback when env var missing
+- Batch achievement notifications to prevent text wall
+- Reduced PreToolUse information overload with priority-based display
+- Removed automatic TUI launch (memory optimization for multi-session)
+
+### Changed
+- README revamped with marketing focus and Impact Telemetry showcase
+
 ## [5.0.0] - 2026-03-26
 
 ### ⚠️ Paradigm Shift: Library → Framework
