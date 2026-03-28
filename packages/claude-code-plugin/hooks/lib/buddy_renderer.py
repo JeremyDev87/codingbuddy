@@ -3,7 +3,10 @@
 Renders buddy face greeting, project scan results, agent recommendations,
 and session summary with tone/language support and ANSI color output.
 """
+import os
 import re
+import sys
+import time
 from typing import Any, Dict, List, Optional
 
 # ANSI color codes for terminal output
@@ -89,6 +92,19 @@ _MAX_FACE_LENGTH = 10
 _FACE_PATTERN = re.compile(
     r"^[^\x00-\x1f\x7f A-Za-z0-9]{1,%d}$" % _MAX_FACE_LENGTH
 )
+
+
+def type_text(text: str, speed: float = 0.03) -> None:
+    """Write text to stderr one character at a time with flush for typing animation.
+
+    Args:
+        text: The text to animate.
+        speed: Delay in seconds between each character (default 0.03s).
+    """
+    for char in text:
+        sys.stderr.write(char)
+        sys.stderr.flush()
+        time.sleep(speed)
 
 
 def get_buddy_config(config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
@@ -585,12 +601,16 @@ def render_session_start(
     previous_session: "Dict[str, Any] | None" = None,
     pending_context: "Dict[str, Any] | None" = None,
     buddy_config: Optional[Dict[str, str]] = None,
+    typing: bool = False,
 ) -> str:
     """Render complete session-start output.
 
     Assembles buddy face, scan results, and recommendations into
     a single formatted output string. If previous_session is provided,
     renders a returning session greeting instead of the default.
+
+    When typing=True, writes the output to stderr with a typing animation
+    effect on the greeting text and returns an empty string.
 
     Args:
         scan: Project scan data dict.
@@ -600,9 +620,10 @@ def render_session_start(
         previous_session: Optional previous session data for returning users.
         pending_context: Optional pending work context from context.md.
         buddy_config: Optional buddy customization from get_buddy_config().
+        typing: If True, output to stderr with typing animation on greeting.
 
     Returns:
-        Complete formatted session-start output.
+        Complete formatted session-start output, or empty string if typing=True.
     """
     # Returning session path
     if previous_session:
@@ -634,4 +655,32 @@ def render_session_start(
         parts.append("")
         parts.append(badges)
 
-    return "\n".join(parts)
+    full_output = "\n".join(parts)
+
+    if not typing:
+        return full_output
+
+    # Typing mode: animate the greeting text, print rest instantly
+    bc = buddy_config or DEFAULT_BUDDY_CONFIG
+    custom_greeting = bc.get("greeting", "")
+    if previous_session:
+        greeting = custom_greeting if custom_greeting else _get_returning_greeting(tone, language)
+    else:
+        greeting = custom_greeting if custom_greeting else _get_greeting(tone, language)
+
+    idx = full_output.find(greeting)
+    if idx == -1 or not greeting:
+        # Fallback: print everything instantly
+        sys.stderr.write(full_output + "\n")
+        sys.stderr.flush()
+        return ""
+
+    before = full_output[:idx]
+    after = full_output[idx + len(greeting):]
+
+    sys.stderr.write(before)
+    sys.stderr.flush()
+    type_text(greeting)
+    sys.stderr.write(after + "\n")
+    sys.stderr.flush()
+    return ""

@@ -547,7 +547,7 @@ def main():
             _ensure_lib_path()
 
             from config import get_config as _get_config
-            from buddy_renderer import render_session_start
+            from buddy_renderer import render_session_start, get_buddy_config
             from adaptive_perf import get_monitor, format_lightweight_notice
 
             cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
@@ -593,11 +593,18 @@ def main():
             except Exception:
                 pass  # Never block for returning session detection
 
+            # Buddy config and typing animation (#1033)
+            buddy_cfg = get_buddy_config(cfg)
+            buddy_section = cfg.get("buddy") if isinstance(cfg.get("buddy"), dict) else {}
+            typing_enabled = buddy_section.get("typingEffect", True) and not os.environ.get("CI")
+
             # Render and output
             output = render_session_start(
                 scan_data, recommendations, tone, language,
                 previous_session=previous_session,
                 pending_context=pending_context,
+                buddy_config=buddy_cfg,
+                typing=bool(typing_enabled),
             )
             if output:
                 print(output)

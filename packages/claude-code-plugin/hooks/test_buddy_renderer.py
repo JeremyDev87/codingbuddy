@@ -17,6 +17,7 @@ from buddy_renderer import (
     render_session_summary,
     render_returning_session,
     get_buddy_config,
+    type_text,
     GREETINGS,
     FAREWELL_GREETINGS,
     FAREWELL_MESSAGES,
@@ -462,6 +463,95 @@ class TestBuddyCustomFace:
     def test_no_buddy_config_keeps_defaults(self):
         result = render_buddy_face("casual", "en")
         assert BUDDY_FACE in result
+
+
+class TestTypeText:
+    """Tests for type_text — typing animation (#1033)."""
+
+    def test_writes_all_chars_to_stderr(self, capsys, monkeypatch):
+        """type_text writes every character to stderr."""
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        type_text("hello")
+        captured = capsys.readouterr()
+        assert captured.err == "hello"
+        assert captured.out == ""
+
+    def test_empty_string_writes_nothing(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        type_text("")
+        captured = capsys.readouterr()
+        assert captured.err == ""
+
+    def test_unicode_text(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        type_text("\uc548\ub155!")
+        captured = capsys.readouterr()
+        assert captured.err == "\uc548\ub155!"
+
+    def test_calls_sleep_per_char(self, monkeypatch):
+        sleep_calls = []
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda s: sleep_calls.append(s))
+        type_text("abc", speed=0.05)
+        assert len(sleep_calls) == 3
+        assert all(s == 0.05 for s in sleep_calls)
+
+    def test_default_speed(self, monkeypatch):
+        sleep_calls = []
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda s: sleep_calls.append(s))
+        type_text("ab")
+        assert all(s == 0.03 for s in sleep_calls)
+
+
+class TestTypingMode:
+    """Tests for render_session_start typing=True (#1033)."""
+
+    def test_typing_returns_empty_string(self, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en", typing=True)
+        assert result == ""
+
+    def test_typing_false_returns_full_output(self):
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en", typing=False)
+        assert "app" in result
+        assert BUDDY_FACE in result
+
+    def test_typing_writes_to_stderr(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        scan = {"name": "app"}
+        render_session_start(scan, [], "casual", "en", typing=True)
+        captured = capsys.readouterr()
+        assert BUDDY_FACE in captured.err
+        assert "Hey!" in captured.err
+        assert "app" in captured.err
+
+    def test_typing_greeting_appears_in_stderr(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        scan = {"name": "app"}
+        render_session_start(scan, [], "formal", "ko", typing=True)
+        captured = capsys.readouterr()
+        assert "\ud504\ub85c\uc81d\ud2b8" in captured.err
+
+    def test_typing_with_returning_session(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        scan = {"name": "app"}
+        prev = {"started_at": 1000, "ended_at": 2000, "tool_call_count": 5, "error_count": 0}
+        result = render_session_start(
+            scan, [], "casual", "en",
+            previous_session=prev, typing=True,
+        )
+        assert result == ""
+        captured = capsys.readouterr()
+        assert "back" in captured.err.lower()
+
+    def test_typing_with_custom_greeting(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        bc = {"face": BUDDY_FACE, "greeting": "Custom hello!", "name": "B", "farewell": ""}
+        scan = {"name": "app"}
+        render_session_start(scan, [], "casual", "en", buddy_config=bc, typing=True)
+        captured = capsys.readouterr()
+        assert "Custom hello!" in captured.err
 
 
 if __name__ == "__main__":
