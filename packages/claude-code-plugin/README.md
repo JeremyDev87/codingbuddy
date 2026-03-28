@@ -2,18 +2,18 @@
 
 # CodingBuddy Claude Code Plugin
 
-> Version 4.5.0
+> Version 5.1.0
 
-Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, and reusable skills for systematic development.
+Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, Impact Telemetry, and reusable skills for systematic development.
 
 ## Installation
 
 ```bash
-# Via npm
-npm install codingbuddy-claude-plugin
+# 1. Add marketplace
+claude marketplace add JeremyDev87/codingbuddy
 
-# Or via Claude Code
-claude plugin add codingbuddy
+# 2. Install plugin
+claude plugin install codingbuddy@jeremydev87
 ```
 
 ## Features

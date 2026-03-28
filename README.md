@@ -73,10 +73,14 @@ Start coding with `PLAN`, `ACT`, `EVAL`, or `AUTO` keywords.
 > **Claude Code users**: Install as a plugin for the full experience:
 >
 > ```bash
+> # 1. Add marketplace
+> claude marketplace add JeremyDev87/codingbuddy
+>
+> # 2. Install plugin
 > claude plugin install codingbuddy@jeremydev87
 > ```
 >
-> The plugin adds session-aware hooks that power Impact Reports, buddy greetings, onboarding tours, achievement badges, and adaptive performance mode. Update to the latest version with the same command.
+> The plugin adds session-aware hooks that power Impact Reports, buddy greetings, onboarding tours, achievement badges, and adaptive performance mode. Update to the latest version with `claude plugin install codingbuddy@jeremydev87`.
 >
 > See the [Plugin Guide](docs/plugin-guide.md) for details.
 
