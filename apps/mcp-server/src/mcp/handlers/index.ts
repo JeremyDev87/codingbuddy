@@ -127,6 +127,18 @@ export { RuleInsightsHandler } from './rule-insights.handler';
 export { ImpactHandler } from './impact.handler';
 
 /**
+ * Handler for plugin validation tools (validate_plugin_manifest)
+ * @see {@link PluginValidationHandler}
+ */
+export { PluginValidationHandler } from './plugin-validation.handler';
+
+/**
+ * Handler for release check tools (pre_release_check)
+ * @see {@link ReleaseCheckHandler}
+ */
+export { ReleaseCheckHandler } from './release-check.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

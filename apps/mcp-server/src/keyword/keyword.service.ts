@@ -526,7 +526,45 @@ export class KeywordService {
         'TaskMaestro skill not found at ~/.claude/skills/taskmaestro/SKILL.md. To enable tmux-based parallel specialist execution, install the taskmaestro skill.';
     }
 
+    // 11. Auto-include release checklist in EVAL mode on version changes (#1085)
+    this.addReleaseChecklistIfNeeded(result, mode, originalPrompt);
+
     return result;
+  }
+
+  /** Version-related patterns for release checklist auto-detection (#1085). */
+  private static readonly VERSION_PATTERNS = [
+    /\bversion\b.*\b\d+\.\d+\.\d+\b/i,
+    /\bbump\b/i,
+    /\brelease\b/i,
+    /\bchangelog\b/i,
+    /package\.json/,
+    /pyproject\.toml/,
+    /build\.gradle/,
+    /Cargo\.toml/,
+    /go\.mod/,
+  ];
+
+  /**
+   * Auto-include release checklist in EVAL mode when version changes detected (#1085).
+   */
+  private addReleaseChecklistIfNeeded(
+    result: ParseModeResult,
+    mode: Mode,
+    originalPrompt: string,
+  ): void {
+    if (mode !== 'EVAL' && mode !== 'AUTO') return;
+
+    const hasVersionChanges = KeywordService.VERSION_PATTERNS.some(p => p.test(originalPrompt));
+    if (!hasVersionChanges) return;
+
+    if (!result.warnings) {
+      result.warnings = [];
+    }
+    result.warnings.push(
+      'Version-related changes detected. Release checklist has been auto-included. ' +
+        'Run `pre_release_check` for comprehensive validation.',
+    );
   }
 
   /**

@@ -2705,4 +2705,40 @@ ${'Even more content.\n'.repeat(150)}`;
       spy.mockRestore();
     });
   });
+
+  describe('release checklist auto-detection (#1085)', () => {
+    it('should add release warning in EVAL when prompt mentions version bump', async () => {
+      const result = await service.parseMode('EVAL: review version bump to 5.2.0', {});
+      expect(result.mode).toBe('EVAL');
+      expect(result.warnings).toBeDefined();
+      expect(result.warnings!.some((w: string) => w.includes('Release checklist'))).toBe(true);
+    });
+
+    it('should add release warning in EVAL when prompt mentions release', async () => {
+      const result = await service.parseMode('EVAL: prepare release', {});
+      expect(result.warnings!.some((w: string) => w.includes('pre_release_check'))).toBe(true);
+    });
+
+    it('should add release warning in EVAL when package.json in prompt', async () => {
+      const result = await service.parseMode('EVAL: changes to package.json', {});
+      expect(result.warnings!.some((w: string) => w.includes('Release checklist'))).toBe(true);
+    });
+
+    it('should not add release warning in PLAN mode', async () => {
+      const result = await service.parseMode('PLAN: version bump', {});
+      const releaseWarning = result.warnings?.find((w: string) => w.includes('Release checklist'));
+      expect(releaseWarning).toBeUndefined();
+    });
+
+    it('should add release warning in AUTO mode with version keyword', async () => {
+      const result = await service.parseMode('AUTO: bump version to 2.0.0', {});
+      expect(result.warnings!.some((w: string) => w.includes('Release checklist'))).toBe(true);
+    });
+
+    it('should not add release warning when no version keywords', async () => {
+      const result = await service.parseMode('EVAL: review code quality', {});
+      const releaseWarning = result.warnings?.find((w: string) => w.includes('Release checklist'));
+      expect(releaseWarning).toBeUndefined();
+    });
+  });
 });

@@ -35,6 +35,8 @@ import {
   ParallelValidationHandler,
   PipelineHandler,
   ImpactHandler,
+  PluginValidationHandler,
+  ReleaseCheckHandler,
 } from './handlers';
 
 const handlers = [
@@ -53,6 +55,8 @@ const handlers = [
   ParallelValidationHandler,
   PipelineHandler,
   ImpactHandler,
+  PluginValidationHandler,
+  ReleaseCheckHandler,
 ];
 
 @Module({
