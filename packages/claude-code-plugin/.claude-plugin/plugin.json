@@ -5,5 +5,13 @@
   "author": {
     "name": "JeremyDev87",
     "email": "soundbrokaz@kakao.com"
-  }
+  },
+  "commands": [
+    {
+      "name": "buddy",
+      "description": "Show project status, recommended agents, and next actions",
+      "file": "../commands/buddy.md",
+      "user-invocable": true
+    }
+  ]
 }
