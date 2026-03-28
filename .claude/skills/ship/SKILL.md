@@ -1,7 +1,7 @@
 ---
 name: ship
-description: Run local CI checks and ship changes — create branch, commit, push, and PR. Optionally link to a GitHub issue. Use when changes are ready to ship.
-argument-hint: [issue-url-or-number]
+description: Run local CI checks and ship changes — create branch, commit, push, and PR. Optionally link to a GitHub issue. Use `--full` to run all workspace checks. Use when changes are ready to ship.
+argument-hint: "[--full] [issue-url-or-number]"
 allowed-tools: Bash, Read, Grep, Glob
 user-invocable: true
 disable-model-invocation: true
@@ -11,17 +11,21 @@ disable-model-invocation: true
 
 Follow every step in order. Stop and report if any step fails.
 
-## Step 1: Determine Issue Context
+## Step 1: Parse Arguments and Determine Issue Context
 
-Check if `$ARGUMENTS` is provided:
+Parse `$ARGUMENTS` for:
+- **`--full` flag**: If present, run ALL workspace checks (matches CI exactly). Remove `--full` from arguments before processing issue context.
+- **Issue context**: Remaining argument is an issue number or URL.
 
-- **With issue** (`/ship 613` or `/ship https://github.com/.../issues/613`):
+Check if issue context is provided:
+
+- **With issue** (`/ship 613` or `/ship --full 613`):
   ```bash
   gh issue view <number> --json title,body,labels
   ```
   Use the issue title and labels to inform branch name, commit message, and PR description.
 
-- **Without issue** (`/ship`):
+- **Without issue** (`/ship` or `/ship --full`):
   Skip issue fetch. Derive context entirely from the changed files and `git diff`. The user will be asked to confirm the commit message and PR title before proceeding.
 
 ## Step 2: Check Working Tree
@@ -45,7 +49,9 @@ Run `git diff --name-only` (include both staged and unstaged changes) and classi
 | `apps/landing-page/**` | `landing-page` | lint, format:check, typecheck, test:coverage, check:circular, build |
 | `.claude/**`, `.cursor/**`, `.antigravity/**`, `.codex/**`, `.github/**`, `scripts/**` | rules-validation only | `ajv-cli validate` + `markdownlint-cli2` |
 
-If changed files don't match any pattern (e.g., docs-only, root config), skip CI checks entirely and proceed to Step 5.
+**Docs-only changes**: If changed files don't match any pattern above (e.g., docs-only, root config) AND `--full` is NOT set, skip all CI checks (including security) and proceed to Step 7.
+
+**`--full` mode**: If `--full` flag is set, mark ALL workspaces as affected regardless of changed files.
 
 ## Step 3.5: Verify Dependencies
 
@@ -68,9 +74,23 @@ npx --version
 
 **Iron Law:** Never skip CI checks due to missing dependencies.
 
-## Step 4: Run Local CI Checks
+## Step 4: Run Cross-cutting Security Checks
 
-Run checks **only for affected workspaces**. Execute checks sequentially within each workspace. Stop at first failure.
+**Security is cross-cutting** — always run security audit for ALL workspaces when any workspace has changes, even if only one workspace is affected. This matches CI behavior where all security jobs run on every triggered push.
+
+```bash
+yarn workspace codingbuddy npm audit --severity high
+yarn workspace codingbuddy-claude-plugin npm audit --severity high
+yarn workspace landing-page npm audit --severity high
+```
+
+If ANY security check fails, stop and report the failure. Do NOT proceed to shipping.
+
+## Step 5: Run Local CI Checks
+
+Run checks for **affected workspaces only** (or ALL workspaces if `--full` is set). Execute checks sequentially within each workspace. Stop at first failure.
+
+**Note:** Security audits were already run in Step 4 for all workspaces — do not repeat them here.
 
 ### codingbuddy workspace
 
@@ -114,7 +134,7 @@ yarn dlx markdownlint-cli2@0.20.0 "packages/rules/.ai-rules/**/*.md"
 
 If ANY check fails, stop and report the failure. Do NOT proceed to shipping.
 
-## Step 5: Check Commit Convention
+## Step 6: Check Commit Convention
 
 ```bash
 git log --oneline -10
@@ -124,7 +144,7 @@ Identify the commit message convention. This project uses: `type(scope): descrip
 
 Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`, `ci`
 
-## Step 6: Create Branch and Commit
+## Step 7: Create Branch and Commit
 
 ### Branch naming
 
@@ -154,12 +174,12 @@ EOF
 **Rules:**
 - Write commit message in **English**
 - Do NOT include author information
-- Follow the detected convention from Step 5
+- Follow the detected convention from Step 6
 - Use specific file paths in `git add` (never `git add -A` or `git add .`)
 - **Never stage `RESULT.json` or `TASK.md`** — these are ephemeral per-worktree artifacts and must not be committed
 - Only include `Closes #<number>` if an issue was provided
 
-## Step 7: Push and Create PR
+## Step 8: Push and Create PR
 
 ```bash
 git push -u origin <branch-name>
@@ -204,10 +224,12 @@ EOF
 - Body: English, include Summary + Test plan sections
 - Do NOT include author information
 
-## Step 8: Report Result
+## Step 9: Report Result
 
 Print the PR URL and a summary of:
 - Which CI checks were run and passed (or "skipped — no matching workspace")
+- Security checks: always-run status for all workspaces
+- Whether `--full` mode was used
 - Branch name
 - Commit hash
 - PR URL
