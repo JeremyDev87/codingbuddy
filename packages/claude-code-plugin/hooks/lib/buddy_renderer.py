@@ -565,6 +565,96 @@ def _get_summary_header(key: str, language: str) -> str:
     return lang_headers.get(key, SUMMARY_HEADERS["en"].get(key, key))
 
 
+def render_bar_chart(
+    label: str,
+    value: int,
+    max_value: int,
+    width: int = 20,
+    color: str = "green",
+    ascii_mode: bool = False,
+) -> str:
+    """Render a single mini bar chart line (#1041).
+
+    Args:
+        label: Left-aligned label (e.g., "Edit", "Bash").
+        value: Current value to visualize.
+        max_value: Maximum value for full bar width.
+        width: Bar width in characters (default 20).
+        color: ANSI color name for the filled portion.
+        ascii_mode: If True, use ASCII characters instead of Unicode.
+
+    Returns:
+        Formatted bar chart line, e.g.:
+          Normal: "  Edit         ████████░░░░ 5"
+          ASCII:  "  Edit         [####........] 5"
+    """
+    if max_value <= 0 or value <= 0:
+        ratio = 0.0
+    else:
+        ratio = min(value / max_value, 1.0)
+
+    filled = int(ratio * width)
+    empty = width - filled
+
+    if ascii_mode:
+        bar = "[" + "#" * filled + "." * empty + "]"
+    else:
+        filled_bar = "\u2588" * filled + "\u2591" * empty
+        bar = _colorize(filled_bar, color)
+
+    return f"  {label:<12} {bar} {value}"
+
+
+def _render_bar_charts(
+    tool_names: Dict[str, int],
+    stats: Dict[str, Any],
+    ascii_mode: bool = False,
+) -> List[str]:
+    """Build bar chart lines from tool usage data (#1041).
+
+    Shows top tool distribution bars, normalized to the highest count.
+
+    Args:
+        tool_names: Dict of tool name → usage count.
+        stats: Session stats dict with files_changed, tool_count.
+        ascii_mode: Whether to use ASCII rendering.
+
+    Returns:
+        List of formatted bar chart lines.
+    """
+    if not tool_names:
+        return []
+
+    # Get top 3 tools by usage
+    sorted_tools = sorted(tool_names.items(), key=lambda x: x[1], reverse=True)
+    top_tools = sorted_tools[:3]
+
+    if not top_tools:
+        return []
+
+    max_val = top_tools[0][1]
+    if max_val <= 0:
+        return []
+
+    # Color mapping by tool type
+    tool_colors = {
+        "Edit": "yellow",
+        "Write": "yellow",
+        "Bash": "cyan",
+        "Read": "blue",
+        "Grep": "blue",
+        "Glob": "blue",
+        "Agent": "magenta",
+    }
+
+    lines: List[str] = []
+    for tool, count in top_tools:
+        color = tool_colors.get(tool, "green")
+        lines.append(render_bar_chart(tool, count, max_val, color=color, ascii_mode=ascii_mode))
+
+    return lines
+
+
 def render_session_summary(
     stats: Dict[str, Any],
     agents: List[Dict[str, Any]],
@@ -637,6 +727,13 @@ def render_session_summary(
         one_line = generate_one_line_summary(tool_names, agent_name, language)
         if one_line:
             parts.append(f"\U0001f4ac {one_line}")
+
+        # Bar chart visualization (#1041)
+        ascii_mode = bc.get("asciiMode", False)
+        charts = _render_bar_charts(tool_names, stats, ascii_mode=ascii_mode)
+        if charts:
+            parts.append("")
+            parts.extend(charts)
 
     # Active agents section
     if agents:

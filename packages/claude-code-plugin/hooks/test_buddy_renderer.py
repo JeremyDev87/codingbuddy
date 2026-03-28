@@ -16,6 +16,7 @@ from buddy_renderer import (
     render_session_start,
     render_session_summary,
     render_returning_session,
+    render_bar_chart,
     get_buddy_config,
     type_text,
     _to_ascii,
@@ -702,6 +703,112 @@ class TestAsciiModeRendering:
         captured = capsys.readouterr()
         assert "+---+" in captured.err
         assert "\u256d" not in captured.err
+
+
+class TestRenderBarChart:
+    """Tests for render_bar_chart — mini bar chart visualization (#1041)."""
+
+    def test_full_bar(self):
+        result = render_bar_chart("Edit", 10, 10, width=10)
+        assert "Edit" in result
+        assert "10" in result
+        assert "\u2588" * 10 in result  # ██████████
+
+    def test_half_bar(self):
+        result = render_bar_chart("Bash", 5, 10, width=10)
+        assert "\u2588" * 5 in result
+        assert "\u2591" * 5 in result
+
+    def test_zero_value(self):
+        result = render_bar_chart("Read", 0, 10, width=10)
+        assert "0" in result
+        assert "\u2591" * 10 in result  # all empty
+
+    def test_zero_max_value(self):
+        result = render_bar_chart("Read", 5, 0, width=10)
+        assert "5" in result
+        assert "\u2591" * 10 in result  # all empty (safe division)
+
+    def test_value_exceeds_max(self):
+        result = render_bar_chart("Edit", 15, 10, width=10)
+        assert "\u2588" * 10 in result  # capped at full
+
+    def test_ascii_mode(self):
+        result = render_bar_chart("Bash", 5, 10, width=10, ascii_mode=True)
+        assert "[" in result
+        assert "]" in result
+        assert "#" * 5 in result
+        assert "." * 5 in result
+
+    def test_ascii_mode_full(self):
+        result = render_bar_chart("Edit", 10, 10, width=10, ascii_mode=True)
+        assert "[##########]" in result
+
+    def test_ascii_mode_empty(self):
+        result = render_bar_chart("Read", 0, 10, width=10, ascii_mode=True)
+        assert "[..........]" in result
+
+    def test_label_alignment(self):
+        result = render_bar_chart("X", 5, 10, width=10)
+        # Label should be left-padded to 12 chars
+        assert "X " in result
+
+    def test_color_applied_in_normal_mode(self):
+        result = render_bar_chart("Edit", 5, 10, color="yellow")
+        assert ANSI_COLORS["yellow"] in result
+        assert ANSI_COLORS["reset"] in result
+
+    def test_no_color_in_ascii_mode(self):
+        result = render_bar_chart("Edit", 5, 10, color="yellow", ascii_mode=True)
+        assert ANSI_COLORS["yellow"] not in result
+
+
+class TestBarChartInSummary:
+    """Tests for bar chart integration in render_session_summary (#1041)."""
+
+    def test_bar_charts_appear_with_tool_names(self):
+        stats = {"duration_minutes": 10, "tool_count": 30, "files_changed": 5}
+        tool_names = {"Edit": 10, "Read": 15, "Bash": 5}
+        result = render_session_summary(stats, [], "casual", "en", tool_names=tool_names)
+        assert "\u2588" in result  # bar chart present
+        assert "Edit" in result
+        assert "Read" in result
+        assert "Bash" in result
+
+    def test_bar_charts_show_top_3_only(self):
+        stats = {"duration_minutes": 10, "tool_count": 50, "files_changed": 5}
+        tool_names = {"Edit": 10, "Read": 20, "Bash": 15, "Glob": 3, "Grep": 2}
+        result = render_session_summary(stats, [], "casual", "en", tool_names=tool_names)
+        # Top 3: Read(20), Bash(15), Edit(10)
+        assert "Read" in result
+        assert "Bash" in result
+        assert "Edit" in result
+
+    def test_no_bar_charts_without_tool_names(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "\u2588" not in result  # no bar chars
+
+    def test_bar_charts_ascii_mode(self):
+        bc = {
+            "name": "Buddy", "face": BUDDY_FACE,
+            "greeting": "", "farewell": "", "asciiMode": True,
+        }
+        stats = {"duration_minutes": 10, "tool_count": 20, "files_changed": 3}
+        tool_names = {"Edit": 8, "Read": 12}
+        result = render_session_summary(
+            stats, [], "casual", "en",
+            buddy_config=bc, tool_names=tool_names,
+        )
+        assert "[#" in result  # ASCII bar
+        assert "\u2588" not in result  # no Unicode bar
+
+    def test_empty_tool_names_no_charts(self):
+        stats = {"duration_minutes": 5, "tool_count": 0, "files_changed": 0}
+        result = render_session_summary(
+            stats, [], "casual", "en", tool_names={},
+        )
+        assert "\u2588" not in result
 
 
 if __name__ == "__main__":
