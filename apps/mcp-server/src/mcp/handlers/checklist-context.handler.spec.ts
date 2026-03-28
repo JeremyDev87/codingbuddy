@@ -2,11 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChecklistContextHandler } from './checklist-context.handler';
 import { ChecklistService } from '../../checklist/checklist.service';
 import { ContextService } from '../../context/context.service';
+import type { ImpactEventService } from '../../impact';
 
 describe('ChecklistContextHandler', () => {
   let handler: ChecklistContextHandler;
   let mockChecklistService: ChecklistService;
   let mockContextService: ContextService;
+  let mockImpactEventService: Partial<ImpactEventService>;
 
   const mockChecklistResult = {
     checklists: [{ domain: 'security', items: [], priority: 'high', icon: '🔒' }],
@@ -47,7 +49,13 @@ describe('ChecklistContextHandler', () => {
       analyzeTask: vi.fn().mockResolvedValue(mockAnalysisResult),
     } as unknown as ContextService;
 
-    handler = new ChecklistContextHandler(mockChecklistService, mockContextService);
+    mockImpactEventService = { logEvent: vi.fn() };
+
+    handler = new ChecklistContextHandler(
+      mockChecklistService,
+      mockContextService,
+      mockImpactEventService as ImpactEventService,
+    );
   });
 
   describe('handle', () => {

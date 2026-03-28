@@ -29,6 +29,7 @@ import {
 import { buildVisualData, type AgentVisualInput } from '../../keyword/visual-data.builder';
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { AgentService } from '../../agent/agent.service';
+import { ImpactEventService } from '../../impact';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -102,6 +103,7 @@ export class ModeHandler extends AbstractHandler {
     private readonly contextDocService: ContextDocumentService,
     private readonly diagnosticLogService: DiagnosticLogService,
     private readonly agentService: AgentService,
+    private readonly impactEventService: ImpactEventService,
   ) {
     super();
   }
@@ -280,7 +282,7 @@ export class ModeHandler extends AbstractHandler {
         settings?.eco,
       );
 
-      return createJsonResponse({
+      const response = createJsonResponse({
         ...result,
         language,
         languageInstruction: languageInstructionResult.instruction,
@@ -300,6 +302,17 @@ export class ModeHandler extends AbstractHandler {
         // Include project root warning when auto-detected and config missing
         ...(projectRootWarning && { projectRootWarning }),
       });
+
+      try {
+        this.impactEventService.logEvent('default', 'mode_activated', {
+          mode: result.mode,
+          agent: result.agent,
+        });
+      } catch {
+        // Never break handler execution
+      }
+
+      return response;
     } catch (error) {
       return createErrorResponse(
         `Failed to parse mode: ${error instanceof Error ? error.message : 'Unknown error'}`,

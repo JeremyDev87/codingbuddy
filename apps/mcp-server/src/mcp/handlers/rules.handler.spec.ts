@@ -3,11 +3,13 @@ import { RulesHandler } from './rules.handler';
 import { RulesService } from '../../rules/rules.service';
 import { ModelResolverService } from '../../model';
 import type { AgentProfile } from '../../rules/rules.types';
+import type { ImpactEventService } from '../../impact';
 
 describe('RulesHandler', () => {
   let handler: RulesHandler;
   let mockRulesService: RulesService;
   let mockModelResolverService: ModelResolverService;
+  let mockImpactEventService: Partial<ImpactEventService>;
 
   const mockAgent: AgentProfile = {
     name: 'test-agent',
@@ -33,7 +35,13 @@ describe('RulesHandler', () => {
       }),
     } as unknown as ModelResolverService;
 
-    handler = new RulesHandler(mockRulesService, mockModelResolverService);
+    mockImpactEventService = { logEvent: vi.fn() };
+
+    handler = new RulesHandler(
+      mockRulesService,
+      mockModelResolverService,
+      mockImpactEventService as ImpactEventService,
+    );
   });
 
   describe('handle', () => {

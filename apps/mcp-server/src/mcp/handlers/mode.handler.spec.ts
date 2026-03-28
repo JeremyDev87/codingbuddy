@@ -8,6 +8,7 @@ import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import type { AgentService } from '../../agent/agent.service';
+import type { ImpactEventService } from '../../impact';
 
 describe('ModeHandler', () => {
   let handler: ModeHandler;
@@ -19,6 +20,7 @@ describe('ModeHandler', () => {
   let mockContextDocService: ContextDocumentService;
   let mockDiagnosticLogService: DiagnosticLogService;
   let mockAgentService: Partial<AgentService>;
+  let mockImpactEventService: Partial<ImpactEventService>;
 
   const mockParseModeResult = {
     mode: 'PLAN',
@@ -125,6 +127,10 @@ describe('ModeHandler', () => {
       }),
     };
 
+    mockImpactEventService = {
+      logEvent: vi.fn(),
+    };
+
     handler = new ModeHandler(
       mockKeywordService,
       mockConfigService,
@@ -134,6 +140,7 @@ describe('ModeHandler', () => {
       mockContextDocService,
       mockDiagnosticLogService,
       mockAgentService as AgentService,
+      mockImpactEventService as ImpactEventService,
     );
   });
 

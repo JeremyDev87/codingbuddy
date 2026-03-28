@@ -13,6 +13,7 @@ import {
 import type { Mode } from '../../keyword/keyword.types';
 import type { ContextIssue } from '../../context/context-document.types';
 import { isValidVerbosity, getVerbosityConfig } from '../../shared/verbosity.types';
+import { ImpactEventService } from '../../impact';
 
 /**
  * Handler for context document tools.
@@ -26,7 +27,10 @@ import { isValidVerbosity, getVerbosityConfig } from '../../shared/verbosity.typ
  */
 @Injectable()
 export class ContextDocumentHandler extends AbstractHandler {
-  constructor(private readonly contextDocService: ContextDocumentService) {
+  constructor(
+    private readonly contextDocService: ContextDocumentService,
+    private readonly impactEventService: ImpactEventService,
+  ) {
     super();
   }
 
@@ -397,6 +401,23 @@ Call this at the end of each mode to persist decisions and notes.`,
 
     if (!result.success) {
       return createErrorResponse(result.error || 'Failed to update context');
+    }
+
+    try {
+      if (typedMode === 'EVAL') {
+        const findings = Array.isArray(args?.findings) ? (args.findings as string[]) : [];
+        this.impactEventService.logEvent('default', 'issue_found', {
+          count: findings.length,
+          domain: 'eval',
+        });
+      } else if (typedMode === 'ACT') {
+        const decisions = Array.isArray(args?.decisions) ? (args.decisions as string[]) : [];
+        this.impactEventService.logEvent('default', 'context_saved', {
+          count: decisions.length,
+        });
+      }
+    } catch {
+      // Never break handler execution
     }
 
     return createJsonResponse({

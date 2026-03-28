@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AgentHandler } from './agent.handler';
 import { AgentService } from '../../agent/agent.service';
+import type { ImpactEventService } from '../../impact';
 
 describe('AgentHandler', () => {
   let handler: AgentHandler;
   let mockAgentService: AgentService;
+  let mockImpactEventService: Partial<ImpactEventService>;
 
   const mockSystemPromptResult = {
     agentName: 'security-specialist',
@@ -22,7 +24,9 @@ describe('AgentHandler', () => {
       prepareParallelAgents: vi.fn().mockResolvedValue(mockParallelAgentsResult),
     } as unknown as AgentService;
 
-    handler = new AgentHandler(mockAgentService);
+    mockImpactEventService = { logEvent: vi.fn() };
+
+    handler = new AgentHandler(mockAgentService, mockImpactEventService as ImpactEventService);
   });
 
   describe('handle', () => {

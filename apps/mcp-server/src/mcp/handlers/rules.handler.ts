@@ -6,6 +6,7 @@ import { RulesService } from '../../rules/rules.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
 import { ModelResolverService } from '../../model';
 import { extractRequiredString } from '../../shared/validation.constants';
+import { ImpactEventService } from '../../impact';
 
 /**
  * Handler for rules-related tools
@@ -17,6 +18,7 @@ export class RulesHandler extends AbstractHandler {
   constructor(
     private readonly rulesService: RulesService,
     private readonly modelResolverService: ModelResolverService,
+    private readonly impactEventService: ImpactEventService,
   ) {
     super();
   }
@@ -74,6 +76,17 @@ export class RulesHandler extends AbstractHandler {
       return createErrorResponse('Missing required parameter: query');
     }
     const results = await this.rulesService.searchRules(query);
+
+    try {
+      const count = Array.isArray(results) ? results.length : 0;
+      this.impactEventService.logEvent('default', 'rule_matched', {
+        count,
+        detail: query,
+      });
+    } catch {
+      // Never break handler execution
+    }
+
     return createJsonResponse(results);
   }
 

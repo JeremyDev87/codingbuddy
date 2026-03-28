@@ -12,6 +12,7 @@ import {
   isValidMode,
   type ValidMode,
 } from '../../shared/validation.constants';
+import { ImpactEventService } from '../../impact';
 
 /**
  * Valid checklist domains for runtime validation
@@ -35,6 +36,7 @@ export class ChecklistContextHandler extends AbstractHandler {
   constructor(
     private readonly checklistService: ChecklistService,
     private readonly contextService: ContextService,
+    private readonly impactEventService: ImpactEventService,
   ) {
     super();
   }
@@ -135,6 +137,16 @@ export class ChecklistContextHandler extends AbstractHandler {
         files,
         domains,
       });
+
+      try {
+        this.impactEventService.logEvent('default', 'checklist_generated', {
+          domain: domains?.join(','),
+          count: result.summary?.total ?? 0,
+        });
+      } catch {
+        // Never break handler execution
+      }
+
       return createJsonResponse(result);
     } catch (error) {
       return createErrorResponse(

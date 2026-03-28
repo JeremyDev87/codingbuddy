@@ -14,6 +14,7 @@ import {
   isValidMode,
   isRecordObject,
 } from '../../shared/validation.constants';
+import { ImpactEventService } from '../../impact';
 
 /**
  * Handler for agent-related tools
@@ -23,7 +24,10 @@ import {
  */
 @Injectable()
 export class AgentHandler extends AbstractHandler {
-  constructor(private readonly agentService: AgentService) {
+  constructor(
+    private readonly agentService: AgentService,
+    private readonly impactEventService: ImpactEventService,
+  ) {
     super();
   }
 
@@ -241,6 +245,15 @@ export class AgentHandler extends AbstractHandler {
               'Report completion summary via SendMessage to team-lead with total findings count',
           },
         };
+      }
+
+      try {
+        this.impactEventService.logEvent('default', 'agent_dispatched', {
+          agent: primaryAgent ?? undefined,
+          detail: executionStrategy,
+        });
+      } catch {
+        // Never break handler execution
       }
 
       return createJsonResponse(result);

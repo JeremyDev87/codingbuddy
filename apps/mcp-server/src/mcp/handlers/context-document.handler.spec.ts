@@ -2,10 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ContextDocumentHandler } from './context-document.handler';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { CONTEXT_FILE_PATH, getSessionContextFilePath } from '../../context/context-document.types';
+import type { ImpactEventService } from '../../impact';
 
 describe('ContextDocumentHandler', () => {
   let handler: ContextDocumentHandler;
   let mockContextDocService: ContextDocumentService;
+  let mockImpactEventService: Partial<ImpactEventService>;
 
   const mockReadResult = {
     exists: true,
@@ -39,7 +41,12 @@ describe('ContextDocumentHandler', () => {
       }),
     } as unknown as ContextDocumentService;
 
-    handler = new ContextDocumentHandler(mockContextDocService);
+    mockImpactEventService = { logEvent: vi.fn() };
+
+    handler = new ContextDocumentHandler(
+      mockContextDocService,
+      mockImpactEventService as ImpactEventService,
+    );
   });
 
   describe('handle', () => {
