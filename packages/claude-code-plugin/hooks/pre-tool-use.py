@@ -31,11 +31,7 @@ from tdd_progress import build_tdd_indicator
 _GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
 
 QUALITY_GATE_CONTEXT = (
-    "[CodingBuddy Quality Gate] Before committing, ensure:\n"
-    "- All tests pass\n"
-    "- Code follows project conventions\n"
-    "- Changes are reviewed (self-review at minimum)\n"
-    "- Commit message follows project convention"
+    "[Quality Gate] Verify: tests pass, conventions followed, changes self-reviewed."
 )
 
 FILE_WATCHER_CONTEXT = (
@@ -144,7 +140,10 @@ def _get_staged_files() -> List[str]:
 
 
 def _get_test_suggestion(staged_files: List[str]) -> Optional[str]:
-    """Use SmartTestRunner to build a test-run suggestion for staged files."""
+    """Use SmartTestRunner to build a compact test-run suggestion for staged files.
+
+    Returns a collapsed count instead of listing individual files (#1039).
+    """
     try:
         from smart_test_runner import SmartTestRunner
 
@@ -152,18 +151,32 @@ def _get_test_suggestion(staged_files: List[str]) -> Optional[str]:
         related = runner.find_related_tests(staged_files)
         if not related:
             return None
-        return runner.format_suggestion(related)
+        count = len(related)
+        return f"{count} related test(s) found — consider running before commit"
     except Exception:
         return None
 
 
 def _get_checklist_warning(staged_files: List[str]) -> Optional[str]:
-    """Use ChecklistVerifier to build a checklist warning for staged files (#1001)."""
+    """Use ChecklistVerifier to build a compact checklist summary for staged files.
+
+    Returns collapsed domain counts instead of detailed items (#1039).
+    """
     try:
         from checklist_verifier import ChecklistVerifier
 
         verifier = ChecklistVerifier()
-        return verifier.verify(staged_files)
+        domains = verifier.detect_domains(staged_files)
+        if not domains:
+            return None
+        domain_counts = []
+        for domain in domains:
+            items = verifier.get_checklist_items(domain)
+            if items:
+                domain_counts.append(f"{domain}({len(items)})")
+        if not domain_counts:
+            return None
+        return f"[Checklist] {', '.join(domain_counts)}"
     except Exception:
         return None
 

@@ -114,7 +114,7 @@ class TestPreToolUseGitCommitQualityGates:
         assert result is None
 
     def test_git_commit_with_gates_enabled_returns_context(self, monkeypatch, capsys):
-        """When qualityGates.enabled is True, should return additionalContext."""
+        """When qualityGates.enabled is True, should return compact additionalContext."""
         config = {"qualityGates": {"enabled": True}}
         result = _run_hook(
             {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'feat: test'"}},
@@ -123,8 +123,12 @@ class TestPreToolUseGitCommitQualityGates:
         assert result is not None
         assert "hookSpecificOutput" in result
         hook_output = result["hookSpecificOutput"]
-        # Should have additionalContext with quality gate reminder
+        # Should have compact additionalContext with quality gate reminder (#1039)
         assert "additionalContext" in hook_output
+        ctx = hook_output["additionalContext"]
+        assert "[Quality Gate]" in ctx
+        # Compact: single line, no bullet points
+        assert ctx.count("\n") == 0
 
     def test_git_commit_amend_with_gates(self, monkeypatch, capsys):
         """git commit --amend should also trigger quality gates."""
@@ -160,7 +164,7 @@ class TestPreToolUseSmartTestRunner:
     """Tests for SmartTestRunner integration in pre-tool-use hook."""
 
     def test_git_commit_injects_test_suggestion(self, monkeypatch, capsys, tmp_path):
-        """git commit should inject related test suggestion into additionalContext."""
+        """git commit should inject compact test count into additionalContext (#1039)."""
         # Create a fake staged file list
         monkeypatch.setattr(
             "subprocess.check_output",
@@ -173,8 +177,9 @@ class TestPreToolUseSmartTestRunner:
         )
         assert result is not None
         ctx = result["hookSpecificOutput"]["additionalContext"]
-        assert "Consider running" in ctx
-        assert "foo.spec.ts" in ctx
+        # Collapsed format: count only, no individual file listing
+        assert "related test(s) found" in ctx
+        assert "foo.spec.ts" not in ctx
 
     def test_git_commit_no_staged_files_no_suggestion(self, monkeypatch, capsys):
         """git commit with no staged files should not inject suggestion."""
@@ -203,7 +208,7 @@ class TestPreToolUseSmartTestRunner:
         assert result is None
 
     def test_git_commit_combines_quality_gate_and_test_suggestion(self, monkeypatch, capsys):
-        """When both quality gates and test suggestion active, both in context."""
+        """When both quality gates and test suggestion active, both in compact context (#1039)."""
         monkeypatch.setattr(
             "subprocess.check_output",
             lambda *a, **kw: b"src/bar.ts\n",
@@ -215,7 +220,7 @@ class TestPreToolUseSmartTestRunner:
         )
         assert result is not None
         ctx = result["hookSpecificOutput"]["additionalContext"]
-        assert "Consider running" in ctx
+        assert "related test(s) found" in ctx
         assert "Quality Gate" in ctx
 
     def test_non_git_commit_no_test_suggestion(self, monkeypatch, capsys):
@@ -239,6 +244,77 @@ class TestPreToolUseSmartTestRunner:
         )
         # Should not crash — returns None (no suggestion)
         assert result is None
+
+
+class TestPreToolUseCompactOutput:
+    """Tests for compact output format (#1039)."""
+
+    def test_checklist_collapsed_to_domain_counts(self, monkeypatch, capsys):
+        """Checklist should show domain counts, not individual items (#1039)."""
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"src/auth/login.ts\n",
+        )
+        config = {"qualityGates": {"enabled": False}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'feat: auth'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        # Collapsed: "[Checklist] security(5)" not individual items
+        assert "[Checklist]" in ctx
+        assert "security(" in ctx
+        # Should NOT contain individual checklist items
+        assert "Validate and sanitize" not in ctx
+
+    def test_quality_gate_compact_single_line(self, monkeypatch, capsys):
+        """Quality gate should be a single line (#1039)."""
+        config = {"qualityGates": {"enabled": True}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'test'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        # Quality gate alone: single line, no newlines
+        assert "[Quality Gate]" in ctx
+        assert ctx.count("\n") == 0
+
+    def test_full_commit_output_max_5_lines(self, monkeypatch, capsys):
+        """Combined output (gate + tests + checklist) should be max 5 lines (#1039)."""
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"src/auth/login.ts\nsrc/api/users.ts\n",
+        )
+        config = {"qualityGates": {"enabled": True}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'feat: all'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        line_count = ctx.count("\n") + 1
+        assert line_count <= 5, f"Output has {line_count} lines, max is 5:\n{ctx}"
+
+    def test_test_suggestion_shows_count_not_files(self, monkeypatch, capsys):
+        """Test suggestion should show count, not individual file paths (#1039)."""
+        monkeypatch.setattr(
+            "subprocess.check_output",
+            lambda *a, **kw: b"src/foo.ts\nsrc/bar.ts\nsrc/baz.ts\n",
+        )
+        config = {"qualityGates": {"enabled": False}}
+        result = _run_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git commit -m 'feat: multi'"}},
+            monkeypatch, capsys, config=config,
+        )
+        assert result is not None
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        # Should show count (3 files * ~5 candidates each = many, but deduplicated)
+        assert "related test(s) found" in ctx
+        # Should NOT list individual test files
+        assert ".spec.ts" not in ctx
+        assert ".test.ts" not in ctx
 
 
 class TestPreToolUseStatusMessage:
@@ -325,4 +401,4 @@ class TestPreToolUseStatusMessage:
         hook_out = result["hookSpecificOutput"]
         assert "statusMessage" in hook_out
         assert "additionalContext" in hook_out
-        assert "Quality Gate" in hook_out["additionalContext"]
+        assert "[Quality Gate]" in hook_out["additionalContext"]
