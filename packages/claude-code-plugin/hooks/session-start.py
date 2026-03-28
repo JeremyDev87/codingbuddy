@@ -30,7 +30,7 @@ except ImportError:
 # Constants
 HOOK_FILENAME = "codingbuddy-mode-detect.py"
 SOURCE_FILENAME = "user-prompt-submit.py"
-HOOK_COMMAND = f"python3 ~/.claude/hooks/{HOOK_FILENAME}"
+HOOK_COMMAND = f'python3 "$HOME/.claude/hooks/{HOOK_FILENAME}"'
 
 # i18n Messages
 MESSAGES: Dict[str, Dict[str, str]] = {
