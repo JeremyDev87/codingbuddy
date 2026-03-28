@@ -131,7 +131,7 @@ def handle_stop(data: dict):
         try:
             from achievement_tracker import (
                 AchievementTracker,
-                render_achievement_celebration,
+                render_batch_celebration,
                 render_achievement_badges,
             )
 
@@ -145,10 +145,10 @@ def handle_stop(data: dict):
 
             newly_unlocked = tracker.check_achievements()
             if newly_unlocked:
-                for achievement in newly_unlocked:
-                    celebration = render_achievement_celebration(
-                        achievement, language
-                    )
+                celebration = render_batch_celebration(
+                    newly_unlocked, language
+                )
+                if celebration:
                     print(celebration, file=sys.stderr)
 
             # Show badge summary if any unlocked

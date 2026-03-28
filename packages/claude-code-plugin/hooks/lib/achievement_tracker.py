@@ -73,22 +73,27 @@ CELEBRATION_MESSAGES: Dict[str, Dict[str, str]] = {
     "en": {
         "unlocked": "Achievement Unlocked!",
         "congrats": "Congratulations!",
+        "more_unlocked": "+{n} more achievements unlocked!",
     },
     "ko": {
         "unlocked": "업적 달성!",
         "congrats": "축하합니다!",
+        "more_unlocked": "+{n}개의 업적을 추가 달성!",
     },
     "ja": {
         "unlocked": "実績解除!",
         "congrats": "おめでとうございます!",
+        "more_unlocked": "+{n}件の実績を解除!",
     },
     "zh": {
         "unlocked": "成就解锁!",
         "congrats": "恭喜!",
+        "more_unlocked": "+{n}个成就已解锁!",
     },
     "es": {
         "unlocked": "Logro desbloqueado!",
         "congrats": "Felicitaciones!",
+        "more_unlocked": "+{n} logros más desbloqueados!",
     },
 }
 
@@ -381,6 +386,37 @@ def render_achievement_celebration(
         "",
     ]
     return "\n".join(lines)
+
+
+def render_batch_celebration(
+    newly_unlocked: List[Dict[str, Any]],
+    language: str = "en",
+) -> str:
+    """Render a batch celebration for one or more newly unlocked achievements.
+
+    When a single achievement is unlocked, delegates to render_achievement_celebration.
+    When multiple are unlocked, shows the first in detail and summarises the rest.
+
+    Args:
+        newly_unlocked: List of achievement definition dicts just unlocked.
+        language: Language code.
+
+    Returns:
+        Formatted celebration string, or empty string if list is empty.
+    """
+    if not newly_unlocked:
+        return ""
+
+    if len(newly_unlocked) == 1:
+        return render_achievement_celebration(newly_unlocked[0], language)
+
+    # Multiple: show first achievement in detail, summarise the rest
+    top = newly_unlocked[0]
+    detail = render_achievement_celebration(top, language)
+    msgs = CELEBRATION_MESSAGES.get(language, CELEBRATION_MESSAGES["en"])
+    remaining = len(newly_unlocked) - 1
+    summary_line = f"  {msgs['more_unlocked'].format(n=remaining)}"
+    return f"{detail}\n{summary_line}"
 
 
 def render_achievement_badges(

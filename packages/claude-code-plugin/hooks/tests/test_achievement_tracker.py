@@ -20,6 +20,7 @@ from achievement_tracker import (
     get_achievement_definitions,
     render_achievement_badges,
     render_achievement_celebration,
+    render_batch_celebration,
 )
 
 
@@ -350,3 +351,54 @@ class TestRenderBadges:
         unlocked = [{"id": "unknown_xyz", "name": "Mystery"}]
         result = render_achievement_badges(unlocked, "en")
         assert "Mystery" in result
+
+
+class TestRenderBatchCelebration:
+    """Test batch celebration rendering (#1042)."""
+
+    def test_empty_list(self):
+        result = render_batch_celebration([], "en")
+        assert result == ""
+
+    def test_single_achievement(self):
+        defn = get_achievement_by_id("tdd_champion")
+        result = render_batch_celebration([defn], "en")
+        expected = render_achievement_celebration(defn, "en")
+        assert result == expected
+
+    def test_three_achievements(self):
+        ids = ["tdd_champion", "agent_master", "streak"]
+        achievements = []
+        for aid in ids:
+            defn = get_achievement_by_id(aid)
+            if defn:
+                achievements.append(defn)
+        # Pad with fallback dicts if not enough real definitions
+        while len(achievements) < 3:
+            achievements.append({"name": f"Test{len(achievements)}", "icon": "\U0001f3c6"})
+
+        result = render_batch_celebration(achievements, "en")
+        # First achievement should be detailed
+        assert achievements[0]["name"] in result
+        assert "Achievement Unlocked!" in result
+        # Summary line for remaining
+        assert "+2 more achievements unlocked!" in result
+
+    def test_three_achievements_korean(self):
+        achievements = [
+            {"name": "First", "icon": "\U0001f3c6", "face": "\u2605\u203f\u2605"},
+            {"name": "Second", "icon": "\U0001f3c6"},
+            {"name": "Third", "icon": "\U0001f3c6"},
+        ]
+        result = render_batch_celebration(achievements, "ko")
+        assert "업적 달성!" in result
+        assert "+2개의 업적을 추가 달성!" in result
+
+    def test_two_achievements(self):
+        achievements = [
+            {"name": "Alpha", "icon": "\U0001f3c6", "face": "\u2605\u203f\u2605"},
+            {"name": "Beta", "icon": "\U0001f3c6"},
+        ]
+        result = render_batch_celebration(achievements, "en")
+        assert "Alpha" in result
+        assert "+1 more achievements unlocked!" in result
