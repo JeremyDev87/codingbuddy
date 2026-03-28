@@ -18,6 +18,8 @@ from buddy_renderer import (
     render_returning_session,
     get_buddy_config,
     type_text,
+    _to_ascii,
+    _detect_unicode_support,
     GREETINGS,
     FAREWELL_GREETINGS,
     FAREWELL_MESSAGES,
@@ -552,6 +554,154 @@ class TestTypingMode:
         render_session_start(scan, [], "casual", "en", buddy_config=bc, typing=True)
         captured = capsys.readouterr()
         assert "Custom hello!" in captured.err
+
+
+class TestToAscii:
+    """Tests for _to_ascii Unicode→ASCII conversion (#1040)."""
+
+    def test_box_drawing_converted(self):
+        assert _to_ascii("\u256d\u2501\u2501\u2501\u256e") == "+---+"
+
+    def test_pipe_converted(self):
+        assert _to_ascii("\u2503") == "|"
+
+    def test_buddy_face_converted(self):
+        assert _to_ascii("\u25d5\u203f\u25d5") == ":_:"
+
+    def test_emoji_converted(self):
+        assert _to_ascii("\u26a1") == "*"
+        assert _to_ascii("\U0001f527") == "[tool]"
+        assert _to_ascii("\U0001f4c1") == "[file]"
+
+    def test_plain_ascii_unchanged(self):
+        assert _to_ascii("Hello world") == "Hello world"
+
+    def test_mixed_content(self):
+        result = _to_ascii("\u2503 \u25d5\u203f\u25d5 \u2503 Hey!")
+        assert result == "| :_: | Hey!"
+
+
+class TestDetectUnicodeSupport:
+    """Tests for _detect_unicode_support (#1040)."""
+
+    def test_utf8_lang_returns_true(self, monkeypatch):
+        monkeypatch.setenv("LANG", "en_US.UTF-8")
+        monkeypatch.delenv("LC_ALL", raising=False)
+        assert _detect_unicode_support() is True
+
+    def test_dumb_term_returns_false(self, monkeypatch):
+        monkeypatch.setenv("TERM", "dumb")
+        monkeypatch.delenv("LANG", raising=False)
+        monkeypatch.delenv("LC_ALL", raising=False)
+        assert _detect_unicode_support() is False
+
+    def test_default_returns_true(self, monkeypatch):
+        monkeypatch.delenv("LANG", raising=False)
+        monkeypatch.delenv("LC_ALL", raising=False)
+        monkeypatch.delenv("TERM", raising=False)
+        assert _detect_unicode_support() is True
+
+
+class TestAsciiModeConfig:
+    """Tests for asciiMode in get_buddy_config (#1040)."""
+
+    def test_ascii_mode_true(self):
+        config = {"buddy": {"asciiMode": True}}
+        result = get_buddy_config(config)
+        assert result["asciiMode"] is True
+
+    def test_ascii_mode_false(self):
+        config = {"buddy": {"asciiMode": False}}
+        result = get_buddy_config(config)
+        assert result["asciiMode"] is False
+
+    def test_ascii_mode_default(self):
+        config = {"buddy": {"name": "Bot"}}
+        result = get_buddy_config(config)
+        assert result["asciiMode"] is False
+
+    def test_ascii_mode_auto_with_utf8(self, monkeypatch):
+        monkeypatch.setenv("LANG", "en_US.UTF-8")
+        config = {"buddy": {"asciiMode": "auto"}}
+        result = get_buddy_config(config)
+        assert result["asciiMode"] is False  # Unicode supported → no ASCII
+
+    def test_ascii_mode_auto_dumb_term(self, monkeypatch):
+        monkeypatch.setenv("TERM", "dumb")
+        monkeypatch.delenv("LANG", raising=False)
+        monkeypatch.delenv("LC_ALL", raising=False)
+        config = {"buddy": {"asciiMode": "auto"}}
+        result = get_buddy_config(config)
+        assert result["asciiMode"] is True  # No Unicode → ASCII
+
+
+class TestAsciiModeRendering:
+    """Tests for ASCII mode in render functions (#1040)."""
+
+    def _ascii_buddy_config(self):
+        return {
+            "name": "Buddy", "face": BUDDY_FACE,
+            "greeting": "", "farewell": "", "asciiMode": True,
+        }
+
+    def test_session_start_ascii_no_unicode_box(self):
+        bc = self._ascii_buddy_config()
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en", buddy_config=bc)
+        # Box drawing replaced
+        assert "\u256d" not in result  # no ╭
+        assert "\u2501" not in result  # no ━
+        assert "\u2503" not in result  # no ┃
+        assert "+---+" in result
+        assert "|" in result
+
+    def test_session_start_ascii_face_converted(self):
+        bc = self._ascii_buddy_config()
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en", buddy_config=bc)
+        assert ":_:" in result
+        assert "\u25d5" not in result  # no ◕
+
+    def test_session_start_ascii_emoji_converted(self):
+        bc = self._ascii_buddy_config()
+        scan = {"name": "app", "framework": "Next.js 15", "file_count": 42}
+        result = render_session_start(scan, [], "casual", "en", buddy_config=bc)
+        assert "*" in result  # ⚡ → *
+        assert "[file]" in result  # 📁 → [file]
+        assert "\u26a1" not in result
+        assert "\U0001f4c1" not in result
+
+    def test_session_start_unicode_mode_unchanged(self):
+        """Default (no asciiMode) should keep Unicode characters."""
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en")
+        assert "\u256d" in result  # ╭ still present
+        assert "\u25d5" in result  # ◕ still present
+
+    def test_session_summary_ascii_mode(self):
+        bc = self._ascii_buddy_config()
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        result = render_session_summary(stats, [], "casual", "en", buddy_config=bc)
+        assert "+---+" in result
+        assert "\u256d" not in result
+        assert "[time]" in result  # ⏱ → [time]
+        assert "[tool]" in result  # 🔧 → [tool]
+
+    def test_session_summary_unicode_mode_unchanged(self):
+        stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
+        result = render_session_summary(stats, [], "casual", "en")
+        assert "\u256d" in result
+        assert "\U0001f527" in result  # 🔧
+
+    def test_typing_mode_ascii(self, capsys, monkeypatch):
+        monkeypatch.setattr("buddy_renderer.time.sleep", lambda _s: None)
+        bc = self._ascii_buddy_config()
+        scan = {"name": "app"}
+        result = render_session_start(scan, [], "casual", "en", buddy_config=bc, typing=True)
+        assert result == ""
+        captured = capsys.readouterr()
+        assert "+---+" in captured.err
+        assert "\u256d" not in captured.err
 
 
 if __name__ == "__main__":

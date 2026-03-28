@@ -77,12 +77,71 @@ BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
 BUDDY_WRAP_FACE = "\u25d5\u2304\u25d5"  # ◕⌄◕
 BUDDY_WINK_FACE = "\u25d5\u2040\u25d5"  # ◕⁀◕
 
+# Unicode → ASCII fallback mapping (#1040)
+_UNICODE_TO_ASCII: Dict[str, str] = {
+    # Box drawing
+    "\u256d": "+", "\u256e": "+", "\u2570": "+", "\u256f": "+",
+    "\u2501": "-", "\u2503": "|", "\u2502": "|",
+    # Face characters
+    "\u25d5": ":", "\u203f": "_", "\u2304": "v", "\u2040": "^",
+    # Emoji → text
+    "\u26a1": "*",
+    "\U0001f9f2": "[cov]",
+    "\U0001f4c1": "[file]",
+    "\U0001f517": "[api]",
+    "\u23f1": "[time]",
+    "\U0001f527": "[tool]",
+    "\U0001f4dd": "[edit]",
+    "\U0001f4ac": "[msg]",
+    "\u2705": "[ok]",
+    "\u26a0\ufe0f": "[warn]",
+    "\u26a0": "[warn]",
+    "\U0001f916": "[bot]",
+    # Surrogate pair variants (used in some source strings)
+    "\ud83e\uddf2": "[cov]",
+    "\ud83d\udcc1": "[file]",
+    "\ud83d\udd17": "[api]",
+    "\U0001f534": "(R)",
+    "\U0001f7e2": "(G)",
+    "\U0001f535": "(B)",
+    "\U0001f7e1": "(Y)",
+    "\U0001f7e3": "(P)",
+    "\u26aa": "(W)",
+    "\u2728": "(*)",
+}
+
+
+def _to_ascii(text: str) -> str:
+    """Replace Unicode/emoji characters with ASCII equivalents (#1040)."""
+    for uc, asc in _UNICODE_TO_ASCII.items():
+        text = text.replace(uc, asc)
+    return text
+
+
+def _detect_unicode_support() -> bool:
+    """Check if the terminal likely supports Unicode.
+
+    Returns True if Unicode is likely supported, False otherwise.
+    """
+    lang = os.environ.get("LANG", "")
+    lc_all = os.environ.get("LC_ALL", "")
+    term = os.environ.get("TERM", "")
+
+    if "utf" in lang.lower() or "utf" in lc_all.lower():
+        return True
+    if term == "dumb":
+        return False
+    # Default: assume Unicode support (most modern terminals)
+    return True
+
+
 # Default buddy character configuration
-DEFAULT_BUDDY_CONFIG: Dict[str, str] = {
+DEFAULT_BUDDY_CONFIG: Dict[str, Any] = {
     "name": "Buddy",
     "face": BUDDY_FACE,
     "greeting": "",
     "farewell": "",
+    "asciiMode": False,
 }
 
 # Max length for custom face field (unicode characters)
@@ -107,7 +166,7 @@ def type_text(text: str, speed: float = 0.03) -> None:
         time.sleep(speed)
 
 
-def get_buddy_config(config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+def get_buddy_config(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Extract and validate buddy customization from config dict.
 
     Args:
@@ -142,6 +201,15 @@ def get_buddy_config(config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
     farewell = buddy.get("farewell")
     if isinstance(farewell, str) and 0 < len(farewell.strip()) <= 100:
         result["farewell"] = farewell.strip()
+
+    # asciiMode: bool or "auto" (#1040)
+    ascii_val = buddy.get("asciiMode")
+    if ascii_val is True:
+        result["asciiMode"] = True
+    elif ascii_val == "auto":
+        result["asciiMode"] = not _detect_unicode_support()
+    else:
+        result["asciiMode"] = False
 
     return result
 
@@ -396,7 +464,7 @@ def _colorize(text: str, color: str) -> str:
 def render_buddy_face(
     tone: str,
     language: str,
-    buddy_config: Optional[Dict[str, str]] = None,
+    buddy_config: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Render the buddy character face with greeting.
 
@@ -502,7 +570,7 @@ def render_session_summary(
     agents: List[Dict[str, Any]],
     tone: str,
     language: str,
-    buddy_config: Optional[Dict[str, str]] = None,
+    buddy_config: Optional[Dict[str, Any]] = None,
     tool_names: Optional[Dict[str, int]] = None,
 ) -> str:
     """Render session summary with buddy character for stop hook.
@@ -591,7 +659,13 @@ def render_session_summary(
     parts.append("")
     parts.append(f"{face} {farewell}")
 
-    return "\n".join(parts)
+    result = "\n".join(parts)
+
+    # ASCII fallback mode (#1040)
+    if bc.get("asciiMode"):
+        result = _to_ascii(result)
+
+    return result
 
 
 def _get_returning_greeting(tone: str, language: str) -> str:
@@ -627,7 +701,7 @@ def render_returning_session(
     pending_context: "Dict[str, Any] | None",
     tone: str,
     language: str,
-    buddy_config: Optional[Dict[str, str]] = None,
+    buddy_config: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Render returning session welcome-back display.
 
@@ -744,7 +818,7 @@ def render_session_start(
     language: str,
     previous_session: "Dict[str, Any] | None" = None,
     pending_context: "Dict[str, Any] | None" = None,
-    buddy_config: Optional[Dict[str, str]] = None,
+    buddy_config: Optional[Dict[str, Any]] = None,
     typing: bool = False,
 ) -> str:
     """Render complete session-start output.
@@ -801,11 +875,15 @@ def render_session_start(
 
     full_output = "\n".join(parts)
 
+    # ASCII fallback mode (#1040)
+    bc = buddy_config or DEFAULT_BUDDY_CONFIG
+    if bc.get("asciiMode"):
+        full_output = _to_ascii(full_output)
+
     if not typing:
         return full_output
 
     # Typing mode: animate the greeting text, print rest instantly
-    bc = buddy_config or DEFAULT_BUDDY_CONFIG
     custom_greeting = bc.get("greeting", "")
     if previous_session:
         greeting = custom_greeting if custom_greeting else _get_returning_greeting(tone, language)
