@@ -69,7 +69,10 @@ def handle_stop(data: dict):
                     "colorAnsi": "cyan",
                 })
 
-            rendered = render_session_summary(render_stats, agents, tone, language)
+            rendered = render_session_summary(
+                render_stats, agents, tone, language,
+                tool_names=tool_names,
+            )
             if rendered:
                 print(rendered, file=sys.stderr)
         except Exception:

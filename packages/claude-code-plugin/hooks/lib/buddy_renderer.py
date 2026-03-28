@@ -240,6 +240,140 @@ SUMMARY_HEADERS: Dict[str, Dict[str, str]] = {
 }
 
 
+# One-line session summary templates by language (#1036)
+ONE_LINE_TEMPLATES: Dict[str, Dict[str, str]] = {
+    "en": {
+        "files_and_commands": "{files} {file_word} modified · {commands} commands run",
+        "files_only": "{files} {file_word} modified",
+        "commands_only": "{commands} commands run",
+        "exploration": "Codebase exploration ({reads} files read)",
+        "minimal": "{tools} tool calls",
+        "agent_prefix": "{agent}: ",
+    },
+    "ko": {
+        "files_and_commands": "파일 {files}개 수정 · 명령어 {commands}개 실행",
+        "files_only": "파일 {files}개 수정",
+        "commands_only": "명령어 {commands}개 실행",
+        "exploration": "코드베이스 탐색 (파일 {reads}개 읽음)",
+        "minimal": "도구 {tools}회 호출",
+        "agent_prefix": "{agent}: ",
+    },
+    "ja": {
+        "files_and_commands": "ファイル{files}件変更 · コマンド{commands}件実行",
+        "files_only": "ファイル{files}件変更",
+        "commands_only": "コマンド{commands}件実行",
+        "exploration": "コードベース探索 (ファイル{reads}件読取)",
+        "minimal": "ツール{tools}回呼出",
+        "agent_prefix": "{agent}: ",
+    },
+    "zh": {
+        "files_and_commands": "修改了{files}个文件 · 执行了{commands}个命令",
+        "files_only": "修改了{files}个文件",
+        "commands_only": "执行了{commands}个命令",
+        "exploration": "代码库探索 (读取了{reads}个文件)",
+        "minimal": "调用了{tools}次工具",
+        "agent_prefix": "{agent}: ",
+    },
+    "es": {
+        "files_and_commands": "{files} {file_word} modificados · {commands} comandos ejecutados",
+        "files_only": "{files} {file_word} modificados",
+        "commands_only": "{commands} comandos ejecutados",
+        "exploration": "Exploración del código ({reads} archivos leídos)",
+        "minimal": "{tools} llamadas de herramientas",
+        "agent_prefix": "{agent}: ",
+    },
+    "pt": {
+        "files_and_commands": "{files} {file_word} modificados · {commands} comandos executados",
+        "files_only": "{files} {file_word} modificados",
+        "commands_only": "{commands} comandos executados",
+        "exploration": "Exploração do código ({reads} arquivos lidos)",
+        "minimal": "{tools} chamadas de ferramentas",
+        "agent_prefix": "{agent}: ",
+    },
+    "de": {
+        "files_and_commands": "{files} {file_word} geändert · {commands} Befehle ausgeführt",
+        "files_only": "{files} {file_word} geändert",
+        "commands_only": "{commands} Befehle ausgeführt",
+        "exploration": "Codebase-Erkundung ({reads} Dateien gelesen)",
+        "minimal": "{tools} Toolaufrufe",
+        "agent_prefix": "{agent}: ",
+    },
+    "fr": {
+        "files_and_commands": "{files} {file_word} modifiés · {commands} commandes exécutées",
+        "files_only": "{files} {file_word} modifiés",
+        "commands_only": "{commands} commandes exécutées",
+        "exploration": "Exploration du code ({reads} fichiers lus)",
+        "minimal": "{tools} appels d'outils",
+        "agent_prefix": "{agent}: ",
+    },
+}
+
+# Singular/plural file word by language
+_FILE_WORDS: Dict[str, Dict[str, str]] = {
+    "en": {"one": "file", "many": "files"},
+    "es": {"one": "archivo", "many": "archivos"},
+    "pt": {"one": "arquivo", "many": "arquivos"},
+    "de": {"one": "Datei", "many": "Dateien"},
+    "fr": {"one": "fichier", "many": "fichiers"},
+}
+
+
+def generate_one_line_summary(
+    tool_names: Dict[str, int],
+    agent_name: str,
+    language: str,
+) -> str:
+    """Generate a one-line session summary from tool usage data.
+
+    Analyzes tool_names to determine activity type and generates a
+    human-readable one-line summary with multi-language support.
+
+    Args:
+        tool_names: Dict mapping tool name to usage count
+            (e.g. {"Edit": 5, "Bash": 10, "Read": 20}).
+        agent_name: Active agent name, empty string if none.
+        language: Language code (en, ko, ja, zh, es, pt, de, fr).
+
+    Returns:
+        One-line summary string.
+    """
+    templates = ONE_LINE_TEMPLATES.get(language, ONE_LINE_TEMPLATES["en"])
+
+    files_changed = tool_names.get("Edit", 0) + tool_names.get("Write", 0)
+    commands_run = tool_names.get("Bash", 0)
+    reads = tool_names.get("Read", 0) + tool_names.get("Grep", 0) + tool_names.get("Glob", 0)
+    total_tools = sum(tool_names.values())
+
+    # Determine file word (singular/plural) for languages that need it
+    file_words = _FILE_WORDS.get(language, _FILE_WORDS.get("en", {"one": "file", "many": "files"}))
+    file_word = file_words["one"] if files_changed == 1 else file_words["many"]
+
+    # Select appropriate template
+    if files_changed > 0 and commands_run > 0:
+        summary = templates["files_and_commands"].format(
+            files=files_changed, file_word=file_word, commands=commands_run,
+        )
+    elif files_changed > 0:
+        summary = templates["files_only"].format(
+            files=files_changed, file_word=file_word,
+        )
+    elif commands_run > 0:
+        summary = templates["commands_only"].format(commands=commands_run)
+    elif reads > 0:
+        summary = templates["exploration"].format(reads=reads)
+    elif total_tools > 0:
+        summary = templates["minimal"].format(tools=total_tools)
+    else:
+        summary = templates["minimal"].format(tools=0)
+
+    # Prepend agent name if available
+    if agent_name:
+        prefix = templates["agent_prefix"].format(agent=agent_name)
+        summary = prefix + summary
+
+    return summary
+
+
 def _get_greeting(tone: str, language: str) -> str:
     """Get greeting message for given tone and language."""
     tone_greetings = GREETINGS.get(tone, GREETINGS["casual"])
@@ -369,6 +503,7 @@ def render_session_summary(
     tone: str,
     language: str,
     buddy_config: Optional[Dict[str, str]] = None,
+    tool_names: Optional[Dict[str, int]] = None,
 ) -> str:
     """Render session summary with buddy character for stop hook.
 
@@ -382,6 +517,8 @@ def render_session_summary(
         tone: 'casual' or 'formal'
         language: Language code (en, ko, ja, zh, es)
         buddy_config: Optional buddy customization from get_buddy_config().
+        tool_names: Optional dict of tool name to usage count for
+            one-line summary generation (#1036).
 
     Returns:
         Formatted session summary string.
@@ -425,6 +562,13 @@ def render_session_summary(
             stat_items.append(f"\U0001f4dd {files_changed} files changed")
 
         parts.append(" \u2502 ".join(stat_items))
+
+    # One-line session summary (#1036)
+    if tool_names:
+        agent_name = agents[0]["name"] if agents else ""
+        one_line = generate_one_line_summary(tool_names, agent_name, language)
+        if one_line:
+            parts.append(f"\U0001f4ac {one_line}")
 
     # Active agents section
     if agents:
