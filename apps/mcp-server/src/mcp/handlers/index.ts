@@ -121,6 +121,12 @@ export { ContextArchiveHandler } from './context-archive.handler';
 export { RuleInsightsHandler } from './rule-insights.handler';
 
 /**
+ * Handler for impact tools (get_session_impact)
+ * @see {@link ImpactHandler}
+ */
+export { ImpactHandler } from './impact.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

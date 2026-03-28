@@ -12,6 +12,7 @@ import { StateModule } from '../state/state.module';
 import { DiagnosticModule } from '../diagnostic/diagnostic.module';
 import { TuiEventsModule } from '../tui/events';
 import { PipelineModule } from '../pipeline/pipeline.module';
+import { ImpactModule } from '../impact';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import { LanguageService } from '../shared/language.service';
 import { ModelResolverService } from '../model';
@@ -33,6 +34,7 @@ import {
   DiscussionHandler,
   ParallelValidationHandler,
   PipelineHandler,
+  ImpactHandler,
 } from './handlers';
 
 const handlers = [
@@ -50,6 +52,7 @@ const handlers = [
   DiscussionHandler,
   ParallelValidationHandler,
   PipelineHandler,
+  ImpactHandler,
 ];
 
 @Module({
@@ -65,6 +68,7 @@ const handlers = [
     DiagnosticModule,
     TuiEventsModule,
     PipelineModule,
+    ImpactModule,
   ],
   controllers: [McpController],
   providers: [
