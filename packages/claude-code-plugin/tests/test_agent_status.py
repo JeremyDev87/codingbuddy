@@ -8,7 +8,7 @@ import pytest
 # Add hooks/lib to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "hooks", "lib"))
 
-from agent_status import build_status_message, clear_cache, _COLOR_EMOJI_MAP
+from agent_status import build_status_message, clear_cache, get_handoff_message, _COLOR_EMOJI_MAP
 
 
 @pytest.fixture(autouse=True)
@@ -178,3 +178,96 @@ class TestCaching:
         clear_cache()
         r2 = build_status_message(project_root=project_with_agents)
         assert r1 == r2  # Same result, but freshly loaded
+
+
+class TestHandoffMessage:
+    """Tests for agent handoff detection and message generation."""
+
+    def test_no_handoff_on_first_call(self, monkeypatch, project_with_agents):
+        """First call should not produce a handoff message."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+        assert get_handoff_message() is None
+
+    def test_no_handoff_when_same_agent(self, monkeypatch, project_with_agents):
+        """Repeated calls with the same agent should not produce a handoff."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+        build_status_message(project_root=project_with_agents)
+        assert get_handoff_message() is None
+
+    def test_handoff_when_agent_changes(self, monkeypatch, project_with_agents):
+        """Switching agents should produce a handoff message with both faces."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "Backend Developer")
+        build_status_message(project_root=project_with_agents)
+
+        handoff = get_handoff_message()
+        assert handoff is not None
+        # Previous agent face: ★‿★ (frontend-developer)
+        assert "\u2605\u203f\u2605" in handoff
+        # New agent face: ●‿● (Backend Developer)
+        assert "\u25cf\u203f\u25cf" in handoff
+        # Arrow separator
+        assert "\u2192" in handoff  # →
+        # 교대 suffix
+        assert "\uad50\ub300!" in handoff  # 교대!
+
+    def test_handoff_includes_agent_names(self, monkeypatch, project_with_agents):
+        """Handoff message should include both agent names."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "Backend Developer")
+        build_status_message(project_root=project_with_agents)
+
+        handoff = get_handoff_message()
+        assert "frontend-developer" in handoff
+        assert "Backend Developer" in handoff
+
+    def test_handoff_with_fallback_face(self, monkeypatch, project_with_agents):
+        """Agent without visual data should use robot emoji in handoff."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "plain-agent")
+        build_status_message(project_root=project_with_agents)
+
+        handoff = get_handoff_message()
+        assert handoff is not None
+        assert "\U0001f916" in handoff  # 🤖 fallback for plain-agent
+
+    def test_handoff_resets_after_read(self, monkeypatch, project_with_agents):
+        """Handoff message should reset on next build_status_message call."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "Backend Developer")
+        build_status_message(project_root=project_with_agents)
+        assert get_handoff_message() is not None
+
+        # Same agent again — no new handoff
+        build_status_message(project_root=project_with_agents)
+        assert get_handoff_message() is None
+
+    def test_handoff_cleared_by_clear_cache(self, monkeypatch, project_with_agents):
+        """clear_cache should reset handoff state."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "Backend Developer")
+        build_status_message(project_root=project_with_agents)
+
+        clear_cache()
+        assert get_handoff_message() is None
+
+    def test_no_handoff_when_agent_unset(self, monkeypatch, project_with_agents):
+        """Setting agent then unsetting should not produce handoff."""
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "frontend-developer")
+        build_status_message(project_root=project_with_agents)
+
+        monkeypatch.delenv("CODINGBUDDY_ACTIVE_AGENT", raising=False)
+        build_status_message(project_root=project_with_agents)
+        assert get_handoff_message() is None
