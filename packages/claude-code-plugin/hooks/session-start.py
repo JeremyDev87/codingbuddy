@@ -624,22 +624,6 @@ def main():
         except Exception:
             pass  # Never block session start
 
-        # Step 7: Launch companion TUI (#970)
-        try:
-            _ensure_lib_path()
-            from tui_launcher import launch as launch_tui
-            from config import get_config as _get_tui_cfg
-
-            from session_utils import get_session_id as _get_sid_tui
-            _tui_sid = _get_sid_tui()
-            _tui_cwd = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
-            _tui_cfg = _get_tui_cfg(_tui_cwd)
-            _tui_ok, _tui_msg = launch_tui(_tui_sid, _tui_cfg)
-            if _tui_msg:
-                print(_tui_msg, file=sys.stderr)
-        except Exception:
-            pass  # Never block session start
-
         sys.exit(0)
 
     except PermissionError as e:

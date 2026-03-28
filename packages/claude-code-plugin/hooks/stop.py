@@ -28,13 +28,6 @@ def handle_stop(data: dict):
         from session_utils import get_session_id
         session_id = get_session_id()
 
-        # Clean up companion TUI pane (#970)
-        try:
-            from tui_launcher import cleanup as cleanup_tui
-            cleanup_tui(session_id)
-        except Exception:
-            pass  # Never block session stop
-
         stats = SessionStats(session_id=session_id)
 
         # Flush pending in-memory stats before finalize (#931)
