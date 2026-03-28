@@ -1,0 +1,121 @@
+{
+  "domain": "release",
+  "icon": "📦",
+  "description": "Release readiness validation — version sync, lockfile, manifests, security audit",
+  "categories": [
+    {
+      "name": "version_consistency",
+      "triggers": {
+        "files": [
+          "**/package.json",
+          "**/pyproject.toml",
+          "**/setup.py",
+          "**/build.gradle*",
+          "**/pom.xml",
+          "**/Cargo.toml",
+          "**/go.mod"
+        ],
+        "patterns": ["version"]
+      },
+      "items": [
+        {
+          "id": "rel-ver-001",
+          "text": "All version-bearing files contain the same version number",
+          "priority": "critical",
+          "reason": "Version drift between files causes install failures and confusion"
+        },
+        {
+          "id": "rel-ver-002",
+          "text": "Version follows semver — breaking changes bump major, features bump minor",
+          "priority": "high",
+          "reason": "Incorrect semver breaks dependency resolution for consumers"
+        },
+        {
+          "id": "rel-ver-003",
+          "text": "CHANGELOG updated with release notes for new version",
+          "priority": "high",
+          "reason": "Users need to know what changed before upgrading"
+        }
+      ]
+    },
+    {
+      "name": "lockfile_sync",
+      "triggers": {
+        "files": [
+          "**/yarn.lock",
+          "**/package-lock.json",
+          "**/pnpm-lock.yaml",
+          "**/Pipfile.lock",
+          "**/poetry.lock",
+          "**/Cargo.lock",
+          "**/go.sum"
+        ]
+      },
+      "items": [
+        {
+          "id": "rel-lock-001",
+          "text": "Lockfile is in sync with dependency declarations (no frozen-lockfile failures)",
+          "priority": "critical",
+          "reason": "Lockfile drift causes CI failures and non-reproducible builds"
+        },
+        {
+          "id": "rel-lock-002",
+          "text": "No new high/critical vulnerabilities in dependency audit",
+          "priority": "high",
+          "reason": "Shipping known vulnerabilities exposes users to security risks"
+        }
+      ]
+    },
+    {
+      "name": "manifest_validation",
+      "triggers": {
+        "files": [
+          "**/.claude-plugin/plugin.json",
+          "**/.claude-plugin/marketplace.json",
+          "**/plugin.json",
+          "**/manifest.json"
+        ]
+      },
+      "items": [
+        {
+          "id": "rel-mfst-001",
+          "text": "Plugin manifest version matches package version",
+          "priority": "critical",
+          "reason": "Version mismatch causes marketplace listing to show wrong version"
+        },
+        {
+          "id": "rel-mfst-002",
+          "text": "Plugin manifest passes schema validation",
+          "priority": "high",
+          "reason": "Invalid manifest fields can break plugin installation"
+        }
+      ]
+    },
+    {
+      "name": "ci_quality_gate",
+      "triggers": {
+        "files": [
+          "**/.github/workflows/**",
+          "**/.gitlab-ci.yml",
+          "**/Jenkinsfile",
+          "**/bitbucket-pipelines.yml"
+        ],
+        "patterns": ["ci", "pipeline", "workflow"]
+      },
+      "items": [
+        {
+          "id": "rel-ci-001",
+          "text": "All CI checks pass (lint, typecheck, test, build)",
+          "priority": "critical",
+          "reason": "Shipping with failing CI means shipping broken code"
+        },
+        {
+          "id": "rel-ci-002",
+          "text": "Test coverage meets project threshold",
+          "priority": "high",
+          "reason": "Coverage regression indicates untested new code"
+        }
+      ]
+    }
+  ]
+}

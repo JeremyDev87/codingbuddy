@@ -131,8 +131,16 @@ jobs:
 
       - name: Validate AI Rules
         run: |
-          echo "📋 Validating JSON Schema..."
+          echo "📋 Validating agent JSON Schema..."
           yarn dlx ajv-cli@5.0.0 validate -s packages/rules/.ai-rules/schemas/agent.schema.json -d "packages/rules/.ai-rules/agents/*.json" --spec=draft7
+
+          echo ""
+          echo "📋 Validating plugin.json schema..."
+          yarn dlx ajv-cli@5.0.0 validate -s packages/rules/.ai-rules/schemas/plugin.schema.json -d "packages/claude-code-plugin/.claude-plugin/plugin.json" --spec=draft7
+
+          echo ""
+          echo "📋 Validating marketplace.json schema..."
+          yarn dlx ajv-cli@5.0.0 validate -s packages/rules/.ai-rules/schemas/marketplace.schema.json -d ".claude-plugin/marketplace.json" --spec=draft7
 
           echo ""
           echo "📝 Linting Markdown files..."

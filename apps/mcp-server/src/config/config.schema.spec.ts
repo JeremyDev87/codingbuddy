@@ -373,4 +373,53 @@ describe('CodingBuddyConfigSchema', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('ReleaseConfigSchema', () => {
+    it('should accept valid release config', () => {
+      const config = {
+        release: {
+          versionFiles: ['package.json', 'version.ts'],
+          lockfile: 'yarn.lock',
+          preReleaseChecks: ['lint', 'typecheck', 'test:coverage', 'build'],
+          securityAudit: true,
+          coverageThreshold: 90,
+          validatePlugin: true,
+          bumpScript: 'scripts/bump-version.sh',
+        },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+      expect(result.data?.release?.versionFiles).toEqual(['package.json', 'version.ts']);
+      expect(result.data?.release?.coverageThreshold).toBe(90);
+    });
+
+    it('should accept empty release config', () => {
+      const config = { release: {} };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept config without release field', () => {
+      const config = { language: 'ko' };
+      const result = validateConfig(config);
+      expect(result.success).toBe(true);
+      expect(result.data?.release).toBeUndefined();
+    });
+
+    it('should reject coverageThreshold above 100', () => {
+      const config = {
+        release: { coverageThreshold: 101 },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject coverageThreshold below 0', () => {
+      const config = {
+        release: { coverageThreshold: -1 },
+      };
+      const result = validateConfig(config);
+      expect(result.success).toBe(false);
+    });
+  });
 });

@@ -139,6 +139,32 @@ const AutoConfigSchema = z.object({
 });
 
 /**
+ * Release configuration for version management and pre-release validation.
+ */
+const ReleaseConfigSchema = z.object({
+  /** Files that contain the project version (checked for consistency) */
+  versionFiles: z.array(z.string()).optional(),
+
+  /** Lockfile path to verify sync (auto-detected if omitted) */
+  lockfile: z.string().optional(),
+
+  /** Commands to run before release (e.g., ['lint', 'typecheck', 'test:coverage', 'build']) */
+  preReleaseChecks: z.array(z.string()).optional(),
+
+  /** Run security audit before release. Default: true */
+  securityAudit: z.boolean().default(true).optional(),
+
+  /** Minimum test coverage percentage required */
+  coverageThreshold: z.number().min(0).max(100).optional(),
+
+  /** Plugin manifest validation (auto-detected if .claude-plugin/ exists). Default: true */
+  validatePlugin: z.boolean().default(true).optional(),
+
+  /** Version bump script path (e.g., 'scripts/bump-version.sh') */
+  bumpScript: z.string().optional(),
+});
+
+/**
  * Context document configuration for DoS prevention limits.
  * Limits array sizes and string lengths to prevent memory exhaustion.
  */
@@ -176,6 +202,9 @@ export const CodingBuddyConfigSchema = z.object({
 
   // AUTO mode settings
   auto: AutoConfigSchema.optional(),
+
+  // Release configuration
+  release: ReleaseConfigSchema.optional(),
 
   // Context document limits (DoS prevention)
   context: ContextConfigSchema.optional(),

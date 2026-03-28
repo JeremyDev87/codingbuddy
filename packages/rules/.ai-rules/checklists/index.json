@@ -42,6 +42,13 @@
       "icon": "🔍",
       "file": "seo.json",
       "description": "SEO optimization items (metadata, structure, links)"
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "icon": "📦",
+      "file": "release.json",
+      "description": "Release readiness validation (version sync, lockfile, manifests, security audit)"
     }
   ]
 }
