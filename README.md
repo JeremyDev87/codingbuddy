@@ -70,7 +70,15 @@ npx codingbuddy init
 
 Start coding with `PLAN`, `ACT`, `EVAL`, or `AUTO` keywords.
 
-> **Claude Code users**: Install as a plugin for the full experience — `claude plugin install codingbuddy@jeremydev87`. See the [Plugin Guide](docs/plugin-guide.md).
+> **Claude Code users**: Install as a plugin for the full experience:
+>
+> ```bash
+> claude plugin install codingbuddy@jeremydev87
+> ```
+>
+> The plugin adds session-aware hooks that power Impact Reports, buddy greetings, onboarding tours, achievement badges, and adaptive performance mode. Update to the latest version with the same command.
+>
+> See the [Plugin Guide](docs/plugin-guide.md) for details.
 
 [Full Getting Started Guide →](docs/getting-started.md)
 
@@ -271,7 +279,7 @@ Create `codingbuddy.config.json` in your project root:
 
 | Setting | Options | Default |
 |---------|---------|---------|
-| `language` | `en`, `ko`, `ja`, `zh`, `es` | `en` |
+| `language` | `en`, `ko`, `ja`, `zh`, `es`, `pt-br`, `de`, `fr` | `en` |
 | `verbosity` | `minimal`, `compact`, `standard`, `detailed` | `compact` |
 | `ai.defaultModel` | Any Claude model ID | `claude-sonnet-4-*` |
 
