@@ -46,6 +46,28 @@ Reusable workflows for consistent development:
 - Refactoring
 - And more...
 
+## Experience
+
+See CodingBuddy in action — from project scan to session wrap-up.
+
+### Session Start
+
+![Session Start](docs/assets/session-start.gif)
+
+CodingBuddy greets you, scans the project structure, and loads your coding rules automatically.
+
+### During Work
+
+![During Work](docs/assets/during-work.gif)
+
+Specialist agents activate in real-time, tools execute with contextual checklists, and the PLAN/ACT/EVAL workflow keeps quality on track.
+
+### Session End
+
+![Session End](docs/assets/session-end.gif)
+
+A concise summary of what was accomplished, with achievements and quality metrics at a glance.
+
 ## MCP Integration (Required)
 
 This plugin requires the CodingBuddy MCP server for full functionality:
