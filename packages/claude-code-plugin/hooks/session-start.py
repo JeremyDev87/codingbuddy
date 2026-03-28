@@ -271,7 +271,7 @@ def _is_hook_in_settings(settings: dict) -> bool:
     user_prompt_hooks = settings.get("hooks", {}).get("UserPromptSubmit", [])
     for hook_group in user_prompt_hooks:
         for hook in hook_group.get("hooks", []):
-            if hook.get("command") == HOOK_COMMAND:
+            if HOOK_FILENAME in hook.get("command", ""):
                 return True
     return False
 
