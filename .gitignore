@@ -58,6 +58,9 @@ custom.mdc
 .codingbuddy/
 docs/codingbuddy/*
 !docs/codingbuddy/wiki/
+
+# Impact telemetry (local-only)
+docs/codingbuddy/impact-events.jsonl
 .omc/
 .taskmaestro/
 RESULT.json
