@@ -19,6 +19,7 @@ import { ModelResolverService } from '../../model/model-resolver.service';
 import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
+import type { ImpactEventService } from '../../impact';
 
 /**
  * Integration tests verifying all concrete handlers inherit
@@ -138,9 +139,15 @@ describe('Handler Security Integration', () => {
       error: vi.fn().mockResolvedValue({ success: true }),
     } as unknown as DiagnosticLogService;
 
+    const mockImpactEventService = { logEvent: vi.fn() } as unknown as ImpactEventService;
+
     // Initialize handlers
-    agentHandler = new AgentHandler(mockAgentService);
-    checklistHandler = new ChecklistContextHandler(mockChecklistService, mockContextService);
+    agentHandler = new AgentHandler(mockAgentService, mockImpactEventService);
+    checklistHandler = new ChecklistContextHandler(
+      mockChecklistService,
+      mockContextService,
+      mockImpactEventService,
+    );
     configHandler = new ConfigHandler(
       mockConfigService,
       mockConfigDiffService,
@@ -160,8 +167,13 @@ describe('Handler Security Integration', () => {
       mockContextDocService,
       mockDiagnosticLogService,
       mockAgentServiceForMode as AgentService,
+      mockImpactEventService,
     );
-    rulesHandler = new RulesHandler(mockRulesService, mockModelResolverService);
+    rulesHandler = new RulesHandler(
+      mockRulesService,
+      mockModelResolverService,
+      mockImpactEventService,
+    );
     skillHandler = new SkillHandler(mockSkillRecommendationService, mockRulesService);
   });
 
