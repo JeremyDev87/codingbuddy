@@ -12,112 +12,50 @@
 [![npm version](https://img.shields.io/npm/v/codingbuddy.svg)](https://www.npmjs.com/package/codingbuddy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<p align="center">
-  <img src="docs/ai-rules-architecture.svg" alt="Codingbuddy Multi-Agent Architecture" width="800"/>
-</p>
+**Prove your AI coding is actually improving.**
 
-## AI Expert Team for Your Code
-
-**Codingbuddy orchestrates 35 AI agents to deliver human-expert-team-level code quality.**
-
-A single AI can't be an expert at everything. Codingbuddy creates an AI development team—architects, developers, security specialists, accessibility experts, and more—that collaborate to review, verify, and refine your code until it meets professional standards.
+Codingbuddy is a multi-AI MCP server that orchestrates 37 specialist agents across 9 AI tools — and measures the impact on your code quality with every session.
 
 ---
 
-## The Vision
+## Session Impact Report
 
-### The Problem
-
-When you ask an AI to write code, you get a single perspective. No security review. No accessibility check. No architecture validation. Just one AI doing everything "okay" but nothing excellently.
-
-Human development teams have specialists:
-- **Architects** who design systems
-- **Security engineers** who find vulnerabilities
-- **QA specialists** who catch edge cases
-- **Performance experts** who optimize bottlenecks
-
-### Our Solution
-
-**Codingbuddy brings the specialist team model to AI coding.**
-
-Instead of one AI trying to do everything, Codingbuddy coordinates multiple specialized agents that collaborate:
+At the end of every session, codingbuddy shows you what actually happened:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Your Request                              │
-│            "Implement user authentication"                   │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 📋 PLAN: Solution Architect + Architecture Specialist       │
-│          → Design system architecture                       │
-│          → Define security requirements                     │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 🚀 ACT: Backend Developer + Test Strategy Specialist        │
-│         → Implement with TDD                                │
-│         → Follow quality standards                          │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 🔍 EVAL: Code Reviewer + Parallel Specialists               │
-│          🔒 Security    → JWT vulnerabilities?              │
-│          ♿ Accessibility → WCAG compliance?                 │
-│          ⚡ Performance  → Optimization needed?              │
-│          📏 Quality      → SOLID principles?                │
-└─────────────────────────────────────────────────────────────┘
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-        Critical > 0?              Critical = 0 AND
-        High > 0?                  High = 0
-              │                           │
-              ▼                           ▼
-        Return to PLAN              ✅ Quality Achieved
-        with improvements           Ship with confidence
+┌─────────────────────────────────────────────────┐
+│            Session Impact Report                │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  Issues prevented           12                  │
+│    Security                  4  (2 critical)    │
+│    Accessibility             3                  │
+│    Performance               2                  │
+│    Code Quality              3                  │
+│                                                 │
+│  Agents dispatched           8                  │
+│  Checklists generated        5                  │
+│  Mode transitions            PLAN → ACT → EVAL │
+│  Context decisions          14                  │
+│                                                 │
+└─────────────────────────────────────────────────┘
 ```
+
+Most AI rules tools tell you to "code better." Codingbuddy proves you did.
 
 ---
 
 ## Quick Start
 
-**Requires Node.js 18+ and npm 9+ (or yarn 4+)**
-
-### Claude Code Plugin (Recommended)
-
-The fastest way to get started — full framework with harness engineering, autonomous loops, and agent collaboration:
-
 ```bash
-# Install the plugin
-claude plugin install codingbuddy@jeremydev87
-
-# Install MCP server for full functionality
+# 1. Install
 npm install -g codingbuddy
 
-# Initialize your project
+# 2. Initialize your project
 npx codingbuddy init
+
+# 3. Add to your AI tool's MCP config
 ```
-
-| Documentation | Description |
-|---------------|-------------|
-| [Plugin Setup Guide](docs/plugin-guide.md) | Installation and configuration |
-| [Quick Reference](docs/plugin-quick-reference.md) | Commands and modes at a glance |
-| [Architecture](docs/plugin-architecture.md) | How plugin and MCP work together |
-
-### MCP Server (Other AI Tools)
-
-For Cursor, GitHub Copilot, Antigravity, Amazon Q, Kiro, and other MCP-compatible tools:
-
-```bash
-# Initialize your project
-npx codingbuddy init
-```
-
-Add to your AI tool's MCP config:
 
 ```json
 {
@@ -130,195 +68,228 @@ Add to your AI tool's MCP config:
 }
 ```
 
-### Start Using
+Start coding with `PLAN`, `ACT`, `EVAL`, or `AUTO` keywords.
 
-```
-PLAN: Implement user registration with email verification
-→ AI team plans the architecture
-
-ACT
-→ AI team implements with TDD
-
-EVAL
-→ AI team reviews from 8+ perspectives
-
-AUTO: Build a complete auth system
-→ AI team iterates until quality achieved
-```
+> **Claude Code users**: Install as a plugin for the full experience — `claude plugin install codingbuddy@jeremydev87`. See the [Plugin Guide](docs/plugin-guide.md).
 
 [Full Getting Started Guide →](docs/getting-started.md)
 
 ---
 
-## Multi-Agent Architecture
+## Why Codingbuddy?
 
-### 3-Tier Agent System
+**Measurable results, not promises.** Session Impact Reports show issues prevented, agents dispatched, and quality improvements — backed by data from every tool call.
 
-| Tier | Agents | Role |
-|------|--------|------|
-| **Mode Agents** (4) | plan-mode, act-mode, eval-mode, auto-mode | Workflow orchestration |
-| **Primary Agents** (16) | solution-architect, technical-planner, frontend-developer, backend-developer, +12 more | Core implementation |
-| **Specialist Agents** (15) | security, accessibility, performance, test-strategy, +11 more | Domain expertise |
+**37 specialists, not one generalist.** Security engineers, accessibility experts, performance specialists, architects — each with domain expertise that a single AI cannot match.
 
-### Agent Collaboration Example
+**One ruleset, 9 AI tools.** Same quality standards whether you use Cursor, Claude Code, GitHub Copilot, or any other supported tool. Switch tools without losing consistency.
 
-When you request a feature, agents automatically collaborate:
-
-```
-🤖 solution-architect    → Designs the approach
-   └── 👤 architecture-specialist  → Validates layer boundaries
-   └── 👤 test-strategy-specialist → Plans test coverage
-
-🤖 backend-developer     → Implements the code
-   └── 👤 security-specialist      → Reviews auth patterns
-   └── 👤 event-architecture       → Designs message flows
-
-🤖 code-reviewer         → Evaluates quality
-   └── 👤 4 specialists in parallel → Multi-dimensional review
-```
-
----
-
-## Quality Assurance Cycle
-
-### The PLAN → ACT → EVAL Loop
-
-Codingbuddy enforces a quality-driven development cycle:
-
-1. **PLAN**: Design before coding (architecture, test strategy)
-2. **ACT**: Implement with TDD and quality standards
-3. **EVAL**: Multi-specialist review (security, performance, accessibility, quality)
-4. **Iterate**: Continue until quality targets met
-
-### AUTO Mode: Autonomous Quality Achievement
-
-```bash
-# Just describe what you want
-AUTO: Implement JWT authentication with refresh tokens
-
-# Codingbuddy automatically:
-# → Plans the implementation
-# → Writes code following TDD
-# → Reviews with 4+ specialists
-# → Iterates until: Critical=0 AND High=0
-# → Delivers production-ready code
-```
-
-### Exit Criteria
-
-| Severity | Must Fix Before Ship |
-|----------|---------------------|
-| 🔴 Critical | Yes - Immediate security/data issues |
-| 🟠 High | Yes - Significant problems |
-| 🟡 Medium | Optional - Technical debt |
-| 🟢 Low | Optional - Enhancement |
-
----
-
-## What Makes It Different
-
-| Traditional AI Coding | Codingbuddy |
-|----------------------|-------------|
-| Single AI perspective | 35 specialist agent perspectives |
-| "Generate and hope" | Plan → Implement → Verify |
-| No quality gates | Critical=0, High=0 required |
-| Manual review needed | Automated multi-dimensional review |
-| Inconsistent quality | Iterative refinement until standards met |
-
----
-
-## Terminal Dashboard (TUI)
-
-Codingbuddy includes a built-in terminal UI that displays real-time agent activity, task progress, and workflow state alongside your AI assistant.
-
-<p align="center">
-  <img src="docs/images/tui-dashboard.jpeg" alt="Codingbuddy TUI Dashboard" width="800" />
-</p>
-
-### Quick Start
-
-```bash
-# Standalone mode (recommended) — run in a separate terminal
-npx codingbuddy tui
-
-# Embedded mode — launch alongside MCP server
-npx codingbuddy mcp --tui
-```
-
-### Dashboard Panels
-
-| Panel | Description |
-|-------|-------------|
-| **HeaderBar** | Workflow mode indicator (PLAN → ACT → EVAL), global state, and real-time clock |
-| **FlowMap** | Hierarchical pipeline showing active agents, stages, and tree-structured progress |
-| **FocusedAgent** | Live view of the active agent with sparkline activity chart and progress bar |
-| **Checklist** | Task completion tracking synced from PLAN/ACT/EVAL context decisions |
-| **Activity Chart** | Real-time horizontal bar chart of tool invocations updated as agents work |
-| **StageHealth** | Cumulative session stats — agent count, skill count, tool invocations, and bottleneck detection |
-
-### Key Capabilities
-
-- **Multi-session**: Multiple Claude Code sessions share a single TUI window via IPC (Unix Domain Socket)
-- **Responsive layout**: Adapts to terminal width — narrow (<80), medium (80-119), wide (120+) columns
-- **Zero overhead**: Non-blocking event emission via `setImmediate()` — <1ms impact on MCP response times
-- **Auto-launch**: Optionally spawns TUI in a new terminal window automatically (`CODINGBUDDY_AUTO_TUI=true`)
-
-[TUI Guide →](docs/tui-guide.md) · [Architecture →](docs/tui-architecture.md) · [Troubleshooting →](docs/tui-troubleshooting.md)
+**Quality gates that ship.** The PLAN → ACT → EVAL cycle iterates until Critical=0 and High=0. Production-ready code, not "good enough" code.
 
 ---
 
 ## Supported AI Tools
 
-| Tool | Status |
-|------|--------|
-| Claude Code | ✅ Full MCP + Plugin |
-| Cursor | ✅ Supported |
-| GitHub Copilot | ✅ Supported |
-| Antigravity | ✅ Supported |
-| Amazon Q | ✅ Supported |
-| Kiro | ✅ Supported |
-| OpenCode | ✅ Supported |
+| Tool | Integration | Setup |
+|------|-------------|-------|
+| Claude Code | MCP Server + Plugin | [Guide](packages/rules/.ai-rules/adapters/claude-code.md) |
+| Cursor | MCP Server | [Guide](packages/rules/.ai-rules/adapters/cursor.md) |
+| GitHub Copilot / Codex | MCP Server | [Guide](packages/rules/.ai-rules/adapters/codex.md) |
+| Antigravity (Gemini) | MCP Server | [Guide](packages/rules/.ai-rules/adapters/antigravity.md) |
+| Amazon Q | MCP Server | [Guide](packages/rules/.ai-rules/adapters/q.md) |
+| Kiro | MCP Server | [Guide](packages/rules/.ai-rules/adapters/kiro.md) |
+| Windsurf | MCP Server | [Guide](packages/rules/.ai-rules/adapters/windsurf.md) |
+| Aider | MCP Server | [Guide](packages/rules/.ai-rules/adapters/aider.md) |
+| OpenCode | MCP Server | [Guide](packages/rules/.ai-rules/adapters/opencode.md) |
 
-[Setup Guides →](docs/supported-tools.md)
+[All Setup Guides →](docs/supported-tools.md)
+
+---
+
+## How It Works
+
+Codingbuddy enforces a quality-driven development cycle:
+
+```
+    PLAN                    ACT                     EVAL
+ ┌──────────┐          ┌──────────┐          ┌──────────────┐
+ │ Architect │          │Developer │          │  Code Review  │
+ │  designs  │───────▶  │implements│───────▶  │  + Parallel   │
+ │  approach │          │ with TDD │          │  Specialists  │
+ └──────────┘          └──────────┘          └──────┬───────┘
+                                                    │
+                                          ┌─────────┴─────────┐
+                                          │                   │
+                                    Critical > 0?       Critical = 0
+                                    High > 0?           High = 0
+                                          │                   │
+                                          ▼                   ▼
+                                    Back to PLAN        Ship with
+                                                       confidence
+```
+
+**AUTO mode** runs the full cycle autonomously:
+
+```
+AUTO: Implement JWT authentication with refresh tokens
+→ Plans architecture with security requirements
+→ Implements with TDD
+→ Reviews: security, performance, accessibility, code quality
+→ Iterates until production-ready
+```
+
+---
+
+## Impact Telemetry
+
+Codingbuddy tracks what its agents do during your session and generates a summary at the end.
+
+### What It Tracks
+
+| Event | Description |
+|-------|-------------|
+| Mode transitions | PLAN/ACT/EVAL workflow progression |
+| Agents dispatched | Which specialists were activated and when |
+| Issues prevented | Problems caught before reaching production |
+| Checklists generated | Domain-specific quality gates applied |
+| Context decisions | Architectural decisions persisted across sessions |
+| Rules matched | Project-specific rules enforced during the session |
+
+### How It Works
+
+1. Every MCP tool call logs impact events to the session
+2. Events are categorized by domain (security, accessibility, performance, quality) and severity
+3. At session end, `get_session_impact` generates the summary report
+
+No configuration needed. Impact telemetry is always on.
+
+---
+
+## Agents
+
+37 specialist agents organized in a 3-tier system.
+
+### Mode Agents (4)
+
+Orchestrate the development workflow.
+
+| Agent | Role |
+|-------|------|
+| Plan Mode | Design architecture and test strategy |
+| Act Mode | Execute implementation with TDD |
+| Eval Mode | Multi-specialist code review |
+| Auto Mode | Autonomous PLAN → ACT → EVAL until quality met |
+
+### Primary Agents (18)
+
+Core implementation and review roles.
+
+| Agent | Focus |
+|-------|-------|
+| Solution Architect | High-level system design |
+| Technical Planner | Implementation planning with TDD tasks |
+| Frontend Developer | React/Next.js, Server Components, accessibility |
+| Backend Developer | Node.js, Python, Go, Java — Clean Architecture |
+| Mobile Developer | React Native, Flutter, iOS, Android |
+| Data Engineer | Schema design, migrations, query optimization |
+| Data Scientist | EDA, statistical modeling, ML, Jupyter |
+| Systems Developer | Rust, C/C++, FFI, embedded, low-level performance |
+| Code Reviewer | Multi-dimensional quality assessment |
+| Test Engineer | TDD cycle, coverage, all test types |
+| Security Engineer | Auth, encryption, vulnerability remediation |
+| Software Engineer | General-purpose, any language (fallback) |
+| DevOps Engineer | Docker, monitoring, deployment |
+| Platform Engineer | IaC, Kubernetes, multi-cloud, GitOps |
+| Tooling Engineer | Build tools, project configuration |
+| Agent Architect | AI agent design and validation |
+| AI/ML Engineer | LLM integration, RAG, prompt engineering |
+| UI/UX Designer | Visual hierarchy, interaction patterns, UX laws |
+
+### Specialist Agents (13)
+
+Domain experts dispatched in parallel during EVAL.
+
+| Agent | Domain |
+|-------|--------|
+| Architecture | Layer boundaries, dependency direction, SOLID |
+| Test Strategy | TDD vs test-after, coverage planning |
+| Security | OWASP, auth/authz, XSS/CSRF |
+| Accessibility | WCAG 2.1 AA, ARIA, keyboard navigation |
+| Performance | Core Web Vitals, bundle size, rendering |
+| Code Quality | Complexity analysis, DRY, design patterns |
+| SEO | Metadata, JSON-LD, Open Graph |
+| i18n | Translation keys, RTL, locale formatting |
+| Integration | API patterns, OAuth, circuit breakers |
+| Event Architecture | Event Sourcing, CQRS, Saga, message queues |
+| Documentation | JSDoc, code comments, API docs |
+| Observability | OpenTelemetry, tracing, SLI/SLO |
+| Migration | Strangler Fig, zero-downtime migrations |
+
+### Utility Agents (2)
+
+| Agent | Purpose |
+|-------|---------|
+| Parallel Orchestrator | Multi-issue parallel execution with file-overlap validation |
+| Plan Reviewer | Plan quality and feasibility checks |
+
+[Full Agent Reference →](packages/rules/.ai-rules/agents/README.md)
+
+---
+
+## Built-in Skills
+
+Reusable workflows that enforce consistent development practices.
+
+| Skill | Description |
+|-------|-------------|
+| `ship` | Run CI checks, create branch, commit, push, and PR |
+| `retrospective` | Analyze session archives for patterns and improvements |
+| `test-driven-development` | Red → Green → Refactor cycle enforcement |
+| `systematic-debugging` | Root cause analysis before proposing fixes |
+| `security-audit` | OWASP Top 10 review, secrets scanning |
+| `performance-optimization` | Profiling-first optimization workflow |
+| `refactoring` | Tidy First principles with test safety |
+| `brainstorming` | Explore intent and requirements before building |
+
+[Full Skills Library →](packages/rules/.ai-rules/skills/README.md)
 
 ---
 
 ## Configuration
 
-### AI Model Settings
-
-Configure the default AI model in `codingbuddy.config.json`:
+Create `codingbuddy.config.json` in your project root:
 
 ```json
 {
+  "language": "en",
+  "verbosity": "compact",
   "ai": {
     "defaultModel": "claude-sonnet-4-20250514"
   }
 }
 ```
 
-| Model | Best For |
-|-------|----------|
-| `claude-opus-4-*` | Complex architecture, deep analysis |
-| `claude-sonnet-4-*` | General development (default) |
-| `claude-haiku-3-5-*` | Quick lookups (not recommended for coding) |
+| Setting | Options | Default |
+|---------|---------|---------|
+| `language` | `en`, `ko`, `ja`, `zh`, `es` | `en` |
+| `verbosity` | `minimal`, `compact`, `standard`, `detailed` | `compact` |
+| `ai.defaultModel` | Any Claude model ID | `claude-sonnet-4-*` |
 
-### Verbosity Settings
+[Configuration Reference →](docs/config-schema.md)
 
-Optimize token usage with verbosity levels:
+---
 
-```json
-{
-  "verbosity": "compact"
-}
+## Terminal Dashboard (TUI)
+
+Real-time visualization of agent activity, task progress, and workflow state.
+
+```bash
+npx codingbuddy tui
 ```
 
-| Level | Use Case |
-|-------|----------|
-| `minimal` | Maximum token savings, essential info only |
-| `compact` | Balanced, reduced formatting (default) |
-| `standard` | Full formatting, structured responses |
-| `detailed` | Extended explanations, examples included |
+Multi-session support, responsive layout, and zero overhead on MCP response times.
+
+[TUI Guide →](docs/tui-guide.md)
 
 ---
 
@@ -326,12 +297,13 @@ Optimize token usage with verbosity levels:
 
 | Document | Description |
 |----------|-------------|
-| [Getting Started](docs/getting-started.md) | Installation and quick setup |
-| [Philosophy](docs/philosophy.md) | Vision and design principles |
+| [Getting Started](docs/getting-started.md) | Installation and setup |
 | [Agent System](packages/rules/.ai-rules/agents/README.md) | Complete agent reference |
-| [Skills Library](packages/rules/.ai-rules/skills/README.md) | Reusable workflow skills (TDD, debugging, PR, etc.) |
+| [Skills Library](packages/rules/.ai-rules/skills/README.md) | Workflow skills |
 | [Supported Tools](docs/supported-tools.md) | AI tool integration guides |
 | [Configuration](docs/config-schema.md) | Config file options |
+| [Plugin Guide](docs/plugin-guide.md) | Claude Code plugin setup |
+| [TUI Guide](docs/tui-guide.md) | Terminal dashboard |
 | [API Reference](docs/api.md) | MCP server capabilities |
 
 ---
