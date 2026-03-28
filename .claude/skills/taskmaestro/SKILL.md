@@ -658,6 +658,23 @@ WORKER_PROMPT
 | /ship fails | Write RESULT.json with `status: "failure"` + error details |
 | Implementation fails after 3 retries | Write RESULT.json with `status: "failure"` |
 | Any other exit path | RESULT.json **must** still be written — no exceptions |
+| Conductor starts review | Update RESULT.json to `status: "review_pending"` + `review_cycle` + `review_comments` |
+| Worker addresses review | Update RESULT.json to `status: "review_addressed"` |
+| Conductor approves PR | Update RESULT.json to `status: "approved"` (진짜 완료) |
+
+**Extended RESULT.json fields for review cycle:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `review_cycle` | `number` | No | Current review cycle count (default: 0) |
+| `review_comments` | `string[]` | No | Summary list of conductor review comments |
+
+**Status lifecycle:**
+```
+success → review_pending → review_addressed → approved
+                ↑                    │
+                └────────────────────┘ (max 3 cycles)
+```
 
 **Error recovery flow:**
 
@@ -1372,7 +1389,10 @@ watch_workers() {
 | 2 (poll) | No `[TM:*]` → 3-factor analysis | Fallback for crashed/legacy workers |
 | 3 | State = `idle` (no RESULT.json) | Increment idle counter → nudge after 2 cycles (#861) |
 | 3 | State = `error_idle` (errors + prompt) | Nudge with error recovery instructions (#861) |
-| 3 | State = `done` (RESULT.json valid) | Mark complete, reset counters |
+| 3 | State = `done` (RESULT.json `approved`) | Mark complete, reset counters |
+| 3 | State = `review_start` (RESULT.json `success`) | Start review cycle (see Review Cycle Protocol) |
+| 3 | State = `review_pending` | Awaiting worker response — no action |
+| 3 | State = `review_addressed` | Conductor re-reviews (see Review Cycle Protocol) |
 | 3 | State = `working` | Reset idle counter, continue |
 | 4 | Nudge count >= 3 | Escalate — conductor alert (#861) |
 
@@ -1570,13 +1590,33 @@ cleanup_all() {
 Every status line MUST include parenthetical evidence:
 
 ```
-패널 1: ✅ done - "task" → PR #N (RESULT.json: issue match ✓, pane idle ✓)
+패널 1: ✅ approved - "task" → PR #N (RESULT.json: approved, review cycles: 2, pane idle ✓)
 패널 2: 🔄 working - "task" (active: ✽ Implementing… · ↓ 5.3k tokens)
-패널 3: ⚠️ uncertain - "task" (RESULT.json exists BUT pane active — cross-verify)
-패널 4: ❌ error - "task" (error in last 10 lines: "ModuleNotFoundError")
+패널 3: 🔍 reviewing - "task" → PR #N (RESULT.json: success, review cycle 1/3)
+패널 4: ⏳ review_pending - "task" → PR #N (RESULT.json: review_pending, cycle 1/3, awaiting worker)
+패널 5: 📝 review_addressed - "task" → PR #N (RESULT.json: review_addressed, cycle 2/3, awaiting re-review)
+패널 6: ⚠️ uncertain - "task" (RESULT.json exists BUT pane active — cross-verify)
+패널 7: ❌ error - "task" (error in last 10 lines: "ModuleNotFoundError")
 ```
 
-Rules: Never bare ✅ without evidence. "thinking" alone ≠ working.
+**Status icons:**
+
+| status | Icon | Description |
+|--------|------|-------------|
+| `approved` | ✅ | Final approval (truly done) |
+| `success` (review starting) | 🔍 | Review cycle in progress |
+| `review_pending` | ⏳ | Conductor review done, awaiting worker response |
+| `review_addressed` | 📝 | Worker addressed review, awaiting re-review |
+| `working` | 🔄 | Worker actively working |
+| `failure` / `error` | ❌ | Failed or unexpected error |
+
+Rules:
+- Never bare ✅ without evidence
+- RESULT.json `approved` + pane idle = confirmed done
+- RESULT.json `success` = start review cycle (NOT done)
+- RESULT.json `review_pending` = awaiting worker response
+- RESULT.json `review_addressed` = awaiting conductor re-review
+- "thinking" alone ≠ working
 
 ## Important Notes
 
@@ -1603,6 +1643,155 @@ Rules: Never bare ✅ without evidence. "thinking" alone ≠ working.
 - **NEVER use `git add -A` or `git add .`** — always stage specific files by name. This applies to both the conductor and all worker prompts.
 - **RESULT.json and TASK.md must NEVER be committed** — these are ephemeral per-worktree artifacts. If found in staged changes, unstage immediately.
 - **Stale RESULT.json auto-removal** — if RESULT.json `issue` field does not match the currently assigned task, remove it (`rm -f RESULT.json`) before the worker starts.
+
+---
+
+## Review Cycle Protocol
+
+When a worker creates a PR and writes RESULT.json with `status: "success"`, the conductor starts a code review cycle instead of marking the task as done. The task is only "truly done" when the conductor approves with `status: "approved"`.
+
+### Trigger
+
+Watch mode RESULT.json status mapping:
+
+| status | Watch Action |
+|--------|-------------|
+| `"success"` | Start review cycle (NOT "done") |
+| `"failure"` / `"error"` | Report to user (unchanged) |
+| `"review_pending"` | Waiting for worker response |
+| `"review_addressed"` | Conductor should re-review |
+| `"approved"` | Truly done ✅ |
+
+### Review Steps
+
+When conductor detects `status: "success"` or `status: "review_addressed"`:
+
+1. **Read PR diff**
+   ```bash
+   gh pr diff <PR_NUMBER>
+   ```
+
+2. **Generate checklist**
+   Use codingbuddy `generate_checklist` MCP tool with the changed file paths for domain-specific checks.
+
+3. **Write review comments**
+   Review the changes against the checklist and post comments on the PR:
+   ```bash
+   gh pr review <PR_NUMBER> --comment --body "<review comments>"
+   ```
+
+4. **Update RESULT.json**
+   Conductor updates the worker's RESULT.json:
+   ```json
+   {
+     "status": "review_pending",
+     "review_cycle": 1,
+     "review_comments": ["unused import 'FileChangeStats'", "missing error handling", "..."]
+   }
+   ```
+
+5. **Instruct worker**
+   ```bash
+   tmux send-keys -t "$target" \
+     "PR #<PR_NUMBER>에 리뷰 코멘트가 달렸다. gh pr view <PR_NUMBER> --comments 로 확인하고, 수용할 부분은 코드 수정 후 push, 거부할 부분은 PR에 반박 코멘트를 남겨라. 완료 후 RESULT.json의 status를 review_addressed로 업데이트해라." Enter
+   ```
+
+6. **Worker responds**
+   - Accept: fix code → push
+   - Reject: post rebuttal comment with rationale
+   - Reply to each comment with "Resolved: [action taken]"
+   - Update RESULT.json: `status: "review_addressed"`
+
+7. **Re-review**
+   When conductor detects `status: "review_addressed"`:
+   - Re-read `gh pr diff <PR_NUMBER>`
+   - Check unresolved comments
+   - If improved enough → **approve** (Step 8)
+   - If not → repeat from Step 3
+
+8. **Final approval**
+   ```bash
+   # If not own PR
+   gh pr review <PR_NUMBER> --approve --body "LGTM - all review comments addressed"
+   # If own PR (cannot self-approve)
+   gh pr review <PR_NUMBER> --comment --body "✅ Review complete - all comments addressed"
+   ```
+   Update RESULT.json: `status: "approved"`
+
+### Max Review Cycles
+
+- **Maximum 3 review cycles** (prevents infinite loops)
+- After 3 cycles, report to user:
+  ```
+  ⚠️ pane-N: 3 review cycles exhausted, unresolved issues remain.
+  PR: #<PR_NUMBER>
+  Unresolved: [list of comments]
+  User decision required.
+  ```
+- Conductor stops reviewing that pane and waits for user instruction.
+
+### Quality Criteria for Approval
+
+Conductor approves when:
+- CI fully passes (`gh pr checks <PR_NUMBER>`)
+- No unused variables/imports
+- New code has appropriate tests
+- Existing tests not broken
+- Code style consistency maintained
+
+### Watch Loop Integration
+
+In the watch loop, replace the simple "done" handling with review-aware logic:
+
+```bash
+# Inside watch loop, when has_result=true:
+if [ "$has_result" = true ]; then
+  local r_status
+  r_status=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${result_file}','utf8')).status||'')}catch(e){console.log('')}" 2>/dev/null)
+
+  case "$r_status" in
+    "success")
+      # Start review cycle — NOT done yet
+      state="review_start"
+      echo "pane-${pane}: 🔍 PR ready for review"
+      # Conductor initiates review (Steps 1-5 above)
+      ;;
+    "review_pending")
+      state="review_pending"
+      echo "pane-${pane}: ⏳ awaiting worker response"
+      ;;
+    "review_addressed")
+      # Re-review needed
+      state="review_addressed"
+      echo "pane-${pane}: 📝 re-review needed"
+      # Conductor initiates re-review (Step 7 above)
+      ;;
+    "approved")
+      state="done"
+      set_worker_status "$target" "complete"
+      echo "pane-${pane}: ✅ approved (review complete)"
+      ;;
+    "failure"|"error")
+      state="error_idle"
+      set_worker_status "$target" "error"
+      ;;
+  esac
+fi
+```
+
+### Wave Completion with Review
+
+Wave completion detection must use `"approved"` instead of simple RESULT.json existence:
+
+```
+All workers approved (RESULT.json status="approved")
+     ↓
+generate_wave_report()
+     ↓
+auto_wave_transition()
+```
+
+A worker with `status: "success"`, `"review_pending"`, or `"review_addressed"` is NOT done — the wave remains in progress.
 
 ---
 
