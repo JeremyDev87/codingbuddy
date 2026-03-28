@@ -114,6 +114,19 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Impact report: render session impact (#1064)
+        try:
+            duration_secs = final_data.get("duration_seconds", 0)
+            if duration_secs >= 30:
+                impact_dir = os.environ.get(
+                    "CLAUDE_PROJECT_DIR", os.getcwd()
+                )
+                report = _render_impact_report(session_id, impact_dir)
+                if report:
+                    summary += "\n\n" + report
+        except Exception:
+            pass  # Never block session stop
+
         # Agent memory: record session agent activity (#947)
         try:
             from agent_memory import AgentMemory
@@ -177,6 +190,106 @@ def handle_stop(data: dict):
         pass  # Never block session stop
 
     return None
+
+
+def _render_impact_report(session_id, project_dir):
+    """Render impact report from JSONL events for the given session (#1064).
+
+    Reads impact-events.jsonl directly (MCP server may already be stopping).
+    Returns empty string if no events found.
+    """
+    jsonl_path = os.path.join(
+        project_dir, "docs", "codingbuddy", "impact-events.jsonl"
+    )
+    if not os.path.isfile(jsonl_path):
+        return ""
+
+    events = []
+    with open(jsonl_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                evt = json.loads(line)
+                if evt.get("sessionId") == session_id:
+                    events.append(evt)
+            except (json.JSONDecodeError, KeyError):
+                continue
+
+    if not events:
+        return ""
+
+    # Aggregate
+    issues_prevented = 0
+    issues_by_domain = {}
+    agents_dispatched = 0
+    checklists_generated = 0
+    checklist_domains = set()
+    mode_transitions = []
+
+    for evt in events:
+        et = evt.get("eventType", "")
+        data = evt.get("data", {})
+
+        if et in ("issue_found", "issue_prevented"):
+            count = data.get("count") or 1
+            issues_prevented += count
+            domain = data.get("domain")
+            if domain:
+                issues_by_domain[domain] = (
+                    issues_by_domain.get(domain, 0) + count
+                )
+        elif et == "agent_dispatched":
+            agents_dispatched += 1
+        elif et == "checklist_generated":
+            checklists_generated += 1
+            domain = data.get("domain")
+            if domain:
+                checklist_domains.add(domain)
+        elif et == "mode_activated":
+            mode = data.get("mode")
+            if mode:
+                mode_transitions.append(mode)
+
+    # Build content rows
+    rows = []
+    if issues_prevented > 0:
+        rows.append(f"  🛡️  Issues prevented    {issues_prevented}")
+        domain_parts = "  ".join(
+            f"• {d}: {c}" for d, c in issues_by_domain.items()
+        )
+        if domain_parts:
+            rows.append(f"     {domain_parts}")
+    if agents_dispatched > 0:
+        rows.append(
+            f"  🤖 Agents dispatched   {agents_dispatched} specialists"
+        )
+    if checklists_generated > 0:
+        rows.append(
+            f"  📋 Checklists applied  {len(checklist_domains)} domains"
+        )
+    if mode_transitions:
+        rows.append(
+            f"  🔄 Mode transitions    {'→'.join(mode_transitions)}"
+        )
+
+    if not rows:
+        return ""
+
+    # Box rendering
+    BOX_W = 41
+    hr = "─" * BOX_W
+
+    def _box(text):
+        return f"│{text.ljust(BOX_W)}│"
+
+    lines = [f"╭{hr}╮", _box("  📊 Impact Report"), f"├{hr}┤"]
+    for row in rows:
+        lines.append(_box(row))
+    lines.append(f"╰{hr}╯")
+
+    return "\n".join(lines)
 
 
 def _maybe_notify_session_end(summary: str):
