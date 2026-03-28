@@ -14,6 +14,7 @@ Supported languages:
 """
 
 import json
+import os
 import sys
 import re
 from typing import Optional
@@ -67,6 +68,21 @@ def main():
         if detected_mode:
             # Output mandatory context for Claude
             print(CONTEXT_TEMPLATE.format(mode=detected_mode))
+
+            # Update HUD state with detected mode (#1090)
+            try:
+                _hooks_dir = os.path.dirname(os.path.abspath(__file__))
+                _lib_dir = os.path.join(_hooks_dir, "lib")
+                if _lib_dir not in sys.path:
+                    sys.path.insert(0, _lib_dir)
+                from hud_state import update_hud_state
+                state_file = os.environ.get("CODINGBUDDY_HUD_STATE_FILE")
+                if state_file:
+                    update_hud_state(state_file=state_file, currentMode=detected_mode)
+                else:
+                    update_hud_state(currentMode=detected_mode)
+            except Exception:
+                pass
 
         # Exit successfully (exit code 0 = success, output added as context)
         sys.exit(0)
