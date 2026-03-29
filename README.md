@@ -100,6 +100,20 @@ Start coding with `PLAN`, `ACT`, `EVAL`, or `AUTO` keywords.
 
 ---
 
+## What's New in v5.1.2
+
+**StatusLine HUD** — Real-time session metrics right in the Claude Code UI: current mode, estimated cost, cache hit rate, and context usage.
+
+```
+◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
+```
+
+**tmux Sidebar** — Run Claude Code inside tmux and get an auto-configured TUI dashboard sidebar with agent status, checklists, and metrics.
+
+**Release Validation** — Two new MCP tools: `validate_plugin_manifest` for schema-based plugin.json validation, and `pre_release_check` for comprehensive pre-release checks with ecosystem auto-detection (Node.js, Python, Go, Rust, Java).
+
+---
+
 ## Supported AI Tools
 
 | Tool | Integration | Setup |

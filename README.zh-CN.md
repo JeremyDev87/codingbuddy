@@ -250,6 +250,20 @@ npx codingbuddy mcp --tui
 
 ---
 
+## v5.1.2 新功能
+
+**StatusLine HUD** — 在Claude Code UI中实时显示会话指标：模式、成本、缓存率、上下文使用量。
+
+```
+◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
+```
+
+**tmux侧边栏** — 在tmux中运行Claude Code时，自动配置TUI仪表板侧边栏。
+
+**发布验证** — 新增`validate_plugin_manifest`和`pre_release_check` MCP工具。
+
+---
+
 ## 支持的 AI 工具
 
 | 工具 | 状态 |

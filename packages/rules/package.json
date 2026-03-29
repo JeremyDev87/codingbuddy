@@ -1,6 +1,6 @@
 {
   "name": "codingbuddy-rules",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "AI coding rules for consistent practices across AI assistants",
   "main": "index.js",
   "types": "index.d.ts",

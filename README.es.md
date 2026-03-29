@@ -250,6 +250,20 @@ npx codingbuddy mcp --tui
 
 ---
 
+## Novedades en v5.1.2
+
+**StatusLine HUD** — Métricas de sesión en tiempo real en la UI de Claude Code: modo, costo, tasa de caché, uso de contexto.
+
+```
+◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
+```
+
+**Barra lateral tmux** — Ejecute Claude Code dentro de tmux y obtenga un panel TUI automático como barra lateral.
+
+**Validación de lanzamiento** — Nuevas herramientas MCP: `validate_plugin_manifest` y `pre_release_check`.
+
+---
+
 ## Herramientas de IA Compatibles
 
 | Herramienta | Estado |

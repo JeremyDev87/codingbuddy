@@ -5,6 +5,25 @@
 이 문서는 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/) 형식을 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/spec/v2.0.0.html)을 준수합니다.
 
+## [5.1.2] - 2026-03-29
+
+### 추가됨
+- **StatusLine HUD**: Claude Code UI에 실시간 세션 지표 표시 (모드, 비용, 캐시율, 컨텍스트 사용량)
+- **tmux 사이드바**: tmux 내에서 TUI 대시보드를 사이드바로 자동 설정
+- **`validate_plugin_manifest` 도구**: Claude Code plugin.json을 스키마로 검증하고 수정 제안 제공
+- **`pre_release_check` 도구**: 에코시스템 자동 감지 릴리즈 사전 검증 (Node.js, Python, Go, Rust, Java)
+- **릴리즈 체크리스트 도메인**: 버전 일관성, 락파일 동기화, 매니페스트 검증, CI 품질 게이트 등 10개 항목
+- **릴리즈 설정 스키마**: codingbuddy.config.json에 `release` 섹션 추가
+- **EVAL 릴리즈 감지**: EVAL/AUTO 모드에서 버전 관련 키워드 감지 시 릴리즈 체크리스트 자동 포함
+- **CI 스키마 검증**: dev 워크플로우에 plugin.json, marketplace.json JSON Schema 검증 추가
+- **HUD 상태 모듈**: statusLine과 모드 감지를 위한 크로스-훅 상태 관리
+
+### 수정됨
+- `bump-version.sh`에서 `yarn install` 실행하여 peerDependencies 변경 후 락파일 드리프트 방지
+
+### 변경됨
+- `CODINGBUDDY_AUTO_TUI` 기본값 `0`으로 변경 — Claude Code 사용자를 위해 tmux 사이드바가 독립 TUI를 대체
+
 ## [4.4.0] - 2026-03-04
 
 ### 추가됨

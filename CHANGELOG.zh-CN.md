@@ -5,6 +5,25 @@
 本文档格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/spec/v2.0.0.html)。
 
+## [5.1.2] - 2026-03-29
+
+### 新增
+- **StatusLine HUD**: 在Claude Code UI中实时显示会话指标（模式、成本、缓存率、上下文使用量）
+- **tmux侧边栏**: 在tmux中自动将TUI仪表板设置为侧边栏面板
+- **`validate_plugin_manifest`工具**: 根据已知模式验证Claude Code plugin.json并提供修复建议
+- **`pre_release_check`工具**: 生态系统自动检测的预发布验证（Node.js、Python、Go、Rust、Java）
+- **发布检查清单域**: 版本一致性、锁文件同步、清单验证、CI质量门等10个项目
+- **发布配置模式**: 在codingbuddy.config.json中添加`release`部分
+- **EVAL发布检测**: 在EVAL/AUTO模式下检测到版本相关关键词时自动包含发布检查清单
+- **CI模式验证**: 在dev工作流中添加plugin.json和marketplace.json JSON Schema验证
+- **HUD状态模块**: 用于statusLine和模式检测的跨钩子状态管理
+
+### 修复
+- `bump-version.sh`现在运行`yarn install`以防止peerDependencies更改后的锁文件漂移
+
+### 变更
+- `CODINGBUDDY_AUTO_TUI`默认值改为`0` — tmux侧边栏替代Claude Code用户的独立TUI
+
 ## [4.4.0] - 2026-03-04
 
 ### 新增

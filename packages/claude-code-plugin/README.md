@@ -2,18 +2,18 @@
 
 # CodingBuddy Claude Code Plugin
 
-> Version 5.1.0
+> Version 5.1.2
 
-Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, Impact Telemetry, and reusable skills for systematic development.
+Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, and reusable skills for systematic development.
 
 ## Installation
 
 ```bash
-# 1. Add marketplace
-claude marketplace add JeremyDev87/codingbuddy
+# Via npm
+npm install codingbuddy-claude-plugin
 
-# 2. Install plugin
-claude plugin install codingbuddy@jeremydev87
+# Or via Claude Code
+claude plugin add codingbuddy
 ```
 
 ## Features
@@ -45,28 +45,6 @@ Reusable workflows for consistent development:
 - API Design
 - Refactoring
 - And more...
-
-## Experience
-
-See CodingBuddy in action — from project scan to session wrap-up.
-
-### Session Start
-
-![Session Start](docs/assets/session-start.gif)
-
-CodingBuddy greets you, scans the project structure, and loads your coding rules automatically.
-
-### During Work
-
-![During Work](docs/assets/during-work.gif)
-
-Specialist agents activate in real-time, tools execute with contextual checklists, and the PLAN/ACT/EVAL workflow keeps quality on track.
-
-### Session End
-
-![Session End](docs/assets/session-end.gif)
-
-A concise summary of what was accomplished, with achievements and quality metrics at a glance.
 
 ## MCP Integration (Required)
 

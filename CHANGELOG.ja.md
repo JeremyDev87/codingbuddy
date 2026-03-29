@@ -5,6 +5,25 @@
 このドキュメントは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) の形式に基づいており、
 [セマンティック バージョニング](https://semver.org/lang/ja/spec/v2.0.0.html) に準拠しています。
 
+## [5.1.2] - 2026-03-29
+
+### 追加
+- **StatusLine HUD**: Claude Code UIにリアルタイムセッション指標を表示（モード、コスト、キャッシュ率、コンテキスト使用量）
+- **tmuxサイドバー**: tmux内でTUIダッシュボードをサイドバーとして自動設定
+- **`validate_plugin_manifest`ツール**: Claude Codeプラグインのplugin.jsonをスキーマで検証し修正提案を提供
+- **`pre_release_check`ツール**: エコシステム自動検出によるリリース前検証（Node.js、Python、Go、Rust、Java）
+- **リリースチェックリストドメイン**: バージョン整合性、ロックファイル同期、マニフェスト検証、CI品質ゲートなど10項目
+- **リリース設定スキーマ**: codingbuddy.config.jsonに`release`セクションを追加
+- **EVALリリース検出**: EVAL/AUTOモードでバージョン関連キーワード検出時にリリースチェックリストを自動含有
+- **CIスキーマ検証**: devワークフローにplugin.json、marketplace.json JSON Schema検証を追加
+- **HUD状態モジュール**: statusLineとモード検出のためのクロスフック状態管理
+
+### 修正
+- `bump-version.sh`で`yarn install`を実行してpeerDependencies変更後のロックファイルドリフトを防止
+
+### 変更
+- `CODINGBUDDY_AUTO_TUI`のデフォルト値を`0`に変更 — Claude Codeユーザー向けにtmuxサイドバーがスタンドアロンTUIを置換
+
 ## [4.4.0] - 2026-03-04
 
 ### 追加

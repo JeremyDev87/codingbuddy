@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.2] - 2026-03-29
+
+### Added
+- **StatusLine HUD**: Real-time session metrics in Claude Code UI (mode, cost, cache rate, context usage)
+- **tmux sidebar**: Auto-setup TUI dashboard as sidebar pane when running in tmux
+- **`validate_plugin_manifest` tool**: Validate Claude Code plugin.json against known schema with fix suggestions
+- **`pre_release_check` tool**: Pre-release validation with ecosystem auto-detection (Node.js, Python, Go, Rust, Java)
+- **Release checklist domain**: 10 items across version consistency, lockfile sync, manifest validation, CI quality gate
+- **Release config schema**: `release` section in codingbuddy.config.json for version files, lockfile, coverage threshold
+- **EVAL release detection**: Auto-include release checklist when version-related keywords detected in EVAL/AUTO mode
+- **CI schema validation**: plugin.json and marketplace.json JSON Schema validation in dev workflow
+- **HUD state module**: Cross-hook state management for statusLine and mode detection
+
+### Fixed
+- `bump-version.sh` now runs `yarn install` to prevent lockfile drift after peerDependencies changes
+
+### Changed
+- `CODINGBUDDY_AUTO_TUI` defaults to `0` — tmux sidebar replaces standalone TUI for Claude Code users
+
 ## [5.1.0] - 2026-03-28
 
 ### Added

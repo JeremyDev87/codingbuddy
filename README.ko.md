@@ -250,6 +250,20 @@ npx codingbuddy mcp --tui
 
 ---
 
+## v5.1.2 새로운 기능
+
+**StatusLine HUD** — Claude Code UI에 실시간 세션 지표 표시: 현재 모드, 예상 비용, 캐시 적중률, 컨텍스트 사용량.
+
+```
+◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
+```
+
+**tmux 사이드바** — tmux 안에서 Claude Code를 실행하면 TUI 대시보드 사이드바가 자동으로 설정됩니다.
+
+**릴리즈 검증** — `validate_plugin_manifest`(plugin.json 스키마 검증)와 `pre_release_check`(에코시스템 자동 감지 릴리즈 사전 검증) MCP 도구 추가.
+
+---
+
 ## 지원 AI 도구
 
 | 도구 | 상태 |
