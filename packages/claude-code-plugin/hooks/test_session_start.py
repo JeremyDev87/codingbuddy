@@ -309,6 +309,90 @@ class TestFindAgentsDir:
             assert len(json_files) > 0
 
 
+class TestHookLibCopy:
+    """Tests for lib/ directory copying alongside hook file (#1102)."""
+
+    def test_copies_lib_dir_when_installing_hook(self):
+        """Test that lib/ directory is copied alongside the hook file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir) / "home"
+            home.mkdir()
+
+            # Create mock plugin source with lib/
+            plugin_dir = Path(tmpdir) / "plugin" / "hooks"
+            plugin_dir.mkdir(parents=True)
+            source_file = plugin_dir / "user-prompt-submit.py"
+            source_file.write_text("# mock hook")
+
+            lib_dir = plugin_dir / "lib"
+            lib_dir.mkdir()
+            (lib_dir / "hud_state.py").write_text("# mock hud_state")
+            (lib_dir / "__init__.py").write_text("")
+
+            hooks_dir = home / ".claude" / "hooks"
+            target_file = hooks_dir / session_hook.HOOK_FILENAME
+
+            # Simulate main() behavior: find source and install
+            with patch.object(session_hook, "find_plugin_source", return_value=source_file):
+                with patch.object(Path, "home", return_value=home):
+                    session_hook._install_hook_with_lib(source_file, hooks_dir, target_file)
+
+            # Verify hook file was copied
+            assert target_file.exists()
+
+            # Verify lib/ was copied
+            target_lib = hooks_dir / "lib"
+            assert target_lib.is_dir()
+            assert (target_lib / "hud_state.py").exists()
+            assert (target_lib / "__init__.py").exists()
+
+    def test_updates_lib_dir_when_already_exists(self):
+        """Test that lib/ directory is updated when it already exists."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create source with new file
+            plugin_dir = Path(tmpdir) / "plugin" / "hooks"
+            plugin_dir.mkdir(parents=True)
+            source_file = plugin_dir / "user-prompt-submit.py"
+            source_file.write_text("# mock hook")
+            source_lib = plugin_dir / "lib"
+            source_lib.mkdir()
+            (source_lib / "hud_state.py").write_text("# updated version")
+            (source_lib / "new_module.py").write_text("# new")
+
+            # Create existing target with old lib
+            hooks_dir = Path(tmpdir) / "target_hooks"
+            hooks_dir.mkdir(parents=True)
+            target_file = hooks_dir / session_hook.HOOK_FILENAME
+            target_lib = hooks_dir / "lib"
+            target_lib.mkdir()
+            (target_lib / "hud_state.py").write_text("# old version")
+
+            session_hook._install_hook_with_lib(source_file, hooks_dir, target_file)
+
+            # Verify updated
+            assert (target_lib / "hud_state.py").read_text() == "# updated version"
+            assert (target_lib / "new_module.py").exists()
+
+    def test_works_when_source_has_no_lib(self):
+        """Test graceful handling when source has no lib/ directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plugin_dir = Path(tmpdir) / "plugin" / "hooks"
+            plugin_dir.mkdir(parents=True)
+            source_file = plugin_dir / "user-prompt-submit.py"
+            source_file.write_text("# mock hook")
+            # No lib/ directory
+
+            hooks_dir = Path(tmpdir) / "target_hooks"
+            hooks_dir.mkdir(parents=True)
+            target_file = hooks_dir / session_hook.HOOK_FILENAME
+
+            # Should not raise
+            session_hook._install_hook_with_lib(source_file, hooks_dir, target_file)
+
+            assert target_file.exists()
+            assert not (hooks_dir / "lib").exists()
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__, "-v"])

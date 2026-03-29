@@ -344,6 +344,35 @@ def register_hook_in_settings(settings_file: Path) -> bool:
     return True
 
 
+def _install_hook_with_lib(
+    source_file: Path, hooks_dir: Path, target_file: Path
+) -> None:
+    """Copy hook file AND its lib/ dependencies to the target hooks directory.
+
+    Copies the hook script and, if present, the sibling lib/ directory
+    so that runtime imports (e.g. hud_state) work from ~/.claude/hooks/.
+
+    Args:
+        source_file: Path to the source hook script.
+        hooks_dir: Target directory (e.g. ~/.claude/hooks/).
+        target_file: Full target path for the hook script.
+    """
+    hooks_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy(source_file, target_file)
+    target_file.chmod(0o755)
+
+    # Copy lib/ directory alongside the hook (#1102)
+    source_lib = source_file.parent / "lib"
+    if source_lib.is_dir():
+        target_lib = hooks_dir / "lib"
+        shutil.copytree(
+            source_lib,
+            target_lib,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
+
+
 HUD_FILENAME = "codingbuddy-hud.py"
 
 # tmux suggestion messages (i18n)
@@ -648,9 +677,7 @@ def main():
             source_file = find_plugin_source()
 
             if source_file:
-                hooks_dir.mkdir(parents=True, exist_ok=True)
-                shutil.copy(source_file, target_file)
-                target_file.chmod(0o755)
+                _install_hook_with_lib(source_file, hooks_dir, target_file)
                 installed_hook = True
             else:
                 # Source not found - provide manual installation guide
