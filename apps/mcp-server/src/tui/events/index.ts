@@ -32,3 +32,4 @@ export {
   AGENT_CATEGORY_MAP,
   AGENT_ICONS,
 } from './agent-metadata.types';
+export { HudFileBridge, type HudFileBridgeOptions } from './hud-file-bridge';

@@ -1,3 +1,5 @@
+import * as path from 'node:path';
+import * as os from 'node:os';
 import { getInstancesFilePath } from '../tui/ipc/ipc.types';
 import { InstanceRegistry } from '../tui/ipc/instance-registry';
 import { restartTui } from './restart-tui';
@@ -55,6 +57,25 @@ export async function runTui(options: { restart?: boolean } = {}): Promise<void>
 
   manager.startPolling();
 
+  // HUD file bridge: watch hud-state.json and emit EventBus events (#1104)
+  // This enables TUI updates in stdio mode where IPC may not deliver events.
+  let hudBridge: { stop(): void } | null = null;
+  try {
+    const { HudFileBridge } = await import('../tui/events');
+    const sessions = manager.getSessions();
+    if (sessions.length > 0) {
+      const hudStatePath = path.join(
+        process.env.CODINGBUDDY_HUD_STATE_DIR ?? path.join(os.homedir(), '.codingbuddy'),
+        'hud-state.json',
+      );
+      const bridge = new HudFileBridge(sessions[0].eventBus, hudStatePath);
+      bridge.start();
+      hudBridge = bridge;
+    }
+  } catch {
+    // Non-critical — TUI still works via IPC if available
+  }
+
   let tuiInstance: { unmount: () => void } | null = null;
 
   let shuttingDown = false;
@@ -66,6 +87,7 @@ export async function runTui(options: { restart?: boolean } = {}): Promise<void>
       process.exit(0);
     }, CLIENT_SHUTDOWN_TIMEOUT_MS);
     timeout.unref();
+    hudBridge?.stop();
     void manager.disconnectAll();
     tuiInstance?.unmount();
     process.exitCode = 0;
