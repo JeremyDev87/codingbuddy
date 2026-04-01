@@ -503,37 +503,6 @@ wait
 
 Expected: Debug log shows `Graceful shutdown: unmounting TUI...`, then clean exit.
 
-## Auto-Launch Issues
-
-### TUI Window Opens and Immediately Closes
-
-**Symptom:** After starting Claude Code with codingbuddy MCP configured, a terminal window briefly appears and disappears.
-
-**Cause:** `TuiAutoLauncher` cannot find the `codingbuddy` binary in PATH.
-
-**Diagnosis:**
-
-```bash
-# Check if codingbuddy is in PATH
-which codingbuddy
-
-# Check instance registry
-cat ~/.codingbuddy/instances.json
-
-# Check if MCP server is running
-ps aux | grep codingbuddy
-
-# Run TUI manually with debug output
-npx codingbuddy tui
-```
-
-**Solutions:**
-
-- **Update to latest version**: The auto-launcher now resolves the binary path automatically (fixed in v4.2.0).
-- **Install globally**: `npm install -g codingbuddy`
-- **Run manually**: `npx codingbuddy tui`
-- **Disable auto-launch**: Remove `CODINGBUDDY_AUTO_TUI` from `~/.claude/settings.json` env section.
-
 ### "No running codingbuddy MCP server found"
 
 **Symptom:** Running `codingbuddy tui` or `npx codingbuddy tui` shows this error.
@@ -583,28 +552,6 @@ ps aux | grep codingbuddy
 
 - For npx users: ensure you're using the latest published version.
 - For local development: run `yarn build && yarn build:tui` in `apps/mcp-server/`.
-
-### Auto-Launch Environment Variable Reference
-
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `CODINGBUDDY_AUTO_TUI` | Enable auto-launch of TUI in new terminal window | Not set (disabled) |
-| `CODINGBUDDY_PROJECT_ROOT` | Project root for instance registry | `process.cwd()` |
-| `MCP_DEBUG` | Enable debug logging to stderr | Not set (disabled) |
-
-**Enable debug logging** in `.mcp.json`:
-
-```json
-{
-  "codingbuddy": {
-    "command": "npx",
-    "args": ["codingbuddy", "mcp", "--tui"],
-    "env": {
-      "MCP_DEBUG": "1"
-    }
-  }
-}
-```
 
 ## Related Documentation
 

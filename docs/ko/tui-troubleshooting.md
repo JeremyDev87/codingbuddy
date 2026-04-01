@@ -2,37 +2,6 @@
 
 이 가이드는 codingbuddy MCP 서버에서 TUI 에이전트 모니터를 실행할 때 발생하는 일반적인 문제를 해결하는 데 도움을 줍니다.
 
-## 자동 실행 문제
-
-### TUI 창이 열렸다가 즉시 닫힘
-
-**증상:** Claude Code에 codingbuddy MCP가 설정된 상태로 시작하면 터미널 창이 잠깐 나타났다가 사라집니다.
-
-**원인:** `TuiAutoLauncher`가 PATH에서 `codingbuddy` 바이너리를 찾을 수 없습니다.
-
-**진단:**
-
-```bash
-# codingbuddy가 PATH에 있는지 확인
-which codingbuddy
-
-# 인스턴스 레지스트리 확인
-cat ~/.codingbuddy/instances.json
-
-# MCP 서버가 실행 중인지 확인
-ps aux | grep codingbuddy
-
-# 디버그 출력으로 TUI 수동 실행
-npx codingbuddy tui
-```
-
-**해결 방법:**
-
-- **최신 버전으로 업데이트**: 자동 실행기가 바이너리 경로를 자동으로 해결합니다 (v4.2.0에서 수정됨).
-- **전역 설치**: `npm install -g codingbuddy`
-- **수동 실행**: `npx codingbuddy tui`
-- **자동 실행 비활성화**: `~/.claude/settings.json`의 env 섹션에서 `CODINGBUDDY_AUTO_TUI` 제거.
-
 ### "No running codingbuddy MCP server found" 오류
 
 **증상:** `codingbuddy tui` 또는 `npx codingbuddy tui` 실행 시 이 오류가 표시됩니다.
@@ -82,28 +51,6 @@ ps aux | grep codingbuddy
 
 - npx 사용자: 최신 배포 버전을 사용하고 있는지 확인합니다.
 - 로컬 개발: `apps/mcp-server/`에서 `yarn build && yarn build:tui` 실행.
-
-### 자동 실행 환경 변수 참조
-
-| 변수 | 목적 | 기본값 |
-|------|------|--------|
-| `CODINGBUDDY_AUTO_TUI` | 새 터미널 창에서 TUI 자동 실행 활성화 | 미설정 (비활성) |
-| `CODINGBUDDY_PROJECT_ROOT` | 인스턴스 레지스트리의 프로젝트 루트 | `process.cwd()` |
-| `MCP_DEBUG` | stderr로 디버그 로깅 활성화 | 미설정 (비활성) |
-
-**`.mcp.json`에서 디버그 로깅 활성화:**
-
-```json
-{
-  "codingbuddy": {
-    "command": "npx",
-    "args": ["codingbuddy", "mcp", "--tui"],
-    "env": {
-      "MCP_DEBUG": "1"
-    }
-  }
-}
-```
 
 ## 아이콘이 박스 또는 물음표로 표시됨
 

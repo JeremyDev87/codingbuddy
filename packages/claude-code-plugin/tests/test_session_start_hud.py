@@ -39,7 +39,7 @@ def home_dir(tmp_path):
 def settings_file(home_dir):
     """Path to settings.json in simulated home."""
     sf = home_dir / ".claude" / "settings.json"
-    sf.write_text(json.dumps({"env": {"CODINGBUDDY_AUTO_TUI": "1"}}))
+    sf.write_text(json.dumps({"env": {}}))
     return sf
 
 
@@ -104,13 +104,6 @@ class TestInstallStatusline:
         data = json.loads(settings_file.read_text())
         # command unchanged (not overwritten with full path)
         assert data["statusLine"]["command"] == "python3 codingbuddy-hud.py"
-
-    def test_sets_auto_tui_to_zero(self, home_dir, settings_file, hud_source, monkeypatch):
-        monkeypatch.setenv("CLAUDE_PLUGIN_DIR", str(hud_source.parent.parent))
-        session_start._install_statusline(home_dir, settings_file)
-
-        data = json.loads(settings_file.read_text())
-        assert data["env"]["CODINGBUDDY_AUTO_TUI"] == "0"
 
     def test_noop_when_source_not_found(self, home_dir, settings_file, monkeypatch):
         monkeypatch.delenv("CLAUDE_PLUGIN_DIR", raising=False)

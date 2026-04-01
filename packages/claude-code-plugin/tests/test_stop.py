@@ -229,49 +229,6 @@ class TestAutoLearningSuggestions:
         assert "Auto-Learning" not in result["systemMessage"]
 
 
-class TestCloseTuiSidebar:
-    """Tests for TUI sidebar cleanup on session stop (#1109)."""
-
-    def test_noop_when_not_in_tmux(self, monkeypatch):
-        """Should do nothing when TMUX env var is not set."""
-        monkeypatch.delenv("TMUX", raising=False)
-        mod = _load_module()
-        # Should not raise
-        mod._close_tui_sidebar()
-
-    @patch("subprocess.run")
-    def test_kills_codingbuddy_pane(self, mock_run, monkeypatch):
-        """Should kill panes running codingbuddy."""
-        monkeypatch.setenv("TMUX", "/tmp/tmux-501/default,12345,0")
-        mock_run.return_value = MagicMock(
-            stdout="%1 zsh\n%2 codingbuddy\n%3 vim\n",
-        )
-        mod = _load_module()
-        mod._close_tui_sidebar()
-
-        assert mock_run.call_count == 2  # list-panes + kill-pane
-        kill_call = mock_run.call_args_list[1]
-        assert kill_call[0][0] == ["tmux", "kill-pane", "-t", "%2"]
-
-    @patch("subprocess.run")
-    def test_no_kill_when_no_codingbuddy_pane(self, mock_run, monkeypatch):
-        """Should not call kill-pane when no codingbuddy pane exists."""
-        monkeypatch.setenv("TMUX", "/tmp/tmux-501/default,12345,0")
-        mock_run.return_value = MagicMock(stdout="%1 zsh\n%2 vim\n")
-        mod = _load_module()
-        mod._close_tui_sidebar()
-
-        assert mock_run.call_count == 1  # only list-panes
-
-    @patch("subprocess.run", side_effect=Exception("tmux crashed"))
-    def test_exception_does_not_propagate(self, mock_run, monkeypatch):
-        """Should swallow all exceptions."""
-        monkeypatch.setenv("TMUX", "/tmp/tmux-501/default,12345,0")
-        mod = _load_module()
-        # Should not raise
-        mod._close_tui_sidebar()
-
-
 class TestSessionSummaryRendering:
     """Tests for buddy session summary rendering in stop hook (#972)."""
 
