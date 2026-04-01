@@ -315,7 +315,6 @@ describe('init.command', () => {
 
       expect(mockEnsureClaudeSettingsEnv).toHaveBeenCalledWith({
         ENABLE_TOOL_SEARCH: 'false',
-        CODINGBUDDY_AUTO_TUI: '1',
       });
     });
 
@@ -375,7 +374,6 @@ describe('init.command', () => {
 
       expect(mockEnsureClaudeSettingsEnv).toHaveBeenCalledWith({
         ENABLE_TOOL_SEARCH: 'false',
-        CODINGBUDDY_AUTO_TUI: '1',
       });
     });
 

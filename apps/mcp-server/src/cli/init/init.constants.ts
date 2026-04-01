@@ -14,7 +14,6 @@ import type { GitignoreEntry } from './gitignore.utils';
  */
 export const CLAUDE_SETTINGS_ENV_ENTRIES: Record<string, string> = {
   ENABLE_TOOL_SEARCH: 'false',
-  CODINGBUDDY_AUTO_TUI: '1',
 };
 
 /**
