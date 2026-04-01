@@ -412,28 +412,6 @@ def _ensure_mcp_json(mcp_json_path: Path) -> None:
 
 HUD_FILENAME = "codingbuddy-hud.py"
 
-# tmux suggestion messages (i18n)
-TMUX_SUGGESTION: Dict[str, str] = {
-    "en": (
-        "\u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n"
-        "\u2502 \u25d5\u203f\u25d5 Tip: Run Claude Code inside tmux for     \u2502\n"
-        "\u2502     the full CodingBuddy sidebar experience!  \u2502\n"
-        "\u2502                                               \u2502\n"
-        "\u2502     tmux new -s dev                           \u2502\n"
-        "\u2502     claude                                    \u2502\n"
-        "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f"
-    ),
-    "ko": (
-        "\u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n"
-        "\u2502 \u25d5\u203f\u25d5 Tip: tmux \uc548\uc5d0\uc11c Claude Code\ub97c \uc2e4\ud589\ud558\uba74  \u2502\n"
-        "\u2502     CodingBuddy \uc0ac\uc774\ub4dc\ubc14\ub97c \ubcfc \uc218 \uc788\uc5b4\uc694!      \u2502\n"
-        "\u2502                                               \u2502\n"
-        "\u2502     tmux new -s dev                           \u2502\n"
-        "\u2502     claude                                    \u2502\n"
-        "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f"
-    ),
-}
-
 
 def _get_plugin_version() -> str:
     """Read plugin version from .claude-plugin/plugin.json.
@@ -517,7 +495,7 @@ def _find_hud_source() -> Optional[Path]:
 
 
 def _install_statusline(home: Path, settings_file: Path) -> None:
-    """Install codingbuddy statusLine and set CODINGBUDDY_AUTO_TUI=0 (#1089, #1092)."""
+    """Install codingbuddy statusLine (#1089)."""
     # 1. Find and copy HUD script
     source = _find_hud_source()
     if not source:
@@ -542,45 +520,8 @@ def _install_statusline(home: Path, settings_file: Path) -> None:
         }
     # else: custom statusLine — preserve
 
-    # 3. Set CODINGBUDDY_AUTO_TUI=0 (#1092)
-    env = settings.setdefault("env", {})
-    if env.get("CODINGBUDDY_AUTO_TUI") == "1":
-        env["CODINGBUDDY_AUTO_TUI"] = "0"
-
     _write_settings_file(settings_file, settings)
 
-
-def _sidebar_pane_exists() -> bool:
-    """Check if a codingbuddy TUI pane exists in the current tmux window."""
-    try:
-        result = subprocess.run(
-            ["tmux", "list-panes", "-F", "#{pane_current_command}"],
-            capture_output=True, text=True, timeout=2,
-        )
-        return "codingbuddy" in result.stdout
-    except Exception:
-        return False
-
-
-def _setup_tmux_sidebar() -> None:
-    """Detect tmux and create TUI sidebar pane (#1091)."""
-    if not os.environ.get("TMUX"):
-        lang = _get_cached_language()
-        tip = TMUX_SUGGESTION.get(lang, TMUX_SUGGESTION["en"])
-        print(tip, file=sys.stderr)
-        return
-
-    if _sidebar_pane_exists():
-        return
-
-    subprocess.Popen(
-        ["tmux", "split-window", "-h", "-l", "25%", "-d", "codingbuddy", "tui"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-    )
-    subprocess.Popen(
-        ["tmux", "select-pane", "-L"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-    )
 
 
 def _ensure_lib_path():
@@ -900,12 +841,6 @@ def main():
                     f"\n   → Run /plugin to update\n",
                     file=sys.stderr,
                 )
-        except Exception:
-            pass  # Never block session start
-
-        # Step 6.5: tmux sidebar auto-setup (#1091)
-        try:
-            _setup_tmux_sidebar()
         except Exception:
             pass  # Never block session start
 
