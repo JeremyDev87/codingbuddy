@@ -309,6 +309,66 @@ class TestFindAgentsDir:
             assert len(json_files) > 0
 
 
+class TestEnsureMcpJson:
+    """Tests for _ensure_mcp_json function (#1100)."""
+
+    def test_creates_mcp_json_when_missing(self):
+        """Test creates mcp.json with codingbuddy entry when file doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mcp_path = Path(tmpdir) / ".claude" / "mcp.json"
+
+            session_hook._ensure_mcp_json(mcp_path)
+
+            assert mcp_path.exists()
+            data = json.loads(mcp_path.read_text())
+            assert "codingbuddy" in data["mcpServers"]
+            assert data["mcpServers"]["codingbuddy"]["command"] == "codingbuddy"
+            assert data["mcpServers"]["codingbuddy"]["args"] == ["mcp"]
+
+    def test_merges_into_existing_mcp_json(self):
+        """Test adds codingbuddy entry while preserving existing servers."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mcp_path = Path(tmpdir) / "mcp.json"
+            mcp_path.write_text(json.dumps({
+                "mcpServers": {
+                    "other-server": {"command": "other", "args": ["--flag"]}
+                }
+            }))
+
+            session_hook._ensure_mcp_json(mcp_path)
+
+            data = json.loads(mcp_path.read_text())
+            assert "codingbuddy" in data["mcpServers"]
+            assert "other-server" in data["mcpServers"]
+
+    def test_does_not_overwrite_existing_codingbuddy(self):
+        """Test does not overwrite user's custom codingbuddy configuration."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mcp_path = Path(tmpdir) / "mcp.json"
+            custom_config = {
+                "mcpServers": {
+                    "codingbuddy": {"command": "custom-path", "args": ["--custom"]}
+                }
+            }
+            mcp_path.write_text(json.dumps(custom_config))
+
+            session_hook._ensure_mcp_json(mcp_path)
+
+            data = json.loads(mcp_path.read_text())
+            assert data["mcpServers"]["codingbuddy"]["command"] == "custom-path"
+
+    def test_handles_corrupted_mcp_json(self):
+        """Test handles corrupted JSON gracefully."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mcp_path = Path(tmpdir) / "mcp.json"
+            mcp_path.write_text("not valid json{{{")
+
+            session_hook._ensure_mcp_json(mcp_path)
+
+            data = json.loads(mcp_path.read_text())
+            assert "codingbuddy" in data["mcpServers"]
+
+
 class TestHookLibCopy:
     """Tests for lib/ directory copying alongside hook file (#1102)."""
 

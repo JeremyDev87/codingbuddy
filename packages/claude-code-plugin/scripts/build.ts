@@ -140,6 +140,35 @@ MIT
   return result;
 }
 
+function createMcpJson(): BuildResult {
+  const result: BuildResult = {
+    step: 'MCP Configuration',
+    success: true,
+    details: [],
+    errors: [],
+  };
+
+  try {
+    const mcpConfig = {
+      mcpServers: {
+        codingbuddy: {
+          command: 'codingbuddy',
+          args: ['mcp'],
+        },
+      },
+    };
+
+    const mcpJsonPath = path.join(ROOT_DIR, '.mcp.json');
+    fs.writeFileSync(mcpJsonPath, JSON.stringify(mcpConfig, null, 2) + '\n');
+    result.details.push(`Generated .mcp.json`);
+  } catch (err: unknown) {
+    result.success = false;
+    result.errors.push(`Failed to create .mcp.json: ${getErrorMessage(err)}`);
+  }
+
+  return result;
+}
+
 async function main(): Promise<void> {
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║         CodingBuddy Claude Code Plugin Builder             ║');
@@ -154,6 +183,10 @@ async function main(): Promise<void> {
   // Step 1: Generate README
   console.log('📖 Step 1: Generating README...');
   results.push(createReadme());
+
+  // Step 2: Generate .mcp.json
+  console.log('🔧 Step 2: Generating .mcp.json...');
+  results.push(createMcpJson());
 
   // Summary
   console.log('\n════════════════════════════════════════════════════════════');

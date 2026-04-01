@@ -373,6 +373,43 @@ def _install_hook_with_lib(
         )
 
 
+CODINGBUDDY_MCP_ENTRY = {
+    "command": "codingbuddy",
+    "args": ["mcp"],
+}
+
+
+def _ensure_mcp_json(mcp_json_path: Path) -> None:
+    """Ensure ~/.claude/mcp.json contains the codingbuddy MCP server entry (#1100).
+
+    Creates the file if missing, or merges the codingbuddy entry into an
+    existing file while preserving other MCP server configurations.
+    """
+    mcp_json_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if mcp_json_path.exists():
+        try:
+            with open(mcp_json_path, "r", encoding="utf-8") as f:
+                if HAS_FCNTL:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                existing = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            existing = {}
+    else:
+        existing = {}
+
+    servers = existing.setdefault("mcpServers", {})
+    if "codingbuddy" in servers:
+        return  # Already configured — don't overwrite user customizations
+
+    servers["codingbuddy"] = CODINGBUDDY_MCP_ENTRY
+
+    with open(mcp_json_path, "w", encoding="utf-8") as f:
+        if HAS_FCNTL:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        json.dump(existing, f, indent=2, ensure_ascii=False)
+
+
 HUD_FILENAME = "codingbuddy-hud.py"
 
 # tmux suggestion messages (i18n)
@@ -695,6 +732,12 @@ def main():
         # Step 2.5: Install codingbuddy statusLine (#1089, #1092)
         try:
             _install_statusline(home, settings_file)
+        except Exception:
+            pass  # Never block session start
+
+        # Step 2.6: Ensure ~/.claude/mcp.json has codingbuddy entry (#1100)
+        try:
+            _ensure_mcp_json(home / ".claude" / "mcp.json")
         except Exception:
             pass  # Never block session start
 
