@@ -708,6 +708,15 @@ def main():
 
         installed_hook = False
         registered_settings = False
+        new_version = None
+
+        # Step 0.5: Auto-update marketplace clone (#1101)
+        try:
+            _ensure_lib_path()
+            from updater import auto_update_marketplace
+            new_version = auto_update_marketplace(home=home)
+        except Exception:
+            pass  # Never block session start
 
         # Step 1: Install hook file if not exists
         if not target_file.exists():
@@ -883,6 +892,14 @@ def main():
             )
             if output:
                 print(output)
+
+            # Show update notification if marketplace clone was updated (#1101)
+            if new_version:
+                print(
+                    f"\n🔄 CodingBuddy v{new_version} available in marketplace!"
+                    f"\n   → Run /plugin to update\n",
+                    file=sys.stderr,
+                )
         except Exception:
             pass  # Never block session start
 
