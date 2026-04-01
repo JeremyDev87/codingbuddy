@@ -5,6 +5,7 @@ Outputs a systemMessage with the session summary on Stop event.
 """
 import json
 import os
+import subprocess
 import sys
 
 # Resolve hooks/lib and add to path
@@ -175,6 +176,12 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Close TUI sidebar pane (#1109)
+        try:
+            _close_tui_sidebar()
+        except Exception:
+            pass  # Never block session stop
+
         if summary:
             return {
                 "systemMessage": summary,
@@ -283,6 +290,26 @@ def _render_impact_report(session_id, project_dir):
     lines.append(f"╰{hr}╯")
 
     return "\n".join(lines)
+
+
+def _close_tui_sidebar():
+    """Close codingbuddy TUI sidebar pane on session stop (#1109)."""
+    if not os.environ.get("TMUX"):
+        return
+    try:
+        result = subprocess.run(
+            ["tmux", "list-panes", "-F", "#{pane_id} #{pane_current_command}"],
+            capture_output=True, text=True, timeout=2,
+        )
+        for line in result.stdout.strip().splitlines():
+            parts = line.split(None, 1)
+            if len(parts) == 2 and "codingbuddy" in parts[1]:
+                subprocess.run(
+                    ["tmux", "kill-pane", "-t", parts[0]],
+                    capture_output=True, timeout=2,
+                )
+    except Exception:
+        pass  # Never block session stop
 
 
 def _maybe_notify_session_end(summary: str):
