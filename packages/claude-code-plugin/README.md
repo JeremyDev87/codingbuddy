@@ -2,7 +2,7 @@
 
 # CodingBuddy Claude Code Plugin
 
-> Version 5.1.2
+> Version 5.1.3
 
 Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, and reusable skills for systematic development.
 

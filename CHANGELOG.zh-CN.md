@@ -5,6 +5,17 @@
 本文档格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/spec/v2.0.0.html)。
 
+## [5.1.3] - 2026-04-01
+
+### 新增
+- **TUI文件桥接**: 基于`fs.watch`的桥接，支持stdio模式下TUI侧边栏更新 (#1104, #1105)
+- **市场自动更新**: session-start钩子自动fetch市场克隆（24小时节流） (#1101, #1107)
+- **MCP自动配置**: 会话启动时自动创建`~/.claude/mcp.json`，确保MCP连接 (#1100, #1106)
+
+### 修复
+- **钩子lib/目录**: session-start现在随钩子文件一起复制`lib/`，修复HUD状态更新 (#1102, #1103)
+- **mcp.json缺失**: 修复插件安装后MCP工具不可用的问题 (#1100, #1106)
+
 ## [5.1.2] - 2026-03-29
 
 ### 新增

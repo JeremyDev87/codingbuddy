@@ -5,6 +5,17 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [5.1.3] - 2026-04-01
+
+### Agregado
+- **Puente de archivo TUI**: Puente basado en `fs.watch` para actualizaciones de la barra lateral TUI en modo stdio (#1104, #1105)
+- **Actualización automática del marketplace**: Hook session-start auto-fetch del clon del marketplace con limitación de 24h (#1101, #1107)
+- **Configuración automática MCP**: Creación automática de `~/.claude/mcp.json` al inicio de sesión para conectividad MCP (#1100, #1106)
+
+### Corregido
+- **Directorio lib/ del hook**: session-start ahora copia `lib/` junto al archivo del hook, corrigiendo las actualizaciones de estado HUD (#1102, #1103)
+- **mcp.json faltante**: Las herramientas MCP ya no están indisponibles después de instalar el plugin (#1100, #1106)
+
 ## [5.1.2] - 2026-03-29
 
 ### Agregado

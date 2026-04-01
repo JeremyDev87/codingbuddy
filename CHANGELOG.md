@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.3] - 2026-04-01
+
+### Added
+- **TUI File Bridge**: `fs.watch`-based bridge enables TUI sidebar updates in stdio mode (#1104, #1105)
+- **Marketplace Auto-Update**: Session-start hook auto-fetches marketplace clone with 24h throttle (#1101, #1107)
+- **MCP Auto-Configuration**: Auto-create `~/.claude/mcp.json` on session start for seamless MCP connectivity (#1100, #1106)
+
+### Fixed
+- **Hook lib/ directory**: Session-start now copies `lib/` alongside hook file, fixing HUD state updates (#1102, #1103)
+- **mcp.json missing**: Plugin installation no longer leaves MCP tools unavailable (#1100, #1106)
+
 ## [5.1.2] - 2026-03-29
 
 ### Added

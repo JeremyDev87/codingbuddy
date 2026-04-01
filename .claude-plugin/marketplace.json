@@ -12,7 +12,7 @@
       "name": "codingbuddy",
       "source": "./packages/claude-code-plugin",
       "description": "PLAN/ACT/EVAL workflow, specialist agents, and reusable skills for systematic TDD development",
-      "version": "5.1.2",
+      "version": "5.1.3",
       "category": "development"
     }
   ]

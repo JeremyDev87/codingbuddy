@@ -5,6 +5,17 @@
 이 문서는 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/) 형식을 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/spec/v2.0.0.html)을 준수합니다.
 
+## [5.1.3] - 2026-04-01
+
+### 추가됨
+- **TUI 파일 브릿지**: `fs.watch` 기반 브릿지로 stdio 모드에서 TUI 사이드바 업데이트 지원 (#1104, #1105)
+- **마켓플레이스 자동 업데이트**: session-start 훅에서 마켓플레이스 클론 자동 fetch (24시간 스로틀) (#1101, #1107)
+- **MCP 자동 구성**: 세션 시작 시 `~/.claude/mcp.json` 자동 생성으로 MCP 연결 보장 (#1100, #1106)
+
+### 수정됨
+- **훅 lib/ 디렉토리**: session-start가 훅 파일과 함께 `lib/`을 복사하여 HUD 상태 업데이트 수정 (#1102, #1103)
+- **mcp.json 누락**: 플러그인 설치 후 MCP 도구를 사용할 수 없는 문제 수정 (#1100, #1106)
+
 ## [5.1.2] - 2026-03-29
 
 ### 추가됨
