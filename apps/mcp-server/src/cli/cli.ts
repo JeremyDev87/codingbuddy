@@ -8,14 +8,17 @@
 import { runInit } from './init';
 import { bootstrap } from '../main';
 import { getPackageVersion } from '../shared/version.utils';
-import type { InitOptions, TuiOptions, InstallOptions } from './cli.types';
+import type { InitOptions, TuiOptions, InstallOptions, UninstallOptions } from './cli.types';
 
 /**
  * Parsed command line arguments
  */
 export interface ParsedArgs {
-  command: 'init' | 'install' | 'mcp' | 'tui' | 'help' | 'version';
-  options: Partial<InitOptions> & Partial<TuiOptions> & Partial<InstallOptions>;
+  command: 'init' | 'install' | 'plugins' | 'uninstall' | 'mcp' | 'tui' | 'help' | 'version';
+  options: Partial<InitOptions> &
+    Partial<TuiOptions> &
+    Partial<InstallOptions> &
+    Partial<UninstallOptions>;
 }
 
 /**
@@ -58,6 +61,19 @@ export function parseArgs(args: string[]): ParsedArgs {
     };
   }
 
+  if (command === 'plugins') {
+    return { command: 'plugins', options };
+  }
+
+  if (command === 'uninstall') {
+    const uninstallName = args[1];
+    const uninstallYes = args.includes('--yes') || args.includes('-y');
+    return {
+      command: 'uninstall',
+      options: { ...options, uninstallName, uninstallYes },
+    };
+  }
+
   if (command !== 'init') {
     return { command: 'help', options };
   }
@@ -91,6 +107,8 @@ CodingBuddy CLI - AI-powered project configuration generator
 Usage:
   codingbuddy init [path] [options]    Initialize configuration
   codingbuddy install <git-url>        Install a plugin from git repository
+  codingbuddy plugins                  List installed plugins
+  codingbuddy uninstall <name>         Uninstall a plugin
   codingbuddy mcp                      Start MCP server (stdio mode)
   codingbuddy tui                      Monitor agent execution in real-time
   codingbuddy tui --restart            Restart TUI client (fixes blank screen)
@@ -107,6 +125,9 @@ Examples:
   codingbuddy init ./my-project        Initialize in specific directory
   codingbuddy init --force             Overwrite existing config
   codingbuddy install github:user/repo Install a community plugin
+  codingbuddy plugins                  List all installed plugins
+  codingbuddy uninstall my-plugin      Remove a plugin
+  codingbuddy uninstall my-plugin -y   Remove without confirmation
   codingbuddy mcp                      Start MCP server for AI assistants
 
 Note:
@@ -187,6 +208,39 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
         force: options.installForce ?? false,
       });
       if (!installResult.success) {
+        process.exitCode = 1;
+      }
+      break;
+    }
+
+    case 'plugins': {
+      const { runPlugins } = await import('./plugin/plugins.command');
+      const pluginsResult = runPlugins({
+        projectRoot: options.projectRoot ?? process.cwd(),
+      });
+      if (!pluginsResult.success) {
+        process.exitCode = 1;
+      }
+      break;
+    }
+
+    case 'uninstall': {
+      const { runUninstall } = await import('./plugin/uninstall.command');
+      if (!options.uninstallName) {
+        process.stderr.write('Error: Missing plugin name. Usage: codingbuddy uninstall <name>\n');
+        process.exitCode = 1;
+        break;
+      }
+      const uninstallResult = runUninstall({
+        pluginName: options.uninstallName,
+        projectRoot: options.projectRoot ?? process.cwd(),
+        yes: options.uninstallYes ?? false,
+      });
+      if (!uninstallResult.success && !uninstallResult.confirmationRequired) {
+        process.exitCode = 1;
+      }
+      if (uninstallResult.confirmationRequired) {
+        process.stderr.write('Confirmation required. Use --yes or -y to skip.\n');
         process.exitCode = 1;
       }
       break;

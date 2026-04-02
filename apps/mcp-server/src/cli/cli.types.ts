@@ -58,6 +58,16 @@ export interface InstallOptions {
 }
 
 /**
+ * Uninstall command options (parsed from CLI args)
+ */
+export interface UninstallOptions {
+  /** Plugin name to uninstall */
+  uninstallName?: string;
+  /** Skip confirmation prompt */
+  uninstallYes?: boolean;
+}
+
+/**
  * Console output levels
  */
 export type LogLevel = 'info' | 'success' | 'warn' | 'error';

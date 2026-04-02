@@ -88,6 +88,33 @@ describe('cli', () => {
       expect(result.options.projectRoot).toBe('/custom/path');
     });
 
+    it('should parse plugins command', () => {
+      const result = parseArgs(['plugins']);
+
+      expect(result.command).toBe('plugins');
+    });
+
+    it('should parse uninstall command with plugin name', () => {
+      const result = parseArgs(['uninstall', 'my-plugin']);
+
+      expect(result.command).toBe('uninstall');
+      expect(result.options.uninstallName).toBe('my-plugin');
+    });
+
+    it('should parse uninstall with --yes flag', () => {
+      const result = parseArgs(['uninstall', 'my-plugin', '--yes']);
+
+      expect(result.command).toBe('uninstall');
+      expect(result.options.uninstallYes).toBe(true);
+    });
+
+    it('should parse uninstall with -y short flag', () => {
+      const result = parseArgs(['uninstall', 'my-plugin', '-y']);
+
+      expect(result.command).toBe('uninstall');
+      expect(result.options.uninstallYes).toBe(true);
+    });
+
     it('should parse init with --yes flag', () => {
       const result = parseArgs(['init', '--yes']);
 
