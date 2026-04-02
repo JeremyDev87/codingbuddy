@@ -137,10 +137,19 @@ Watch 모드가 RESULT.json을 감지했을 때:
    }
    ```
 
-5. **워커에게 리뷰 반영 지시**
+5. **워커에게 리뷰 반영 지시 (file-based)**
+
+   Review Fix TASK.md를 워커 worktree에 작성한 후 짧은 트리거를 전송한다:
    ```bash
+   # Review Fix TASK.md를 워커 worktree에 작성 (아래 템플릿 참조)
+   cat > "$REPO/.taskmaestro/wt-$PANE_IDX/TASK.md" << TASKEOF
+   # Review Fix Task
+   ... (Review Fix TASK.md Template 섹션 참조)
+   TASKEOF
+
+   # 짧은 트리거만 send-keys로 전송
    tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE_IDX" \
-     "PR #<PR_NUMBER>에 리뷰 코멘트가 달렸다. gh pr view <PR_NUMBER> --comments 로 확인하고, 수용할 부분은 코드 수정 후 push하고, 거부할 부분은 PR에 반박 코멘트를 남겨라. 완료 후 RESULT.json의 status를 \"review_addressed\"로 업데이트해라." Enter
+     "Read TASK.md and execute all steps." Enter
    ```
 
 6. **워커 응답**
@@ -165,6 +174,39 @@ Watch 모드가 RESULT.json을 감지했을 때:
    gh pr review <PR_NUMBER> --comment --body "✅ Review complete - all comments addressed"
    ```
    RESULT.json 업데이트: `status: "approved"`
+
+### Review Fix TASK.md Template
+
+리뷰 코멘트에 대한 수정 지시를 워커에게 전달할 때 사용하는 TASK.md 템플릿이다.
+지휘자 또는 리뷰 에이전트가 워커의 worktree 루트에 이 파일을 작성한다.
+
+```markdown
+# Review Fix Task
+
+PR #<PR_NUMBER> (issue #<ISSUE_NUMBER>)에 리뷰 코멘트가 달렸습니다.
+
+## Steps
+
+1. `gh pr view <PR_NUMBER> --comments` 로 리뷰 코멘트를 확인하세요.
+2. 수용할 부분은 코드를 수정하세요.
+3. 거부할 부분은 PR에 반박 코멘트를 남기세요 (사유 포함).
+4. 각 코멘트에 "Resolved: [수행한 작업]" 형태로 회신하세요.
+5. 수정 완료 후:
+   a. `yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test` — 모두 통과해야 합니다.
+   b. `git add` → `git commit` → `git push`
+6. RESULT.json을 업데이트하세요:
+   ```json
+   {
+     "status": "review_addressed",
+     "review_cycle": <현재_사이클_번호>
+   }
+   ```
+
+[MANDATORY PRE-PUSH] yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test — ALL must pass before push.
+[CONTINUOUS] DO NOT stop. Complete ALL steps. Only stop AFTER updating RESULT.json to "review_addressed".
+```
+
+> **핵심:** 워커가 리뷰 반영 후 반드시 RESULT.json의 `status`를 `"review_addressed"`로 업데이트해야 watch cron이 재리뷰를 트리거할 수 있다.
 
 ### Max Review Cycles
 
@@ -320,10 +362,17 @@ tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$REVIEW_PANE" \
 
 2. **`review_result: "changes_requested"`인 경우:**
    - 워커의 RESULT.json을 `status: "review_pending"`으로 업데이트 (review_cycle 증가)
-   - 워커에게 리뷰 반영 지시:
+   - 워커에게 리뷰 반영 지시 (file-based):
      ```bash
+     # Review Fix TASK.md를 워커 worktree에 작성 (아래 템플릿 참조)
+     cat > "$REPO/.taskmaestro/wt-$WORKER_PANE/TASK.md" << TASKEOF
+     # Review Fix Task
+     ... (Review Fix TASK.md Template 섹션 참조)
+     TASKEOF
+
+     # 짧은 트리거만 send-keys로 전송
      tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$WORKER_PANE" \
-       "PR #<PR_NUMBER>에 리뷰 코멘트가 달렸다. gh pr view <PR_NUMBER> --comments 로 확인하고, 수용할 부분은 코드 수정 후 push하고, 거부할 부분은 PR에 반박 코멘트를 남겨라. 완료 후 RESULT.json의 status를 \"review_addressed\"로 업데이트해라." Enter
+       "Read TASK.md and execute all steps." Enter
      ```
 
 3. **리뷰 에이전트 초기화:**
@@ -732,65 +781,58 @@ cat ~/.claude/taskmaestro-state.json
 소켓/세션/윈도우 정보를 가져온다.
 패널 번호가 워커 패널 목록에 포함되는지 검증한다. 지휘자 패널이거나 존재하지 않는 패널이면 에러 출력 후 중단.
 
-### Step 2: 작업 전송
+### Step 2: 작업 지시 파일 작성 및 트리거 전송
 
-워커에게 작업 지시와 함께 **RESULT.json 작성 지시**를 포함한 프롬프트를 전송한다.
+워커에게 작업 지시와 함께 **RESULT.json 작성 지시**를 포함한 프롬프트를 **TASK.md 파일**로 전달한다.
 
-프롬프트 템플릿:
-```
-<작업 지시>
+> **중요:** 긴 프롬프트를 `send-keys`로 직접 전송하면 잘릴 수 있다. 반드시 TASK.md 파일에 작성하고 짧은 트리거만 `send-keys`로 전송한다.
+
+#### Step 2a: TASK.md 파일 작성
+
+워커 worktree 루트에 `TASK.md`를 작성한다:
+
+```bash
+WT_PATH="$REPO/.taskmaestro/wt-$PANE"
+
+cat > "$WT_PATH/TASK.md" << 'TASKEOF'
+# Task: <작업 지시 요약>
+
+<작업 지시 전체 내용>
 
 ---
-[MANDATORY PRE-PUSH VERIFICATION]
-Push 전에 반드시 아래 명령을 모두 실행하고, 실패 시 수정 후 재실행하세요.
-하나라도 실패하면 절대 push하지 마세요:
-
-1. yarn prettier --write .
-2. yarn lint --fix
-3. yarn type-check
-4. yarn test
-
-4개 모두 통과한 후에만 git push하세요. CI 실패는 허용되지 않습니다.
-
-[TASKMAESTRO COMPLETION PROTOCOL]
-작업이 완료되면 (성공/실패/에러 무관) 반드시 아래 파일을 작성하세요:
-
-파일: RESULT.json (현재 worktree 루트, 즉 현재 디렉토리)
-
-스키마:
-{
-  "status": "success | failure | error",
-  "issue": "<이슈 번호 또는 null>",
-  "pr_number": <PR 번호 또는 null>,
-  "pr_url": "<PR URL 또는 null>",
-  "timestamp": "<ISO 8601>",
-  "cost": "<세션 비용 또는 null>",
-  "error": "<에러 메시지 또는 null>"
-}
-
-- status: "success" (정상 완료), "failure" (테스트 실패 등), "error" (예기치 못한 오류)
-- 커밋/PR 생성 후, 세션 종료 전에 이 파일을 작성하세요
-- 이 파일은 지휘자가 완료 감지에 사용합니다
-
-[CONTINUOUS EXECUTION DIRECTIVE]
-DO NOT stop between steps. Complete ALL tasks without waiting for user input.
-Only stop AFTER writing RESULT.json.
-If you encounter an error, try to fix it yourself before stopping.
-If you are truly blocked, write RESULT.json with status "error" and explain in the error field.
+[MANDATORY PRE-PUSH] yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test — ALL must pass before push.
+[COMPLETION] Write RESULT.json: {"status":"success|failure|error","issue":"#NNNN","pr_number":N,"pr_url":"URL","timestamp":"ISO","cost":null,"error":null}
+[CONTINUOUS] DO NOT stop. Complete ALL steps. Only stop AFTER RESULT.json.
+TASKEOF
 ```
 
-send-keys로 전송:
+#### Step 2b: 짧은 트리거 전송
+
 ```bash
-tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE" "$PROMPT_WITH_RESULT_PROTOCOL" Enter
+tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE" \
+  "Read TASK.md and execute all steps. Follow TDD. Create PR with correct labels. Write RESULT.json when done. " Enter
 ```
 
-> **참고:** 프롬프트가 길어 send-keys로 직접 전송 시 잘릴 수 있다. 이 경우 프롬프트를 임시 파일에 저장하고 `send-keys`로 파일 경로를 참조하거나, 여러 줄로 나누어 전송한다. 실제 구현 시 지휘자가 프롬프트 문자열을 조립하여 한 번에 전송한다.
+> **참고:** 트리거 메시지에 핵심 지시를 한 줄로 요약하여 포함한다. 상세 지시는 TASK.md에서 읽게 된다.
 
 ### Step 3: 상태 파일 업데이트
 
 해당 패널의 task와 status를 업데이트한다:
 - `task`: 작업 지시 내용
 - `status`: "working"
+
+### Worker Completion & Review Fix Protocol
+
+워커는 작업 완료 후 RESULT.json을 작성한다. 이후 리뷰 사이클이 시작되면:
+
+1. 지휘자(또는 watch cron)가 Review Fix TASK.md를 워커 worktree에 작성한다
+2. 워커는 `"Read TASK.md and execute all steps."` 트리거를 받고 TASK.md를 읽어 실행한다
+3. 워커가 리뷰 반영을 완료하면:
+   - 코드 수정 → pre-push 검증 → push
+   - **RESULT.json의 `status`를 `"review_addressed"`로 업데이트** (필수)
+4. watch cron이 `"review_addressed"`를 감지하여 재리뷰를 트리거한다
+
+> **핵심:** 워커가 리뷰 반영 후 RESULT.json을 `"review_addressed"`로 업데이트하지 않으면, watch cron이 재리뷰를 시작할 수 없다. TASK.md 템플릿에 이 지시가 포함되어 있다.
 
 ### Step 4: 결과 보고
 
@@ -1020,8 +1062,59 @@ done
 ### 시작 (watch_cron_id가 null인 경우)
 
 1. 상태 파일에서 정보 로드
-2. CronCreate로 30초 주기 cron job 생성:
-   - 프롬프트: 각 워커 패널에 대해 **1차: RESULT.json 확인 → 2차: capture-pane fallback** 순서로 상태를 감지한다. RESULT.json의 status에 따라 분기한다: `"success"` → Review Routing (review_pane 존재 시 리뷰 에이전트에 위임, 없으면 직접 리뷰), `"review_addressed"` → Review Routing으로 재리뷰, `"approved"` → 진짜 완료 보고, `"failure"`/`"error"` → 사용자에게 에러 보고. **리뷰 에이전트 패널의 RESULT.json도 확인한다**: `review_result: "approve"` → 워커 PR 승인, `"changes_requested"` → 워커에 수정 지시. Claude Code가 비정상 종료된 패널이 있으면 재시작 여부를 사용자에게 질문한다.
+2. CronCreate로 30초 주기 cron job 생성. 프롬프트에 아래 전체 로직을 포함한다:
+
+   **워커 패널 순회 (1차: RESULT.json → 2차: capture-pane fallback):**
+
+   각 워커 패널에 대해 `$REPO/.taskmaestro/wt-$PANE_IDX/RESULT.json`을 확인하고, status에 따라 분기한다:
+
+   - **`"success"` 감지 (리뷰 사이클 시작):**
+     1. 상태 파일에서 `review_pane` 확인
+     2. `review_pane` 존재 시 → Review Agent Protocol에 따라 리뷰 에이전트에 위임
+     3. `review_pane` 없으면 → Conductor Fallback Review 실행:
+        a. `gh pr diff <PR_NUMBER>` 로 PR 변경사항 읽기
+        b. codingbuddy `generate_checklist` 도구로 체크리스트 생성
+        c. `gh pr review <PR_NUMBER> --comment --body "<리뷰>"` 로 리뷰 코멘트 작성
+        d. 워커의 RESULT.json 업데이트: `status: "review_pending"`, `review_cycle` 증가, `review_comments` 추가
+        e. 워커 worktree에 Review Fix TASK.md 작성 (아래 템플릿 참조):
+           ```bash
+           # Review Fix TASK.md를 워커 worktree에 작성
+           cat > "$REPO/.taskmaestro/wt-$PANE_IDX/TASK.md" << 'TASKEOF'
+           # Review Fix Task
+           ... (Review Fix TASK.md Template 참조)
+           TASKEOF
+           ```
+        f. 워커에게 짧은 트리거 전송:
+           ```bash
+           tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE_IDX" \
+             "Read TASK.md and execute all steps." Enter
+           ```
+
+   - **`"review_addressed"` 감지 (재리뷰):**
+     1. `review_cycle` 확인. 3 이상이면 사용자에게 보고하고 해당 패널 리뷰 중단
+     2. 상태 파일에서 `review_pane` 확인
+     3. `review_pane` 존재 시 → 리뷰 에이전트에 재리뷰 위임
+     4. `review_pane` 없으면 → Conductor Fallback Review 재실행:
+        a. `gh pr diff <PR_NUMBER>` 재확인
+        b. 미해결 코멘트 확인 (`gh pr view <PR_NUMBER> --comments`)
+        c. 충분히 개선 → `status: "approved"`, PR approve 코멘트 작성, 사용자에게 완료 보고
+        d. 아직 부족 → 새 리뷰 코멘트 작성 후 Review Fix TASK.md를 다시 워커에게 전달
+
+   - **`"approved"` 감지:** 진짜 완료 ✅. 상태를 "done"으로 업데이트하고 사용자에게 보고
+   - **`"failure"` / `"error"` 감지:** 사용자에게 에러/실패 보고 (기존 동작 유지)
+   - **`"review_pending"` 감지:** 워커 응답 대기 중. 지휘자는 대기한다
+
+   **리뷰 에이전트 패널 확인 (review_pane이 설정된 경우):**
+
+   `$REPO/.taskmaestro/wt-$REVIEW_PANE/RESULT.json` 확인:
+   - `review_result: "approve"` → 워커의 RESULT.json을 `status: "approved"`로 업데이트, PR approve 코멘트 작성, 리뷰 에이전트 RESULT.json 삭제
+   - `review_result: "changes_requested"` → 워커의 RESULT.json을 `status: "review_pending"`으로 업데이트 (`review_cycle` 증가), 워커 worktree에 Review Fix TASK.md 작성, 워커에게 `"Read TASK.md and execute all steps."` 트리거 전송, 리뷰 에이전트 RESULT.json 삭제
+
+   **Fallback (RESULT.json 없는 패널):**
+
+   capture-pane으로 상태 확인. idle인데 status가 "working"이면 Auto-Nudge Protocol 실행.
+   Claude Code가 비정상 종료된 패널이 있으면 재시작 여부를 사용자에게 질문한다.
+
 3. cron job ID를 상태 파일의 `watch_cron_id`에 기록
 4. 보고: "Watch 모드를 시작합니다 (30초 주기). 중지하려면 `/taskmaestro watch`를 다시 실행하세요."
 
