@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -639,6 +640,44 @@ def _read_pending_context(cwd: str) -> Optional[Dict[str, str]]:
     return result if result.get("mode") else None
 
 
+def _check_briefing_recovery() -> None:
+    """Check for recent briefings and suggest recovery.
+
+    Scans docs/codingbuddy/briefings/ for .md files modified within the
+    last 24 hours.  If any are found, prints a suggestion to stderr so
+    the user knows they can resume previous work.
+
+    This function never raises — all errors are silently swallowed to
+    avoid blocking session start.
+    """
+    try:
+        briefings_dir = os.path.join(
+            os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd()),
+            "docs", "codingbuddy", "briefings",
+        )
+        if not os.path.isdir(briefings_dir):
+            return
+
+        now = time.time()
+        recent: List[str] = []
+        for f in sorted(os.listdir(briefings_dir), reverse=True):
+            if f.endswith(".md"):
+                age = now - os.path.getmtime(os.path.join(briefings_dir, f))
+                if age < 86400:  # 24 hours
+                    recent.append(f)
+                if len(recent) >= 3:
+                    break
+
+        if recent:
+            print(
+                f"\U0001f4cb Found {len(recent)} recent briefing(s). "
+                f"Use `resume_session` to continue previous work.",
+                file=sys.stderr,
+            )
+    except Exception:
+        pass  # Never block session start
+
+
 def main():
     """Main entry point for the session start hook."""
     try:
@@ -733,6 +772,12 @@ def main():
             from session_utils import get_session_id as _get_sid_hud
             hud_version = _get_plugin_version()
             init_hud_state(_get_sid_hud(), hud_version)
+        except Exception:
+            pass  # Never block session start
+
+        # Step 4.6: Detect recent briefings and suggest recovery (#1125)
+        try:
+            _check_briefing_recovery()
         except Exception:
             pass  # Never block session start
 
