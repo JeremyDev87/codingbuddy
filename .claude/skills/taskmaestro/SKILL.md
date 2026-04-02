@@ -178,6 +178,23 @@ Watch 모드가 RESULT.json을 감지했을 때:
   ```
 - 이후 지휘자는 해당 패널의 리뷰를 중단하고 사용자 지시를 대기한다.
 
+### Review Fix TASK.md Template
+
+When conductor posts review comments and needs worker to fix:
+
+```markdown
+# Review Fix: PR #<PR_NUMBER>
+
+Read review comments: `gh api repos/<owner>/<repo>/pulls/<PR_NUMBER>/reviews --jq '.[-1].body'`
+
+Fix these issues:
+<numbered list of issues from review>
+
+After fixing:
+1. git add -A && git commit --amend --no-edit && git push --force-with-lease
+2. Update RESULT.json: status → "review_addressed"
+```
+
 ### Quality Criteria for Approval
 
 approve할 조건:
@@ -772,6 +789,8 @@ Push 전에 반드시 아래 명령을 모두 실행하고, 실패 시 수정 �
 - 커밋/PR 생성 후, 세션 종료 전에 이 파일을 작성하세요
 - 이 파일은 지휘자가 완료 감지에 사용합니다
 
+[PR LABELS] After creating PR, add labels: gh pr edit <PR_NUMBER> --add-label "<labels from issue>"
+
 [CONTINUOUS EXECUTION DIRECTIVE]
 DO NOT stop between steps. Complete ALL tasks without waiting for user input.
 Only stop AFTER writing RESULT.json.
@@ -784,7 +803,18 @@ send-keys로 전송:
 tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE" "$PROMPT_WITH_RESULT_PROTOCOL" Enter
 ```
 
-> **참고:** 프롬프트가 길어 send-keys로 직접 전송 시 잘릴 수 있다. 이 경우 프롬프트를 임시 파일에 저장하고 `send-keys`로 파일 경로를 참조하거나, 여러 줄로 나누어 전송한다. 실제 구현 시 지휘자가 프롬프트 문자열을 조립하여 한 번에 전송한다.
+> **File-based instruction delivery (RECOMMENDED):**
+> 프롬프트가 200자를 초과하면 inline send-keys 대신 TASK.md 파일 기반 전달을 사용한다.
+> send-keys로 긴 프롬프트를 직접 전송하면 잘리거나 idle 세션에서 무시될 수 있다.
+>
+> ```bash
+> # For long prompts (>200 chars), use file-based delivery:
+> WT_PATH="$DIR/.taskmaestro/wt-$PANE_IDX"
+> cat > "$WT_PATH/TASK.md" << 'EOF'
+> <instructions>
+> EOF
+> tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE_IDX" "Read TASK.md and execute" Enter
+> ```
 
 ### Step 3: 상태 파일 업데이트
 
@@ -1020,8 +1050,55 @@ done
 ### 시작 (watch_cron_id가 null인 경우)
 
 1. 상태 파일에서 정보 로드
-2. CronCreate로 30초 주기 cron job 생성:
-   - 프롬프트: 각 워커 패널에 대해 **1차: RESULT.json 확인 → 2차: capture-pane fallback** 순서로 상태를 감지한다. RESULT.json의 status에 따라 분기한다: `"success"` → Review Routing (review_pane 존재 시 리뷰 에이전트에 위임, 없으면 직접 리뷰), `"review_addressed"` → Review Routing으로 재리뷰, `"approved"` → 진짜 완료 보고, `"failure"`/`"error"` → 사용자에게 에러 보고. **리뷰 에이전트 패널의 RESULT.json도 확인한다**: `review_result: "approve"` → 워커 PR 승인, `"changes_requested"` → 워커에 수정 지시. Claude Code가 비정상 종료된 패널이 있으면 재시작 여부를 사용자에게 질문한다.
+2. CronCreate로 30초 주기 cron job 생성. 프롬프트에 아래 **전체 리뷰 라우팅 로직**을 포함한다:
+
+```
+각 워커 패널에 대해 1차: RESULT.json 확인 → 2차: capture-pane fallback 순서로 상태를 감지한다.
+
+[STATUS ROUTING]
+
+When RESULT.json status="success":
+  1. Read PR number from RESULT.json
+  2. Check CI: `gh pr checks <PR_NUMBER>` — if any check fails, report to user and WAIT (do not start review)
+  3. Read diff: `gh pr diff <PR_NUMBER>`
+  4. Post review comment: `gh pr review <PR_NUMBER> --comment --body "<review>"`
+  5. Write fix instructions to worker's TASK.md file (see Review Fix TASK.md Template)
+  6. Update RESULT.json: status="review_pending", review_cycle++
+  7. Send to worker: `tmux send-keys "Read TASK.md and execute" Enter`
+
+When RESULT.json status="review_addressed":
+  1. Re-read diff: `gh pr diff <PR_NUMBER>`
+  2. Check if previous review issues are resolved
+  3. If all resolved → Update RESULT.json: status="approved", post approve comment
+  4. If not resolved → Write new fix instructions to TASK.md, update status="review_pending" (max 3 cycles)
+
+When RESULT.json status="review_pending":
+  → Worker response pending. Conductor waits.
+
+When RESULT.json status="approved":
+  → Truly complete. Report to user.
+
+When RESULT.json status="failure" or "error":
+  → Report error/failure to user (existing behavior).
+
+[REVIEW AGENT ROUTING]
+If review_pane exists: delegate review to review agent pane instead of conductor doing it directly.
+Also check review agent pane's RESULT.json:
+  review_result="approve" → approve worker PR
+  review_result="changes_requested" → send fix instructions to worker
+
+[IDLE WORKER NUDGING]
+If pane is idle (❯ visible) and status is "working":
+  nudge_count[pane] += 1
+  if nudge_count <= 1: send "continue"
+  elif nudge_count == 2: send "continue with the next incomplete task"
+  else: write explicit instruction to TASK.md and send "Read TASK.md and execute"
+  Report: "Pane N: IDLE → auto-nudged (#count)"
+
+[CRASHED PANE]
+Claude Code가 비정상 종료된 패널이 있으면 재시작 여부를 사용자에게 질문한다.
+```
+
 3. cron job ID를 상태 파일의 `watch_cron_id`에 기록
 4. 보고: "Watch 모드를 시작합니다 (30초 주기). 중지하려면 `/taskmaestro watch`를 다시 실행하세요."
 
