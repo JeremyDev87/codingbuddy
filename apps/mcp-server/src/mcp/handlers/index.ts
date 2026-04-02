@@ -139,6 +139,12 @@ export { PluginValidationHandler } from './plugin-validation.handler';
 export { ReleaseCheckHandler } from './release-check.handler';
 
 /**
+ * Handler for quality report tools (pr_quality_report)
+ * @see {@link QualityReportHandler}
+ */
+export { QualityReportHandler } from './quality-report.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

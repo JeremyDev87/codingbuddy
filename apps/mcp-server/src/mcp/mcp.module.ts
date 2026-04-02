@@ -13,6 +13,7 @@ import { DiagnosticModule } from '../diagnostic/diagnostic.module';
 import { TuiEventsModule } from '../tui/events';
 import { PipelineModule } from '../pipeline/pipeline.module';
 import { ImpactModule } from '../impact';
+import { ShipModule } from '../ship/ship.module';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import { LanguageService } from '../shared/language.service';
 import { ModelResolverService } from '../model';
@@ -37,6 +38,7 @@ import {
   ImpactHandler,
   PluginValidationHandler,
   ReleaseCheckHandler,
+  QualityReportHandler,
 } from './handlers';
 
 const handlers = [
@@ -57,6 +59,7 @@ const handlers = [
   ImpactHandler,
   PluginValidationHandler,
   ReleaseCheckHandler,
+  QualityReportHandler,
 ];
 
 @Module({
@@ -73,6 +76,7 @@ const handlers = [
     TuiEventsModule,
     PipelineModule,
     ImpactModule,
+    ShipModule,
   ],
   controllers: [McpController],
   providers: [
