@@ -68,6 +68,14 @@ export interface UninstallOptions {
 }
 
 /**
+ * Search command options (parsed from CLI args)
+ */
+export interface SearchOptions {
+  /** Search query string */
+  searchQuery?: string;
+}
+
+/**
  * Console output levels
  */
 export type LogLevel = 'info' | 'success' | 'warn' | 'error';

@@ -8,17 +8,33 @@
 import { runInit } from './init';
 import { bootstrap } from '../main';
 import { getPackageVersion } from '../shared/version.utils';
-import type { InitOptions, TuiOptions, InstallOptions, UninstallOptions } from './cli.types';
+import type {
+  InitOptions,
+  TuiOptions,
+  InstallOptions,
+  UninstallOptions,
+  SearchOptions,
+} from './cli.types';
 
 /**
  * Parsed command line arguments
  */
 export interface ParsedArgs {
-  command: 'init' | 'install' | 'plugins' | 'uninstall' | 'mcp' | 'tui' | 'help' | 'version';
+  command:
+    | 'init'
+    | 'install'
+    | 'plugins'
+    | 'uninstall'
+    | 'search'
+    | 'mcp'
+    | 'tui'
+    | 'help'
+    | 'version';
   options: Partial<InitOptions> &
     Partial<TuiOptions> &
     Partial<InstallOptions> &
-    Partial<UninstallOptions>;
+    Partial<UninstallOptions> &
+    Partial<SearchOptions>;
 }
 
 /**
@@ -65,6 +81,14 @@ export function parseArgs(args: string[]): ParsedArgs {
     return { command: 'plugins', options };
   }
 
+  if (command === 'search') {
+    const searchQuery = args.slice(1).join(' ');
+    return {
+      command: 'search',
+      options: { ...options, searchQuery },
+    };
+  }
+
   if (command === 'uninstall') {
     const uninstallName = args[1];
     const uninstallYes = args.includes('--yes') || args.includes('-y');
@@ -107,6 +131,7 @@ CodingBuddy CLI - AI-powered project configuration generator
 Usage:
   codingbuddy init [path] [options]    Initialize configuration
   codingbuddy install <git-url>        Install a plugin from git repository
+  codingbuddy search <query>           Search plugins in the registry
   codingbuddy plugins                  List installed plugins
   codingbuddy uninstall <name>         Uninstall a plugin
   codingbuddy mcp                      Start MCP server (stdio mode)
@@ -125,6 +150,7 @@ Examples:
   codingbuddy init ./my-project        Initialize in specific directory
   codingbuddy init --force             Overwrite existing config
   codingbuddy install github:user/repo Install a community plugin
+  codingbuddy search nextjs            Search for Next.js plugins
   codingbuddy plugins                  List all installed plugins
   codingbuddy uninstall my-plugin      Remove a plugin
   codingbuddy uninstall my-plugin -y   Remove without confirmation
@@ -192,6 +218,20 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
     case 'tui': {
       const { runTui } = await import('./run-tui');
       await runTui({ restart: options.restart ?? false });
+      break;
+    }
+
+    case 'search': {
+      const { runSearch } = await import('./plugin/search.command');
+      if (!options.searchQuery) {
+        process.stderr.write('Error: Missing query. Usage: codingbuddy search <query>\n');
+        process.exitCode = 1;
+        break;
+      }
+      const searchResult = await runSearch({ query: options.searchQuery });
+      if (!searchResult.success) {
+        process.exitCode = 1;
+      }
       break;
     }
 
