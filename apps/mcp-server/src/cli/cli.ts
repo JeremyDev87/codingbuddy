@@ -14,6 +14,7 @@ import type {
   InstallOptions,
   UninstallOptions,
   SearchOptions,
+  UpdateOptions,
 } from './cli.types';
 
 /**
@@ -26,6 +27,7 @@ export interface ParsedArgs {
     | 'plugins'
     | 'uninstall'
     | 'search'
+    | 'update'
     | 'mcp'
     | 'tui'
     | 'help'
@@ -34,7 +36,8 @@ export interface ParsedArgs {
     Partial<TuiOptions> &
     Partial<InstallOptions> &
     Partial<UninstallOptions> &
-    Partial<SearchOptions>;
+    Partial<SearchOptions> &
+    Partial<UpdateOptions>;
 }
 
 /**
@@ -98,6 +101,14 @@ export function parseArgs(args: string[]): ParsedArgs {
     };
   }
 
+  if (command === 'update') {
+    const updatePluginName = args[1];
+    return {
+      command: 'update',
+      options: { ...options, updatePluginName },
+    };
+  }
+
   if (command !== 'init') {
     return { command: 'help', options };
   }
@@ -133,6 +144,7 @@ Usage:
   codingbuddy install <git-url>        Install a plugin from git repository
   codingbuddy search <query>           Search plugins in the registry
   codingbuddy plugins                  List installed plugins
+  codingbuddy update [name]            Check and update outdated plugins
   codingbuddy uninstall <name>         Uninstall a plugin
   codingbuddy mcp                      Start MCP server (stdio mode)
   codingbuddy tui                      Monitor agent execution in real-time
@@ -152,6 +164,8 @@ Examples:
   codingbuddy install github:user/repo Install a community plugin
   codingbuddy search nextjs            Search for Next.js plugins
   codingbuddy plugins                  List all installed plugins
+  codingbuddy update                    Check all plugins for updates
+  codingbuddy update my-plugin         Update a specific plugin
   codingbuddy uninstall my-plugin      Remove a plugin
   codingbuddy uninstall my-plugin -y   Remove without confirmation
   codingbuddy mcp                      Start MCP server for AI assistants
@@ -281,6 +295,18 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
       }
       if (uninstallResult.confirmationRequired) {
         process.stderr.write('Confirmation required. Use --yes or -y to skip.\n');
+        process.exitCode = 1;
+      }
+      break;
+    }
+
+    case 'update': {
+      const { runUpdate } = await import('./plugin/update.command');
+      const updateResult = await runUpdate({
+        projectRoot: options.projectRoot ?? process.cwd(),
+        pluginName: options.updatePluginName,
+      });
+      if (!updateResult.success) {
         process.exitCode = 1;
       }
       break;

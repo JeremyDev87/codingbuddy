@@ -76,6 +76,14 @@ export interface SearchOptions {
 }
 
 /**
+ * Update command options (parsed from CLI args)
+ */
+export interface UpdateOptions {
+  /** Specific plugin name to update (optional, updates all if omitted) */
+  updatePluginName?: string;
+}
+
+/**
  * Console output levels
  */
 export type LogLevel = 'info' | 'success' | 'warn' | 'error';
