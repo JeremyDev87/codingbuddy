@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { validatePluginManifest, PluginManifestSchemaError } from './plugin-manifest.schema';
 import type { PluginManifest } from './plugin.types';
 
@@ -123,6 +124,18 @@ describe('PluginManifestSchema', () => {
       expect(() => validatePluginManifest(manifest)).toThrow(PluginManifestSchemaError);
     });
 
+    it('should reject name starting with a digit', () => {
+      const manifest = { ...validManifest, name: '0plugin' };
+
+      expect(() => validatePluginManifest(manifest)).toThrow(PluginManifestSchemaError);
+    });
+
+    it('should reject name with only hyphens', () => {
+      const manifest = { ...validManifest, name: '---' };
+
+      expect(() => validatePluginManifest(manifest)).toThrow(PluginManifestSchemaError);
+    });
+
     it('should reject empty name', () => {
       const manifest = { ...validManifest, name: '' };
 
@@ -156,7 +169,7 @@ describe('PluginManifestSchema', () => {
 
       try {
         validatePluginManifest(manifest);
-        fail('Expected PluginManifestSchemaError');
+        expect.unreachable('Expected PluginManifestSchemaError');
       } catch (error) {
         expect(error).toBeInstanceOf(PluginManifestSchemaError);
         expect((error as PluginManifestSchemaError).message).toContain('name');
@@ -166,7 +179,7 @@ describe('PluginManifestSchema', () => {
     it('should provide actionable error for missing fields', () => {
       try {
         validatePluginManifest({});
-        fail('Expected PluginManifestSchemaError');
+        expect.unreachable('Expected PluginManifestSchemaError');
       } catch (error) {
         expect(error).toBeInstanceOf(PluginManifestSchemaError);
         expect((error as PluginManifestSchemaError).message).toContain('Invalid plugin manifest');

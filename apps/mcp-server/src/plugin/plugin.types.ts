@@ -1,7 +1,8 @@
 /**
  * Plugin Manifest Types
  *
- * TypeScript types for plugin.json manifest files used by community plugins.
+ * Re-exports Zod-inferred types as the single source of truth.
+ * Manual interfaces kept for PluginProvides (used independently).
  */
 
 export interface PluginProvides {
@@ -11,12 +12,4 @@ export interface PluginProvides {
   checklists?: string[];
 }
 
-export interface PluginManifest {
-  name: string;
-  version: string;
-  description: string;
-  author: string;
-  tags?: string[];
-  compatibility?: string;
-  provides: PluginProvides;
-}
+export type { PluginManifest } from './plugin-manifest.schema';

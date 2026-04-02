@@ -7,7 +7,6 @@
  */
 
 import { z } from 'zod';
-import type { PluginManifest } from './plugin.types';
 
 // ============================================================================
 // Custom Error
@@ -38,7 +37,10 @@ export const PluginManifestSchema = z.object({
   name: z
     .string()
     .min(1)
-    .regex(/^[a-z0-9-]+$/, 'Plugin name must be lowercase alphanumeric with hyphens only'),
+    .regex(
+      /^[a-z][a-z0-9-]*$/,
+      'Plugin name must start with a letter and contain only lowercase alphanumeric with hyphens',
+    ),
   version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Version must be in semver format (e.g. 1.0.0)'),
   description: z.string().min(1),
   author: z.string().min(1),
@@ -46,6 +48,12 @@ export const PluginManifestSchema = z.object({
   compatibility: z.string().optional(),
   provides: PluginProvidesSchema,
 });
+
+// ============================================================================
+// Inferred Type (Single Source of Truth)
+// ============================================================================
+
+export type PluginManifest = z.infer<typeof PluginManifestSchema>;
 
 // ============================================================================
 // Validation Function
@@ -62,7 +70,7 @@ export function validatePluginManifest(json: unknown): PluginManifest {
   const result = PluginManifestSchema.safeParse(json);
 
   if (result.success) {
-    return result.data as PluginManifest;
+    return result.data;
   }
 
   const errorMessage = result.error.issues
