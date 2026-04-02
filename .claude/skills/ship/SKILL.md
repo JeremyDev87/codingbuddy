@@ -179,7 +179,22 @@ EOF
 - **Never stage `RESULT.json` or `TASK.md`** — these are ephemeral per-worktree artifacts and must not be committed
 - Only include `Closes #<number>` if an issue was provided
 
-## Step 8: Push and Create PR
+## Step 8: Quality Gate (PR Guardian)
+
+Before creating the PR, run an automated quality check on changed files:
+
+1. Get changed files:
+   ```bash
+   git diff --name-only origin/master...HEAD
+   ```
+2. Call the `pr_quality_report` MCP tool with the changed file list
+3. The tool returns a Quality Report with domain statuses (security, accessibility, code-quality, performance)
+4. Include the Quality Report markdown in the PR body under a `## CodingBuddy Quality Report` section
+5. If any domain has status `fail`, warn the user before proceeding with PR creation
+
+If `pr_quality_report` tool is unavailable (e.g., MCP server not running), skip this step with a warning and continue.
+
+## Step 9: Push and Create PR
 
 ```bash
 git push -u origin <branch-name>
@@ -196,6 +211,9 @@ gh pr create --title "<type>(scope): description" --label "<labels>" --body "$(c
 
 ## Test plan
 <verification steps>
+
+## CodingBuddy Quality Report
+<insert Quality Report from Step 8, or omit if skipped>
 
 Closes #<issue-number>
 EOF
@@ -224,7 +242,7 @@ EOF
 - Body: English, include Summary + Test plan sections
 - Do NOT include author information
 
-## Step 9: Report Result
+## Step 10: Report Result
 
 Print the PR URL and a summary of:
 - Which CI checks were run and passed (or "skipped — no matching workspace")
