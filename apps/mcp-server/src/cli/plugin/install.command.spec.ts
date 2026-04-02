@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockInstall = vi.fn();
+const mockResolveSource = vi.fn();
 const mockConsoleUtils = {
   log: {
     info: vi.fn(),
@@ -14,6 +15,7 @@ const mockConsoleUtils = {
 vi.mock('../../plugin/plugin-installer.service', () => ({
   PluginInstallerService: class {
     install = mockInstall;
+    resolveSource = mockResolveSource;
   },
 }));
 
@@ -34,7 +36,11 @@ describe('install.command', () => {
     force: false,
   };
 
-  it('should call PluginInstallerService.install with correct options', async () => {
+  beforeEach(() => {
+    mockResolveSource.mockResolvedValue({ source: 'github:user/repo' });
+  });
+
+  it('should call resolveSource before install', async () => {
     mockInstall.mockResolvedValue({
       success: true,
       pluginName: 'my-plugin',
@@ -43,11 +49,63 @@ describe('install.command', () => {
 
     await runInstall(defaultOptions);
 
+    expect(mockResolveSource).toHaveBeenCalledWith('github:user/repo');
     expect(mockInstall).toHaveBeenCalledWith({
       source: 'github:user/repo',
       targetRoot: '/project',
       force: false,
     });
+  });
+
+  it('should pass resolved source URL to install', async () => {
+    mockResolveSource.mockResolvedValue({
+      source: 'github:codingbuddy-plugins/nextjs-app-router',
+    });
+    mockInstall.mockResolvedValue({
+      success: true,
+      pluginName: 'nextjs-app-router',
+      summary: 'Installed nextjs-app-router@1.0.0',
+    });
+
+    await runInstall({ ...defaultOptions, source: 'nextjs-app-router' });
+
+    expect(mockInstall).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'github:codingbuddy-plugins/nextjs-app-router',
+      }),
+    );
+  });
+
+  it('should pass version to install when resolved', async () => {
+    mockResolveSource.mockResolvedValue({
+      source: 'github:codingbuddy-plugins/nextjs-app-router',
+      version: '1.0.0',
+    });
+    mockInstall.mockResolvedValue({
+      success: true,
+      pluginName: 'nextjs-app-router',
+      summary: 'Installed nextjs-app-router@1.0.0',
+    });
+
+    await runInstall({ ...defaultOptions, source: 'nextjs-app-router@1.0.0' });
+
+    expect(mockInstall).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'github:codingbuddy-plugins/nextjs-app-router',
+        version: '1.0.0',
+      }),
+    );
+  });
+
+  it('should print error when resolveSource fails', async () => {
+    mockResolveSource.mockRejectedValue(new Error('Plugin "nonexistent" not found in registry.'));
+
+    const result = await runInstall({ ...defaultOptions, source: 'nonexistent' });
+
+    expect(result.success).toBe(false);
+    expect(mockConsoleUtils.log.error).toHaveBeenCalledWith(
+      expect.stringContaining('not found in registry'),
+    );
   });
 
   it('should print success summary on successful install', async () => {
@@ -65,7 +123,7 @@ describe('install.command', () => {
     );
   });
 
-  it('should print error message on failure', async () => {
+  it('should print error message on install failure', async () => {
     mockInstall.mockResolvedValue({
       success: false,
       error: 'Invalid plugin manifest: name is required',

@@ -20,6 +20,7 @@ import {
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { validatePluginManifest, PluginManifest } from './plugin-manifest.schema';
+import { RegistryClient } from './registry-client';
 import { getPackageVersion } from '../shared/version.utils';
 
 // ============================================================================
@@ -30,6 +31,12 @@ export interface InstallOptions {
   source: string;
   targetRoot: string;
   force: boolean;
+  version?: string;
+}
+
+export interface ResolvedSource {
+  source: string;
+  version?: string;
 }
 
 export interface InstallResult {
@@ -68,6 +75,41 @@ const ASSET_DIRS = ['agents', 'rules', 'skills', 'checklists'] as const;
 
 export class PluginInstallerService {
   /**
+   * Resolve a plugin name or URL to a git source.
+   * If input is a git URL (github: or https://), pass through.
+   * Otherwise, look up the plugin name in the registry.
+   * Supports name@version syntax.
+   */
+  async resolveSource(nameOrUrl: string): Promise<ResolvedSource> {
+    if (nameOrUrl.startsWith('github:') || nameOrUrl.startsWith('https://')) {
+      return { source: nameOrUrl };
+    }
+
+    const { name, version } = this.parseNameVersion(nameOrUrl);
+    const client = new RegistryClient();
+    const plugin = await client.findByName(name);
+
+    if (!plugin) {
+      throw new Error(
+        `Plugin "${name}" not found in registry. Use a git URL (github:user/repo or https://...) for unregistered plugins.`,
+      );
+    }
+
+    return version ? { source: plugin.source, version } : { source: plugin.source };
+  }
+
+  /**
+   * Parse name@version syntax into name and optional version.
+   */
+  private parseNameVersion(input: string): { name: string; version?: string } {
+    const atIndex = input.lastIndexOf('@');
+    if (atIndex > 0) {
+      return { name: input.slice(0, atIndex), version: input.slice(atIndex + 1) };
+    }
+    return { name: input };
+  }
+
+  /**
    * Resolve a git source string to a clone-able URL.
    * Supports: github:user/repo shorthand, full HTTPS URLs.
    */
@@ -97,7 +139,8 @@ export class PluginInstallerService {
       // 2. Clone to temp directory
       tempDir = mkdtempSync(join(tmpdir(), 'codingbuddy-plugin-'));
       try {
-        execSync(`git clone --depth=1 ${gitUrl} ${tempDir}`, {
+        const branchFlag = options.version ? ` --branch v${options.version}` : '';
+        execSync(`git clone --depth=1${branchFlag} ${gitUrl} ${tempDir}`, {
           stdio: 'pipe',
           timeout: 60_000,
         });

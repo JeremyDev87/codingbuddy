@@ -24,6 +24,7 @@ export interface RegistryPlugin {
   name: string;
   version: string;
   description: string;
+  source: string;
   tags: string[];
   provides: RegistryPluginProvides;
 }
@@ -57,6 +58,11 @@ export class RegistryClient {
     } catch {
       return { plugins: [] };
     }
+  }
+
+  async findByName(name: string): Promise<RegistryPlugin | undefined> {
+    const index = await this.fetchIndex();
+    return index.plugins.find(plugin => plugin.name === name);
   }
 
   async search(query: string): Promise<RegistryPlugin[]> {

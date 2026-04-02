@@ -23,13 +23,16 @@ export async function runInstall(options: InstallCommandOptions): Promise<Instal
   const console = createConsoleUtils();
   const installer = new PluginInstallerService();
 
-  console.log.step('📦', `Installing plugin from ${options.source}...`);
-
   try {
+    const resolved = await installer.resolveSource(options.source);
+
+    console.log.step('📦', `Installing plugin from ${resolved.source}...`);
+
     const result = await installer.install({
-      source: options.source,
+      source: resolved.source,
       targetRoot: options.projectRoot,
       force: options.force,
+      version: resolved.version,
     });
 
     if (result.success) {
@@ -41,7 +44,7 @@ export async function runInstall(options: InstallCommandOptions): Promise<Instal
     return { success: false, error: result.error };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.log.error(`Unexpected error: ${message}`);
+    console.log.error(message);
     return { success: false, error: message };
   }
 }

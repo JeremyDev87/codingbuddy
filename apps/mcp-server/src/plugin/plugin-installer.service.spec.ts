@@ -41,6 +41,14 @@ vi.mock('os', () => ({
   tmpdir: () => '/tmp',
 }));
 
+const mockFindByName = vi.fn();
+
+vi.mock('./registry-client', () => ({
+  RegistryClient: class {
+    findByName = mockFindByName;
+  },
+}));
+
 import { PluginInstallerService, InstallOptions } from './plugin-installer.service';
 
 const TEMP_DIR = '/tmp/codingbuddy-plugin-abc123';
@@ -122,6 +130,63 @@ describe('PluginInstallerService', () => {
 
     it('should throw on invalid URL format', () => {
       expect(() => service.resolveGitUrl('not-a-url')).toThrow('Invalid git URL');
+    });
+  });
+
+  describe('resolveSource', () => {
+    it('should pass through github: URLs', async () => {
+      const result = await service.resolveSource('github:user/repo');
+      expect(result).toEqual({ source: 'github:user/repo' });
+      expect(mockFindByName).not.toHaveBeenCalled();
+    });
+
+    it('should pass through https:// URLs', async () => {
+      const result = await service.resolveSource('https://github.com/user/repo');
+      expect(result).toEqual({ source: 'https://github.com/user/repo' });
+      expect(mockFindByName).not.toHaveBeenCalled();
+    });
+
+    it('should resolve plugin name via registry', async () => {
+      mockFindByName.mockResolvedValue({
+        name: 'nextjs-app-router',
+        version: '1.0.0',
+        source: 'github:codingbuddy-plugins/nextjs-app-router',
+        description: 'Next.js plugin',
+        tags: [],
+        provides: {},
+      });
+
+      const result = await service.resolveSource('nextjs-app-router');
+
+      expect(mockFindByName).toHaveBeenCalledWith('nextjs-app-router');
+      expect(result).toEqual({ source: 'github:codingbuddy-plugins/nextjs-app-router' });
+    });
+
+    it('should parse name@version and return version', async () => {
+      mockFindByName.mockResolvedValue({
+        name: 'nextjs-app-router',
+        version: '2.0.0',
+        source: 'github:codingbuddy-plugins/nextjs-app-router',
+        description: 'Next.js plugin',
+        tags: [],
+        provides: {},
+      });
+
+      const result = await service.resolveSource('nextjs-app-router@1.0.0');
+
+      expect(mockFindByName).toHaveBeenCalledWith('nextjs-app-router');
+      expect(result).toEqual({
+        source: 'github:codingbuddy-plugins/nextjs-app-router',
+        version: '1.0.0',
+      });
+    });
+
+    it('should throw error when name not found in registry', async () => {
+      mockFindByName.mockResolvedValue(undefined);
+
+      await expect(service.resolveSource('nonexistent-plugin')).rejects.toThrow(
+        /not found in registry/,
+      );
     });
   });
 
@@ -299,6 +364,21 @@ describe('PluginInstallerService', () => {
       expect(mockRmSync).toHaveBeenCalledWith(
         TEMP_DIR,
         expect.objectContaining({ recursive: true }),
+      );
+    });
+
+    it('should clone specific version tag when version is provided', async () => {
+      setupCloneSuccess();
+
+      const result = await service.install({
+        ...defaultOptions,
+        version: '1.0.0',
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockExecSync).toHaveBeenCalledWith(
+        expect.stringContaining('--branch v1.0.0'),
+        expect.any(Object),
       );
     });
 
