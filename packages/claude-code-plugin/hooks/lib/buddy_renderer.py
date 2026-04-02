@@ -307,6 +307,50 @@ SUMMARY_HEADERS: Dict[str, Dict[str, str]] = {
     "fr": {"summary": "R\u00e9sum\u00e9 de session", "agents": "Agents actifs"},
 }
 
+# Intelligence Report section headers by language (#1130)
+INTEL_HEADERS: Dict[str, Dict[str, str]] = {
+    "en": {
+        "title": "Session Intelligence Report",
+        "activity": "Activity",
+        "changes": "What You Did",
+        "gaps": "Gaps",
+        "insights": "Insights",
+        "achievements": "Achievements",
+    },
+    "ko": {
+        "title": "\uc138\uc158 \uc778\ud154\ub9ac\uc804\uc2a4 \ub9ac\ud3ec\ud2b8",
+        "activity": "\ud65c\ub3d9",
+        "changes": "\uc791\uc5c5 \ub0b4\uc6a9",
+        "gaps": "\uac2d",
+        "insights": "\uc778\uc0ac\uc774\ud2b8",
+        "achievements": "\uc5c5\uc801",
+    },
+    "ja": {
+        "title": "\u30bb\u30c3\u30b7\u30e7\u30f3\u30a4\u30f3\u30c6\u30ea\u30b8\u30a7\u30f3\u30b9\u30ec\u30dd\u30fc\u30c8",
+        "activity": "\u30a2\u30af\u30c6\u30a3\u30d3\u30c6\u30a3",
+        "changes": "\u4f5c\u696d\u5185\u5bb9",
+        "gaps": "\u30ae\u30e3\u30c3\u30d7",
+        "insights": "\u30a4\u30f3\u30b5\u30a4\u30c8",
+        "achievements": "\u5b9f\u7e3e",
+    },
+    "zh": {
+        "title": "\u4f1a\u8bdd\u667a\u80fd\u62a5\u544a",
+        "activity": "\u6d3b\u52a8",
+        "changes": "\u5de5\u4f5c\u5185\u5bb9",
+        "gaps": "\u7f3a\u53e3",
+        "insights": "\u6d1e\u5bdf",
+        "achievements": "\u6210\u5c31",
+    },
+    "es": {
+        "title": "Informe de Inteligencia de Sesi\u00f3n",
+        "activity": "Actividad",
+        "changes": "Lo que hiciste",
+        "gaps": "Brechas",
+        "insights": "Observaciones",
+        "achievements": "Logros",
+    },
+}
+
 
 # One-line session summary templates by language (#1036)
 ONE_LINE_TEMPLATES: Dict[str, Dict[str, str]] = {
@@ -1003,3 +1047,154 @@ def render_session_start(
     sys.stderr.write(after + "\n")
     sys.stderr.flush()
     return ""
+
+
+# ---------------------------------------------------------------------------
+# Intelligence Report renderer (#1130)
+# ---------------------------------------------------------------------------
+
+def _intel_header(key: str, language: str) -> str:
+    """Get Intelligence Report header for the given key and language."""
+    lang_headers = INTEL_HEADERS.get(language, INTEL_HEADERS["en"])
+    return lang_headers.get(key, INTEL_HEADERS["en"].get(key, key))
+
+
+def render_intelligence_report(
+    stats: Dict[str, Any],
+    changes: List[Dict[str, Any]],
+    untested: List[str],
+    change_summary: str,
+    language: str = "en",
+    ascii_mode: bool = False,
+) -> str:
+    """Render the Session Intelligence Report box (#1130).
+
+    Args:
+        stats: Session statistics dict with keys:
+            duration_minutes (int), tool_count (int), files_changed (int),
+            tokens_in (int, optional), tokens_out (int, optional).
+        changes: List of change dicts from SessionAnalyzer.analyze_changes().
+        untested: List of file paths missing tests from detect_untested_files().
+        change_summary: Human-readable summary from generate_summary().
+        language: Language code (en, ko, ja, zh, es).
+        ascii_mode: Whether to use ASCII-only characters.
+
+    Returns:
+        Formatted Intelligence Report string, or empty string if no data.
+    """
+    BOX_W = 41
+    hr = "\u2500" * BOX_W
+
+    def _box(text: str) -> str:
+        # Truncate if too long, accounting for Unicode widths
+        display = text[:BOX_W]
+        return f"\u2502{display.ljust(BOX_W)}\u2502"
+
+    def _separator() -> str:
+        return f"\u251c{hr}\u2524"
+
+    lines: List[str] = []
+
+    # Title
+    title = _intel_header("title", language)
+    lines.append(f"\u256d{hr}\u256e")
+    lines.append(_box(f"  \U0001f9e0 {title}"))
+    lines.append(_separator())
+
+    # --- Activity section ---
+    activity_hdr = _intel_header("activity", language)
+    lines.append(_box(f"  \U0001f4ca {activity_hdr}"))
+
+    duration = stats.get("duration_minutes", 0)
+    tool_count = stats.get("tool_count", 0)
+    activity_parts = []
+    if duration > 0:
+        activity_parts.append(f"Duration: {duration}m")
+    if tool_count > 0:
+        activity_parts.append(f"Tools: {tool_count}")
+    if activity_parts:
+        lines.append(_box(f"    {' | '.join(activity_parts)}"))
+
+    tokens_in = stats.get("tokens_in", 0)
+    tokens_out = stats.get("tokens_out", 0)
+    if tokens_in > 0 or tokens_out > 0:
+        def _fmt_tokens(n: int) -> str:
+            if n >= 1000:
+                return f"{n / 1000:.1f}K"
+            return str(n)
+        lines.append(
+            _box(f"    Tokens: {_fmt_tokens(tokens_in)} in"
+                 f" / {_fmt_tokens(tokens_out)} out")
+        )
+
+    # --- What You Did section ---
+    if changes:
+        lines.append(_separator())
+        changes_hdr = _intel_header("changes", language)
+        lines.append(_box(f"  \U0001f4dd {changes_hdr}"))
+        lines.append(_box(f"    {change_summary}"))
+
+        # Show up to 5 changed files
+        shown = changes[:5]
+        for c in shown:
+            fname = c["file"]
+            # Truncate long paths
+            if len(fname) > 33:
+                fname = "\u2026" + fname[-(33 - 1):]
+            lines.append(_box(f"    \u2022 {fname}"))
+        if len(changes) > 5:
+            lines.append(_box(f"    ... +{len(changes) - 5} more"))
+
+    # --- Gaps section (untested files) ---
+    if untested:
+        lines.append(_separator())
+        gaps_hdr = _intel_header("gaps", language)
+        lines.append(_box(f"  \u26a0\ufe0f  {gaps_hdr}"))
+        count_msg = (
+            f"    {len(untested)} file{'s' if len(untested) != 1 else ''}"
+            " without tests:"
+        )
+        lines.append(_box(count_msg))
+        shown_untested = untested[:3]
+        for f in shown_untested:
+            fname = f
+            if len(fname) > 33:
+                fname = "\u2026" + fname[-(33 - 1):]
+            lines.append(_box(f"    \u2022 {fname}"))
+        if len(untested) > 3:
+            lines.append(_box(f"    ... +{len(untested) - 3} more"))
+
+    # --- Insights section ---
+    if changes:
+        lines.append(_separator())
+        insights_hdr = _intel_header("insights", language)
+        lines.append(_box(f"  \U0001f4a1 {insights_hdr}"))
+
+        # Detect frequent-edit directories
+        dir_counts: Dict[str, int] = {}
+        for c in changes:
+            parts = c["file"].split("/")
+            if len(parts) > 1:
+                top_dir = parts[0]
+                dir_counts[top_dir] = dir_counts.get(top_dir, 0) + 1
+
+        if dir_counts:
+            hotspot = max(dir_counts, key=dir_counts.get)  # type: ignore[arg-type]
+            if dir_counts[hotspot] >= 2:
+                lines.append(
+                    _box(f"    Frequent edits in {hotspot}/")
+                )
+            else:
+                lines.append(_box("    Changes spread across dirs"))
+        else:
+            lines.append(_box("    Single-directory session"))
+
+    # Bottom border
+    lines.append(f"\u2570{hr}\u256f")
+
+    result = "\n".join(lines)
+
+    if ascii_mode:
+        result = _to_ascii(result)
+
+    return result

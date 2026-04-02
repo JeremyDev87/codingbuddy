@@ -72,6 +72,51 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Intelligence Report: analyze git changes (#1130)
+        try:
+            from session_analyzer import SessionAnalyzer
+            from buddy_renderer import render_intelligence_report
+            from config import get_config
+
+            cwd = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
+            cfg = get_config(cwd)
+            language = cfg.get("language", "en")
+            ascii_mode = False
+            buddy_cfg = cfg.get("buddy", {})
+            if isinstance(buddy_cfg, dict):
+                ascii_mode = buddy_cfg.get("asciiMode", False)
+
+            analyzer = SessionAnalyzer()
+            changes = analyzer.analyze_changes()
+            untested = analyzer.detect_untested_files()
+            change_summary = analyzer.generate_summary()
+
+            tool_names = final_data.get("tool_names", {})
+            intel_stats = {
+                "duration_minutes": int(
+                    final_data.get("duration_seconds", 0) // 60
+                ),
+                "tool_count": final_data.get("tool_count", 0),
+                "files_changed": (
+                    tool_names.get("Edit", 0) + tool_names.get("Write", 0)
+                ),
+                "tokens_in": final_data.get("tokens_in", 0),
+                "tokens_out": final_data.get("tokens_out", 0),
+            }
+
+            intel_report = render_intelligence_report(
+                stats=intel_stats,
+                changes=changes,
+                untested=untested,
+                change_summary=change_summary,
+                language=language,
+                ascii_mode=ascii_mode,
+            )
+            if intel_report:
+                print(intel_report, file=sys.stderr)
+        except Exception:
+            pass  # Never block session stop
+
         # End session in history database (#823)
         try:
             from history_db import HistoryDB
