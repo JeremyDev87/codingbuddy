@@ -463,6 +463,19 @@ Before assigning issues to a wave, predict the FULL file footprint per issue:
    - `.gitignore` — new artifacts
 3. **MCP server issues**: Always flag `config.schema.ts` as potential overlap
 
+### MCP Server Issues — Mandatory Overlap Check
+
+ANY issue that creates a new MCP handler MUST flag these files as modified:
+- `apps/mcp-server/src/mcp/handlers/index.ts`
+- `apps/mcp-server/src/mcp/mcp.module.ts`
+
+ANY issue that creates a new NestJS module MUST flag:
+- `apps/mcp-server/src/app.module.ts`
+
+ANY issue that adds to an existing module MUST flag that module file.
+
+Two issues touching the same barrel/module file → MUST be in different waves.
+
 **Overlap check:**
 ```
 For each pair of issues in the wave:
@@ -471,7 +484,9 @@ For each pair of issues in the wave:
     → Move one issue to next wave OR make sequential in same pane
 ```
 
-**Reference incident:** Wave A PR #876/#879 — config.schema.ts modified by two issues not listed in issue body, causing merge conflict.
+**Reference incidents:**
+- Wave A PR #876/#879 — config.schema.ts modified by two issues not listed in issue body, causing merge conflict.
+- Wave 1 PR #1142 — handlers/index.ts and mcp.module.ts modified by two MCP handler issues (#1120, #1122) not listed in issue body, causing merge conflict.
 
 ---
 
