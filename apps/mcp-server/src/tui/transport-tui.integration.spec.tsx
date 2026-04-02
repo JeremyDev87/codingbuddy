@@ -6,12 +6,12 @@ import { DashboardApp } from './dashboard-app';
 import { TuiEventBus, TUI_EVENTS } from './events';
 import { resolveTuiConfig } from './tui-config';
 
+import { flushInk } from './testing/tui-test-utils';
+
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
   return { ...actual, isNerdFontEnabled: () => false };
 });
-
-const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('Transport-TUI Integration', () => {
   describe('stdio 모드: stdout 격리', () => {
@@ -40,7 +40,7 @@ describe('Transport-TUI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
 
       expect(stdoutCapture.join('')).toBe('');
       expect(lastFrame()).toBeTruthy();
@@ -60,7 +60,7 @@ describe('Transport-TUI Integration', () => {
 
       const eventBus = new TuiEventBus();
       render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       expect(stdoutCapture.join('')).toContain('"jsonrpc":"2.0"');
       expect(stdoutCapture.join('')).not.toContain('CODINGBUDDY');
@@ -92,7 +92,7 @@ describe('Transport-TUI Integration', () => {
           isPrimary: id === 'arch-1',
         });
       }
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
@@ -119,7 +119,7 @@ describe('Transport-TUI Integration', () => {
         from: null,
         to: 'PLAN',
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -139,7 +139,7 @@ describe('Transport-TUI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
@@ -192,7 +192,7 @@ describe('Transport-TUI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -213,7 +213,7 @@ describe('Transport-TUI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');

@@ -5,6 +5,8 @@ import { DashboardApp } from '../dashboard-app';
 import { TuiEventBus, TUI_EVENTS } from '../events';
 import type { TuiEventName } from '../events/types';
 
+import { flushInk } from '../testing/tui-test-utils';
+
 vi.mock('../utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('../utils/icons')>();
   return {
@@ -12,8 +14,6 @@ vi.mock('../utils/icons', async importOriginal => {
     isNerdFontEnabled: () => false,
   };
 });
-
-const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('10,000 이벤트 후 메모리 증가 < 50MB (GC 없이)', () => {
   it('should keep memory growth under 50MB after 10,000 events', async () => {
@@ -38,7 +38,7 @@ describe('10,000 이벤트 후 메모리 증가 < 50MB (GC 없이)', () => {
       });
     }
 
-    await tick();
+    await flushInk();
 
     global.gc?.();
     const heapAfter = process.memoryUsage().heapUsed;
@@ -79,7 +79,7 @@ describe('리스너 누적 방지', () => {
       });
     }
 
-    await tick();
+    await flushInk();
     unmount();
 
     for (const event of Object.values(TUI_EVENTS)) {
@@ -102,7 +102,7 @@ describe('비활성화 Agent 상태 정리 확인', () => {
         isPrimary: false,
       });
     }
-    await tick();
+    await flushInk();
 
     for (let i = 0; i < 5; i++) {
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -111,7 +111,7 @@ describe('비활성화 Agent 상태 정리 확인', () => {
         durationMs: 100,
       });
     }
-    await tick();
+    await flushInk();
 
     expect(lastFrame()).toContain('IDLE');
 
@@ -121,7 +121,7 @@ describe('비활성화 Agent 상태 정리 확인', () => {
       role: 'specialist',
       isPrimary: false,
     });
-    await tick();
+    await flushInk();
 
     expect(lastFrame()).toContain('RUNNING');
   });

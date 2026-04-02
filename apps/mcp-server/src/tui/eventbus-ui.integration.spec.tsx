@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render } from 'ink-testing-library';
 import { DashboardApp } from './dashboard-app';
 import { TuiEventBus, TUI_EVENTS, TuiInterceptor } from './events';
+import { flushInk } from './testing/tui-test-utils';
 
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
@@ -16,8 +17,6 @@ vi.mock('./hooks/use-tick', () => ({
   useTick: () => 0,
 }));
 
-const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-
 describe('EventBus ↔ UI Integration', () => {
   describe('Agent 활성화 → Dashboard 상태 변화', () => {
     it('should show primary agent name and RUNNING state when AGENT_ACTIVATED with isPrimary=true', async () => {
@@ -30,7 +29,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('solution-arch');
@@ -59,7 +58,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       // FlowMap truncates names in 17-char-wide boxes (e.g., "security-...")
@@ -86,7 +85,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -94,7 +93,7 @@ describe('EventBus ↔ UI Integration', () => {
         reason: 'completed',
         durationMs: 1200,
       });
-      await tick();
+      await flushInk();
       // Still one running
       expect(lastFrame()).toContain('RUNNING');
     });
@@ -109,7 +108,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -117,7 +116,7 @@ describe('EventBus ↔ UI Integration', () => {
         reason: 'completed',
         durationMs: 1200,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('IDLE');
     });
 
@@ -131,7 +130,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -139,7 +138,7 @@ describe('EventBus ↔ UI Integration', () => {
         reason: 'error',
         durationMs: 500,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('ERROR');
     });
 
@@ -153,7 +152,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('solution-arch');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -161,7 +160,7 @@ describe('EventBus ↔ UI Integration', () => {
         reason: 'completed',
         durationMs: 2000,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('IDLE');
     });
   });
@@ -172,7 +171,7 @@ describe('EventBus ↔ UI Integration', () => {
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'PLAN', to: 'ACT' });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -184,9 +183,9 @@ describe('EventBus ↔ UI Integration', () => {
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'ACT' });
-      await tick();
+      await flushInk();
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'ACT', to: 'EVAL' });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -199,7 +198,7 @@ describe('EventBus ↔ UI Integration', () => {
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'PLAN', to: 'ACT' });
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: 'ACT', to: 'AUTO' });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -235,7 +234,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       // FlowMap truncates names in 17-char-wide boxes (e.g., "security-...", "test-stra...")
@@ -270,7 +269,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -290,7 +289,7 @@ describe('EventBus ↔ UI Integration', () => {
           'test-strategy-specialist': 'Tests designed',
         },
       });
-      await tick();
+      await flushInk();
 
       // Primary still running
       expect(lastFrame()).toContain('RUNNING');
@@ -301,7 +300,7 @@ describe('EventBus ↔ UI Integration', () => {
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
 
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
-      await tick();
+      await flushInk();
 
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
         agentId: 'p1',
@@ -309,7 +308,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.PARALLEL_STARTED, {
@@ -334,7 +333,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -360,7 +359,7 @@ describe('EventBus ↔ UI Integration', () => {
           'performance-specialist': 'done',
         },
       });
-      await tick();
+      await flushInk();
 
       // Only primary still running
       expect(lastFrame()).toContain('RUNNING');
@@ -380,7 +379,7 @@ describe('EventBus ↔ UI Integration', () => {
         skillName: 'test-driven-development',
         reason: 'TDD cycle',
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -400,8 +399,8 @@ describe('EventBus ↔ UI Integration', () => {
         skillName: 'systematic-debugging',
         reason: 'bug detected',
       });
-      await tick();
-      await tick();
+      await flushInk();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
@@ -422,7 +421,7 @@ describe('EventBus ↔ UI Integration', () => {
       });
 
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       // Agent should NOT be reflected because listener wasn't registered yet
       const frame = lastFrame() ?? '';
@@ -437,7 +436,7 @@ describe('EventBus ↔ UI Integration', () => {
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
 
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       // Re-emit after mount to sync state
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -446,7 +445,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toContain('RUNNING');
@@ -461,7 +460,7 @@ describe('EventBus ↔ UI Integration', () => {
 
       // 1. Mode change to PLAN
       eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
-      await tick();
+      await flushInk();
 
       // 2. Primary agent activates
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -470,7 +469,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'primary',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       // 3. Parallel execution
@@ -490,7 +489,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: false,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       // 4. Specialists complete
@@ -511,7 +510,7 @@ describe('EventBus ↔ UI Integration', () => {
           'test-strategy-specialist': 'ok',
         },
       });
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       // Primary still running
@@ -522,7 +521,7 @@ describe('EventBus ↔ UI Integration', () => {
     it('should handle error scenario: activate → error deactivation → re-activate', async () => {
       const eventBus = new TuiEventBus();
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick(); // ensure useEffect subscribes before emitting
+      await flushInk(); // ensure useEffect subscribes before emitting
 
       // 1. Activate agent
       eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
@@ -531,7 +530,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
 
       // 2. Agent fails with error
@@ -540,7 +539,7 @@ describe('EventBus ↔ UI Integration', () => {
         reason: 'error',
         durationMs: 300,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('ERROR');
 
       // 3. Re-activate the same agent (retry scenario)
@@ -550,7 +549,7 @@ describe('EventBus ↔ UI Integration', () => {
         role: 'specialist',
         isPrimary: true,
       });
-      await tick();
+      await flushInk();
       expect(lastFrame()).toContain('RUNNING');
     });
   });
@@ -562,7 +561,7 @@ describe('EventBus ↔ UI Integration', () => {
       interceptor.enable();
 
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       await interceptor.intercept(
         'parse_mode',
@@ -581,7 +580,7 @@ describe('EventBus ↔ UI Integration', () => {
       );
 
       await new Promise(resolve => setImmediate(resolve));
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -594,7 +593,7 @@ describe('EventBus ↔ UI Integration', () => {
       interceptor.enable();
 
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       await interceptor.intercept('parse_mode', { prompt: 'PLAN something' }, async () => ({
         content: [
@@ -612,7 +611,7 @@ describe('EventBus ↔ UI Integration', () => {
       }));
 
       await new Promise(resolve => setImmediate(resolve));
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -624,14 +623,14 @@ describe('EventBus ↔ UI Integration', () => {
       interceptor.enable();
 
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       await interceptor.intercept('search_rules', { query: 'test' }, async () => ({
         content: [{ type: 'text', text: '{"results":[]}' }],
       }));
 
       await new Promise(resolve => setImmediate(resolve));
-      await tick();
+      await flushInk();
 
       const frame = lastFrame() ?? '';
       // After deactivation, should be IDLE
@@ -644,7 +643,7 @@ describe('EventBus ↔ UI Integration', () => {
       interceptor.enable();
 
       const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-      await tick();
+      await flushInk();
 
       // 1. parse_mode call sets mode
       await interceptor.intercept('parse_mode', { prompt: 'EVAL review code' }, async () => ({
@@ -660,7 +659,7 @@ describe('EventBus ↔ UI Integration', () => {
       }));
 
       await new Promise(resolve => setImmediate(resolve));
-      await tick();
+      await flushInk();
 
       let frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();
@@ -686,7 +685,7 @@ describe('EventBus ↔ UI Integration', () => {
       );
 
       await new Promise(resolve => setImmediate(resolve));
-      await tick();
+      await flushInk();
 
       frame = lastFrame() ?? '';
       expect(frame).toBeTruthy();

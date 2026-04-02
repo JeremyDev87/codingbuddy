@@ -4,6 +4,7 @@ import { render } from 'ink-testing-library';
 import { DashboardApp } from './dashboard-app';
 import { TuiEventBus, TUI_EVENTS } from './events';
 import { createInitialDashboardState } from './hooks/use-dashboard-state';
+import { flushInk } from './testing/tui-test-utils';
 
 vi.mock('./utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('./utils/icons')>();
@@ -13,8 +14,6 @@ vi.mock('./utils/icons', async importOriginal => {
 vi.mock('./hooks/use-tick', () => ({
   useTick: () => 0,
 }));
-
-const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('DashboardApp', () => {
   it('renders without eventBus (idle state)', () => {
@@ -27,7 +26,7 @@ describe('DashboardApp', () => {
   it('shows RUNNING state when agent is activated', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-    await tick(); // ensure useEffect subscribes before emitting
+    await flushInk(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'arch-1',
@@ -35,7 +34,7 @@ describe('DashboardApp', () => {
       role: 'primary',
       isPrimary: true,
     });
-    await tick();
+    await flushInk();
 
     const frame = lastFrame() ?? '';
     expect(frame).toContain('RUNNING');
@@ -45,7 +44,7 @@ describe('DashboardApp', () => {
   it('shows IDLE after all agents deactivated', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-    await tick(); // ensure useEffect subscribes before emitting
+    await flushInk(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'a1',
@@ -53,7 +52,7 @@ describe('DashboardApp', () => {
       role: 'primary',
       isPrimary: true,
     });
-    await tick();
+    await flushInk();
     expect(lastFrame()).toContain('RUNNING');
 
     eventBus.emit(TUI_EVENTS.AGENT_DEACTIVATED, {
@@ -61,17 +60,17 @@ describe('DashboardApp', () => {
       reason: 'completed',
       durationMs: 100,
     });
-    await tick();
+    await flushInk();
     expect(lastFrame()).toContain('IDLE');
   });
 
   it('handles mode change events', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-    await tick(); // ensure useEffect subscribes before emitting
+    await flushInk(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.MODE_CHANGED, { from: null, to: 'PLAN' });
-    await tick();
+    await flushInk();
 
     const frame = lastFrame() ?? '';
     expect(frame).toBeTruthy();
@@ -81,7 +80,7 @@ describe('DashboardApp', () => {
   it('shows multiple agents in FlowMap', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-    await tick(); // ensure useEffect subscribes before emitting
+    await flushInk(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'p1',
@@ -95,7 +94,7 @@ describe('DashboardApp', () => {
       role: 'specialist',
       isPrimary: false,
     });
-    await tick();
+    await flushInk();
 
     const frame = lastFrame() ?? '';
     expect(frame).toContain('RUNNING');
@@ -107,7 +106,7 @@ describe('DashboardApp', () => {
   it('shows focused agent in FocusedAgentPanel without Tools/IO section', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-    await tick();
+    await flushInk();
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'a1',
@@ -115,14 +114,14 @@ describe('DashboardApp', () => {
       role: 'primary',
       isPrimary: true,
     });
-    await tick();
+    await flushInk();
 
     eventBus.emit(TUI_EVENTS.TOOL_INVOKED, {
       toolName: 'file_edit',
       agentId: 'a1',
       timestamp: Date.now(),
     });
-    await tick();
+    await flushInk();
 
     const frame = lastFrame() ?? '';
     // Tools/IO section should not be visible
@@ -133,7 +132,7 @@ describe('DashboardApp', () => {
   it('focuses on primary running agent', async () => {
     const eventBus = new TuiEventBus();
     const { lastFrame } = render(<DashboardApp eventBus={eventBus} />);
-    await tick(); // ensure useEffect subscribes before emitting
+    await flushInk(); // ensure useEffect subscribes before emitting
 
     eventBus.emit(TUI_EVENTS.AGENT_ACTIVATED, {
       agentId: 'p1',
@@ -141,7 +140,7 @@ describe('DashboardApp', () => {
       role: 'primary',
       isPrimary: true,
     });
-    await tick();
+    await flushInk();
 
     const frame = lastFrame() ?? '';
     // FocusedAgentPanel should show the primary agent details

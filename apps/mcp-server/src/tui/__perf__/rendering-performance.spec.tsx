@@ -10,6 +10,7 @@ import {
   AGENT_CATEGORY_MAP,
 } from '../events';
 import { AGENT_ICONS } from '../utils/icons';
+import { flushInk } from '../testing/tui-test-utils';
 
 vi.mock('../utils/icons', async importOriginal => {
   const actual = await importOriginal<typeof import('../utils/icons')>();
@@ -19,10 +20,7 @@ vi.mock('../utils/icons', async importOriginal => {
   };
 });
 
-const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-const flushRender = async () => {
-  for (let i = 0; i < 5; i++) await tick();
-};
+const flushRender = async () => flushInk(5);
 
 const ALL_AGENT_NAMES = Object.keys(AGENT_ICONS);
 
@@ -62,7 +60,7 @@ describe(`${ALL_AGENT_NAMES.length} Agent 초기 렌더링`, () => {
       eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
         agents: buildAgentMetadata(ALL_AGENT_NAMES),
       });
-      await tick();
+      await flushInk();
 
       // Measure activation of all agents (first as primary, rest as specialists)
       const start = performance.now();
@@ -113,7 +111,7 @@ describe('단일 Agent 상태 변경 리렌더', () => {
       eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
         agents: buildAgentMetadata(ALL_AGENT_NAMES),
       });
-      await tick();
+      await flushInk();
 
       // Activate all agents (first as primary, rest as specialists)
       for (let i = 0; i < ALL_AGENT_NAMES.length; i++) {
@@ -175,7 +173,7 @@ describe(`${ALL_AGENT_NAMES.length} Agent 동시 상태 업데이트`, () => {
       eventBus.emit(TUI_EVENTS.AGENTS_LOADED, {
         agents: buildAgentMetadata(ALL_AGENT_NAMES),
       });
-      await tick();
+      await flushInk();
 
       // Activate all agents (first as primary, rest as specialists)
       for (let i = 0; i < ALL_AGENT_NAMES.length; i++) {
