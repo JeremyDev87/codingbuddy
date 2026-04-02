@@ -9,7 +9,13 @@ import logging
 import os
 import re
 import subprocess
+import sys
 from typing import Dict, List, Optional, Set
+
+# Ensure hooks/lib is on sys.path so sibling imports work reliably
+_lib_dir = os.path.dirname(os.path.abspath(__file__))
+if _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
 
 from config import load_config
 
@@ -120,7 +126,10 @@ def create_test_gap_issues(
             )
         except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
             logger.warning("gh issue create failed for %s: %s", file_path, exc)
-            return results  # stop on gh unavailable
+            # Early return: FileNotFoundError means gh binary is not installed,
+            # so all subsequent attempts would fail too. TimeoutExpired suggests
+            # a systemic connectivity issue. In both cases, skip remaining files.
+            return results
 
         if proc.returncode != 0:
             logger.warning(
