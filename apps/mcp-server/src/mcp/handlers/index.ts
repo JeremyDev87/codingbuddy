@@ -151,6 +151,12 @@ export { QualityReportHandler } from './quality-report.handler';
 export { BriefingHandler } from './briefing.handler';
 
 /**
+ * Handler for resume session tools (resume_session)
+ * @see {@link ResumeHandler}
+ */
+export { ResumeHandler } from './resume.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
