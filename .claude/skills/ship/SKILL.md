@@ -2,7 +2,7 @@
 name: ship
 description: Run local CI checks and ship changes — create branch, commit, push, and PR. Optionally link to a GitHub issue. Use `--full` to run all workspace checks. Use when changes are ready to ship.
 argument-hint: "[--full] [issue-url-or-number]"
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob, mcp__codingbuddy__pr_quality_report
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -179,11 +179,30 @@ EOF
 - **Never stage `RESULT.json` or `TASK.md`** — these are ephemeral per-worktree artifacts and must not be committed
 - Only include `Closes #<number>` if an issue was provided
 
-## Step 8: Push and Create PR
+## Step 8: Push
 
 ```bash
 git push -u origin <branch-name>
 ```
+
+## Step 9: Quality Gate (PR Guardian)
+
+Before creating the PR, run an automated quality check:
+
+1. Get changed files:
+   ```bash
+   git diff --name-only origin/master...HEAD
+   ```
+2. Call `pr_quality_report` MCP tool with the file list
+3. The tool will:
+   - Auto-detect relevant domains (security, accessibility, code-quality, performance)
+   - Run specialist analysis on each domain
+   - Return a formatted Quality Report
+4. Include the Quality Report in the PR body under a `## CodingBuddy Quality Report` section
+5. If any domain has status `fail`, warn the user before proceeding
+6. If the tool times out or returns a partial result, include whatever is available and note any incomplete domains
+
+## Step 10: Create PR
 
 Create PR using `gh pr create`:
 
@@ -193,6 +212,9 @@ Create PR using `gh pr create`:
 gh pr create --title "<type>(scope): description" --label "<labels>" --body "$(cat <<'EOF'
 ## Summary
 <bullet points summarizing changes>
+
+## CodingBuddy Quality Report
+<quality report from Step 9>
 
 ## Test plan
 <verification steps>
@@ -211,6 +233,9 @@ gh pr create --title "<type>(scope): description" --label "<labels>" --body "$(c
 ## Summary
 <bullet points summarizing changes>
 
+## CodingBuddy Quality Report
+<quality report from Step 9>
+
 ## Test plan
 <verification steps>
 EOF
@@ -221,10 +246,10 @@ EOF
 
 **PR Rules:**
 - Title: under 70 characters, English, follows commit convention
-- Body: English, include Summary + Test plan sections
+- Body: English, include Summary + Test plan + CodingBuddy Quality Report sections
 - Do NOT include author information
 
-## Step 9: Report Result
+## Step 11: Report Result
 
 Print the PR URL and a summary of:
 - Which CI checks were run and passed (or "skipped — no matching workspace")
