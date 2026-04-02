@@ -37,6 +37,7 @@ import {
   ImpactHandler,
   PluginValidationHandler,
   ReleaseCheckHandler,
+  BriefingHandler,
 } from './handlers';
 
 const handlers = [
@@ -57,6 +58,7 @@ const handlers = [
   ImpactHandler,
   PluginValidationHandler,
   ReleaseCheckHandler,
+  BriefingHandler,
 ];
 
 @Module({

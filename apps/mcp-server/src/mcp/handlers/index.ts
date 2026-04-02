@@ -139,6 +139,12 @@ export { PluginValidationHandler } from './plugin-validation.handler';
 export { ReleaseCheckHandler } from './release-check.handler';
 
 /**
+ * Handler for briefing tools (create_briefing)
+ * @see {@link BriefingHandler}
+ */
+export { BriefingHandler } from './briefing.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
