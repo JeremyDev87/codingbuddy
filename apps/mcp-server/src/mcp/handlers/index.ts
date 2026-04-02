@@ -145,6 +145,12 @@ export { ReleaseCheckHandler } from './release-check.handler';
 export { QualityReportHandler } from './quality-report.handler';
 
 /**
+ * Handler for briefing tools (create_briefing)
+ * @see {@link BriefingHandler}
+ */
+export { BriefingHandler } from './briefing.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

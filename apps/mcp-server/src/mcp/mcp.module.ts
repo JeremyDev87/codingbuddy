@@ -39,6 +39,7 @@ import {
   PluginValidationHandler,
   ReleaseCheckHandler,
   QualityReportHandler,
+  BriefingHandler,
 } from './handlers';
 
 const handlers = [
@@ -60,6 +61,7 @@ const handlers = [
   PluginValidationHandler,
   ReleaseCheckHandler,
   QualityReportHandler,
+  BriefingHandler,
 ];
 
 @Module({
