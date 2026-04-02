@@ -157,6 +157,12 @@ export { BriefingHandler } from './briefing.handler';
 export { ResumeHandler } from './resume.handler';
 
 /**
+ * Handler for rule impact report tools (get_rule_impact_report)
+ * @see {@link RuleImpactHandler}
+ */
+export { RuleImpactHandler } from './rule-impact.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
