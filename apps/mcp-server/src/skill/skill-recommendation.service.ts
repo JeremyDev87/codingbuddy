@@ -8,6 +8,9 @@ import type {
 } from './skill-recommendation.types';
 import { getSortedTriggers } from './skill-triggers';
 import { SKILL_KEYWORDS } from './i18n/keywords';
+import { RulesService } from '../rules/rules.service';
+
+const DEFAULT_PRIORITY = 0;
 
 /**
  * Get skill description from SKILL_KEYWORDS (single source of truth)
@@ -22,6 +25,7 @@ function getSkillDescription(skillName: string): string {
  */
 @Injectable()
 export class SkillRecommendationService {
+  constructor(private readonly rulesService: RulesService) {}
   /**
    * Recommends skills based on the given prompt
    * @param prompt User's input prompt
@@ -113,13 +117,18 @@ export class SkillRecommendationService {
    * listSkills({ minPriority: 20 })
    * // => { skills: [debugging, executing-plans, writing-plans], total: 3 }
    */
-  listSkills(options?: ListSkillsOptions): ListSkillsResult {
-    let skills: SkillInfo[] = SKILL_KEYWORDS.map(skill => ({
-      name: skill.skillName,
-      priority: skill.priority,
-      description: skill.description,
-      concepts: Object.keys(skill.concepts),
-    }));
+  async listSkills(options?: ListSkillsOptions): Promise<ListSkillsResult> {
+    const fsSkills = await this.rulesService.listSkillsFromDir();
+
+    let skills: SkillInfo[] = fsSkills.map(fsSkill => {
+      const kwEntry = SKILL_KEYWORDS.find(k => k.skillName === fsSkill.name);
+      return {
+        name: fsSkill.name,
+        priority: kwEntry?.priority ?? DEFAULT_PRIORITY,
+        description: fsSkill.description,
+        concepts: kwEntry ? Object.keys(kwEntry.concepts) : [],
+      };
+    });
 
     // Apply filters
     if (options?.minPriority !== undefined) {

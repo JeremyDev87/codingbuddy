@@ -228,7 +228,7 @@ const createMockSkillRecommendationService = (): Partial<SkillRecommendationServ
     ],
     originalPrompt: 'I have a bug in my code',
   } as RecommendSkillsResult),
-  listSkills: vi.fn().mockReturnValue({
+  listSkills: vi.fn().mockResolvedValue({
     skills: [
       {
         name: 'systematic-debugging',
@@ -2122,7 +2122,7 @@ describe('McpService', () => {
       });
 
       it('should filter by minPriority', async () => {
-        vi.mocked(mockSkillRecommendationService.listSkills!).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockResolvedValue({
           skills: [
             {
               name: 'systematic-debugging',
@@ -2159,7 +2159,7 @@ describe('McpService', () => {
       });
 
       it('should filter by maxPriority', async () => {
-        vi.mocked(mockSkillRecommendationService.listSkills!).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockResolvedValue({
           skills: [
             {
               name: 'brainstorming',
@@ -2190,7 +2190,7 @@ describe('McpService', () => {
       });
 
       it('should filter by both minPriority and maxPriority', async () => {
-        vi.mocked(mockSkillRecommendationService.listSkills!).mockReturnValue({
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockResolvedValue({
           skills: [
             {
               name: 'test-driven-development',
@@ -2223,9 +2223,9 @@ describe('McpService', () => {
 
     describe('Error Handling', () => {
       it('should return error when service throws', async () => {
-        vi.mocked(mockSkillRecommendationService.listSkills!).mockImplementation(() => {
-          throw new Error('Service error');
-        });
+        vi.mocked(mockSkillRecommendationService.listSkills!).mockRejectedValue(
+          new Error('Service error'),
+        );
 
         const handler = handlers.get('tools/call');
         expect(handler).toBeDefined();

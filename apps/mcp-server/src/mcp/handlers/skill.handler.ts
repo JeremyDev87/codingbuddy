@@ -120,7 +120,7 @@ export class SkillHandler extends AbstractHandler {
     }
   }
 
-  private handleListSkills(args: Record<string, unknown> | undefined): ToolResponse {
+  private async handleListSkills(args: Record<string, unknown> | undefined): Promise<ToolResponse> {
     try {
       const options: ListSkillsOptions = {};
 
@@ -131,7 +131,7 @@ export class SkillHandler extends AbstractHandler {
         options.maxPriority = args.maxPriority;
       }
 
-      const result = this.skillRecommendationService.listSkills(options);
+      const result = await this.skillRecommendationService.listSkills(options);
       return createJsonResponse(result);
     } catch (error) {
       return createErrorResponse(

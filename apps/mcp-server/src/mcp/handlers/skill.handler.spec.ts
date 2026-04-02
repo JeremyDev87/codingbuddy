@@ -14,7 +14,7 @@ describe('SkillHandler', () => {
         originalPrompt: 'test prompt',
         recommendations: [{ skillName: 'test-skill', matchedPatterns: [] }],
       }),
-      listSkills: vi.fn().mockReturnValue({
+      listSkills: vi.fn().mockResolvedValue({
         skills: [{ name: 'test-skill', priority: 1 }],
         total: 1,
       }),

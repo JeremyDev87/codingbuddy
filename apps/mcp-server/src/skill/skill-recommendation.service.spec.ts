@@ -1,14 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SkillRecommendationService } from './skill-recommendation.service';
 import type { RecommendSkillsResult } from './skill-recommendation.types';
 import { clearTriggerCache } from './skill-triggers';
+import type { RulesService } from '../rules/rules.service';
+
+/** Create a mock RulesService that returns the given skill list */
+function createMockRulesService(
+  skills: Array<{ name: string; description: string }> = [],
+): RulesService {
+  return {
+    listSkillsFromDir: vi.fn().mockResolvedValue(skills),
+  } as unknown as RulesService;
+}
+
+/** Default filesystem-like skills for testing (includes both keyword-registered and extra skills) */
+const FILESYSTEM_SKILLS: Array<{ name: string; description: string }> = [
+  { name: 'systematic-debugging', description: 'Systematic approach to debugging' },
+  { name: 'brainstorming', description: 'Brainstorming and ideation' },
+  { name: 'executing-plans', description: 'Execute implementation plans' },
+  { name: 'writing-plans', description: 'Write implementation plans' },
+  { name: 'frontend-design', description: 'Frontend design patterns' },
+  { name: 'test-driven-development', description: 'TDD workflow' },
+  { name: 'refactoring', description: 'Code refactoring' },
+  { name: 'documentation-generation', description: 'Generate documentation' },
+  // Extra skills NOT in SKILL_KEYWORDS
+  { name: 'api-design', description: 'API design patterns' },
+  { name: 'git-workflow', description: 'Git workflow management' },
+  { name: 'docker-setup', description: 'Docker configuration' },
+];
 
 describe('SkillRecommendationService', () => {
   let service: SkillRecommendationService;
+  let mockRulesService: RulesService;
 
   beforeEach(() => {
     clearTriggerCache();
-    service = new SkillRecommendationService();
+    mockRulesService = createMockRulesService(FILESYSTEM_SKILLS);
+    service = new SkillRecommendationService(mockRulesService);
   });
 
   describe('recommendSkills basic functionality', () => {
@@ -360,11 +388,11 @@ describe('SkillRecommendationService', () => {
   });
 
   describe('listSkills', () => {
-    it('should return all skills sorted by priority descending', () => {
-      const result = service.listSkills();
+    it('should return all filesystem skills sorted by priority descending', async () => {
+      const result = await service.listSkills();
 
       expect(result.skills).toBeDefined();
-      expect(result.total).toBeGreaterThan(0);
+      expect(result.total).toBe(FILESYSTEM_SKILLS.length);
       expect(result.skills.length).toBe(result.total);
 
       // Check sorted by priority descending
@@ -373,8 +401,49 @@ describe('SkillRecommendationService', () => {
       }
     });
 
-    it('should include name, priority, description, concepts for each skill', () => {
-      const result = service.listSkills();
+    it('should call rulesService.listSkillsFromDir as primary source', async () => {
+      await service.listSkills();
+
+      expect(mockRulesService.listSkillsFromDir).toHaveBeenCalled();
+    });
+
+    it('should enrich skills with SKILL_KEYWORDS priority when available', async () => {
+      const result = await service.listSkills();
+
+      // systematic-debugging has priority 25 in SKILL_KEYWORDS
+      const debugging = result.skills.find(s => s.name === 'systematic-debugging');
+      expect(debugging?.priority).toBe(25);
+    });
+
+    it('should assign default priority to skills without SKILL_KEYWORDS entry', async () => {
+      const result = await service.listSkills();
+
+      // api-design is NOT in SKILL_KEYWORDS — should get default priority
+      const apiDesign = result.skills.find(s => s.name === 'api-design');
+      expect(apiDesign).toBeDefined();
+      expect(apiDesign!.priority).toBe(0);
+    });
+
+    it('should use filesystem description for skills', async () => {
+      const result = await service.listSkills();
+
+      const apiDesign = result.skills.find(s => s.name === 'api-design');
+      expect(apiDesign?.description).toBe('API design patterns');
+    });
+
+    it('should include concepts from SKILL_KEYWORDS when available', async () => {
+      const result = await service.listSkills();
+
+      const debugging = result.skills.find(s => s.name === 'systematic-debugging');
+      expect(debugging?.concepts.length).toBeGreaterThan(0);
+
+      // Extra skill should have empty concepts
+      const apiDesign = result.skills.find(s => s.name === 'api-design');
+      expect(apiDesign?.concepts).toEqual([]);
+    });
+
+    it('should include name, priority, description, concepts for each skill', async () => {
+      const result = await service.listSkills();
 
       for (const skill of result.skills) {
         expect(skill.name).toBeDefined();
@@ -384,41 +453,52 @@ describe('SkillRecommendationService', () => {
       }
     });
 
-    it('should filter by minPriority', () => {
-      const result = service.listSkills({ minPriority: 20 });
+    it('should filter by minPriority', async () => {
+      const result = await service.listSkills({ minPriority: 20 });
 
+      expect(result.skills.length).toBeGreaterThan(0);
       for (const skill of result.skills) {
         expect(skill.priority).toBeGreaterThanOrEqual(20);
       }
     });
 
-    it('should filter by maxPriority', () => {
-      const result = service.listSkills({ maxPriority: 15 });
+    it('should filter by maxPriority', async () => {
+      const result = await service.listSkills({ maxPriority: 15 });
 
       for (const skill of result.skills) {
         expect(skill.priority).toBeLessThanOrEqual(15);
       }
     });
 
-    it('should filter by both minPriority and maxPriority', () => {
-      const result = service.listSkills({ minPriority: 12, maxPriority: 20 });
+    it('should filter by both minPriority and maxPriority', async () => {
+      const result = await service.listSkills({ minPriority: 10, maxPriority: 20 });
 
       expect(result.skills.length).toBeGreaterThan(0);
       for (const skill of result.skills) {
-        expect(skill.priority).toBeGreaterThanOrEqual(12);
+        expect(skill.priority).toBeGreaterThanOrEqual(10);
         expect(skill.priority).toBeLessThanOrEqual(20);
       }
     });
 
-    it('should return empty array when minPriority > maxPriority', () => {
-      const result = service.listSkills({ minPriority: 100, maxPriority: 10 });
+    it('should return empty array when minPriority > maxPriority', async () => {
+      const result = await service.listSkills({ minPriority: 100, maxPriority: 10 });
 
       expect(result.skills).toEqual([]);
       expect(result.total).toBe(0);
     });
 
-    it('should return empty array when no skills match filter criteria', () => {
-      const result = service.listSkills({ minPriority: 1000 });
+    it('should return empty array when no skills match filter criteria', async () => {
+      const result = await service.listSkills({ minPriority: 1000 });
+
+      expect(result.skills).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+
+    it('should return empty array when filesystem returns no skills', async () => {
+      const emptyRulesService = createMockRulesService([]);
+      const emptyService = new SkillRecommendationService(emptyRulesService);
+
+      const result = await emptyService.listSkills();
 
       expect(result.skills).toEqual([]);
       expect(result.total).toBe(0);
