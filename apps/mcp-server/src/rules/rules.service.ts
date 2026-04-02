@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { existsSync } from 'fs';
 import { AgentProfile, SearchResult } from './rules.types';
-import type { Skill } from './skill.schema';
+import type { Skill, SkillFrontmatterTrigger } from './skill.schema';
 import { CustomService } from '../custom';
 import { ConfigService } from '../config/config.service';
 import { MODE_AGENTS } from '../keyword/keyword.types';
@@ -187,9 +187,11 @@ export class RulesService {
 
   /**
    * List all available skills from the skills directory
-   * @returns Array of skill summaries with name and description
+   * @returns Array of skill summaries with name, description, and optional triggers
    */
-  async listSkillsFromDir(): Promise<Array<{ name: string; description: string }>> {
+  async listSkillsFromDir(): Promise<
+    Array<{ name: string; description: string; triggers?: SkillFrontmatterTrigger[] }>
+  > {
     try {
       return await listSkillSummaries(this.rulesDir);
     } catch (error) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, type OnModuleInit } from '@nestjs/common';
 import type {
   SkillRecommendation,
   RecommendSkillsResult,
@@ -12,6 +12,22 @@ import { RulesService } from '../rules/rules.service';
 
 const DEFAULT_PRIORITY = 0;
 
+const CONFIDENCE_RANK: Record<string, number> = {
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
+interface CachedFrontmatterTrigger {
+  pattern: RegExp;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+interface FrontmatterTriggerEntry {
+  description: string;
+  triggers: CachedFrontmatterTrigger[];
+}
+
 /**
  * Get skill description from SKILL_KEYWORDS (single source of truth)
  */
@@ -24,8 +40,43 @@ function getSkillDescription(skillName: string): string {
  * Service for recommending skills based on user prompts
  */
 @Injectable()
-export class SkillRecommendationService {
+export class SkillRecommendationService implements OnModuleInit {
+  private frontmatterTriggerCache = new Map<string, FrontmatterTriggerEntry>();
+
   constructor(private readonly rulesService: RulesService) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.loadFrontmatterTriggers();
+  }
+
+  /**
+   * Loads and caches frontmatter triggers from SKILL.md files.
+   * Called at module init and can be called manually for testing.
+   */
+  async loadFrontmatterTriggers(): Promise<void> {
+    const skills = await this.rulesService.listSkillsFromDir();
+    this.frontmatterTriggerCache.clear();
+
+    for (const skill of skills) {
+      if (skill.triggers && skill.triggers.length > 0) {
+        const compiled: CachedFrontmatterTrigger[] = [];
+        for (const t of skill.triggers) {
+          try {
+            compiled.push({ pattern: new RegExp(t.pattern, 'i'), confidence: t.confidence });
+          } catch {
+            // Skip invalid regex patterns
+          }
+        }
+        if (compiled.length > 0) {
+          this.frontmatterTriggerCache.set(skill.name, {
+            description: skill.description,
+            triggers: compiled,
+          });
+        }
+      }
+    }
+  }
+
   /**
    * Recommends skills based on the given prompt
    * @param prompt User's input prompt
@@ -43,48 +94,90 @@ export class SkillRecommendationService {
     }
 
     const triggers = getSortedTriggers();
-    const skillMatches = new Map<string, { matchedPatterns: string[]; priority: number }>();
+    const skillMatches = new Map<
+      string,
+      {
+        matchedPatterns: string[];
+        priority: number;
+        confidence: 'high' | 'medium' | 'low';
+        description: string;
+      }
+    >();
 
-    // Test each trigger's patterns against the prompt
+    // Step 1: Test keyword triggers against the prompt
     for (const trigger of triggers) {
       const matchedPatterns: string[] = [];
 
       for (const pattern of trigger.patterns) {
         if (pattern.test(trimmedPrompt)) {
-          // Extract the matched keyword from the pattern source
-          const patternSource = pattern.source;
-          matchedPatterns.push(patternSource);
+          matchedPatterns.push(pattern.source);
         }
       }
 
-      // Only add if there are matches and skill not already added
       if (matchedPatterns.length > 0 && !skillMatches.has(trigger.skillName)) {
         skillMatches.set(trigger.skillName, {
           matchedPatterns,
           priority: trigger.priority,
+          confidence: this.determineConfidence(matchedPatterns.length),
+          description: getSkillDescription(trigger.skillName),
         });
       }
     }
 
-    // Convert to SkillRecommendation array
+    // Step 2: Check frontmatter triggers and merge
+    for (const [skillName, entry] of this.frontmatterTriggerCache) {
+      const fmMatchedPatterns: string[] = [];
+      let bestConfidence: 'high' | 'medium' | 'low' = 'low';
+
+      for (const trigger of entry.triggers) {
+        if (trigger.pattern.test(trimmedPrompt)) {
+          fmMatchedPatterns.push(trigger.pattern.source);
+          if ((CONFIDENCE_RANK[trigger.confidence] ?? 0) > (CONFIDENCE_RANK[bestConfidence] ?? 0)) {
+            bestConfidence = trigger.confidence;
+          }
+        }
+      }
+
+      if (fmMatchedPatterns.length > 0) {
+        const existing = skillMatches.get(skillName);
+        if (existing) {
+          // Merge: add frontmatter patterns, use higher confidence
+          const mergedPatterns = [...new Set([...existing.matchedPatterns, ...fmMatchedPatterns])];
+          const existingRank = CONFIDENCE_RANK[existing.confidence] ?? 0;
+          const newRank = CONFIDENCE_RANK[bestConfidence] ?? 0;
+          existing.matchedPatterns = mergedPatterns;
+          if (newRank > existingRank) {
+            existing.confidence = bestConfidence;
+          }
+        } else {
+          skillMatches.set(skillName, {
+            matchedPatterns: fmMatchedPatterns,
+            priority: 0,
+            confidence: bestConfidence,
+            description: entry.description,
+          });
+        }
+      }
+    }
+
+    // Step 3: Convert to SkillRecommendation array and sort
     const recommendations: SkillRecommendation[] = [];
 
-    for (const [skillName, { matchedPatterns }] of skillMatches) {
-      const confidence = this.determineConfidence(matchedPatterns.length);
-
+    for (const [skillName, match] of skillMatches) {
       recommendations.push({
         skillName,
-        confidence,
-        matchedPatterns,
-        description: getSkillDescription(skillName),
+        confidence: match.confidence,
+        matchedPatterns: match.matchedPatterns,
+        description: match.description,
       });
     }
 
-    // Sort by priority (triggers are already sorted, but we need to maintain order from Map)
+    // Sort by priority descending, then by confidence descending
     recommendations.sort((a, b) => {
       const aPriority = skillMatches.get(a.skillName)?.priority ?? 0;
       const bPriority = skillMatches.get(b.skillName)?.priority ?? 0;
-      return bPriority - aPriority;
+      if (bPriority !== aPriority) return bPriority - aPriority;
+      return (CONFIDENCE_RANK[b.confidence] ?? 0) - (CONFIDENCE_RANK[a.confidence] ?? 0);
     });
 
     return {

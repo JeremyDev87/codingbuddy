@@ -19,6 +19,51 @@ This is the skill content.
       expect(result.description).toBe('A test skill description');
       expect(result.content).toContain('# Test Skill');
       expect(result.path).toBe('skills/test-skill/SKILL.md');
+      expect(result.triggers).toBeUndefined();
+    });
+
+    it('should parse valid SKILL.md with triggers', () => {
+      const content = `---
+name: widget-skill
+description: Widget architecture skill
+triggers:
+  - pattern: "widget.*(slot|architecture)"
+    confidence: high
+  - pattern: "(parallel route|layout)"
+    confidence: medium
+---
+
+# Widget Skill
+
+Content here.
+`;
+      const result = parseSkill(content, 'skills/widget-skill/SKILL.md');
+
+      expect(result.name).toBe('widget-skill');
+      expect(result.triggers).toBeDefined();
+      expect(result.triggers).toHaveLength(2);
+      expect(result.triggers![0]).toEqual({
+        pattern: 'widget.*(slot|architecture)',
+        confidence: 'high',
+      });
+      expect(result.triggers![1]).toEqual({
+        pattern: '(parallel route|layout)',
+        confidence: 'medium',
+      });
+    });
+
+    it('should parse skill with empty triggers array', () => {
+      const content = `---
+name: no-triggers
+description: Skill with empty triggers
+triggers: []
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.triggers).toEqual([]);
     });
 
     it('should handle multiline description', () => {
@@ -121,6 +166,47 @@ Just content.
       const content = `---
 name: test
 description: [invalid yaml array as description]
+---
+
+Content.
+`;
+      expect(() => parseSkill(content, 'path')).toThrow(SkillSchemaError);
+    });
+
+    it('should reject trigger with invalid confidence value', () => {
+      const content = `---
+name: bad-trigger
+description: Bad trigger confidence
+triggers:
+  - pattern: "test"
+    confidence: "invalid"
+---
+
+Content.
+`;
+      expect(() => parseSkill(content, 'path')).toThrow(SkillSchemaError);
+    });
+
+    it('should reject trigger missing pattern field', () => {
+      const content = `---
+name: bad-trigger
+description: Missing pattern
+triggers:
+  - confidence: high
+---
+
+Content.
+`;
+      expect(() => parseSkill(content, 'path')).toThrow(SkillSchemaError);
+    });
+
+    it('should reject trigger with empty pattern string', () => {
+      const content = `---
+name: bad-trigger
+description: Empty pattern
+triggers:
+  - pattern: ""
+    confidence: high
 ---
 
 Content.

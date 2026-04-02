@@ -4,9 +4,15 @@ import type { RecommendSkillsResult } from './skill-recommendation.types';
 import { clearTriggerCache } from './skill-triggers';
 import type { RulesService } from '../rules/rules.service';
 
+import type { SkillFrontmatterTrigger } from '../rules/skill.schema';
+
 /** Create a mock RulesService that returns the given skill list */
 function createMockRulesService(
-  skills: Array<{ name: string; description: string }> = [],
+  skills: Array<{
+    name: string;
+    description: string;
+    triggers?: SkillFrontmatterTrigger[];
+  }> = [],
 ): RulesService {
   return {
     listSkillsFromDir: vi.fn().mockResolvedValue(skills),
@@ -14,7 +20,11 @@ function createMockRulesService(
 }
 
 /** Default filesystem-like skills for testing (includes both keyword-registered and extra skills) */
-const FILESYSTEM_SKILLS: Array<{ name: string; description: string }> = [
+const FILESYSTEM_SKILLS: Array<{
+  name: string;
+  description: string;
+  triggers?: SkillFrontmatterTrigger[];
+}> = [
   { name: 'systematic-debugging', description: 'Systematic approach to debugging' },
   { name: 'brainstorming', description: 'Brainstorming and ideation' },
   { name: 'executing-plans', description: 'Execute implementation plans' },
@@ -27,16 +37,27 @@ const FILESYSTEM_SKILLS: Array<{ name: string; description: string }> = [
   { name: 'api-design', description: 'API design patterns' },
   { name: 'git-workflow', description: 'Git workflow management' },
   { name: 'docker-setup', description: 'Docker configuration' },
+  // Skill with frontmatter triggers (NOT in SKILL_KEYWORDS)
+  {
+    name: 'widget-slot-architecture',
+    description: 'Next.js Parallel Routes Widget Slot pattern',
+    triggers: [
+      { pattern: 'widget.*(slot|architecture|parallel)', confidence: 'high' as const },
+      { pattern: '(parallel route|next.*layout|slot.*pattern)', confidence: 'medium' as const },
+      { pattern: '(dashboard.*layout|multi.*panel)', confidence: 'low' as const },
+    ],
+  },
 ];
 
 describe('SkillRecommendationService', () => {
   let service: SkillRecommendationService;
   let mockRulesService: RulesService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     clearTriggerCache();
     mockRulesService = createMockRulesService(FILESYSTEM_SKILLS);
     service = new SkillRecommendationService(mockRulesService);
+    await service.loadFrontmatterTriggers();
   });
 
   describe('recommendSkills basic functionality', () => {
@@ -384,6 +405,120 @@ describe('SkillRecommendationService', () => {
 
       expect(result.recommendations.length).toBeGreaterThan(0);
       expect(result.recommendations[0].skillName).toBe('systematic-debugging');
+    });
+  });
+
+  describe('frontmatter triggers', () => {
+    it('should match skill via frontmatter trigger pattern', () => {
+      const result = service.recommendSkills('I need a widget slot architecture');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+      expect(wsa!.confidence).toBe('high');
+    });
+
+    it('should use medium confidence for medium-confidence trigger', () => {
+      const result = service.recommendSkills('How to use parallel route in next layout');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+      expect(wsa!.confidence).toBe('medium');
+    });
+
+    it('should use low confidence for low-confidence trigger', () => {
+      const result = service.recommendSkills('Need a dashboard layout for the admin');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+      expect(wsa!.confidence).toBe('low');
+    });
+
+    it('should use highest confidence when multiple triggers match', () => {
+      // "widget slot" matches high, "parallel route" matches medium → high wins
+      const result = service.recommendSkills('widget slot with parallel route');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+      expect(wsa!.confidence).toBe('high');
+    });
+
+    it('should not match frontmatter triggers for unrelated prompt', () => {
+      const result = service.recommendSkills('random text xyz123');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeUndefined();
+    });
+
+    it('should include matched patterns from frontmatter triggers', () => {
+      const result = service.recommendSkills('widget slot architecture');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+      expect(wsa!.matchedPatterns.length).toBeGreaterThan(0);
+    });
+
+    it('should use skill description from filesystem for frontmatter-only skills', () => {
+      const result = service.recommendSkills('widget slot architecture');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+      expect(wsa!.description).toBe('Next.js Parallel Routes Widget Slot pattern');
+    });
+
+    it('should merge keyword and frontmatter triggers for same skill', async () => {
+      // Create a skill that exists in BOTH keywords.ts and has frontmatter triggers
+      const skillsWithOverlap = [
+        ...FILESYSTEM_SKILLS,
+        {
+          name: 'systematic-debugging',
+          description: 'Debugging skill',
+          triggers: [{ pattern: 'custom-debug-pattern', confidence: 'high' as const }],
+        },
+      ];
+      const overlapService = new SkillRecommendationService(
+        createMockRulesService(skillsWithOverlap),
+      );
+      await overlapService.loadFrontmatterTriggers();
+
+      // Match via keyword trigger
+      const result = overlapService.recommendSkills('There is a bug and custom-debug-pattern');
+
+      const debugging = result.recommendations.find(r => r.skillName === 'systematic-debugging');
+      expect(debugging).toBeDefined();
+      // Should have patterns from both sources
+      expect(debugging!.matchedPatterns.length).toBeGreaterThan(1);
+    });
+
+    it('should skip invalid regex patterns gracefully', async () => {
+      const skillsWithBadRegex = [
+        {
+          name: 'bad-regex-skill',
+          description: 'Skill with invalid regex',
+          triggers: [
+            { pattern: '[invalid(regex', confidence: 'high' as const },
+            { pattern: 'valid-pattern', confidence: 'medium' as const },
+          ],
+        },
+      ];
+      const badService = new SkillRecommendationService(createMockRulesService(skillsWithBadRegex));
+      await badService.loadFrontmatterTriggers();
+
+      // Should still work with valid pattern
+      const result = badService.recommendSkills('valid-pattern text');
+
+      const skill = result.recommendations.find(r => r.skillName === 'bad-regex-skill');
+      expect(skill).toBeDefined();
+    });
+
+    it('should work when no frontmatter triggers are loaded', async () => {
+      const noTriggerService = new SkillRecommendationService(
+        createMockRulesService([{ name: 'plain-skill', description: 'No triggers' }]),
+      );
+      await noTriggerService.loadFrontmatterTriggers();
+
+      const result = noTriggerService.recommendSkills('fix the bug');
+      // Should still work with keyword triggers
+      expect(result.recommendations.length).toBeGreaterThan(0);
     });
   });
 

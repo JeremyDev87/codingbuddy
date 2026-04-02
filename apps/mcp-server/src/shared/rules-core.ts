@@ -10,7 +10,7 @@ import { isPathSafe } from './security.utils';
 import { parseAgentProfile, AgentSchemaError } from '../rules/agent.schema';
 import { parseSkill, SkillSchemaError } from '../rules/skill.schema';
 import type { AgentProfile, SearchResult } from '../rules/rules.types';
-import type { Skill } from '../rules/skill.schema';
+import type { Skill, SkillFrontmatterTrigger } from '../rules/skill.schema';
 
 // ============================================================================
 // Types
@@ -244,11 +244,15 @@ export async function searchInRuleFiles(
 export async function listSkillSummaries(
   rulesDir: string,
   deps?: FileSystemDeps,
-): Promise<Array<{ name: string; description: string }>> {
+): Promise<Array<{ name: string; description: string; triggers?: SkillFrontmatterTrigger[] }>> {
   const skillsDir = path.join(rulesDir, 'skills');
   const readdir = getReaddir(deps);
   const readFile = getReadFile(deps);
-  const summaries: Array<{ name: string; description: string }> = [];
+  const summaries: Array<{
+    name: string;
+    description: string;
+    triggers?: SkillFrontmatterTrigger[];
+  }> = [];
 
   try {
     const entries = (await readdir(skillsDir, {
@@ -264,6 +268,7 @@ export async function listSkillSummaries(
           summaries.push({
             name: skill.name,
             description: skill.description,
+            triggers: skill.triggers,
           });
         } catch {
           // Skip invalid/missing skills

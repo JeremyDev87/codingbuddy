@@ -31,9 +31,20 @@ export class SkillSchemaError extends Error {
 // ============================================================================
 
 /**
+ * Trigger entry schema for SKILL.md frontmatter
+ * - pattern: regex pattern string (non-empty)
+ * - confidence: high | medium | low
+ */
+const SkillFrontmatterTriggerSchema = z.object({
+  pattern: z.string().min(1),
+  confidence: z.enum(['high', 'medium', 'low']),
+});
+
+/**
  * Skill frontmatter schema
  * - name: lowercase with hyphens only (a-z0-9-)
  * - description: 1-500 characters
+ * - triggers: optional array of pattern+confidence entries
  */
 const SkillFrontmatterSchema = z.object({
   name: z
@@ -41,17 +52,24 @@ const SkillFrontmatterSchema = z.object({
     .min(1)
     .regex(/^[a-z0-9-]+$/, 'Skill name must be lowercase alphanumeric with hyphens only'),
   description: z.string().min(1).max(500),
+  triggers: z.array(SkillFrontmatterTriggerSchema).optional(),
 });
 
 // ============================================================================
 // Types
 // ============================================================================
 
+export interface SkillFrontmatterTrigger {
+  pattern: string;
+  confidence: 'high' | 'medium' | 'low';
+}
+
 export interface Skill {
   name: string;
   description: string;
   content: string;
   path: string;
+  triggers?: SkillFrontmatterTrigger[];
 }
 
 // ============================================================================
@@ -127,5 +145,6 @@ export function parseSkill(content: string, filePath: string): Skill {
     description: result.data.description,
     content: body,
     path: filePath,
+    triggers: result.data.triggers,
   };
 }
