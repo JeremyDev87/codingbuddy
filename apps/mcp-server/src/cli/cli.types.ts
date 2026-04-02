@@ -48,6 +48,16 @@ export interface TuiOptions {
 }
 
 /**
+ * Install command options (parsed from CLI args)
+ */
+export interface InstallOptions {
+  /** Git URL or github:user/repo shorthand */
+  installSource?: string;
+  /** Force overwrite on name conflicts */
+  installForce?: boolean;
+}
+
+/**
  * Console output levels
  */
 export type LogLevel = 'info' | 'success' | 'warn' | 'error';

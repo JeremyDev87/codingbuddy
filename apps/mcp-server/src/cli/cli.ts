@@ -8,14 +8,14 @@
 import { runInit } from './init';
 import { bootstrap } from '../main';
 import { getPackageVersion } from '../shared/version.utils';
-import type { InitOptions, TuiOptions } from './cli.types';
+import type { InitOptions, TuiOptions, InstallOptions } from './cli.types';
 
 /**
  * Parsed command line arguments
  */
 export interface ParsedArgs {
-  command: 'init' | 'mcp' | 'tui' | 'help' | 'version';
-  options: Partial<InitOptions> & Partial<TuiOptions>;
+  command: 'init' | 'install' | 'mcp' | 'tui' | 'help' | 'version';
+  options: Partial<InitOptions> & Partial<TuiOptions> & Partial<InstallOptions>;
 }
 
 /**
@@ -47,6 +47,15 @@ export function parseArgs(args: string[]): ParsedArgs {
   if (command === 'tui') {
     const restart = args.includes('--restart');
     return { command: 'tui', options: { ...options, restart } };
+  }
+
+  if (command === 'install') {
+    const installSource = args[1];
+    const installForce = args.includes('--force') || args.includes('-f');
+    return {
+      command: 'install',
+      options: { ...options, installSource, installForce },
+    };
   }
 
   if (command !== 'init') {
@@ -81,6 +90,7 @@ CodingBuddy CLI - AI-powered project configuration generator
 
 Usage:
   codingbuddy init [path] [options]    Initialize configuration
+  codingbuddy install <git-url>        Install a plugin from git repository
   codingbuddy mcp                      Start MCP server (stdio mode)
   codingbuddy tui                      Monitor agent execution in real-time
   codingbuddy tui --restart            Restart TUI client (fixes blank screen)
@@ -88,7 +98,7 @@ Usage:
   codingbuddy --version                Show version
 
 Options:
-  --force, -f           Overwrite existing config
+  --force, -f           Overwrite existing config / force install
   --yes, -y             Accept detected defaults (quick setup)
   --api-key <key>       Anthropic API key (or set ANTHROPIC_API_KEY env)
 
@@ -96,6 +106,7 @@ Examples:
   codingbuddy init                     Initialize in current directory
   codingbuddy init ./my-project        Initialize in specific directory
   codingbuddy init --force             Overwrite existing config
+  codingbuddy install github:user/repo Install a community plugin
   codingbuddy mcp                      Start MCP server for AI assistants
 
 Note:
@@ -160,6 +171,24 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
     case 'tui': {
       const { runTui } = await import('./run-tui');
       await runTui({ restart: options.restart ?? false });
+      break;
+    }
+
+    case 'install': {
+      const { runInstall } = await import('./plugin/install.command');
+      if (!options.installSource) {
+        process.stderr.write('Error: Missing git URL. Usage: codingbuddy install <git-url>\n');
+        process.exitCode = 1;
+        break;
+      }
+      const installResult = await runInstall({
+        source: options.installSource,
+        projectRoot: options.projectRoot ?? process.cwd(),
+        force: options.installForce ?? false,
+      });
+      if (!installResult.success) {
+        process.exitCode = 1;
+      }
       break;
     }
 
