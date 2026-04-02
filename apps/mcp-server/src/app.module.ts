@@ -7,6 +7,7 @@ import { AgentModule } from './agent/agent.module';
 import { ChecklistModule } from './checklist/checklist.module';
 import { ContextModule } from './context/context.module';
 import { TuiEventsModule } from './tui/events/events.module';
+import { PluginModule } from './plugin/plugin.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TuiEventsModule } from './tui/events/events.module';
     ChecklistModule,
     ContextModule,
     TuiEventsModule,
+    PluginModule,
   ],
 })
 export class AppModule {}
