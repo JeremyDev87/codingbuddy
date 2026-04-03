@@ -46,9 +46,24 @@ Reusable workflows for consistent development:
 - Refactoring
 - And more...
 
-## MCP Integration (Required)
+## Feature Availability
 
-This plugin requires the CodingBuddy MCP server for full functionality:
+| Feature | Standalone | With MCP |
+|---------|-----------|----------|
+| Mode detection (PLAN/ACT/EVAL/AUTO) | ✅ | ✅ |
+| Basic agent recommendation | ✅ | ✅ |
+| TDD workflow guidance | ✅ | ✅ |
+| HUD / StatusLine | ✅ | ✅ |
+| Session stats & history | ✅ | ✅ |
+| Specialist agent dispatch | ❌ | ✅ |
+| Context tracking (cross-session) | ❌ | ✅ |
+| Parallel agent execution | ❌ | ✅ |
+| Contextual checklists | ❌ | ✅ |
+| Rule search & impact tracking | ❌ | ✅ |
+
+## MCP Integration (Recommended)
+
+This plugin works standalone but benefits from the CodingBuddy MCP server for full functionality:
 
 ```bash
 npm install -g codingbuddy

@@ -3,6 +3,23 @@
 ## Purpose
 Execute the implementation plan with TDD
 
+## Mode Availability
+
+### Standalone Mode (no MCP server)
+This command works without the CodingBuddy MCP server.
+In standalone mode, you get:
+- Mode detection and transition
+- TDD cycle execution (Red → Green → Refactor)
+- Basic quality standards enforcement
+- Agent-guided implementation
+
+### MCP Enhanced Mode
+With the CodingBuddy MCP server connected, you additionally get:
+- `parse_mode` with full context tracking
+- Specialist agent dispatch for implementation verification
+- Contextual checklists (security, accessibility, performance)
+- Cross-session context persistence
+
 ## Activation
 This command activates ACT mode for the CodingBuddy workflow.
 
@@ -182,12 +199,13 @@ To preserve this implementation session for future reference:
 
 ## MCP Integration
 
-If CodingBuddy MCP server is available, call:
+If MCP is available, call `parse_mode` for enhanced features:
 ```
 parse_mode({ prompt: "ACT: <user request>" })
 ```
 
 This provides additional context, checklists, and specialist agent recommendations.
+In standalone mode, the command works with built-in workflow guidance.
 
 ## Next Mode
 

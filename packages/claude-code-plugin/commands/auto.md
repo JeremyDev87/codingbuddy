@@ -3,6 +3,23 @@
 ## Purpose
 Autonomous PLAN → ACT → EVAL cycle until quality achieved
 
+## Mode Availability
+
+### Standalone Mode (no MCP server)
+This command works without the CodingBuddy MCP server.
+In standalone mode, you get:
+- Autonomous PLAN → ACT → EVAL iteration
+- Basic agent recommendation per phase
+- TDD workflow guidance
+- Quality-based exit conditions
+
+### MCP Enhanced Mode
+With the CodingBuddy MCP server connected, you additionally get:
+- `parse_mode` with full context tracking per phase
+- Specialist agent dispatch for each iteration
+- Contextual checklists (security, accessibility, performance)
+- Cross-session context persistence
+
 ## Activation
 This command activates AUTO mode for the CodingBuddy workflow.
 
@@ -181,12 +198,13 @@ Remaining Issues:
 
 ## MCP Integration
 
-If CodingBuddy MCP server is available, call:
+If MCP is available, call `parse_mode` for enhanced features:
 ```
 parse_mode({ prompt: "AUTO: <user request>" })
 ```
 
 This provides additional context, checklists, and specialist agent recommendations.
+In standalone mode, the command works with built-in workflow guidance.
 
 ## Next Mode
 

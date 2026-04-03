@@ -3,6 +3,23 @@
 ## Purpose
 Design implementation approach before writing code
 
+## Mode Availability
+
+### Standalone Mode (no MCP server)
+This command works without the CodingBuddy MCP server.
+In standalone mode, you get:
+- Mode detection and transition
+- Basic agent recommendation
+- TDD workflow guidance
+- Core checklist
+
+### MCP Enhanced Mode
+With the CodingBuddy MCP server connected, you additionally get:
+- `parse_mode` with full context tracking
+- Specialist agent dispatch
+- Contextual checklists (security, accessibility, performance)
+- Cross-session context persistence
+
 ## Activation
 This command activates PLAN mode for the CodingBuddy workflow.
 
@@ -237,12 +254,13 @@ To preserve this planning session for future reference:
 
 ## MCP Integration
 
-If CodingBuddy MCP server is available, call:
+If MCP is available, call `parse_mode` for enhanced features:
 ```
 parse_mode({ prompt: "PLAN: <user request>" })
 ```
 
 This provides additional context, checklists, and specialist agent recommendations.
+In standalone mode, the command works with built-in workflow guidance.
 
 ## Next Mode
 

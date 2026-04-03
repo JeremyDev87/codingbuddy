@@ -3,6 +3,23 @@
 ## Purpose
 Evaluate code quality and suggest improvements
 
+## Mode Availability
+
+### Standalone Mode (no MCP server)
+This command works without the CodingBuddy MCP server.
+In standalone mode, you get:
+- Mode detection and transition
+- Code quality evaluation
+- Anti-sycophancy analysis
+- Devil's Advocate and Impact Radius analysis
+
+### MCP Enhanced Mode
+With the CodingBuddy MCP server connected, you additionally get:
+- `parse_mode` with full context tracking
+- Specialist agent dispatch for comprehensive evaluation
+- Contextual checklists (security, accessibility, performance)
+- Cross-session context persistence
+
 ## Activation
 This command activates EVAL mode for the CodingBuddy workflow.
 
@@ -306,12 +323,13 @@ To preserve this evaluation session for future reference:
 
 ## MCP Integration
 
-If CodingBuddy MCP server is available, call:
+If MCP is available, call `parse_mode` for enhanced features:
 ```
 parse_mode({ prompt: "EVAL: <user request>" })
 ```
 
 This provides additional context, checklists, and specialist agent recommendations.
+In standalone mode, the command works with built-in workflow guidance.
 
 ## Next Mode
 

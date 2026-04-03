@@ -64,9 +64,26 @@ npm install -g codingbuddy-claude-plugin
 yarn global add codingbuddy-claude-plugin
 ```
 
-## MCP Server Setup (Required)
+## Feature Availability
 
-The plugin requires the CodingBuddy MCP server for full functionality. The MCP server provides:
+The plugin works standalone but provides enhanced features with the MCP server:
+
+| Feature | Standalone | With MCP |
+|---------|-----------|----------|
+| Mode detection (PLAN/ACT/EVAL/AUTO) | ✅ | ✅ |
+| Basic agent recommendation | ✅ | ✅ |
+| TDD workflow guidance | ✅ | ✅ |
+| HUD / StatusLine | ✅ | ✅ |
+| Session stats & history | ✅ | ✅ |
+| Specialist agent dispatch | ❌ | ✅ |
+| Context tracking (cross-session) | ❌ | ✅ |
+| Parallel agent execution | ❌ | ✅ |
+| Contextual checklists | ❌ | ✅ |
+| Rule search & impact tracking | ❌ | ✅ |
+
+## MCP Server Setup (Recommended)
+
+The CodingBuddy MCP server unlocks the full feature set. The MCP server provides:
 
 - Specialist agents and skills
 - Workflow modes (PLAN/ACT/EVAL/AUTO)
