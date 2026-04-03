@@ -7,7 +7,11 @@ import json
 import os
 import sqlite3
 import stat
+import sys
 from typing import Dict, List, Optional
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from runtime_mode import detect_runtime_mode
 
 HOOK_FILES = [
     "session-start.py",
@@ -26,7 +30,7 @@ def _result(check: str, status: str, message: str) -> Dict[str, str]:
 
 
 class HealthChecker:
-    """Runs 7 diagnostic checks on the CodingBuddy plugin environment."""
+    """Runs 10 diagnostic checks on the CodingBuddy plugin environment."""
 
     def __init__(
         self,
@@ -166,10 +170,64 @@ class HealthChecker:
         return _result("events_dir", "WARN", "events/ directory not found")
 
     # ------------------------------------------------------------------
+    # Check 8: MCP connection
+    # ------------------------------------------------------------------
+    def check_mcp_connection(self) -> Dict[str, str]:
+        """Check if CodingBuddy MCP server is configured in mcp.json."""
+        mcp_json = os.path.join(self._claude_dir, "mcp.json")
+        if not os.path.isfile(mcp_json):
+            return _result("mcp_connection", "WARN", "mcp.json not found — standalone mode")
+        try:
+            with open(mcp_json, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            servers = data.get("mcpServers", {})
+            for key in servers:
+                if "codingbuddy" in key.lower():
+                    return _result("mcp_connection", "PASS", "MCP configured (codingbuddy entry found)")
+            return _result("mcp_connection", "WARN", "MCP not configured — standalone mode active")
+        except (json.JSONDecodeError, OSError):
+            return _result("mcp_connection", "WARN", "mcp.json unreadable — standalone mode")
+
+    # ------------------------------------------------------------------
+    # Check 9: runtime mode
+    # ------------------------------------------------------------------
+    def check_runtime_mode(self) -> Dict[str, str]:
+        """Detect current runtime mode (mcp or standalone)."""
+        mode = detect_runtime_mode(self._home_dir)
+        return _result("runtime_mode", "PASS", f"Runtime: {mode}")
+
+    # ------------------------------------------------------------------
+    # Check 10: standalone readiness
+    # ------------------------------------------------------------------
+    def check_standalone_readiness(self) -> Dict[str, str]:
+        """Check if standalone mode prerequisites are met."""
+        issues = []
+        # Check .ai-rules existence
+        rules_dir = os.path.join(self._project_dir, ".ai-rules")
+        if not os.path.isdir(rules_dir):
+            # Also check packages path
+            pkg_rules = os.path.join(self._plugin_root, "..", "rules", ".ai-rules")
+            if not os.path.isdir(os.path.normpath(pkg_rules)):
+                issues.append(".ai-rules/ not found")
+        # Check ModeEngine importable
+        try:
+            from mode_engine import ModeEngine  # noqa: F401
+        except ImportError:
+            issues.append("ModeEngine not importable")
+        # Check UserPromptSubmit registered
+        settings_result = self.check_settings_hook()
+        if settings_result["status"] != "PASS":
+            issues.append("UserPromptSubmit hook not registered")
+
+        if not issues:
+            return _result("standalone_readiness", "PASS", "Standalone mode ready")
+        return _result("standalone_readiness", "WARN", f"Standalone not ready: {', '.join(issues)}")
+
+    # ------------------------------------------------------------------
     # Aggregate
     # ------------------------------------------------------------------
     def run_all(self) -> List[Dict[str, str]]:
-        """Run all 7 diagnostic checks and return results."""
+        """Run all 10 diagnostic checks and return results."""
         return [
             self.check_hooks_json(),
             self.check_hook_files(),
@@ -178,6 +236,9 @@ class HealthChecker:
             self.check_config(),
             self.check_secrets_permissions(),
             self.check_events_dir(),
+            self.check_mcp_connection(),
+            self.check_runtime_mode(),
+            self.check_standalone_readiness(),
         ]
 
     @staticmethod

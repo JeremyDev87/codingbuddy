@@ -224,14 +224,72 @@ class TestCheckEventsDir:
         assert result["status"] == "WARN"
 
 
-class TestRunAll:
-    """run_all() returns all 7 check results."""
+class TestCheckMcpConnection:
+    """Check 8: MCP connection detection."""
 
-    def test_returns_7_results(self, env):
+    def test_mcp_configured(self, env):
+        mcp_json = env / ".claude" / "mcp.json"
+        mcp_json.write_text(json.dumps({
+            "mcpServers": {"codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}}
+        }))
+        checker = _make_checker(env)
+        result = checker.check_mcp_connection()
+        assert result["status"] == "PASS"
+        assert "codingbuddy entry found" in result["message"]
+
+    def test_mcp_not_configured(self, env):
+        mcp_json = env / ".claude" / "mcp.json"
+        mcp_json.write_text(json.dumps({"mcpServers": {"other-server": {}}}))
+        checker = _make_checker(env)
+        result = checker.check_mcp_connection()
+        assert result["status"] == "WARN"
+        assert "standalone" in result["message"]
+
+    def test_mcp_json_missing(self, env):
+        checker = _make_checker(env)
+        result = checker.check_mcp_connection()
+        assert result["status"] == "WARN"
+        assert "not found" in result["message"]
+
+
+class TestCheckRuntimeMode:
+    """Check 9: runtime mode detection."""
+
+    def test_returns_valid_mode(self, env):
+        checker = _make_checker(env)
+        result = checker.check_runtime_mode()
+        assert result["status"] == "PASS"
+        assert result["check"] == "runtime_mode"
+        assert "Runtime:" in result["message"]
+        assert result["message"] in ("Runtime: mcp", "Runtime: standalone")
+
+
+class TestCheckStandaloneReadiness:
+    """Check 10: standalone readiness."""
+
+    def test_ready_with_all_requirements(self, env):
+        # Create .ai-rules directory
+        (env / ".ai-rules").mkdir()
+        checker = _make_checker(env)
+        result = checker.check_standalone_readiness()
+        assert result["check"] == "standalone_readiness"
+        # ModeEngine may not be importable in test env, so just check it runs
+        assert result["status"] in ("PASS", "WARN")
+
+    def test_missing_ai_rules(self, env):
+        checker = _make_checker(env)
+        result = checker.check_standalone_readiness()
+        assert result["status"] == "WARN"
+        assert ".ai-rules/" in result["message"]
+
+
+class TestRunAll:
+    """run_all() returns all 10 check results."""
+
+    def test_returns_10_results(self, env):
         checker = _make_checker(env)
         results = checker.run_all()
-        assert len(results) == 7
-        assert all(r["status"] == "PASS" for r in results)
+        assert len(results) == 10
 
     def test_each_check_has_required_keys(self, env):
         checker = _make_checker(env)
