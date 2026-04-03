@@ -118,6 +118,109 @@ describe('agent-prompt.builder', () => {
 
       expect(result).toMatch(/output|format|json|structured/i);
     });
+
+    it('should include mandatory_checklist when present', () => {
+      const profileWithChecklist: AgentProfile = {
+        ...mockAgentProfile,
+        mandatory_checklist: [
+          'Type safety: no any usage',
+          'Test coverage 90%+',
+          'SOLID principles applied',
+        ],
+      };
+      const result = buildAgentSystemPrompt(profileWithChecklist, mockContext);
+
+      expect(result).toContain('## Mandatory Checklist');
+      expect(result).toContain('- [ ] Type safety: no any usage');
+      expect(result).toContain('- [ ] Test coverage 90%+');
+      expect(result).toContain('- [ ] SOLID principles applied');
+    });
+
+    it('should include communication language when present', () => {
+      const profileWithLang: AgentProfile = {
+        ...mockAgentProfile,
+        communication: { language: 'Korean' },
+      };
+      const result = buildAgentSystemPrompt(profileWithLang, mockContext);
+
+      expect(result).toContain('## Communication');
+      expect(result).toContain('IMPORTANT: Always respond in Korean.');
+    });
+
+    it('should use agent-specific mode instructions when modes field present', () => {
+      const profileWithModes: AgentProfile = {
+        ...mockAgentProfile,
+        modes: {
+          eval: {
+            focus: ['code quality', 'security'],
+            output_format: 'structured review',
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithModes, mockContext);
+
+      expect(result).toContain('## Mode-Specific Instructions');
+      expect(result).toContain('code quality');
+      expect(result).toContain('structured review');
+      // Should NOT contain generic EVAL instructions
+      expect(result).not.toContain('Evaluate and assess the implementation quality');
+    });
+
+    it('should fall back to generic mode instructions when agent modes not present', () => {
+      const result = buildAgentSystemPrompt(mockAgentProfile, mockContext);
+
+      expect(result).toContain('Evaluate and assess the implementation quality');
+      expect(result).not.toContain('## Mode-Specific Instructions');
+    });
+
+    it('should include required skills when present', () => {
+      const profileWithSkills: AgentProfile = {
+        ...mockAgentProfile,
+        skills: {
+          required: [
+            { name: 'todo_write', purpose: 'Track implementation', when: 'Creating plans' },
+          ],
+          recommended: [
+            { name: 'web_search', purpose: 'Validate recommendations', when: 'Evaluating' },
+          ],
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithSkills, mockContext);
+
+      expect(result).toContain('## Required Skills');
+      expect(result).toContain('**todo_write**: Track implementation (when: Creating plans)');
+      expect(result).toContain('## Recommended Skills');
+      expect(result).toContain('**web_search**: Validate recommendations (when: Evaluating)');
+    });
+
+    it('should include verification_guide when present', () => {
+      const profileWithVerification: AgentProfile = {
+        ...mockAgentProfile,
+        verification_guide: {
+          steps: ['Check type safety', 'Run tests', 'Review coverage'],
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithVerification, mockContext);
+
+      expect(result).toContain('## Verification Guide');
+      expect(result).toContain('Check type safety');
+      expect(result).toContain('Run tests');
+    });
+
+    it('should handle agent without optional rich metadata gracefully', () => {
+      // mockAgentProfile has no mandatory_checklist, modes, skills, etc.
+      const result = buildAgentSystemPrompt(mockAgentProfile, mockContext);
+
+      expect(result).toBeDefined();
+      expect(result).not.toContain('## Mandatory Checklist');
+      expect(result).not.toContain('## Communication');
+      expect(result).not.toContain('## Required Skills');
+      expect(result).not.toContain('## Recommended Skills');
+      expect(result).not.toContain('## Verification Guide');
+      expect(result).not.toContain('## Mode-Specific Instructions');
+      // Should still have generic mode instructions
+      expect(result).toContain('Evaluate and assess the implementation quality');
+    });
   });
 
   describe('buildTaskDescription', () => {

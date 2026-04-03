@@ -74,12 +74,71 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
     sections.push('');
   }
 
-  // Mode-specific instructions
+  // Rich metadata from passthrough fields
+  const rawProfile = agentProfile as Record<string, unknown>;
+
+  // Mandatory Checklist
+  if (Array.isArray(rawProfile.mandatory_checklist) && rawProfile.mandatory_checklist.length) {
+    sections.push('## Mandatory Checklist');
+    for (const item of rawProfile.mandatory_checklist) {
+      sections.push(`- [ ] ${item}`);
+    }
+    sections.push('');
+  }
+
+  // Communication language
+  const comm = rawProfile.communication as Record<string, string> | undefined;
+  if (comm?.language) {
+    sections.push('## Communication');
+    sections.push(`IMPORTANT: Always respond in ${comm.language}.`);
+    sections.push('');
+  }
+
+  // Required / Recommended Skills
+  const skills = rawProfile.skills as
+    | {
+        required?: Array<{ name: string; purpose: string; when: string }>;
+        recommended?: Array<{ name: string; purpose: string; when: string }>;
+      }
+    | undefined;
+  if (skills?.required?.length) {
+    sections.push('## Required Skills');
+    for (const s of skills.required) {
+      sections.push(`- **${s.name}**: ${s.purpose} (when: ${s.when})`);
+    }
+    sections.push('');
+  }
+  if (skills?.recommended?.length) {
+    sections.push('## Recommended Skills');
+    for (const s of skills.recommended) {
+      sections.push(`- **${s.name}**: ${s.purpose} (when: ${s.when})`);
+    }
+    sections.push('');
+  }
+
+  // Mode-specific instructions (agent-defined modes override generic)
   sections.push('## Current Mode');
   sections.push(`Mode: ${context.mode}`);
   sections.push('');
-  sections.push(MODE_INSTRUCTIONS[context.mode]);
-  sections.push('');
+
+  const modesObj = rawProfile.modes as Record<string, unknown> | undefined;
+  const modeKey = context.mode.toLowerCase();
+  const agentModeConfig = modesObj?.[modeKey];
+  if (agentModeConfig && typeof agentModeConfig === 'object') {
+    sections.push('## Mode-Specific Instructions');
+    sections.push(JSON.stringify(agentModeConfig, null, 2));
+    sections.push('');
+  } else {
+    sections.push(MODE_INSTRUCTIONS[context.mode]);
+    sections.push('');
+  }
+
+  // Verification Guide
+  if (rawProfile.verification_guide) {
+    sections.push('## Verification Guide');
+    sections.push(JSON.stringify(rawProfile.verification_guide, null, 2));
+    sections.push('');
+  }
 
   // Context information
   sections.push('## Task Context');
