@@ -3,6 +3,7 @@ import type { ToolDefinition } from './base.handler';
 import type { ToolResponse } from '../response.utils';
 import { AbstractHandler } from './abstract-handler';
 import { AgentService } from '../../agent/agent.service';
+import { AgentStackService } from '../../agent/agent-stack.service';
 import type { InlineAgentDefinition } from '../../agent/agent.types';
 import type { Mode } from '../../keyword/keyword.types';
 import { isValidVerbosity } from '../../shared/verbosity.types';
@@ -27,6 +28,7 @@ import { RuleEventCollector } from '../../rules/rule-event-collector';
 export class AgentHandler extends AbstractHandler {
   constructor(
     private readonly agentService: AgentService,
+    private readonly agentStackService: AgentStackService,
     private readonly impactEventService: ImpactEventService,
     private readonly ruleEventCollector: RuleEventCollector,
   ) {
@@ -34,7 +36,12 @@ export class AgentHandler extends AbstractHandler {
   }
 
   protected getHandledTools(): string[] {
-    return ['get_agent_system_prompt', 'prepare_parallel_agents', 'dispatch_agents'];
+    return [
+      'get_agent_system_prompt',
+      'prepare_parallel_agents',
+      'dispatch_agents',
+      'list_agent_stacks',
+    ];
   }
 
   protected async handleTool(
@@ -48,6 +55,8 @@ export class AgentHandler extends AbstractHandler {
         return this.handlePrepareParallelAgents(args);
       case 'dispatch_agents':
         return this.handleDispatchAgents(args);
+      case 'list_agent_stacks':
+        return this.handleListAgentStacks(args);
       default:
         return createErrorResponse(`Unknown tool: ${toolName}`);
     }
@@ -171,6 +180,11 @@ export class AgentHandler extends AbstractHandler {
               description:
                 'Execution strategy for specialist agents. "subagent" (default) uses Claude Code Agent tool with run_in_background. "taskmaestro" returns tmux pane assignments for /taskmaestro skill. "teams" uses Claude Code native teams with shared TaskList coordination.',
             },
+            agentStack: {
+              type: 'string',
+              description:
+                'Agent stack name to resolve primary + specialists from a preset (e.g., "api-development"). Overrides primaryAgent and specialists when provided.',
+            },
             inlineAgents: {
               type: 'object',
               description:
@@ -196,6 +210,21 @@ export class AgentHandler extends AbstractHandler {
           required: ['mode'],
         },
       },
+      {
+        name: 'list_agent_stacks',
+        description:
+          'List available agent stack presets. Each stack defines a primary agent and specialist combination for common workflows.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            category: {
+              type: 'string',
+              description:
+                'Optional category filter (e.g., "development", "review", "data", "security")',
+            },
+          },
+        },
+      },
     ];
   }
 
@@ -211,14 +240,29 @@ export class AgentHandler extends AbstractHandler {
       );
     }
 
-    const primaryAgent = extractOptionalString(args, 'primaryAgent');
-    const specialists = extractStringArray(args, 'specialists');
+    const agentStack = extractOptionalString(args, 'agentStack');
+    let primaryAgent = extractOptionalString(args, 'primaryAgent');
+    let specialists = extractStringArray(args, 'specialists');
     const targetFiles = extractStringArray(args, 'targetFiles');
     const taskDescription = extractOptionalString(args, 'taskDescription');
-    const includeParallel = args?.includeParallel === true;
+    let includeParallel = args?.includeParallel === true;
     const executionStrategy =
       (args?.executionStrategy as 'subagent' | 'taskmaestro' | 'teams' | undefined) ?? 'subagent';
     const inlineAgents = this.extractInlineAgents(args);
+
+    // Resolve agent stack if provided
+    if (agentStack) {
+      try {
+        const stack = await this.agentStackService.resolveStack(agentStack);
+        primaryAgent = primaryAgent ?? stack.primary_agent;
+        specialists = specialists?.length ? specialists : stack.specialists;
+        includeParallel = includeParallel || stack.specialists.length > 0;
+      } catch (error) {
+        return createErrorResponse(
+          `Failed to resolve agent stack: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
 
     try {
       const result = await this.agentService.dispatchAgents({
@@ -376,6 +420,21 @@ export class AgentHandler extends AbstractHandler {
     } catch (error) {
       return createErrorResponse(
         `Failed to prepare parallel agents: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  private async handleListAgentStacks(
+    args: Record<string, unknown> | undefined,
+  ): Promise<ToolResponse> {
+    const category = extractOptionalString(args, 'category');
+
+    try {
+      const stacks = await this.agentStackService.listStacks(category);
+      return createJsonResponse({ stacks });
+    } catch (error) {
+      return createErrorResponse(
+        `Failed to list agent stacks: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }

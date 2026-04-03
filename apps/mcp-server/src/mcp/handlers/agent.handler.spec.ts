@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AgentHandler } from './agent.handler';
 import { AgentService } from '../../agent/agent.service';
+import { AgentStackService } from '../../agent/agent-stack.service';
 import type { ImpactEventService } from '../../impact';
 import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 describe('AgentHandler', () => {
   let handler: AgentHandler;
   let mockAgentService: AgentService;
+  let mockAgentStackService: AgentStackService;
   let mockImpactEventService: Partial<ImpactEventService>;
   let mockRuleEventCollector: Partial<RuleEventCollector>;
 
@@ -26,11 +28,17 @@ describe('AgentHandler', () => {
       prepareParallelAgents: vi.fn().mockResolvedValue(mockParallelAgentsResult),
     } as unknown as AgentService;
 
+    mockAgentStackService = {
+      listStacks: vi.fn().mockResolvedValue([]),
+      resolveStack: vi.fn().mockRejectedValue(new Error('Stack not found')),
+    } as unknown as AgentStackService;
+
     mockImpactEventService = { logEvent: vi.fn() };
     mockRuleEventCollector = { record: vi.fn() };
 
     handler = new AgentHandler(
       mockAgentService,
+      mockAgentStackService,
       mockImpactEventService as ImpactEventService,
       mockRuleEventCollector as RuleEventCollector,
     );
@@ -739,11 +747,12 @@ describe('AgentHandler', () => {
     it('should return tool definitions', () => {
       const definitions = handler.getToolDefinitions();
 
-      expect(definitions).toHaveLength(3);
+      expect(definitions).toHaveLength(4);
       expect(definitions.map(d => d.name)).toEqual([
         'get_agent_system_prompt',
         'prepare_parallel_agents',
         'dispatch_agents',
+        'list_agent_stacks',
       ]);
     });
 
@@ -776,6 +785,21 @@ describe('AgentHandler', () => {
       const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
       const properties = dispatchAgents?.inputSchema.properties as Record<string, unknown>;
       expect(properties).toHaveProperty('inlineAgents');
+    });
+
+    it('should include agentStack in dispatch_agents schema', () => {
+      const definitions = handler.getToolDefinitions();
+      const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
+      const properties = dispatchAgents?.inputSchema.properties as Record<string, unknown>;
+      expect(properties).toHaveProperty('agentStack');
+    });
+
+    it('should include list_agent_stacks tool definition', () => {
+      const definitions = handler.getToolDefinitions();
+      const listStacks = definitions.find(d => d.name === 'list_agent_stacks');
+      expect(listStacks).toBeDefined();
+      const properties = listStacks?.inputSchema.properties as Record<string, unknown>;
+      expect(properties).toHaveProperty('category');
     });
   });
 
@@ -943,6 +967,179 @@ describe('AgentHandler', () => {
           undefined,
           undefined,
         );
+      });
+    });
+  });
+
+  describe('dispatch_agents with agentStack', () => {
+    const mockStack = {
+      name: 'api-development',
+      description: 'API development stack',
+      category: 'development',
+      primary_agent: 'backend-developer',
+      specialists: ['security-specialist', 'test-engineer'],
+      tags: ['api', 'backend'],
+    };
+
+    const mockDispatchResult = {
+      primaryAgent: {
+        name: 'backend-developer',
+        displayName: 'Backend Developer',
+        description: 'Backend review',
+        dispatchParams: {
+          subagent_type: 'general-purpose' as const,
+          prompt: 'You are a backend developer...',
+          description: 'Backend review',
+        },
+      },
+      executionHint: 'Use Task tool...',
+    };
+
+    beforeEach(() => {
+      mockAgentService.dispatchAgents = vi.fn().mockResolvedValue(mockDispatchResult);
+    });
+
+    it('should resolve stack and pass primary + specialists to service', async () => {
+      mockAgentStackService.resolveStack = vi.fn().mockResolvedValue(mockStack);
+
+      await handler.handle('dispatch_agents', {
+        mode: 'ACT',
+        agentStack: 'api-development',
+      });
+
+      expect(mockAgentStackService.resolveStack).toHaveBeenCalledWith('api-development');
+      expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: 'ACT',
+          primaryAgent: 'backend-developer',
+          specialists: ['security-specialist', 'test-engineer'],
+          includeParallel: true,
+        }),
+      );
+    });
+
+    it('should prefer explicit primaryAgent over stack primary', async () => {
+      mockAgentStackService.resolveStack = vi.fn().mockResolvedValue(mockStack);
+
+      await handler.handle('dispatch_agents', {
+        mode: 'ACT',
+        agentStack: 'api-development',
+        primaryAgent: 'frontend-developer',
+      });
+
+      expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          primaryAgent: 'frontend-developer',
+        }),
+      );
+    });
+
+    it('should prefer explicit specialists over stack specialists', async () => {
+      mockAgentStackService.resolveStack = vi.fn().mockResolvedValue(mockStack);
+
+      await handler.handle('dispatch_agents', {
+        mode: 'ACT',
+        agentStack: 'api-development',
+        specialists: ['performance-specialist'],
+      });
+
+      expect(mockAgentService.dispatchAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          specialists: ['performance-specialist'],
+        }),
+      );
+    });
+
+    it('should return error when stack not found', async () => {
+      mockAgentStackService.resolveStack = vi
+        .fn()
+        .mockRejectedValue(new Error("Agent stack 'non-existent' not found"));
+
+      const result = await handler.handle('dispatch_agents', {
+        mode: 'ACT',
+        agentStack: 'non-existent',
+      });
+
+      expect(result?.isError).toBe(true);
+      expect(result?.content[0]).toMatchObject({
+        type: 'text',
+        text: expect.stringContaining('Failed to resolve agent stack'),
+      });
+    });
+
+    it('should work without agentStack (backward compatible)', async () => {
+      await handler.handle('dispatch_agents', {
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+      });
+
+      expect(mockAgentStackService.resolveStack).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('list_agent_stacks', () => {
+    const mockStacks = [
+      {
+        name: 'api-development',
+        description: 'API development stack',
+        category: 'development',
+        primary_agent: 'backend-developer',
+        specialist_count: 2,
+        tags: ['api', 'backend'],
+      },
+      {
+        name: 'frontend-review',
+        description: 'Frontend review stack',
+        category: 'review',
+        primary_agent: 'frontend-developer',
+        specialist_count: 3,
+        tags: ['frontend'],
+      },
+    ];
+
+    it('should list all agent stacks', async () => {
+      mockAgentStackService.listStacks = vi.fn().mockResolvedValue(mockStacks);
+
+      const result = await handler.handle('list_agent_stacks', {});
+
+      expect(result?.isError).toBeFalsy();
+      const content = JSON.parse(result?.content[0]?.text as string);
+      expect(content.stacks).toHaveLength(2);
+      expect(content.stacks[0].name).toBe('api-development');
+      expect(content.stacks[1].specialist_count).toBe(3);
+    });
+
+    it('should pass category filter', async () => {
+      mockAgentStackService.listStacks = vi.fn().mockResolvedValue([mockStacks[1]]);
+
+      const result = await handler.handle('list_agent_stacks', {
+        category: 'review',
+      });
+
+      expect(mockAgentStackService.listStacks).toHaveBeenCalledWith('review');
+      expect(result?.isError).toBeFalsy();
+      const content = JSON.parse(result?.content[0]?.text as string);
+      expect(content.stacks).toHaveLength(1);
+    });
+
+    it('should work without any parameters', async () => {
+      mockAgentStackService.listStacks = vi.fn().mockResolvedValue([]);
+
+      const result = await handler.handle('list_agent_stacks', undefined);
+
+      expect(result?.isError).toBeFalsy();
+      expect(mockAgentStackService.listStacks).toHaveBeenCalledWith(undefined);
+    });
+
+    it('should return error when service fails', async () => {
+      mockAgentStackService.listStacks = vi.fn().mockRejectedValue(new Error('Read error'));
+
+      const result = await handler.handle('list_agent_stacks', {});
+
+      expect(result?.isError).toBe(true);
+      expect(result?.content[0]).toMatchObject({
+        type: 'text',
+        text: expect.stringContaining('Failed to list agent stacks'),
       });
     });
   });

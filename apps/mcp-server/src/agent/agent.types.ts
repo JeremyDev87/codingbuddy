@@ -169,6 +169,30 @@ export interface InlineAgentDefinition {
 }
 
 /**
+ * Agent stack definition — a preset combination of primary agent + specialists
+ */
+export interface AgentStack {
+  name: string;
+  description: string;
+  category: string;
+  primary_agent: string;
+  specialists: string[];
+  tags?: string[];
+}
+
+/**
+ * Summary of an agent stack for listing
+ */
+export interface AgentStackSummary {
+  name: string;
+  description: string;
+  category: string;
+  primary_agent: string;
+  specialist_count: number;
+  tags: string[];
+}
+
+/**
  * Input parameters for the dispatch_agents tool
  */
 export interface DispatchAgentsInput {
@@ -178,6 +202,8 @@ export interface DispatchAgentsInput {
   specialists?: string[];
   includeParallel?: boolean;
   primaryAgent?: string;
+  /** Agent stack name to resolve primary + specialists from a preset */
+  agentStack?: string;
   /** Execution strategy: 'subagent' (default), 'taskmaestro', or 'teams' */
   executionStrategy?: 'subagent' | 'taskmaestro' | 'teams';
   /** Inline agent definitions keyed by agent ID, highest priority in resolution */

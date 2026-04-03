@@ -479,6 +479,7 @@ function createMcpServiceWithHandlers(
     ),
     new AgentHandler(
       services.agentService as AgentService,
+      { listStacks: vi.fn().mockResolvedValue([]), resolveStack: vi.fn() } as never,
       services.impactEventService as ImpactEventService,
       services.ruleEventCollector as RuleEventCollector,
     ),

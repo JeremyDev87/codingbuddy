@@ -144,8 +144,13 @@ describe('Handler Security Integration', () => {
     const mockRuleEventCollector = { record: vi.fn() } as unknown as RuleEventCollector;
 
     // Initialize handlers
+    const mockAgentStackService = {
+      listStacks: vi.fn().mockResolvedValue([]),
+      resolveStack: vi.fn().mockRejectedValue(new Error('Stack not found')),
+    };
     agentHandler = new AgentHandler(
       mockAgentService,
+      mockAgentStackService as never,
       mockImpactEventService,
       mockRuleEventCollector,
     );

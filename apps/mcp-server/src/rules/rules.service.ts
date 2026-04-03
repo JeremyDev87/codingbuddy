@@ -95,6 +95,10 @@ export class RulesService {
     return [...sortedModeAgents, ...otherAgents.sort()];
   }
 
+  getRulesDir(): string {
+    return this.rulesDir;
+  }
+
   isModeAgent(agentName: string): boolean {
     return (MODE_AGENTS as readonly string[]).includes(agentName);
   }
