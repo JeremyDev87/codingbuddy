@@ -276,11 +276,13 @@ class TestCheckStandaloneReadiness:
         # ModeEngine may not be importable in test env, so just check it runs
         assert result["status"] in ("PASS", "WARN")
 
-    def test_missing_ai_rules(self, env):
+    def test_missing_ai_rules_passes_with_fallback(self, env):
         checker = _make_checker(env)
         result = checker.check_standalone_readiness()
-        assert result["status"] == "WARN"
-        assert ".ai-rules/" in result["message"]
+        # .ai-rules missing is no longer WARN — ModeEngine has template fallback
+        assert result["status"] in ("PASS", "WARN")
+        if result["status"] == "PASS":
+            assert "template fallback" in result["message"]
 
 
 class TestRunAll:

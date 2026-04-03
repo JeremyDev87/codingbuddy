@@ -15,10 +15,15 @@ from buddy_renderer import (
     render_face_banner,
     render_section_header,
 )
+from data_dir import resolve_data_dir
 
-# Flag file location
-ONBOARDED_DIR = os.path.join(os.path.expanduser("~"), ".codingbuddy")
-ONBOARDED_FLAG = os.path.join(ONBOARDED_DIR, "onboarded")
+
+def _onboarded_dir() -> str:
+    return resolve_data_dir()
+
+
+def _onboarded_flag() -> str:
+    return os.path.join(_onboarded_dir(), "onboarded")
 
 # Environment variable to skip tour
 SKIP_ENV_VAR = "CODINGBUDDY_SKIP_TOUR"
@@ -32,13 +37,13 @@ def is_first_run() -> bool:
     """
     if os.environ.get(SKIP_ENV_VAR):
         return False
-    return not os.path.isfile(ONBOARDED_FLAG)
+    return not os.path.isfile(_onboarded_flag())
 
 
 def mark_onboarded() -> None:
     """Create the onboarded flag file to prevent future tours."""
-    os.makedirs(ONBOARDED_DIR, exist_ok=True)
-    Path(ONBOARDED_FLAG).touch()
+    os.makedirs(_onboarded_dir(), exist_ok=True)
+    Path(_onboarded_flag()).touch()
 
 
 # ── i18n Tour Content ──────────────────────────────────────────────

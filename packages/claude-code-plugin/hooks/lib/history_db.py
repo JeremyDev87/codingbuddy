@@ -5,9 +5,13 @@ import sqlite3
 import stat
 import time
 
+from data_dir import resolve_data_dir
+
 logger = logging.getLogger(__name__)
 
-DEFAULT_DB_PATH = os.path.expanduser("~/.codingbuddy/history.db")
+
+def _default_db_path() -> str:
+    return os.path.join(resolve_data_dir(), "history.db")
 
 
 class HistoryDB:
@@ -16,10 +20,10 @@ class HistoryDB:
     _instance: "HistoryDB | None" = None
 
     @classmethod
-    def get_instance(cls, db_path: str = DEFAULT_DB_PATH) -> "HistoryDB":
+    def get_instance(cls, db_path: str = None) -> "HistoryDB":
         """Return the singleton instance, creating it on first call."""
         if cls._instance is None:
-            cls._instance = cls(db_path=db_path)
+            cls._instance = cls(db_path=db_path or _default_db_path())
         return cls._instance
 
     @classmethod
@@ -29,8 +33,8 @@ class HistoryDB:
             cls._instance.close()
             cls._instance = None
 
-    def __init__(self, db_path: str = DEFAULT_DB_PATH):
-        self._db_path = db_path
+    def __init__(self, db_path: str = None):
+        self._db_path = db_path or _default_db_path()
         self._ensure_directory()
         self._conn = sqlite3.connect(db_path, timeout=10)
         self._conn.execute("PRAGMA journal_mode=WAL")

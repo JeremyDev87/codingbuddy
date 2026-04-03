@@ -1,19 +1,20 @@
-"""AgentMemory — per-agent persistent knowledge across sessions (#947).
+"""AgentMemory -- per-agent persistent knowledge across sessions (#947).
 
 Stores findings, patterns, and preferences per agent in JSON files
-under ~/.codingbuddy/agent_memory/.
+under <data_dir>/agent_memory/.
 """
 import json
 import os
 from typing import Optional
 
+from data_dir import resolve_data_dir
+
 
 class AgentMemory:
-    DEFAULT_DIR = os.path.expanduser("~/.codingbuddy/agent_memory")
     MAX_ITEMS = 50
 
     def __init__(self, memory_dir: Optional[str] = None, max_items: int = MAX_ITEMS):
-        self.memory_dir = memory_dir or self.DEFAULT_DIR
+        self.memory_dir = memory_dir or os.path.join(resolve_data_dir(), "agent_memory")
         self.max_items = max_items
 
     def _filepath(self, agent_name: str) -> str:

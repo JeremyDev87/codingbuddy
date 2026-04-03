@@ -26,7 +26,7 @@ class TestIsFirstRun:
         """First run when no onboarded flag exists."""
         with tempfile.TemporaryDirectory() as tmpdir:
             flag = os.path.join(tmpdir, "onboarded")
-            with patch.object(onboarding_tour, "ONBOARDED_FLAG", flag):
+            with patch.object(onboarding_tour, "_onboarded_flag", return_value=flag):
                 with patch.dict(os.environ, {}, clear=False):
                     os.environ.pop(onboarding_tour.SKIP_ENV_VAR, None)
                     assert onboarding_tour.is_first_run() is True
@@ -36,7 +36,7 @@ class TestIsFirstRun:
         with tempfile.TemporaryDirectory() as tmpdir:
             flag = os.path.join(tmpdir, "onboarded")
             Path(flag).touch()
-            with patch.object(onboarding_tour, "ONBOARDED_FLAG", flag):
+            with patch.object(onboarding_tour, "_onboarded_flag", return_value=flag):
                 with patch.dict(os.environ, {}, clear=False):
                     os.environ.pop(onboarding_tour.SKIP_ENV_VAR, None)
                     assert onboarding_tour.is_first_run() is False
@@ -45,7 +45,7 @@ class TestIsFirstRun:
         """Skip tour when CODINGBUDDY_SKIP_TOUR env var is set."""
         with tempfile.TemporaryDirectory() as tmpdir:
             flag = os.path.join(tmpdir, "onboarded")
-            with patch.object(onboarding_tour, "ONBOARDED_FLAG", flag):
+            with patch.object(onboarding_tour, "_onboarded_flag", return_value=flag):
                 with patch.dict(os.environ, {onboarding_tour.SKIP_ENV_VAR: "1"}):
                     assert onboarding_tour.is_first_run() is False
 
@@ -58,8 +58,8 @@ class TestMarkOnboarded:
         with tempfile.TemporaryDirectory() as tmpdir:
             flag_dir = os.path.join(tmpdir, ".codingbuddy")
             flag = os.path.join(flag_dir, "onboarded")
-            with patch.object(onboarding_tour, "ONBOARDED_DIR", flag_dir):
-                with patch.object(onboarding_tour, "ONBOARDED_FLAG", flag):
+            with patch.object(onboarding_tour, "_onboarded_dir", return_value=flag_dir):
+                with patch.object(onboarding_tour, "_onboarded_flag", return_value=flag):
                     onboarding_tour.mark_onboarded()
                     assert os.path.isfile(flag)
 
@@ -68,8 +68,8 @@ class TestMarkOnboarded:
         with tempfile.TemporaryDirectory() as tmpdir:
             flag_dir = os.path.join(tmpdir, "nested", ".codingbuddy")
             flag = os.path.join(flag_dir, "onboarded")
-            with patch.object(onboarding_tour, "ONBOARDED_DIR", flag_dir):
-                with patch.object(onboarding_tour, "ONBOARDED_FLAG", flag):
+            with patch.object(onboarding_tour, "_onboarded_dir", return_value=flag_dir):
+                with patch.object(onboarding_tour, "_onboarded_flag", return_value=flag):
                     onboarding_tour.mark_onboarded()
                     assert os.path.isdir(flag_dir)
                     assert os.path.isfile(flag)
@@ -79,8 +79,8 @@ class TestMarkOnboarded:
         with tempfile.TemporaryDirectory() as tmpdir:
             flag_dir = os.path.join(tmpdir, ".codingbuddy")
             flag = os.path.join(flag_dir, "onboarded")
-            with patch.object(onboarding_tour, "ONBOARDED_DIR", flag_dir):
-                with patch.object(onboarding_tour, "ONBOARDED_FLAG", flag):
+            with patch.object(onboarding_tour, "_onboarded_dir", return_value=flag_dir):
+                with patch.object(onboarding_tour, "_onboarded_flag", return_value=flag):
                     onboarding_tour.mark_onboarded()
                     onboarding_tour.mark_onboarded()  # Should not raise
                     assert os.path.isfile(flag)

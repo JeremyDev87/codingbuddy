@@ -1,11 +1,13 @@
-"""File-based event bridge for Plugin(Python) → MCP(TypeScript) communication.
+"""File-based event bridge for Plugin(Python) -> MCP(TypeScript) communication.
 
-Emits events as JSON lines to ~/.codingbuddy/events/<session_id>.jsonl.
+Emits events as JSON lines to <data_dir>/events/<session_id>.jsonl.
 """
 import json
 import os
 from datetime import datetime, timezone
 from typing import Optional
+
+from data_dir import resolve_data_dir
 
 EVENT_TYPES = (
     "tool_call",
@@ -22,7 +24,7 @@ class EventBridge:
     def __init__(self, session_id: str, events_dir: Optional[str] = None):
         self.session_id = session_id
         self.events_dir = events_dir or os.path.join(
-            os.path.expanduser("~"), ".codingbuddy", "events"
+            resolve_data_dir(), "events"
         )
 
     @property

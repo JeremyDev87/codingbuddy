@@ -11,6 +11,7 @@ import sys
 from typing import Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from data_dir import resolve_data_dir
 from runtime_mode import detect_runtime_mode
 
 HOOK_FILES = [
@@ -42,7 +43,9 @@ class HealthChecker:
         self._home_dir = home_dir or os.path.expanduser("~")
         self._project_dir = project_dir or plugin_root
         self._hooks_dir = os.path.join(plugin_root, "hooks")
-        self._data_dir = os.path.join(self._home_dir, ".codingbuddy")
+        self._data_dir = (
+            os.path.join(self._home_dir, ".codingbuddy") if home_dir else resolve_data_dir()
+        )
         self._claude_dir = os.path.join(self._home_dir, ".claude")
 
     # ------------------------------------------------------------------
@@ -202,13 +205,13 @@ class HealthChecker:
     def check_standalone_readiness(self) -> Dict[str, str]:
         """Check if standalone mode prerequisites are met."""
         issues = []
-        # Check .ai-rules existence
+        has_ai_rules = True
+        # Check .ai-rules existence (informational only — ModeEngine has template fallback)
         rules_dir = os.path.join(self._project_dir, ".ai-rules")
         if not os.path.isdir(rules_dir):
-            # Also check packages path
             pkg_rules = os.path.join(self._plugin_root, "..", "rules", ".ai-rules")
             if not os.path.isdir(os.path.normpath(pkg_rules)):
-                issues.append(".ai-rules/ not found")
+                has_ai_rules = False
         # Check ModeEngine importable
         try:
             from mode_engine import ModeEngine  # noqa: F401
@@ -220,7 +223,13 @@ class HealthChecker:
             issues.append("UserPromptSubmit hook not registered")
 
         if not issues:
-            return _result("standalone_readiness", "PASS", "Standalone mode ready")
+            if has_ai_rules:
+                return _result("standalone_readiness", "PASS", "Standalone mode ready")
+            return _result(
+                "standalone_readiness",
+                "PASS",
+                "Standalone mode ready (template fallback, no .ai-rules)",
+            )
         return _result("standalone_readiness", "WARN", f"Standalone not ready: {', '.join(issues)}")
 
     # ------------------------------------------------------------------
