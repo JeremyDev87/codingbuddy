@@ -5,8 +5,14 @@ Provides PLAN/ACT/EVAL/AUTO mode instructions without requiring MCP server.
 Reads .ai-rules/ files directly and outputs complete mode instructions.
 """
 
+import json
 import os
+import re
 from typing import Optional
+
+
+# Hard limit for hook output
+CHAR_LIMIT = 2000
 
 
 # Default agents per mode
@@ -117,6 +123,10 @@ class ModeEngine:
         """
         Read core.md and extract mode-specific section.
 
+        Finds the ``### {Mode} Mode`` header and collects lines until
+        hitting another ``### `` header whose name does not contain the
+        mode keyword (case-insensitive).
+
         Args:
             mode: Mode name (PLAN, ACT, EVAL, AUTO)
 
@@ -132,9 +142,37 @@ class ModeEngine:
 
         try:
             with open(core_path, "r", encoding="utf-8") as f:
-                return f.read()
+                content = f.read()
         except OSError:
             return None
+
+        mode_upper = mode.upper()
+        mode_headers = {
+            "PLAN": "### Plan Mode",
+            "ACT": "### Act Mode",
+            "EVAL": "### Eval Mode",
+            "AUTO": "### Auto Mode",
+        }
+
+        header = mode_headers.get(mode_upper)
+        if not header:
+            return None
+
+        start = content.find(header)
+        if start == -1:
+            return None
+
+        # Collect from header until the next ### header unrelated to this mode
+        after_header = start + len(header)
+        mode_word = mode_upper.lower()
+        lines = content[after_header:].split("\n")
+        collected: list[str] = [header]
+        for line in lines:
+            if re.match(r"^### ", line) and mode_word not in line.lower():
+                break
+            collected.append(line)
+
+        return "\n".join(collected).strip() or None
 
     def get_default_agent(self, mode: str) -> dict:
         """
@@ -149,18 +187,48 @@ class ModeEngine:
         mode_upper = mode.upper()
         return DEFAULT_AGENTS.get(mode_upper, DEFAULT_AGENTS["ACT"])
 
+    def _load_agent_details(self, agent_name: str) -> Optional[dict]:
+        """
+        Load agent profile from ``.ai-rules/agents/{agent_name}.json``.
+
+        Args:
+            agent_name: Agent file stem (e.g. ``technical-planner``).
+
+        Returns:
+            Dict with ``name``, ``description``, ``expertise`` keys,
+            or None if the file is missing / unreadable.
+        """
+        if not self.rules_dir:
+            return None
+
+        agent_path = os.path.join(self.rules_dir, "agents", f"{agent_name}.json")
+        if not os.path.isfile(agent_path):
+            return None
+
+        try:
+            with open(agent_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return {
+                "name": data.get("name", agent_name),
+                "description": data.get("description", ""),
+                "expertise": data.get("role", {}).get("expertise", []),
+            }
+        except (OSError, json.JSONDecodeError, ValueError):
+            return None
+
     def build_instructions(self, mode: str) -> str:
         """
         Build complete mode instructions for hook output.
 
-        Output is kept within ~2000 char limit for UserPromptSubmit hooks.
-        Falls back to minimal template if .ai-rules/ is not found.
+        Enriches the static template with actual ``.ai-rules/`` data when
+        available and enforces the ``CHAR_LIMIT`` (2000) ceiling.  Falls
+        back to the minimal template when ``.ai-rules/`` is absent.
 
         Args:
             mode: Mode name (PLAN, ACT, EVAL, AUTO)
 
         Returns:
-            Complete mode instructions string.
+            Complete mode instructions string (≤ 2000 chars).
         """
         mode_upper = mode.upper()
         agent = self.get_default_agent(mode_upper)
@@ -168,10 +236,50 @@ class ModeEngine:
 
         instructions = template.format(agent_name=agent["name"])
 
-        # Add MCP enhancement hint
+        # Enrich with .ai-rules data
+        enrichment = self._build_rules_snippet(mode_upper, agent["name"])
+        if enrichment:
+            instructions += "\n\n" + enrichment
+
+        # MCP enhancement hint (always last)
         mcp_hint = (
             "\n\nIf mcp__codingbuddy__parse_mode is available, "
             "call it for enhanced features (checklists, specialist agents, context tracking)."
         )
 
-        return instructions + mcp_hint
+        result = instructions + mcp_hint
+
+        # Enforce hard limit
+        if len(result) > CHAR_LIMIT:
+            result = result[: CHAR_LIMIT - 3] + "..."
+
+        return result
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    def _build_rules_snippet(self, mode: str, agent_name: str) -> Optional[str]:
+        """Compose an enrichment snippet from .ai-rules data."""
+        parts: list[str] = []
+
+        # Agent expertise
+        details = self._load_agent_details(agent_name)
+        if details and details.get("expertise"):
+            expertise_str = ", ".join(details["expertise"][:5])
+            parts.append(f"Agent expertise: {expertise_str}")
+
+        # Mode rules — extract key bullet points
+        rules_text = self.load_mode_rules(mode)
+        if rules_text:
+            key_lines: list[str] = []
+            for line in rules_text.split("\n")[1:]:  # skip header
+                stripped = line.strip()
+                if stripped.startswith(("**", "- ")):
+                    key_lines.append(stripped)
+                if len(key_lines) >= 6:
+                    break
+            if key_lines:
+                parts.append("From .ai-rules:\n" + "\n".join(key_lines))
+
+        return "\n\n".join(parts) if parts else None
