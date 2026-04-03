@@ -1,0 +1,12 @@
+{
+  "name": "data-pipeline",
+  "description": "Data pipeline team for data engineering, analysis, and monitoring",
+  "category": "data",
+  "tags": ["data", "pipeline", "etl", "analytics"],
+  "primary_agent": "data-engineer",
+  "specialist_agents": ["data-scientist", "performance-specialist", "observability-specialist"],
+  "recommended_for": {
+    "file_patterns": ["*.sql", "*.py", "*migration*", "*pipeline*"],
+    "modes": ["PLAN", "ACT"]
+  }
+}

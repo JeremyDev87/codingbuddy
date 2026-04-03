@@ -1,0 +1,17 @@
+{
+  "name": "api-development",
+  "description": "API development team for building and maintaining backend services",
+  "category": "backend",
+  "tags": ["api", "backend", "rest", "graphql"],
+  "primary_agent": "backend-developer",
+  "specialist_agents": [
+    "security-specialist",
+    "test-engineer",
+    "performance-specialist",
+    "documentation-specialist"
+  ],
+  "recommended_for": {
+    "file_patterns": ["*.controller.ts", "*.service.ts", "*.resolver.ts", "*.route.ts"],
+    "modes": ["PLAN", "ACT"]
+  }
+}

@@ -1,6 +1,22 @@
 import type { Mode } from '../keyword/keyword.types';
 
 /**
+ * Agent Stack - a pre-configured team of agents for common workflows
+ */
+export interface AgentStack {
+  name: string;
+  description: string;
+  category: string;
+  tags: string[];
+  primary_agent: string;
+  specialist_agents: string[];
+  recommended_for?: {
+    file_patterns?: string[];
+    modes?: string[];
+  };
+}
+
+/**
  * Context for agent prompt generation
  */
 export interface AgentContext {

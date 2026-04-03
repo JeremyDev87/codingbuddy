@@ -1,0 +1,16 @@
+{
+  "name": "security-audit",
+  "description": "Security audit team for vulnerability assessment and security hardening",
+  "category": "security",
+  "tags": ["security", "audit", "vulnerability", "compliance"],
+  "primary_agent": "security-engineer",
+  "specialist_agents": [
+    "security-specialist",
+    "test-strategy-specialist",
+    "code-quality-specialist"
+  ],
+  "recommended_for": {
+    "file_patterns": ["*auth*", "*token*", "*session*", "*crypto*"],
+    "modes": ["EVAL", "AUTO"]
+  }
+}

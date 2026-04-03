@@ -1,0 +1,17 @@
+{
+  "name": "frontend-polish",
+  "description": "Frontend polish team for UI/UX refinement, accessibility, and performance",
+  "category": "frontend",
+  "tags": ["ui", "ux", "accessibility", "frontend", "seo"],
+  "primary_agent": "frontend-developer",
+  "specialist_agents": [
+    "ui-ux-designer",
+    "accessibility-specialist",
+    "performance-specialist",
+    "seo-specialist"
+  ],
+  "recommended_for": {
+    "file_patterns": ["*.tsx", "*.css", "*.scss", "*.module.css"],
+    "modes": ["EVAL", "ACT"]
+  }
+}

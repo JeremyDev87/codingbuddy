@@ -1,0 +1,17 @@
+{
+  "name": "ml-infrastructure",
+  "description": "ML infrastructure team for AI/ML model development and deployment",
+  "category": "ml",
+  "tags": ["ml", "ai", "model", "inference", "training"],
+  "primary_agent": "ai-ml-engineer",
+  "specialist_agents": [
+    "data-scientist",
+    "performance-specialist",
+    "observability-specialist",
+    "test-engineer"
+  ],
+  "recommended_for": {
+    "file_patterns": ["*.py", "*model*", "*predict*", "*train*"],
+    "modes": ["PLAN", "ACT", "EVAL"]
+  }
+}
