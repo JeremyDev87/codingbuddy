@@ -541,9 +541,7 @@ describe('SkillRecommendationService', () => {
 
       const result = filteredService.recommendSkills('discuss the agent architecture');
 
-      const agentDiscussion = result.recommendations.find(
-        r => r.skillName === 'agent-discussion',
-      );
+      const agentDiscussion = result.recommendations.find(r => r.skillName === 'agent-discussion');
       expect(agentDiscussion).toBeUndefined();
     });
 
@@ -592,9 +590,7 @@ describe('SkillRecommendationService', () => {
       // "fix this bug" normally matches systematic-debugging via keyword triggers
       const result = filteredService.recommendSkills('I need to fix this bug');
 
-      const debugging = result.recommendations.find(
-        r => r.skillName === 'systematic-debugging',
-      );
+      const debugging = result.recommendations.find(r => r.skillName === 'systematic-debugging');
       expect(debugging).toBeUndefined();
     });
   });
