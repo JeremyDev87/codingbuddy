@@ -24,24 +24,24 @@
   "skills": {
     "required": [
       {
-        "name": "superpowers:writing-plans",
+        "name": "writing-plans",
         "purpose": "Create comprehensive implementation plans",
         "when": "Always when creating implementation plans"
       }
     ],
     "recommended": [
       {
-        "name": "superpowers:test-driven-development",
+        "name": "test-driven-development",
         "purpose": "Ensure TDD approach in plan tasks",
         "when": "Designing test-first task sequences"
       },
       {
-        "name": "superpowers:subagent-driven-development",
+        "name": "subagent-driven-development",
         "purpose": "Execute plans with fresh subagent per task",
         "when": "User chooses to execute in current session"
       },
       {
-        "name": "superpowers:executing-plans",
+        "name": "executing-plans",
         "purpose": "Execute plans in parallel session",
         "when": "User chooses to execute in separate session"
       }
@@ -69,7 +69,7 @@
     ],
     "mandatory_checklist": {
       "🔴 writing_plans_skill": {
-        "rule": "MUST invoke superpowers:writing-plans skill for plan creation",
+        "rule": "MUST invoke writing-plans skill for plan creation",
         "verification_key": "writing_plans_skill"
       },
       "🔴 bite_sized_tasks": {
@@ -94,7 +94,7 @@
       }
     },
     "verification_guide": {
-      "writing_plans_skill": "Check that superpowers:writing-plans skill was invoked",
+      "writing_plans_skill": "Check that writing-plans skill was invoked",
       "bite_sized_tasks": "Each step should be a single action (2-5 minutes)",
       "exact_file_paths": "All paths use exact/path/to/file.ext format",
       "tdd_structure": "Each task has: failing test → verify fail → implement → verify pass → commit",
@@ -107,7 +107,7 @@
       "approach": "TDD-First Planning",
       "applies_to": "Implementation plans, task breakdowns, coding tasks",
       "steps": [
-        "1. Invoke superpowers:writing-plans skill",
+        "1. Invoke writing-plans skill",
         "2. Read design document or requirements",
         "3. Identify all components and dependencies",
         "4. Break into bite-sized tasks (2-5 minutes each)",
@@ -172,12 +172,12 @@
   "execution_options": {
     "subagent_driven": {
       "description": "Execute in current session with fresh subagent per task",
-      "skill": "superpowers:subagent-driven-development",
+      "skill": "subagent-driven-development",
       "benefits": ["No context switch", "Fast iteration", "Two-stage review"]
     },
     "parallel_session": {
       "description": "Execute in separate session with checkpoints",
-      "skill": "superpowers:executing-plans",
+      "skill": "executing-plans",
       "benefits": ["Parallel work possible", "Clear handoff points"]
     }
   },
@@ -193,8 +193,8 @@
   "reference": {
     "project_rules": ".ai-rules/rules/",
     "existing_agents": ".ai-rules/agents/*.json",
-    "skills_location": "superpowers plugin skills",
-    "plan_examples": "See superpowers:writing-plans skill for examples"
+    "skills_location": "codingbuddy skills",
+    "plan_examples": "See writing-plans skill for examples"
   },
   "visual": {
     "eye": "⎔",

@@ -24,14 +24,14 @@
   "skills": {
     "required": [
       {
-        "name": "superpowers:brainstorming",
+        "name": "brainstorming",
         "purpose": "Explore design options through collaborative dialogue",
         "when": "Starting any new feature or architectural decision"
       }
     ],
     "recommended": [
       {
-        "name": "superpowers:writing-plans",
+        "name": "writing-plans",
         "purpose": "Document validated designs as implementation plans",
         "when": "After design is finalized, before handoff to Technical Planner"
       }
@@ -59,7 +59,7 @@
     ],
     "mandatory_checklist": {
       "🔴 brainstorming_first": {
-        "rule": "MUST invoke superpowers:brainstorming skill before any design work",
+        "rule": "MUST invoke brainstorming skill before any design work",
         "verification_key": "brainstorming_first"
       },
       "🔴 multiple_options": {
@@ -80,7 +80,7 @@
       }
     },
     "verification_guide": {
-      "brainstorming_first": "Check that superpowers:brainstorming skill was invoked at start",
+      "brainstorming_first": "Check that brainstorming skill was invoked at start",
       "multiple_options": "Verify 2-3 approaches were presented with pros/cons",
       "incremental_validation": "Design was presented in 200-300 word sections with user validation",
       "document_design": "Design document exists in docs/plans/ with correct naming",
@@ -92,7 +92,7 @@
       "approach": "Brainstorm-First",
       "applies_to": "New features, architecture decisions, technology selection",
       "steps": [
-        "1. Invoke superpowers:brainstorming skill",
+        "1. Invoke brainstorming skill",
         "2. Understand project context (files, docs, commits)",
         "3. Ask clarifying questions one at a time",
         "4. Propose 2-3 approaches with trade-offs",
@@ -162,7 +162,7 @@
   "reference": {
     "project_rules": ".ai-rules/rules/",
     "existing_agents": ".ai-rules/agents/*.json",
-    "skills_location": "superpowers plugin skills"
+    "skills_location": "codingbuddy skills"
   },
   "visual": {
     "eye": "⬢",
