@@ -20,7 +20,7 @@ DEFAULT_AGENTS = {
     "PLAN": {"name": "technical-planner", "title": "Technical Planner"},
     "ACT": {"name": "software-engineer", "title": "Software Engineer"},
     "EVAL": {"name": "code-reviewer", "title": "Code Reviewer"},
-    "AUTO": {"name": "auto-mode-agent", "title": "Auto Mode Agent"},
+    "AUTO": {"name": "auto-mode", "title": "Auto Mode Agent"},
 }
 
 # Mode instruction templates (compact, within ~2000 char hook limit)

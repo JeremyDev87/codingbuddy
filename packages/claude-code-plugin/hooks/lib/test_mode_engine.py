@@ -64,7 +64,7 @@ class TestModeEngineGetDefaultAgent(unittest.TestCase):
     def test_auto_agent(self):
         engine = ModeEngine(rules_dir=None)
         agent = engine.get_default_agent("AUTO")
-        self.assertEqual(agent["name"], "auto-mode-agent")
+        self.assertEqual(agent["name"], "auto-mode")
 
     def test_case_insensitive(self):
         engine = ModeEngine(rules_dir=None)
