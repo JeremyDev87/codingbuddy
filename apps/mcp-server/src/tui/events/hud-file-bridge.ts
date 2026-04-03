@@ -15,7 +15,7 @@ const VALID_MODES = new Set(['PLAN', 'ACT', 'EVAL', 'AUTO']);
 export interface HudFileBridgeOptions {
   /** Debounce interval in ms (default: 150) */
   debounceMs?: number;
-  /** Polling interval in ms when fs.watch fails (default: 1000) */
+  /** Polling interval in ms for hybrid safety-net polling (default: 200) */
   pollIntervalMs?: number;
 }
 
@@ -41,7 +41,7 @@ export class HudFileBridge {
     this.eventBus = eventBus;
     this.filePath = filePath;
     this.debounceMs = options?.debounceMs ?? 150;
-    this.pollIntervalMs = options?.pollIntervalMs ?? 1000;
+    this.pollIntervalMs = options?.pollIntervalMs ?? 200;
   }
 
   start(): void {
@@ -61,11 +61,13 @@ export class HudFileBridge {
         if (!filename || filename === basename) this.scheduleProcess();
       });
       this.watcher.on('error', () => {
-        // Directory deleted or inaccessible — fall back to polling
+        // Watcher failed — close it; polling is already running as safety net
         this.watcher?.close();
         this.watcher = null;
-        this.startPollingFallback();
+        process.stderr.write('[codingbuddy] fs.watch failed, polling safety net active\n');
       });
+      // Hybrid mode: run polling alongside fs.watch as a silent safety net
+      this.startPollingFallback(true);
     } catch {
       // Directory doesn't exist yet — poll until it appears
       this.pollUntilExists();
@@ -135,9 +137,11 @@ export class HudFileBridge {
     }
   }
 
-  private startPollingFallback(): void {
+  private startPollingFallback(silent: boolean = false): void {
     if (this.stopped || this.pollInterval) return;
-    process.stderr.write('[codingbuddy] fs.watch failed, falling back to polling\n');
+    if (!silent) {
+      process.stderr.write('[codingbuddy] fs.watch failed, falling back to polling\n');
+    }
     try {
       const stat = fs.statSync(this.filePath);
       this.lastMtimeMs = stat.mtimeMs;
