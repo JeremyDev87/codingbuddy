@@ -15,6 +15,7 @@ import type {
   UninstallOptions,
   SearchOptions,
   UpdateOptions,
+  CreatePluginOptions,
 } from './cli.types';
 import type { CompletionOptions } from './completion';
 
@@ -29,6 +30,7 @@ export interface ParsedArgs {
     | 'uninstall'
     | 'search'
     | 'update'
+    | 'create-plugin'
     | 'mcp'
     | 'tui'
     | 'completion'
@@ -40,6 +42,7 @@ export interface ParsedArgs {
     Partial<UninstallOptions> &
     Partial<SearchOptions> &
     Partial<UpdateOptions> &
+    Partial<CreatePluginOptions> &
     Partial<CompletionOptions>;
 }
 
@@ -112,6 +115,19 @@ export function parseArgs(args: string[]): ParsedArgs {
     };
   }
 
+  if (command === 'create-plugin') {
+    const createPluginName = args[1];
+    let createPluginTemplate: string | undefined;
+    const templateIdx = args.indexOf('--template');
+    if (templateIdx !== -1) {
+      createPluginTemplate = args[templateIdx + 1];
+    }
+    return {
+      command: 'create-plugin',
+      options: { ...options, createPluginName, createPluginTemplate },
+    };
+  }
+
   if (command === 'completion') {
     const shell = args[1];
     return {
@@ -160,6 +176,7 @@ Usage:
   codingbuddy mcp                      Start MCP server (stdio mode)
   codingbuddy tui                      Monitor agent execution in real-time
   codingbuddy tui --restart            Restart TUI client (fixes blank screen)
+  codingbuddy create-plugin <name>     Scaffold a new plugin project
   codingbuddy completion <shell>       Generate shell completions (bash, zsh, fish)
   codingbuddy --help                   Show this help
   codingbuddy --version                Show version
@@ -180,6 +197,8 @@ Examples:
   codingbuddy update my-plugin         Update a specific plugin
   codingbuddy uninstall my-plugin      Remove a plugin
   codingbuddy uninstall my-plugin -y   Remove without confirmation
+  codingbuddy create-plugin my-plugin   Scaffold minimal plugin
+  codingbuddy create-plugin my-plugin --template full  Scaffold with examples
   codingbuddy mcp                      Start MCP server for AI assistants
 
 Note:
@@ -319,6 +338,27 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
         pluginName: options.updatePluginName,
       });
       if (!updateResult.success) {
+        process.exitCode = 1;
+      }
+      break;
+    }
+
+    case 'create-plugin': {
+      const { runCreatePlugin } = await import('./plugin/create-plugin.command');
+      if (!options.createPluginName) {
+        process.stderr.write(
+          'Error: Missing plugin name. Usage: codingbuddy create-plugin <name> [--template minimal|full]\n',
+        );
+        process.exitCode = 1;
+        break;
+      }
+      const template = options.createPluginTemplate === 'full' ? 'full' : 'minimal';
+      const createResult = await runCreatePlugin({
+        name: options.createPluginName,
+        outputDir: process.cwd(),
+        template,
+      });
+      if (!createResult.success) {
         process.exitCode = 1;
       }
       break;

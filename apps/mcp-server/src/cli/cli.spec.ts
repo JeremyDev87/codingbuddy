@@ -129,6 +129,27 @@ describe('cli', () => {
       expect(result.options.uninstallYes).toBe(true);
     });
 
+    it('should parse create-plugin command with name', () => {
+      const result = parseArgs(['create-plugin', 'my-plugin']);
+
+      expect(result.command).toBe('create-plugin');
+      expect(result.options.createPluginName).toBe('my-plugin');
+    });
+
+    it('should parse create-plugin command with --template flag', () => {
+      const result = parseArgs(['create-plugin', 'my-plugin', '--template', 'full']);
+
+      expect(result.command).toBe('create-plugin');
+      expect(result.options.createPluginName).toBe('my-plugin');
+      expect(result.options.createPluginTemplate).toBe('full');
+    });
+
+    it('should parse create-plugin without template as undefined', () => {
+      const result = parseArgs(['create-plugin', 'my-plugin']);
+
+      expect(result.options.createPluginTemplate).toBeUndefined();
+    });
+
     it('should parse init with --yes flag', () => {
       const result = parseArgs(['init', '--yes']);
 

@@ -84,6 +84,16 @@ export interface UpdateOptions {
 }
 
 /**
+ * Create-plugin command options (parsed from CLI args)
+ */
+export interface CreatePluginOptions {
+  /** Plugin name */
+  createPluginName?: string;
+  /** Template type: minimal or full */
+  createPluginTemplate?: string;
+}
+
+/**
  * Console output levels
  */
 export type LogLevel = 'info' | 'success' | 'warn' | 'error';
