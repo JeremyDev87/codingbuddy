@@ -137,6 +137,41 @@ If `custom.ship.globalChecks` is configured, run each global check command after
 <command>   # executed from project root
 ```
 
+### Security check (ALL workspaces)
+
+Security audit must run across ALL workspaces, not just affected ones:
+
+```bash
+# Monorepo — run for ALL workspaces (not just affected):
+<pm> audit
+# Or for npm:
+npm audit --workspaces
+```
+
+**Why:** A vulnerability in an unaffected workspace still ships with the project. Security scanning must be comprehensive.
+
+### CI workflow self-inclusion check
+
+When modifying CI workflow files (e.g., `.github/workflows/*.yml`), verify the workflow's `on.push.paths` or `on.pull_request.paths` filter includes the workflow file itself:
+
+```yaml
+# ✅ Correct — workflow file is included in its own paths filter
+on:
+  push:
+    paths:
+      - 'src/**'
+      - '.github/workflows/ci.yml'  # Self-included
+
+# ❌ Wrong — workflow changes won't trigger the workflow
+on:
+  push:
+    paths:
+      - 'src/**'
+      # Missing: .github/workflows/ci.yml
+```
+
+**Why:** If a workflow file is not in its own paths filter, changes to the workflow itself won't trigger CI, making it impossible to validate workflow changes before merging.
+
 If ANY check fails, stop and report the failure. Do NOT proceed to shipping.
 
 ## Step 6: Check Commit Convention

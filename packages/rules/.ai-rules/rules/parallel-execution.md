@@ -81,6 +81,38 @@ Order waves considering:
 
 ---
 
+## Implementation vs Read-Only Task Dispatch
+
+Implementation tasks (code changes, file modifications, commits) MUST use tmux-based parallel execution (e.g., taskMaestro), NOT background sub-agents.
+
+| Task Type | Dispatch Method | Rationale |
+|-----------|----------------|-----------|
+| **Implementation** (write code, modify files, commit, create PR) | taskMaestro (tmux panes) with git worktree isolation | Full environment, git operations, pre-push checks |
+| **Read-only** (research, analysis, code review, search) | Background sub-agents (Agent tool) | No file mutations, safe to run in parallel without isolation |
+
+**Why:** Background sub-agents lack proper git worktree isolation, cannot run pre-push checks reliably, and risk file conflicts when multiple agents write to the same workspace. taskMaestro provides each worker with an isolated worktree, proper shell environment, and full CI toolchain access.
+
+## Monorepo Path Safety
+
+In monorepo environments, always use absolute paths or `git -C <path>` for git commands to prevent path doubling:
+
+```bash
+# ✅ Correct — absolute path or git -C
+git -C /absolute/path/to/repo status
+git -C "$REPO_ROOT" add src/file.ts
+
+# ❌ Wrong — relative path after cd can double
+cd packages/my-lib
+git add packages/my-lib/src/file.ts  # Path doubled!
+
+# ❌ Wrong — assuming cwd after operations
+git add src/file.ts  # May not be in expected directory
+```
+
+**Why:** Relative paths in monorepo subdirectories frequently cause `git add` to target wrong files or fail silently. After any `cd` or worktree operation, verify cwd or use absolute paths.
+
+---
+
 ## Sub-Agent Parallelization Strategy
 
 When dispatching parallel sub-agents (workers), follow these guidelines:

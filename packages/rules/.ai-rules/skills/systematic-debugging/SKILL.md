@@ -22,6 +22,45 @@ NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 
 If you haven't completed Phase 1, you cannot propose fixes.
 
+## Mandatory 6-Step Debugging Sequence
+
+Before ANY debugging attempt, follow this sequence in order:
+
+1. **Validate/Check command** — If the external tool has a validate/check/lint command, run it FIRST. Always. No exceptions.
+2. **Official documentation** — Verify system behavior by reading official docs. No guessing how a system works.
+3. **Hypothesis formation** — Form a hypothesis with evidence from steps 1-2.
+4. **Fix implementation** — Implement the fix based on your hypothesis.
+5. **Local verification** — Verify the fix locally before shipping.
+6. **Ship** — Only ship after local verification passes.
+
+### Validate First Rule
+
+If an external tool, service, or configuration format has a validate/check/lint command, you MUST run it BEFORE any debugging or fix attempts:
+
+| Tool/Format | Validate Command |
+|-------------|-----------------|
+| GitHub Actions | `actionlint` or validate via `act --list` |
+| Docker | `docker compose config` |
+| Kubernetes | `kubectl apply --dry-run=client` |
+| Terraform | `terraform validate` |
+| JSON | `jq .` or schema-specific validators |
+| YAML | `yamllint` |
+| TypeScript | `tsc --noEmit` |
+| ESLint config | `eslint --print-config` |
+
+**Why:** Validation catches syntax and schema errors instantly. Debugging without validation wastes time on issues the tool itself can detect.
+
+### Verify Mental Model Rule
+
+Before assuming how an external system works, read the official documentation first:
+
+- **Never guess** API behavior, config format, or tool behavior from memory
+- **Always verify** against official docs, especially for version-specific behavior
+- **Check changelogs** when upgrading — behavior may have changed between versions
+- If official docs are unavailable, use `--help`, man pages, or source code as reference
+
+**Why:** Stale mental models from past versions or similar-but-different tools cause debugging to chase phantom issues.
+
 ## When to Use
 
 Use for ANY technical issue:

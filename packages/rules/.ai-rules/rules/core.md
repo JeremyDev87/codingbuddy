@@ -609,11 +609,24 @@ To preserve this implementation session for future reference:
 
 ---
 
-### Error Recovery (ACT mode)
+### Branch Discipline
 
-- On recoverable errors (file not found, command failure, path issues), try alternatives immediately
-- Do not wait for user confirmation on recoverable errors — recover immediately
-- Only report to user on unrecoverable errors (auth failure, critical data loss risk)
+- Always verify current branch before committing (`git status` / `git branch`)
+- Never commit directly to master/main — always use feature branches
+- If accidentally on master/main, create a new branch before committing
+
+### Mode Transition Rules
+
+- **PLAN → ACT:** MUST wait for explicit user "ACT" input. Never auto-proceed from PLAN to ACT.
+- **During ACT:** Proceed autonomously. Only stop for errors or blockers.
+- **"Wait for mode transition"** ≠ "wait during execution" — mode transitions require user input, but execution within a mode is continuous.
+
+### Error Recovery
+
+- **Recoverable errors** (label not found, file missing, command failure, path issues): auto-try alternatives immediately, continue without user confirmation
+- **Unrecoverable errors** (auth failure, critical data loss risk): report to user
+- Only report to user when recovery is impossible
+- Never stop for confirmation on recoverable errors
 - Never break the workflow on error — try alternatives and continue
 
 ### Path Safety (monorepo)

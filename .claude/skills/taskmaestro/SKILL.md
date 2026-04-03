@@ -16,7 +16,7 @@ user-invocable: true
 
 `$ARGUMENTS`를 파싱하여 서브커맨드와 인수를 분리한다:
 
-- `start [--repo <path>] [--base <branch>] [--panes <1,2,3>] [--review-pane]`
+- `start [--repo <path>] [--base <branch>] [--panes <1,2,3>] [--review-pane] [--no-review-pane]`
 - `assign <패널번호> "<작업 지시>"`
 - `status`
 - `watch`
@@ -88,9 +88,9 @@ MY_PANE=$(tmux display-message -p '#{pane_index}')
 워커가 PR을 생성하고 RESULT.json에 `status: "success"`를 기록하면, 리뷰 사이클을 시작한다.
 `status: "approved"`가 될 때까지 반복하며, 승인 시점이 "진짜 완료"가 된다.
 
-> **리뷰 에이전트 패널이 설정된 경우:** 지휘자가 직접 리뷰하지 않고, 리뷰 에이전트 패널에 리뷰를 위임한다.
-> 아래 [Review Agent Protocol](#review-agent-protocol) 섹션을 참조한다.
-> 리뷰 에이전트가 없는 경우에만 지휘자가 직접 리뷰를 수행한다 (아래 Fallback 참조).
+> **기본 동작:** 지휘자가 직접 리뷰를 수행한다 (Conductor Review — primary method).
+> Conductor has PLAN context; worker reviewers do not.
+> `--review-pane` 옵션으로 리뷰 에이전트 패널이 설정된 경우에만 리뷰를 위임한다 (아래 [Review Agent Protocol](#review-agent-protocol) 참조).
 
 ### Trigger
 
@@ -106,12 +106,19 @@ Watch 모드가 RESULT.json을 감지했을 때:
 `status: "success"` 또는 `status: "review_addressed"` 감지 시:
 
 1. **상태 파일에서 `review_pane` 확인**
-2. `review_pane`이 존재하면 → **Review Agent Protocol** 실행 (리뷰 에이전트에 위임)
-3. `review_pane`이 없으면 → **Conductor Fallback Review** 실행 (지휘자 직접 리뷰)
+2. `review_pane`이 없으면 (기본) → **Conductor Review** 실행 (지휘자 직접 리뷰 — primary method)
+3. `review_pane`이 존재하면 → **Review Agent Protocol** 실행 (리뷰 에이전트에 위임)
 
-### Conductor Fallback Review (리뷰 에이전트 없을 때)
+### Conductor Review (Primary — default method)
 
-리뷰 에이전트 패널이 설정되지 않은 경우, 지휘자가 직접 리뷰를 수행한다:
+지휘자가 직접 리뷰를 수행한다 (리뷰 에이전트 패널이 설정되지 않은 경우, 기본 동작):
+
+0. **CI Gate (MUST — BLOCKING)**
+   ```bash
+   gh pr checks <PR_NUMBER>
+   ```
+   ALL checks must pass before proceeding to review.
+   If any check fails → report to user, do NOT approve. Stop review here.
 
 1. **PR diff 읽기**
    ```bash
@@ -537,7 +544,7 @@ Wave 1 → Wave 2 → compact → Wave 3 → Wave 4 → compact → ...
 
 ## Subcommand: start
 
-`/taskmaestro start [--repo <path>] [--base <branch>] [--panes <1,2,3>] [--review-pane]`
+`/taskmaestro start [--repo <path>] [--base <branch>] [--panes <1,2,3>] [--review-pane] [--no-review-pane]`
 
 현재 세션의 기존 패널들에 worktree + Claude Code를 세팅한다.
 
@@ -546,7 +553,8 @@ Wave 1 → Wave 2 → compact → Wave 3 → Wave 4 → compact → ...
 - `--repo`: 대상 레포 경로 (기본값: 현재 작업 디렉토리)
 - `--base`: 베이스 브랜치 (기본값: 현재 브랜치)
 - `--panes`: 사용할 패널 번호 목록 (기본값: 지휘자 패널을 제외한 모든 패널)
-- `--review-pane`: 리뷰 전용 패널 할당 (기본값: 활성화). 비활성화하려면 `--no-review-pane` 사용
+- `--review-pane`: 리뷰 전용 패널 할당 (기본값: 비활성화). 활성화하려면 `--review-pane` 명시 사용
+  - **Rationale:** Conductor has PLAN context; worker reviewers do not. Conductor Review is the primary and default review method.
 
 ### Step 2: 사전 검증
 
@@ -564,12 +572,13 @@ tmux -L "$SOCKET_NAME" list-panes -t "$SESSION:$WIN_IDX" -F '#{pane_index} #{pan
 
 지휘자 패널($MY_PANE)을 제외한 패널들이 워커 대상이 된다. `--panes`로 지정하지 않으면 모든 비활성 패널을 사용한다.
 
-**리뷰 패널 할당 (`--review-pane`, 기본 활성화):**
-사용 가능한 패널 중 마지막 패널을 리뷰 에이전트 전용으로 할당한다.
-`--no-review-pane` 플래그로 비활성화할 수 있다.
+**리뷰 패널 할당 (`--review-pane`, 기본 비활성화):**
+`--review-pane` 플래그를 명시하면 사용 가능한 패널 중 마지막 패널을 리뷰 에이전트 전용으로 할당한다.
+기본값은 비활성화이며, 지휘자가 직접 리뷰를 수행한다 (Conductor Review).
+**Rationale:** Conductor has PLAN context; worker reviewers do not.
 
 ```bash
-# 리뷰 패널 할당 (기본: 마지막 패널)
+# 리뷰 패널 할당 (기본: 비활성화 — --review-pane 명시 시에만 활성화)
 if [ "$REVIEW_PANE_ENABLED" = true ]; then
   REVIEW_PANE=$(echo "$AVAILABLE_PANES" | tail -1)
   WORKER_PANES=$(echo "$AVAILABLE_PANES" | head -n -1)
@@ -815,6 +824,9 @@ cat > "$WT_PATH/TASK.md" << 'TASKEOF'
 <작업 지시 전체 내용>
 
 ---
+[MANDATORY PR RULES]
+When creating PR with gh pr create, ALWAYS include --add-label with appropriate labels (feat, chore, fix, etc.).
+
 [MANDATORY PRE-PUSH] yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test — ALL must pass before push.
 [COMPLETION] Write RESULT.json: {"status":"success|failure|error","issue":"#NNNN","pr_number":N,"pr_url":"URL","timestamp":"ISO","cost":null,"error":null}
 [CONTINUOUS] DO NOT stop. Complete ALL steps. Only stop AFTER RESULT.json.
@@ -1086,7 +1098,7 @@ done
    - **`"success"` 감지 (리뷰 사이클 시작):**
      1. 상태 파일에서 `review_pane` 확인
      2. `review_pane` 존재 시 → Review Agent Protocol에 따라 리뷰 에이전트에 위임
-     3. `review_pane` 없으면 → Conductor Fallback Review 실행:
+     3. `review_pane` 없으면 → Conductor Review 실행:
         a. `gh pr diff <PR_NUMBER>` 로 PR 변경사항 읽기
         b. codingbuddy `generate_checklist` 도구로 체크리스트 생성
         c. `gh pr review <PR_NUMBER> --comment --body "<리뷰>"` 로 리뷰 코멘트 작성
@@ -1109,7 +1121,7 @@ done
      1. `review_cycle` 확인. 3 이상이면 사용자에게 보고하고 해당 패널 리뷰 중단
      2. 상태 파일에서 `review_pane` 확인
      3. `review_pane` 존재 시 → 리뷰 에이전트에 재리뷰 위임
-     4. `review_pane` 없으면 → Conductor Fallback Review 재실행:
+     4. `review_pane` 없으면 → Conductor Review 재실행:
         a. `gh pr diff <PR_NUMBER>` 재확인
         b. 미해결 코멘트 확인 (`gh pr view <PR_NUMBER> --comments`)
         c. 충분히 개선 → `status: "approved"`, PR approve 코멘트 작성, 사용자에게 완료 보고
