@@ -244,7 +244,18 @@ export async function searchInRuleFiles(
 export async function listSkillSummaries(
   rulesDir: string,
   deps?: FileSystemDeps,
-): Promise<Array<{ name: string; description: string; triggers?: SkillFrontmatterTrigger[] }>> {
+): Promise<
+  Array<{
+    name: string;
+    description: string;
+    triggers?: SkillFrontmatterTrigger[];
+    userInvocable?: boolean;
+    disableModelInvocation?: boolean;
+    context?: string;
+    agent?: string;
+    allowedTools?: string[];
+  }>
+> {
   const skillsDir = path.join(rulesDir, 'skills');
   const readdir = getReaddir(deps);
   const readFile = getReadFile(deps);
@@ -252,6 +263,11 @@ export async function listSkillSummaries(
     name: string;
     description: string;
     triggers?: SkillFrontmatterTrigger[];
+    userInvocable?: boolean;
+    disableModelInvocation?: boolean;
+    context?: string;
+    agent?: string;
+    allowedTools?: string[];
   }> = [];
 
   try {
@@ -269,6 +285,11 @@ export async function listSkillSummaries(
             name: skill.name,
             description: skill.description,
             triggers: skill.triggers,
+            userInvocable: skill.userInvocable,
+            disableModelInvocation: skill.disableModelInvocation,
+            context: skill.context,
+            agent: skill.agent,
+            allowedTools: skill.allowedTools,
           });
         } catch {
           // Skip invalid/missing skills

@@ -53,6 +53,11 @@ const SkillFrontmatterSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Skill name must be lowercase alphanumeric with hyphens only'),
   description: z.string().min(1).max(500),
   triggers: z.array(SkillFrontmatterTriggerSchema).optional(),
+  'user-invocable': z.boolean().optional(),
+  'disable-model-invocation': z.boolean().optional(),
+  context: z.string().optional(),
+  agent: z.string().optional(),
+  'allowed-tools': z.array(z.string()).optional(),
 });
 
 // ============================================================================
@@ -70,6 +75,11 @@ export interface Skill {
   content: string;
   path: string;
   triggers?: SkillFrontmatterTrigger[];
+  userInvocable?: boolean;
+  disableModelInvocation?: boolean;
+  context?: string;
+  agent?: string;
+  allowedTools?: string[];
 }
 
 // ============================================================================
@@ -146,5 +156,10 @@ export function parseSkill(content: string, filePath: string): Skill {
     content: body,
     path: filePath,
     triggers: result.data.triggers,
+    userInvocable: result.data['user-invocable'],
+    disableModelInvocation: result.data['disable-model-invocation'],
+    context: result.data.context,
+    agent: result.data.agent,
+    allowedTools: result.data['allowed-tools'],
   };
 }

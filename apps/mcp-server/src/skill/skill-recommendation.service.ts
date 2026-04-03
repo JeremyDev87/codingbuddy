@@ -26,6 +26,7 @@ interface CachedFrontmatterTrigger {
 interface FrontmatterTriggerEntry {
   description: string;
   triggers: CachedFrontmatterTrigger[];
+  userInvocable?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ function getSkillDescription(skillName: string): string {
 @Injectable()
 export class SkillRecommendationService implements OnModuleInit {
   private frontmatterTriggerCache = new Map<string, FrontmatterTriggerEntry>();
+  private skillMetadataCache = new Map<string, { userInvocable?: boolean }>();
 
   constructor(private readonly rulesService: RulesService) {}
 
@@ -56,8 +58,12 @@ export class SkillRecommendationService implements OnModuleInit {
   async loadFrontmatterTriggers(): Promise<void> {
     const skills = await this.rulesService.listSkillsFromDir();
     this.frontmatterTriggerCache.clear();
+    this.skillMetadataCache.clear();
 
     for (const skill of skills) {
+      if (skill.userInvocable !== undefined) {
+        this.skillMetadataCache.set(skill.name, { userInvocable: skill.userInvocable });
+      }
       if (skill.triggers && skill.triggers.length > 0) {
         const compiled: CachedFrontmatterTrigger[] = [];
         for (const t of skill.triggers) {
@@ -160,10 +166,16 @@ export class SkillRecommendationService implements OnModuleInit {
       }
     }
 
-    // Step 3: Convert to SkillRecommendation array and sort
+    // Step 3: Convert to SkillRecommendation array, filter non-invocable, and sort
     const recommendations: SkillRecommendation[] = [];
 
     for (const [skillName, match] of skillMatches) {
+      // Filter out skills explicitly marked as user-invocable: false
+      const metadata = this.skillMetadataCache.get(skillName);
+      if (metadata?.userInvocable === false) {
+        continue;
+      }
+
       recommendations.push({
         skillName,
         confidence: match.confidence,

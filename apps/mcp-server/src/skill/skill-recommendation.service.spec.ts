@@ -12,6 +12,7 @@ function createMockRulesService(
     name: string;
     description: string;
     triggers?: SkillFrontmatterTrigger[];
+    userInvocable?: boolean;
   }> = [],
 ): RulesService {
   return {
@@ -519,6 +520,82 @@ describe('SkillRecommendationService', () => {
       const result = noTriggerService.recommendSkills('fix the bug');
       // Should still work with keyword triggers
       expect(result.recommendations.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('user-invocable filtering', () => {
+    it('should exclude skills with userInvocable: false from recommendations', async () => {
+      const skillsWithNonInvocable = [
+        ...FILESYSTEM_SKILLS,
+        {
+          name: 'agent-discussion',
+          description: 'Internal agent discussion skill',
+          userInvocable: false,
+          triggers: [{ pattern: 'discuss.*agent', confidence: 'high' as const }],
+        },
+      ];
+      const filteredService = new SkillRecommendationService(
+        createMockRulesService(skillsWithNonInvocable),
+      );
+      await filteredService.loadFrontmatterTriggers();
+
+      const result = filteredService.recommendSkills('discuss the agent architecture');
+
+      const agentDiscussion = result.recommendations.find(
+        r => r.skillName === 'agent-discussion',
+      );
+      expect(agentDiscussion).toBeUndefined();
+    });
+
+    it('should include skills with userInvocable: true in recommendations', async () => {
+      const skillsWithInvocable = [
+        ...FILESYSTEM_SKILLS,
+        {
+          name: 'invocable-skill',
+          description: 'User invocable skill',
+          userInvocable: true,
+          triggers: [{ pattern: 'invocable-test-xyz', confidence: 'high' as const }],
+        },
+      ];
+      const invocableService = new SkillRecommendationService(
+        createMockRulesService(skillsWithInvocable),
+      );
+      await invocableService.loadFrontmatterTriggers();
+
+      const result = invocableService.recommendSkills('invocable-test-xyz');
+
+      const skill = result.recommendations.find(r => r.skillName === 'invocable-skill');
+      expect(skill).toBeDefined();
+    });
+
+    it('should include skills without userInvocable field (default behavior)', async () => {
+      // Skills without userInvocable should be included (backwards compatible)
+      const result = service.recommendSkills('widget slot architecture');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
+    });
+
+    it('should filter non-invocable skills even when matched by keyword triggers', async () => {
+      const skillsWithNonInvocable = [
+        {
+          name: 'systematic-debugging',
+          description: 'Debugging skill',
+          userInvocable: false,
+        },
+      ];
+      const filteredService = new SkillRecommendationService(
+        createMockRulesService(skillsWithNonInvocable),
+      );
+      await filteredService.loadFrontmatterTriggers();
+
+      // "fix this bug" normally matches systematic-debugging via keyword triggers
+      const result = filteredService.recommendSkills('I need to fix this bug');
+
+      const debugging = result.recommendations.find(
+        r => r.skillName === 'systematic-debugging',
+      );
+      expect(debugging).toBeUndefined();
     });
   });
 

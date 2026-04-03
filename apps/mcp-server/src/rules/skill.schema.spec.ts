@@ -52,6 +52,124 @@ Content here.
       });
     });
 
+    it('should parse user-invocable field', () => {
+      const content = `---
+name: internal-skill
+description: An internal skill
+user-invocable: false
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.userInvocable).toBe(false);
+    });
+
+    it('should parse disable-model-invocation field', () => {
+      const content = `---
+name: manual-only
+description: Manual only skill
+disable-model-invocation: true
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.disableModelInvocation).toBe(true);
+    });
+
+    it('should parse context field', () => {
+      const content = `---
+name: ctx-skill
+description: Skill with context
+context: conversation
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.context).toBe('conversation');
+    });
+
+    it('should parse agent field', () => {
+      const content = `---
+name: agent-skill
+description: Skill with agent
+agent: security-specialist
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.agent).toBe('security-specialist');
+    });
+
+    it('should parse allowed-tools field', () => {
+      const content = `---
+name: tools-skill
+description: Skill with allowed tools
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.allowedTools).toEqual(['Read', 'Grep', 'Glob']);
+    });
+
+    it('should leave extended fields undefined when not present', () => {
+      const content = `---
+name: basic-skill
+description: Basic skill without extended fields
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.userInvocable).toBeUndefined();
+      expect(result.disableModelInvocation).toBeUndefined();
+      expect(result.context).toBeUndefined();
+      expect(result.agent).toBeUndefined();
+      expect(result.allowedTools).toBeUndefined();
+    });
+
+    it('should parse skill with all extended fields together', () => {
+      const content = `---
+name: full-skill
+description: Skill with all fields
+user-invocable: true
+disable-model-invocation: false
+context: project
+agent: frontend-developer
+allowed-tools:
+  - Edit
+  - Write
+triggers:
+  - pattern: "test"
+    confidence: high
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.userInvocable).toBe(true);
+      expect(result.disableModelInvocation).toBe(false);
+      expect(result.context).toBe('project');
+      expect(result.agent).toBe('frontend-developer');
+      expect(result.allowedTools).toEqual(['Edit', 'Write']);
+      expect(result.triggers).toHaveLength(1);
+    });
+
     it('should parse skill with empty triggers array', () => {
       const content = `---
 name: no-triggers

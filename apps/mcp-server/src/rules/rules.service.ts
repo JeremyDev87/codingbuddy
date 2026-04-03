@@ -194,7 +194,16 @@ export class RulesService {
    * @returns Array of skill summaries with name, description, and optional triggers
    */
   async listSkillsFromDir(): Promise<
-    Array<{ name: string; description: string; triggers?: SkillFrontmatterTrigger[] }>
+    Array<{
+      name: string;
+      description: string;
+      triggers?: SkillFrontmatterTrigger[];
+      userInvocable?: boolean;
+      disableModelInvocation?: boolean;
+      context?: string;
+      agent?: string;
+      allowedTools?: string[];
+    }>
   > {
     try {
       return await listSkillSummaries(this.rulesDir);
