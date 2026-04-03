@@ -50,13 +50,13 @@ describe('AgentStackService', () => {
 
   describe('listStacks', () => {
     it('should return stacks from default location', async () => {
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         if (String(dirPath).includes('.ai-rules/agent-stacks')) {
-          return ['api-development.json', 'frontend-review.json'] as unknown as fs.Dirent[];
+          return ['api-development.json', 'frontend-review.json'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         const p = String(filePath);
         if (p.includes('api-development.json')) return JSON.stringify(sampleStack);
         if (p.includes('frontend-review.json')) return JSON.stringify(sampleStack2);
@@ -78,17 +78,17 @@ describe('AgentStackService', () => {
         specialists: ['security-specialist'],
       };
 
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         const p = String(dirPath);
         if (p.includes('.codingbuddy/agent-stacks')) {
-          return ['api-development.json'] as unknown as fs.Dirent[];
+          return ['api-development.json'] as unknown[];
         }
         if (p.includes('.ai-rules/agent-stacks')) {
-          return ['api-development.json', 'frontend-review.json'] as unknown as fs.Dirent[];
+          return ['api-development.json', 'frontend-review.json'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         const p = String(filePath);
         if (p.includes('.codingbuddy') && p.includes('api-development.json')) {
           return JSON.stringify(customStack);
@@ -107,13 +107,13 @@ describe('AgentStackService', () => {
     });
 
     it('should filter by category', async () => {
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         if (String(dirPath).includes('.ai-rules/agent-stacks')) {
-          return ['api-development.json', 'frontend-review.json'] as unknown as fs.Dirent[];
+          return ['api-development.json', 'frontend-review.json'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         const p = String(filePath);
         if (p.includes('api-development.json')) return JSON.stringify(sampleStack);
         if (p.includes('frontend-review.json')) return JSON.stringify(sampleStack2);
@@ -135,13 +135,13 @@ describe('AgentStackService', () => {
     });
 
     it('should skip invalid JSON files gracefully', async () => {
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         if (String(dirPath).includes('.ai-rules/agent-stacks')) {
-          return ['valid.json', 'invalid.json', 'not-json.txt'] as unknown as fs.Dirent[];
+          return ['valid.json', 'invalid.json', 'not-json.txt'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         const p = String(filePath);
         if (p.includes('valid.json')) return JSON.stringify(sampleStack);
         if (p.includes('invalid.json')) return 'not valid json {{{';
@@ -157,13 +157,13 @@ describe('AgentStackService', () => {
     it('should skip stacks missing required fields', async () => {
       const incompleteStack = { name: 'incomplete' };
 
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         if (String(dirPath).includes('.ai-rules/agent-stacks')) {
-          return ['valid.json', 'incomplete.json'] as unknown as fs.Dirent[];
+          return ['valid.json', 'incomplete.json'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         const p = String(filePath);
         if (p.includes('valid.json')) return JSON.stringify(sampleStack);
         if (p.includes('incomplete.json')) return JSON.stringify(incompleteStack);
@@ -178,13 +178,13 @@ describe('AgentStackService', () => {
 
   describe('resolveStack', () => {
     it('should resolve stack by name from default location', async () => {
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         if (String(dirPath).includes('.ai-rules/agent-stacks')) {
-          return ['api-development.json'] as unknown as fs.Dirent[];
+          return ['api-development.json'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         if (String(filePath).includes('api-development.json')) {
           return JSON.stringify(sampleStack);
         }
@@ -204,17 +204,17 @@ describe('AgentStackService', () => {
         specialists: ['security-specialist', 'test-engineer', 'code-quality-specialist'],
       };
 
-      mockFs.readdir.mockImplementation(async (dirPath: fs.PathLike) => {
+      mockFs.readdir.mockImplementation(async (dirPath: unknown) => {
         const p = String(dirPath);
         if (p.includes('.codingbuddy/agent-stacks')) {
-          return ['api-development.json'] as unknown as fs.Dirent[];
+          return ['api-development.json'] as unknown[];
         }
         if (p.includes('.ai-rules/agent-stacks')) {
-          return ['api-development.json'] as unknown as fs.Dirent[];
+          return ['api-development.json'] as unknown[];
         }
         throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
       });
-      mockFs.readFile.mockImplementation(async (filePath: fs.PathLike) => {
+      mockFs.readFile.mockImplementation(async (filePath: unknown) => {
         const p = String(filePath);
         if (p.includes('.codingbuddy') && p.includes('api-development.json')) {
           return JSON.stringify(customStack);
