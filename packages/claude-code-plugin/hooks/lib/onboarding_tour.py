@@ -12,6 +12,8 @@ from buddy_renderer import (
     BUDDY_FACE,
     DEFAULT_BUDDY_CONFIG,
     get_buddy_config,
+    render_face_banner,
+    render_section_header,
 )
 
 # Flag file location
@@ -188,11 +190,9 @@ def render_onboarding_tour(
     reset = ANSI_COLORS["reset"]
 
     lines = [
-        f"\u256d\u2501\u2501\u2501\u256e",
-        f"\u2503 {face} \u2503 {cyan}{welcome}{reset}",
-        f"\u2570\u2501\u2501\u2501\u256f",
+        *render_face_banner(face, f"{cyan}{welcome}{reset}"),
         "",
-        f"\u2501\u2501 {_get_text(TOUR_HEADER, language)} \u2501\u2501\u2501\u2501\u2501\u2501",
+        render_section_header(_get_text(TOUR_HEADER, language), min_tail=6),
     ]
 
     for step_num in (1, 2, 3):

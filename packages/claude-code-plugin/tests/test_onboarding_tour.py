@@ -16,6 +16,7 @@ if _hooks_lib not in sys.path:
     sys.path.insert(0, _hooks_lib)
 
 import onboarding_tour  # noqa: E402
+from buddy_renderer import display_width  # noqa: E402
 
 
 class TestIsFirstRun:
@@ -142,6 +143,13 @@ class TestRenderOnboardingTour:
         custom = {"name": "TestBuddy", "face": "\u2605\u203f\u2605", "greeting": "", "farewell": ""}
         result = onboarding_tour.render_onboarding_tour(buddy_config=custom)
         assert "\u2605\u203f\u2605" in result
+
+    def test_custom_face_banner_keeps_top_and_bottom_aligned(self):
+        """Longer custom faces expand the top banner cleanly."""
+        custom = {"name": "TestBuddy", "face": "\u2605\u25d5\u203f\u25d5\u2605", "greeting": "", "farewell": ""}
+        result = onboarding_tour.render_onboarding_tour(buddy_config=custom)
+        top, _middle, bottom = result.splitlines()[:3]
+        assert display_width(top) == display_width(bottom)
 
     def test_welcome_message_present(self):
         """Welcome message is in the output."""

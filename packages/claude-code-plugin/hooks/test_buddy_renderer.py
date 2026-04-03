@@ -10,12 +10,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "lib"))
 
 from buddy_renderer import (
+    display_width,
     render_buddy_face,
     render_scan_results,
     render_recommendations,
     render_session_start,
     render_session_summary,
     render_returning_session,
+    render_intelligence_report,
     render_bar_chart,
     get_buddy_config,
     type_text,
@@ -58,7 +60,7 @@ class TestRenderBuddyFace:
         assert "Hey!" in result
 
     def test_unknown_language_defaults_en(self):
-        result = render_buddy_face("casual", "fr")
+        result = render_buddy_face("casual", "xx")
         assert "Hey!" in result
 
     def test_face_contains_box(self):
@@ -295,7 +297,7 @@ class TestRenderSessionSummary:
 
     def test_unknown_language_defaults_en(self):
         stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
-        result = render_session_summary(stats, [], "casual", "fr")
+        result = render_session_summary(stats, [], "casual", "xx")
         assert "Great work today!" in result
 
     def test_face_contains_box(self):
@@ -409,6 +411,13 @@ class TestBuddyCustomFace:
         assert "\u2606\u203f\u2606" in result
         assert "Hey!" in result  # default greeting since custom is empty
 
+    def test_render_buddy_face_box_scales_for_longer_face(self):
+        face = "\u2605\u25d5\u203f\u25d5\u2605"
+        bc = {"face": face, "greeting": "Hi!", "name": "Buddy", "farewell": ""}
+        result = render_buddy_face("casual", "en", buddy_config=bc)
+        lines = result.splitlines()
+        assert lines[0].count("\u2501") == display_width(face) + 2
+
     def test_render_buddy_face_custom_greeting(self):
         bc = {"face": BUDDY_FACE, "greeting": "Yo!", "name": "B", "farewell": ""}
         result = render_buddy_face("casual", "en", buddy_config=bc)
@@ -427,6 +436,14 @@ class TestBuddyCustomFace:
         result = render_session_summary(stats, [], "casual", "en", buddy_config=bc)
         assert "Ciao!" in result
         assert "See you next time!" not in result
+
+    def test_render_session_summary_farewell_keeps_buddy_face_when_agents_exist(self):
+        stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
+        agents = [{"name": "Backend", "message": "JWT", "eye": "\u25d0", "colorAnsi": "yellow"}]
+        result = render_session_summary(stats, agents, "casual", "en")
+        last_line = result.splitlines()[-1]
+        assert BUDDY_FACE in last_line
+        assert "\u25d0\u2304\u25d0" not in last_line
 
     def test_render_session_summary_default_farewell_without_config(self):
         stats = {"duration_minutes": 5, "tool_count": 3, "files_changed": 1}
@@ -653,7 +670,7 @@ class TestAsciiModeRendering:
         assert "\u256d" not in result  # no ╭
         assert "\u2501" not in result  # no ━
         assert "\u2503" not in result  # no ┃
-        assert "+---+" in result
+        assert "+-----+" in result
         assert "|" in result
 
     def test_session_start_ascii_face_converted(self):
@@ -683,7 +700,7 @@ class TestAsciiModeRendering:
         bc = self._ascii_buddy_config()
         stats = {"duration_minutes": 10, "tool_count": 5, "files_changed": 2}
         result = render_session_summary(stats, [], "casual", "en", buddy_config=bc)
-        assert "+---+" in result
+        assert "+-----+" in result
         assert "\u256d" not in result
         assert "[time]" in result  # ⏱ → [time]
         assert "[tool]" in result  # 🔧 → [tool]
@@ -701,7 +718,7 @@ class TestAsciiModeRendering:
         result = render_session_start(scan, [], "casual", "en", buddy_config=bc, typing=True)
         assert result == ""
         captured = capsys.readouterr()
-        assert "+---+" in captured.err
+        assert "+-----+" in captured.err
         assert "\u256d" not in captured.err
 
 
@@ -757,6 +774,21 @@ class TestRenderBarChart:
         result = render_bar_chart("Edit", 5, 10, color="yellow")
         assert ANSI_COLORS["yellow"] in result
         assert ANSI_COLORS["reset"] in result
+
+
+class TestRenderIntelligenceReport:
+    """Tests for display-width-aware report boxes."""
+
+    def test_box_lines_share_same_display_width_for_wide_text(self):
+        result = render_intelligence_report(
+            {"duration_minutes": 32, "tool_count": 47, "tokens_in": 12345, "tokens_out": 6789},
+            [{"file": "src/\uc778\uc99d/\ub85c\uadf8\uc778/very-long-component-name.tsx"} for _ in range(6)],
+            ["src/\ud14c\uc2a4\ud2b8\uc5c6\uc74c/\ub9e4\uc6b0\uae34\ud30c\uc77c\uc774\ub984.ts"],
+            "\ud30c\uc77c 8\uac1c \uc218\uc815 \u00b7 \uba85\ub839\uc5b4 7\uac1c \uc2e4\ud589",
+            language="ko",
+        )
+        widths = {display_width(line) for line in result.splitlines() if line}
+        assert len(widths) == 1
 
     def test_no_color_in_ascii_mode(self):
         result = render_bar_chart("Edit", 5, 10, color="yellow", ascii_mode=True)

@@ -7,6 +7,7 @@ import sys
 import io
 from unittest.mock import patch, MagicMock
 import pytest
+from buddy_renderer import display_width
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "hooks", "lib"))
 
@@ -263,6 +264,31 @@ class TestSessionSummaryRendering:
         assert stats_arg["files_changed"] == 5  # Edit:3 + Write:2
         assert call_args[0][2] == "casual"
         assert call_args[0][3] == "en"
+
+
+class TestImpactReportRendering:
+    """Tests for display-width-safe impact report rendering."""
+
+    def test_impact_report_box_aligns_with_wide_text(self, tmp_path):
+        mod = _load_module()
+        impact_dir = tmp_path / "docs" / "codingbuddy"
+        impact_dir.mkdir(parents=True)
+
+        events = [
+            {"sessionId": "session-1", "eventType": "issue_prevented", "data": {"count": 2, "domain": "\ubcf4\uc548"}},
+            {"sessionId": "session-1", "eventType": "agent_dispatched", "data": {}},
+            {"sessionId": "session-1", "eventType": "checklist_generated", "data": {"domain": "\uc811\uadfc\uc131"}},
+            {"sessionId": "session-1", "eventType": "mode_activated", "data": {"mode": "PLAN"}},
+            {"sessionId": "session-1", "eventType": "mode_activated", "data": {"mode": "ACT"}},
+        ]
+        with open(impact_dir / "impact-events.jsonl", "w", encoding="utf-8") as f:
+            for event in events:
+                f.write(json.dumps(event, ensure_ascii=False) + "\n")
+
+        result = mod._render_impact_report("session-1", str(tmp_path))
+        assert result
+        widths = {display_width(line) for line in result.splitlines() if line}
+        assert len(widths) == 1
 
     @patch("buddy_renderer.render_session_summary")
     @patch("config.get_config")

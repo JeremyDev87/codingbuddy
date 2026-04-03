@@ -317,13 +317,19 @@ def _render_impact_report(session_id, project_dir):
         return ""
 
     # Box rendering
-    BOX_W = 41
+    from buddy_renderer import display_width, render_box_line
+
+    title = "  \U0001f4ca Impact Report"
+    BOX_W = max(
+        41,
+        min(54, max(display_width(text) for text in [title, *rows]) + 2),
+    )
     hr = "─" * BOX_W
 
     def _box(text):
-        return f"│{text.ljust(BOX_W)}│"
+        return render_box_line(text, BOX_W)
 
-    lines = [f"╭{hr}╮", _box("  📊 Impact Report"), f"├{hr}┤"]
+    lines = [f"╭{hr}╮", _box(title), f"├{hr}┤"]
     for row in rows:
         lines.append(_box(row))
     lines.append(f"╰{hr}╯")

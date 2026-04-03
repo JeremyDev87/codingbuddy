@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 from typing import Any, Dict, List, Optional
 
 # ANSI color codes for terminal output
@@ -151,6 +152,128 @@ _MAX_FACE_LENGTH = 10
 _FACE_PATTERN = re.compile(
     r"^[^\x00-\x1f\x7f A-Za-z0-9]{1,%d}$" % _MAX_FACE_LENGTH
 )
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from a string."""
+    return _ANSI_RE.sub("", text)
+
+
+def _char_display_width(char: str) -> int:
+    """Best-effort terminal display width for a single character."""
+    if not char:
+        return 0
+    if unicodedata.combining(char):
+        return 0
+
+    category = unicodedata.category(char)
+    if category in ("Cc", "Cf"):
+        return 0
+
+    codepoint = ord(char)
+    # Treat emoji/pictographs as double-width in common terminals.
+    if 0x1F300 <= codepoint <= 0x1FAFF or 0x2600 <= codepoint <= 0x27BF:
+        return 2
+
+    if unicodedata.east_asian_width(char) in ("W", "F"):
+        return 2
+
+    return 1
+
+
+def display_width(text: str) -> int:
+    """Return terminal display width, ignoring ANSI escape codes."""
+    return sum(_char_display_width(ch) for ch in strip_ansi(text))
+
+
+def pad_to_display_width(text: str, width: int) -> str:
+    """Right-pad a string to a target terminal display width."""
+    padding = max(0, width - display_width(text))
+    return text + (" " * padding)
+
+
+def truncate_to_display_width(
+    text: str,
+    width: int,
+    ellipsis: str = "\u2026",
+) -> str:
+    """Truncate a string to a target terminal display width."""
+    if width <= 0:
+        return ""
+    if display_width(text) <= width:
+        return text
+
+    ellipsis_width = display_width(ellipsis)
+    if width <= ellipsis_width:
+        return ellipsis if width == ellipsis_width else ""
+
+    result: List[str] = []
+    current = 0
+    limit = width - ellipsis_width
+    for ch in strip_ansi(text):
+        ch_width = _char_display_width(ch)
+        if current + ch_width > limit:
+            break
+        result.append(ch)
+        current += ch_width
+
+    return "".join(result).rstrip() + ellipsis
+
+
+def truncate_left_to_display_width(
+    text: str,
+    width: int,
+    ellipsis: str = "\u2026",
+) -> str:
+    """Left-truncate a string while keeping the tail visible."""
+    if width <= 0:
+        return ""
+    if display_width(text) <= width:
+        return text
+
+    ellipsis_width = display_width(ellipsis)
+    if width <= ellipsis_width:
+        return ellipsis if width == ellipsis_width else ""
+
+    result: List[str] = []
+    current = 0
+    limit = width - ellipsis_width
+    for ch in reversed(strip_ansi(text)):
+        ch_width = _char_display_width(ch)
+        if current + ch_width > limit:
+            break
+        result.append(ch)
+        current += ch_width
+
+    return ellipsis + "".join(reversed(result)).lstrip()
+
+
+def render_face_banner(face: str, message: str = "") -> List[str]:
+    """Render a small face box that stays aligned for custom/wide faces."""
+    inner_width = max(3, display_width(face) + 2)
+    face_cell = pad_to_display_width(f" {face} ", inner_width)
+    rule = "\u2501" * inner_width
+    top = f"\u256d{rule}\u256e"
+    middle = f"\u2503{face_cell}\u2503"
+    if message:
+        middle += f" {message}"
+    bottom = f"\u2570{rule}\u256f"
+    return [top, middle, bottom]
+
+
+def render_section_header(label: str, min_tail: int = 10) -> str:
+    """Render a section header with balanced trailing rule characters."""
+    prefix = f"\u2501\u2501 {label} "
+    tail = "\u2501" * max(min_tail, 28 - display_width(prefix))
+    return prefix + tail
+
+
+def render_box_line(text: str, width: int) -> str:
+    """Render a single box row with display-width-aware padding."""
+    clipped = truncate_to_display_width(text, width)
+    return f"\u2502{pad_to_display_width(clipped, width)}\u2502"
 
 
 def type_text(text: str, speed: float = 0.03) -> None:
@@ -524,12 +647,7 @@ def render_buddy_face(
     face = bc.get("face", BUDDY_FACE)
     custom_greeting = bc.get("greeting", "")
     greeting = custom_greeting if custom_greeting else _get_greeting(tone, language)
-    lines = [
-        "\u256d\u2501\u2501\u2501\u256e",
-        f"\u2503 {face} \u2503 {greeting}",
-        "\u2570\u2501\u2501\u2501\u256f",
-    ]
-    return "\n".join(lines)
+    return "\n".join(render_face_banner(face, greeting))
 
 
 def render_scan_results(scan: Dict[str, Any]) -> str:
@@ -543,7 +661,7 @@ def render_scan_results(scan: Dict[str, Any]) -> str:
         Formatted scan results string.
     """
     name = scan.get("name", "unknown")
-    lines = [f"\u2501\u2501 {name} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"]
+    lines = [render_section_header(name, min_tail=12)]
 
     framework = scan.get("framework")
     if framework:
@@ -732,18 +850,16 @@ def render_session_summary(
     farewell = custom_farewell if custom_farewell else _get_farewell_message(tone, language)
 
     # Use custom face for wrap variant: take first char of custom face if set
-    face = bc.get("face", BUDDY_FACE)
-    if face != BUDDY_FACE:
-        wrap_face = face  # custom face used as-is
+    buddy_face = bc.get("face", BUDDY_FACE)
+    if buddy_face != BUDDY_FACE:
+        wrap_face = buddy_face  # custom face used as-is
     else:
         wrap_face = BUDDY_WRAP_FACE
 
     parts = []
 
     # Buddy face with farewell greeting
-    parts.append("\u256d\u2501\u2501\u2501\u256e")
-    parts.append(f"\u2503 {wrap_face} \u2503 {greeting}")
-    parts.append("\u2570\u2501\u2501\u2501\u256f")
+    parts.extend(render_face_banner(wrap_face, greeting))
 
     # Session stats section (only if data available)
     duration = stats.get("duration_minutes", 0)
@@ -753,7 +869,7 @@ def render_session_summary(
     if duration > 0 or tool_count > 0 or files_changed > 0:
         header = _get_summary_header("summary", language)
         parts.append("")
-        parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+        parts.append(render_section_header(header, min_tail=18))
 
         stat_items = []
         if duration > 0:
@@ -783,14 +899,14 @@ def render_session_summary(
     if agents:
         header = _get_summary_header("agents", language)
         parts.append("")
-        parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+        parts.append(render_section_header(header, min_tail=16))
         for agent in agents:
             name = agent.get("name", "Agent")
             message = agent.get("message", "")
             eye = agent.get("eye", "\u25cf")
             color = agent.get("colorAnsi", "white")
-            face = f"{eye}\u2304{eye}"
-            colored_face = _colorize(face, color)
+            agent_face = f"{eye}\u2304{eye}"
+            colored_face = _colorize(agent_face, color)
             line = f"{colored_face} {name}"
             if message:
                 line += f"  {message}"
@@ -798,7 +914,7 @@ def render_session_summary(
 
     # Farewell
     parts.append("")
-    parts.append(f"{face} {farewell}")
+    parts.append(f"{buddy_face} {farewell}")
 
     result = "\n".join(parts)
 
@@ -873,14 +989,12 @@ def render_returning_session(
     parts = []
 
     # Buddy face with welcome-back greeting
-    parts.append("\u256d\u2501\u2501\u2501\u256e")
-    parts.append(f"\u2503 {face} \u2503 {greeting}")
-    parts.append("\u2570\u2501\u2501\u2501\u256f")
+    parts.extend(render_face_banner(face, greeting))
 
     # Last session summary
     header = _get_returning_header("last_session", language)
     parts.append("")
-    parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+    parts.append(render_section_header(header, min_tail=8))
 
     stat_items = []
 
@@ -906,7 +1020,7 @@ def render_returning_session(
     if pending_context and pending_context.get("task"):
         pending_header = _get_returning_header("pending", language)
         parts.append("")
-        parts.append(f"\u2501\u2501 {pending_header} \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
+        parts.append(render_section_header(pending_header, min_tail=8))
 
         mode = pending_context.get("mode", "")
         task = pending_context.get("task", "")
@@ -1005,7 +1119,7 @@ def render_session_start(
     if recommendations:
         header = _get_header("recommendations", language)
         parts.append("")
-        parts.append(f"\u2501\u2501 {header} \u2501\u2501\u2501\u2501\u2501\u2501")
+        parts.append(render_section_header(header, min_tail=8))
         parts.append(render_recommendations(recommendations))
 
     # Achievement badges section (#1008)
@@ -1082,13 +1196,25 @@ def render_intelligence_report(
     Returns:
         Formatted Intelligence Report string, or empty string if no data.
     """
-    BOX_W = 41
+    title = _intel_header("title", language)
+    activity_hdr = _intel_header("activity", language)
+    changes_hdr = _intel_header("changes", language)
+    gaps_hdr = _intel_header("gaps", language)
+    insights_hdr = _intel_header("insights", language)
+
+    width_candidates = [
+        f"  \U0001f9e0 {title}",
+        f"  \U0001f4ca {activity_hdr}",
+        f"  \U0001f4dd {changes_hdr}",
+        f"  \u26a0\ufe0f  {gaps_hdr}",
+        f"  \U0001f4a1 {insights_hdr}",
+        f"    {change_summary}",
+    ]
+    BOX_W = max(41, min(54, max(display_width(text) for text in width_candidates) + 2))
     hr = "\u2500" * BOX_W
 
     def _box(text: str) -> str:
-        # Truncate if too long, accounting for Unicode widths
-        display = text[:BOX_W]
-        return f"\u2502{display.ljust(BOX_W)}\u2502"
+        return render_box_line(text, BOX_W)
 
     def _separator() -> str:
         return f"\u251c{hr}\u2524"
@@ -1096,13 +1222,11 @@ def render_intelligence_report(
     lines: List[str] = []
 
     # Title
-    title = _intel_header("title", language)
     lines.append(f"\u256d{hr}\u256e")
     lines.append(_box(f"  \U0001f9e0 {title}"))
     lines.append(_separator())
 
     # --- Activity section ---
-    activity_hdr = _intel_header("activity", language)
     lines.append(_box(f"  \U0001f4ca {activity_hdr}"))
 
     duration = stats.get("duration_minutes", 0)
@@ -1130,17 +1254,14 @@ def render_intelligence_report(
     # --- What You Did section ---
     if changes:
         lines.append(_separator())
-        changes_hdr = _intel_header("changes", language)
         lines.append(_box(f"  \U0001f4dd {changes_hdr}"))
         lines.append(_box(f"    {change_summary}"))
 
         # Show up to 5 changed files
         shown = changes[:5]
+        file_width = max(12, BOX_W - display_width("    \u2022 "))
         for c in shown:
-            fname = c["file"]
-            # Truncate long paths
-            if len(fname) > 33:
-                fname = "\u2026" + fname[-(33 - 1):]
+            fname = truncate_left_to_display_width(c["file"], file_width)
             lines.append(_box(f"    \u2022 {fname}"))
         if len(changes) > 5:
             lines.append(_box(f"    ... +{len(changes) - 5} more"))
@@ -1148,7 +1269,6 @@ def render_intelligence_report(
     # --- Gaps section (untested files) ---
     if untested:
         lines.append(_separator())
-        gaps_hdr = _intel_header("gaps", language)
         lines.append(_box(f"  \u26a0\ufe0f  {gaps_hdr}"))
         count_msg = (
             f"    {len(untested)} file{'s' if len(untested) != 1 else ''}"
@@ -1156,10 +1276,9 @@ def render_intelligence_report(
         )
         lines.append(_box(count_msg))
         shown_untested = untested[:3]
+        file_width = max(12, BOX_W - display_width("    \u2022 "))
         for f in shown_untested:
-            fname = f
-            if len(fname) > 33:
-                fname = "\u2026" + fname[-(33 - 1):]
+            fname = truncate_left_to_display_width(f, file_width)
             lines.append(_box(f"    \u2022 {fname}"))
         if len(untested) > 3:
             lines.append(_box(f"    ... +{len(untested) - 3} more"))
@@ -1167,7 +1286,6 @@ def render_intelligence_report(
     # --- Insights section ---
     if changes:
         lines.append(_separator())
-        insights_hdr = _intel_header("insights", language)
         lines.append(_box(f"  \U0001f4a1 {insights_hdr}"))
 
         # Detect frequent-edit directories
