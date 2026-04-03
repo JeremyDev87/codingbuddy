@@ -57,7 +57,7 @@ class TestEnglishModeKeywords:
             env=mock_env,
         )
         assert result.succeeded
-        assert f"MODE_KEYWORD_DETECTED: {mode}" in result.stdout
+        assert f"# Mode: {mode}" in result.stdout
 
     def test_no_detection_for_normal_prompt(self, mock_env):
         result = run_hook(
@@ -66,7 +66,7 @@ class TestEnglishModeKeywords:
             env=mock_env,
         )
         assert result.succeeded
-        assert "MODE_KEYWORD_DETECTED" not in result.stdout
+        assert "# Mode:" not in result.stdout
 
 
 class TestKoreanModeKeywords:
@@ -85,7 +85,7 @@ class TestKoreanModeKeywords:
             env=mock_env,
         )
         assert result.succeeded
-        assert f"MODE_KEYWORD_DETECTED: {mode}" in result.stdout
+        assert f"# Mode: {mode}" in result.stdout
 
 
 class TestJapaneseModeKeywords:
@@ -104,7 +104,7 @@ class TestJapaneseModeKeywords:
             env=mock_env,
         )
         assert result.succeeded
-        assert f"MODE_KEYWORD_DETECTED: {mode}" in result.stdout
+        assert f"# Mode: {mode}" in result.stdout
 
 
 class TestChineseModeKeywords:
@@ -123,7 +123,7 @@ class TestChineseModeKeywords:
             env=mock_env,
         )
         assert result.succeeded
-        assert f"MODE_KEYWORD_DETECTED: {mode}" in result.stdout
+        assert f"# Mode: {mode}" in result.stdout
 
 
 class TestSpanishModeKeywords:
@@ -142,29 +142,28 @@ class TestSpanishModeKeywords:
             env=mock_env,
         )
         assert result.succeeded
-        assert f"MODE_KEYWORD_DETECTED: {mode}" in result.stdout
+        assert f"# Mode: {mode}" in result.stdout
 
 
 class TestContextInjection:
-    """Verify correct context format is injected."""
+    """Verify self-contained mode instructions are injected."""
 
-    def test_context_contains_mandatory_action(self, mock_env):
+    def test_context_contains_parse_mode_hint(self, mock_env):
         result = run_hook(
             "user-prompt-submit.py",
             input_data={"prompt": "PLAN design a new feature"},
             env=mock_env,
         )
-        assert "MANDATORY_ACTION" in result.stdout
+        assert "# Mode: PLAN" in result.stdout
         assert "parse_mode" in result.stdout
 
-    def test_context_wrapped_in_tags(self, mock_env):
+    def test_context_contains_agent_name(self, mock_env):
         result = run_hook(
             "user-prompt-submit.py",
             input_data={"prompt": "AUTO implement feature"},
             env=mock_env,
         )
-        assert "<codingbuddy-mode-detected>" in result.stdout
-        assert "</codingbuddy-mode-detected>" in result.stdout
+        assert "# Mode: AUTO" in result.stdout
 
     def test_case_insensitive_detection(self, mock_env):
         """Keywords should be detected case-insensitively."""
@@ -174,4 +173,4 @@ class TestContextInjection:
             env=mock_env,
         )
         assert result.succeeded
-        assert "MODE_KEYWORD_DETECTED: PLAN" in result.stdout
+        assert "# Mode: PLAN" in result.stdout

@@ -104,7 +104,7 @@ export class AgentStackService {
       typeof obj.description === 'string' &&
       typeof obj.category === 'string' &&
       typeof obj.primary_agent === 'string' &&
-      Array.isArray(obj.specialists)
+      Array.isArray(obj.specialist_agents)
     );
   }
 
@@ -114,8 +114,8 @@ export class AgentStackService {
       description: stack.description,
       category: stack.category,
       primary_agent: stack.primary_agent,
-      specialist_count: stack.specialists.length,
-      tags: stack.tags ?? [],
+      specialist_count: stack.specialist_agents.length,
+      tags: stack.tags,
     };
   }
 }

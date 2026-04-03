@@ -977,7 +977,7 @@ describe('AgentHandler', () => {
       description: 'API development stack',
       category: 'development',
       primary_agent: 'backend-developer',
-      specialists: ['security-specialist', 'test-engineer'],
+      specialist_agents: ['security-specialist', 'test-engineer'],
       tags: ['api', 'backend'],
     };
 
