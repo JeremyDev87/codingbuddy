@@ -31,9 +31,9 @@ This command activates PLAN mode for the CodingBuddy workflow.
 - After creating plan, user can type `ACT` to execute
 
 **🔴 Agent Activation (STRICT):**
-- When in PLAN mode, **Frontend Developer Agent** (`.ai-rules/agents/frontend-developer.json`) **MUST** be automatically activated
+- When in PLAN mode, **Frontend Developer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
 - The Agent's workflow framework and all mandatory requirements MUST be followed
-- See `.ai-rules/agents/frontend-developer.json` for complete development framework
+- See agent documentation for complete development framework
 
 **Purpose:**
 Create actionable implementation plans following TDD and augmented coding principles
@@ -72,7 +72,7 @@ Resolve ambiguous requirements through sequential Q&A before creating a plan.
 - User provides comprehensive specification document
 
 **Reference:**
-See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
+See project rules for detailed question guidelines.
 
 ---
 
@@ -128,7 +128,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 🏗️ Architecture Planning
 (When architecture planning is needed)
-- Use Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) modes.planning for comprehensive architecture planning
+- Use Architecture Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive architecture planning
 - [Layer placement plan (per project architecture)]
 - [Dependency direction design]
 - [Type definitions planning]
@@ -137,7 +137,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 🧪 Test Strategy Planning
 (When test strategy planning is needed)
-- Use Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.planning for comprehensive test strategy planning
+- Use Test Strategy Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive test strategy planning
 - [TDD vs Test-After decision]
 - [Test coverage goals (90%+ for core logic)]
 - [Test file structure planning]
@@ -145,7 +145,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## ⚡ Performance Planning
 (When performance planning is needed)
-- Use Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) modes.planning for comprehensive performance planning
+- Use Performance Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive performance planning
 - [Bundle/build size optimization plan]
 - [Code splitting strategy]
 - [Framework-specific optimization techniques]
@@ -153,7 +153,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 🔒 Security Planning
 (When security planning is needed)
-- Use Security Specialist Agent framework (`.ai-rules/agents/security-specialist.json`) modes.planning for comprehensive security planning
+- Use Security Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive security planning
 - [Authentication planning (OAuth 2.0, JWT)]
 - [Authorization planning]
 - [Input validation planning]
@@ -161,7 +161,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 📨 Event Architecture Planning
 (When event-driven architecture, message queues, or distributed transactions planning is needed)
-- Use Event Architecture Specialist Agent framework (`.ai-rules/agents/event-architecture-specialist.json`) modes.planning for comprehensive event architecture planning
+- Use Event Architecture Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive event architecture planning
 - [Message broker selection (Kafka, RabbitMQ, SQS)]
 - [Event schema and versioning planning]
 - [Delivery guarantees and idempotency planning]
@@ -170,7 +170,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## ♿ Accessibility Planning
 (When accessibility planning is needed)
-- Use Accessibility Specialist Agent framework (`.ai-rules/agents/accessibility-specialist.json`) modes.planning for comprehensive accessibility planning
+- Use Accessibility Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive accessibility planning
 - [WCAG 2.1 AA compliance plan]
 - [ARIA attributes planning]
 - [Keyboard navigation planning]
@@ -178,7 +178,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 🔍 SEO Planning
 (When SEO planning is needed)
-- Use SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) modes.planning for comprehensive SEO planning
+- Use SEO Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive SEO planning
 - [Framework metadata API planning]
 - [Structured data planning]
 - [Social sharing optimization planning]
@@ -186,7 +186,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 🎨 UI/UX Design Planning
 (When UI/UX design planning is needed)
-- Use UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) modes.planning for comprehensive UI/UX design planning
+- Use UI/UX Designer Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive UI/UX design planning
 - [Visual hierarchy planning]
 - [User flow optimization]
 - [Interaction patterns planning]
@@ -194,7 +194,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 📚 Documentation Planning
 (When documentation planning is needed)
-- Use Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.planning for comprehensive documentation planning
+- Use Documentation Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive documentation planning
 - [Code comments planning for complex logic]
 - [TypeScript type definitions as documentation]
 - [JSDoc comments for public APIs]
@@ -202,7 +202,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ## 📐 Code Quality Planning
 (When code quality planning is needed)
-- Use Code Quality Specialist Agent framework (`.ai-rules/agents/code-quality-specialist.json`) modes.planning for comprehensive code quality planning
+- Use Code Quality Specialist Agent (dispatched via parse_mode in MCP mode) modes.planning for comprehensive code quality planning
 - [SOLID principles application planning]
 - [DRY strategy planning (code duplication elimination)]
 - [Complexity management planning (function size, nesting depth)]

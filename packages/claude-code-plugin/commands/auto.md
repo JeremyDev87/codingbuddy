@@ -79,10 +79,10 @@ Autonomous iterative development - automatically cycling through planning, imple
 | `auto.maxIterations` | 3 | 1-10 | Maximum PLAN→ACT→EVAL cycles before forced exit |
 
 **🔴 Agent Activation (STRICT):**
-- When AUTO mode is triggered, **Primary Developer Agent** (e.g., `.ai-rules/agents/frontend-developer.json`) **MUST** be automatically activated for PLAN and ACT phases
-- During EVAL phase, **Code Reviewer Agent** (`.ai-rules/agents/code-reviewer.json`) **MUST** be automatically activated
+- When AUTO mode is triggered, **Primary Developer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated for PLAN and ACT phases
+- During EVAL phase, **Code Reviewer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
 - The respective Agent's workflow framework and all mandatory requirements MUST be followed
-- See `.ai-rules/agents/` for complete agent frameworks
+- See agent definitions for complete agent frameworks
 
 **Output Format:**
 ```

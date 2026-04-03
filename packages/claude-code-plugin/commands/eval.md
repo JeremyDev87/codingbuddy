@@ -37,9 +37,9 @@ This command activates EVAL mode for the CodingBuddy workflow.
 - Korean: `평가해` or `개선안 제시해`
 
 **🔴 Agent Activation (STRICT):**
-- When EVAL is triggered, **Code Reviewer Agent** (`.ai-rules/agents/code-reviewer.json`) **MUST** be automatically activated
+- When EVAL is triggered, **Code Reviewer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
 - The Agent's evaluation framework and all mandatory requirements MUST be followed
-- See `.ai-rules/agents/code-reviewer.json` for complete evaluation framework
+- See agent documentation for complete evaluation framework
 
 **Purpose:**
 Self-improvement through iterative refinement
@@ -54,23 +54,23 @@ Self-improvement through iterative refinement
 
 2. **Assess Quality** (via Code Reviewer Agent mandatory perspectives)
    - 🔴 Code quality (SOLID, DRY, complexity)
-     - **Required**: When evaluating code quality, reference Code Quality Specialist Agent (`.ai-rules/agents/code-quality-specialist.json`) modes.evaluation framework for SOLID principles, DRY, complexity analysis, and design patterns assessment
+     - **Required**: When evaluating code quality, reference Code Quality Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation framework for SOLID principles, DRY, complexity analysis, and design patterns assessment
    - 🔴 Architecture (layer boundaries, dependency direction, type safety)
-     - **Required**: When evaluating architecture, reference Architecture Specialist Agent (`.ai-rules/agents/architecture-specialist.json`) framework for layer boundaries, dependency direction, and type safety assessment
+     - **Required**: When evaluating architecture, reference Architecture Specialist Agent (dispatched via parse_mode in MCP mode) framework for layer boundaries, dependency direction, and type safety assessment
    - 🔴 Test coverage (90%+ goal)
-     - **Required**: When evaluating tests, reference Test Strategy Specialist Agent (`.ai-rules/agents/test-strategy-specialist.json`) modes.evaluation framework for test coverage, TDD workflow, and test quality assessment
+     - **Required**: When evaluating tests, reference Test Strategy Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation framework for test coverage, TDD workflow, and test quality assessment
    - 🔴 Performance (build size, execution optimization)
-     - **Required**: When evaluating performance, reference Performance Specialist Agent (`.ai-rules/agents/performance-specialist.json`) framework for build size, execution optimization, and performance metrics assessment
+     - **Required**: When evaluating performance, reference Performance Specialist Agent (dispatched via parse_mode in MCP mode) framework for build size, execution optimization, and performance metrics assessment
    - 🔴 Security (XSS/CSRF, authentication/authorization)
-     - **Required**: When evaluating security, reference Security Specialist Agent (`.ai-rules/agents/security-specialist.json`) framework for OAuth 2.0, JWT, CSRF/XSS protection assessment
+     - **Required**: When evaluating security, reference Security Specialist Agent (dispatched via parse_mode in MCP mode) framework for OAuth 2.0, JWT, CSRF/XSS protection assessment
    - 🔴 Accessibility (WCAG 2.1 AA compliance)
-     - **Required**: When evaluating accessibility, reference Accessibility Specialist Agent (`.ai-rules/agents/accessibility-specialist.json`) framework for WCAG 2.1 AA compliance verification
+     - **Required**: When evaluating accessibility, reference Accessibility Specialist Agent (dispatched via parse_mode in MCP mode) framework for WCAG 2.1 AA compliance verification
    - 🔴 SEO (metadata, structured data)
-     - **Required**: When evaluating SEO, reference SEO Specialist Agent (`.ai-rules/agents/seo-specialist.json`) framework for metadata, structured data, and search engine optimization assessment
+     - **Required**: When evaluating SEO, reference SEO Specialist Agent (dispatched via parse_mode in MCP mode) framework for metadata, structured data, and search engine optimization assessment
    - 🔴 UI/UX Design (visual hierarchy, UX patterns)
-     - **Required**: When evaluating UI/UX design, reference UI/UX Designer Agent (`.ai-rules/agents/ui-ux-designer.json`) framework for visual hierarchy, UX laws, and interaction patterns assessment
+     - **Required**: When evaluating UI/UX design, reference UI/UX Designer Agent (dispatched via parse_mode in MCP mode) framework for visual hierarchy, UX laws, and interaction patterns assessment
    - 🔴 Documentation Quality (documentation, cursor rules, AI prompts)
-     - **Required**: When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment
+     - **Required**: When evaluating documentation, cursor rules, or AI prompts, reference Documentation Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation framework for clarity, completeness, consistency, actionability, structure, and references assessment
 
 3. **Identify Improvements** (via Code Reviewer Agent)
    - Evaluate from multiple perspectives
@@ -91,7 +91,7 @@ Self-improvement through iterative refinement
 - Evaluate OUTPUT only, not implementer's INTENT
 - No subjective assessments - use objective evidence only
 - Must identify at least 3 improvement areas OR all identified issues
-- Prohibited phrases: See `anti_sycophancy.prohibited_phrases` in `.ai-rules/agents/code-reviewer.json` (English + Korean)
+- Prohibited phrases: See Code Reviewer Agent's `anti_sycophancy.prohibited_phrases` (English + Korean)
 - Start with problems, not praise
 - Challenge every design decision
 
@@ -178,14 +178,14 @@ Self-improvement through iterative refinement
 
 ## 🔒 Security Assessment
 (When authentication/authorization code or security-related features are present)
-- Use Security Specialist Agent framework (`.ai-rules/agents/security-specialist.json`) for comprehensive security review
+- Use Security Specialist Agent (dispatched via parse_mode in MCP mode) for comprehensive security review
 - [OAuth 2.0 / JWT security review]
 - [CSRF/XSS protection verification]
 - [Security vulnerabilities with risk assessment (Critical/High/Medium/Low)]
 
 ## 📨 Event Architecture Assessment
 (When event-driven architecture or message queue code is present)
-- Use Event Architecture Specialist Agent framework (`.ai-rules/agents/event-architecture-specialist.json`) modes.evaluation for comprehensive event architecture review
+- Use Event Architecture Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation for comprehensive event architecture review
 - [Reliability and delivery guarantees audit]
 - [Consistency and saga pattern verification]
 - [Scalability and partitioning assessment]
@@ -193,14 +193,14 @@ Self-improvement through iterative refinement
 
 ## ♿ Accessibility Assessment
 (When UI components are present)
-- Use Accessibility Specialist Agent framework (`.ai-rules/agents/accessibility-specialist.json`) for comprehensive accessibility review
+- Use Accessibility Specialist Agent (dispatched via parse_mode in MCP mode) for comprehensive accessibility review
 - [WCAG 2.1 AA compliance review]
 - [ARIA attributes and keyboard navigation verification]
 - [Accessibility issues with impact assessment (Critical/High/Medium/Low)]
 
 ## 📐 Code Quality Assessment
 (When code quality evaluation is needed)
-- Use Code Quality Specialist Agent framework (`.ai-rules/agents/code-quality-specialist.json`) modes.evaluation for comprehensive code quality review
+- Use Code Quality Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation for comprehensive code quality review
 - [SOLID principles compliance review]
 - [DRY principle verification]
 - [Complexity analysis]
@@ -208,7 +208,7 @@ Self-improvement through iterative refinement
 
 ## 🏗️ Architecture Assessment
 (When architecture evaluation is needed)
-- Use Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) for comprehensive architecture review
+- Use Architecture Specialist Agent (dispatched via parse_mode in MCP mode) for comprehensive architecture review
 - [Layer boundaries compliance review]
 - [Dependency direction verification]
 - [Type safety assessment]
@@ -216,7 +216,7 @@ Self-improvement through iterative refinement
 
 ## 🧪 Test Quality Assessment
 (When test evaluation is needed)
-- Use Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.evaluation for comprehensive test quality review
+- Use Test Strategy Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation for comprehensive test quality review
 - [Test coverage (90%+ goal) review]
 - [TDD workflow verification]
 - [Test-After strategy validation]
@@ -224,7 +224,7 @@ Self-improvement through iterative refinement
 
 ## ⚡ Performance Assessment
 (When performance evaluation is needed)
-- Use Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) for comprehensive performance review
+- Use Performance Specialist Agent (dispatched via parse_mode in MCP mode) for comprehensive performance review
 - [Build/bundle size optimization review]
 - [Framework-specific optimization assessment]
 - [Performance metrics verification]
@@ -232,7 +232,7 @@ Self-improvement through iterative refinement
 
 ## 🔍 SEO Assessment
 (When SEO evaluation is needed)
-- Use SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) for comprehensive SEO review
+- Use SEO Specialist Agent (dispatched via parse_mode in MCP mode) for comprehensive SEO review
 - [Framework metadata API usage review]
 - [Structured data verification]
 - [Social sharing optimization assessment]
@@ -240,7 +240,7 @@ Self-improvement through iterative refinement
 
 ## 🎨 UI/UX Design Assessment
 (When UI/UX design evaluation is needed)
-- Use UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) for comprehensive UI/UX design review
+- Use UI/UX Designer Agent (dispatched via parse_mode in MCP mode) for comprehensive UI/UX design review
 - [Visual hierarchy assessment]
 - [User flow evaluation]
 - [Interaction patterns review]
@@ -248,7 +248,7 @@ Self-improvement through iterative refinement
 
 ## 📚 Documentation Quality Assessment
 (When documentation, cursor rules, or AI prompts are evaluated)
-- Use Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.evaluation for comprehensive documentation quality review
+- Use Documentation Specialist Agent (dispatched via parse_mode in MCP mode) modes.evaluation for comprehensive documentation quality review
 - [Clarity assessment (goals, instructions, terminology)]
 - [Completeness review (required sections, edge cases)]
 - [Consistency verification (naming, format, structure)]
@@ -299,7 +299,7 @@ To preserve this evaluation session for future reference:
 **Special Cases:**
 
 *Documentation-only changes (no code):*
-- Use `documentation_metrics` from `code-reviewer.json` instead of code metrics
+- Use Code Reviewer Agent's `documentation_metrics` instead of code metrics
 - Evaluate: clarity, completeness, consistency, actionability
 - Critical Findings table should reference section names instead of file:line
 

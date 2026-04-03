@@ -35,9 +35,9 @@ This command activates ACT mode for the CodingBuddy workflow.
 - Execute implementation steps defined in PLAN
 
 **🔴 Agent Activation (STRICT):**
-- When ACT is triggered, **Frontend Developer Agent** (`.ai-rules/agents/frontend-developer.json`) **MUST** be automatically activated
+- When ACT is triggered, **Frontend Developer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
 - The Agent's development philosophy and code quality checklist MUST be followed
-- See `.ai-rules/agents/frontend-developer.json` for complete development framework
+- See agent documentation for complete development framework
 
 **Purpose:**
 Execute implementation following TDD cycle, augmented coding principles, and quality standards
@@ -83,28 +83,28 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 
 ## 🏗️ Architecture Implementation Verification
 (When architecture implementation verification is needed)
-- Use Architecture Specialist Agent framework (`.ai-rules/agents/architecture-specialist.json`) modes.implementation for comprehensive architecture implementation verification
+- Use Architecture Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive architecture implementation verification
 - [Layer placement verification]
 - [Dependency direction verification]
 - [Type definitions verification]
 
 ## 🧪 Test Strategy Implementation Verification
 (When test strategy implementation verification is needed)
-- Use Test Strategy Specialist Agent framework (`.ai-rules/agents/test-strategy-specialist.json`) modes.implementation for comprehensive test strategy implementation verification
+- Use Test Strategy Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive test strategy implementation verification
 - [TDD vs Test-After verification]
 - [Test coverage verification (90%+ for core logic)]
 - [Test file structure verification]
 
 ## ⚡ Performance Implementation Verification
 (When performance implementation verification is needed)
-- Use Performance Specialist Agent framework (`.ai-rules/agents/performance-specialist.json`) modes.implementation for comprehensive performance implementation verification
+- Use Performance Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive performance implementation verification
 - [Bundle/build size verification]
 - [Code splitting verification]
 - [Framework-specific optimization verification]
 
 ## 🔒 Security Implementation Verification
 (When security implementation verification is needed)
-- Use Security Specialist Agent framework (`.ai-rules/agents/security-specialist.json`) modes.implementation for comprehensive security implementation verification
+- Use Security Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive security implementation verification
 - [Authentication verification (OAuth 2.0, JWT)]
 - [Authorization verification]
 - [Input validation verification]
@@ -112,7 +112,7 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 
 ## 📨 Event Architecture Implementation Verification
 (When event-driven architecture implementation verification is needed)
-- Use Event Architecture Specialist Agent framework (`.ai-rules/agents/event-architecture-specialist.json`) modes.implementation for comprehensive event architecture implementation verification
+- Use Event Architecture Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive event architecture implementation verification
 - [Producer/consumer implementation verification]
 - [Idempotency and retry configuration verification]
 - [DLQ and error handling verification]
@@ -120,7 +120,7 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 
 ## ♿ Accessibility Implementation Verification
 (When accessibility implementation verification is needed)
-- Use Accessibility Specialist Agent framework (`.ai-rules/agents/accessibility-specialist.json`) modes.implementation for comprehensive accessibility implementation verification
+- Use Accessibility Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive accessibility implementation verification
 - [WCAG 2.1 AA compliance verification]
 - [ARIA attributes verification]
 - [Keyboard navigation verification]
@@ -128,28 +128,28 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
 
 ## 🔍 SEO Implementation Verification
 (When SEO implementation verification is needed)
-- Use SEO Specialist Agent framework (`.ai-rules/agents/seo-specialist.json`) modes.implementation for comprehensive SEO implementation verification
+- Use SEO Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive SEO implementation verification
 - [Framework metadata API verification]
 - [Structured data verification]
 - [Social sharing optimization verification]
 
 ## 🎨 UI/UX Design Implementation Verification
 (When UI/UX design implementation verification is needed)
-- Use UI/UX Designer Agent framework (`.ai-rules/agents/ui-ux-designer.json`) modes.implementation for comprehensive UI/UX design implementation verification
+- Use UI/UX Designer Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive UI/UX design implementation verification
 - [Visual hierarchy verification]
 - [Interaction states verification]
 - [Responsive design verification]
 
 ## 📚 Documentation Implementation Verification
 (When documentation implementation verification is needed)
-- Use Documentation Specialist Agent framework (`.ai-rules/agents/documentation-specialist.json`) modes.implementation for comprehensive documentation implementation verification
+- Use Documentation Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive documentation implementation verification
 - [Code comments verification for complex logic]
 - [TypeScript type definitions verification]
 - [JSDoc verification for public APIs]
 
 ## 📐 Code Quality Implementation Verification
 (When code quality implementation verification is needed)
-- Use Code Quality Specialist Agent framework (`.ai-rules/agents/code-quality-specialist.json`) modes.implementation for comprehensive code quality implementation verification
+- Use Code Quality Specialist Agent (dispatched via parse_mode in MCP mode) modes.implementation for comprehensive code quality implementation verification
 - [SOLID principles verification]
 - [DRY principle verification (code duplication elimination)]
 - [Complexity verification (function size, nesting depth)]
