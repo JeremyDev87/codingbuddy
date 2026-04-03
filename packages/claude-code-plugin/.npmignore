@@ -1,0 +1,14 @@
+# Build/Dev artifacts
+dist/
+src/
+coverage/
+*.tsbuildinfo
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Note: hooks/ test/runtime exclusions are in hooks/.npmignore
+# (root .npmignore cannot override package.json "files" field)

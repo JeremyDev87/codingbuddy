@@ -1,0 +1,13 @@
+# Runtime artifacts
+.omc/
+
+# Test files
+test_*.py
+tests/
+lib/test_*.py
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
