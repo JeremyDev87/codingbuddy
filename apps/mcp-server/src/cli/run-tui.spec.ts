@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import type { IpcInstance } from '../tui/ipc/ipc.types';
 
 // --- runTui integration tests with module mocks ---
@@ -31,6 +33,54 @@ vi.mock('../tui/ipc', () => ({
     getSessions = mockGetSessions;
   },
 }));
+
+describe('resolveHudStateDir', () => {
+  const savedEnv: Record<string, string | undefined> = {};
+
+  beforeEach(() => {
+    savedEnv.CODINGBUDDY_HUD_STATE_DIR = process.env.CODINGBUDDY_HUD_STATE_DIR;
+    savedEnv.CLAUDE_PLUGIN_DATA = process.env.CLAUDE_PLUGIN_DATA;
+    delete process.env.CODINGBUDDY_HUD_STATE_DIR;
+    delete process.env.CLAUDE_PLUGIN_DATA;
+  });
+
+  afterEach(() => {
+    if (savedEnv.CODINGBUDDY_HUD_STATE_DIR !== undefined) {
+      process.env.CODINGBUDDY_HUD_STATE_DIR = savedEnv.CODINGBUDDY_HUD_STATE_DIR;
+    } else {
+      delete process.env.CODINGBUDDY_HUD_STATE_DIR;
+    }
+    if (savedEnv.CLAUDE_PLUGIN_DATA !== undefined) {
+      process.env.CLAUDE_PLUGIN_DATA = savedEnv.CLAUDE_PLUGIN_DATA;
+    } else {
+      delete process.env.CLAUDE_PLUGIN_DATA;
+    }
+  });
+
+  it('returns CODINGBUDDY_HUD_STATE_DIR when set', async () => {
+    process.env.CODINGBUDDY_HUD_STATE_DIR = '/custom/hud-dir';
+    const { resolveHudStateDir } = await import('./run-tui');
+    expect(resolveHudStateDir()).toBe('/custom/hud-dir');
+  });
+
+  it('returns CLAUDE_PLUGIN_DATA when CODINGBUDDY_HUD_STATE_DIR is unset', async () => {
+    process.env.CLAUDE_PLUGIN_DATA = '/plugin/data';
+    const { resolveHudStateDir } = await import('./run-tui');
+    expect(resolveHudStateDir()).toBe('/plugin/data');
+  });
+
+  it('returns ~/.codingbuddy as default fallback', async () => {
+    const { resolveHudStateDir } = await import('./run-tui');
+    expect(resolveHudStateDir()).toBe(path.join(os.homedir(), '.codingbuddy'));
+  });
+
+  it('CODINGBUDDY_HUD_STATE_DIR takes priority over CLAUDE_PLUGIN_DATA', async () => {
+    process.env.CODINGBUDDY_HUD_STATE_DIR = '/explicit-override';
+    process.env.CLAUDE_PLUGIN_DATA = '/plugin/data';
+    const { resolveHudStateDir } = await import('./run-tui');
+    expect(resolveHudStateDir()).toBe('/explicit-override');
+  });
+});
 
 describe('runTui', () => {
   let stderrSpy: ReturnType<typeof vi.spyOn>;

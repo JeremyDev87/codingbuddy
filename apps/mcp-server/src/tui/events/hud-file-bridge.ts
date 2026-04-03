@@ -15,6 +15,8 @@ const VALID_MODES = new Set(['PLAN', 'ACT', 'EVAL', 'AUTO']);
 export interface HudFileBridgeOptions {
   /** Debounce interval in ms (default: 150) */
   debounceMs?: number;
+  /** Polling interval in ms when fs.watch fails (default: 1000) */
+  pollIntervalMs?: number;
 }
 
 interface HudState {
@@ -26,10 +28,12 @@ export class HudFileBridge {
   private readonly eventBus: TuiEventBus;
   private readonly filePath: string;
   private readonly debounceMs: number;
+  private readonly pollIntervalMs: number;
 
   private watcher: fs.FSWatcher | null = null;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private lastMtimeMs = 0;
   private prev: HudState = { currentMode: null, activeAgent: null };
   private stopped = false;
 
@@ -37,6 +41,7 @@ export class HudFileBridge {
     this.eventBus = eventBus;
     this.filePath = filePath;
     this.debounceMs = options?.debounceMs ?? 150;
+    this.pollIntervalMs = options?.pollIntervalMs ?? 1000;
   }
 
   start(): void {
@@ -56,7 +61,10 @@ export class HudFileBridge {
         if (!filename || filename === basename) this.scheduleProcess();
       });
       this.watcher.on('error', () => {
-        // Directory deleted or inaccessible — silently ignore
+        // Directory deleted or inaccessible — fall back to polling
+        this.watcher?.close();
+        this.watcher = null;
+        this.startPollingFallback();
       });
     } catch {
       // Directory doesn't exist yet — poll until it appears
@@ -125,6 +133,33 @@ export class HudFileBridge {
     } catch {
       return { currentMode: null, activeAgent: null };
     }
+  }
+
+  private startPollingFallback(): void {
+    if (this.stopped || this.pollInterval) return;
+    process.stderr.write('[codingbuddy] fs.watch failed, falling back to polling\n');
+    try {
+      const stat = fs.statSync(this.filePath);
+      this.lastMtimeMs = stat.mtimeMs;
+    } catch {
+      this.lastMtimeMs = 0;
+    }
+    this.pollInterval = setInterval(() => {
+      if (this.stopped) {
+        clearInterval(this.pollInterval!);
+        this.pollInterval = null;
+        return;
+      }
+      try {
+        const stat = fs.statSync(this.filePath);
+        if (stat.mtimeMs !== this.lastMtimeMs) {
+          this.lastMtimeMs = stat.mtimeMs;
+          this.scheduleProcess();
+        }
+      } catch {
+        // File may have been deleted — ignore until it reappears
+      }
+    }, this.pollIntervalMs);
   }
 
   private pollUntilExists(): void {

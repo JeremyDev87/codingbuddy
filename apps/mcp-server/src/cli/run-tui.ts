@@ -8,6 +8,20 @@ import { restartTui } from './restart-tui';
 const CLIENT_SHUTDOWN_TIMEOUT_MS = 3000;
 
 /**
+ * Resolve the HUD state directory in priority order:
+ * 1. CODINGBUDDY_HUD_STATE_DIR (explicit override)
+ * 2. CLAUDE_PLUGIN_DATA (plugin convention)
+ * 3. ~/.codingbuddy (default)
+ */
+export function resolveHudStateDir(): string {
+  return (
+    process.env.CODINGBUDDY_HUD_STATE_DIR ??
+    process.env.CLAUDE_PLUGIN_DATA ??
+    path.join(os.homedir(), '.codingbuddy')
+  );
+}
+
+/**
  * Run standalone TUI client that connects to running MCP server instances.
  * Uses MultiSessionManager to handle multiple concurrent sessions.
  *
@@ -64,10 +78,7 @@ export async function runTui(options: { restart?: boolean } = {}): Promise<void>
     const { HudFileBridge } = await import('../tui/events');
     const sessions = manager.getSessions();
     if (sessions.length > 0) {
-      const hudStatePath = path.join(
-        process.env.CODINGBUDDY_HUD_STATE_DIR ?? path.join(os.homedir(), '.codingbuddy'),
-        'hud-state.json',
-      );
+      const hudStatePath = path.join(resolveHudStateDir(), 'hud-state.json');
       const bridge = new HudFileBridge(sessions[0].eventBus, hudStatePath);
       bridge.start();
       hudBridge = bridge;

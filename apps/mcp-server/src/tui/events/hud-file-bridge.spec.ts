@@ -99,6 +99,29 @@ describe('HudFileBridge', () => {
     expect(modeChanges).toHaveLength(0);
   });
 
+  it('falls back to polling when fs.watch emits error', async () => {
+    writeHudState(hudFile, { currentMode: 'PLAN' });
+    bridge = new HudFileBridge(eventBus, hudFile, { debounceMs: 10, pollIntervalMs: 50 });
+    bridge.start();
+
+    const modeChanges: Array<{ from: string | null; to: string }> = [];
+    eventBus.on(TUI_EVENTS.MODE_CHANGED, p => modeChanges.push(p));
+
+    // Simulate watcher error to trigger polling fallback
+    // Access internal watcher and emit error
+    const watcher = (bridge as unknown as { watcher: fs.FSWatcher | null }).watcher;
+    expect(watcher).not.toBeNull();
+    watcher!.emit('error', new Error('EPERM'));
+
+    // Write new state — polling should detect the change
+    await sleep(100);
+    writeHudState(hudFile, { currentMode: 'ACT' });
+    await sleep(300);
+
+    expect(modeChanges.length).toBeGreaterThanOrEqual(1);
+    expect(modeChanges[modeChanges.length - 1]).toEqual({ from: 'PLAN', to: 'ACT' });
+  });
+
   it('handles malformed JSON gracefully', async () => {
     writeHudState(hudFile, { currentMode: 'PLAN' });
     bridge = new HudFileBridge(eventBus, hudFile, { debounceMs: 10 });
