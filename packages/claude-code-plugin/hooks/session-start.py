@@ -39,6 +39,7 @@ MESSAGES: Dict[str, Dict[str, str]] = {
     "en": {
         "installed": "CodingBuddy mode detection hook installed",
         "patterns": "   PLAN:/ACT:/EVAL:/AUTO: patterns will be auto-detected",
+        "restart_needed": "   Restart Claude Code to activate PLAN/ACT/EVAL/AUTO mode detection.",
         "source_not_found": "CodingBuddy: Could not find hook source file. Please reinstall the plugin or check the installation.",
         "permission_error": "CodingBuddy: Permission error - {error}",
         "permission_hint": "Try running: chmod +x ~/.claude/hooks/codingbuddy-mode-detect.py",
@@ -48,6 +49,7 @@ MESSAGES: Dict[str, Dict[str, str]] = {
     "ko": {
         "installed": "CodingBuddy 모드 감지 훅이 설치되었습니다",
         "patterns": "   PLAN:/ACT:/EVAL:/AUTO: 패턴이 자동 감지됩니다",
+        "restart_needed": "   PLAN/ACT/EVAL/AUTO 모드 감지를 활성화하려면 Claude Code를 재시작하세요.",
         "source_not_found": "CodingBuddy: 훅 소스 파일을 찾을 수 없습니다. 플러그인을 재설치하거나 설치를 확인하세요.",
         "permission_error": "CodingBuddy: 권한 오류 - {error}",
         "permission_hint": "실행: chmod +x ~/.claude/hooks/codingbuddy-mode-detect.py",
@@ -57,6 +59,7 @@ MESSAGES: Dict[str, Dict[str, str]] = {
     "ja": {
         "installed": "CodingBuddyモード検出フックがインストールされました",
         "patterns": "   PLAN:/ACT:/EVAL:/AUTO: パターンが自動検出されます",
+        "restart_needed": "   PLAN/ACT/EVAL/AUTOモード検出を有効にするには、Claude Codeを再起動してください。",
         "source_not_found": "CodingBuddy: フックソースファイルが見つかりません。プラグインを再インストールするか、インストールを確認してください。",
         "permission_error": "CodingBuddy: 権限エラー - {error}",
         "permission_hint": "実行: chmod +x ~/.claude/hooks/codingbuddy-mode-detect.py",
@@ -66,6 +69,7 @@ MESSAGES: Dict[str, Dict[str, str]] = {
     "zh": {
         "installed": "CodingBuddy模式检测钩子已安装",
         "patterns": "   PLAN:/ACT:/EVAL:/AUTO: 模式将被自动检测",
+        "restart_needed": "   请重启Claude Code以激活PLAN/ACT/EVAL/AUTO模式检测。",
         "source_not_found": "CodingBuddy: 找不到钩子源文件。请重新安装插件或检查安装。",
         "permission_error": "CodingBuddy: 权限错误 - {error}",
         "permission_hint": "执行: chmod +x ~/.claude/hooks/codingbuddy-mode-detect.py",
@@ -75,6 +79,7 @@ MESSAGES: Dict[str, Dict[str, str]] = {
     "es": {
         "installed": "Hook de detección de modo CodingBuddy instalado",
         "patterns": "   PLAN:/ACT:/EVAL:/AUTO: los patrones serán detectados automáticamente",
+        "restart_needed": "   Reinicie Claude Code para activar la detección de modos PLAN/ACT/EVAL/AUTO.",
         "source_not_found": "CodingBuddy: No se pudo encontrar el archivo fuente del hook. Por favor reinstale el plugin o verifique la instalación.",
         "permission_error": "CodingBuddy: Error de permisos - {error}",
         "permission_hint": "Ejecute: chmod +x ~/.claude/hooks/codingbuddy-mode-detect.py",
@@ -717,6 +722,8 @@ def main():
         if installed_hook or registered_settings:
             print(msg("installed"))
             print(msg("patterns"))
+            if installed_hook:
+                print(msg("restart_needed"))
 
         # Step 2.5: Install codingbuddy statusLine (#1089, #1092)
         try:

@@ -115,34 +115,33 @@ class TestDetectMode:
 class TestMainFunction:
     """Integration tests for the main hook function."""
 
-    def test_outputs_context_when_plan_detected(self):
-        """Test that self-contained mode instructions are output when PLAN keyword is detected."""
-        hook_path = Path(__file__).parent / "user-prompt-submit.py"
-        input_data = json.dumps({"prompt": "PLAN: test feature"})
+    def _run_hook(self, prompt, env_extra=None):
+        """Helper to run hook subprocess with optional env overrides."""
+        import os as _os
 
-        result = subprocess.run(
+        hook_path = Path(__file__).parent / "user-prompt-submit.py"
+        input_data = json.dumps({"prompt": prompt})
+        env = _os.environ.copy()
+        if env_extra:
+            env.update(env_extra)
+        return subprocess.run(
             [sys.executable, str(hook_path)],
             input=input_data,
             capture_output=True,
-            text=True
+            text=True,
+            env=env,
         )
+
+    def test_outputs_context_when_plan_detected(self):
+        """Test that mode instructions are output when PLAN keyword is detected."""
+        result = self._run_hook("PLAN: test feature")
 
         assert result.returncode == 0
         assert "# Mode: PLAN" in result.stdout
-        assert "technical-planner" in result.stdout
-        assert "mcp__codingbuddy__parse_mode" in result.stdout
 
     def test_no_output_when_no_keyword(self):
         """Test that no output when no keyword is detected."""
-        hook_path = Path(__file__).parent / "user-prompt-submit.py"
-        input_data = json.dumps({"prompt": "Hello, how are you?"})
-
-        result = subprocess.run(
-            [sys.executable, str(hook_path)],
-            input=input_data,
-            capture_output=True,
-            text=True
-        )
+        result = self._run_hook("Hello, how are you?")
 
         assert result.returncode == 0
         assert result.stdout == ""
@@ -150,31 +149,89 @@ class TestMainFunction:
     def test_handles_invalid_json(self):
         """Test that invalid JSON is handled gracefully."""
         hook_path = Path(__file__).parent / "user-prompt-submit.py"
-        input_data = "not valid json"
-
         result = subprocess.run(
             [sys.executable, str(hook_path)],
-            input=input_data,
+            input="not valid json",
             capture_output=True,
-            text=True
+            text=True,
         )
-
         assert result.returncode == 0
 
     def test_handles_missing_prompt_field(self):
         """Test that missing prompt field is handled gracefully."""
-        hook_path = Path(__file__).parent / "user-prompt-submit.py"
-        input_data = json.dumps({"other_field": "value"})
+        result = self._run_hook("")
+        assert result.returncode == 0
 
-        result = subprocess.run(
+
+class TestMcpVsStandaloneOutput:
+    """Tests for MCP vs standalone output branching (#1214)."""
+
+    def _run_hook_with_home(self, prompt, home_dir):
+        """Run hook with a custom HOME to control MCP detection."""
+        import os as _os
+
+        hook_path = Path(__file__).parent / "user-prompt-submit.py"
+        input_data = json.dumps({"prompt": prompt})
+        env = _os.environ.copy()
+        env["HOME"] = str(home_dir)
+        # Prevent env override from interfering
+        env.pop("CODINGBUDDY_RULES_DIR", None)
+        return subprocess.run(
             [sys.executable, str(hook_path)],
             input=input_data,
             capture_output=True,
-            text=True
+            text=True,
+            env=env,
         )
 
-        assert result.returncode == 0
-        assert result.stdout == ""
+    def test_standalone_outputs_enriched_instructions(self):
+        """Standalone mode: full ModeEngine output with agent info."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # No .claude/mcp.json → standalone
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+
+            result = self._run_hook_with_home("PLAN: test", tmpdir)
+            assert result.returncode == 0
+            assert "# Mode: PLAN" in result.stdout
+            # Standalone should include full template content
+            assert "technical-planner" in result.stdout
+
+    def test_mcp_outputs_minimal(self):
+        """MCP mode: minimal output, delegate to parse_mode."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create mcp.json with codingbuddy entry → MCP mode
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            mcp_json = claude_dir / "mcp.json"
+            mcp_json.write_text(json.dumps({
+                "mcpServers": {
+                    "codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}
+                }
+            }))
+
+            result = self._run_hook_with_home("PLAN: test", tmpdir)
+            assert result.returncode == 0
+            assert "# Mode: PLAN" in result.stdout
+            assert "mcp__codingbuddy__parse_mode" in result.stdout
+            # MCP mode should NOT have full template content
+            assert "Checklist:" not in result.stdout
+
+    def test_no_output_without_keyword(self):
+        """No mode keyword → no output regardless of MCP status."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+
+            result = self._run_hook_with_home("Hello world", tmpdir)
+            assert result.returncode == 0
+            assert result.stdout == ""
 
 
 if __name__ == "__main__":

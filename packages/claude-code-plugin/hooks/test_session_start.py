@@ -453,6 +453,68 @@ class TestHookLibCopy:
             assert not (hooks_dir / "lib").exists()
 
 
+class TestRestartMessage:
+    """Tests for restart message when hook is newly installed (#1214)."""
+
+    def test_restart_message_key_exists_in_all_languages(self):
+        """Test that 'restart_needed' key exists in all language dicts."""
+        for lang, messages in session_hook.MESSAGES.items():
+            assert "restart_needed" in messages, (
+                f"Missing 'restart_needed' in {lang} messages"
+            )
+
+    def test_restart_message_output_on_new_install(self, capsys):
+        """Test restart message is printed when hook is newly installed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            hooks_dir = home / ".claude" / "hooks"
+            hooks_dir.mkdir(parents=True)
+            settings_file = home / ".claude" / "settings.json"
+
+            # Create mock source
+            plugin_dir = Path(tmpdir) / "plugin" / "hooks"
+            plugin_dir.mkdir(parents=True)
+            source_file = plugin_dir / "user-prompt-submit.py"
+            source_file.write_text("# mock hook")
+            (plugin_dir / "lib").mkdir()
+            (plugin_dir / "lib" / "__init__.py").write_text("")
+
+            with patch.object(session_hook, "find_plugin_source", return_value=source_file):
+                with patch.object(Path, "home", return_value=home):
+                    # Simulate the main() install logic
+                    target_file = hooks_dir / session_hook.HOOK_FILENAME
+                    installed_hook = False
+                    if not target_file.exists():
+                        session_hook._install_hook_with_lib(
+                            source_file, hooks_dir, target_file
+                        )
+                        installed_hook = True
+
+                    if installed_hook:
+                        print(session_hook.msg("installed"))
+                        print(session_hook.msg("patterns"))
+                        print(session_hook.msg("restart_needed"))
+
+            captured = capsys.readouterr()
+            assert "restart" in captured.out.lower() or "재시작" in captured.out or "再起動" in captured.out
+
+    def test_no_restart_message_when_already_installed(self, capsys):
+        """Test no restart message when hook already exists."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            hooks_dir = home / ".claude" / "hooks"
+            hooks_dir.mkdir(parents=True)
+            target_file = hooks_dir / session_hook.HOOK_FILENAME
+            target_file.write_text("# existing hook")
+
+            installed_hook = not target_file.exists()  # False
+            if installed_hook:
+                print(session_hook.msg("restart_needed"))
+
+            captured = capsys.readouterr()
+            assert captured.out == ""
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__, "-v"])

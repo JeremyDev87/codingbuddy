@@ -60,21 +60,35 @@ def main():
         detected_mode = detect_mode(prompt)
 
         if detected_mode:
-            # Self-contained mode instructions via ModeEngine
+            # Ensure lib/ is importable
             _hooks_dir = os.path.dirname(os.path.abspath(__file__))
             _lib_dir = os.path.join(_hooks_dir, "lib")
             if _lib_dir not in sys.path:
                 sys.path.insert(0, _lib_dir)
 
             try:
+                from runtime_mode import is_mcp_available
                 from mode_engine import ModeEngine
-                engine = ModeEngine()
-                instructions = engine.build_instructions(detected_mode)
-                print(instructions)
+
+                if is_mcp_available():
+                    # MCP mode: minimal output, parse_mode handles the rest
+                    print(f"# Mode: {detected_mode}")
+                    print(
+                        "If mcp__codingbuddy__parse_mode is available, "
+                        "call it for enhanced features."
+                    )
+                else:
+                    # Standalone mode: full enriched instructions
+                    engine = ModeEngine()
+                    instructions = engine.build_instructions(detected_mode)
+                    print(instructions)
             except Exception:
-                # Fallback: minimal instruction if ModeEngine fails
+                # Fallback: minimal instruction if imports fail
                 print(f"# Mode: {detected_mode}")
-                print("If mcp__codingbuddy__parse_mode is available, call it for enhanced features.")
+                print(
+                    "If mcp__codingbuddy__parse_mode is available, "
+                    "call it for enhanced features."
+                )
 
             # Update HUD state with detected mode (#1090)
             try:
