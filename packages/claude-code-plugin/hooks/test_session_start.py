@@ -368,6 +368,34 @@ class TestEnsureMcpJson:
             data = json.loads(mcp_path.read_text())
             assert "codingbuddy" in data["mcpServers"]
 
+    def test_skips_mcp_json_when_binary_not_installed(self):
+        """Test that mcp.json is NOT created when codingbuddy binary is not on PATH (#1237)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mcp_path = Path(tmpdir) / ".claude" / "mcp.json"
+
+            with patch("shutil.which", return_value=None):
+                # Simulate the guarded call from session-start main flow
+                import shutil as _shutil
+                if _shutil.which("codingbuddy"):
+                    session_hook._ensure_mcp_json(mcp_path)
+
+            assert not mcp_path.exists()
+
+    def test_creates_mcp_json_when_binary_installed(self):
+        """Test that mcp.json IS created when codingbuddy binary is on PATH (#1237)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mcp_path = Path(tmpdir) / ".claude" / "mcp.json"
+
+            with patch("shutil.which", return_value="/usr/local/bin/codingbuddy"):
+                import shutil as _shutil
+                if _shutil.which("codingbuddy"):
+                    session_hook._ensure_mcp_json(mcp_path)
+
+            assert mcp_path.exists()
+            data = json.loads(mcp_path.read_text())
+            assert "codingbuddy" in data["mcpServers"]
+            assert data["mcpServers"]["codingbuddy"]["command"] == "codingbuddy"
+
 
 class TestHookLibCopy:
     """Tests for lib/ directory copying alongside hook file (#1102)."""

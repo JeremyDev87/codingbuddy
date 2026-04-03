@@ -733,7 +733,9 @@ def main():
 
         # Step 2.6: Ensure ~/.claude/mcp.json has codingbuddy entry (#1100)
         try:
-            _ensure_mcp_json(home / ".claude" / "mcp.json")
+            import shutil as _shutil
+            if _shutil.which("codingbuddy"):
+                _ensure_mcp_json(home / ".claude" / "mcp.json")
         except Exception:
             pass  # Never block session start
 
