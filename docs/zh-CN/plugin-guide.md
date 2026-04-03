@@ -92,7 +92,7 @@ npm install -g codingbuddy
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }
@@ -107,7 +107,7 @@ npm install -g codingbuddy
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }

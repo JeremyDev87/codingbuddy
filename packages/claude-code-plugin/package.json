@@ -29,7 +29,9 @@
     ".claude-plugin",
     ".mcp.json",
     "README.md",
-    "scripts/postinstall.js"
+    "scripts/postinstall.js",
+    "hooks/",
+    "commands/"
   ],
   "scripts": {
     "build": "ts-node scripts/build.ts --mode=production",

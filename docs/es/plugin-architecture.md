@@ -258,7 +258,7 @@ El contexto se persiste en `docs/codingbuddy/context.md`:
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }

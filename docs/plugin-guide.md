@@ -92,7 +92,7 @@ Edit `~/.claude/settings.json`:
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }
@@ -107,7 +107,7 @@ Create `.mcp.json` in your project root:
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }

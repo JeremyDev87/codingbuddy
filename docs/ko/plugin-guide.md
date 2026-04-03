@@ -92,7 +92,7 @@ Claude Code 설정에 MCP 서버를 추가합니다:
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }
@@ -107,7 +107,7 @@ Claude Code 설정에 MCP 서버를 추가합니다:
   "mcpServers": {
     "codingbuddy": {
       "command": "codingbuddy",
-      "args": []
+      "args": ["mcp"]
     }
   }
 }

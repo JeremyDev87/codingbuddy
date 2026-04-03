@@ -171,7 +171,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
      "mcpServers": {
        "codingbuddy": {
          "command": "codingbuddy",
-         "args": []
+         "args": ["mcp"]
        }
      }
    }
@@ -230,7 +230,7 @@ cat ~/.claude/settings.json | grep -A5 codingbuddy
      "mcpServers": {
        "codingbuddy": {
          "command": "/usr/local/bin/codingbuddy",
-         "args": []
+         "args": ["mcp"]
        }
      }
    }
