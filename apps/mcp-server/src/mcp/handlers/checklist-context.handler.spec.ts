@@ -3,12 +3,14 @@ import { ChecklistContextHandler } from './checklist-context.handler';
 import { ChecklistService } from '../../checklist/checklist.service';
 import { ContextService } from '../../context/context.service';
 import type { ImpactEventService } from '../../impact';
+import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 describe('ChecklistContextHandler', () => {
   let handler: ChecklistContextHandler;
   let mockChecklistService: ChecklistService;
   let mockContextService: ContextService;
   let mockImpactEventService: Partial<ImpactEventService>;
+  let mockRuleEventCollector: Partial<RuleEventCollector>;
 
   const mockChecklistResult = {
     checklists: [{ domain: 'security', items: [], priority: 'high', icon: '🔒' }],
@@ -50,11 +52,13 @@ describe('ChecklistContextHandler', () => {
     } as unknown as ContextService;
 
     mockImpactEventService = { logEvent: vi.fn() };
+    mockRuleEventCollector = { record: vi.fn() };
 
     handler = new ChecklistContextHandler(
       mockChecklistService,
       mockContextService,
       mockImpactEventService as ImpactEventService,
+      mockRuleEventCollector as RuleEventCollector,
     );
   });
 
@@ -125,6 +129,45 @@ describe('ChecklistContextHandler', () => {
           type: 'text',
           text: expect.stringContaining('Checklist error'),
         });
+      });
+
+      it('should record checklist_generated event for each domain', async () => {
+        await handler.handle('generate_checklist', {
+          domains: ['security', 'accessibility'],
+        });
+
+        expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'checklist_generated',
+            domain: 'security',
+          }),
+        );
+        expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'checklist_generated',
+            domain: 'accessibility',
+          }),
+        );
+      });
+
+      it('should not record events when checklist generation fails', async () => {
+        mockChecklistService.generateChecklist = vi.fn().mockRejectedValue(new Error('fail'));
+
+        await handler.handle('generate_checklist', { domains: ['security'] });
+
+        expect(mockRuleEventCollector.record).not.toHaveBeenCalled();
+      });
+
+      it('should not break handler when event recording throws', async () => {
+        mockRuleEventCollector.record = vi.fn().mockImplementation(() => {
+          throw new Error('record error');
+        });
+
+        const result = await handler.handle('generate_checklist', {
+          domains: ['security'],
+        });
+
+        expect(result?.isError).toBeFalsy();
       });
     });
 

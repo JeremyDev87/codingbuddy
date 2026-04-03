@@ -1,12 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DiscussionHandler } from './discussion.handler';
 import type { AgentOpinion, DiscussionResult } from './discussion.types';
+import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 describe('DiscussionHandler', () => {
   let handler: DiscussionHandler;
+  let mockRuleEventCollector: Partial<RuleEventCollector>;
 
   beforeEach(() => {
-    handler = new DiscussionHandler();
+    mockRuleEventCollector = { record: vi.fn() };
+    handler = new DiscussionHandler(mockRuleEventCollector as RuleEventCollector);
   });
 
   describe('handle', () => {
@@ -164,6 +167,49 @@ describe('DiscussionHandler', () => {
         const maxIndex = Math.max(...opinionSeverities);
         expect(data.maxSeverity).toBe(severityOrder[maxIndex]);
       });
+    });
+  });
+
+  describe('rule event tracking', () => {
+    it('should record specialist_dispatched event for each specialist', async () => {
+      await handler.handle('agent_discussion', {
+        topic: 'Auth review',
+        specialists: ['security-specialist', 'performance-specialist'],
+      });
+
+      expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'specialist_dispatched',
+          domain: 'security-specialist',
+        }),
+      );
+      expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'specialist_dispatched',
+          domain: 'performance-specialist',
+        }),
+      );
+    });
+
+    it('should not record events when validation fails', async () => {
+      await handler.handle('agent_discussion', {
+        specialists: ['security-specialist'],
+      });
+
+      expect(mockRuleEventCollector.record).not.toHaveBeenCalled();
+    });
+
+    it('should not break handler when event recording throws', async () => {
+      mockRuleEventCollector.record = vi.fn().mockImplementation(() => {
+        throw new Error('record error');
+      });
+
+      const result = await handler.handle('agent_discussion', {
+        topic: 'Auth review',
+        specialists: ['security-specialist'],
+      });
+
+      expect(result?.isError).toBeFalsy();
     });
   });
 

@@ -30,6 +30,7 @@ import { buildVisualData, type AgentVisualInput } from '../../keyword/visual-dat
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { AgentService } from '../../agent/agent.service';
 import { ImpactEventService } from '../../impact';
+import { RuleEventCollector } from '../../rules/rule-event-collector';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -104,6 +105,7 @@ export class ModeHandler extends AbstractHandler {
     private readonly diagnosticLogService: DiagnosticLogService,
     private readonly agentService: AgentService,
     private readonly impactEventService: ImpactEventService,
+    private readonly ruleEventCollector: RuleEventCollector,
   ) {
     super();
   }
@@ -310,6 +312,17 @@ export class ModeHandler extends AbstractHandler {
         });
       } catch {
         // Never break handler execution
+      }
+
+      try {
+        this.ruleEventCollector.record({
+          type: 'mode_activated',
+          timestamp: new Date().toISOString(),
+          rule: result.mode,
+          details: { agent: result.agent },
+        });
+      } catch {
+        // Fire-and-forget: never break handler execution
       }
 
       return response;

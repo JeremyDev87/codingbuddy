@@ -2,11 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AgentHandler } from './agent.handler';
 import { AgentService } from '../../agent/agent.service';
 import type { ImpactEventService } from '../../impact';
+import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 describe('AgentHandler', () => {
   let handler: AgentHandler;
   let mockAgentService: AgentService;
   let mockImpactEventService: Partial<ImpactEventService>;
+  let mockRuleEventCollector: Partial<RuleEventCollector>;
 
   const mockSystemPromptResult = {
     agentName: 'security-specialist',
@@ -25,8 +27,13 @@ describe('AgentHandler', () => {
     } as unknown as AgentService;
 
     mockImpactEventService = { logEvent: vi.fn() };
+    mockRuleEventCollector = { record: vi.fn() };
 
-    handler = new AgentHandler(mockAgentService, mockImpactEventService as ImpactEventService);
+    handler = new AgentHandler(
+      mockAgentService,
+      mockImpactEventService as ImpactEventService,
+      mockRuleEventCollector as RuleEventCollector,
+    );
   });
 
   describe('handle', () => {
@@ -443,6 +450,76 @@ describe('AgentHandler', () => {
         expect(result?.content[0]).toMatchObject({
           type: 'text',
           text: expect.stringContaining('Dispatch failed'),
+        });
+      });
+
+      describe('rule event tracking', () => {
+        it('should record specialist_dispatched event on dispatch', async () => {
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+            taskDescription: 'Review security',
+          });
+
+          expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+            expect.objectContaining({
+              type: 'specialist_dispatched',
+              domain: 'security-specialist',
+            }),
+          );
+        });
+
+        it('should record events for each specialist in parallel dispatch', async () => {
+          mockAgentService.dispatchAgents = vi.fn().mockResolvedValue({
+            ...mockDispatchResult,
+            parallelAgents: [
+              { name: 'accessibility-specialist' },
+              { name: 'performance-specialist' },
+            ],
+          });
+
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            specialists: ['accessibility-specialist', 'performance-specialist'],
+            includeParallel: true,
+          });
+
+          expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+            expect.objectContaining({
+              type: 'specialist_dispatched',
+              domain: 'accessibility-specialist',
+            }),
+          );
+          expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+            expect.objectContaining({
+              type: 'specialist_dispatched',
+              domain: 'performance-specialist',
+            }),
+          );
+        });
+
+        it('should not record events when dispatch fails', async () => {
+          mockAgentService.dispatchAgents = vi.fn().mockRejectedValue(new Error('Dispatch failed'));
+
+          await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+          });
+
+          expect(mockRuleEventCollector.record).not.toHaveBeenCalled();
+        });
+
+        it('should not break handler when event recording throws', async () => {
+          mockRuleEventCollector.record = vi.fn().mockImplementation(() => {
+            throw new Error('record error');
+          });
+
+          const result = await handler.handle('dispatch_agents', {
+            mode: 'EVAL',
+            primaryAgent: 'security-specialist',
+          });
+
+          expect(result?.isError).toBeFalsy();
         });
       });
 

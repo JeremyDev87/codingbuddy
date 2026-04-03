@@ -20,6 +20,7 @@ import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import type { ImpactEventService } from '../../impact';
+import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 /**
  * Integration tests verifying all concrete handlers inherit
@@ -140,13 +141,19 @@ describe('Handler Security Integration', () => {
     } as unknown as DiagnosticLogService;
 
     const mockImpactEventService = { logEvent: vi.fn() } as unknown as ImpactEventService;
+    const mockRuleEventCollector = { record: vi.fn() } as unknown as RuleEventCollector;
 
     // Initialize handlers
-    agentHandler = new AgentHandler(mockAgentService, mockImpactEventService);
+    agentHandler = new AgentHandler(
+      mockAgentService,
+      mockImpactEventService,
+      mockRuleEventCollector,
+    );
     checklistHandler = new ChecklistContextHandler(
       mockChecklistService,
       mockContextService,
       mockImpactEventService,
+      mockRuleEventCollector,
     );
     configHandler = new ConfigHandler(
       mockConfigService,
@@ -168,6 +175,7 @@ describe('Handler Security Integration', () => {
       mockDiagnosticLogService,
       mockAgentServiceForMode as AgentService,
       mockImpactEventService,
+      mockRuleEventCollector,
     );
     rulesHandler = new RulesHandler(
       mockRulesService,

@@ -1,13 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { QualityReportHandler } from './quality-report.handler';
 import { QualityReportService } from '../../ship/quality-report.service';
+import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 describe('QualityReportHandler', () => {
   let handler: QualityReportHandler;
+  let mockRuleEventCollector: Partial<RuleEventCollector>;
 
   beforeEach(() => {
     const service = new QualityReportService();
-    handler = new QualityReportHandler(service);
+    mockRuleEventCollector = { record: vi.fn() };
+    handler = new QualityReportHandler(service, mockRuleEventCollector as RuleEventCollector);
   });
 
   it('should return null for unhandled tools', async () => {
@@ -59,5 +62,39 @@ describe('QualityReportHandler', () => {
     expect(defs).toHaveLength(1);
     expect(defs[0].name).toBe('pr_quality_report');
     expect(defs[0].inputSchema.required).toContain('changedFiles');
+  });
+
+  describe('rule event tracking', () => {
+    it('should record specialist_dispatched events for detected domains', async () => {
+      await handler.handle('pr_quality_report', {
+        changedFiles: ['src/auth/token.ts'],
+      });
+
+      expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'specialist_dispatched',
+        }),
+      );
+    });
+
+    it('should not record events for empty changed files', async () => {
+      await handler.handle('pr_quality_report', {
+        changedFiles: [],
+      });
+
+      expect(mockRuleEventCollector.record).not.toHaveBeenCalled();
+    });
+
+    it('should not break handler when event recording throws', async () => {
+      mockRuleEventCollector.record = vi.fn().mockImplementation(() => {
+        throw new Error('record error');
+      });
+
+      const result = await handler.handle('pr_quality_report', {
+        changedFiles: ['src/auth/token.ts'],
+      });
+
+      expect(result?.isError).toBeFalsy();
+    });
   });
 });

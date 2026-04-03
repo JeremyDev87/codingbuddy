@@ -13,6 +13,7 @@ import {
   type ValidMode,
 } from '../../shared/validation.constants';
 import { ImpactEventService } from '../../impact';
+import { RuleEventCollector } from '../../rules/rule-event-collector';
 
 /**
  * Valid checklist domains for runtime validation
@@ -37,6 +38,7 @@ export class ChecklistContextHandler extends AbstractHandler {
     private readonly checklistService: ChecklistService,
     private readonly contextService: ContextService,
     private readonly impactEventService: ImpactEventService,
+    private readonly ruleEventCollector: RuleEventCollector,
   ) {
     super();
   }
@@ -145,6 +147,19 @@ export class ChecklistContextHandler extends AbstractHandler {
         });
       } catch {
         // Never break handler execution
+      }
+
+      try {
+        const timestamp = new Date().toISOString();
+        for (const domain of domains ?? []) {
+          this.ruleEventCollector.record({
+            type: 'checklist_generated',
+            timestamp,
+            domain,
+          });
+        }
+      } catch {
+        // Fire-and-forget: never break handler execution
       }
 
       return createJsonResponse(result);

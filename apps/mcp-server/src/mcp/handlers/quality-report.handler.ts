@@ -5,12 +5,16 @@ import { AbstractHandler } from './abstract-handler';
 import { QualityReportService } from '../../ship/quality-report.service';
 import { createJsonResponse, createErrorResponse } from '../response.utils';
 import { extractStringArray } from '../../shared/validation.constants';
+import { RuleEventCollector } from '../../rules/rule-event-collector';
 
 @Injectable()
 export class QualityReportHandler extends AbstractHandler {
   private readonly logger = new Logger(QualityReportHandler.name);
 
-  constructor(private readonly qualityReportService: QualityReportService) {
+  constructor(
+    private readonly qualityReportService: QualityReportService,
+    private readonly ruleEventCollector: RuleEventCollector,
+  ) {
     super();
   }
 
@@ -36,6 +40,22 @@ export class QualityReportHandler extends AbstractHandler {
         changedFiles,
         timeout,
       });
+
+      try {
+        const domains = result.domains as { domain: string }[] | undefined;
+        if (domains?.length) {
+          const timestamp = new Date().toISOString();
+          for (const d of domains) {
+            this.ruleEventCollector.record({
+              type: 'specialist_dispatched',
+              timestamp,
+              domain: d.domain,
+            });
+          }
+        }
+      } catch {
+        // Fire-and-forget: never break handler execution
+      }
 
       return createJsonResponse(result);
     } catch (error) {

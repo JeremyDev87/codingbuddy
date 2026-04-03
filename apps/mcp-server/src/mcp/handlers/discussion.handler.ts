@@ -15,6 +15,7 @@ import type {
   ConsensusStatus,
 } from './discussion.types';
 import { VALID_SEVERITIES } from './discussion.types';
+import { RuleEventCollector } from '../../rules/rule-event-collector';
 
 /**
  * Specialist domain knowledge mapping.
@@ -41,6 +42,10 @@ const SEVERITY_ORDER: readonly OpinionSeverity[] = ['info', 'low', 'medium', 'hi
  */
 @Injectable()
 export class DiscussionHandler extends AbstractHandler {
+  constructor(private readonly ruleEventCollector: RuleEventCollector) {
+    super();
+  }
+
   protected getHandledTools(): string[] {
     return ['agent_discussion'];
   }
@@ -120,6 +125,19 @@ export class DiscussionHandler extends AbstractHandler {
       summary,
       maxSeverity,
     };
+
+    try {
+      const timestamp = new Date().toISOString();
+      for (const specialist of specialists) {
+        this.ruleEventCollector.record({
+          type: 'specialist_dispatched',
+          timestamp,
+          domain: specialist,
+        });
+      }
+    } catch {
+      // Fire-and-forget: never break handler execution
+    }
 
     return createJsonResponse(result);
   }

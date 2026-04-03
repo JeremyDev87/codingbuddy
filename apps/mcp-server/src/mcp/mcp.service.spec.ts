@@ -18,6 +18,7 @@ import { ModelResolverService } from '../model';
 import { StateService } from '../state/state.service';
 import { DiagnosticLogService } from '../diagnostic/diagnostic-log.service';
 import type { ImpactEventService } from '../impact';
+import type { RuleEventCollector } from '../rules/rule-event-collector';
 import type { ToolHandler } from './handlers';
 import {
   RulesHandler,
@@ -452,6 +453,7 @@ interface CreateMcpServiceOptions {
   stateService?: Partial<StateService>;
   diagnosticLogService?: Partial<DiagnosticLogService>;
   impactEventService?: Partial<ImpactEventService>;
+  ruleEventCollector?: Partial<RuleEventCollector>;
 }
 
 function createMcpServiceWithHandlers(
@@ -478,6 +480,7 @@ function createMcpServiceWithHandlers(
     new AgentHandler(
       services.agentService as AgentService,
       services.impactEventService as ImpactEventService,
+      services.ruleEventCollector as RuleEventCollector,
     ),
     new ModeHandler(
       services.keywordService as KeywordService,
@@ -489,11 +492,13 @@ function createMcpServiceWithHandlers(
       services.diagnosticLogService as DiagnosticLogService,
       services.agentService as AgentService,
       services.impactEventService as ImpactEventService,
+      services.ruleEventCollector as RuleEventCollector,
     ),
     new ChecklistContextHandler(
       services.checklistService as ChecklistService,
       services.contextService as ContextService,
       services.impactEventService as ImpactEventService,
+      services.ruleEventCollector as RuleEventCollector,
     ),
   ];
 
@@ -582,6 +587,7 @@ describe('McpService', () => {
       stateService: mockStateService,
       diagnosticLogService: mockDiagnosticLogService,
       impactEventService: { logEvent: vi.fn() },
+      ruleEventCollector: { record: vi.fn() },
     };
 
     const mcpService = createMcpServiceWithHandlers(defaultMocks);

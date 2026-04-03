@@ -15,6 +15,7 @@ import {
   isRecordObject,
 } from '../../shared/validation.constants';
 import { ImpactEventService } from '../../impact';
+import { RuleEventCollector } from '../../rules/rule-event-collector';
 
 /**
  * Handler for agent-related tools
@@ -27,6 +28,7 @@ export class AgentHandler extends AbstractHandler {
   constructor(
     private readonly agentService: AgentService,
     private readonly impactEventService: ImpactEventService,
+    private readonly ruleEventCollector: RuleEventCollector,
   ) {
     super();
   }
@@ -254,6 +256,28 @@ export class AgentHandler extends AbstractHandler {
         });
       } catch {
         // Never break handler execution
+      }
+
+      try {
+        const timestamp = new Date().toISOString();
+        if (primaryAgent) {
+          this.ruleEventCollector.record({
+            type: 'specialist_dispatched',
+            timestamp,
+            domain: primaryAgent,
+          });
+        }
+        if (result.parallelAgents) {
+          for (const agent of result.parallelAgents as { name: string }[]) {
+            this.ruleEventCollector.record({
+              type: 'specialist_dispatched',
+              timestamp,
+              domain: agent.name,
+            });
+          }
+        }
+      } catch {
+        // Fire-and-forget: never break handler execution
       }
 
       return createJsonResponse(result);

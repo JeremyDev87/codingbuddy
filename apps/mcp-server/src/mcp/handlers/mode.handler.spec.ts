@@ -9,6 +9,7 @@ import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import type { AgentService } from '../../agent/agent.service';
 import type { ImpactEventService } from '../../impact';
+import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
 describe('ModeHandler', () => {
   let handler: ModeHandler;
@@ -21,6 +22,7 @@ describe('ModeHandler', () => {
   let mockDiagnosticLogService: DiagnosticLogService;
   let mockAgentService: Partial<AgentService>;
   let mockImpactEventService: Partial<ImpactEventService>;
+  let mockRuleEventCollector: Partial<RuleEventCollector>;
 
   const mockParseModeResult = {
     mode: 'PLAN',
@@ -131,6 +133,8 @@ describe('ModeHandler', () => {
       logEvent: vi.fn(),
     };
 
+    mockRuleEventCollector = { record: vi.fn() };
+
     handler = new ModeHandler(
       mockKeywordService,
       mockConfigService,
@@ -141,6 +145,7 @@ describe('ModeHandler', () => {
       mockDiagnosticLogService,
       mockAgentService as AgentService,
       mockImpactEventService as ImpactEventService,
+      mockRuleEventCollector as RuleEventCollector,
     );
   });
 
@@ -1201,6 +1206,49 @@ describe('ModeHandler', () => {
       expect(result?.isError).toBeFalsy();
       const parsed = JSON.parse(result!.content[0].text as string);
       expect(parsed.agentDiscussion).toBeUndefined();
+    });
+  });
+
+  describe('rule event tracking', () => {
+    it('should record mode_activated event with mode as rule', async () => {
+      await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
+      });
+
+      expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'mode_activated',
+          rule: 'PLAN',
+        }),
+      );
+    });
+
+    it('should include agent in event details', async () => {
+      await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
+      });
+
+      expect(mockRuleEventCollector.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'mode_activated',
+          rule: 'PLAN',
+          details: expect.objectContaining({
+            agent: 'plan-mode-agent',
+          }),
+        }),
+      );
+    });
+
+    it('should not break handler when event recording throws', async () => {
+      mockRuleEventCollector.record = vi.fn().mockImplementation(() => {
+        throw new Error('record error');
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
+      });
+
+      expect(result?.isError).toBeFalsy();
     });
   });
 });
