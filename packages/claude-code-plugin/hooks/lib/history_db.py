@@ -36,7 +36,7 @@ class HistoryDB:
     def __init__(self, db_path: str = None):
         self._db_path = db_path or _default_db_path()
         self._ensure_directory()
-        self._conn = sqlite3.connect(db_path, timeout=10)
+        self._conn = sqlite3.connect(self._db_path, timeout=10)
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._set_file_permissions()
         self._create_tables()

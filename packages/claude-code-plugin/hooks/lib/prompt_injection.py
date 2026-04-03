@@ -110,7 +110,7 @@ class PromptInjector:
         if not isinstance(sections_cfg, dict):
             sections_cfg = {}
 
-        mcp_mode = is_mcp_available()
+        mcp_mode = is_mcp_available(project_dir=cwd)
 
         parts: list[str] = []
 

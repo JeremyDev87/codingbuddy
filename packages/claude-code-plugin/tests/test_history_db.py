@@ -199,6 +199,24 @@ class TestCleanupAndConcurrency:
         assert len(errors) == 0, f"Concurrent access errors: {errors}"
 
 
+class TestDefaultConstructor:
+    """HistoryDB() with no args should use default path and not raise."""
+
+    def test_default_constructor_does_not_raise(self, db_dir, monkeypatch):
+        """HistoryDB() with no args must use self._db_path, not the original None."""
+        default_path = os.path.join(db_dir, "default", "history.db")
+        monkeypatch.setattr(
+            "hooks.lib.history_db._default_db_path", lambda: default_path
+        )
+        db = HistoryDB()
+        assert db._db_path == default_path
+        assert os.path.isfile(default_path)
+        db.start_session("default-test", project="/proj")
+        sessions = db.query_sessions(days=1)
+        assert len(sessions) == 1
+        db.close()
+
+
 class TestSingleton:
     """Tests for HistoryDB singleton pattern (#931)."""
 

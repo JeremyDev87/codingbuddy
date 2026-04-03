@@ -176,27 +176,41 @@ class HealthChecker:
     # Check 8: MCP connection
     # ------------------------------------------------------------------
     def check_mcp_connection(self) -> Dict[str, str]:
-        """Check if CodingBuddy MCP server is configured in mcp.json."""
-        mcp_json = os.path.join(self._claude_dir, "mcp.json")
-        if not os.path.isfile(mcp_json):
-            return _result("mcp_connection", "WARN", "mcp.json not found — standalone mode")
-        try:
-            with open(mcp_json, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            servers = data.get("mcpServers", {})
-            for key in servers:
-                if "codingbuddy" in key.lower():
-                    return _result("mcp_connection", "PASS", "MCP configured (codingbuddy entry found)")
-            return _result("mcp_connection", "WARN", "MCP not configured — standalone mode active")
-        except (json.JSONDecodeError, OSError):
-            return _result("mcp_connection", "WARN", "mcp.json unreadable — standalone mode")
+        """Check if CodingBuddy MCP server is configured.
+
+        Checks three locations in order:
+        1. ~/.claude/mcp.json
+        2. ~/.claude/settings.json → mcpServers
+        3. {project_dir}/.mcp.json
+        """
+        locations = [
+            os.path.join(self._claude_dir, "mcp.json"),
+            os.path.join(self._claude_dir, "settings.json"),
+            os.path.join(self._project_dir, ".mcp.json"),
+        ]
+        for path in locations:
+            if not os.path.isfile(path):
+                continue
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                servers = data.get("mcpServers", {})
+                for key in servers:
+                    if "codingbuddy" in key.lower():
+                        return _result(
+                            "mcp_connection", "PASS",
+                            f"MCP configured (codingbuddy entry found in {os.path.basename(path)})",
+                        )
+            except (json.JSONDecodeError, OSError):
+                continue
+        return _result("mcp_connection", "WARN", "MCP not configured — standalone mode active")
 
     # ------------------------------------------------------------------
     # Check 9: runtime mode
     # ------------------------------------------------------------------
     def check_runtime_mode(self) -> Dict[str, str]:
         """Detect current runtime mode (mcp or standalone)."""
-        mode = detect_runtime_mode(self._home_dir)
+        mode = detect_runtime_mode(self._home_dir, self._project_dir)
         return _result("runtime_mode", "PASS", f"Runtime: {mode}")
 
     # ------------------------------------------------------------------

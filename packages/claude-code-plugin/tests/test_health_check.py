@@ -245,11 +245,33 @@ class TestCheckMcpConnection:
         assert result["status"] == "WARN"
         assert "standalone" in result["message"]
 
-    def test_mcp_json_missing(self, env):
+    def test_mcp_json_missing_falls_back_to_standalone(self, env):
         checker = _make_checker(env)
         result = checker.check_mcp_connection()
         assert result["status"] == "WARN"
-        assert "not found" in result["message"]
+        assert "standalone" in result["message"]
+
+    def test_mcp_from_settings_json(self, env):
+        """settings.json with codingbuddy mcpServers → PASS."""
+        settings_path = env / ".claude" / "settings.json"
+        settings = json.loads(settings_path.read_text())
+        settings["mcpServers"] = {"codingbuddy": {"command": "npx"}}
+        settings_path.write_text(json.dumps(settings))
+        checker = _make_checker(env)
+        result = checker.check_mcp_connection()
+        assert result["status"] == "PASS"
+        assert "settings.json" in result["message"]
+
+    def test_mcp_from_project_mcp_json(self, env):
+        """project .mcp.json with codingbuddy → PASS."""
+        project_mcp = env / ".mcp.json"
+        project_mcp.write_text(json.dumps({
+            "mcpServers": {"codingbuddy": {"command": "npx"}}
+        }))
+        checker = _make_checker(env)
+        result = checker.check_mcp_connection()
+        assert result["status"] == "PASS"
+        assert ".mcp.json" in result["message"]
 
 
 class TestCheckRuntimeMode:

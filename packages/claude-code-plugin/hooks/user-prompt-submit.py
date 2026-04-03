@@ -70,7 +70,7 @@ def main():
                 from runtime_mode import is_mcp_available
                 from mode_engine import ModeEngine
 
-                if is_mcp_available():
+                if is_mcp_available(project_dir=os.getcwd()):
                     # MCP mode: minimal output, parse_mode handles the rest
                     print(f"# Mode: {detected_mode}")
                     print(
