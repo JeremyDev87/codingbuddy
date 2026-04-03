@@ -16,6 +16,7 @@ import type {
   SearchOptions,
   UpdateOptions,
 } from './cli.types';
+import type { CompletionOptions } from './completion';
 
 /**
  * Parsed command line arguments
@@ -30,6 +31,7 @@ export interface ParsedArgs {
     | 'update'
     | 'mcp'
     | 'tui'
+    | 'completion'
     | 'help'
     | 'version';
   options: Partial<InitOptions> &
@@ -37,7 +39,8 @@ export interface ParsedArgs {
     Partial<InstallOptions> &
     Partial<UninstallOptions> &
     Partial<SearchOptions> &
-    Partial<UpdateOptions>;
+    Partial<UpdateOptions> &
+    Partial<CompletionOptions>;
 }
 
 /**
@@ -109,6 +112,14 @@ export function parseArgs(args: string[]): ParsedArgs {
     };
   }
 
+  if (command === 'completion') {
+    const shell = args[1];
+    return {
+      command: 'completion',
+      options: { ...options, shell },
+    };
+  }
+
   if (command !== 'init') {
     return { command: 'help', options };
   }
@@ -149,6 +160,7 @@ Usage:
   codingbuddy mcp                      Start MCP server (stdio mode)
   codingbuddy tui                      Monitor agent execution in real-time
   codingbuddy tui --restart            Restart TUI client (fixes blank screen)
+  codingbuddy completion <shell>       Generate shell completions (bash, zsh, fish)
   codingbuddy --help                   Show this help
   codingbuddy --version                Show version
 
@@ -307,6 +319,22 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
         pluginName: options.updatePluginName,
       });
       if (!updateResult.success) {
+        process.exitCode = 1;
+      }
+      break;
+    }
+
+    case 'completion': {
+      const { runCompletion } = await import('./completion');
+      if (!options.shell) {
+        process.stderr.write(
+          'Error: Missing shell type. Usage: codingbuddy completion <bash|zsh|fish>\n',
+        );
+        process.exitCode = 1;
+        break;
+      }
+      const completionResult = runCompletion({ shell: options.shell });
+      if (!completionResult.success) {
         process.exitCode = 1;
       }
       break;

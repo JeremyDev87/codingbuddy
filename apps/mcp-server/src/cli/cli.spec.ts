@@ -88,6 +88,20 @@ describe('cli', () => {
       expect(result.options.projectRoot).toBe('/custom/path');
     });
 
+    it('should parse completion command with shell type', () => {
+      const result = parseArgs(['completion', 'bash']);
+
+      expect(result.command).toBe('completion');
+      expect(result.options.shell).toBe('bash');
+    });
+
+    it('should parse completion command without shell type', () => {
+      const result = parseArgs(['completion']);
+
+      expect(result.command).toBe('completion');
+      expect(result.options.shell).toBeUndefined();
+    });
+
     it('should parse plugins command', () => {
       const result = parseArgs(['plugins']);
 
