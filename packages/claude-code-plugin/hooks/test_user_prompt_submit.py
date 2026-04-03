@@ -116,7 +116,7 @@ class TestMainFunction:
     """Integration tests for the main hook function."""
 
     def test_outputs_context_when_plan_detected(self):
-        """Test that context is output when PLAN keyword is detected."""
+        """Test that self-contained mode instructions are output when PLAN keyword is detected."""
         hook_path = Path(__file__).parent / "user-prompt-submit.py"
         input_data = json.dumps({"prompt": "PLAN: test feature"})
 
@@ -128,9 +128,9 @@ class TestMainFunction:
         )
 
         assert result.returncode == 0
-        assert "<codingbuddy-mode-detected>" in result.stdout
-        assert "MODE_KEYWORD_DETECTED: PLAN" in result.stdout
-        assert "MANDATORY_ACTION" in result.stdout
+        assert "# Mode: PLAN" in result.stdout
+        assert "technical-planner" in result.stdout
+        assert "mcp__codingbuddy__parse_mode" in result.stdout
 
     def test_no_output_when_no_keyword(self):
         """Test that no output when no keyword is detected."""
