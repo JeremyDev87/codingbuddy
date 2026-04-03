@@ -14,6 +14,8 @@ from typing import Any, Dict, Optional
 from urllib.request import Request, urlopen, build_opener, HTTPRedirectHandler
 from urllib.error import URLError
 
+from data_dir import resolve_data_dir
+
 
 class _NoRedirectHandler(HTTPRedirectHandler):
     """Refuse all HTTP redirects to prevent secret leakage."""
@@ -139,7 +141,7 @@ def notify(
     Args:
         event: The notification event to send.
         config: Parsed codingbuddy.config.json (event toggles + platform list).
-        secrets_dir: Override secrets directory (default: ~/.codingbuddy).
+        secrets_dir: Override secrets directory (default: resolve_data_dir()).
 
     Returns:
         Dict mapping platform name -> success boolean.
@@ -149,7 +151,7 @@ def notify(
         return {}
 
     if secrets_dir is None:
-        secrets_dir = os.path.join(os.path.expanduser("~"), ".codingbuddy")
+        secrets_dir = resolve_data_dir()
 
     secrets = load_secrets(secrets_dir)
     notifications = config.get("notifications", {})
