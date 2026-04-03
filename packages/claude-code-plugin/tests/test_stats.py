@@ -51,6 +51,18 @@ class TestInit:
         expected_dir = os.path.join(os.path.expanduser("~"), ".codingbuddy")
         assert os.path.isdir(expected_dir)
 
+    def test_chmod_failure_graceful(self, tmp_path, monkeypatch):
+        """chmod failure should not crash initialization."""
+        d = str(tmp_path / "restricted_dir")
+        os.makedirs(d, mode=0o700)
+
+        def failing_chmod(*args, **kwargs):
+            raise PermissionError("Operation not permitted")
+
+        monkeypatch.setattr(os, "chmod", failing_chmod)
+        s = SessionStats(session_id="perm-test", data_dir=d)
+        assert os.path.isdir(d)
+
 
 class TestRecordToolCall:
     def test_increments_count(self, stats):

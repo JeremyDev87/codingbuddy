@@ -40,7 +40,13 @@ class SessionStats:
         self.data_dir = data_dir
         os.makedirs(self.data_dir, mode=0o700, exist_ok=True)
         # Fix permissions if dir already existed
-        os.chmod(self.data_dir, 0o700)
+        try:
+            os.chmod(self.data_dir, 0o700)
+        except OSError:
+            import sys
+            sys.stderr.write(
+                f"[codingbuddy] Warning: could not set permissions on {self.data_dir}\n"
+            )
 
         self.stats_file = os.path.join(self.data_dir, f"{session_id}.json")
 
