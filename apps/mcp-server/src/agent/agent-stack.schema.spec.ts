@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readdirSync, readFileSync } from 'fs';
+import { join, resolve } from 'path';
 import { AgentStackSchema } from './agent-stack.schema';
 
 describe('AgentStackSchema', () => {
@@ -126,6 +128,46 @@ describe('AgentStackSchema', () => {
         ...validStack,
         specialist_agents: [123, true],
       });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('preset JSON integration', () => {
+    const presetsDir = resolve(__dirname, '../../../../packages/rules/.ai-rules/agent-stacks');
+    const jsonFiles = readdirSync(presetsDir).filter(f => f.endsWith('.json'));
+
+    it('should find at least one preset JSON file', () => {
+      expect(jsonFiles.length).toBeGreaterThan(0);
+    });
+
+    for (const file of jsonFiles) {
+      it(`${file} passes Zod schema validation with specialist_agents`, () => {
+        const raw = readFileSync(join(presetsDir, file), 'utf-8');
+        const data: unknown = JSON.parse(raw);
+        const result = AgentStackSchema.safeParse(data);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.specialist_agents).toBeDefined();
+          expect(Array.isArray(result.data.specialist_agents)).toBe(true);
+          expect(result.data.specialist_agents.length).toBeGreaterThan(0);
+          for (const agent of result.data.specialist_agents) {
+            expect(typeof agent).toBe('string');
+          }
+        }
+      });
+    }
+
+    it('rejects a preset with "specialists" instead of "specialist_agents"', () => {
+      const driftedStack = {
+        name: 'drifted-stack',
+        description: 'Stack with wrong field name',
+        category: 'test',
+        tags: [],
+        primary_agent: 'software-engineer',
+        specialists: ['security-specialist'],
+      };
+      const result = AgentStackSchema.safeParse(driftedStack);
       expect(result.success).toBe(false);
     });
   });
