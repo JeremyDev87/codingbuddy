@@ -553,6 +553,16 @@ ps aux | grep codingbuddy
 - For npx users: ensure you're using the latest published version.
 - For local development: run `yarn build && yarn build:tui` in `apps/mcp-server/`.
 
+## v5.2.0 Changes
+
+Starting with v5.2.0, the TUI model has changed:
+
+- **Auto-open removed** — The TUI no longer launches automatically with the MCP server. This eliminates stdout conflicts and simplifies server startup.
+- **Manual start** — Use `codingbuddy tui` (or `npx codingbuddy tui`) to launch the TUI dashboard manually.
+- **Single multi-session model** — One TUI instance connects to all running MCP server instances, displaying sessions in a unified view.
+
+If you were relying on `--tui` flag or auto-open behavior, update your workflow to use `codingbuddy tui` as a separate command.
+
 ## Related Documentation
 
 - [TUI User Guide](./tui-guide.md) - How to run and configure the TUI

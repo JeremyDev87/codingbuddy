@@ -22,6 +22,10 @@ Always reach for these codingbuddy tools before any OMC equivalent:
 | `get_agent_details` | Agent profile and expertise lookup |
 | `get_project_config` | Tech stack, architecture, language settings |
 | `prepare_parallel_agents` | Ready-to-use prompts for parallel specialist agents |
+| `pr_quality_report` | Run specialist agents on changed files for PR quality |
+| `create_briefing` | Capture session state for cross-session recovery |
+| `resume_session` | Load previous session briefing |
+| `get_rule_impact_report` | Rule effectiveness analytics |
 
 ---
 

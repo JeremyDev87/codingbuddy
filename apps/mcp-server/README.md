@@ -21,6 +21,11 @@ npx codingbuddy init
 |---------|-------------|
 | `codingbuddy init` | Analyze project and generate configuration |
 | `codingbuddy mcp` | Start MCP server (stdio mode by default) |
+| `codingbuddy install <source>` | Install plugin from git URL or registry |
+| `codingbuddy search <query>` | Search plugins in registry |
+| `codingbuddy plugins` | List installed plugins |
+| `codingbuddy update [name]` | Update outdated plugins |
+| `codingbuddy uninstall <name>` | Uninstall plugin |
 | `codingbuddy --help` | Show help |
 | `codingbuddy --version` | Show version |
 
@@ -45,6 +50,10 @@ npx codingbuddy init
 | `get_code_conventions` | **🆕** Get project code conventions from config files (tsconfig, eslint, prettier, editorconfig, markdownlint) |
 | `generate_checklist` | Generate contextual checklists including conventions domain |
 | `analyze_task` | Comprehensive task analysis with risk assessment |
+| `pr_quality_report` | Run specialist agents on changed files for PR quality |
+| `create_briefing` | Capture session state for cross-session recovery |
+| `resume_session` | Load previous session briefing |
+| `get_rule_impact_report` | Rule effectiveness analytics |
 
 ### MCP Prompts
 

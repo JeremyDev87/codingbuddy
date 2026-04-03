@@ -100,17 +100,21 @@ Start coding with `PLAN`, `ACT`, `EVAL`, or `AUTO` keywords.
 
 ---
 
-## What's New in v5.1.2
+## What's New in v5.2.0
 
-**StatusLine HUD** — Real-time session metrics right in the Claude Code UI: current mode, estimated cost, cache hit rate, and context usage.
+**PR Guardian** — `pr_quality_report` MCP tool runs specialist agents on changed files, integrated with `/ship` quality gate for automated PR quality checks.
 
-```
-◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
-```
+**Context Rescue** — `create_briefing` and `resume_session` tools enable cross-session recovery, preserving decisions and context across conversation boundaries.
 
-**tmux Sidebar** — Run Claude Code inside tmux and get an auto-configured TUI dashboard sidebar with agent status, checklists, and metrics.
+**Session Intelligence** — SessionAnalyzer generates Intelligence Reports in the stop hook, providing actionable insights from every coding session.
 
-**Release Validation** — Two new MCP tools: `validate_plugin_manifest` for schema-based plugin.json validation, and `pre_release_check` for comprehensive pre-release checks with ecosystem auto-detection (Node.js, Python, Go, Rust, Java).
+**Rule Impact Dashboard** — Event tracking, stats writer, and impact reporting measure which rules actually prevent issues — proving your AI coding is improving.
+
+**Plugin Marketplace** — Full plugin lifecycle with `install`, `search`, `update`, `plugins`, and `uninstall` CLI commands, plus registry resolver for discovering community plugins.
+
+**Skill Discovery** — Filesystem-based `list_skills` with `triggers` frontmatter in SKILL.md for automatic skill activation based on context.
+
+**TUI** — Single multi-session model with manual `codingbuddy tui` launch. Auto-open removed for cleaner MCP server startup.
 
 ---
 

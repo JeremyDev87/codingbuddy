@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2026-04-03
+
+### Added
+
+#### PR Guardian
+- `pr_quality_report` MCP tool for automated PR quality analysis (#1120)
+- Quality Gate step in /ship skill — runs specialist checks before PR creation (#1123)
+
+#### Context Rescue
+- `create_briefing` MCP tool for session state capture (#1122)
+- `resume_session` MCP tool for cross-session recovery (#1124)
+- Briefing recovery detection on session-start (#1125)
+
+#### Session Intelligence
+- `SessionAnalyzer` module for git diff analysis and untested file detection (#1128)
+- Intelligence Report in session stop hook — shows what you did, gaps, and insights (#1130)
+- Auto-create GitHub issues for untested files (opt-in) (#1132)
+
+#### Rule Impact Dashboard
+- Rule event tracking in MCP handlers (#1129)
+- `rule-stats.json` writer service for aggregated rule metrics (#1131)
+- `get_rule_impact_report` MCP tool for quantified rule effectiveness (#1133)
+
+#### Plugin Marketplace Phase 1
+- Plugin manifest schema and validator (#1135)
+- `codingbuddy install` command — git-based plugin installation (#1136)
+- `codingbuddy plugins` and `codingbuddy uninstall` commands (#1137)
+
+#### Plugin Marketplace Phase 2
+- `codingbuddy search` command for plugin discovery via registry (#1169)
+- Registry resolver in install command — install by name (#1170)
+- `codingbuddy update` command for plugin upgrades (#1171)
+
+#### Skill Discovery
+- `list_skills` switched to filesystem-based discovery — all 48 skills now visible (#1162)
+- `triggers` field in SKILL.md frontmatter for `recommend_skills` (#1163)
+- CI validation test for skill/agent discoverability (#1164)
+
+### Changed
+
+#### TUI Refactor
+- Removed TUI auto-open from session-start hook (#1112)
+- Removed TUI auto-launch from MCP server bootstrap (#1113)
+- Adopted single TUI multi-session model — `codingbuddy tui` manual start (#1111)
+
+### Fixed
+- Flaky TUI tests — replaced `setTimeout(0)` tick with robust `flushInk` utility (#1118)
+- TaskMaestro review cycle automation and idle worker nudging (#1143)
+- File overlap detection includes implicit shared files (barrel exports, module files) (#1145)
+- Auto-issue module review fixes — safe import pattern (#1149)
+
 ## [5.1.3] - 2026-04-01
 
 ### Added
