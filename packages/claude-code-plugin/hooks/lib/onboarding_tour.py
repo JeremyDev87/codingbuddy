@@ -140,13 +140,17 @@ TOUR_STEPS: Dict[int, Dict[str, Dict[str, str]]] = {
     },
 }
 
-TOUR_SKIP: Dict[str, str] = {
-    "en": "Skip future tours: touch ~/.codingbuddy/onboarded",
-    "ko": "투어 건너뛰기: touch ~/.codingbuddy/onboarded",
-    "ja": "ツアーをスキップ: touch ~/.codingbuddy/onboarded",
-    "zh": "跳过教程: touch ~/.codingbuddy/onboarded",
-    "es": "Saltar tour: touch ~/.codingbuddy/onboarded",
-}
+def get_tour_skip_message(lang: str) -> str:
+    """Generate skip message with actual data dir path."""
+    data_dir = resolve_data_dir()
+    templates = {
+        "en": f"Skip future tours: touch {data_dir}/onboarded",
+        "ko": f"투어 건너뛰기: touch {data_dir}/onboarded",
+        "ja": f"ツアーをスキップ: touch {data_dir}/onboarded",
+        "zh": f"跳过教程: touch {data_dir}/onboarded",
+        "es": f"Saltar tour: touch {data_dir}/onboarded",
+    }
+    return templates.get(lang, templates["en"])
 
 TOUR_HEADER: Dict[str, str] = {
     "en": "Quick Tour",
@@ -217,6 +221,6 @@ def render_onboarding_tour(
 
     lines.append("")
     lines.append(f"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")
-    lines.append(f"\U0001f4ac {_get_text(TOUR_SKIP, language)}")
+    lines.append(f"\U0001f4ac {get_tour_skip_message(language)}")
 
     return "\n".join(lines)

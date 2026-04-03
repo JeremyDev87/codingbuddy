@@ -108,9 +108,18 @@ class TestRenderOnboardingTour:
         assert onboarding_tour.BUDDY_FACE in result
 
     def test_contains_skip_message(self):
-        """Tour output contains skip instructions."""
-        result = onboarding_tour.render_onboarding_tour()
-        assert "~/.codingbuddy/onboarded" in result
+        """Tour output contains skip instructions with resolved data dir."""
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CLAUDE_PLUGIN_DATA", None)
+            result = onboarding_tour.render_onboarding_tour()
+            assert "/.codingbuddy/onboarded" in result
+
+    def test_skip_message_uses_custom_data_dir(self):
+        """Skip message reflects CLAUDE_PLUGIN_DATA when set."""
+        with patch.dict(os.environ, {"CLAUDE_PLUGIN_DATA": "/tmp/custom-buddy"}):
+            result = onboarding_tour.render_onboarding_tour()
+            assert "/tmp/custom-buddy/onboarded" in result
+            assert "~/.codingbuddy/onboarded" not in result
 
     def test_english_content(self):
         """English tour contains expected keywords."""
@@ -160,6 +169,35 @@ class TestRenderOnboardingTour:
         """Example commands are included in tour steps."""
         result = onboarding_tour.render_onboarding_tour(language="en")
         assert "PLAN add user authentication" in result
+
+
+class TestGetTourSkipMessage:
+    """Tests for get_tour_skip_message function."""
+
+    def test_default_path(self):
+        """Uses ~/.codingbuddy when CLAUDE_PLUGIN_DATA is not set."""
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CLAUDE_PLUGIN_DATA", None)
+            msg = onboarding_tour.get_tour_skip_message("en")
+            assert "/.codingbuddy/onboarded" in msg
+
+    def test_custom_data_dir(self):
+        """Uses CLAUDE_PLUGIN_DATA path when set."""
+        with patch.dict(os.environ, {"CLAUDE_PLUGIN_DATA": "/custom/data"}):
+            msg = onboarding_tour.get_tour_skip_message("en")
+            assert "/custom/data/onboarded" in msg
+
+    def test_korean_with_custom_dir(self):
+        """Korean message uses custom path."""
+        with patch.dict(os.environ, {"CLAUDE_PLUGIN_DATA": "/my/dir"}):
+            msg = onboarding_tour.get_tour_skip_message("ko")
+            assert "/my/dir/onboarded" in msg
+            assert "투어 건너뛰기" in msg
+
+    def test_unknown_lang_falls_back_to_english(self):
+        """Unknown language falls back to English."""
+        msg = onboarding_tour.get_tour_skip_message("xx")
+        assert "Skip future tours" in msg
 
 
 class TestHelpers:
