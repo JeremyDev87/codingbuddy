@@ -23,7 +23,7 @@ describe('AgentStackService', () => {
     description: 'API development stack',
     category: 'development',
     primary_agent: 'backend-developer',
-    specialists: ['security-specialist', 'test-engineer'],
+    specialist_agents: ['security-specialist', 'test-engineer'],
     tags: ['api', 'backend'],
   };
 
@@ -32,7 +32,7 @@ describe('AgentStackService', () => {
     description: 'Frontend review stack',
     category: 'review',
     primary_agent: 'frontend-developer',
-    specialists: ['accessibility-specialist', 'performance-specialist'],
+    specialist_agents: ['accessibility-specialist', 'performance-specialist'],
     tags: ['frontend', 'ui'],
   };
 
@@ -79,7 +79,7 @@ describe('AgentStackService', () => {
       const customStack = {
         ...sampleStack,
         description: 'Custom API stack',
-        specialists: ['security-specialist'],
+        specialist_agents: ['security-specialist'],
       };
 
       mockReaddir.mockImplementation(async (dirPath: string) => {
@@ -188,13 +188,13 @@ describe('AgentStackService', () => {
 
       expect(stack.name).toBe('api-development');
       expect(stack.primary_agent).toBe('backend-developer');
-      expect(stack.specialists).toEqual(['security-specialist', 'test-engineer']);
+      expect(stack.specialist_agents).toEqual(['security-specialist', 'test-engineer']);
     });
 
     it('should prefer custom stack over default', async () => {
       const customStack = {
         ...sampleStack,
-        specialists: ['security-specialist', 'test-engineer', 'code-quality-specialist'],
+        specialist_agents: ['security-specialist', 'test-engineer', 'code-quality-specialist'],
       };
 
       mockReadFile.mockImplementation(async (filePath: string) => {
@@ -207,7 +207,7 @@ describe('AgentStackService', () => {
 
       const stack = await service.resolveStack('api-development');
 
-      expect(stack.specialists).toHaveLength(3);
+      expect(stack.specialist_agents).toHaveLength(3);
     });
 
     it('should throw when stack not found', async () => {

@@ -185,18 +185,6 @@ export interface InlineAgentDefinition {
 }
 
 /**
- * Agent stack definition — a preset combination of primary agent + specialists
- */
-export interface AgentStack {
-  name: string;
-  description: string;
-  category: string;
-  primary_agent: string;
-  specialists: string[];
-  tags?: string[];
-}
-
-/**
  * Summary of an agent stack for listing
  */
 export interface AgentStackSummary {

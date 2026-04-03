@@ -255,8 +255,8 @@ export class AgentHandler extends AbstractHandler {
       try {
         const stack = await this.agentStackService.resolveStack(agentStack);
         primaryAgent = primaryAgent ?? stack.primary_agent;
-        specialists = specialists?.length ? specialists : stack.specialists;
-        includeParallel = includeParallel || stack.specialists.length > 0;
+        specialists = specialists?.length ? specialists : stack.specialist_agents;
+        includeParallel = includeParallel || stack.specialist_agents.length > 0;
       } catch (error) {
         return createErrorResponse(
           `Failed to resolve agent stack: ${error instanceof Error ? error.message : 'Unknown error'}`,
