@@ -184,7 +184,6 @@ export interface InlineAgentDefinition {
   [key: string]: unknown;
 }
 
-
 /**
  * Summary of an agent stack for listing
  */
