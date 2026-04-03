@@ -233,6 +233,78 @@ class TestMcpVsStandaloneOutput:
             assert result.returncode == 0
             assert result.stdout == ""
 
+    def test_claude_project_dir_env_overrides_cwd(self):
+        """CLAUDE_PROJECT_DIR env set to dir with mcp.json → MCP output even when cwd differs (#1236)."""
+        import tempfile
+        import os as _os
+
+        with tempfile.TemporaryDirectory() as project_dir, \
+             tempfile.TemporaryDirectory() as cwd_dir:
+            # Set up MCP config in project_dir
+            claude_dir = Path(project_dir) / ".claude"
+            claude_dir.mkdir()
+            mcp_json = claude_dir / "mcp.json"
+            mcp_json.write_text(json.dumps({
+                "mcpServers": {
+                    "codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}
+                }
+            }))
+
+            hook_path = Path(__file__).parent / "user-prompt-submit.py"
+            input_data = json.dumps({"prompt": "PLAN: test"})
+            env = _os.environ.copy()
+            env["HOME"] = cwd_dir  # HOME has no mcp.json
+            env["CLAUDE_PROJECT_DIR"] = project_dir
+            env.pop("CODINGBUDDY_RULES_DIR", None)
+
+            result = subprocess.run(
+                [sys.executable, str(hook_path)],
+                input=input_data,
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=cwd_dir,  # cwd differs from project_dir
+            )
+
+            assert result.returncode == 0
+            assert "# Mode: PLAN" in result.stdout
+            assert "mcp__codingbuddy__parse_mode" in result.stdout
+
+    def test_claude_project_dir_with_project_mcp_json(self):
+        """CLAUDE_PROJECT_DIR with project-level .mcp.json → MCP detection (#1236)."""
+        import tempfile
+        import os as _os
+
+        with tempfile.TemporaryDirectory() as project_dir, \
+             tempfile.TemporaryDirectory() as cwd_dir:
+            # Set up project-level .mcp.json (not ~/.claude/mcp.json)
+            mcp_json = Path(project_dir) / ".mcp.json"
+            mcp_json.write_text(json.dumps({
+                "mcpServers": {
+                    "codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}
+                }
+            }))
+
+            hook_path = Path(__file__).parent / "user-prompt-submit.py"
+            input_data = json.dumps({"prompt": "ACT: test"})
+            env = _os.environ.copy()
+            env["HOME"] = cwd_dir
+            env["CLAUDE_PROJECT_DIR"] = project_dir
+            env.pop("CODINGBUDDY_RULES_DIR", None)
+
+            result = subprocess.run(
+                [sys.executable, str(hook_path)],
+                input=input_data,
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=cwd_dir,
+            )
+
+            assert result.returncode == 0
+            assert "# Mode: ACT" in result.stdout
+            assert "mcp__codingbuddy__parse_mode" in result.stdout
+
 
 if __name__ == "__main__":
     import pytest

@@ -70,7 +70,8 @@ def main():
                 from runtime_mode import is_mcp_available
                 from mode_engine import ModeEngine
 
-                if is_mcp_available(project_dir=os.getcwd()):
+                project_dir = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
+                if is_mcp_available(project_dir=project_dir):
                     # MCP mode: minimal output, parse_mode handles the rest
                     print(f"# Mode: {detected_mode}")
                     print(
@@ -79,7 +80,7 @@ def main():
                     )
                 else:
                     # Standalone mode: full enriched instructions
-                    engine = ModeEngine()
+                    engine = ModeEngine(cwd=project_dir)
                     instructions = engine.build_instructions(detected_mode)
                     print(instructions)
             except Exception:
