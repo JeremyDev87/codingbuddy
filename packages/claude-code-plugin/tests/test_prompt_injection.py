@@ -1,6 +1,7 @@
 """Tests for PromptInjector — system prompt injection module (#828)."""
 import os
 import sys
+from unittest import mock
 import pytest
 
 # Ensure hooks/lib is on path
@@ -10,6 +11,13 @@ if _lib_dir not in sys.path:
     sys.path.insert(0, _lib_dir)
 
 from prompt_injection import PromptInjector
+
+
+@pytest.fixture(autouse=True)
+def _mock_mcp_available():
+    """Default: mock is_mcp_available to return True (MCP mode) for all existing tests."""
+    with mock.patch("prompt_injection.is_mcp_available", return_value=True):
+        yield
 
 
 @pytest.fixture
@@ -225,3 +233,44 @@ class TestDisabledInjection:
     def test_returns_empty_when_none_config(self, injector):
         result = injector.build_system_prompt({"promptInjection": None}, "/tmp")
         assert result == ""
+
+
+class TestStandaloneMode:
+    """Tests for standalone mode (MCP not available)."""
+
+    @pytest.fixture(autouse=True)
+    def _standalone(self):
+        with mock.patch("prompt_injection.is_mcp_available", return_value=False):
+            yield
+
+    def test_standalone_contains_mode_hook_instruction(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "follow the mode instructions provided by the mode detection hook" in result
+
+    def test_standalone_no_parse_mode_must(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "MUST call parse_mode" not in result
+
+    def test_standalone_no_dispatch_enforcement(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "dispatch" not in result.lower() or "dispatch=\"auto\"" not in result
+
+    def test_standalone_still_has_tdd(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "TDD" in result
+
+    def test_standalone_still_has_quality_gates(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "lint" in result.lower() or "test" in result.lower()
+
+
+class TestMcpMode:
+    """Explicit MCP mode tests — verify original behavior is preserved."""
+
+    def test_mcp_contains_parse_mode_must(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert "MUST call parse_mode FIRST" in result
+
+    def test_mcp_contains_dispatch_enforcement(self, injector, base_config):
+        result = injector.build_system_prompt(base_config, "/tmp")
+        assert 'dispatch="auto"' in result
