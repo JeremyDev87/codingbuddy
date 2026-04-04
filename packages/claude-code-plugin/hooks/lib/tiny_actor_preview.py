@@ -9,7 +9,9 @@ import os
 from typing import Optional
 
 from tiny_actor_card import create_actor_card, TinyActorCard
+from tiny_actor_grid import layout_grid
 from tiny_actor_presets import get_cast_preset, BUDDY_FACE
+from tiny_actor_renderer import render_card
 
 # ---------------------------------------------------------------------------
 # Feature flag
@@ -25,62 +27,10 @@ def is_tiny_actors_enabled() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Card rendering helpers
+# Public API
 # ---------------------------------------------------------------------------
 
 _CARD_WIDTH = 14
-_SEPARATOR = " "
-
-
-def _render_card_lines(card: TinyActorCard, width: int) -> list[str]:
-    """Render a single actor card as a list of fixed-width lines."""
-    label = card.label[:width]
-    face = card.face
-    lines = [
-        label.center(width),
-        face.center(width),
-    ]
-    if card.quote:
-        quote = card.quote[:width]
-        lines.append(quote.center(width))
-    return lines
-
-
-def _arrange_cards_horizontal(
-    cards: list[TinyActorCard],
-    available_width: int,
-) -> str:
-    """Arrange actor cards in a horizontal row, wrapping to fit *available_width*."""
-    if not cards:
-        return ""
-
-    card_w = min(_CARD_WIDTH, available_width)
-    sep_w = len(_SEPARATOR)
-    # Cards per row: at least 1
-    cards_per_row = max(1, (available_width + sep_w) // (card_w + sep_w))
-
-    rows_output: list[str] = []
-    for row_start in range(0, len(cards), cards_per_row):
-        row_cards = cards[row_start : row_start + cards_per_row]
-        rendered = [_render_card_lines(c, card_w) for c in row_cards]
-
-        # Pad all to same number of lines
-        max_lines = max(len(r) for r in rendered)
-        for r in rendered:
-            while len(r) < max_lines:
-                r.append(" " * card_w)
-
-        # Merge horizontally
-        for line_idx in range(max_lines):
-            merged = _SEPARATOR.join(r[line_idx] for r in rendered)
-            rows_output.append(merged[:available_width])
-
-    return "\n".join(rows_output)
-
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
 
 
 def render_actor_preview(
@@ -130,7 +80,17 @@ def render_actor_preview(
             )
             cards.append(card)
 
-        return _arrange_cards_horizontal(cards, available_width)
+        # Render each card through the width-safe renderer
+        rendered = [render_card(c, card_width=_CARD_WIDTH) for c in cards]
+
+        # Assemble via the responsive grid layout
+        grid_lines = layout_grid(
+            rendered,
+            available_width=available_width,
+            card_width=_CARD_WIDTH,
+        )
+
+        return "\n".join(grid_lines) if grid_lines else None
 
     except Exception:
         return None

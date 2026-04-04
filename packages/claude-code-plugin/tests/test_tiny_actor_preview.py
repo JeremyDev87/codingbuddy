@@ -10,6 +10,7 @@ _lib_dir = os.path.join(os.path.dirname(_tests_dir), "hooks", "lib")
 if _lib_dir not in sys.path:
     sys.path.insert(0, _lib_dir)
 
+from buddy_renderer import display_width
 from tiny_actor_preview import is_tiny_actors_enabled, render_actor_preview
 
 # ---------------------------------------------------------------------------
@@ -100,9 +101,8 @@ class TestRenderActorPreviewEnabled:
         result = render_actor_preview("PLAN", available_width=40)
         assert result is not None
         for line in result.split("\n"):
-            # Each line should not exceed available_width
-            # (stripped of ANSI codes for measurement)
-            assert len(line) <= 40
+            # Use display_width for correct measurement of Unicode content
+            assert display_width(line) <= 40
 
     def test_all_preset_modes_render(self):
         for mode in ("PLAN", "EVAL", "AUTO", "SHIP"):
