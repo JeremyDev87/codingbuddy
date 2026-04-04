@@ -119,7 +119,30 @@ describe('agent-prompt.builder', () => {
       expect(result).toMatch(/output|format|json|structured/i);
     });
 
-    it('should include mandatory_checklist when present', () => {
+    it('should include mandatory_checklist from activation object format', () => {
+      const profileWithActivation: AgentProfile = {
+        ...mockAgentProfile,
+        activation: {
+          mandatory_checklist: {
+            '🔴 language': {
+              rule: 'MUST respond in Korean',
+              verification_key: 'language',
+            },
+            '🔴 tdd': {
+              rule: 'Follow TDD cycle',
+              verification_key: 'tdd_cycle',
+            },
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithActivation, mockContext);
+
+      expect(result).toContain('## Mandatory Checklist');
+      expect(result).toContain('- [ ] MUST respond in Korean');
+      expect(result).toContain('- [ ] Follow TDD cycle');
+    });
+
+    it('should fall back to top-level array mandatory_checklist (backward compat)', () => {
       const profileWithChecklist: AgentProfile = {
         ...mockAgentProfile,
         mandatory_checklist: [
@@ -134,6 +157,22 @@ describe('agent-prompt.builder', () => {
       expect(result).toContain('- [ ] Type safety: no any usage');
       expect(result).toContain('- [ ] Test coverage 90%+');
       expect(result).toContain('- [ ] SOLID principles applied');
+    });
+
+    it('should prefer activation.mandatory_checklist over top-level array', () => {
+      const profileWithBoth: AgentProfile = {
+        ...mockAgentProfile,
+        mandatory_checklist: ['Top-level item'],
+        activation: {
+          mandatory_checklist: {
+            '🔴 check': { rule: 'Activation item', verification_key: 'check' },
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithBoth, mockContext);
+
+      expect(result).toContain('- [ ] Activation item');
+      expect(result).not.toContain('Top-level item');
     });
 
     it('should include communication language when present', () => {
@@ -193,18 +232,75 @@ describe('agent-prompt.builder', () => {
       expect(result).toContain('**web_search**: Validate recommendations (when: Evaluating)');
     });
 
-    it('should include verification_guide when present', () => {
+    it('should include verification_guide from activation', () => {
+      const profileWithActivation: AgentProfile = {
+        ...mockAgentProfile,
+        activation: {
+          verification_guide: {
+            tdd_cycle: 'Check test file exists before implementation',
+            server_components: 'Verify no use client directive',
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithActivation, mockContext);
+
+      expect(result).toContain('## Verification Guide');
+      expect(result).toContain('**tdd_cycle**: Check test file exists before implementation');
+      expect(result).toContain('**server_components**: Verify no use client directive');
+    });
+
+    it('should fall back to top-level verification_guide (backward compat)', () => {
       const profileWithVerification: AgentProfile = {
         ...mockAgentProfile,
         verification_guide: {
-          steps: ['Check type safety', 'Run tests', 'Review coverage'],
+          steps: 'Check type safety and run tests',
         },
       };
       const result = buildAgentSystemPrompt(profileWithVerification, mockContext);
 
       expect(result).toContain('## Verification Guide');
-      expect(result).toContain('Check type safety');
-      expect(result).toContain('Run tests');
+      expect(result).toContain('**steps**: Check type safety and run tests');
+    });
+
+    it('should include execution_order from activation (object format)', () => {
+      const profileWithActivation: AgentProfile = {
+        ...mockAgentProfile,
+        activation: {
+          execution_order: {
+            plan_mode: ['1. Analyze requirements', '2. Create plan'],
+            act_mode: ['1. Implement changes', '2. Run tests'],
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithActivation, mockContext);
+
+      expect(result).toContain('## Execution Order');
+      expect(result).toContain('### plan_mode');
+      expect(result).toContain('1. Analyze requirements');
+      expect(result).toContain('### act_mode');
+      expect(result).toContain('1. Implement changes');
+    });
+
+    it('should include execution_order from activation (array format)', () => {
+      const profileWithActivation: AgentProfile = {
+        ...mockAgentProfile,
+        activation: {
+          execution_order: ['Step 1', 'Step 2', 'Step 3'],
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithActivation, mockContext);
+
+      expect(result).toContain('## Execution Order');
+      expect(result).toContain('1. Step 1');
+      expect(result).toContain('1. Step 2');
+    });
+
+    it('should handle agent without activation field gracefully', () => {
+      const result = buildAgentSystemPrompt(mockAgentProfile, mockContext);
+
+      expect(result).not.toContain('## Mandatory Checklist');
+      expect(result).not.toContain('## Verification Guide');
+      expect(result).not.toContain('## Execution Order');
     });
 
     it('should handle agent without optional rich metadata gracefully', () => {

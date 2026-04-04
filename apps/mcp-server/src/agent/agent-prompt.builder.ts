@@ -76,9 +76,27 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
 
   // Rich metadata from passthrough fields
   const rawProfile = agentProfile as Record<string, unknown>;
+  const activation = rawProfile.activation as Record<string, unknown> | undefined;
 
-  // Mandatory Checklist
-  if (Array.isArray(rawProfile.mandatory_checklist) && rawProfile.mandatory_checklist.length) {
+  // Mandatory Checklist — prefer activation.mandatory_checklist (object with {rule:...} items)
+  const activationChecklist = activation?.mandatory_checklist;
+  if (
+    activationChecklist &&
+    typeof activationChecklist === 'object' &&
+    !Array.isArray(activationChecklist)
+  ) {
+    sections.push('## Mandatory Checklist');
+    for (const [, item] of Object.entries(activationChecklist as Record<string, unknown>)) {
+      if (item && typeof item === 'object' && 'rule' in item) {
+        sections.push(`- [ ] ${(item as { rule: string }).rule}`);
+      }
+    }
+    sections.push('');
+  } else if (
+    Array.isArray(rawProfile.mandatory_checklist) &&
+    rawProfile.mandatory_checklist.length
+  ) {
+    // Backward compat: top-level array format
     sections.push('## Mandatory Checklist');
     for (const item of rawProfile.mandatory_checklist) {
       sections.push(`- [ ] ${item}`);
@@ -133,10 +151,34 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
     sections.push('');
   }
 
-  // Verification Guide
-  if (rawProfile.verification_guide) {
+  // Verification Guide — prefer activation.verification_guide
+  const verificationGuide = activation?.verification_guide ?? rawProfile.verification_guide;
+  if (verificationGuide && typeof verificationGuide === 'object') {
     sections.push('## Verification Guide');
-    sections.push(JSON.stringify(rawProfile.verification_guide, null, 2));
+    for (const [key, desc] of Object.entries(verificationGuide as Record<string, string>)) {
+      sections.push(`- **${key}**: ${desc}`);
+    }
+    sections.push('');
+  }
+
+  // Execution Order — from activation.execution_order
+  const executionOrder = activation?.execution_order;
+  if (executionOrder && typeof executionOrder === 'object' && !Array.isArray(executionOrder)) {
+    sections.push('## Execution Order');
+    for (const [phase, steps] of Object.entries(executionOrder as Record<string, unknown>)) {
+      if (Array.isArray(steps) && steps.length) {
+        sections.push(`### ${phase}`);
+        for (const step of steps) {
+          sections.push(`${step}`);
+        }
+      }
+    }
+    sections.push('');
+  } else if (Array.isArray(executionOrder) && executionOrder.length) {
+    sections.push('## Execution Order');
+    for (const step of executionOrder) {
+      sections.push(`1. ${step}`);
+    }
     sections.push('');
   }
 
