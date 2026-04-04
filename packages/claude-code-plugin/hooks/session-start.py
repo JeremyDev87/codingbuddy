@@ -888,6 +888,16 @@ def main():
             if output:
                 print(output)
 
+            # Tiny Actor Grid preview (#1302)
+            try:
+                from tiny_actor_preview import render_actor_preview
+
+                actor_preview = render_actor_preview("PLAN")
+                if actor_preview:
+                    print(actor_preview)
+            except Exception:
+                pass  # Never block session start
+
             # Show update notification if marketplace clone was updated (#1101)
             if new_version:
                 print(
