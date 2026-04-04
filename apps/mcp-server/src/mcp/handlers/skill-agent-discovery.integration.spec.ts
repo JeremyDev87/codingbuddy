@@ -85,6 +85,50 @@ describe('Skill/Agent Discovery Completeness', () => {
     });
   });
 
+  describe('core skill regression guard', () => {
+    /**
+     * Core skills that MUST always be discoverable.
+     * If any of these disappear from discovery results, it indicates
+     * a schema or parser regression that silently hides runtime skills.
+     */
+    const REQUIRED_CORE_SKILLS = [
+      'pr-review',
+      'systematic-debugging',
+      'database-migration',
+      'security-audit',
+    ] as const;
+
+    /**
+     * Minimum number of skills that must be visible.
+     * Prevents mass disappearance due to parser/schema changes.
+     * Update this floor when skills are intentionally removed.
+     */
+    const MINIMUM_VISIBLE_SKILL_COUNT = 20;
+
+    it('should include all required core skills in discovery results', async () => {
+      const mcpSkills = await listSkillSummaries(RULES_DIR);
+      const discoveredNames = new Set(mcpSkills.map(s => s.name));
+
+      const missing = REQUIRED_CORE_SKILLS.filter(name => !discoveredNames.has(name));
+
+      expect(
+        missing,
+        `Core skills missing from discovery: ${missing.join(', ')}. ` +
+          'This likely indicates a schema or parser regression.',
+      ).toEqual([]);
+    });
+
+    it('should not drop below minimum visible skill count', async () => {
+      const mcpSkills = await listSkillSummaries(RULES_DIR);
+
+      expect(
+        mcpSkills.length,
+        `Only ${mcpSkills.length} skills visible (minimum: ${MINIMUM_VISIBLE_SKILL_COUNT}). ` +
+          'A sudden drop suggests a parser or schema change silently removed skills.',
+      ).toBeGreaterThanOrEqual(MINIMUM_VISIBLE_SKILL_COUNT);
+    });
+  });
+
   describe('SKILL_KEYWORDS orphan check', () => {
     it('no orphaned keywords.ts entries — every skillName must exist on disk', async () => {
       const skillsDir = path.join(RULES_DIR, 'skills');
