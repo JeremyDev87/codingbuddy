@@ -42,22 +42,22 @@ This command activates ACT mode for the CodingBuddy workflow.
 **Purpose:**
 Execute implementation following TDD cycle, augmented coding principles, and quality standards
 
-**What ACT does (with Primary Developer Agent):**
+**What ACT does (with Software Engineer):**
 
-1. **Execute TDD Cycle** (via Primary Developer Agent)
+1. **Execute TDD Cycle** (via Software Engineer)
    - 🔴 For core logic: Red → Green → Refactor cycle
    - Write failing test first
    - Implement minimal code to pass
    - Refactor only after tests pass
-   - 🔴 **Required**: Follow Primary Developer Agent's TDD cycle
+   - 🔴 **Required**: Follow Software Engineer's TDD cycle
 
-2. **Implement Components** (via Primary Developer Agent)
+2. **Implement Components** (via Software Engineer)
    - Follow framework-specific component patterns
    - Use project design system components first
    - Apply project styling conventions
-   - 🔴 **Required**: Follow Primary Developer Agent's component strategy
+   - 🔴 **Required**: Follow Software Engineer's component strategy
 
-3. **Maintain Quality Standards** (via Primary Developer Agent)
+3. **Maintain Quality Standards** (via Software Engineer)
    - 🔴 Type safety (no unsafe type bypasses)
    - 🔴 Test coverage 90%+
    - 🔴 Pure/impure function separation
@@ -66,10 +66,10 @@ Execute implementation following TDD cycle, augmented coding principles, and qua
    - 🔴 Accessibility compliance
    - 🔴 **Required**: Reference Implementation Specialist Agents for comprehensive implementation verification (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
-**Output Format (via Primary Developer Agent):**
+**Output Format (via Software Engineer):**
 ```
 # Mode: ACT
-## Agent : [Primary Developer Agent Name]
+## Agent : Software Engineer
 
 ## 🚀 Implementation Progress
 
@@ -176,19 +176,19 @@ To preserve this implementation session for future reference:
 ```
 
 **🔴 Required:**
-- All implementations must follow the Primary Developer Agent's code quality checklist
+- All implementations must follow the Software Engineer's code quality checklist
 - Respond in the language specified in the agent's communication.language setting
 - Execute one step at a time, verify tests after each step
 - On recoverable errors (file not found, command failure, path issues), try alternatives immediately
 - Only return to PLAN on unrecoverable blockers (missing dependencies, architectural conflicts)
 
 **Verification:**
-- Agent name should appear as `## Agent : [Primary Developer Agent Name]` in response
+- Agent name should appear as `## Agent : Software Engineer` in response
 - Mode indicator `# Mode: ACT` should be first line
 - Implementation Progress should show step-by-step completion
 - Implementation Specialist Verification sections should be included when applicable (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 - Quality Checks section should verify: Type Safety, Tests, Linting, Design System
-- Use `verification_guide` from Primary Developer Agent for detailed checklist validation
+- Use `verification_guide` from Software Engineer for detailed checklist validation
 - For TDD: Verify test file exists before implementation, test fails first (Red), then passes (Green)
 - For Test-After: Verify component exists before test file
 - Verify framework-specific component patterns are followed

@@ -76,15 +76,15 @@ See project rules for detailed question guidelines.
 
 ---
 
-**What PLAN does (with Primary Developer Agent):**
+**What PLAN does (with Technical Planner):**
 
-1. **Analyze Requirements** (via Primary Developer Agent)
+1. **Analyze Requirements** (via Technical Planner)
    - Understand user requirements
    - Identify core logic vs presentation components
    - Determine TDD (test-first) vs Test-After approach
-   - 🔴 **Required**: Follow Primary Developer Agent's workflow framework
+   - 🔴 **Required**: Follow Technical Planner's workflow framework
 
-2. **Plan Implementation** (via Primary Developer Agent workflow)
+2. **Plan Implementation** (via Technical Planner workflow)
    - 🔴 TDD for core logic (business logic, utilities, data access layers)
    - 🔴 Test-After for presentation (UI components, views)
    - Define file structure (types, constants, utils)
@@ -92,7 +92,7 @@ See project rules for detailed question guidelines.
    - Consider framework-specific component patterns
    - 🔴 **Required**: Reference Planning Specialist Agents for comprehensive planning (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
-3. **Output Structured PLAN** (via Primary Developer Agent)
+3. **Output Structured PLAN** (via Technical Planner)
    - Step-by-step implementation plan
    - Clear task breakdown
    - File naming conventions
@@ -100,10 +100,10 @@ See project rules for detailed question guidelines.
    - Type safety requirements
    - 🔴 **Required**: Create todo list using `todo_write` tool for all implementation steps
 
-**Output Format (via Primary Developer Agent):**
+**Output Format (via Technical Planner):**
 ```
 # Mode: PLAN
-## Agent : [Primary Developer Agent Name]
+## Agent : Technical Planner
 
 ## 📋 Plan Overview
 [High-level summary of what will be implemented]
@@ -236,18 +236,18 @@ To preserve this planning session for future reference:
 ```
 
 **🔴 Required:**
-- All plans must follow the Primary Developer Agent's workflow framework
+- All plans must follow the Technical Planner's workflow framework
 - Respond in the language specified in the agent's communication.language setting
 - Follow framework-specific component patterns as defined in project configuration
 - 🔴 **MUST use `todo_write` tool** to create todo list for all implementation steps
 - All todo items should be in `pending` status when created in PLAN mode
 
 **Verification:**
-- Agent name should appear as `## Agent : [Primary Developer Agent Name]` in response
+- Agent name should appear as `## Agent : Technical Planner` in response
 - Mode indicator `# Mode: PLAN` should be first line
 - Plan should include structured sections: Plan Overview, Todo List (created with todo_write), Implementation Steps, Planning Specialist sections (when applicable), Risk Assessment, File Structure, Quality Checklist
 - Todo list must be created using `todo_write` tool before outputting plan
-- All mandatory checklist items from the Primary Developer Agent should be considered during planning
+- All mandatory checklist items from the Technical Planner should be considered during planning
 - Planning Specialist Agents should be referenced when planning respective areas (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
 ---

@@ -45,7 +45,7 @@ Autonomous iterative development - automatically cycling through planning, imple
 
 1. **Initial Phase: PLAN**
    - Creates implementation plan following TDD and augmented coding principles
-   - Activates Primary Developer Agent automatically
+   - Activates Technical Planner automatically
    - Outputs structured plan with todo items
 
 2. **Execution Phase: ACT**
@@ -79,7 +79,7 @@ Autonomous iterative development - automatically cycling through planning, imple
 | `auto.maxIterations` | 3 | 1-10 | Maximum PLAN→ACT→EVAL cycles before forced exit |
 
 **🔴 Agent Activation (STRICT):**
-- When AUTO mode is triggered, **Primary Developer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated for PLAN and ACT phases
+- When AUTO mode is triggered, **Technical Planner** (PLAN phase) and **Software Engineer** (ACT phase) (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated for their respective phases
 - During EVAL phase, **Code Reviewer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
 - The respective Agent's workflow framework and all mandatory requirements MUST be followed
 - See agent definitions for complete agent frameworks
@@ -177,8 +177,8 @@ Remaining Issues:
 | Time efficiency | Optimized for quality | Optimized for control |
 
 **🔴 Required:**
-- All PLAN phases must follow the Primary Developer Agent's workflow framework
-- All ACT phases must follow the Primary Developer Agent's code quality checklist
+- All PLAN phases must follow the Technical Planner's workflow framework
+- All ACT phases must follow the Software Engineer's code quality checklist
 - All EVAL phases must follow the Code Reviewer Agent's evaluation framework
 - Respond in the language specified in the agent's communication.language setting
 - Continue iterating automatically until exit conditions are met (Critical = 0 AND High = 0)
