@@ -29,6 +29,7 @@ import {
 import { buildVisualData, type AgentVisualInput } from '../../keyword/visual-data.builder';
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { AgentService } from '../../agent/agent.service';
+import { CouncilPresetService } from '../../agent/council-preset.service';
 import { ImpactEventService } from '../../impact';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
 
@@ -104,6 +105,7 @@ export class ModeHandler extends AbstractHandler {
     private readonly contextDocService: ContextDocumentService,
     private readonly diagnosticLogService: DiagnosticLogService,
     private readonly agentService: AgentService,
+    private readonly councilPresetService: CouncilPresetService,
     private readonly impactEventService: ImpactEventService,
     private readonly ruleEventCollector: RuleEventCollector,
   ) {
@@ -276,6 +278,10 @@ export class ModeHandler extends AbstractHandler {
         settings?.ai?.agentDiscussion,
       );
 
+      // Resolve council preset for PLAN/EVAL modes
+      const councilPreset =
+        this.councilPresetService.resolvePreset(result.mode as Mode) ?? undefined;
+
       // Build visual data for agent visualization
       const visual = await this.buildVisual(
         result.mode as Mode,
@@ -299,6 +305,8 @@ export class ModeHandler extends AbstractHandler {
         ...(agentDiscussion && { agentDiscussion }),
         // Include visual data for agent visualization
         ...(visual && { visual }),
+        // Include council preset for PLAN/EVAL modes
+        ...(councilPreset && { councilPreset }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing

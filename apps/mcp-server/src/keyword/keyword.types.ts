@@ -1,4 +1,6 @@
 import type { DiffAnalysisResult } from './diff-analyzer';
+import type { CouncilPreset } from '../agent/council-preset.service';
+import type { CouncilSummary } from '../collaboration/council-summary.types';
 
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
@@ -507,6 +509,20 @@ export interface ParseModeResult {
    * Present when staged or unstaged changes exist in the working directory.
    */
   diffAnalysis?: DiffAnalysisResult;
+  /**
+   * @apiProperty External API - do not rename.
+   * Deterministic council preset for the current mode.
+   * Present in PLAN and EVAL modes — lists the primary agent and specialist reviewers
+   * that form the council for that mode. Absent for ACT/AUTO modes.
+   */
+  councilPreset?: CouncilPreset;
+  /**
+   * @apiProperty External API - do not rename.
+   * Structured consensus summary from specialist council outputs.
+   * Present only when specialist results have been collected and aggregated.
+   * Clients should treat this as read-only diagnostic data.
+   */
+  councilSummary?: CouncilSummary;
 }
 
 /**

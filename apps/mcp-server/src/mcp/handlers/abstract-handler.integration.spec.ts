@@ -19,6 +19,7 @@ import { ModelResolverService } from '../../model/model-resolver.service';
 import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
+import { CouncilPresetService } from '../../agent/council-preset.service';
 import type { ImpactEventService } from '../../impact';
 import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
@@ -179,6 +180,7 @@ describe('Handler Security Integration', () => {
       mockContextDocService,
       mockDiagnosticLogService,
       mockAgentServiceForMode as AgentService,
+      new CouncilPresetService(),
       mockImpactEventService,
       mockRuleEventCollector,
     );

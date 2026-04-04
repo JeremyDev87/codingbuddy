@@ -8,6 +8,7 @@ import { StateService } from '../../state/state.service';
 import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import type { AgentService } from '../../agent/agent.service';
+import { CouncilPresetService } from '../../agent/council-preset.service';
 import type { ImpactEventService } from '../../impact';
 import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
@@ -21,6 +22,7 @@ describe('ModeHandler', () => {
   let mockContextDocService: ContextDocumentService;
   let mockDiagnosticLogService: DiagnosticLogService;
   let mockAgentService: Partial<AgentService>;
+  let mockCouncilPresetService: CouncilPresetService;
   let mockImpactEventService: Partial<ImpactEventService>;
   let mockRuleEventCollector: Partial<RuleEventCollector>;
 
@@ -129,6 +131,8 @@ describe('ModeHandler', () => {
       }),
     };
 
+    mockCouncilPresetService = new CouncilPresetService();
+
     mockImpactEventService = {
       logEvent: vi.fn(),
     };
@@ -144,6 +148,7 @@ describe('ModeHandler', () => {
       mockContextDocService,
       mockDiagnosticLogService,
       mockAgentService as AgentService,
+      mockCouncilPresetService,
       mockImpactEventService as ImpactEventService,
       mockRuleEventCollector as RuleEventCollector,
     );
@@ -1249,6 +1254,108 @@ describe('ModeHandler', () => {
       });
 
       expect(result?.isError).toBeFalsy();
+    });
+  });
+
+  describe('council preset integration', () => {
+    it('should include councilPreset in PLAN mode response', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilPreset).toBeDefined();
+      expect(parsed.councilPreset.mode).toBe('PLAN');
+      expect(parsed.councilPreset.primary).toBe('technical-planner');
+      expect(parsed.councilPreset.specialists).toEqual(
+        expect.arrayContaining([
+          'architecture-specialist',
+          'test-strategy-specialist',
+          'code-quality-specialist',
+          'security-specialist',
+        ]),
+      );
+    });
+
+    it('should include councilPreset in EVAL mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilPreset).toBeDefined();
+      expect(parsed.councilPreset.mode).toBe('EVAL');
+      expect(parsed.councilPreset.primary).toBe('code-reviewer');
+      expect(parsed.councilPreset.specialists).toEqual(
+        expect.arrayContaining([
+          'security-specialist',
+          'performance-specialist',
+          'accessibility-specialist',
+        ]),
+      );
+    });
+
+    it('should NOT include councilPreset in ACT mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilPreset).toBeUndefined();
+    });
+
+    it('should NOT include councilPreset in AUTO mode response', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: 'implement dashboard',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO implement dashboard',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilPreset).toBeUndefined();
+    });
+
+    it('should not include councilSummary when no specialist results exist', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilSummary).toBeUndefined();
+    });
+
+    it('councilPreset should be serializable JSON', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const text = (result?.content[0] as { text: string }).text;
+      // Round-trip serialization test
+      const parsed = JSON.parse(text);
+      const reserialized = JSON.stringify(parsed.councilPreset);
+      expect(JSON.parse(reserialized)).toEqual(parsed.councilPreset);
     });
   });
 });

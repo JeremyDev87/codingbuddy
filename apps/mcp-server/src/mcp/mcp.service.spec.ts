@@ -10,6 +10,7 @@ import { SkillRecommendationService } from '../skill/skill-recommendation.servic
 import type { RecommendSkillsResult, ListSkillsResult } from '../skill/skill-recommendation.types';
 import { LanguageService } from '../shared/language.service';
 import { AgentService } from '../agent/agent.service';
+import { CouncilPresetService } from '../agent/council-preset.service';
 import type { AgentSystemPrompt, ParallelAgentSet } from '../agent/agent.types';
 import { ChecklistService } from '../checklist/checklist.service';
 import { ContextService } from '../context/context.service';
@@ -492,6 +493,7 @@ function createMcpServiceWithHandlers(
       services.contextDocService as ContextDocumentService,
       services.diagnosticLogService as DiagnosticLogService,
       services.agentService as AgentService,
+      new CouncilPresetService(),
       services.impactEventService as ImpactEventService,
       services.ruleEventCollector as RuleEventCollector,
     ),
