@@ -9,6 +9,8 @@
  * by MCP server (single source of truth).
  */
 
+import * as path from 'path';
+import * as fs from 'fs';
 import { describe, it, expect, beforeAll } from 'vitest';
 
 // Import utilities that are testable in isolation
@@ -188,10 +190,6 @@ describe('build script orchestration', () => {
 // Packaging Integration — namespaced command assets
 // ============================================================================
 describe('packaging integration', () => {
-  // Use a fresh import of path/fs to keep these tests self-contained
-  const path = require('path');
-  const fs = require('fs');
-
   const pluginRoot = path.resolve(__dirname, '..');
   const commandsDir = path.join(pluginRoot, 'commands');
 
