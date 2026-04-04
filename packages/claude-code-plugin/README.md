@@ -2,7 +2,7 @@
 
 # CodingBuddy Claude Code Plugin
 
-> Version 5.1.3
+> Version 5.2.0
 
 Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, and reusable skills for systematic development.
 
@@ -25,11 +25,21 @@ claude plugin add codingbuddy
 - **AUTO**: Autonomous PLAN → ACT → EVAL cycle
 
 ### Commands
-- `/plan` - Enter PLAN mode
-- `/act` - Enter ACT mode
-- `/eval` - Enter EVAL mode
-- `/auto` - Enter AUTO mode
-- `/checklist` - Generate contextual checklists
+- `/codingbuddy:plan` - Enter PLAN mode
+- `/codingbuddy:act` - Enter ACT mode
+- `/codingbuddy:eval` - Enter EVAL mode
+- `/codingbuddy:auto` - Enter AUTO mode
+- `/codingbuddy:checklist` - Generate contextual checklists
+- `/codingbuddy:buddy` - Show project status and next actions
+
+> **Tip:** Type `PLAN`, `ACT`, `EVAL`, or `AUTO` as keywords for the fastest workflow entry.
+
+### Command Migration
+
+Legacy bare commands (`/plan`, `/act`, `/eval`, `/auto`, `/buddy`, `/checklist`) are deprecated.
+They continue to work during the transition period, but all new commands use the `codingbuddy:*` namespace.
+
+See [Migration Guide](./docs/migration-guide.md) for details.
 
 ### Specialist Agents
 35 AI agents for different domains:
@@ -46,24 +56,9 @@ Reusable workflows for consistent development:
 - Refactoring
 - And more...
 
-## Feature Availability
+## MCP Integration (Required)
 
-| Feature | Standalone | With MCP |
-|---------|-----------|----------|
-| Mode detection (PLAN/ACT/EVAL/AUTO) | ✅ | ✅ |
-| Basic agent recommendation | ✅ | ✅ |
-| TDD workflow guidance | ✅ | ✅ |
-| HUD / StatusLine | ✅ | ✅ |
-| Session stats & history | ✅ | ✅ |
-| Specialist agent dispatch | ❌ | ✅ |
-| Context tracking (cross-session) | ❌ | ✅ |
-| Parallel agent execution | ❌ | ✅ |
-| Contextual checklists | ❌ | ✅ |
-| Rule search & impact tracking | ❌ | ✅ |
-
-## MCP Integration (Recommended)
-
-This plugin works standalone but benefits from the CodingBuddy MCP server for full functionality:
+This plugin requires the CodingBuddy MCP server for full functionality:
 
 ```bash
 npm install -g codingbuddy

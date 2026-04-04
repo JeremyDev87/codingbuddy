@@ -72,11 +72,21 @@ claude plugin add codingbuddy
 - **AUTO**: Autonomous PLAN → ACT → EVAL cycle
 
 ### Commands
-- \`/plan\` - Enter PLAN mode
-- \`/act\` - Enter ACT mode
-- \`/eval\` - Enter EVAL mode
-- \`/auto\` - Enter AUTO mode
-- \`/checklist\` - Generate contextual checklists
+- \`/codingbuddy:plan\` - Enter PLAN mode
+- \`/codingbuddy:act\` - Enter ACT mode
+- \`/codingbuddy:eval\` - Enter EVAL mode
+- \`/codingbuddy:auto\` - Enter AUTO mode
+- \`/codingbuddy:checklist\` - Generate contextual checklists
+- \`/codingbuddy:buddy\` - Show project status and next actions
+
+> **Tip:** Type \`PLAN\`, \`ACT\`, \`EVAL\`, or \`AUTO\` as keywords for the fastest workflow entry.
+
+### Command Migration
+
+Legacy bare commands (\`/plan\`, \`/act\`, \`/eval\`, \`/auto\`, \`/buddy\`, \`/checklist\`) are deprecated.
+They continue to work during the transition period, but all new commands use the \`codingbuddy:*\` namespace.
+
+See [Migration Guide](./docs/migration-guide.md) for details.
 
 ### Specialist Agents
 35 AI agents for different domains:
