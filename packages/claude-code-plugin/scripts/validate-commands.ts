@@ -12,7 +12,7 @@
  * 4. Namespace validation (codingbuddy:* convention)
  *
  * Usage:
- *   npx tsx scripts/validate-commands.ts
+ *   ts-node scripts/validate-commands.ts
  */
 
 import * as path from 'path';

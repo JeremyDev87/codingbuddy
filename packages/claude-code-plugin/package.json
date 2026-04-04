@@ -45,7 +45,7 @@
     "typecheck": "tsc --noEmit",
     "circular": "madge --circular --extensions ts src/",
     "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\"",
-    "validate:commands": "npx tsx scripts/validate-commands.ts",
+    "validate:commands": "ts-node scripts/validate-commands.ts",
     "test": "vitest run",
     "test:hooks": "python3 -m pytest tests/ -v --tb=short",
     "test:all": "vitest run && python3 -m pytest tests/ -v --tb=short",
