@@ -13,6 +13,7 @@ function createMockRulesService(
     description: string;
     triggers?: SkillFrontmatterTrigger[];
     userInvocable?: boolean;
+    disableModelInvocation?: boolean;
   }> = [],
 ): RulesService {
   return {
@@ -592,6 +593,58 @@ describe('SkillRecommendationService', () => {
 
       const debugging = result.recommendations.find(r => r.skillName === 'systematic-debugging');
       expect(debugging).toBeUndefined();
+    });
+  });
+
+  describe('disableModelInvocation filtering', () => {
+    it('should exclude skills with disableModelInvocation: true from recommendations', async () => {
+      const skillsWithDisabled = [
+        ...FILESYSTEM_SKILLS,
+        {
+          name: 'incident-response',
+          description: 'Incident response skill',
+          disableModelInvocation: true,
+          triggers: [{ pattern: 'incident.*response', confidence: 'high' as const }],
+        },
+      ];
+      const filteredService = new SkillRecommendationService(
+        createMockRulesService(skillsWithDisabled),
+      );
+      await filteredService.loadFrontmatterTriggers();
+
+      const result = filteredService.recommendSkills('handle incident response procedure');
+
+      const incident = result.recommendations.find(r => r.skillName === 'incident-response');
+      expect(incident).toBeUndefined();
+    });
+
+    it('should include skills with disableModelInvocation: false in recommendations', async () => {
+      const skillsWithEnabled = [
+        ...FILESYSTEM_SKILLS,
+        {
+          name: 'enabled-skill',
+          description: 'Model invocation enabled skill',
+          disableModelInvocation: false,
+          triggers: [{ pattern: 'enabled-model-test-xyz', confidence: 'high' as const }],
+        },
+      ];
+      const enabledService = new SkillRecommendationService(
+        createMockRulesService(skillsWithEnabled),
+      );
+      await enabledService.loadFrontmatterTriggers();
+
+      const result = enabledService.recommendSkills('enabled-model-test-xyz');
+
+      const skill = result.recommendations.find(r => r.skillName === 'enabled-skill');
+      expect(skill).toBeDefined();
+    });
+
+    it('should include skills without disableModelInvocation field (default behavior)', async () => {
+      // Skills without disableModelInvocation should be included (backwards compatible)
+      const result = service.recommendSkills('widget slot architecture');
+
+      const wsa = result.recommendations.find(r => r.skillName === 'widget-slot-architecture');
+      expect(wsa).toBeDefined();
     });
   });
 

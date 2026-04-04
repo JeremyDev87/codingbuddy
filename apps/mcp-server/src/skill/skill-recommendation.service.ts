@@ -43,7 +43,10 @@ function getSkillDescription(skillName: string): string {
 @Injectable()
 export class SkillRecommendationService implements OnModuleInit {
   private frontmatterTriggerCache = new Map<string, FrontmatterTriggerEntry>();
-  private skillMetadataCache = new Map<string, { userInvocable?: boolean }>();
+  private skillMetadataCache = new Map<
+    string,
+    { userInvocable?: boolean; disableModelInvocation?: boolean }
+  >();
 
   constructor(private readonly rulesService: RulesService) {}
 
@@ -61,8 +64,11 @@ export class SkillRecommendationService implements OnModuleInit {
     this.skillMetadataCache.clear();
 
     for (const skill of skills) {
-      if (skill.userInvocable !== undefined) {
-        this.skillMetadataCache.set(skill.name, { userInvocable: skill.userInvocable });
+      if (skill.userInvocable !== undefined || skill.disableModelInvocation !== undefined) {
+        this.skillMetadataCache.set(skill.name, {
+          userInvocable: skill.userInvocable,
+          disableModelInvocation: skill.disableModelInvocation,
+        });
       }
       if (skill.triggers && skill.triggers.length > 0) {
         const compiled: CachedFrontmatterTrigger[] = [];
@@ -170,9 +176,12 @@ export class SkillRecommendationService implements OnModuleInit {
     const recommendations: SkillRecommendation[] = [];
 
     for (const [skillName, match] of skillMatches) {
-      // Filter out skills explicitly marked as user-invocable: false
+      // Filter out skills explicitly marked as non-invocable
       const metadata = this.skillMetadataCache.get(skillName);
       if (metadata?.userInvocable === false) {
+        continue;
+      }
+      if (metadata?.disableModelInvocation === true) {
         continue;
       }
 
