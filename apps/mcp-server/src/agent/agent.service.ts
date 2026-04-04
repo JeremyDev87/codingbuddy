@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { RulesService } from '../rules/rules.service';
 import { CustomService } from '../custom';
 import { ConfigService } from '../config/config.service';
+import { TeamsCapabilityService } from './teams-capability.service';
 import type { Mode } from '../keyword/keyword.types';
 import type { AgentProfile } from '../rules/rules.types';
 import type {
@@ -43,6 +44,7 @@ export class AgentService {
     private readonly rulesService: RulesService,
     private readonly customService: CustomService,
     private readonly configService: ConfigService,
+    private readonly teamsCapability: TeamsCapabilityService,
   ) {}
 
   /**
@@ -392,12 +394,25 @@ export class AgentService {
   /**
    * Dispatch with composable taskmaestro+teams strategy.
    * TaskMaestro manages tmux panes (outer), Teams coordinates within panes (inner).
+   *
+   * When Teams capability is disabled, falls back to pure TaskMaestro
+   * (omits inner coordination fields from assignments).
    */
   private async dispatchComposable(
     input: DispatchAgentsInput,
     context: AgentContext,
     result: DispatchResult,
   ): Promise<DispatchResult> {
+    const teamsAvailable = await this.teamsCapability.isAvailable();
+
+    // If Teams is not available, fall back to pure TaskMaestro
+    if (!teamsAvailable) {
+      this.logger.debug(
+        'Teams capability disabled — falling back to pure TaskMaestro for composable dispatch',
+      );
+      return this.dispatchTaskmaestro(input, context, result);
+    }
+
     const uniqueSpecialists = Array.from(new Set(input.specialists!));
     const teamName = `${(input.mode ?? 'eval').toLowerCase()}-specialists`;
     const { agents, failedAgents } = await this.loadAgents(
@@ -407,11 +422,22 @@ export class AgentService {
       input.inlineAgents,
     );
 
-    // Build TaskMaestro assignments (outer transport)
+    // Build TaskMaestro assignments with inner coordination metadata
     const assignments: TaskmaestroAssignment[] = agents.map(agent => ({
       name: agent.id,
       displayName: agent.displayName,
       prompt: this.buildTaskmaestroPrompt(agent, input),
+      innerCoordination: {
+        type: 'teams' as const,
+        teamSpec: {
+          team_name: teamName,
+          description: `${input.mode} mode specialist team (coordinated within TaskMaestro panes)`,
+        },
+        teammates: agents.map(a => ({
+          name: a.id,
+          subagent_type: 'general-purpose' as const,
+        })),
+      },
     }));
 
     const tmDispatch = {

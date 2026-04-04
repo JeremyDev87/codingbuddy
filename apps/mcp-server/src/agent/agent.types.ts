@@ -90,12 +90,34 @@ export interface DispatchedAgent {
 }
 
 /**
- * A single TaskMaestro pane assignment with agent name and prompt
+ * Inner Teams coordination metadata embedded in a TaskMaestro pane assignment.
+ * Present only when the composable `taskmaestro+teams` strategy is active
+ * and the Teams capability gate is enabled.
+ */
+export interface InnerTeamsSpec {
+  type: 'teams';
+  teamSpec: {
+    team_name: string;
+    description: string;
+  };
+  teammates: Array<{
+    name: string;
+    subagent_type: 'general-purpose';
+  }>;
+}
+
+/**
+ * A single TaskMaestro pane assignment with agent name and prompt.
+ * When the composable `taskmaestro+teams` strategy is active,
+ * `innerCoordination` carries the metadata a pane worker needs
+ * to bootstrap its inner Teams workflow.
  */
 export interface TaskmaestroAssignment {
   name: string;
   displayName: string;
   prompt: string;
+  /** Inner coordination metadata for composable taskmaestro+teams execution */
+  innerCoordination?: InnerTeamsSpec;
 }
 
 /**

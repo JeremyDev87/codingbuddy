@@ -3,6 +3,7 @@ import { AgentService } from './agent.service';
 import type { RulesService } from '../rules/rules.service';
 import type { CustomService } from '../custom';
 import type { ConfigService } from '../config/config.service';
+import type { TeamsCapabilityService } from './teams-capability.service';
 import type { AgentProfile } from '../rules/rules.types';
 import type { AgentContext, DispatchResult } from './agent.types';
 
@@ -11,6 +12,7 @@ describe('AgentService', () => {
   let mockRulesService: Partial<RulesService>;
   let mockCustomService: Partial<CustomService>;
   let mockConfigService: Partial<ConfigService>;
+  let mockTeamsCapability: Partial<TeamsCapabilityService>;
 
   const mockSecurityAgent: AgentProfile = {
     name: 'Security Specialist',
@@ -52,11 +54,20 @@ describe('AgentService', () => {
     mockConfigService = {
       getProjectRoot: vi.fn().mockReturnValue('/test/project'),
     };
+    mockTeamsCapability = {
+      isAvailable: vi.fn().mockResolvedValue(true),
+      getStatus: vi.fn().mockResolvedValue({
+        available: true,
+        reason: 'Enabled for testing',
+        source: 'environment',
+      }),
+    };
 
     service = new AgentService(
       mockRulesService as RulesService,
       mockCustomService as CustomService,
       mockConfigService as ConfigService,
+      mockTeamsCapability as TeamsCapabilityService,
     );
   });
 
@@ -915,6 +926,85 @@ describe('AgentService', () => {
       expect(result.taskmaestro!.paneCount).toBe(1);
       expect(result.teams!.teammates).toHaveLength(1);
       expect(result.failedAgents).toHaveLength(1);
+    });
+  });
+
+  describe('dispatchAgents taskmaestro+teams inner coordination bootstrap', () => {
+    it('should populate innerCoordination on assignments when Teams capability is enabled', async () => {
+      vi.mocked(mockTeamsCapability.isAvailable!).mockResolvedValue(true);
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.taskmaestro).toBeDefined();
+      const assignments = result.taskmaestro!.assignments;
+      expect(assignments).toHaveLength(2);
+
+      // Each assignment carries inner coordination metadata
+      for (const assignment of assignments) {
+        expect(assignment.innerCoordination).toBeDefined();
+        expect(assignment.innerCoordination!.type).toBe('teams');
+        expect(assignment.innerCoordination!.teamSpec.team_name).toBe('eval-specialists');
+        expect(assignment.innerCoordination!.teammates).toHaveLength(2);
+        expect(assignment.innerCoordination!.teammates[0].subagent_type).toBe('general-purpose');
+      }
+    });
+
+    it('should omit innerCoordination and fall back to pure taskmaestro when Teams capability is disabled', async () => {
+      vi.mocked(mockTeamsCapability.isAvailable!).mockResolvedValue(false);
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      // Falls back to pure taskmaestro
+      expect(result.executionStrategy).toBe('taskmaestro');
+      expect(result.taskmaestro).toBeDefined();
+      expect(result.teams).toBeUndefined();
+
+      // No inner coordination on assignments
+      for (const assignment of result.taskmaestro!.assignments) {
+        expect(assignment.innerCoordination).toBeUndefined();
+      }
+
+      // executionPlan should be simple (no inner)
+      expect(result.executionPlan).toBeDefined();
+      expect(result.executionPlan!.outerExecution.type).toBe('taskmaestro');
+      expect(result.executionPlan!.innerCoordination).toBeUndefined();
+    });
+
+    it('should include teammate list matching loaded agents in innerCoordination', async () => {
+      vi.mocked(mockTeamsCapability.isAvailable!).mockResolvedValue(true);
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockRejectedValueOnce(new Error('Agent not found'))
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'invalid-agent', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      // Only successfully loaded agents appear
+      expect(result.taskmaestro!.assignments).toHaveLength(2);
+      expect(result.failedAgents).toHaveLength(1);
+
+      // innerCoordination teammates match the successfully loaded agents
+      const teammates = result.taskmaestro!.assignments[0].innerCoordination!.teammates;
+      expect(teammates).toHaveLength(2);
+      expect(teammates.map(t => t.name)).toEqual(['security-specialist', 'performance-specialist']);
     });
   });
 
