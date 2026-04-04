@@ -289,11 +289,10 @@ describe('skill-triggers', () => {
       }
     });
 
-    it('should have systematic-debugging (priority 25) as the first trigger', () => {
+    it('should have highest priority skill as the first trigger', () => {
       const sorted = getSortedTriggers();
 
-      expect(sorted[0].skillName).toBe('systematic-debugging');
-      expect(sorted[0].priority).toBe(25);
+      expect(sorted[0].priority).toBe(40);
     });
 
     it('should have brainstorming (priority 10) as the last trigger', () => {

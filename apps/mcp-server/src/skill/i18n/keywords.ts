@@ -2362,4 +2362,1009 @@ export const SKILL_KEYWORDS: SkillKeywordConfig[] = [
       },
     },
   },
+
+  // ============================================================================
+  // API DESIGN - Priority 25
+  // REST/GraphQL API design patterns, OpenAPI spec, versioning, resource design
+  // ============================================================================
+  {
+    skillName: 'api-design',
+    priority: 25,
+    description: 'Design REST or GraphQL APIs with OpenAPI spec, versioning, and documentation',
+    concepts: {
+      api_design: {
+        en: [
+          'API design',
+          'REST API',
+          'RESTful',
+          'GraphQL',
+          'endpoint design',
+          'resource design',
+          'API architecture',
+        ],
+        ko: ['API 설계', 'REST API', 'RESTful', 'GraphQL', '엔드포인트 설계', '리소스 설계'],
+        ja: ['API設計', 'REST API', 'RESTful', 'GraphQL', 'エンドポイント設計'],
+        zh: ['API设计', 'REST API', 'RESTful', 'GraphQL', '端点设计', '资源设计'],
+        es: ['diseño de API', 'REST API', 'RESTful', 'GraphQL', 'diseño de endpoint'],
+      },
+      api_spec: {
+        en: [
+          'OpenAPI',
+          'Swagger',
+          'API spec',
+          'API specification',
+          'API schema',
+          'API contract',
+          'API documentation',
+        ],
+        ko: ['OpenAPI', 'Swagger', 'API 스펙', 'API 명세', 'API 스키마', 'API 문서'],
+        ja: ['OpenAPI', 'Swagger', 'API仕様', 'APIスキーマ', 'API文書'],
+        zh: ['OpenAPI', 'Swagger', 'API规范', 'API文档', 'API模式'],
+        es: ['OpenAPI', 'Swagger', 'especificación API', 'documentación API'],
+      },
+      versioning: {
+        en: [
+          'API versioning',
+          'API version',
+          'breaking change',
+          'backward compatible',
+          'deprecation',
+          'migration guide',
+        ],
+        ko: ['API 버전', 'API 버전관리', '호환성', '하위 호환', '폐기', '마이그레이션 가이드'],
+        ja: ['APIバージョン', '後方互換', '非推奨', '移行ガイド'],
+        zh: ['API版本', '向后兼容', '弃用', '迁移指南'],
+        es: ['versión de API', 'compatibilidad', 'deprecación', 'guía de migración'],
+      },
+      error_response: {
+        en: [
+          'error response',
+          'status code',
+          'HTTP status',
+          'error format',
+          'error handling',
+          'pagination',
+          'rate limiting',
+        ],
+        ko: ['에러 응답', '상태 코드', 'HTTP 상태', '에러 형식', '페이지네이션', '레이트 리밋'],
+        ja: ['エラーレスポンス', 'ステータスコード', 'HTTPステータス', 'ページネーション'],
+        zh: ['错误响应', '状态码', 'HTTP状态', '分页', '速率限制'],
+        es: ['respuesta de error', 'código de estado', 'paginación', 'limitación de tasa'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // BUILD FIX - Priority 40
+  // Build error resolution — fast minimal-diff fixes
+  // ============================================================================
+  {
+    skillName: 'build-fix',
+    priority: 40,
+    description: 'Fix build errors, TypeScript errors, and compilation failures with minimal diffs',
+    concepts: {
+      build_error: {
+        en: [
+          'build error',
+          'build failed',
+          'build failure',
+          'compilation error',
+          'compile error',
+          'build broken',
+          'build not passing',
+        ],
+        ko: ['빌드 에러', '빌드 실패', '빌드 오류', '컴파일 에러', '컴파일 오류', '빌드 깨짐'],
+        ja: ['ビルドエラー', 'ビルド失敗', 'コンパイルエラー', 'ビルド壊れた'],
+        zh: ['构建错误', '构建失败', '编译错误', '构建中断'],
+        es: ['error de build', 'build fallido', 'error de compilación', 'build roto'],
+      },
+      typescript_error: {
+        en: [
+          'TypeScript error',
+          'TS error',
+          'type error',
+          'type check failed',
+          'tsc error',
+          'type-check',
+          'type checking',
+        ],
+        ko: [
+          '타입스크립트 에러',
+          'TS 에러',
+          '타입 에러',
+          '타입 체크 실패',
+          '타입 오류',
+          '타입체크',
+        ],
+        ja: ['TypeScriptエラー', 'TSエラー', '型エラー', '型チェック失敗'],
+        zh: ['TypeScript错误', 'TS错误', '类型错误', '类型检查失败'],
+        es: ['error de TypeScript', 'error de tipo', 'verificación de tipo fallida'],
+      },
+      fix_build: {
+        en: ['fix build', 'fix compilation', 'fix the build', 'make it compile', 'fix tsc'],
+        ko: ['빌드 고쳐', '빌드 수정', '컴파일 수정', '빌드 고치기'],
+        ja: ['ビルド修正', 'コンパイル修正', 'ビルドを直す'],
+        zh: ['修复构建', '修复编译', '修复构建错误'],
+        es: ['arreglar build', 'arreglar compilación', 'corregir build'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // COST BUDGET - Priority 15
+  // AI session cost management and budget enforcement
+  // ============================================================================
+  {
+    skillName: 'cost-budget',
+    priority: 15,
+    description: 'Manage AI session costs, set budget limits, prevent cost overruns',
+    concepts: {
+      cost: {
+        en: [
+          'cost',
+          'spending',
+          'budget',
+          'token cost',
+          'API cost',
+          'token usage',
+          'credit',
+          'billing',
+        ],
+        ko: ['비용', '예산', '토큰 비용', 'API 비용', '토큰 사용량', '크레딧', '과금'],
+        ja: ['コスト', '予算', 'トークンコスト', 'APIコスト', 'クレジット', '請求'],
+        zh: ['成本', '预算', 'token成本', 'API成本', '额度', '计费'],
+        es: ['costo', 'presupuesto', 'costo de token', 'costo de API', 'crédito', 'facturación'],
+      },
+      budget_limit: {
+        en: [
+          'budget limit',
+          'cost limit',
+          'spending limit',
+          'cost ceiling',
+          'cost cap',
+          'cost overrun',
+          'over budget',
+        ],
+        ko: ['예산 한도', '비용 한도', '비용 상한', '비용 초과', '예산 초과'],
+        ja: ['予算上限', 'コスト上限', '予算超過', 'コスト超過'],
+        zh: ['预算限制', '成本上限', '成本超限', '超出预算'],
+        es: ['límite de presupuesto', 'límite de costo', 'sobrecosto', 'sobre presupuesto'],
+      },
+      autonomous_cost: {
+        en: [
+          'autopilot cost',
+          'autonomous budget',
+          'runaway cost',
+          'session cost',
+          'parallel cost',
+        ],
+        ko: ['자동 실행 비용', '자율 실행 예산', '세션 비용', '병렬 실행 비용', '비용 관리'],
+        ja: ['自律実行コスト', 'セッションコスト', '並列実行コスト', 'コスト管理'],
+        zh: ['自动执行成本', '会话成本', '并行执行成本', '成本管理'],
+        es: ['costo de autopilot', 'costo de sesión', 'costo de ejecución paralela'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // CROSS-REPO ISSUES - Priority 12
+  // Cross-repository issue tracking and upstream bug reporting
+  // ============================================================================
+  {
+    skillName: 'cross-repo-issues',
+    priority: 12,
+    description: 'Track and create issues across repositories and upstream projects',
+    concepts: {
+      cross_repo: {
+        en: [
+          'cross-repo',
+          'cross repo',
+          'another repo',
+          'different repo',
+          'upstream issue',
+          'upstream bug',
+          'upstream report',
+        ],
+        ko: [
+          '다른 레포',
+          '크로스 레포',
+          '업스트림 이슈',
+          '업스트림 버그',
+          '다른 저장소',
+          '외부 레포',
+        ],
+        ja: ['別リポ', 'クロスリポ', 'アップストリーム', '外部リポ', '別のリポジトリ'],
+        zh: ['跨仓库', '上游问题', '上游bug', '其他仓库', '外部仓库'],
+        es: ['otro repo', 'repo diferente', 'upstream', 'repositorio externo'],
+      },
+      fork_upstream: {
+        en: [
+          'fork',
+          'forked repo',
+          'upstream',
+          'upstream project',
+          'original repo',
+          'source repo',
+          'parent repo',
+        ],
+        ko: ['포크', '포크된 레포', '업스트림', '원본 레포', '소스 레포', '부모 레포'],
+        ja: ['フォーク', 'アップストリーム', '元のリポ', 'ソースリポ'],
+        zh: ['fork', '上游项目', '原始仓库', '源仓库', '父仓库'],
+        es: ['fork', 'upstream', 'repo original', 'repo fuente', 'repo padre'],
+      },
+      dependency_issue: {
+        en: [
+          'dependency bug',
+          'library bug',
+          'package bug',
+          'third-party issue',
+          'external dependency',
+        ],
+        ko: ['의존성 버그', '라이브러리 버그', '패키지 버그', '서드파티 이슈', '외부 의존성'],
+        ja: ['依存関係バグ', 'ライブラリバグ', 'パッケージバグ', 'サードパーティ問題'],
+        zh: ['依赖bug', '库bug', '包bug', '第三方问题', '外部依赖'],
+        es: ['bug de dependencia', 'bug de librería', 'problema de terceros'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // DEPENDENCY MANAGEMENT - Priority 22
+  // CVE handling, major upgrades, lock file conflicts, license compliance
+  // ============================================================================
+  {
+    skillName: 'dependency-management',
+    priority: 22,
+    description: 'Manage CVEs, version upgrades, lock file conflicts, and license compliance',
+    concepts: {
+      dependency_update: {
+        en: [
+          'dependency update',
+          'update dependencies',
+          'upgrade dependency',
+          'package update',
+          'upgrade package',
+          'outdated',
+          'outdated package',
+        ],
+        ko: [
+          '의존성 업데이트',
+          '패키지 업데이트',
+          '패키지 업그레이드',
+          '의존성 업그레이드',
+          '오래된 패키지',
+        ],
+        ja: ['依存関係更新', 'パッケージ更新', 'パッケージアップグレード', '古いパッケージ'],
+        zh: ['依赖更新', '包更新', '包升级', '过时的包'],
+        es: ['actualizar dependencia', 'actualizar paquete', 'paquete obsoleto'],
+      },
+      vulnerability: {
+        en: [
+          'CVE',
+          'vulnerability',
+          'security vulnerability',
+          'npm audit',
+          'yarn audit',
+          'security advisory',
+          'CVSS',
+        ],
+        ko: ['CVE', '취약점', '보안 취약점', 'npm audit', 'yarn audit', '보안 권고'],
+        ja: ['CVE', '脆弱性', 'セキュリティ脆弱性', 'npm audit', 'yarn audit', 'セキュリティ勧告'],
+        zh: ['CVE', '漏洞', '安全漏洞', 'npm audit', 'yarn audit', '安全公告'],
+        es: ['CVE', 'vulnerabilidad', 'auditoría npm', 'auditoría yarn', 'aviso de seguridad'],
+      },
+      lockfile: {
+        en: [
+          'lock file',
+          'lockfile',
+          'package-lock',
+          'yarn.lock',
+          'lock conflict',
+          'lock file conflict',
+        ],
+        ko: ['락 파일', '락파일', 'package-lock', 'yarn.lock', '락 파일 충돌'],
+        ja: ['ロックファイル', 'package-lock', 'yarn.lock', 'ロックファイル競合'],
+        zh: ['锁文件', 'package-lock', 'yarn.lock', '锁文件冲突'],
+        es: ['archivo lock', 'lockfile', 'conflicto de lock'],
+      },
+      license: {
+        en: [
+          'license compliance',
+          'license audit',
+          'license check',
+          'open source license',
+          'GPL',
+          'MIT license',
+        ],
+        ko: ['라이선스 준수', '라이선스 감사', '라이선스 확인', '오픈소스 라이선스'],
+        ja: ['ライセンス準拠', 'ライセンス監査', 'ライセンス確認', 'オープンソースライセンス'],
+        zh: ['许可证合规', '许可证审计', '许可证检查', '开源许可证'],
+        es: ['cumplimiento de licencia', 'auditoría de licencia', 'licencia open source'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // FINISHING A DEVELOPMENT BRANCH - Priority 20
+  // Branch completion: merge, PR, cleanup decisions
+  // ============================================================================
+  {
+    skillName: 'finishing-a-development-branch',
+    priority: 20,
+    description: 'Complete and integrate development branch work — merge, PR, or cleanup',
+    concepts: {
+      finish_branch: {
+        en: [
+          'finish branch',
+          'complete branch',
+          'done with branch',
+          'branch done',
+          'wrap up branch',
+          'finalize branch',
+          'close branch',
+        ],
+        ko: ['브랜치 완료', '브랜치 마무리', '브랜치 끝', '브랜치 정리', '개발 완료', '작업 완료'],
+        ja: ['ブランチ完了', 'ブランチ終了', 'ブランチ整理', '開発完了'],
+        zh: ['完成分支', '分支收尾', '分支整理', '开发完成'],
+        es: ['terminar rama', 'completar rama', 'cerrar rama', 'finalizar rama'],
+      },
+      merge_integrate: {
+        en: [
+          'merge branch',
+          'integrate branch',
+          'merge back',
+          'merge to main',
+          'merge to master',
+          'ready to merge',
+        ],
+        ko: ['브랜치 머지', '머지하기', '메인에 머지', '마스터에 머지', '머지 준비', '통합하기'],
+        ja: ['ブランチマージ', 'マージする', 'メインにマージ', 'マスターにマージ'],
+        zh: ['合并分支', '合并到main', '合并到master', '准备合并'],
+        es: ['merge rama', 'integrar rama', 'merge a main', 'merge a master'],
+      },
+      cleanup: {
+        en: [
+          'delete branch',
+          'cleanup branch',
+          'clean up',
+          'prune branch',
+          'remove branch',
+          'branch cleanup',
+        ],
+        ko: ['브랜치 삭제', '브랜치 정리', '브랜치 제거', '클린업'],
+        ja: ['ブランチ削除', 'ブランチクリーンアップ', 'ブランチ整理'],
+        zh: ['删除分支', '清理分支', '分支清理'],
+        es: ['eliminar rama', 'limpiar rama', 'limpieza de rama'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // GIT MASTER - Priority 40
+  // Git operations: commits, rebasing, cherry-picking, history, conflicts
+  // ============================================================================
+  {
+    skillName: 'git-master',
+    priority: 40,
+    description: 'Git operations — atomic commits, rebasing, cherry-picking, conflict resolution',
+    concepts: {
+      commit: {
+        en: [
+          'commit',
+          'git commit',
+          'commit message',
+          'atomic commit',
+          'squash commit',
+          'amend commit',
+          'commit history',
+        ],
+        ko: ['커밋', 'git 커밋', '커밋 메시지', '커밋 히스토리', '커밋 합치기', '커밋 수정'],
+        ja: ['コミット', 'gitコミット', 'コミットメッセージ', 'コミット履歴'],
+        zh: ['提交', 'git提交', '提交消息', '提交历史', '合并提交'],
+        es: ['commit', 'git commit', 'mensaje de commit', 'historial de commit'],
+      },
+      rebase: {
+        en: [
+          'rebase',
+          'git rebase',
+          'interactive rebase',
+          'rebase onto',
+          'rebase conflict',
+          'squash',
+        ],
+        ko: ['리베이스', 'git rebase', '인터랙티브 리베이스', '스쿼시'],
+        ja: ['リベース', 'gitリベース', 'インタラクティブリベース', 'スカッシュ'],
+        zh: ['变基', 'git变基', '交互式变基', '压缩提交'],
+        es: ['rebase', 'git rebase', 'rebase interactivo', 'squash'],
+      },
+      cherry_pick: {
+        en: ['cherry-pick', 'cherry pick', 'git cherry-pick', 'pick commit'],
+        ko: ['체리픽', '체리 픽', 'git cherry-pick', '커밋 가져오기'],
+        ja: ['チェリーピック', 'gitチェリーピック'],
+        zh: ['cherry-pick', '挑选提交', '拣选提交'],
+        es: ['cherry-pick', 'git cherry-pick'],
+      },
+      conflict: {
+        en: [
+          'merge conflict',
+          'conflict resolution',
+          'resolve conflict',
+          'git conflict',
+          'conflict marker',
+        ],
+        ko: ['머지 충돌', '충돌 해결', 'git 충돌', '컨플릭트'],
+        ja: ['マージコンフリクト', 'コンフリクト解決', 'git競合'],
+        zh: ['合并冲突', '冲突解决', 'git冲突'],
+        es: ['conflicto de merge', 'resolución de conflicto', 'conflicto git'],
+      },
+      history: {
+        en: ['git history', 'clean history', 'history cleanup', 'git log', 'blame', 'git blame'],
+        ko: ['git 히스토리', '히스토리 정리', 'git log', 'git blame'],
+        ja: ['git履歴', '履歴整理', 'gitログ', 'gitブレーム'],
+        zh: ['git历史', '历史清理', 'git日志', 'git追溯'],
+        es: ['historial git', 'limpieza de historial', 'git log', 'git blame'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // ONBOARD - Priority 40
+  // New project onboarding: tech stack scanning, config generation, adapter setup
+  // ============================================================================
+  {
+    skillName: 'onboard',
+    priority: 40,
+    description:
+      'Guided onboarding for new projects — scan tech stack, generate config, setup adapters',
+    concepts: {
+      onboarding: {
+        en: [
+          'onboard',
+          'onboarding',
+          'setup project',
+          'project setup',
+          'initialize project',
+          'init project',
+          'getting started',
+          'new project',
+        ],
+        ko: [
+          '온보딩',
+          '프로젝트 설정',
+          '프로젝트 셋업',
+          '프로젝트 초기화',
+          '새 프로젝트',
+          '시작하기',
+        ],
+        ja: [
+          'オンボーディング',
+          'プロジェクト設定',
+          'プロジェクトセットアップ',
+          'プロジェクト初期化',
+          '新規プロジェクト',
+        ],
+        zh: ['项目设置', '项目初始化', '新项目', '入门', '开始配置'],
+        es: ['onboarding', 'configurar proyecto', 'inicializar proyecto', 'nuevo proyecto'],
+      },
+      config_generation: {
+        en: [
+          'generate config',
+          'create config',
+          'codingbuddy config',
+          'codingbuddy.config',
+          'setup codingbuddy',
+          'install codingbuddy',
+        ],
+        ko: [
+          '설정 생성',
+          '설정 파일 생성',
+          'codingbuddy 설정',
+          'codingbuddy 설치',
+          '설정 파일 만들기',
+        ],
+        ja: ['設定生成', 'コンフィグ生成', 'codingbuddy設定', 'codingbuddyセットアップ'],
+        zh: ['生成配置', '创建配置', 'codingbuddy配置', '安装codingbuddy'],
+        es: ['generar config', 'crear config', 'configurar codingbuddy', 'instalar codingbuddy'],
+      },
+      adapter_setup: {
+        en: [
+          'adapter',
+          'AI tool adapter',
+          'cursor adapter',
+          'claude adapter',
+          '.ai-rules',
+          'ai rules',
+        ],
+        ko: ['어댑터', 'AI 도구 어댑터', 'cursor 어댑터', 'claude 어댑터', 'AI 규칙'],
+        ja: ['アダプター', 'AIツールアダプター', 'AIルール'],
+        zh: ['适配器', 'AI工具适配器', 'AI规则'],
+        es: ['adaptador', 'adaptador de herramienta AI', 'reglas AI'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // PLAN AND REVIEW - Priority 22
+  // Plan creation + automated plan-reviewer validation
+  // ============================================================================
+  {
+    skillName: 'plan-and-review',
+    priority: 22,
+    description: 'Create implementation plans with automated plan-reviewer validation',
+    concepts: {
+      plan_review: {
+        en: [
+          'plan and review',
+          'plan review',
+          'review plan',
+          'validate plan',
+          'plan validation',
+          'plan quality',
+        ],
+        ko: ['계획 리뷰', '계획 검토', '계획 검증', '플랜 리뷰', '계획 품질', '계획 확인'],
+        ja: ['計画レビュー', '計画検証', 'プランレビュー', '計画品質'],
+        zh: ['计划审查', '计划验证', '计划检查', '计划质量'],
+        es: ['revisión de plan', 'validar plan', 'calidad del plan'],
+      },
+      plan_create: {
+        en: [
+          'create plan',
+          'write plan',
+          'implementation plan',
+          'make a plan',
+          'plan implementation',
+          'plan then review',
+        ],
+        ko: ['계획 작성', '계획 만들기', '구현 계획', '플랜 작성', '계획 세우기', '계획 후 리뷰'],
+        ja: ['計画作成', '実装計画', 'プラン作成', '計画を立てる'],
+        zh: ['创建计划', '编写计划', '实施计划', '制定计划'],
+        es: ['crear plan', 'plan de implementación', 'escribir plan'],
+      },
+      plan_approval: {
+        en: [
+          'plan approval',
+          'approve plan',
+          'plan sign-off',
+          'plan accepted',
+          'plan rejected',
+          'plan feedback',
+        ],
+        ko: ['계획 승인', '계획 수락', '계획 피드백', '계획 거절', '계획 확정'],
+        ja: ['計画承認', '計画受理', '計画フィードバック', '計画確定'],
+        zh: ['计划批准', '计划通过', '计划反馈', '计划确定'],
+        es: ['aprobar plan', 'aprobación de plan', 'feedback del plan'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // PLAN TO ISSUES - Priority 22
+  // Decompose plans into GitHub issues with dependency graphs and wave grouping
+  // ============================================================================
+  {
+    skillName: 'plan-to-issues',
+    priority: 22,
+    description: 'Decompose plans into GitHub issues with dependency graphs and wave grouping',
+    concepts: {
+      plan_decompose: {
+        en: [
+          'plan to issues',
+          'decompose plan',
+          'break down plan',
+          'split into issues',
+          'plan to tickets',
+          'create issues from plan',
+        ],
+        ko: [
+          '계획을 이슈로',
+          '계획 분해',
+          '이슈로 쪼개기',
+          '플랜 분해',
+          '계획에서 이슈 생성',
+          '이슈 분리',
+        ],
+        ja: ['計画をイシューに', '計画分解', 'イシューに分割', '計画からイシュー作成'],
+        zh: ['计划转issue', '分解计划', '拆分为issue', '从计划创建issue'],
+        es: ['plan a issues', 'descomponer plan', 'dividir en issues', 'crear issues del plan'],
+      },
+      wave_grouping: {
+        en: [
+          'wave grouping',
+          'wave assignment',
+          'parallel execution wave',
+          'file overlap',
+          'dependency graph',
+          'issue dependencies',
+        ],
+        ko: [
+          'Wave 그룹',
+          'Wave 배정',
+          '병렬 실행 Wave',
+          '파일 중복',
+          '의존성 그래프',
+          '이슈 의존성',
+        ],
+        ja: ['Waveグループ', 'Wave割り当て', '並列実行Wave', 'ファイル重複', '依存グラフ'],
+        zh: ['Wave分组', 'Wave分配', '并行执行Wave', '文件重叠', '依赖图'],
+        es: [
+          'agrupación Wave',
+          'asignación Wave',
+          'solapamiento de archivos',
+          'grafo de dependencias',
+        ],
+      },
+      github_issues: {
+        en: [
+          'GitHub issues',
+          'create issues',
+          'issue creation',
+          'acceptance criteria',
+          'issue template',
+        ],
+        ko: ['GitHub 이슈', '이슈 생성', '이슈 만들기', '인수 조건', '이슈 템플릿'],
+        ja: ['GitHubイシュー', 'イシュー作成', '受入基準', 'イシューテンプレート'],
+        zh: ['GitHub issue', '创建issue', '验收标准', 'issue模板'],
+        es: ['issues de GitHub', 'crear issues', 'criterios de aceptación', 'plantilla de issue'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // PR ALL-IN-ONE - Priority 30
+  // Unified commit and PR workflow with auto-commit and smart issue linking
+  // ============================================================================
+  {
+    skillName: 'pr-all-in-one',
+    priority: 30,
+    description:
+      'Unified commit and PR workflow — auto-commit, smart issue linking, branch management',
+    concepts: {
+      pr_creation: {
+        en: [
+          'create PR',
+          'make PR',
+          'open PR',
+          'pull request',
+          'submit PR',
+          'push and PR',
+          'PR all in one',
+        ],
+        ko: ['PR 생성', 'PR 만들기', 'PR 올리기', '풀 리퀘스트', 'PR 제출', 'PR 한번에'],
+        ja: ['PR作成', 'プルリクエスト', 'PR提出', 'PRをオープン'],
+        zh: ['创建PR', '提交PR', '发起PR', 'pull request', 'PR一步到位'],
+        es: ['crear PR', 'abrir PR', 'pull request', 'enviar PR'],
+      },
+      auto_commit: {
+        en: [
+          'auto commit',
+          'commit and PR',
+          'commit and push',
+          'commit changes',
+          'stage and commit',
+        ],
+        ko: ['자동 커밋', '커밋하고 PR', '커밋하고 푸시', '변경사항 커밋'],
+        ja: ['自動コミット', 'コミットしてPR', 'コミットしてプッシュ'],
+        zh: ['自动提交', '提交并PR', '提交并推送'],
+        es: ['auto commit', 'commit y PR', 'commit y push'],
+      },
+      issue_link: {
+        en: [
+          'link issue',
+          'close issue',
+          'closes #',
+          'fixes #',
+          'resolves #',
+          'issue linking',
+          'auto link',
+        ],
+        ko: ['이슈 연결', '이슈 닫기', '이슈 링크', '자동 링크', '이슈 연동'],
+        ja: ['イシューリンク', 'イシュー連携', 'イシューを閉じる', '自動リンク'],
+        zh: ['关联issue', '关闭issue', 'issue链接', '自动关联'],
+        es: ['vincular issue', 'cerrar issue', 'enlace de issue', 'auto enlace'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // RECEIVING CODE REVIEW - Priority 22
+  // Handle received PR review feedback with verification-first approach
+  // ============================================================================
+  {
+    skillName: 'receiving-code-review',
+    priority: 22,
+    description: 'Handle PR review feedback with verification-first, anti-sycophancy approach',
+    concepts: {
+      review_feedback: {
+        en: [
+          'review feedback',
+          'review comments',
+          'PR comments',
+          'PR feedback',
+          'received review',
+          'got review',
+          'reviewer said',
+        ],
+        ko: ['리뷰 피드백', '리뷰 코멘트', 'PR 코멘트', 'PR 피드백', '리뷰 받음', '리뷰어가'],
+        ja: [
+          'レビューフィードバック',
+          'レビューコメント',
+          'PRコメント',
+          'PRフィードバック',
+          'レビューを受けた',
+        ],
+        zh: ['审查反馈', '审查评论', 'PR评论', 'PR反馈', '收到审查'],
+        es: ['feedback de revisión', 'comentarios de PR', 'revisión recibida'],
+      },
+      respond_review: {
+        en: [
+          'respond to review',
+          'address review',
+          'handle review',
+          'fix review comments',
+          'resolve review',
+          'address feedback',
+        ],
+        ko: ['리뷰 대응', '리뷰 처리', '리뷰 코멘트 수정', '리뷰 해결', '피드백 반영', '리뷰 반영'],
+        ja: [
+          'レビュー対応',
+          'レビュー処理',
+          'レビューコメント修正',
+          'レビュー解決',
+          'フィードバック反映',
+        ],
+        zh: ['回应审查', '处理审查', '修复审查评论', '解决审查', '反馈处理'],
+        es: ['responder a revisión', 'atender revisión', 'resolver comentarios de revisión'],
+      },
+      verify_suggestion: {
+        en: [
+          'verify suggestion',
+          'check suggestion',
+          'reviewer suggestion',
+          'review suggestion',
+          'change request',
+        ],
+        ko: ['제안 확인', '제안 검증', '리뷰어 제안', '변경 요청'],
+        ja: ['提案確認', '提案検証', 'レビュアー提案', '変更リクエスト'],
+        zh: ['验证建议', '检查建议', '审查建议', '变更请求'],
+        es: ['verificar sugerencia', 'sugerencia del revisor', 'solicitud de cambio'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // REQUESTING CODE REVIEW - Priority 20
+  // Prepare code for review: pre-flight validation, change summary, test evidence
+  // ============================================================================
+  {
+    skillName: 'requesting-code-review',
+    priority: 20,
+    description: 'Prepare code for review — pre-flight validation, change summary, test evidence',
+    concepts: {
+      request_review: {
+        en: [
+          'request review',
+          'ask for review',
+          'prepare for review',
+          'ready for review',
+          'submit for review',
+          'review request',
+        ],
+        ko: ['리뷰 요청', '리뷰 준비', '리뷰 제출', '코드 리뷰 요청', '리뷰 부탁', '리뷰 보내기'],
+        ja: ['レビュー依頼', 'レビュー準備', 'レビュー提出', 'コードレビュー依頼'],
+        zh: ['请求审查', '准备审查', '提交审查', '代码审查请求'],
+        es: ['solicitar revisión', 'preparar para revisión', 'enviar para revisión'],
+      },
+      preflight: {
+        en: [
+          'pre-flight check',
+          'preflight',
+          'pre-review check',
+          'before review',
+          'review checklist',
+          'review preparation',
+        ],
+        ko: ['사전 체크', '프리플라이트', '리뷰 전 확인', '리뷰 체크리스트', '리뷰 준비사항'],
+        ja: ['プリフライトチェック', 'レビュー前チェック', 'レビューチェックリスト'],
+        zh: ['预检查', '审查前检查', '审查清单', '审查准备'],
+        es: ['verificación previa', 'checklist de revisión', 'preparación de revisión'],
+      },
+      change_summary: {
+        en: [
+          'change summary',
+          'PR description',
+          'review focus',
+          'what changed',
+          'test evidence',
+          'test proof',
+        ],
+        ko: ['변경 요약', 'PR 설명', '리뷰 포인트', '변경 사항', '테스트 증거', '테스트 결과'],
+        ja: ['変更要約', 'PR説明', 'レビューポイント', 'テスト証拠'],
+        zh: ['变更摘要', 'PR描述', '审查重点', '测试证据'],
+        es: ['resumen de cambios', 'descripción de PR', 'evidencia de test'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // TEST COVERAGE GATE - Priority 25
+  // Enforce test coverage thresholds before shipping
+  // ============================================================================
+  {
+    skillName: 'test-coverage-gate',
+    priority: 25,
+    description: 'Enforce minimum test coverage thresholds before shipping or creating PRs',
+    concepts: {
+      coverage: {
+        en: [
+          'test coverage',
+          'code coverage',
+          'coverage report',
+          'coverage threshold',
+          'coverage gate',
+          'coverage check',
+        ],
+        ko: [
+          '테스트 커버리지',
+          '코드 커버리지',
+          '커버리지 리포트',
+          '커버리지 기준',
+          '커버리지 체크',
+        ],
+        ja: ['テストカバレッジ', 'コードカバレッジ', 'カバレッジレポート', 'カバレッジ基準'],
+        zh: ['测试覆盖率', '代码覆盖率', '覆盖率报告', '覆盖率阈值'],
+        es: [
+          'cobertura de test',
+          'cobertura de código',
+          'reporte de cobertura',
+          'umbral de cobertura',
+        ],
+      },
+      coverage_type: {
+        en: [
+          'line coverage',
+          'branch coverage',
+          'function coverage',
+          'statement coverage',
+          'coverage percentage',
+        ],
+        ko: ['라인 커버리지', '브랜치 커버리지', '함수 커버리지', '커버리지 퍼센트'],
+        ja: ['行カバレッジ', 'ブランチカバレッジ', '関数カバレッジ', 'カバレッジ率'],
+        zh: ['行覆盖', '分支覆盖', '函数覆盖', '覆盖率百分比'],
+        es: ['cobertura de líneas', 'cobertura de ramas', 'cobertura de funciones'],
+      },
+      coverage_tool: {
+        en: ['vitest coverage', 'jest coverage', 'c8', 'istanbul', 'nyc', 'coverage tool'],
+        ko: ['vitest 커버리지', 'jest 커버리지', 'c8', 'istanbul', '커버리지 도구'],
+        ja: ['vitestカバレッジ', 'jestカバレッジ', 'c8', 'istanbul', 'カバレッジツール'],
+        zh: ['vitest覆盖率', 'jest覆盖率', 'c8', 'istanbul', '覆盖率工具'],
+        es: ['cobertura vitest', 'cobertura jest', 'c8', 'istanbul', 'herramienta de cobertura'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // USING GIT WORKTREES - Priority 30
+  // Git worktree workflow: creation, naming, safety checks, cleanup
+  // ============================================================================
+  {
+    skillName: 'using-git-worktrees',
+    priority: 30,
+    description:
+      'Git worktree workflow — isolated workspaces for parallel execution and feature exploration',
+    concepts: {
+      worktree: {
+        en: [
+          'worktree',
+          'git worktree',
+          'work tree',
+          'working tree',
+          'worktree create',
+          'worktree add',
+        ],
+        ko: ['워크트리', 'git 워크트리', '워크 트리', '워크트리 생성', '워크트리 추가'],
+        ja: ['ワークツリー', 'gitワークツリー', 'ワークツリー作成', 'ワークツリー追加'],
+        zh: ['worktree', 'git工作树', '工作树创建', '工作树添加'],
+        es: ['worktree', 'git worktree', 'crear worktree', 'añadir worktree'],
+      },
+      parallel_workspace: {
+        en: [
+          'parallel workspace',
+          'isolated workspace',
+          'separate workspace',
+          'parallel development',
+          'multiple workspaces',
+        ],
+        ko: [
+          '병렬 워크스페이스',
+          '격리된 워크스페이스',
+          '별도 작업 공간',
+          '병렬 개발',
+          '다중 작업 공간',
+        ],
+        ja: ['並列ワークスペース', '隔離ワークスペース', '別ワークスペース', '並列開発'],
+        zh: ['并行工作区', '隔离工作区', '独立工作区', '并行开发'],
+        es: ['workspace paralelo', 'workspace aislado', 'desarrollo paralelo'],
+      },
+      worktree_cleanup: {
+        en: [
+          'worktree cleanup',
+          'remove worktree',
+          'delete worktree',
+          'prune worktree',
+          'worktree list',
+          'worktree status',
+        ],
+        ko: ['워크트리 정리', '워크트리 삭제', '워크트리 제거', '워크트리 목록', '워크트리 상태'],
+        ja: ['ワークツリー整理', 'ワークツリー削除', 'ワークツリー一覧', 'ワークツリー状態'],
+        zh: ['清理工作树', '删除工作树', '工作树列表', '工作树状态'],
+        es: ['limpiar worktree', 'eliminar worktree', 'listar worktree', 'estado worktree'],
+      },
+    },
+  },
+
+  // ============================================================================
+  // VERIFICATION BEFORE COMPLETION - Priority 35
+  // Pre-completion verification: run checks before claiming work is done
+  // ============================================================================
+  {
+    skillName: 'verification-before-completion',
+    priority: 35,
+    description:
+      'Run verification commands before claiming work is complete — evidence before assertions',
+    concepts: {
+      verify_completion: {
+        en: [
+          'verify before done',
+          'verify completion',
+          'check before commit',
+          'verify before shipping',
+          'pre-completion check',
+          'done checklist',
+        ],
+        ko: [
+          '완료 전 검증',
+          '커밋 전 확인',
+          '배포 전 확인',
+          '완료 체크리스트',
+          '마무리 검증',
+          '작업 검증',
+        ],
+        ja: ['完了前検証', 'コミット前確認', 'デプロイ前確認', '完了チェックリスト'],
+        zh: ['完成前验证', '提交前检查', '部署前检查', '完成清单'],
+        es: [
+          'verificar antes de terminar',
+          'verificar antes de commit',
+          'checklist de finalización',
+        ],
+      },
+      run_checks: {
+        en: [
+          'run tests first',
+          'run lint first',
+          'run build first',
+          'check passes',
+          'verify passes',
+          'confirm passing',
+        ],
+        ko: ['테스트 먼저 실행', '린트 먼저 실행', '빌드 먼저 실행', '통과 확인', '패스 확인'],
+        ja: ['テストを先に実行', 'リントを先に実行', 'ビルドを先に実行', '通過確認'],
+        zh: ['先运行测试', '先运行lint', '先运行构建', '确认通过'],
+        es: ['ejecutar tests primero', 'ejecutar lint primero', 'confirmar que pasan'],
+      },
+      evidence: {
+        en: [
+          'show evidence',
+          'prove it works',
+          'test output',
+          'build output',
+          'passing output',
+          'evidence of success',
+        ],
+        ko: ['증거 보여줘', '작동 증명', '테스트 출력', '빌드 출력', '성공 증거', '통과 결과'],
+        ja: ['証拠を見せる', '動作証明', 'テスト出力', 'ビルド出力', '成功の証拠'],
+        zh: ['展示证据', '证明可行', '测试输出', '构建输出', '成功证据'],
+        es: ['mostrar evidencia', 'probar que funciona', 'salida de test', 'evidencia de éxito'],
+      },
+    },
+  },
 ];

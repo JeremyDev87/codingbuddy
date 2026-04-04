@@ -626,10 +626,10 @@ describe('SkillRecommendationService', () => {
     it('should assign default priority to skills without SKILL_KEYWORDS entry', async () => {
       const result = await service.listSkills();
 
-      // api-design is NOT in SKILL_KEYWORDS — should get default priority
-      const apiDesign = result.skills.find(s => s.name === 'api-design');
-      expect(apiDesign).toBeDefined();
-      expect(apiDesign!.priority).toBe(0);
+      // docker-setup is NOT in SKILL_KEYWORDS — should get default priority
+      const dockerSetup = result.skills.find(s => s.name === 'docker-setup');
+      expect(dockerSetup).toBeDefined();
+      expect(dockerSetup!.priority).toBe(0);
     });
 
     it('should use filesystem description for skills', async () => {
@@ -645,9 +645,9 @@ describe('SkillRecommendationService', () => {
       const debugging = result.skills.find(s => s.name === 'systematic-debugging');
       expect(debugging?.concepts.length).toBeGreaterThan(0);
 
-      // Extra skill should have empty concepts
-      const apiDesign = result.skills.find(s => s.name === 'api-design');
-      expect(apiDesign?.concepts).toEqual([]);
+      // Extra skill without SKILL_KEYWORDS entry should have empty concepts
+      const dockerSetup = result.skills.find(s => s.name === 'docker-setup');
+      expect(dockerSetup?.concepts).toEqual([]);
     });
 
     it('should include name, priority, description, concepts for each skill', async () => {
