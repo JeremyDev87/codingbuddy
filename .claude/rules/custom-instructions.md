@@ -157,11 +157,12 @@ Examples:
 
 **When `parse_mode` returns `dispatchReady`, use it directly with the Task tool — no extra calls needed.**
 
-**Strategy Selection (before dispatch):**
-- [ ] Check `availableStrategies` in `parse_mode` response
-- [ ] If `["subagent", "taskmaestro"]` → AskUserQuestion to choose
+**Outer Transport Selection (before dispatch):**
+- [ ] Check `availableStrategies` in `parse_mode` response (outer transport options)
+- [ ] If `["subagent", "taskmaestro"]` → AskUserQuestion to choose outer strategy
 - [ ] If `taskmaestroInstallHint` present and user wants taskmaestro → guide installation
 - [ ] Pass chosen strategy to `dispatch_agents(executionStrategy: ...)`
+- [ ] Teams (inner coordination, experimental) may be used within a session if APIs are available
 
 **Quick Checklist (Auto-Dispatch - Preferred):**
 - [ ] Check `dispatchReady` in `parse_mode` response
@@ -186,8 +187,9 @@ Examples:
 | **EVAL** | 🔒 security, ♿ accessibility, ⚡ performance, 📏 code-quality, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
 | **AUTO** | 🏛️ architecture, 🧪 test-strategy, 🔒 security, 📏 code-quality, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
 
-> **Note:** All modes support both SubAgent and TaskMaestro execution strategies.
-> The strategy is selected per-invocation via user choice.
+> **Note:** SubAgent and TaskMaestro are **outer transport** strategies (one per invocation, user choice).
+> Teams is an **inner coordination** layer (experimental) that can optionally run within either outer strategy.
+> See the [Execution Model](../../packages/rules/.ai-rules/adapters/claude-code.md#execution-model-outer-transport-vs-inner-coordination) for details.
 
 **📖 Full Guide:** [Parallel Specialist Agents Execution](../../packages/rules/.ai-rules/adapters/claude-code.md#parallel-specialist-agents-execution)
 
@@ -203,8 +205,9 @@ Examples:
 
 If the `parse_mode` response contains `dispatch="auto"` or `dispatchReady` with specialist agents:
 1. **MUST** dispatch every listed specialist — skipping any is a protocol violation
-2. **Teams preferred** over Agent tool for specialist dispatch (use `TeamCreate` + `SendMessage`)
-3. **Report results** via `SendMessage` back to team lead, not just text output
+2. Use the selected **outer transport** (SubAgent or TaskMaestro) to dispatch specialists
+3. **Optionally** use Teams as inner coordination within a session (experimental, requires runtime API availability)
+4. **Report results** via the dispatch mechanism (TaskOutput for SubAgent, SendMessage for Teams)
 
 ### Red Flags (STOP if you think these)
 

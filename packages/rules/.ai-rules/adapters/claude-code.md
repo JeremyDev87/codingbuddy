@@ -529,9 +529,112 @@ When `parse_mode` returns `dispatch="auto"` or `dispatchReady` with specialist a
 
 **Rule:** Every listed specialist MUST be dispatched. Skipping any specialist is a protocol violation.
 
-#### Teams-Based Specialist Dispatch (Preferred)
+#### Red Flags
 
-Teams are preferred over the Agent tool for specialist dispatch because they enable structured coordination and message-based reporting:
+| Thought | Reality |
+|---------|---------|
+| "I can handle this analysis myself" | Specialists have domain expertise. Dispatch them. |
+| "It's just a small change" | dispatch="auto" means the system determined specialists are needed. |
+| "I'll save time by skipping" | Skipping causes missed issues that cost more later. |
+| "I'll dispatch later" | Dispatch IMMEDIATELY when dispatch="auto" is returned. |
+
+### Execution Model: Outer Transport vs Inner Coordination
+
+CodingBuddy uses a **nested execution model** with two distinct layers:
+
+| Layer | Role | Tool | Scope |
+|-------|------|------|-------|
+| **Outer transport** | Parallel task execution across isolated environments | **TaskMaestro** (tmux + git worktree) or **SubAgent** (background agents) | One pane/agent per issue or task |
+| **Inner coordination** | Specialist collaboration within a single session | **Teams** (experimental) | Multiple specialists within one pane/session |
+
+> **Key distinction:** TaskMaestro and SubAgent are alternatives for the *outer* layer. Teams is an *inner* layer that can optionally run inside either outer strategy.
+
+#### Nested Execution Examples
+
+**Example 1: TaskMaestro (outer) + Teams (inner)**
+
+```
+TaskMaestro session (outer)
+├── Pane 1: Issue #101 (auth feature)
+│   └── Teams session (inner, optional)
+│       ├── security-specialist → reviews auth impl
+│       └── test-strategy-specialist → validates test coverage
+├── Pane 2: Issue #102 (dashboard UI)
+│   └── Single agent (no inner Teams needed)
+└── Pane 3: Issue #103 (API refactor)
+    └── Teams session (inner, optional)
+        ├── architecture-specialist → validates API design
+        └── performance-specialist → checks query efficiency
+```
+
+**Example 2: SubAgent (outer) without inner Teams**
+
+```
+SubAgent dispatch (outer)
+├── Agent 1: security-specialist (run_in_background)
+├── Agent 2: accessibility-specialist (run_in_background)
+└── Agent 3: performance-specialist (run_in_background)
+→ Collect results via TaskOutput
+```
+
+### Execution Strategy Selection (MANDATORY)
+
+When `parse_mode` returns `availableStrategies`, select the **outer transport** strategy:
+
+1. **Check `availableStrategies`** in the response
+2. **If both strategies available** (`["subagent", "taskmaestro"]`), ask user with AskUserQuestion:
+   - Option A: "SubAgent (background agents, fast)" (Recommended)
+   - Option B: "TaskMaestro (tmux parallel panes, visual monitoring)"
+3. **If only `["subagent"]`** and `taskmaestroInstallHint` present:
+   - Ask: "TaskMaestro is not installed. Would you like to install it for tmux-based parallel execution?"
+   - Yes → invoke `/taskmaestro` skill to guide installation, then re-check
+   - No → proceed with subagent
+4. **Call `dispatch_agents`** with chosen `executionStrategy` parameter:
+   - `dispatch_agents({ mode, specialists, executionStrategy: "subagent" })` — Agent tool flow
+   - `dispatch_agents({ mode, specialists, executionStrategy: "taskmaestro" })` — tmux pane assignments
+5. **Execute** based on strategy:
+   - **subagent**: Use `dispatchParams` with Agent tool (`run_in_background: true`)
+   - **taskmaestro**: Follow `executionHint` — start panes, assign prompts, monitor, collect results
+
+### TaskMaestro Execution Flow
+
+When `executionStrategy: "taskmaestro"` is chosen, `dispatch_agents` returns:
+
+```json
+{
+  "taskmaestro": {
+    "sessionName": "eval-specialists",
+    "paneCount": 5,
+    "assignments": [
+      { "name": "security-specialist", "displayName": "Security Specialist", "prompt": "..." },
+      { "name": "performance-specialist", "displayName": "Performance Specialist", "prompt": "..." }
+    ]
+  },
+  "executionHint": "1. /taskmaestro start --panes 5\n2. ..."
+}
+```
+
+Execute by following the `executionHint` commands sequentially.
+
+### Teams as Inner Coordination Layer (Experimental)
+
+> **Capability gate:** Teams-based coordination is experimental and depends on Claude Code native Teams support being available at runtime. If Teams APIs (`TeamCreate`, `SendMessage`, etc.) are not available, fall back to the SubAgent dispatch pattern.
+
+Teams provide structured specialist coordination **within** a single session or TaskMaestro pane. Use Teams when a task benefits from multiple specialists collaborating and reporting back to a coordinator, rather than running independently.
+
+#### When to Use Inner Teams
+
+- A single task (or pane) needs input from 2+ specialists who should coordinate
+- Specialist findings need to be collected and consolidated by a team lead
+- The task requires structured message-based reporting between specialists
+
+#### When NOT to Use Inner Teams
+
+- Each specialist can run independently with no cross-specialist dependencies
+- You are dispatching specialists across separate issues/tasks (use outer transport instead)
+- Teams APIs are not available at runtime
+
+#### Teams Workflow (within a session)
 
 ```
 1. TeamCreate({ team_name: "<task>-specialists" })
@@ -571,60 +674,12 @@ Specialists report findings through `SendMessage` to the team lead. This enables
 - [recommendation]
 ```
 
-#### Fallback: Agent Tool
+#### Fallback: SubAgent Dispatch
 
-If Teams-based dispatch fails, fall back to the Agent tool:
-- Use `run_in_background: true` for each specialist
+If Teams APIs are unavailable or Teams-based dispatch fails:
+- Use SubAgent with `run_in_background: true` for each specialist
 - Collect results via `TaskOutput`
 - Document the fallback reason in your response
-
-#### Red Flags
-
-| Thought | Reality |
-|---------|---------|
-| "I can handle this analysis myself" | Specialists have domain expertise. Dispatch them. |
-| "It's just a small change" | dispatch="auto" means the system determined specialists are needed. |
-| "I'll save time by skipping" | Skipping causes missed issues that cost more later. |
-| "I'll dispatch later" | Dispatch IMMEDIATELY when dispatch="auto" is returned. |
-
-### Execution Strategy Selection (MANDATORY)
-
-When `parse_mode` returns `availableStrategies`:
-
-1. **Check `availableStrategies`** in the response
-2. **If both strategies available** (`["subagent", "taskmaestro"]`), ask user with AskUserQuestion:
-   - Option A: "SubAgent (background agents, fast)" (Recommended)
-   - Option B: "TaskMaestro (tmux parallel panes, visual monitoring)"
-3. **If only `["subagent"]`** and `taskmaestroInstallHint` present:
-   - Ask: "TaskMaestro is not installed. Would you like to install it for tmux-based parallel execution?"
-   - Yes → invoke `/taskmaestro` skill to guide installation, then re-check
-   - No → proceed with subagent
-4. **Call `dispatch_agents`** with chosen `executionStrategy` parameter:
-   - `dispatch_agents({ mode, specialists, executionStrategy: "subagent" })` — existing Agent tool flow
-   - `dispatch_agents({ mode, specialists, executionStrategy: "taskmaestro" })` — returns tmux assignments
-5. **Execute** based on strategy:
-   - **subagent**: Use `dispatchParams` with Agent tool (`run_in_background: true`)
-   - **taskmaestro**: Follow `executionHint` — start panes, assign prompts, monitor, collect results
-
-### TaskMaestro Execution Flow
-
-When `executionStrategy: "taskmaestro"` is chosen, `dispatch_agents` returns:
-
-```json
-{
-  "taskmaestro": {
-    "sessionName": "eval-specialists",
-    "paneCount": 5,
-    "assignments": [
-      { "name": "security-specialist", "displayName": "Security Specialist", "prompt": "..." },
-      { "name": "performance-specialist", "displayName": "Performance Specialist", "prompt": "..." }
-    ]
-  },
-  "executionHint": "1. /taskmaestro start --panes 5\n2. ..."
-}
-```
-
-Execute by following the `executionHint` commands sequentially.
 
 ## PR All-in-One Skill
 
