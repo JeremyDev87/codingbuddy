@@ -14,6 +14,9 @@ function createMockRulesService(
     triggers?: SkillFrontmatterTrigger[];
     userInvocable?: boolean;
     disableModelInvocation?: boolean;
+    context?: string;
+    agent?: string;
+    allowedTools?: string[];
   }> = [],
 ): RulesService {
   return {
@@ -763,6 +766,71 @@ describe('SkillRecommendationService', () => {
 
       expect(result.skills).toEqual([]);
       expect(result.total).toBe(0);
+    });
+
+    describe('execution metadata', () => {
+      it('should include execution metadata when present in skill', async () => {
+        const rulesWithMetadata = createMockRulesService([
+          {
+            name: 'security-audit',
+            description: 'Security audit skill',
+            context: 'fork',
+            agent: 'general-purpose',
+            allowedTools: ['Read', 'Grep', 'Glob'],
+            userInvocable: true,
+          },
+        ]);
+        const svc = new SkillRecommendationService(rulesWithMetadata);
+        await svc.loadFrontmatterTriggers();
+
+        const result = await svc.listSkills();
+        const skill = result.skills.find(s => s.name === 'security-audit');
+
+        expect(skill).toBeDefined();
+        expect(skill!.context).toBe('fork');
+        expect(skill!.agent).toBe('general-purpose');
+        expect(skill!.allowedTools).toEqual(['Read', 'Grep', 'Glob']);
+        expect(skill!.userInvocable).toBe(true);
+      });
+
+      it('should omit execution metadata when not present (backward compat)', async () => {
+        const rulesWithoutMetadata = createMockRulesService([
+          {
+            name: 'brainstorming',
+            description: 'Brainstorming skill',
+          },
+        ]);
+        const svc = new SkillRecommendationService(rulesWithoutMetadata);
+        await svc.loadFrontmatterTriggers();
+
+        const result = await svc.listSkills();
+        const skill = result.skills.find(s => s.name === 'brainstorming');
+
+        expect(skill).toBeDefined();
+        expect(skill!.context).toBeUndefined();
+        expect(skill!.agent).toBeUndefined();
+        expect(skill!.allowedTools).toBeUndefined();
+        expect(skill!.userInvocable).toBeUndefined();
+        expect(skill!.disableModelInvocation).toBeUndefined();
+      });
+
+      it('should include disableModelInvocation when set', async () => {
+        const rulesWithDisabled = createMockRulesService([
+          {
+            name: 'database-migration',
+            description: 'DB migration skill',
+            disableModelInvocation: true,
+          },
+        ]);
+        const svc = new SkillRecommendationService(rulesWithDisabled);
+        await svc.loadFrontmatterTriggers();
+
+        const result = await svc.listSkills();
+        const skill = result.skills.find(s => s.name === 'database-migration');
+
+        expect(skill).toBeDefined();
+        expect(skill!.disableModelInvocation).toBe(true);
+      });
     });
   });
 });

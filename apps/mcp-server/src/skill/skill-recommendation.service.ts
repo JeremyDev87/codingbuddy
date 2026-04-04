@@ -236,12 +236,22 @@ export class SkillRecommendationService implements OnModuleInit {
 
     let skills: SkillInfo[] = fsSkills.map(fsSkill => {
       const kwEntry = SKILL_KEYWORDS.find(k => k.skillName === fsSkill.name);
-      return {
+      const info: SkillInfo = {
         name: fsSkill.name,
         priority: kwEntry?.priority ?? DEFAULT_PRIORITY,
         description: fsSkill.description,
         concepts: kwEntry ? Object.keys(kwEntry.concepts) : [],
       };
+
+      // Include execution metadata only when present (backward compat)
+      if (fsSkill.userInvocable !== undefined) info.userInvocable = fsSkill.userInvocable;
+      if (fsSkill.disableModelInvocation !== undefined)
+        info.disableModelInvocation = fsSkill.disableModelInvocation;
+      if (fsSkill.context !== undefined) info.context = fsSkill.context;
+      if (fsSkill.agent !== undefined) info.agent = fsSkill.agent;
+      if (fsSkill.allowedTools !== undefined) info.allowedTools = fsSkill.allowedTools;
+
+      return info;
     });
 
     // Apply filters

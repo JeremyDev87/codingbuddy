@@ -36,6 +36,16 @@ export interface SkillInfo {
    * Use recommend_skills to get matched keywords for a specific prompt.
    */
   concepts: string[];
+  /** Whether the skill can be invoked by a user (e.g. via slash command) */
+  userInvocable?: boolean;
+  /** Whether the model should not auto-invoke this skill */
+  disableModelInvocation?: boolean;
+  /** Execution context: "fork" runs in a separate context */
+  context?: string;
+  /** Agent to use when executing the skill */
+  agent?: string;
+  /** Tools the skill is allowed to use */
+  allowedTools?: string[];
 }
 
 /**
