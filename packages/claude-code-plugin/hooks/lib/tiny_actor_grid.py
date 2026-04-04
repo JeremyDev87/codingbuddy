@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from itertools import zip_longest
 
+from buddy_renderer import display_width, pad_to_display_width
+
 
 def layout_grid(
     cards: list[list[str]],
@@ -55,7 +57,7 @@ def layout_grid(
             padded_cards.append(padded)
 
         for line_parts in zip_longest(*padded_cards, fillvalue=" " * card_width):
-            parts = [part.ljust(card_width) for part in line_parts]
+            parts = [pad_to_display_width(part, card_width) for part in line_parts]
             # Pad row to full width when fewer cards than max_columns
             while len(parts) < max_columns:
                 parts.append(" " * card_width)

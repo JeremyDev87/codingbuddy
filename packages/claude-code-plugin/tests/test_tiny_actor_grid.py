@@ -10,6 +10,7 @@ _lib_dir = os.path.join(os.path.dirname(_tests_dir), "hooks", "lib")
 if _lib_dir not in sys.path:
     sys.path.insert(0, _lib_dir)
 
+from buddy_renderer import display_width
 from tiny_actor_grid import layout_grid
 
 # ---------------------------------------------------------------------------
@@ -78,6 +79,65 @@ class TestOutputConsistency:
         lines = layout_grid(cards, available_width=80, card_width=_CARD_WIDTH, gap=2)
         widths = {len(line) for line in lines}
         assert len(widths) == 1, f"Expected uniform width, got {widths}"
+
+    def test_cjk_labels_consistent_display_width(self):
+        """Cards with CJK text must produce uniform display width across rows."""
+        from buddy_renderer import pad_to_display_width
+
+        def _cjk_card() -> list[str]:
+            return [
+                pad_to_display_width("한국어", _CARD_WIDTH),
+                pad_to_display_width("테스트", _CARD_WIDTH),
+                pad_to_display_width("라벨", _CARD_WIDTH),
+            ]
+
+        cards = [_cjk_card(), _make_card(label="A"), _cjk_card()]
+        lines = layout_grid(cards, available_width=80, card_width=_CARD_WIDTH, gap=2)
+        widths = {display_width(line) for line in lines}
+        assert len(widths) == 1, f"CJK grid display widths not uniform: {widths}"
+
+    def test_ansi_colored_text_consistent_display_width(self):
+        """Cards with ANSI escape codes must produce uniform display width."""
+        from buddy_renderer import pad_to_display_width
+
+        RED = "\033[31m"
+        RESET = "\033[0m"
+
+        def _ansi_card() -> list[str]:
+            return [
+                pad_to_display_width(f"{RED}colored{RESET}", _CARD_WIDTH),
+                pad_to_display_width(f"{RED}face{RESET}", _CARD_WIDTH),
+                pad_to_display_width(f"{RED}text{RESET}", _CARD_WIDTH),
+            ]
+
+        cards = [_ansi_card(), _make_card(label="B"), _ansi_card()]
+        lines = layout_grid(cards, available_width=80, card_width=_CARD_WIDTH, gap=2)
+        widths = {display_width(line) for line in lines}
+        assert len(widths) == 1, f"ANSI grid display widths not uniform: {widths}"
+
+    def test_mixed_cjk_ansi_ascii_consistent(self):
+        """Mixed CJK, ANSI, and ASCII cards in one grid stay aligned."""
+        from buddy_renderer import pad_to_display_width
+
+        GREEN = "\033[32m"
+        RESET = "\033[0m"
+
+        cjk_card = [
+            pad_to_display_width("보안전문가", _CARD_WIDTH),
+            pad_to_display_width("분석중", _CARD_WIDTH),
+            pad_to_display_width("완료", _CARD_WIDTH),
+        ]
+        ansi_card = [
+            pad_to_display_width(f"{GREEN}status{RESET}", _CARD_WIDTH),
+            pad_to_display_width(f"{GREEN}ok{RESET}", _CARD_WIDTH),
+            pad_to_display_width(f"{GREEN}done{RESET}", _CARD_WIDTH),
+        ]
+        ascii_card = _make_card(label="Z")
+
+        cards = [cjk_card, ansi_card, ascii_card]
+        lines = layout_grid(cards, available_width=80, card_width=_CARD_WIDTH, gap=2)
+        widths = {display_width(line) for line in lines}
+        assert len(widths) == 1, f"Mixed grid display widths not uniform: {widths}"
 
 
 # ---------------------------------------------------------------------------
