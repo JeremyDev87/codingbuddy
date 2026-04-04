@@ -176,9 +176,9 @@ export class AgentHandler extends AbstractHandler {
             },
             executionStrategy: {
               type: 'string',
-              enum: ['subagent', 'taskmaestro', 'teams'],
+              enum: ['subagent', 'taskmaestro', 'teams', 'taskmaestro+teams'],
               description:
-                'Execution strategy for specialist agents. "subagent" (default) uses Claude Code Agent tool with run_in_background. "taskmaestro" returns tmux pane assignments for /taskmaestro skill. "teams" uses Claude Code native teams with shared TaskList coordination.',
+                'Execution strategy for specialist agents. "subagent" (default) uses Claude Code Agent tool with run_in_background. "taskmaestro" returns tmux pane assignments for /taskmaestro skill. "teams" uses Claude Code native teams with shared TaskList coordination. "taskmaestro+teams" uses TaskMaestro as outer transport with Teams as inner coordination.',
             },
             agentStack: {
               type: 'string',
@@ -247,7 +247,12 @@ export class AgentHandler extends AbstractHandler {
     const taskDescription = extractOptionalString(args, 'taskDescription');
     let includeParallel = args?.includeParallel === true;
     const executionStrategy =
-      (args?.executionStrategy as 'subagent' | 'taskmaestro' | 'teams' | undefined) ?? 'subagent';
+      (args?.executionStrategy as
+        | 'subagent'
+        | 'taskmaestro'
+        | 'teams'
+        | 'taskmaestro+teams'
+        | undefined) ?? 'subagent';
     const inlineAgents = this.extractInlineAgents(args);
 
     // Resolve agent stack if provided

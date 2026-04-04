@@ -756,7 +756,7 @@ describe('AgentHandler', () => {
       ]);
     });
 
-    it('should include teams in executionStrategy enum', () => {
+    it('should include all strategies in executionStrategy enum', () => {
       const definitions = handler.getToolDefinitions();
       const dispatchAgents = definitions.find(d => d.name === 'dispatch_agents');
       const strategyEnum = (
@@ -765,6 +765,7 @@ describe('AgentHandler', () => {
       expect(strategyEnum).toContain('teams');
       expect(strategyEnum).toContain('subagent');
       expect(strategyEnum).toContain('taskmaestro');
+      expect(strategyEnum).toContain('taskmaestro+teams');
     });
 
     it('should have correct required parameters', () => {

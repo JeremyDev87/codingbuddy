@@ -4,7 +4,7 @@ import type { RulesService } from '../rules/rules.service';
 import type { CustomService } from '../custom';
 import type { ConfigService } from '../config/config.service';
 import type { AgentProfile } from '../rules/rules.types';
-import type { AgentContext, DispatchResult } from './agent.types';
+import type { AgentContext, DispatchResult, ExecutionPlan } from './agent.types';
 
 describe('AgentService', () => {
   let service: AgentService;
@@ -802,6 +802,185 @@ describe('AgentService', () => {
       expect(result.executionHint).toContain('/taskmaestro assign');
       expect(result.executionHint).toContain('/taskmaestro status');
       expect(result.executionHint).toContain('/taskmaestro stop all');
+    });
+  });
+
+  describe('dispatchAgents with taskmaestro+teams composable strategy', () => {
+    it('should return both taskmaestro and teams fields', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.taskmaestro).toBeDefined();
+      expect(result.teams).toBeDefined();
+      expect(result.executionStrategy).toBe('taskmaestro+teams');
+    });
+
+    it('should set executionPlan with nested layers', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.executionPlan).toBeDefined();
+      expect(result.executionPlan!.outerExecution.type).toBe('taskmaestro');
+      expect(result.executionPlan!.innerCoordination).toBeDefined();
+      expect(result.executionPlan!.innerCoordination!.type).toBe('teams');
+    });
+
+    it('should match pane count to specialists', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.taskmaestro!.paneCount).toBe(2);
+      expect(result.teams!.teammates).toHaveLength(2);
+    });
+
+    it('should use mode-based session/team name', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'PLAN',
+        specialists: ['security-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.taskmaestro!.sessionName).toBe('plan-specialists');
+      expect(result.teams!.team_name).toBe('plan-specialists');
+    });
+
+    it('should include composable execution hint', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockResolvedValueOnce(mockPerformanceAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.executionHint).toContain('Composable execution');
+      expect(result.executionHint).toContain('TaskMaestro');
+      expect(result.executionHint).toContain('Teams');
+    });
+
+    it('should include primary agent when provided', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent) // primary
+        .mockResolvedValueOnce(mockPerformanceAgent); // specialist
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        primaryAgent: 'security-specialist',
+        specialists: ['performance-specialist'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.primaryAgent).toBeDefined();
+      expect(result.primaryAgent!.name).toBe('security-specialist');
+      expect(result.taskmaestro).toBeDefined();
+      expect(result.teams).toBeDefined();
+    });
+
+    it('should handle failed agents in composable strategy', async () => {
+      vi.mocked(mockRulesService.getAgent!)
+        .mockResolvedValueOnce(mockSecurityAgent)
+        .mockRejectedValueOnce(new Error('Agent not found'));
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist', 'invalid-agent'],
+        executionStrategy: 'taskmaestro+teams',
+      });
+
+      expect(result.taskmaestro!.paneCount).toBe(1);
+      expect(result.teams!.teammates).toHaveLength(1);
+      expect(result.failedAgents).toHaveLength(1);
+    });
+  });
+
+  describe('executionPlan in all strategies', () => {
+    it('subagent strategy populates executionPlan', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        includeParallel: true,
+      });
+
+      expect(result.executionPlan).toBeDefined();
+      expect(result.executionPlan!.outerExecution.type).toBe('subagent');
+      expect(result.executionPlan!.innerCoordination).toBeUndefined();
+    });
+
+    it('taskmaestro strategy populates executionPlan', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        executionStrategy: 'taskmaestro',
+      });
+
+      expect(result.executionPlan).toBeDefined();
+      expect(result.executionPlan!.outerExecution.type).toBe('taskmaestro');
+      expect(result.executionPlan!.innerCoordination).toBeUndefined();
+    });
+
+    it('teams strategy populates executionPlan', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        executionStrategy: 'teams',
+      });
+
+      expect(result.executionPlan).toBeDefined();
+      expect(result.executionPlan!.outerExecution.type).toBe('teams');
+      expect(result.executionPlan!.innerCoordination).toBeUndefined();
+    });
+
+    it('no specialists results in no executionPlan', async () => {
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+      });
+
+      expect(result.executionPlan).toBeUndefined();
+    });
+
+    it('backward compat: no executionStrategy still defaults to subagent', async () => {
+      vi.mocked(mockRulesService.getAgent!).mockResolvedValueOnce(mockSecurityAgent);
+
+      const result = await service.dispatchAgents({
+        mode: 'EVAL',
+        specialists: ['security-specialist'],
+        includeParallel: true,
+      });
+
+      expect(result.executionStrategy).toBe('subagent');
+      expect(result.executionPlan).toBeDefined();
+      expect(result.executionPlan!.outerExecution.type).toBe('subagent');
     });
   });
 });

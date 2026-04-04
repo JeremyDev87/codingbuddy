@@ -16,6 +16,7 @@ import type {
   DispatchedAgent,
   TaskmaestroAssignment,
   TeamsTeammate,
+  ExecutionPlan,
 } from './agent.types';
 import { FILE_PATTERN_SPECIALISTS } from './agent.types';
 import {
@@ -24,6 +25,13 @@ import {
   buildParallelExecutionHint,
 } from './agent-prompt.builder';
 import { createAgentSummary } from './agent-summary.utils';
+import {
+  buildSimplePlan,
+  buildNestedPlan,
+  subagentLayer,
+  taskmaestroLayer,
+  teamsLayer,
+} from './execution-plan';
 import type { VerbosityLevel } from '../shared/verbosity.types';
 import { getVerbosityConfig } from '../shared/verbosity.types';
 
@@ -207,6 +215,12 @@ export class AgentService {
    *
    * Returns structured dispatch data that can be directly used with
    * Claude Code's Task tool, eliminating the need for manual prompt assembly.
+   *
+   * Supports composable execution strategies:
+   * - `'subagent'` (default): parallel subagents via Claude Code Agent tool
+   * - `'taskmaestro'`: tmux-based pane execution
+   * - `'teams'`: Claude Code native Teams coordination
+   * - `'taskmaestro+teams'`: TaskMaestro as outer transport, Teams as inner coordination
    */
   async dispatchAgents(input: DispatchAgentsInput): Promise<DispatchResult> {
     const context: AgentContext = {
@@ -244,73 +258,108 @@ export class AgentService {
       }
     }
 
+    // Dispatch taskmaestro+teams composable strategy
+    if (input.executionStrategy === 'taskmaestro+teams' && input.specialists?.length) {
+      return this.dispatchComposable(input, context, result);
+    }
+
     // Dispatch taskmaestro strategy
     if (input.executionStrategy === 'taskmaestro' && input.specialists?.length) {
-      const uniqueSpecialists = Array.from(new Set(input.specialists));
-      const { agents, failedAgents } = await this.loadAgents(
-        uniqueSpecialists,
-        context,
-        true,
-        input.inlineAgents,
-      );
-
-      const assignments: TaskmaestroAssignment[] = agents.map(agent => ({
-        name: agent.id,
-        displayName: agent.displayName,
-        prompt: this.buildTaskmaestroPrompt(agent, input),
-      }));
-
-      return {
-        primaryAgent: result.primaryAgent,
-        taskmaestro: {
-          sessionName: `${(input.mode ?? 'eval').toLowerCase()}-specialists`,
-          paneCount: assignments.length,
-          assignments,
-        },
-        executionStrategy: 'taskmaestro',
-        executionHint: this.buildTaskmaestroHint(assignments.length),
-        failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
-      };
+      return this.dispatchTaskmaestro(input, context, result);
     }
 
     // Dispatch teams strategy
     if (input.executionStrategy === 'teams' && input.specialists?.length) {
-      const uniqueSpecialists = Array.from(new Set(input.specialists));
-      const teamName = `${(input.mode ?? 'eval').toLowerCase()}-specialists`;
-      const { agents, failedAgents } = await this.loadAgents(
-        uniqueSpecialists,
-        context,
-        true,
-        input.inlineAgents,
-      );
-
-      const teammates: TeamsTeammate[] = agents.map(agent => ({
-        name: agent.id,
-        subagent_type: 'general-purpose' as const,
-        team_name: teamName,
-        prompt: agent.taskPrompt || `Perform ${agent.displayName} analysis in ${input.mode} mode`,
-      }));
-
-      return {
-        primaryAgent: result.primaryAgent,
-        teams: {
-          team_name: teamName,
-          description: `${input.mode} mode specialist team`,
-          teammates,
-        },
-        executionStrategy: 'teams',
-        executionHint: this.buildTeamsHint(teamName, teammates.length),
-        failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
-      };
+      return this.dispatchTeams(input, context, result);
     }
 
     // Dispatch parallel agents (subagent strategy)
+    return this.dispatchSubagent(input, context, result);
+  }
+
+  private async dispatchTaskmaestro(
+    input: DispatchAgentsInput,
+    context: AgentContext,
+    result: DispatchResult,
+  ): Promise<DispatchResult> {
+    const uniqueSpecialists = Array.from(new Set(input.specialists!));
+    const { agents, failedAgents } = await this.loadAgents(
+      uniqueSpecialists,
+      context,
+      true,
+      input.inlineAgents,
+    );
+
+    const assignments: TaskmaestroAssignment[] = agents.map(agent => ({
+      name: agent.id,
+      displayName: agent.displayName,
+      prompt: this.buildTaskmaestroPrompt(agent, input),
+    }));
+
+    const tmDispatch = {
+      sessionName: `${(input.mode ?? 'eval').toLowerCase()}-specialists`,
+      paneCount: assignments.length,
+      assignments,
+    };
+
+    return {
+      primaryAgent: result.primaryAgent,
+      taskmaestro: tmDispatch,
+      executionStrategy: 'taskmaestro',
+      executionHint: this.buildTaskmaestroHint(assignments.length),
+      executionPlan: buildSimplePlan(taskmaestroLayer(tmDispatch)),
+      failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
+    };
+  }
+
+  private async dispatchTeams(
+    input: DispatchAgentsInput,
+    context: AgentContext,
+    result: DispatchResult,
+  ): Promise<DispatchResult> {
+    const uniqueSpecialists = Array.from(new Set(input.specialists!));
+    const teamName = `${(input.mode ?? 'eval').toLowerCase()}-specialists`;
+    const { agents, failedAgents } = await this.loadAgents(
+      uniqueSpecialists,
+      context,
+      true,
+      input.inlineAgents,
+    );
+
+    const teammates: TeamsTeammate[] = agents.map(agent => ({
+      name: agent.id,
+      subagent_type: 'general-purpose' as const,
+      team_name: teamName,
+      prompt: agent.taskPrompt || `Perform ${agent.displayName} analysis in ${input.mode} mode`,
+    }));
+
+    const teamsConfig = {
+      team_name: teamName,
+      description: `${input.mode} mode specialist team`,
+      teammates,
+    };
+
+    return {
+      primaryAgent: result.primaryAgent,
+      teams: teamsConfig,
+      executionStrategy: 'teams',
+      executionHint: this.buildTeamsHint(teamName, teammates.length),
+      executionPlan: buildSimplePlan(teamsLayer(teamsConfig)),
+      failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
+    };
+  }
+
+  private async dispatchSubagent(
+    input: DispatchAgentsInput,
+    context: AgentContext,
+    result: DispatchResult,
+  ): Promise<DispatchResult> {
     if (input.includeParallel && input.specialists?.length) {
       const uniqueSpecialists = Array.from(new Set(input.specialists));
       const { agents, failedAgents } = await this.loadAgents(
         uniqueSpecialists,
         context,
-        true, // always include full prompt for dispatch
+        true,
         input.inlineAgents,
       );
 
@@ -332,10 +381,73 @@ export class AgentService {
       if (failedAgents.length > 0) {
         result.failedAgents = failedAgents;
       }
+
+      result.executionPlan = buildSimplePlan(subagentLayer(result.parallelAgents));
     }
 
     result.executionStrategy = 'subagent';
     return result;
+  }
+
+  /**
+   * Dispatch with composable taskmaestro+teams strategy.
+   * TaskMaestro manages tmux panes (outer), Teams coordinates within panes (inner).
+   */
+  private async dispatchComposable(
+    input: DispatchAgentsInput,
+    context: AgentContext,
+    result: DispatchResult,
+  ): Promise<DispatchResult> {
+    const uniqueSpecialists = Array.from(new Set(input.specialists!));
+    const teamName = `${(input.mode ?? 'eval').toLowerCase()}-specialists`;
+    const { agents, failedAgents } = await this.loadAgents(
+      uniqueSpecialists,
+      context,
+      true,
+      input.inlineAgents,
+    );
+
+    // Build TaskMaestro assignments (outer transport)
+    const assignments: TaskmaestroAssignment[] = agents.map(agent => ({
+      name: agent.id,
+      displayName: agent.displayName,
+      prompt: this.buildTaskmaestroPrompt(agent, input),
+    }));
+
+    const tmDispatch = {
+      sessionName: teamName,
+      paneCount: assignments.length,
+      assignments,
+    };
+
+    // Build Teams config (inner coordination)
+    const teammates: TeamsTeammate[] = agents.map(agent => ({
+      name: agent.id,
+      subagent_type: 'general-purpose' as const,
+      team_name: teamName,
+      prompt: agent.taskPrompt || `Perform ${agent.displayName} analysis in ${input.mode} mode`,
+    }));
+
+    const teamsConfig = {
+      team_name: teamName,
+      description: `${input.mode} mode specialist team (coordinated within TaskMaestro panes)`,
+      teammates,
+    };
+
+    const executionPlan: ExecutionPlan = buildNestedPlan(
+      taskmaestroLayer(tmDispatch),
+      teamsLayer(teamsConfig),
+    );
+
+    return {
+      primaryAgent: result.primaryAgent,
+      taskmaestro: tmDispatch,
+      teams: teamsConfig,
+      executionStrategy: 'taskmaestro+teams',
+      executionHint: this.buildComposableHint(teamName, assignments.length),
+      executionPlan,
+      failedAgents: failedAgents.length > 0 ? failedAgents : result.failedAgents,
+    };
   }
 
   private buildTaskmaestroPrompt(agent: PreparedAgent, input: DispatchAgentsInput): string {
@@ -373,6 +485,20 @@ When done, provide a summary of all findings.`;
 4. Monitor via TaskList — teammates coordinate via shared task list
 5. Collect results when all teammates go idle
 6. Shutdown teammates via SendMessage with shutdown_request`;
+  }
+
+  private buildComposableHint(teamName: string, paneCount: number): string {
+    return `Composable execution (TaskMaestro + Teams):
+Outer — TaskMaestro manages ${paneCount} tmux pane(s):
+  1. /taskmaestro start --panes ${paneCount}
+  2. Assign each pane its specialist prompt
+Inner — Teams coordinates within panes:
+  1. Each pane worker uses TeamCreate: { team_name: "${teamName}" }
+  2. Workers share task list for coordination
+  3. Monitor via TaskList and /taskmaestro status
+Teardown:
+  1. Shutdown teammates via SendMessage with shutdown_request
+  2. /taskmaestro stop all`;
   }
 
   /**

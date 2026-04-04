@@ -146,6 +146,59 @@ export interface VisibilityConfig {
 }
 
 /**
+ * Execution layer: subagent strategy
+ */
+export interface SubagentLayer {
+  type: 'subagent';
+  agents: DispatchedAgent[];
+}
+
+/**
+ * Execution layer: TaskMaestro tmux-based transport
+ */
+export interface TaskmaestroLayer {
+  type: 'taskmaestro';
+  config: TaskmaestroDispatch;
+}
+
+/**
+ * Execution layer: Claude Code native Teams coordination
+ */
+export interface TeamsLayer {
+  type: 'teams';
+  config: TeamsDispatch;
+  visibility?: VisibilityConfig;
+}
+
+/**
+ * Discriminated union of all execution layer types.
+ * Each layer represents a single execution strategy.
+ */
+export type ExecutionLayer = SubagentLayer | TaskmaestroLayer | TeamsLayer;
+
+/**
+ * Composable execution plan with outer transport and optional inner coordination.
+ *
+ * Simple plan:  outerExecution only (e.g. subagent, taskmaestro, or teams)
+ * Nested plan:  outerExecution + innerCoordination (e.g. taskmaestro + teams)
+ *
+ * @example
+ * // Simple subagent plan
+ * { outerExecution: { type: 'subagent', agents: [...] } }
+ *
+ * @example
+ * // Nested: TaskMaestro as transport, Teams as coordination
+ * {
+ *   outerExecution: { type: 'taskmaestro', config: {...} },
+ *   innerCoordination: { type: 'teams', config: {...} }
+ * }
+ */
+export interface ExecutionPlan {
+  outerExecution: ExecutionLayer;
+  innerCoordination?: ExecutionLayer;
+}
+
+/**
  * Result of dispatching agents for execution
  */
 export interface DispatchResult {
@@ -162,6 +215,8 @@ export interface DispatchResult {
   executionStrategy?: string;
   /** Real-time specialist execution visibility configuration */
   visibility?: VisibilityConfig;
+  /** Composable execution plan (always populated when agents are dispatched) */
+  executionPlan?: ExecutionPlan;
 }
 
 /**
@@ -208,8 +263,8 @@ export interface DispatchAgentsInput {
   primaryAgent?: string;
   /** Agent stack name to resolve primary + specialists from a preset */
   agentStack?: string;
-  /** Execution strategy: 'subagent' (default), 'taskmaestro', or 'teams' */
-  executionStrategy?: 'subagent' | 'taskmaestro' | 'teams';
+  /** Execution strategy: 'subagent' (default), 'taskmaestro', 'teams', or composable 'taskmaestro+teams' */
+  executionStrategy?: 'subagent' | 'taskmaestro' | 'teams' | 'taskmaestro+teams';
   /** Inline agent definitions keyed by agent ID, highest priority in resolution */
   inlineAgents?: Record<string, InlineAgentDefinition>;
 }
