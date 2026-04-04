@@ -171,6 +171,14 @@ describe('Handler Security Integration', () => {
         executionHint: 'Use Task tool...',
       }),
     };
+    const mockTeamsCapabilityServiceForMode = {
+      getStatus: vi.fn().mockResolvedValue({
+        available: false,
+        reason: 'Teams coordination is experimental and disabled by default',
+        source: 'default',
+      }),
+      isAvailable: vi.fn().mockResolvedValue(false),
+    };
     modeHandler = new ModeHandler(
       mockKeywordService,
       mockConfigService,
@@ -181,6 +189,7 @@ describe('Handler Security Integration', () => {
       mockDiagnosticLogService,
       mockAgentServiceForMode as AgentService,
       new CouncilPresetService(),
+      mockTeamsCapabilityServiceForMode as unknown as import('../../agent/teams-capability.service').TeamsCapabilityService,
       mockImpactEventService,
       mockRuleEventCollector,
     );

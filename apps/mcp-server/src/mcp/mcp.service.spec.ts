@@ -494,6 +494,12 @@ function createMcpServiceWithHandlers(
       services.diagnosticLogService as DiagnosticLogService,
       services.agentService as AgentService,
       new CouncilPresetService(),
+      {
+        getStatus: vi
+          .fn()
+          .mockResolvedValue({ available: false, reason: 'default', source: 'default' }),
+        isAvailable: vi.fn().mockResolvedValue(false),
+      } as never,
       services.impactEventService as ImpactEventService,
       services.ruleEventCollector as RuleEventCollector,
     ),

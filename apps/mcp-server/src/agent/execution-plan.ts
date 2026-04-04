@@ -5,7 +5,7 @@ import type {
   TaskmaestroDispatch,
   TeamsDispatch,
   VisibilityConfig,
-} from './agent.types';
+} from './execution-plan.types';
 
 /**
  * Build a single-layer execution plan.

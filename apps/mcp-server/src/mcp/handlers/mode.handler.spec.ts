@@ -9,6 +9,7 @@ import { ContextDocumentService } from '../../context/context-document.service';
 import { DiagnosticLogService } from '../../diagnostic/diagnostic-log.service';
 import type { AgentService } from '../../agent/agent.service';
 import { CouncilPresetService } from '../../agent/council-preset.service';
+import type { TeamsCapabilityService } from '../../agent/teams-capability.service';
 import type { ImpactEventService } from '../../impact';
 import type { RuleEventCollector } from '../../rules/rule-event-collector';
 
@@ -23,6 +24,7 @@ describe('ModeHandler', () => {
   let mockDiagnosticLogService: DiagnosticLogService;
   let mockAgentService: Partial<AgentService>;
   let mockCouncilPresetService: CouncilPresetService;
+  let mockTeamsCapabilityService: Partial<TeamsCapabilityService>;
   let mockImpactEventService: Partial<ImpactEventService>;
   let mockRuleEventCollector: Partial<RuleEventCollector>;
 
@@ -133,6 +135,15 @@ describe('ModeHandler', () => {
 
     mockCouncilPresetService = new CouncilPresetService();
 
+    mockTeamsCapabilityService = {
+      getStatus: vi.fn().mockResolvedValue({
+        available: false,
+        reason: 'Teams coordination is experimental and disabled by default',
+        source: 'default',
+      }),
+      isAvailable: vi.fn().mockResolvedValue(false),
+    };
+
     mockImpactEventService = {
       logEvent: vi.fn(),
     };
@@ -149,6 +160,7 @@ describe('ModeHandler', () => {
       mockDiagnosticLogService,
       mockAgentService as AgentService,
       mockCouncilPresetService,
+      mockTeamsCapabilityService as TeamsCapabilityService,
       mockImpactEventService as ImpactEventService,
       mockRuleEventCollector as RuleEventCollector,
     );
@@ -1356,6 +1368,112 @@ describe('ModeHandler', () => {
       const parsed = JSON.parse(text);
       const reserialized = JSON.stringify(parsed.councilPreset);
       expect(JSON.parse(reserialized)).toEqual(parsed.councilPreset);
+    });
+  });
+
+  describe('execution metadata in parse_mode response', () => {
+    it('should include teamsCapability when TeamsCapabilityService returns status', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.teamsCapability).toBeDefined();
+      expect(parsed.teamsCapability.available).toBe(false);
+      expect(parsed.teamsCapability.source).toBe('default');
+    });
+
+    it('should include executionPlan when dispatchReady has agents', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        included_agent: {
+          name: 'Solution Architect',
+          systemPrompt: 'You are a solution architect...',
+          expertise: ['architecture'],
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.executionPlan).toBeDefined();
+      expect(parsed.executionPlan.strategy).toBe('subagent');
+      expect(parsed.executionPlan.isNested).toBe(false);
+      expect(parsed.executionPlan.outerExecution.type).toBe('subagent');
+    });
+
+    it('should build nested plan when Teams is available', async () => {
+      (mockTeamsCapabilityService.getStatus as ReturnType<typeof vi.fn>).mockResolvedValue({
+        available: true,
+        reason: 'Enabled via CODINGBUDDY_TEAMS_ENABLED environment variable',
+        source: 'environment',
+      });
+
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        included_agent: {
+          name: 'Solution Architect',
+          systemPrompt: 'You are a solution architect...',
+          expertise: ['architecture'],
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.executionPlan).toBeDefined();
+      expect(parsed.executionPlan.isNested).toBe(true);
+      expect(parsed.executionPlan.strategy).toBe('subagent+teams');
+      expect(parsed.executionPlan.innerCoordination).toBeDefined();
+      expect(parsed.executionPlan.innerCoordination.type).toBe('teams');
+    });
+
+    it('should not include executionPlan when no dispatchReady agents', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.executionPlan).toBeUndefined();
+    });
+
+    it('should handle TeamsCapabilityService failure gracefully', async () => {
+      (mockTeamsCapabilityService.getStatus as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Service unavailable'),
+      );
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN test task',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.teamsCapability).toBeUndefined();
+    });
+
+    it('should reflect teamsCapability.available=true when enabled via config', async () => {
+      (mockTeamsCapabilityService.getStatus as ReturnType<typeof vi.fn>).mockResolvedValue({
+        available: true,
+        reason: 'Enabled via experimental.teamsCoordination config',
+        source: 'config',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse(result!.content[0].text as string);
+      expect(parsed.teamsCapability.available).toBe(true);
+      expect(parsed.teamsCapability.source).toBe('config');
     });
   });
 });

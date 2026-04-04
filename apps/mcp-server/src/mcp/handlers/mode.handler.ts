@@ -30,6 +30,16 @@ import { buildVisualData, type AgentVisualInput } from '../../keyword/visual-dat
 import { isValidVerbosity } from '../../shared/verbosity.types';
 import { AgentService } from '../../agent/agent.service';
 import { CouncilPresetService } from '../../agent/council-preset.service';
+import { TeamsCapabilityService } from '../../agent/teams-capability.service';
+import type { TeamsCapabilityStatus } from '../../agent/teams-capability.types';
+import {
+  buildSimplePlan,
+  buildNestedPlan,
+  subagentLayer,
+  teamsLayer,
+  serializeExecutionPlan,
+} from '../../agent/execution-plan';
+import type { ExecutionPlan } from '../../agent/execution-plan.types';
 import { ImpactEventService } from '../../impact';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
 
@@ -106,6 +116,7 @@ export class ModeHandler extends AbstractHandler {
     private readonly diagnosticLogService: DiagnosticLogService,
     private readonly agentService: AgentService,
     private readonly councilPresetService: CouncilPresetService,
+    private readonly teamsCapabilityService: TeamsCapabilityService,
     private readonly impactEventService: ImpactEventService,
     private readonly ruleEventCollector: RuleEventCollector,
   ) {
@@ -282,6 +293,10 @@ export class ModeHandler extends AbstractHandler {
       const councilPreset =
         this.councilPresetService.resolvePreset(result.mode as Mode) ?? undefined;
 
+      // Resolve Teams capability status and build execution plan
+      const teamsCapability = await this.resolveTeamsCapability();
+      const executionPlan = this.buildExecutionPlan(dispatchReady, teamsCapability);
+
       // Build visual data for agent visualization
       const visual = await this.buildVisual(
         result.mode as Mode,
@@ -307,6 +322,10 @@ export class ModeHandler extends AbstractHandler {
         ...(visual && { visual }),
         // Include council preset for PLAN/EVAL modes
         ...(councilPreset && { councilPreset }),
+        // Include execution plan metadata when dispatch is active
+        ...(executionPlan && { executionPlan: serializeExecutionPlan(executionPlan) }),
+        // Include Teams capability status
+        ...(teamsCapability && { teamsCapability }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -618,6 +637,92 @@ export class ModeHandler extends AbstractHandler {
       );
       return undefined;
     }
+  }
+
+  /**
+   * Resolve Teams capability status from TeamsCapabilityService.
+   * Returns undefined on failure (graceful degradation).
+   */
+  private async resolveTeamsCapability(): Promise<TeamsCapabilityStatus | undefined> {
+    try {
+      return await this.teamsCapabilityService.getStatus();
+    } catch (error) {
+      this.logger.warn(
+        `Failed to resolve Teams capability: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * Build an ExecutionPlan from dispatchReady data and Teams capability.
+   * Returns undefined when no dispatch-ready agents are present.
+   *
+   * Logic:
+   * - Outer layer is always 'subagent' (derived from dispatchReady agents).
+   * - If Teams is available, an inner 'teams' coordination layer is added.
+   */
+  private buildExecutionPlan(
+    dispatchReady?: DispatchReady,
+    teamsCapability?: TeamsCapabilityStatus,
+  ): ExecutionPlan | undefined {
+    if (!dispatchReady) {
+      return undefined;
+    }
+
+    const agents: {
+      name: string;
+      displayName: string;
+      description: string;
+      dispatchParams: {
+        subagent_type: 'general-purpose';
+        prompt: string;
+        description: string;
+        run_in_background?: true;
+      };
+    }[] = [];
+
+    if (dispatchReady.primaryAgent) {
+      agents.push({
+        name: dispatchReady.primaryAgent.name,
+        displayName: dispatchReady.primaryAgent.displayName,
+        description: dispatchReady.primaryAgent.description,
+        dispatchParams: dispatchReady.primaryAgent.dispatchParams,
+      });
+    }
+
+    if (dispatchReady.parallelAgents?.length) {
+      for (const agent of dispatchReady.parallelAgents) {
+        agents.push({
+          name: agent.name,
+          displayName: agent.displayName,
+          description: agent.description,
+          dispatchParams: agent.dispatchParams,
+        });
+      }
+    }
+
+    if (agents.length === 0) {
+      return undefined;
+    }
+
+    const outer = subagentLayer(agents);
+
+    if (teamsCapability?.available) {
+      const inner = teamsLayer({
+        team_name: 'auto',
+        description: 'Auto-generated Teams coordination layer',
+        teammates: agents.map(a => ({
+          name: a.name,
+          subagent_type: 'general-purpose' as const,
+          team_name: 'auto',
+          prompt: a.description,
+        })),
+      });
+      return buildNestedPlan(outer, inner);
+    }
+
+    return buildSimplePlan(outer);
   }
 
   /**

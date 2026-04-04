@@ -1,6 +1,8 @@
 import type { DiffAnalysisResult } from './diff-analyzer';
 import type { CouncilPreset } from '../agent/council-preset.types';
 import type { CouncilSummary } from '../collaboration/council-summary.types';
+import type { ExecutionPlan } from '../agent/execution-plan.types';
+import type { TeamsCapabilityStatus } from '../agent/teams-capability.types';
 
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
@@ -523,6 +525,18 @@ export interface ParseModeResult {
    * Clients should treat this as read-only diagnostic data.
    */
   councilSummary?: CouncilSummary;
+  /**
+   * @apiProperty External API - do not rename.
+   * Describes the outer execution transport and optional inner coordination layer.
+   * Built from the composable execution model (#1309). Present when dispatch is active.
+   */
+  executionPlan?: ExecutionPlan;
+  /**
+   * @apiProperty External API - do not rename.
+   * Runtime capability status for Teams coordination.
+   * Reflects environment, config, or default gating from TeamsCapabilityService (#1311).
+   */
+  teamsCapability?: TeamsCapabilityStatus;
 }
 
 /**
