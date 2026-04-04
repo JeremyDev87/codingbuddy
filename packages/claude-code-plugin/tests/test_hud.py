@@ -166,6 +166,122 @@ class TestFormatDuration:
         assert hud.format_duration("") == "0m"
 
 
+class TestFormatDurationMs:
+    def test_zero(self):
+        assert hud.format_duration_ms(0) == "0m"
+
+    def test_minutes(self):
+        assert hud.format_duration_ms(720_000) == "12m"
+
+    def test_hours(self):
+        assert hud.format_duration_ms(4_980_000) == "1h23m"
+
+    def test_sub_minute(self):
+        assert hud.format_duration_ms(30_000) == "0m"
+
+
+class TestResolveCost:
+    def test_exact_from_stdin(self):
+        stdin = {"cost": {"total_cost_usd": 1.23}}
+        cost, is_exact = hud.resolve_cost(stdin, "", {})
+        assert cost == 1.23
+        assert is_exact is True
+
+    def test_fallback_to_estimate(self):
+        stdin = {}
+        ctx = {"current_usage": {
+            "input_tokens": 10000,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+        }}
+        cost, is_exact = hud.resolve_cost(stdin, "claude-sonnet-4-5", ctx)
+        assert cost > 0
+        assert is_exact is False
+
+    def test_zero_exact_cost_is_exact(self):
+        stdin = {"cost": {"total_cost_usd": 0}}
+        cost, is_exact = hud.resolve_cost(stdin, "", {})
+        assert cost == 0.0
+        assert is_exact is True
+
+    def test_missing_cost_key(self):
+        stdin = {"cost": {}}
+        cost, is_exact = hud.resolve_cost(stdin, "", {})
+        assert is_exact is False
+
+
+class TestResolveDuration:
+    def test_exact_from_stdin(self):
+        stdin = {"cost": {"total_duration_ms": 720_000}}
+        assert hud.resolve_duration(stdin, {}) == "12m"
+
+    def test_fallback_to_hud_state(self):
+        ts = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+        stdin = {}
+        state = {"sessionStartTimestamp": ts}
+        result = hud.resolve_duration(stdin, state)
+        assert "5m" in result or "4m" in result
+
+    def test_no_data_returns_zero(self):
+        assert hud.resolve_duration({}, {}) == "0m"
+
+
+class TestResolveAgent:
+    def test_stdin_agent_preferred(self):
+        stdin = {"agent": {"name": "security-reviewer"}}
+        assert hud.resolve_agent(stdin, "old-env-agent") == "security-reviewer"
+
+    def test_fallback_to_env(self):
+        assert hud.resolve_agent({}, "env-agent") == "env-agent"
+
+    def test_both_empty(self):
+        assert hud.resolve_agent({}, "") == ""
+
+
+class TestResolveModelLabel:
+    def test_display_name_and_id(self):
+        stdin = {"model": {"id": "claude-opus-4-6", "display_name": "Opus"}}
+        mid, display = hud.resolve_model_label(stdin)
+        assert mid == "claude-opus-4-6"
+        assert display == "Opus"
+
+    def test_no_model(self):
+        mid, display = hud.resolve_model_label({})
+        assert mid == ""
+        assert display == ""
+
+
+class TestFormatRateLimits:
+    def test_no_rate_limits(self):
+        assert hud.format_rate_limits({}) == ""
+
+    def test_five_hour_only(self):
+        stdin = {"rate_limits": {"five_hour": {"used_percentage": 23.5}}}
+        assert hud.format_rate_limits(stdin) == "RL:5h:24%"
+
+    def test_both_limits(self):
+        stdin = {"rate_limits": {
+            "five_hour": {"used_percentage": 10},
+            "seven_day": {"used_percentage": 40},
+        }}
+        result = hud.format_rate_limits(stdin)
+        assert "5h:10%" in result
+        assert "7d:40%" in result
+
+
+class TestFormatWorktree:
+    def test_no_worktree(self):
+        assert hud.format_worktree({}) == ""
+
+    def test_with_name(self):
+        stdin = {"worktree": {"name": "my-feature", "path": "/tmp/wt"}}
+        assert hud.format_worktree(stdin) == "WT:my-feature"
+
+    def test_empty_name(self):
+        stdin = {"worktree": {"path": "/tmp/wt"}}
+        assert hud.format_worktree(stdin) == ""
+
+
 class TestFormatStatusLine:
     def test_full_output_with_mode(self):
         stdin = {
@@ -189,8 +305,27 @@ class TestFormatStatusLine:
         assert "\u25d5\u203f\u25d5" in result  # ◕‿◕
         assert "PLAN" in result
         assert "5.1.1" in result
-        assert "$" in result
+        assert "~$" in result  # estimated (no cost.total_cost_usd)
         assert "Ctx:45%" in result
+        assert "Opus" in result  # display_name shown
+
+    def test_exact_cost_prefix(self):
+        stdin = {
+            "cost": {"total_cost_usd": 0.42, "total_duration_ms": 60000},
+            "model": {"id": "claude-sonnet-4-5"},
+            "context_window": {"used_percentage": 10},
+        }
+        result = hud.format_status_line(stdin, {})
+        assert "$0.42" in result
+        assert "~$" not in result  # exact, not estimated
+
+    def test_exact_duration_from_stdin(self):
+        stdin = {
+            "cost": {"total_duration_ms": 720_000},
+            "context_window": {"used_percentage": 0},
+        }
+        result = hud.format_status_line(stdin, {})
+        assert "12m" in result
 
     def test_no_mode_shows_ready(self):
         result = hud.format_status_line({}, {"version": "5.1.1"})
@@ -200,7 +335,14 @@ class TestFormatStatusLine:
         result = hud.format_status_line({}, {})
         assert "\u25d5\u203f\u25d5" in result  # always has buddy face
 
-    def test_agent_line(self):
+    def test_agent_from_stdin(self):
+        stdin = {"agent": {"name": "security-reviewer"}}
+        result = hud.format_status_line(stdin, {})
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "security-reviewer" in lines[1]
+
+    def test_agent_line_env_fallback(self):
         result = hud.format_status_line(
             {},
             {"version": "5.1.1", "currentMode": "ACT"},
@@ -210,9 +352,60 @@ class TestFormatStatusLine:
         assert len(lines) == 2
         assert "architect" in lines[1]
 
+    def test_stdin_agent_overrides_env(self):
+        stdin = {"agent": {"name": "from-stdin"}}
+        result = hud.format_status_line(stdin, {}, active_agent="from-env")
+        assert "from-stdin" in result
+        assert "from-env" not in result
+
     def test_no_agent_single_line(self):
         result = hud.format_status_line({}, {"version": "5.1.1"})
         assert "\n" not in result
+
+    def test_rate_limits_shown(self):
+        stdin = {"rate_limits": {
+            "five_hour": {"used_percentage": 50},
+            "seven_day": {"used_percentage": 20},
+        }}
+        result = hud.format_status_line(stdin, {})
+        assert "RL:" in result
+        assert "5h:50%" in result
+
+    def test_worktree_shown(self):
+        stdin = {"worktree": {"name": "feat-x"}}
+        result = hud.format_status_line(stdin, {})
+        assert "WT:feat-x" in result
+
+    def test_full_telemetry(self):
+        """All exact stdin fields present — full telemetry line."""
+        stdin = {
+            "model": {"id": "claude-opus-4-6", "display_name": "Opus"},
+            "cost": {"total_cost_usd": 2.50, "total_duration_ms": 4_980_000},
+            "context_window": {
+                "used_percentage": 65,
+                "current_usage": {
+                    "input_tokens": 5000,
+                    "cache_creation_input_tokens": 1000,
+                    "cache_read_input_tokens": 3000,
+                },
+            },
+            "rate_limits": {
+                "five_hour": {"used_percentage": 30},
+                "seven_day": {"used_percentage": 15},
+            },
+            "worktree": {"name": "wt-1"},
+            "agent": {"name": "test-agent"},
+        }
+        state = {"version": "5.3.0", "currentMode": "ACT"}
+        result = hud.format_status_line(stdin, state)
+        assert "$2.50" in result
+        assert "~$" not in result
+        assert "1h23m" in result
+        assert "ACT" in result
+        assert "Opus" in result
+        assert "RL:" in result
+        assert "WT:wt-1" in result
+        assert "test-agent" in result
 
 
 class TestIntegration:
@@ -223,6 +416,7 @@ class TestIntegration:
             "transcript_path": "/tmp/t",
             "cwd": "/tmp",
             "model": {"id": "claude-opus-4-6", "display_name": "Opus"},
+            "cost": {"total_cost_usd": 0.05, "total_duration_ms": 60000},
             "context_window": {
                 "context_window_size": 200000,
                 "used_percentage": 45,
@@ -242,6 +436,30 @@ class TestIntegration:
         assert result.returncode == 0
         assert "\u25d5\u203f\u25d5" in result.stdout  # ◕‿◕
         assert "Ctx:45%" in result.stdout
+        assert "$0.05" in result.stdout  # exact cost
+
+    def test_pipe_stdin_estimated_cost(self):
+        """Run script with no cost object — should show ~$ estimated."""
+        script = os.path.join(_hooks_dir, "codingbuddy-hud.py")
+        stdin_data = json.dumps({
+            "model": {"id": "claude-sonnet-4-5"},
+            "context_window": {
+                "used_percentage": 10,
+                "current_usage": {
+                    "input_tokens": 5000,
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 0,
+                },
+            },
+        })
+        result = subprocess.run(
+            [sys.executable, script],
+            input=stdin_data,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "~$" in result.stdout
 
     def test_empty_stdin_fallback(self):
         """Script should output fallback on empty stdin."""

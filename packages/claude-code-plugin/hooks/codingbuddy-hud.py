@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
-"""CodingBuddy statusLine script (#1088).
+"""CodingBuddy statusLine script (#1088, #1325).
 
 Claude Code invokes this via settings.json statusLine.command.
 Reads session data from stdin JSON, outputs formatted status to stdout.
+
+Telemetry fallback order per field:
+  cost     → stdin cost.total_cost_usd  > estimate_cost()
+  duration → stdin cost.total_duration_ms > hud-state sessionStartTimestamp
+  agent    → stdin agent.name > CODINGBUDDY_ACTIVE_AGENT env
+  model    → stdin model.display_name > model.id
 """
 import json
 import os
@@ -103,6 +109,16 @@ def get_health(ctx_pct: float) -> str:
     return "\U0001f7e2"  # 🟢
 
 
+def format_duration_ms(ms) -> str:
+    """Format milliseconds to duration like '12m' or '1h23m'."""
+    total_minutes = int(ms / 60_000)
+    if total_minutes < 60:
+        return f"{total_minutes}m"
+    hours = total_minutes // 60
+    minutes = total_minutes % 60
+    return f"{hours}h{minutes:02d}m"
+
+
 def format_duration(start_timestamp: str) -> str:
     """Format ISO timestamp to duration like '12m' or '1h23m'."""
     try:
@@ -138,41 +154,124 @@ def read_state(state_file: str = DEFAULT_STATE_FILE) -> dict:
         return {}
 
 
+def resolve_cost(stdin_data: dict, model_id: str, ctx_window: dict) -> tuple:
+    """Resolve cost: stdin exact > estimate. Returns (cost, is_exact)."""
+    exact = (stdin_data.get("cost") or {}).get("total_cost_usd")
+    if exact is not None:
+        return (float(exact), True)
+    return (estimate_cost(model_id, ctx_window), False)
+
+
+def resolve_duration(stdin_data: dict, hud_state: dict) -> str:
+    """Resolve duration: stdin exact > hud-state timestamp > '0m'."""
+    exact_ms = (stdin_data.get("cost") or {}).get("total_duration_ms")
+    if exact_ms is not None:
+        return format_duration_ms(exact_ms)
+    start_ts = hud_state.get("sessionStartTimestamp", "")
+    if start_ts:
+        return format_duration(start_ts)
+    return "0m"
+
+
+def resolve_agent(stdin_data: dict, env_agent: str = "") -> str:
+    """Resolve agent: stdin > env var."""
+    stdin_agent = (stdin_data.get("agent") or {}).get("name", "")
+    return stdin_agent or env_agent
+
+
+def resolve_model_label(stdin_data: dict) -> tuple:
+    """Resolve model info. Returns (model_id, display_label)."""
+    model_info = stdin_data.get("model") or {}
+    model_id = model_info.get("id", "")
+    display_name = model_info.get("display_name", "")
+    return (model_id, display_name)
+
+
+def format_rate_limits(stdin_data: dict) -> str:
+    """Format rate-limit info if present. Returns '' when absent."""
+    rl = stdin_data.get("rate_limits")
+    if not rl:
+        return ""
+    parts = []
+    five = rl.get("five_hour")
+    if five:
+        pct = five.get("used_percentage", 0)
+        parts.append(f"5h:{pct:.0f}%")
+    seven = rl.get("seven_day")
+    if seven:
+        pct = seven.get("used_percentage", 0)
+        parts.append(f"7d:{pct:.0f}%")
+    if not parts:
+        return ""
+    return "RL:" + ",".join(parts)
+
+
+def format_worktree(stdin_data: dict) -> str:
+    """Format worktree name if present. Returns '' when absent."""
+    wt = stdin_data.get("worktree")
+    if not wt:
+        return ""
+    name = wt.get("name", "")
+    return f"WT:{name}" if name else ""
+
+
 def format_status_line(
     stdin_data: dict,
     hud_state: dict,
     active_agent: str = "",
 ) -> str:
-    """Format the statusLine output."""
+    """Format the statusLine output.
+
+    Fallback order per field:
+      cost     → stdin cost.total_cost_usd  > estimate_cost()
+      duration → stdin cost.total_duration_ms > hud-state sessionStartTimestamp
+      agent    → stdin agent.name > active_agent param
+      model    → stdin model.display_name > model.id
+    """
     version = hud_state.get("version", "")
     mode = hud_state.get("currentMode")
     mode_label = mode if mode else "Ready"
 
-    ctx_window = stdin_data.get("context_window", {})
+    ctx_window = stdin_data.get("context_window") or {}
     ctx_pct = ctx_window.get("used_percentage", 0) or 0
     health = get_health(ctx_pct)
 
-    start_ts = hud_state.get("sessionStartTimestamp", "")
-    duration = format_duration(start_ts) if start_ts else "0m"
-
-    model_id = ""
-    model_info = stdin_data.get("model", {})
-    if model_info:
-        model_id = model_info.get("id", "")
-
-    cost = estimate_cost(model_id, ctx_window)
+    model_id, display_name = resolve_model_label(stdin_data)
+    cost, is_exact = resolve_cost(stdin_data, model_id, ctx_window)
+    duration = resolve_duration(stdin_data, hud_state)
     cache = compute_cache_hit_rate(ctx_window)
+    agent = resolve_agent(stdin_data, active_agent)
+
+    cost_prefix = "$" if is_exact else "~$"
 
     ver_str = f" v{version}" if version else ""
-    line1 = (
-        f"{BUDDY_FACE} CB{ver_str} | {mode_label} {health} | "
-        f"{duration} | ~${cost:.2f} | Cache:{cache:.0f}% | Ctx:{ctx_pct:.0f}%"
-    )
 
-    if not active_agent:
+    segments = [
+        f"{BUDDY_FACE} CB{ver_str}",
+        f"{mode_label} {health}",
+        duration,
+        f"{cost_prefix}{cost:.2f}",
+        f"Cache:{cache:.0f}%",
+        f"Ctx:{ctx_pct:.0f}%",
+    ]
+
+    rl = format_rate_limits(stdin_data)
+    if rl:
+        segments.append(rl)
+
+    wt = format_worktree(stdin_data)
+    if wt:
+        segments.append(wt)
+
+    if display_name:
+        segments.append(display_name)
+
+    line1 = " | ".join(segments)
+
+    if not agent:
         return line1
 
-    return f"{line1}\n\U0001f916 {active_agent}"
+    return f"{line1}\n\U0001f916 {agent}"
 
 
 def main():
@@ -183,9 +282,9 @@ def main():
         state_file = os.environ.get("CODINGBUDDY_HUD_STATE_FILE", DEFAULT_STATE_FILE)
         hud_state = read_state(state_file)
 
-        active_agent = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
+        env_agent = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
 
-        output = format_status_line(stdin_data, hud_state, active_agent)
+        output = format_status_line(stdin_data, hud_state, env_agent)
         print(output)
     except Exception:
         print(f"{BUDDY_FACE} CodingBuddy")
