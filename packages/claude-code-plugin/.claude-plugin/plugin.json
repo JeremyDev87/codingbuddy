@@ -5,5 +5,11 @@
   "author": {
     "name": "JeremyDev87",
     "email": "soundbrokaz@kakao.com"
+  },
+  "namespacePolicy": {
+    "prefix": "codingbuddy",
+    "bareCommandsDeprecated": true,
+    "policyDoc": "docs/namespace-policy.md",
+    "note": "All new commands MUST use the codingbuddy:* namespace. Existing bare commands are migration targets."
   }
 }
