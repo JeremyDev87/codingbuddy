@@ -43,8 +43,8 @@
         },
         "type": {
           "type": "string",
-          "enum": ["primary", "specialist"],
-          "description": "Agent type: 'primary' uses top-level activation for PLAN/ACT workflow, 'specialist' uses modes for domain-specific guidance. RECOMMENDED: Always specify for new agents to ensure proper workflow integration."
+          "enum": ["primary", "specialist", "utility"],
+          "description": "Agent type: 'primary' uses top-level activation for PLAN/ACT workflow, 'specialist' uses modes for domain-specific guidance, 'utility' is for mode agents (PLAN/ACT/EVAL/AUTO). RECOMMENDED: Always specify for new agents to ensure proper workflow integration."
         },
         "expertise": {
           "type": "array",
