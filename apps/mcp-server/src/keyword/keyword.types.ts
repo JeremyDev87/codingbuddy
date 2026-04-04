@@ -1,5 +1,5 @@
 import type { DiffAnalysisResult } from './diff-analyzer';
-import type { CouncilPreset } from '../agent/council-preset.service';
+import type { CouncilPreset } from '../agent/council-preset.types';
 import type { CouncilSummary } from '../collaboration/council-summary.types';
 
 export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;

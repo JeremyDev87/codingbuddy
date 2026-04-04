@@ -1,16 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import type { Mode } from '../keyword/keyword.types';
+import type { CouncilMode, CouncilPreset } from './council-preset.types';
 
-/**
- * A deterministic council preset: a primary agent plus specialist reviewers
- */
-export interface CouncilPreset {
-  mode: 'PLAN' | 'EVAL';
-  primary: string;
-  specialists: string[];
-}
-
-type CouncilMode = Extract<Mode, 'PLAN' | 'EVAL'>;
+export type { CouncilPreset } from './council-preset.types';
 
 const COUNCIL_PRESETS: Record<CouncilMode, CouncilPreset> = {
   PLAN: {
@@ -36,7 +27,7 @@ export class CouncilPresetService {
    * Resolve the council preset for a given mode.
    * Returns null for modes without a preset (ACT, AUTO).
    */
-  resolvePreset(mode: Mode): CouncilPreset | null {
+  resolvePreset(mode: string): CouncilPreset | null {
     const preset = COUNCIL_PRESETS[mode as CouncilMode];
     if (!preset) return null;
     return { ...preset, specialists: [...preset.specialists] };
