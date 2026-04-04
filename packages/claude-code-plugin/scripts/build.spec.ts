@@ -1,15 +1,20 @@
 /**
  * Unit Tests for Build Script Orchestration
  *
- * Tests the build script's utility functions and argument parsing.
- * Note: Build script now only syncs version and generates README.
- * Agents, commands, and skills are provided by MCP server (single source of truth).
+ * Tests the build script's utility functions, argument parsing,
+ * and namespace manifest generation for the codingbuddy:* command mapping.
+ *
+ * Note: Build script syncs version, generates README, and produces
+ * namespace-manifest.json. Agents, commands, and skills are provided
+ * by MCP server (single source of truth).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 
 // Import utilities that are testable in isolation
 import { getErrorMessage, type BuildMode } from '../src/utils';
+import { buildNamespaceManifest, type NamespaceManifest } from './build';
+import { PLUGIN_NAMESPACE, NAMESPACE_SEPARATOR, LEGACY_ALLOWLIST } from './validate-commands';
 
 describe('build script orchestration', () => {
   // ============================================================================
@@ -129,5 +134,93 @@ describe('build script orchestration', () => {
       expect(buildResult.success).toBe(false);
       expect(buildResult.errors).toContain('Failed to write README.md');
     });
+  });
+
+  // ============================================================================
+  // Namespace Manifest Generation
+  // ============================================================================
+  describe('namespace manifest generation', () => {
+    let manifest: NamespaceManifest;
+
+    // Build once — the manifest is deterministic for a given commands/ directory
+    beforeAll(() => {
+      manifest = buildNamespaceManifest();
+    });
+
+    it('uses the codingbuddy plugin namespace', () => {
+      expect(manifest.pluginName).toBe(PLUGIN_NAMESPACE);
+      expect(manifest.namespace).toBe(`${PLUGIN_NAMESPACE}${NAMESPACE_SEPARATOR}`);
+      expect(manifest.separator).toBe(NAMESPACE_SEPARATOR);
+    });
+
+    it('includes all current command files', () => {
+      const bareNames = manifest.commands.map(c => c.bare);
+      for (const cmd of LEGACY_ALLOWLIST) {
+        expect(bareNames).toContain(cmd);
+      }
+    });
+
+    it('maps every command to its namespaced form', () => {
+      for (const cmd of manifest.commands) {
+        expect(cmd.namespaced).toBe(`${PLUGIN_NAMESPACE}${NAMESPACE_SEPARATOR}${cmd.bare}`);
+      }
+    });
+
+    it('references valid file paths in commands/', () => {
+      for (const cmd of manifest.commands) {
+        expect(cmd.file).toBe(`commands/${cmd.bare}.md`);
+      }
+    });
+
+    it('includes a generatedAt ISO timestamp', () => {
+      expect(manifest.generatedAt).toBeTruthy();
+      // ISO 8601 rough check
+      expect(new Date(manifest.generatedAt).toISOString()).toBe(manifest.generatedAt);
+    });
+
+    it('produces at least 6 command entries', () => {
+      expect(manifest.commands.length).toBeGreaterThanOrEqual(6);
+    });
+  });
+});
+
+// ============================================================================
+// Packaging Integration — namespaced command assets
+// ============================================================================
+describe('packaging integration', () => {
+  // Use a fresh import of path/fs to keep these tests self-contained
+  const path = require('path');
+  const fs = require('fs');
+
+  const pluginRoot = path.resolve(__dirname, '..');
+  const commandsDir = path.join(pluginRoot, 'commands');
+
+  it('commands/ directory exists and contains .md files', () => {
+    expect(fs.existsSync(commandsDir)).toBe(true);
+    const files: string[] = fs.readdirSync(commandsDir).filter((f: string) => f.endsWith('.md'));
+    expect(files.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('every command file maps to a codingbuddy:* namespaced slug', () => {
+    const files: string[] = fs.readdirSync(commandsDir).filter((f: string) => f.endsWith('.md'));
+    for (const file of files) {
+      const bare = path.basename(file, '.md');
+      const namespaced = `${PLUGIN_NAMESPACE}${NAMESPACE_SEPARATOR}${bare}`;
+      expect(namespaced).toMatch(/^codingbuddy:.+$/);
+    }
+  });
+
+  it('plugin.json name matches the namespace prefix', () => {
+    const pluginJsonPath = path.join(pluginRoot, '.claude-plugin', 'plugin.json');
+    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+    expect(pluginJson.name).toBe(PLUGIN_NAMESPACE);
+  });
+
+  it('buddy.md references namespaced commands in Quick Actions', () => {
+    const buddyPath = path.join(commandsDir, 'buddy.md');
+    const content = fs.readFileSync(buddyPath, 'utf8');
+    expect(content).toContain('/codingbuddy:plan');
+    expect(content).toContain('/codingbuddy:act');
+    expect(content).toContain('/codingbuddy:buddy');
   });
 });

@@ -1,6 +1,7 @@
 # Build artifacts
 /dist/
 *.tsbuildinfo
+namespace-manifest.json
 
 # Dependencies
 node_modules/

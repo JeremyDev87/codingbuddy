@@ -20,9 +20,15 @@ import * as fs from 'fs';
 
 // Import utilities
 import { getErrorMessage } from '../src/utils';
+import {
+  PLUGIN_NAMESPACE,
+  NAMESPACE_SEPARATOR,
+  extractCommandsFromDirectory,
+} from './validate-commands';
 
 // Paths
 const ROOT_DIR = path.resolve(__dirname, '..');
+const COMMANDS_DIR = path.join(ROOT_DIR, 'commands');
 
 interface BuildResult {
   step: string;
@@ -71,7 +77,10 @@ claude plugin add codingbuddy
 - **EVAL**: Evaluate code quality and suggest improvements
 - **AUTO**: Autonomous PLAN → ACT → EVAL cycle
 
-### Commands
+### Commands (codingbuddy:* namespace)
+
+All commands use the \`codingbuddy:\` namespace to avoid collisions with Claude Code built-ins.
+
 - \`/codingbuddy:plan\` - Enter PLAN mode
 - \`/codingbuddy:act\` - Enter ACT mode
 - \`/codingbuddy:eval\` - Enter EVAL mode
@@ -150,6 +159,64 @@ MIT
   return result;
 }
 
+/**
+ * Namespace manifest shape exported for testing.
+ */
+export interface NamespaceManifest {
+  pluginName: string;
+  namespace: string;
+  separator: string;
+  commands: Array<{
+    file: string;
+    bare: string;
+    namespaced: string;
+  }>;
+  generatedAt: string;
+}
+
+/**
+ * Builds a namespace manifest object from the commands/ directory.
+ * Exported for testing — the build step serialises this to disk.
+ */
+export function buildNamespaceManifest(): NamespaceManifest {
+  const commands = extractCommandsFromDirectory(COMMANDS_DIR);
+  return {
+    pluginName: PLUGIN_NAMESPACE,
+    namespace: `${PLUGIN_NAMESPACE}${NAMESPACE_SEPARATOR}`,
+    separator: NAMESPACE_SEPARATOR,
+    commands: commands.map(cmd => ({
+      file: `commands/${cmd}.md`,
+      bare: cmd,
+      namespaced: `${PLUGIN_NAMESPACE}${NAMESPACE_SEPARATOR}${cmd}`,
+    })),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function createNamespaceManifest(): BuildResult {
+  const result: BuildResult = {
+    step: 'Namespace Manifest',
+    success: true,
+    details: [],
+    errors: [],
+  };
+
+  try {
+    const manifest = buildNamespaceManifest();
+    const outPath = path.join(ROOT_DIR, 'namespace-manifest.json');
+    fs.writeFileSync(outPath, JSON.stringify(manifest, null, 2) + '\n');
+    result.details.push(`Generated namespace-manifest.json (${manifest.commands.length} commands)`);
+    for (const cmd of manifest.commands) {
+      result.details.push(`  ${cmd.bare} → ${cmd.namespaced}`);
+    }
+  } catch (err: unknown) {
+    result.success = false;
+    result.errors.push(`Failed to create namespace-manifest.json: ${getErrorMessage(err)}`);
+  }
+
+  return result;
+}
+
 function createMcpJson(): BuildResult {
   const result: BuildResult = {
     step: 'MCP Configuration',
@@ -194,8 +261,12 @@ async function main(): Promise<void> {
   console.log('📖 Step 1: Generating README...');
   results.push(createReadme());
 
-  // Step 2: Generate .mcp.json
-  console.log('🔧 Step 2: Generating .mcp.json...');
+  // Step 2: Generate namespace manifest
+  console.log('📛 Step 2: Generating namespace manifest...');
+  results.push(createNamespaceManifest());
+
+  // Step 3: Generate .mcp.json
+  console.log('🔧 Step 3: Generating .mcp.json...');
   results.push(createMcpJson());
 
   // Summary
@@ -224,9 +295,10 @@ async function main(): Promise<void> {
   if (allSuccess) {
     console.log('✨ Build completed successfully!');
     console.log(`\nOutput directory: ${ROOT_DIR}`);
-    console.log('  ├── .claude-plugin/  (plugin manifest)');
-    console.log('  ├── .mcp.json        (MCP server configuration)');
-    console.log('  └── README.md        (plugin documentation)');
+    console.log('  ├── .claude-plugin/          (plugin manifest)');
+    console.log('  ├── .mcp.json                (MCP server configuration)');
+    console.log('  ├── namespace-manifest.json  (codingbuddy:* command mapping)');
+    console.log('  └── README.md                (plugin documentation)');
     console.log('\nNote: Agents, commands, and skills are provided by MCP server');
     console.log('      from packages/rules/.ai-rules/ (single source of truth)');
   } else {

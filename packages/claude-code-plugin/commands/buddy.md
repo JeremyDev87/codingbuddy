@@ -101,12 +101,12 @@ Based on the project state, suggest 2-3 concrete next actions:
 ```
 ## ⚡ Quick Actions
 
-- `/plan` — Start planning a new task
-- `/act` — Execute current plan
-- `/eval` — Evaluate recent implementation
-- `/auto` — Autonomous development cycle
-- `/checklist [domain]` — Generate quality checklist
-- `/buddy` — Show this status again
+- `/codingbuddy:plan` — Start planning a new task
+- `/codingbuddy:act` — Execute current plan
+- `/codingbuddy:eval` — Evaluate recent implementation
+- `/codingbuddy:auto` — Autonomous development cycle
+- `/codingbuddy:checklist [domain]` — Generate quality checklist
+- `/codingbuddy:buddy` — Show this status again
 ```
 
 ## MCP Integration
