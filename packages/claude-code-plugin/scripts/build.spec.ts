@@ -254,4 +254,18 @@ describe('packaging integration', () => {
     expect(content).toContain('/codingbuddy:act');
     expect(content).toContain('/codingbuddy:buddy');
   });
+
+  it('package.json files array includes namespace-manifest.json', () => {
+    const pkgPath = path.join(pluginRoot, 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    expect(pkg.files).toContain('namespace-manifest.json');
+  });
+
+  it('namespace-manifest.json is present after build', () => {
+    const manifestPath = path.join(pluginRoot, 'namespace-manifest.json');
+    expect(fs.existsSync(manifestPath)).toBe(true);
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    expect(manifest.pluginName).toBe(PLUGIN_NAMESPACE);
+    expect(manifest.commands.length).toBeGreaterThanOrEqual(6);
+  });
 });

@@ -29,6 +29,7 @@
     ".claude-plugin",
     ".mcp.json",
     "README.md",
+    "namespace-manifest.json",
     "scripts/postinstall.js",
     "hooks/",
     "commands/"
