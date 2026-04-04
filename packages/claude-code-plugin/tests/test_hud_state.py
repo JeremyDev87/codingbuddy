@@ -1,4 +1,4 @@
-"""Tests for HUD state management module (#1087)."""
+"""Tests for HUD state management module (#1087, #1326)."""
 import json
 import os
 import sys
@@ -12,7 +12,7 @@ _lib_dir = os.path.join(os.path.dirname(_tests_dir), "hooks", "lib")
 if _lib_dir not in sys.path:
     sys.path.insert(0, _lib_dir)
 
-from hud_state import init_hud_state, read_hud_state, update_hud_state
+from hud_state import _EXTENDED_DEFAULTS, init_hud_state, read_hud_state, update_hud_state
 
 
 class TestReadHudState:
@@ -84,6 +84,144 @@ class TestUpdateHudState:
         path = str(tmp_path / "nonexistent.json")
         # Should not raise
         update_hud_state(state_file=path, currentMode="PLAN")
+
+
+class TestExtendedSchemaDefaults:
+    """Tests for extended HUD schema fields (#1326)."""
+
+    def test_init_includes_extended_fields(self, tmp_path):
+        path = str(tmp_path / "hud-state.json")
+        init_hud_state("s1", "5.3.0", state_file=path)
+        data = read_hud_state(path)
+
+        assert data["phase"] == "ready"
+        assert data["focus"] is None
+        assert data["executionStrategy"] is None
+        assert data["councilStatus"] is None
+        assert data["blockerCount"] == 0
+        assert data["lastHandoff"] is None
+
+    def test_update_extended_fields(self, tmp_path):
+        path = str(tmp_path / "hud-state.json")
+        init_hud_state("s1", "5.3.0", state_file=path)
+
+        update_hud_state(
+            state_file=path,
+            phase="planning",
+            focus="auth-feature",
+            executionStrategy="subagent",
+            blockerCount=2,
+        )
+        data = read_hud_state(path)
+
+        assert data["phase"] == "planning"
+        assert data["focus"] == "auth-feature"
+        assert data["executionStrategy"] == "subagent"
+        assert data["blockerCount"] == 2
+        # Unchanged fields preserved
+        assert data["councilStatus"] is None
+        assert data["lastHandoff"] is None
+
+    def test_partial_update_preserves_other_extended_fields(self, tmp_path):
+        path = str(tmp_path / "hud-state.json")
+        init_hud_state("s1", "5.3.0", state_file=path)
+
+        update_hud_state(state_file=path, phase="acting", councilStatus="quorum")
+        update_hud_state(state_file=path, blockerCount=1)
+
+        data = read_hud_state(path)
+        assert data["phase"] == "acting"
+        assert data["councilStatus"] == "quorum"
+        assert data["blockerCount"] == 1
+
+
+class TestBackwardCompat:
+    """Backward compatibility with older state files missing extended keys (#1326)."""
+
+    def test_read_old_state_without_fill(self, tmp_path):
+        """Reading an old-format file without fill_defaults returns raw data."""
+        path = str(tmp_path / "old.json")
+        old_data = {
+            "sessionId": "old-1",
+            "version": "5.1.0",
+            "currentMode": "PLAN",
+            "activeAgent": None,
+            "updatedAt": "2026-01-01T00:00:00+00:00",
+            "sessionStartTimestamp": "2026-01-01T00:00:00+00:00",
+        }
+        with open(path, "w") as f:
+            json.dump(old_data, f)
+
+        result = read_hud_state(path)
+        assert "phase" not in result
+        assert "blockerCount" not in result
+
+    def test_read_old_state_with_fill_defaults(self, tmp_path):
+        """fill_defaults=True back-fills missing extended keys."""
+        path = str(tmp_path / "old.json")
+        old_data = {
+            "sessionId": "old-1",
+            "version": "5.1.0",
+            "currentMode": "PLAN",
+            "activeAgent": None,
+            "updatedAt": "2026-01-01T00:00:00+00:00",
+            "sessionStartTimestamp": "2026-01-01T00:00:00+00:00",
+        }
+        with open(path, "w") as f:
+            json.dump(old_data, f)
+
+        result = read_hud_state(path, fill_defaults=True)
+        assert result["phase"] == "ready"
+        assert result["blockerCount"] == 0
+        assert result["focus"] is None
+        assert result["executionStrategy"] is None
+        assert result["councilStatus"] is None
+        assert result["lastHandoff"] is None
+        # Original fields untouched
+        assert result["sessionId"] == "old-1"
+        assert result["currentMode"] == "PLAN"
+
+    def test_fill_defaults_does_not_overwrite_existing(self, tmp_path):
+        """fill_defaults must not overwrite keys already present."""
+        path = str(tmp_path / "partial.json")
+        partial = {
+            "sessionId": "p-1",
+            "phase": "acting",
+            "blockerCount": 3,
+        }
+        with open(path, "w") as f:
+            json.dump(partial, f)
+
+        result = read_hud_state(path, fill_defaults=True)
+        assert result["phase"] == "acting"
+        assert result["blockerCount"] == 3
+        assert result["focus"] is None  # filled
+
+    def test_fill_defaults_on_empty_returns_empty(self, tmp_path):
+        """fill_defaults on missing file still returns empty dict."""
+        path = str(tmp_path / "nope.json")
+        result = read_hud_state(path, fill_defaults=True)
+        assert result == {}
+
+    def test_update_old_state_adds_new_field(self, tmp_path):
+        """Updating an old-format state file can add new fields."""
+        path = str(tmp_path / "old.json")
+        old_data = {
+            "sessionId": "old-1",
+            "version": "5.1.0",
+            "currentMode": None,
+            "activeAgent": None,
+            "updatedAt": "2026-01-01T00:00:00+00:00",
+            "sessionStartTimestamp": "2026-01-01T00:00:00+00:00",
+        }
+        with open(path, "w") as f:
+            json.dump(old_data, f)
+
+        update_hud_state(state_file=path, phase="evaluating", blockerCount=1)
+        result = read_hud_state(path)
+        assert result["phase"] == "evaluating"
+        assert result["blockerCount"] == 1
+        assert result["sessionId"] == "old-1"
 
 
 class TestRoundtrip:
