@@ -4,7 +4,7 @@ import type { RulesService } from '../rules/rules.service';
 import type { CustomService } from '../custom';
 import type { ConfigService } from '../config/config.service';
 import type { AgentProfile } from '../rules/rules.types';
-import type { AgentContext, DispatchResult, ExecutionPlan } from './agent.types';
+import type { AgentContext, DispatchResult } from './agent.types';
 
 describe('AgentService', () => {
   let service: AgentService;
