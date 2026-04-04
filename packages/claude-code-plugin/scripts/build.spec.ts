@@ -187,6 +187,39 @@ describe('build script orchestration', () => {
 });
 
 // ============================================================================
+// README Messaging — standalone-aware MCP messaging
+// ============================================================================
+describe('README messaging', () => {
+  const pluginRoot = path.resolve(__dirname, '..');
+  const readmePath = path.join(pluginRoot, 'README.md');
+
+  let readmeContent: string;
+
+  beforeAll(() => {
+    readmeContent = fs.readFileSync(readmePath, 'utf8');
+  });
+
+  it('marks MCP Integration as Recommended, not Required', () => {
+    expect(readmeContent).toContain('## MCP Integration (Recommended)');
+    expect(readmeContent).not.toContain('## MCP Integration (Required)');
+  });
+
+  it('does not claim MCP is required for full functionality', () => {
+    expect(readmeContent).not.toContain('requires the CodingBuddy MCP server');
+  });
+
+  it('includes the Feature Availability table', () => {
+    expect(readmeContent).toContain('## Feature Availability');
+    expect(readmeContent).toContain('| Feature | Standalone | With MCP |');
+  });
+
+  it('shows standalone features in the availability table', () => {
+    expect(readmeContent).toContain('PLAN/ACT/EVAL/AUTO keyword triggers');
+    expect(readmeContent).toContain('Slash commands (codingbuddy:*)');
+  });
+});
+
+// ============================================================================
 // Packaging Integration — namespaced command assets
 // ============================================================================
 describe('packaging integration', () => {

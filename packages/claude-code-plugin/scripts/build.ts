@@ -112,18 +112,32 @@ Reusable workflows for consistent development:
 - Refactoring
 - And more...
 
-## MCP Integration (Required)
+## Feature Availability
 
-This plugin requires the CodingBuddy MCP server for full functionality:
+The plugin works standalone with core features. MCP integration unlocks the full experience:
+
+| Feature | Standalone | With MCP |
+|---------|:----------:|:--------:|
+| PLAN/ACT/EVAL/AUTO keyword triggers | ✅ | ✅ |
+| Specialist agent prompts | ✅ | ✅ |
+| Slash commands (codingbuddy:*) | ✅ | ✅ |
+| Dynamic checklists | — | ✅ |
+| Context persistence across modes | — | ✅ |
+| Rule search & impact reports | — | ✅ |
+| Session briefings & recovery | — | ✅ |
+
+## MCP Integration (Recommended)
+
+Install the CodingBuddy MCP server to unlock the full feature set:
 
 \`\`\`bash
 npm install -g codingbuddy
 \`\`\`
 
 The MCP server provides:
-- Agents, commands, and skills from \`packages/rules/.ai-rules/\` (single source of truth)
-- Checklists and specialist agent recommendations
+- Dynamic checklists and specialist agent recommendations
 - Context management for PLAN/ACT/EVAL workflow
+- Rule search, impact reports, and session recovery
 
 ## Architecture
 
