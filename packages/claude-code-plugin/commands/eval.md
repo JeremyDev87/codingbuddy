@@ -21,6 +21,11 @@ With the CodingBuddy MCP server connected, you additionally get:
 - Cross-session context persistence
 
 ## Activation
+
+Invoke via `/codingbuddy:eval` (namespaced) or the `EVAL` keyword.
+
+> Legacy bare `/eval` is deprecated. See [Migration Guide](../docs/migration-guide.md).
+
 This command activates EVAL mode for the CodingBuddy workflow.
 
 ## Instructions

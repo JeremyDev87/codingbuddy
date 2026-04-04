@@ -21,6 +21,11 @@ With the CodingBuddy MCP server connected, you additionally get:
 - Cross-session context persistence
 
 ## Activation
+
+Invoke via `/codingbuddy:act` (namespaced) or the `ACT` keyword.
+
+> Legacy bare `/act` is deprecated. See [Migration Guide](../docs/migration-guide.md).
+
 This command activates ACT mode for the CodingBuddy workflow.
 
 ## Instructions

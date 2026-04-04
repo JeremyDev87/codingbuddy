@@ -21,6 +21,11 @@ With the CodingBuddy MCP server connected, you additionally get:
 - Cross-session context persistence
 
 ## Activation
+
+Invoke via `/codingbuddy:auto` (namespaced) or the `AUTO` keyword.
+
+> Legacy bare `/auto` is deprecated. See [Migration Guide](../docs/migration-guide.md).
+
 This command activates AUTO mode for the CodingBuddy workflow.
 
 ## Instructions

@@ -17,13 +17,15 @@ Generate contextual checklists based on file patterns and domains for comprehens
 ## Usage
 
 ```
-/checklist [files] [domains]
+/codingbuddy:checklist [files] [domains]
 ```
 
 Examples:
-- `/checklist src/auth/*.ts security`
-- `/checklist src/components/*.tsx accessibility performance`
-- `/checklist` (auto-detect from recent changes)
+- `/codingbuddy:checklist src/auth/*.ts security`
+- `/codingbuddy:checklist src/components/*.tsx accessibility performance`
+- `/codingbuddy:checklist` (auto-detect from recent changes)
+
+> Legacy bare `/checklist` is deprecated. See [Migration Guide](../docs/migration-guide.md).
 
 ## MCP Integration
 

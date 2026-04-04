@@ -21,6 +21,11 @@ With the CodingBuddy MCP server connected, you additionally get:
 - Cross-session context persistence
 
 ## Activation
+
+Invoke via `/codingbuddy:plan` (namespaced) or the `PLAN` keyword.
+
+> Legacy bare `/plan` is deprecated. See [Migration Guide](../docs/migration-guide.md).
+
 This command activates PLAN mode for the CodingBuddy workflow.
 
 ## Instructions
