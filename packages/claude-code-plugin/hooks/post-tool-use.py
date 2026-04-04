@@ -56,6 +56,18 @@ def handle_post_tool_use(data: dict):
     except Exception:
         pass  # Never block tool execution
 
+    # Update HUD state with post-action information (#1324)
+    try:
+        from hud_helpers import on_tool_end
+
+        on_tool_end(
+            data.get("tool_name", ""),
+            data.get("tool_input", {}),
+            str(data.get("tool_output", "")),
+        )
+    except Exception:
+        pass  # Never block tool execution
+
     return None
 
 

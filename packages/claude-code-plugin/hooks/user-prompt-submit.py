@@ -91,14 +91,14 @@ def main():
                     "call it for enhanced features."
                 )
 
-            # Update HUD state with detected mode (#1090)
+            # Update HUD state with detected mode and reset workflow fields (#1090, #1324)
             try:
-                from hud_state import update_hud_state
+                from hud_helpers import on_mode_entry
                 state_file = os.environ.get("CODINGBUDDY_HUD_STATE_FILE")
                 if state_file:
-                    update_hud_state(state_file=state_file, currentMode=detected_mode)
+                    on_mode_entry(detected_mode, state_file=state_file)
                 else:
-                    update_hud_state(currentMode=detected_mode)
+                    on_mode_entry(detected_mode)
             except Exception:
                 pass
 

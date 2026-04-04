@@ -773,6 +773,7 @@ def main():
             pass  # Never block session start
 
         # Step 4.5: Initialize HUD state for statusLine (#1089)
+        _pending_ctx_for_hud = None
         try:
             _ensure_lib_path()
 
@@ -781,6 +782,17 @@ def main():
             from session_utils import get_session_id as _get_sid_hud
             hud_version = _get_plugin_version()
             init_hud_state(_get_sid_hud(), hud_version)
+        except Exception:
+            pass  # Never block session start
+
+        # Step 4.5b: Enrich HUD baseline with pending context (#1324)
+        try:
+            cwd_hud = os.environ.get("CLAUDE_PROJECT_DIR", str(Path.cwd()))
+            _pending_ctx_for_hud = _read_pending_context(cwd_hud)
+            if _pending_ctx_for_hud:
+                from hud_helpers import init_baseline
+
+                init_baseline(_pending_ctx_for_hud)
         except Exception:
             pass  # Never block session start
 

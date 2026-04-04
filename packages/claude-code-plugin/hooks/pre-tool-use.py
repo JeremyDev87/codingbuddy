@@ -237,6 +237,14 @@ def _handle(data: dict) -> Optional[dict]:
                 if checklist_warning:
                     contexts.append(checklist_warning)
 
+    # Update HUD state with active agent, focus, strategy (#1324)
+    try:
+        from hud_helpers import on_tool_start
+
+        on_tool_start(tool_name, data.get("tool_input", {}))
+    except Exception:
+        pass
+
     # Build response — include statusMessage and/or additionalContext
     if not status_msg and not contexts:
         return None

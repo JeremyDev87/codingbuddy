@@ -117,6 +117,14 @@ def handle_stop(data: dict):
         except Exception:
             pass  # Never block session stop
 
+        # Clear active HUD state (#1324)
+        try:
+            from hud_helpers import on_session_stop
+
+            on_session_stop()
+        except Exception:
+            pass  # Never block session stop
+
         # End session in history database (#823)
         try:
             from history_db import HistoryDB
