@@ -7,7 +7,7 @@ Reads session data from stdin JSON, outputs formatted status to stdout.
 Telemetry fallback order per field:
   cost     → stdin cost.total_cost_usd  > estimate_cost()
   duration → stdin cost.total_duration_ms > hud-state sessionStartTimestamp
-  agent    → stdin agent.name > CODINGBUDDY_ACTIVE_AGENT env
+  agent    → stdin agent.name > hud_state.activeAgent > CODINGBUDDY_ACTIVE_AGENT env
   model    → stdin model.display_name > model.id
 """
 import json
@@ -220,10 +220,13 @@ def resolve_duration(stdin_data: dict, hud_state: dict) -> str:
     return "0m"
 
 
-def resolve_agent(stdin_data: dict, env_agent: str = "") -> str:
-    """Resolve agent: stdin > env var."""
+def resolve_agent(stdin_data: dict, hud_state=None, env_agent: str = "") -> str:
+    """Resolve agent: stdin > hud_state.activeAgent > env var."""
     stdin_agent = (stdin_data.get("agent") or {}).get("name", "")
-    return stdin_agent or env_agent
+    if stdin_agent:
+        return stdin_agent
+    hud_agent = (hud_state or {}).get("activeAgent", "")
+    return hud_agent or env_agent
 
 
 def resolve_model_label(stdin_data: dict) -> tuple:
@@ -336,7 +339,7 @@ def format_status_line(
     Fallback order per field:
       cost     → stdin cost.total_cost_usd  > estimate_cost()
       duration → stdin cost.total_duration_ms > hud-state sessionStartTimestamp
-      agent    → stdin agent.name > active_agent param
+      agent    → stdin agent.name > hud_state.activeAgent > active_agent param
       model    → stdin model.display_name > model.id
     """
     version = hud_state.get("version", "")
@@ -351,7 +354,7 @@ def format_status_line(
     cost, is_exact = resolve_cost(stdin_data, model_id, ctx_window)
     duration = resolve_duration(stdin_data, hud_state)
     cache = compute_cache_hit_rate(ctx_window)
-    agent = resolve_agent(stdin_data, active_agent)
+    agent = resolve_agent(stdin_data, hud_state, active_agent)
 
     cost_prefix = "$" if is_exact else "~$"
 

@@ -229,13 +229,34 @@ class TestResolveDuration:
 class TestResolveAgent:
     def test_stdin_agent_preferred(self):
         stdin = {"agent": {"name": "security-reviewer"}}
-        assert hud.resolve_agent(stdin, "old-env-agent") == "security-reviewer"
+        assert hud.resolve_agent(stdin, env_agent="old-env-agent") == "security-reviewer"
+
+    def test_stdin_overrides_hud_state(self):
+        stdin = {"agent": {"name": "security-reviewer"}}
+        state = {"activeAgent": "plan-mode"}
+        assert hud.resolve_agent(stdin, state, "env-agent") == "security-reviewer"
+
+    def test_hud_state_fallback(self):
+        assert hud.resolve_agent({}, {"activeAgent": "security-specialist"}) == "security-specialist"
+
+    def test_hud_state_overrides_env(self):
+        state = {"activeAgent": "security-specialist"}
+        assert hud.resolve_agent({}, state, "env-agent") == "security-specialist"
 
     def test_fallback_to_env(self):
-        assert hud.resolve_agent({}, "env-agent") == "env-agent"
+        assert hud.resolve_agent({}, env_agent="env-agent") == "env-agent"
 
-    def test_both_empty(self):
-        assert hud.resolve_agent({}, "") == ""
+    def test_env_when_hud_state_empty(self):
+        assert hud.resolve_agent({}, {"activeAgent": ""}, "env-agent") == "env-agent"
+
+    def test_env_when_hud_state_none(self):
+        assert hud.resolve_agent({}, None, "env-agent") == "env-agent"
+
+    def test_all_empty(self):
+        assert hud.resolve_agent({}, {}, "") == ""
+
+    def test_both_empty_no_hud(self):
+        assert hud.resolve_agent({}, None, "") == ""
 
 
 class TestResolveModelLabel:
@@ -358,6 +379,32 @@ class TestFormatStatusLine:
         result = hud.format_status_line(stdin, {}, active_agent="backend-developer")
         assert "[\u2605 fron]" in result   # [★ fron]
         assert "\u25d0" not in result      # ◐ (backend glyph) absent
+
+    def test_hud_state_agent_fallback_badge(self):
+        result = hud.format_status_line(
+            {},
+            {"activeAgent": "security-specialist", "focus": "auth", "blockerCount": 1},
+        )
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "[\u25ee secu]" in lines[1]  # [◮ secu]
+        assert "[auth]" in lines[1]
+        assert "[\u26a01]" in lines[1]  # [⚠1]
+
+    def test_stdin_agent_overrides_hud_state(self):
+        stdin = {"agent": {"name": "frontend-developer"}}
+        state = {"activeAgent": "security-specialist"}
+        result = hud.format_status_line(stdin, state)
+        assert "[\u2605 fron]" in result   # [★ fron]
+        assert "\u25ee" not in result      # ◮ (security glyph) absent
+
+    def test_hud_state_agent_overrides_env(self):
+        state = {"activeAgent": "security-specialist"}
+        result = hud.format_status_line({}, state, active_agent="backend-developer")
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "[\u25ee secu]" in lines[1]  # [◮ secu] from hud_state
+        assert "\u25d0" not in result        # ◐ (backend glyph) absent
 
     def test_no_agent_single_line(self):
         result = hud.format_status_line({}, {"version": "5.1.1"})
