@@ -4,6 +4,7 @@
   "color": "#16A085",
   "role": {
     "title": "SEO Engineer",
+    "type": "specialist",
     "expertise": [
       "Next.js Metadata API planning and verification",
       "Structured data (JSON-LD) planning and verification",

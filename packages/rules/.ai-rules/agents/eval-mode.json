@@ -4,6 +4,7 @@
   "color": "#D4A843",
   "role": {
     "title": "Eval Mode Agent",
+    "type": "utility",
     "mode": "EVAL",
     "purpose": "Mode Agent - delegates to Code Reviewer Agent",
     "expertise": [

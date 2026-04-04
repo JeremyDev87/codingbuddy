@@ -4,6 +4,7 @@
   "color": "#00BCD4",
   "role": {
     "title": "Integration Engineer",
+    "type": "specialist",
     "expertise": [
       "API Integration Patterns (retries, timeouts, circuit breakers)",
       "Webhook Security (HMAC, JWT signature verification)",

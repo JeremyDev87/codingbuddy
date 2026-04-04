@@ -4,6 +4,7 @@
   "color": "#795548",
   "role": {
     "title": "Observability Engineer",
+    "type": "specialist",
     "expertise": [
       "OpenTelemetry instrumentation (traces, metrics, logs)",
       "Distributed tracing (Jaeger, Zipkin, Tempo, Grafana Tempo)",

@@ -4,6 +4,7 @@
   "color": "#8BC34A",
   "role": {
     "title": "Code Quality Engineer",
+    "type": "specialist",
     "expertise": [
       "SOLID principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion)",
       "DRY (Don't Repeat Yourself) principle",

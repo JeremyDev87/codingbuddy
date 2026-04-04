@@ -4,6 +4,7 @@
   "color": "#C0392B",
   "role": {
     "title": "Security Engineer",
+    "type": "specialist",
     "expertise": [
       "OAuth 2.0 / OIDC protocols",
       "JWT token management and security",

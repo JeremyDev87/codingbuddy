@@ -4,6 +4,7 @@
   "color": "#82B366",
   "role": {
     "title": "Act Mode Agent",
+    "type": "utility",
     "mode": "ACT",
     "purpose": "Mode Agent - delegates to Primary Developer Agent",
     "expertise": [

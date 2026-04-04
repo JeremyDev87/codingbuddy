@@ -4,6 +4,7 @@
   "color": "#2C3E80",
   "role": {
     "title": "Architecture Engineer",
+    "type": "specialist",
     "expertise": [
       "Layer placement planning and verification",
       "Dependency direction design and verification",

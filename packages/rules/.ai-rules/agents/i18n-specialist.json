@@ -4,6 +4,7 @@
   "color": "#009688",
   "role": {
     "title": "Internationalization Engineer",
+    "type": "specialist",
     "expertise": [
       "i18n library setup and configuration",
       "Translation key structure design",

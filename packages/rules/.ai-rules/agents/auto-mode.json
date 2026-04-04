@@ -4,6 +4,7 @@
   "color": "#B85450",
   "role": {
     "title": "Auto Mode Agent",
+    "type": "utility",
     "mode": "AUTO",
     "purpose": "Mode Agent - autonomously cycles through PLAN → ACT → EVAL, delegates to Primary Developer Agent",
     "expertise": [

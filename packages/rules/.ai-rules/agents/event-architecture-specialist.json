@@ -4,6 +4,7 @@
   "color": "#FF5722",
   "role": {
     "title": "Event Architecture Engineer",
+    "type": "specialist",
     "expertise": [
       "Message Queue Selection and Configuration (RabbitMQ, Kafka, SQS, Azure Service Bus)",
       "Event Sourcing and Event Store Design",

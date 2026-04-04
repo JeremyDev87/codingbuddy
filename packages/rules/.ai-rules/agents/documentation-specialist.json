@@ -4,6 +4,7 @@
   "color": "#607D8B",
   "role": {
     "title": "Documentation Engineer",
+    "type": "specialist",
     "expertise": [
       "Documentation planning and quality assessment",
       "Code comments planning and verification",

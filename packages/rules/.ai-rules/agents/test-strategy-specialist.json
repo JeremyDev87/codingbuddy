@@ -4,6 +4,7 @@
   "color": "#F1C40F",
   "role": {
     "title": "Test Strategy Engineer",
+    "type": "specialist",
     "expertise": [
       "TDD vs Test-After decision making and verification",
       "Test coverage planning and analysis (90%+ goal)",

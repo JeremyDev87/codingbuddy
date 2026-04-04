@@ -4,6 +4,7 @@
   "color": "#E67E22",
   "role": {
     "title": "Performance Engineer",
+    "type": "specialist",
     "expertise": [
       "Bundle size optimization planning and verification",
       "Code splitting strategy planning and verification",

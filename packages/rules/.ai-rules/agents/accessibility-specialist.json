@@ -4,6 +4,7 @@
   "color": "#27AE60",
   "role": {
     "title": "Accessibility Engineer",
+    "type": "specialist",
     "expertise": [
       "WCAG 2.1 AA compliance planning and verification",
       "ARIA attributes planning and verification",
