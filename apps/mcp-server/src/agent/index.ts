@@ -2,6 +2,8 @@ export * from './agent.module';
 export * from './agent.service';
 export * from './agent-stack.service';
 export * from './council-preset.service';
+export * from './teams-capability.service';
+export * from './teams-capability.types';
 export * from './agent.types';
 export * from './agent-prompt.builder';
 export * from './agent-stack.schema';

@@ -209,6 +209,14 @@ export const CodingBuddyConfigSchema = z.object({
   // Context document limits (DoS prevention)
   context: ContextConfigSchema.optional(),
 
+  // Experimental feature flags
+  experimental: z
+    .object({
+      /** Enable Teams coordination strategy for nested agent dispatch. Default: false */
+      teamsCoordination: z.boolean().default(false).optional(),
+    })
+    .optional(),
+
   // Upstream Repository Mapping (for cross-repo issue creation)
   upstreamRepos: z.record(z.string(), z.string()).optional(),
 
