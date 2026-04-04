@@ -16,7 +16,12 @@ import { describe, it, expect, beforeAll } from 'vitest';
 // Import utilities that are testable in isolation
 import { getErrorMessage, type BuildMode } from '../src/utils';
 import { buildNamespaceManifest, type NamespaceManifest } from './build';
-import { PLUGIN_NAMESPACE, NAMESPACE_SEPARATOR, LEGACY_ALLOWLIST } from './validate-commands';
+import {
+  PLUGIN_NAMESPACE,
+  NAMESPACE_SEPARATOR,
+  KNOWN_BARE_COMMANDS,
+  validateCommands,
+} from './validate-commands';
 
 describe('build script orchestration', () => {
   // ============================================================================
@@ -157,7 +162,7 @@ describe('build script orchestration', () => {
 
     it('includes all current command files', () => {
       const bareNames = manifest.commands.map(c => c.bare);
-      for (const cmd of LEGACY_ALLOWLIST) {
+      for (const cmd of KNOWN_BARE_COMMANDS) {
         expect(bareNames).toContain(cmd);
       }
     });
@@ -267,5 +272,109 @@ describe('packaging integration', () => {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     expect(manifest.pluginName).toBe(PLUGIN_NAMESPACE);
     expect(manifest.commands.length).toBeGreaterThanOrEqual(6);
+  });
+});
+
+// ============================================================================
+// End-to-End Namespace Consumption — proves the runtime path is consistent
+// ============================================================================
+describe('end-to-end namespace consumption', () => {
+  const pluginRoot = path.resolve(__dirname, '..');
+  const commandsDir = path.join(pluginRoot, 'commands');
+  const manifestPath = path.join(pluginRoot, 'namespace-manifest.json');
+  const pluginJsonPath = path.join(pluginRoot, '.claude-plugin', 'plugin.json');
+  const pkgPath = path.join(pluginRoot, 'package.json');
+
+  /**
+   * Claude Code resolves plugin commands as `{plugin.json.name}:{command-filename}`.
+   * This test suite proves the full chain:
+   *   plugin.json.name → commands/*.md filenames → namespace-manifest.json → validator
+   * are all consistent and produce the expected `codingbuddy:*` namespace.
+   */
+
+  // --- Artifact existence ---
+
+  it('all required artifacts exist on disk', () => {
+    expect(fs.existsSync(pluginJsonPath)).toBe(true);
+    expect(fs.existsSync(commandsDir)).toBe(true);
+    expect(fs.existsSync(manifestPath)).toBe(true);
+    expect(fs.existsSync(pkgPath)).toBe(true);
+  });
+
+  // --- plugin.json → namespace ---
+
+  it('plugin.json name establishes the namespace prefix', () => {
+    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+    expect(pluginJson.name).toBe(PLUGIN_NAMESPACE);
+    // Claude Code resolves: /{plugin.name}:{command}
+    expect(`${pluginJson.name}${NAMESPACE_SEPARATOR}`).toBe(`${PLUGIN_NAMESPACE}:`);
+  });
+
+  // --- commands/ ↔ manifest bidirectional consistency ---
+
+  it('every commands/*.md file has a corresponding manifest entry', () => {
+    const files: string[] = fs.readdirSync(commandsDir).filter((f: string) => f.endsWith('.md'));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const manifestBareNames: string[] = manifest.commands.map((c: { bare: string }) => c.bare);
+
+    for (const file of files) {
+      const bare = path.basename(file, '.md');
+      expect(manifestBareNames).toContain(bare);
+    }
+  });
+
+  it('every manifest entry has a corresponding commands/*.md file', () => {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    for (const cmd of manifest.commands) {
+      const filePath = path.join(pluginRoot, cmd.file);
+      expect(fs.existsSync(filePath)).toBe(true);
+    }
+  });
+
+  it('manifest count matches commands/ file count exactly', () => {
+    const files: string[] = fs.readdirSync(commandsDir).filter((f: string) => f.endsWith('.md'));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    expect(manifest.commands.length).toBe(files.length);
+  });
+
+  // --- Namespaced form correctness ---
+
+  it('manifest namespaced fields match plugin.json name + bare name', () => {
+    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+    for (const cmd of manifest.commands) {
+      const expected = `${pluginJson.name}${NAMESPACE_SEPARATOR}${cmd.bare}`;
+      expect(cmd.namespaced).toBe(expected);
+    }
+  });
+
+  // --- Validator agreement ---
+
+  it('validator passes for all commands in the manifest', () => {
+    const result = validateCommands(commandsDir);
+    expect(result.valid).toBe(true);
+    expect(result.collisions).toHaveLength(0);
+    expect(result.namespaceViolations).toHaveLength(0);
+  });
+
+  // --- Package distribution ---
+
+  it('package.json files array ships all namespace artifacts', () => {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    expect(pkg.files).toContain('namespace-manifest.json');
+    expect(pkg.files).toContain('commands/');
+    expect(pkg.files).toContain('.claude-plugin');
+  });
+
+  // --- Cross-artifact namespace coherence ---
+
+  it('plugin.json name, manifest pluginName, and PLUGIN_NAMESPACE constant all agree', () => {
+    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+    expect(pluginJson.name).toBe(PLUGIN_NAMESPACE);
+    expect(manifest.pluginName).toBe(PLUGIN_NAMESPACE);
+    expect(manifest.namespace).toBe(`${PLUGIN_NAMESPACE}${NAMESPACE_SEPARATOR}`);
   });
 });

@@ -84,15 +84,20 @@ export const RESERVED_COMMANDS: ReadonlySet<string> = new Set([
 ]);
 
 // ============================================================================
-// Legacy Allowlist
+// Known Bare Commands
 // ============================================================================
 
 /**
- * Known legacy bare commands that are intentionally kept without namespace prefix.
- * These existed before the codingbuddy:* namespace convention.
+ * Bare command filenames shipped in commands/.
+ *
+ * Claude Code resolves these as `{plugin.json.name}:{filename}` at runtime,
+ * so the files are stored without a namespace prefix.
  * New commands MUST use the codingbuddy:* namespace.
+ *
+ * @deprecated Use `KNOWN_BARE_COMMANDS`. The `LEGACY_ALLOWLIST` alias is
+ * retained only for backward compatibility with existing test imports.
  */
-export const LEGACY_ALLOWLIST: ReadonlySet<string> = new Set([
+export const KNOWN_BARE_COMMANDS: ReadonlySet<string> = new Set([
   'plan',
   'act',
   'eval',
@@ -100,6 +105,9 @@ export const LEGACY_ALLOWLIST: ReadonlySet<string> = new Set([
   'buddy',
   'checklist',
 ]);
+
+/** @deprecated Alias — prefer {@link KNOWN_BARE_COMMANDS}. */
+export const LEGACY_ALLOWLIST = KNOWN_BARE_COMMANDS;
 
 // ============================================================================
 // Plugin Namespace
@@ -182,7 +190,7 @@ export function isReservedCommand(command: string): boolean {
  *
  * Rules:
  * 1. No command may collide with a reserved Claude Code built-in
- * 2. Bare (non-namespaced) commands must be in the legacy allowlist
+ * 2. Bare (non-namespaced) filenames must be in KNOWN_BARE_COMMANDS
  * 3. New commands must use the codingbuddy:* namespace
  */
 export function validateCommands(commandsDir: string): ValidationResult {
@@ -205,8 +213,8 @@ export function validateCommands(commandsDir: string): ValidationResult {
         result.valid = false;
       }
 
-      // Check namespace compliance: bare commands must be in legacy allowlist
-      if (!isNamespaced(cmd) && !LEGACY_ALLOWLIST.has(cmd)) {
+      // Check namespace compliance: bare filenames must be in KNOWN_BARE_COMMANDS
+      if (!isNamespaced(cmd) && !KNOWN_BARE_COMMANDS.has(cmd)) {
         result.namespaceViolations.push(cmd);
         result.valid = false;
       }
@@ -233,7 +241,7 @@ function main(): void {
 
   console.log(`Commands found: ${result.commands.join(', ') || '(none)'}`);
   console.log(`Reserved denylist size: ${RESERVED_COMMANDS.size}`);
-  console.log(`Legacy allowlist: ${[...LEGACY_ALLOWLIST].join(', ')}`);
+  console.log(`Known bare commands: ${[...KNOWN_BARE_COMMANDS].join(', ')}`);
   console.log('');
 
   if (result.collisions.length > 0) {
@@ -248,7 +256,7 @@ function main(): void {
     console.error('❌ NAMESPACE VIOLATION:');
     for (const cmd of result.namespaceViolations) {
       console.error(
-        `   "${cmd}" is a bare command not in the legacy allowlist. Use "${PLUGIN_NAMESPACE}:${cmd}" instead.`,
+        `   "${cmd}" is not a known bare command. Use "${PLUGIN_NAMESPACE}:${cmd}" instead.`,
       );
     }
     console.error('');

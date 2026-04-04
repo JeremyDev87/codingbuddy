@@ -16,6 +16,7 @@ import * as path from 'path';
 
 import {
   RESERVED_COMMANDS,
+  KNOWN_BARE_COMMANDS,
   LEGACY_ALLOWLIST,
   extractCommandsFromDirectory,
   getBaseCommandName,
@@ -71,21 +72,25 @@ describe('reserved command denylist', () => {
 });
 
 // ============================================================================
-// Legacy Allowlist
+// Known Bare Commands
 // ============================================================================
 
-describe('legacy allowlist', () => {
-  it('contains current bare commands', () => {
+describe('known bare commands', () => {
+  it('contains current bare command filenames', () => {
     const expected = ['plan', 'act', 'eval', 'auto', 'buddy', 'checklist'];
     for (const cmd of expected) {
-      expect(LEGACY_ALLOWLIST.has(cmd)).toBe(true);
+      expect(KNOWN_BARE_COMMANDS.has(cmd)).toBe(true);
     }
   });
 
   it('does not overlap with reserved commands', () => {
-    for (const cmd of LEGACY_ALLOWLIST) {
+    for (const cmd of KNOWN_BARE_COMMANDS) {
       expect(RESERVED_COMMANDS.has(cmd)).toBe(false);
     }
+  });
+
+  it('LEGACY_ALLOWLIST alias points to the same set', () => {
+    expect(LEGACY_ALLOWLIST).toBe(KNOWN_BARE_COMMANDS);
   });
 });
 
@@ -218,7 +223,7 @@ describe('validateCommands', () => {
   });
 
   it('passes with current legacy commands', () => {
-    for (const cmd of LEGACY_ALLOWLIST) {
+    for (const cmd of KNOWN_BARE_COMMANDS) {
       fs.writeFileSync(path.join(tmpDir, `${cmd}.md`), `# ${cmd}`);
     }
 
@@ -236,7 +241,7 @@ describe('validateCommands', () => {
     expect(result.collisions).toContain('help');
   });
 
-  it('fails when a bare command is not in legacy allowlist', () => {
+  it('fails when a bare command is not in known bare commands', () => {
     fs.writeFileSync(path.join(tmpDir, 'my-new-command.md'), '# New');
 
     const result = validateCommands(tmpDir);
