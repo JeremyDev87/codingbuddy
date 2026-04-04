@@ -5,7 +5,9 @@ The feature is gated behind ``CODINGBUDDY_TINY_ACTORS`` env var (default: off).
 """
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 from typing import Optional
 
 from tiny_actor_card import create_actor_card, TinyActorCard
@@ -24,6 +26,41 @@ _TRUTHY = {"1", "true", "yes"}
 def is_tiny_actors_enabled() -> bool:
     """Return ``True`` when the Tiny Actor preview is explicitly enabled."""
     return os.environ.get(_FLAG_ENV, "").lower() in _TRUTHY
+
+
+# ---------------------------------------------------------------------------
+# Agent visual.eye loader
+# ---------------------------------------------------------------------------
+
+# Resolve agents directory relative to this file:
+# hooks/lib/ -> ../../ -> packages/claude-code-plugin/ -> ../../ -> repo root
+# -> packages/rules/.ai-rules/agents/
+_AGENTS_DIR: Path = (
+    Path(__file__).resolve().parent.parent.parent.parent.parent
+    / "packages"
+    / "rules"
+    / ".ai-rules"
+    / "agents"
+)
+
+
+def _load_agent_eye(agent_id: str) -> Optional[str]:
+    """Load ``visual.eye`` glyph from the agent JSON definition.
+
+    Returns ``None`` when the file doesn't exist, is malformed, or has no
+    ``visual.eye`` field — the caller should fall back to the default glyph.
+    """
+    try:
+        agent_file = _AGENTS_DIR / f"{agent_id}.json"
+        if not agent_file.is_file():
+            return None
+        data = json.loads(agent_file.read_text(encoding="utf-8"))
+        eye = data.get("visual", {}).get("eye")
+        if isinstance(eye, str) and eye:
+            return eye
+        return None
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -68,6 +105,7 @@ def render_actor_preview(
             agent_id=preset["primary"],
             label=_agent_id_to_label(preset["primary"]),
             mood="proposing",
+            eye_glyph=_load_agent_eye(preset["primary"]),
         )
         cards.append(primary)
 
@@ -77,6 +115,7 @@ def render_actor_preview(
                 agent_id=spec_id,
                 label=_agent_id_to_label(spec_id),
                 mood="reviewing",
+                eye_glyph=_load_agent_eye(spec_id),
             )
             cards.append(card)
 
