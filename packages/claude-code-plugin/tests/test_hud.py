@@ -335,31 +335,67 @@ class TestFormatStatusLine:
         result = hud.format_status_line({}, {})
         assert "\u25d5\u203f\u25d5" in result  # always has buddy face
 
-    def test_agent_from_stdin(self):
-        stdin = {"agent": {"name": "security-reviewer"}}
+    def test_agent_from_stdin_badge(self):
+        stdin = {"agent": {"name": "security-specialist"}}
         result = hud.format_status_line(stdin, {})
         lines = result.strip().split("\n")
         assert len(lines) == 2
-        assert "security-reviewer" in lines[1]
+        assert "[\u25ee secu]" in lines[1]  # [◮ secu]
+        assert "[\u2713]" in lines[1]  # [✓]
 
-    def test_agent_line_env_fallback(self):
+    def test_agent_line_env_fallback_badge(self):
         result = hud.format_status_line(
             {},
             {"version": "5.1.1", "currentMode": "ACT"},
-            active_agent="architect",
+            active_agent="architecture-specialist",
         )
         lines = result.strip().split("\n")
         assert len(lines) == 2
-        assert "architect" in lines[1]
+        assert "[\u2b21 arch]" in lines[1]  # [⬡ arch]
 
-    def test_stdin_agent_overrides_env(self):
-        stdin = {"agent": {"name": "from-stdin"}}
-        result = hud.format_status_line(stdin, {}, active_agent="from-env")
-        assert "from-stdin" in result
-        assert "from-env" not in result
+    def test_stdin_agent_overrides_env_badge(self):
+        stdin = {"agent": {"name": "frontend-developer"}}
+        result = hud.format_status_line(stdin, {}, active_agent="backend-developer")
+        assert "[\u2605 fron]" in result   # [★ fron]
+        assert "\u25d0" not in result      # ◐ (backend glyph) absent
 
     def test_no_agent_single_line(self):
         result = hud.format_status_line({}, {"version": "5.1.1"})
+        assert "\n" not in result
+
+    def test_focus_only_shows_badges(self):
+        result = hud.format_status_line(
+            {},
+            {"version": "5.1.1", "focus": "auth flow"},
+        )
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "[auth flow]" in lines[1]
+        assert "[\u2713]" in lines[1]
+
+    def test_blocker_badge_shown(self):
+        stdin = {"agent": {"name": "test-engineer"}}
+        state = {"blockerCount": 3}
+        result = hud.format_status_line(stdin, state)
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "[\u26a03]" in lines[1]  # [⚠3]
+
+    def test_all_badges_compose(self):
+        stdin = {"agent": {"name": "security-specialist"}}
+        state = {"focus": "login", "blockerCount": 1}
+        result = hud.format_status_line(stdin, state)
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "[\u25ee secu]" in lines[1]  # actor
+        assert "[login]" in lines[1]         # focus
+        assert "[\u26a01]" in lines[1]       # state
+
+    def test_no_agent_no_focus_single_line(self):
+        result = hud.format_status_line(
+            {},
+            {"version": "5.1.1", "blockerCount": 2},
+        )
         assert "\n" not in result
 
     def test_rate_limits_shown(self):
@@ -377,7 +413,7 @@ class TestFormatStatusLine:
         assert "WT:feat-x" in result
 
     def test_full_telemetry(self):
-        """All exact stdin fields present — full telemetry line."""
+        """All exact stdin fields present — full telemetry line + badge line."""
         stdin = {
             "model": {"id": "claude-opus-4-6", "display_name": "Opus"},
             "cost": {"total_cost_usd": 2.50, "total_duration_ms": 4_980_000},
@@ -394,9 +430,9 @@ class TestFormatStatusLine:
                 "seven_day": {"used_percentage": 15},
             },
             "worktree": {"name": "wt-1"},
-            "agent": {"name": "test-agent"},
+            "agent": {"name": "test-engineer"},
         }
-        state = {"version": "5.3.0", "currentMode": "ACT"}
+        state = {"version": "5.3.0", "currentMode": "ACT", "focus": "api", "blockerCount": 0}
         result = hud.format_status_line(stdin, state)
         assert "$2.50" in result
         assert "~$" not in result
@@ -405,7 +441,100 @@ class TestFormatStatusLine:
         assert "Opus" in result
         assert "RL:" in result
         assert "WT:wt-1" in result
-        assert "test-agent" in result
+        lines = result.strip().split("\n")
+        assert len(lines) == 2
+        assert "[\u25c9 test]" in lines[1]  # [◉ test] actor badge
+        assert "[api]" in lines[1]           # focus badge
+        assert "[\u2713]" in lines[1]        # [✓] state badge
+
+
+class TestAbbreviateAgent:
+    def test_security_specialist(self):
+        assert hud.abbreviate_agent("security-specialist") == "secu"
+
+    def test_test_strategy_specialist(self):
+        assert hud.abbreviate_agent("test-strategy-specialist") == "test"
+
+    def test_plan_mode(self):
+        assert hud.abbreviate_agent("plan-mode") == "plan"
+
+    def test_frontend_developer(self):
+        assert hud.abbreviate_agent("frontend-developer") == "fron"
+
+    def test_empty_string(self):
+        assert hud.abbreviate_agent("") == ""
+
+    def test_unknown_agent(self):
+        assert hud.abbreviate_agent("my-custom-tool") == "my"
+
+    def test_single_word_role(self):
+        # All words are role suffixes → fallback to first
+        assert hud.abbreviate_agent("specialist") == "spec"
+
+
+class TestFormatActorBadge:
+    def test_known_agent(self):
+        assert hud.format_actor_badge("security-specialist") == "[\u25ee secu]"
+
+    def test_unknown_agent_fallback_glyph(self):
+        badge = hud.format_actor_badge("unknown-tool")
+        assert badge == "[\U0001f916 unkn]"
+
+    def test_empty_returns_empty(self):
+        assert hud.format_actor_badge("") == ""
+
+
+class TestFormatFocusBadge:
+    def test_with_focus(self):
+        assert hud.format_focus_badge("auth flow") == "[auth flow]"
+
+    def test_empty_returns_empty(self):
+        assert hud.format_focus_badge("") == ""
+
+    def test_none_returns_empty(self):
+        assert hud.format_focus_badge(None) == ""
+
+
+class TestFormatStateBadge:
+    def test_no_blockers(self):
+        assert hud.format_state_badge(0) == "[\u2713]"
+
+    def test_with_blockers(self):
+        assert hud.format_state_badge(2) == "[\u26a02]"
+
+    def test_none_treated_as_zero(self):
+        assert hud.format_state_badge(None) == "[\u2713]"
+
+    def test_string_number(self):
+        assert hud.format_state_badge("3") == "[\u26a03]"
+
+    def test_invalid_string(self):
+        assert hud.format_state_badge("bad") == "[\u2713]"
+
+
+class TestFormatBadgeLine:
+    def test_agent_only(self):
+        line = hud.format_badge_line("security-specialist", "", 0)
+        assert "[\u25ee secu]" in line
+        assert "[\u2713]" in line
+
+    def test_focus_only(self):
+        line = hud.format_badge_line("", "auth flow", 0)
+        assert "[auth flow]" in line
+        assert "[\u2713]" in line
+
+    def test_all_slots(self):
+        line = hud.format_badge_line("test-engineer", "login", 1)
+        assert "[\u25c9 test]" in line
+        assert "[login]" in line
+        assert "[\u26a01]" in line
+
+    def test_no_content_returns_empty(self):
+        assert hud.format_badge_line("", "", 0) == ""
+
+    def test_no_content_with_blockers_returns_empty(self):
+        # blockerCount alone doesn't trigger line 2
+        assert hud.format_badge_line("", "", 5) == ""
 
 
 class TestIntegration:

@@ -17,6 +17,53 @@ from datetime import datetime, timezone
 
 BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
 
+# Agent eye glyphs from .ai-rules agent definitions.
+AGENT_GLYPHS = {
+    "act-mode": "\u25c6",            # ◆
+    "plan-mode": "\u25c7",           # ◇
+    "eval-mode": "\u25c8",           # ◈
+    "auto-mode": "\u25ca",           # ◊
+    "technical-planner": "\u2394",   # ⎔
+    "security-specialist": "\u25ee", # ◮
+    "security-engineer": "\u25b2",   # ▲
+    "test-strategy-specialist": "\u2299",  # ⊙
+    "test-engineer": "\u25c9",       # ◉
+    "frontend-developer": "\u2605",  # ★
+    "backend-developer": "\u25d0",   # ◐
+    "architecture-specialist": "\u2b21",  # ⬡
+    "solution-architect": "\u2b22",  # ⬢
+    "code-quality-specialist": "\u25cf",  # ●
+    "code-reviewer": "\u229b",       # ⊛
+    "performance-specialist": "\u2297",   # ⊗
+    "accessibility-specialist": "\u2726", # ✦
+    "seo-specialist": "\u2727",      # ✧
+    "documentation-specialist": "\u2295", # ⊕
+    "i18n-specialist": "\u25ce",     # ◎
+    "devops-engineer": "\u25bc",     # ▼
+    "platform-engineer": "\u25b3",   # △
+    "observability-specialist": "\u25cc", # ◌
+    "integration-specialist": "\u25cb",   # ○
+    "event-architecture-specialist": "\u2756",  # ❖
+    "migration-specialist": "\u2731",     # ✱
+    "data-engineer": "\u25d1",       # ◑
+    "data-scientist": "\u25d2",      # ◒
+    "software-engineer": "\u25c8",   # ◈
+    "systems-developer": "\u229e",   # ⊞
+    "mobile-developer": "\u2736",    # ✶
+    "ai-ml-engineer": "\u2734",      # ✴
+    "tooling-engineer": "\u22a0",    # ⊠
+    "agent-architect": "\u2b23",     # ⬣
+    "ui-ux-designer": "\u2606",      # ☆
+    "parallel-orchestrator": "\u25a3",    # ▣
+    "plan-reviewer": "\u25c6",       # ◆
+}
+
+# Suffixes stripped when abbreviating agent names to 4-char labels.
+_ROLE_SUFFIXES = frozenset({
+    "specialist", "developer", "engineer", "architect", "designer",
+    "reviewer", "orchestrator", "scientist", "agent", "mode",
+})
+
 MODEL_PRICING = {
     "haiku": (0.80, 4.00),
     "sonnet": (3.00, 15.00),
@@ -215,6 +262,70 @@ def format_worktree(stdin_data: dict) -> str:
     return f"WT:{name}" if name else ""
 
 
+def abbreviate_agent(name: str) -> str:
+    """Create a 4-char label from an agent name.
+
+    Strips known role suffixes, then takes the first remaining
+    word truncated to 4 characters.  e.g.
+      "security-specialist" → "secu"
+      "test-strategy-specialist" → "test"
+      "plan-mode" → "plan"
+    """
+    if not name:
+        return ""
+    parts = name.split("-")
+    core = [p for p in parts if p not in _ROLE_SUFFIXES]
+    if not core:
+        core = parts[:1]
+    return core[0][:4]
+
+
+def format_actor_badge(agent: str) -> str:
+    """Format actor badge: ``[◮ secu]`` or ``[🤖 agen]`` (fallback glyph)."""
+    if not agent:
+        return ""
+    glyph = AGENT_GLYPHS.get(agent, "\U0001f916")  # 🤖 fallback
+    label = abbreviate_agent(agent)
+    return f"[{glyph} {label}]"
+
+
+def format_focus_badge(focus: str) -> str:
+    """Format focus badge: ``[auth flow]``.  Empty string when *focus* is falsy."""
+    if not focus:
+        return ""
+    return f"[{focus}]"
+
+
+def format_state_badge(blocker_count) -> str:
+    """Format state badge: ``[⚠2]`` when blockers > 0, else ``[✓]``."""
+    try:
+        count = int(blocker_count)
+    except (TypeError, ValueError):
+        count = 0
+    if count > 0:
+        return f"[\u26a0{count}]"  # ⚠N
+    return "[\u2713]"  # ✓
+
+
+def format_badge_line(agent: str, focus: str, blocker_count) -> str:
+    """Compose the badge-based second line.
+
+    Returns an empty string when there is nothing to display
+    (no agent and no focus).
+    """
+    if not agent and not focus:
+        return ""
+    badges: list = []
+    actor = format_actor_badge(agent)
+    if actor:
+        badges.append(actor)
+    fb = format_focus_badge(focus)
+    if fb:
+        badges.append(fb)
+    badges.append(format_state_badge(blocker_count))
+    return " ".join(badges)
+
+
 def format_status_line(
     stdin_data: dict,
     hud_state: dict,
@@ -268,10 +379,14 @@ def format_status_line(
 
     line1 = " | ".join(segments)
 
-    if not agent:
+    focus = hud_state.get("focus") or ""
+    blocker_count = hud_state.get("blockerCount", 0) or 0
+
+    line2 = format_badge_line(agent, focus, blocker_count)
+    if not line2:
         return line1
 
-    return f"{line1}\n\U0001f916 {agent}"
+    return f"{line1}\n{line2}"
 
 
 def main():
