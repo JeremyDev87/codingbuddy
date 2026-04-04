@@ -138,8 +138,8 @@ describe('agent-prompt.builder', () => {
       const result = buildAgentSystemPrompt(profileWithActivation, mockContext);
 
       expect(result).toContain('## Mandatory Checklist');
-      expect(result).toContain('- [ ] MUST respond in Korean');
-      expect(result).toContain('- [ ] Follow TDD cycle');
+      expect(result).toContain('- [🔴 language] MUST respond in Korean');
+      expect(result).toContain('- [🔴 tdd] Follow TDD cycle');
     });
 
     it('should fall back to top-level array mandatory_checklist (backward compat)', () => {
@@ -154,9 +154,9 @@ describe('agent-prompt.builder', () => {
       const result = buildAgentSystemPrompt(profileWithChecklist, mockContext);
 
       expect(result).toContain('## Mandatory Checklist');
-      expect(result).toContain('- [ ] Type safety: no any usage');
-      expect(result).toContain('- [ ] Test coverage 90%+');
-      expect(result).toContain('- [ ] SOLID principles applied');
+      expect(result).toContain('- Type safety: no any usage');
+      expect(result).toContain('- Test coverage 90%+');
+      expect(result).toContain('- SOLID principles applied');
     });
 
     it('should prefer activation.mandatory_checklist over top-level array', () => {
@@ -171,7 +171,7 @@ describe('agent-prompt.builder', () => {
       };
       const result = buildAgentSystemPrompt(profileWithBoth, mockContext);
 
-      expect(result).toContain('- [ ] Activation item');
+      expect(result).toContain('- [🔴 check] Activation item');
       expect(result).not.toContain('Top-level item');
     });
 
@@ -292,7 +292,8 @@ describe('agent-prompt.builder', () => {
 
       expect(result).toContain('## Execution Order');
       expect(result).toContain('1. Step 1');
-      expect(result).toContain('1. Step 2');
+      expect(result).toContain('2. Step 2');
+      expect(result).toContain('3. Step 3');
     });
 
     it('should handle agent without activation field gracefully', () => {
@@ -301,6 +302,108 @@ describe('agent-prompt.builder', () => {
       expect(result).not.toContain('## Mandatory Checklist');
       expect(result).not.toContain('## Verification Guide');
       expect(result).not.toContain('## Execution Order');
+    });
+
+    it('should render verification_guide array format as bullet list', () => {
+      const profileWithArrayGuide: AgentProfile = {
+        ...mockAgentProfile,
+        activation: {
+          verification_guide: [
+            'Check test file exists before implementation',
+            'Verify no use client directive',
+            'Ensure proper error handling',
+          ],
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithArrayGuide, mockContext);
+
+      expect(result).toContain('## Verification Guide');
+      expect(result).toContain('- Check test file exists before implementation');
+      expect(result).toContain('- Verify no use client directive');
+      expect(result).toContain('- Ensure proper error handling');
+    });
+
+    it('should not contain raw JSON braces in mode-specific instructions', () => {
+      const profileWithModes: AgentProfile = {
+        ...mockAgentProfile,
+        modes: {
+          eval: {
+            focus: ['code quality', 'security'],
+            output_format: 'structured review',
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithModes, mockContext);
+
+      // Extract mode-specific section
+      const modeSection = result.split('## Mode-Specific Instructions')[1]?.split('\n##')[0] ?? '';
+      expect(modeSection).not.toMatch(/"[a-z_]+":/); // no JSON keys like "focus":
+      expect(modeSection).not.toMatch(/^\s*[{}]/m); // no lines starting with braces
+    });
+
+    it('should trim long mandatory checklists to 10 items with overflow indicator', () => {
+      const entries: Record<string, { rule: string; verification_key: string }> = {};
+      for (let i = 1; i <= 15; i++) {
+        entries[`rule_${i}`] = { rule: `Rule ${i} description`, verification_key: `key_${i}` };
+      }
+      const profileWithLargeChecklist: AgentProfile = {
+        ...mockAgentProfile,
+        activation: { mandatory_checklist: entries },
+      };
+      const result = buildAgentSystemPrompt(profileWithLargeChecklist, mockContext);
+
+      expect(result).toContain('- [rule_1] Rule 1 description');
+      expect(result).toContain('- [rule_10] Rule 10 description');
+      expect(result).toContain('... and 5 more');
+      expect(result).not.toContain('- [rule_11]');
+    });
+
+    it('should trim long verification guide arrays with overflow indicator', () => {
+      const steps = Array.from({ length: 13 }, (_, i) => `Verify step ${i + 1}`);
+      const profile: AgentProfile = {
+        ...mockAgentProfile,
+        activation: { verification_guide: steps },
+      };
+      const result = buildAgentSystemPrompt(profile, mockContext);
+
+      expect(result).toContain('- Verify step 1');
+      expect(result).toContain('- Verify step 10');
+      expect(result).toContain('... and 3 more');
+      expect(result).not.toContain('- Verify step 11');
+    });
+
+    it('should trim long execution order arrays with overflow indicator', () => {
+      const steps = Array.from({ length: 12 }, (_, i) => `Execute step ${i + 1}`);
+      const profile: AgentProfile = {
+        ...mockAgentProfile,
+        activation: { execution_order: steps },
+      };
+      const result = buildAgentSystemPrompt(profile, mockContext);
+
+      expect(result).toContain('1. Execute step 1');
+      expect(result).toContain('10. Execute step 10');
+      expect(result).toContain('... and 2 more');
+      expect(result).not.toContain('11. Execute step 11');
+    });
+
+    it('should render mode-specific instructions as readable markdown, not JSON', () => {
+      const profileWithModes: AgentProfile = {
+        ...mockAgentProfile,
+        modes: {
+          eval: {
+            focus: ['code quality', 'security'],
+            output_format: 'structured review',
+            depth: 3,
+          },
+        },
+      };
+      const result = buildAgentSystemPrompt(profileWithModes, mockContext);
+
+      expect(result).toContain('- **focus**:');
+      expect(result).toContain('- code quality');
+      expect(result).toContain('- security');
+      expect(result).toContain('- **output_format**: structured review');
+      expect(result).toContain('- **depth**: 3');
     });
 
     it('should handle agent without optional rich metadata gracefully', () => {

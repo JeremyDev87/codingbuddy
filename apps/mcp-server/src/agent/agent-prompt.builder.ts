@@ -42,6 +42,47 @@ const MODE_TASK_PREFIXES: Record<Mode, string> = {
 };
 
 /**
+ * Maximum items to render in a list section before trimming
+ */
+const MAX_LIST_ITEMS = 10;
+
+/**
+ * Trim a list to maxItems and append an overflow indicator
+ */
+function trimList(items: string[], maxItems = MAX_LIST_ITEMS): string[] {
+  if (items.length <= maxItems) return items;
+  const remaining = items.length - maxItems;
+  return [...items.slice(0, maxItems), `... and ${remaining} more`];
+}
+
+/**
+ * Render an arbitrary object/array value as readable markdown (no JSON braces)
+ */
+function renderValueAsText(value: unknown, sections: string[], indent = ''): void {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (item && typeof item === 'object') {
+        renderValueAsText(item, sections, indent);
+      } else {
+        sections.push(`${indent}- ${item}`);
+      }
+    }
+  } else if (value && typeof value === 'object') {
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      if (Array.isArray(val)) {
+        sections.push(`${indent}- **${key}**:`);
+        renderValueAsText(val, sections, indent + '  ');
+      } else if (val && typeof val === 'object') {
+        sections.push(`${indent}- **${key}**:`);
+        renderValueAsText(val, sections, indent + '  ');
+      } else {
+        sections.push(`${indent}- **${key}**: ${val}`);
+      }
+    }
+  }
+}
+
+/**
  * Build a complete system prompt for an agent to be executed as a subagent
  */
 export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: AgentContext): string {
@@ -86,10 +127,14 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
     !Array.isArray(activationChecklist)
   ) {
     sections.push('## Mandatory Checklist');
-    for (const [, item] of Object.entries(activationChecklist as Record<string, unknown>)) {
+    const items: string[] = [];
+    for (const [name, item] of Object.entries(activationChecklist as Record<string, unknown>)) {
       if (item && typeof item === 'object' && 'rule' in item) {
-        sections.push(`- [ ] ${(item as { rule: string }).rule}`);
+        items.push(`- [${name}] ${(item as { rule: string }).rule}`);
       }
+    }
+    for (const line of trimList(items)) {
+      sections.push(line);
     }
     sections.push('');
   } else if (
@@ -98,8 +143,9 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
   ) {
     // Backward compat: top-level array format
     sections.push('## Mandatory Checklist');
-    for (const item of rawProfile.mandatory_checklist) {
-      sections.push(`- [ ] ${item}`);
+    const items = (rawProfile.mandatory_checklist as string[]).map((item: string) => `- ${item}`);
+    for (const line of trimList(items)) {
+      sections.push(line);
     }
     sections.push('');
   }
@@ -144,7 +190,7 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
   const agentModeConfig = modesObj?.[modeKey];
   if (agentModeConfig && typeof agentModeConfig === 'object') {
     sections.push('## Mode-Specific Instructions');
-    sections.push(JSON.stringify(agentModeConfig, null, 2));
+    renderValueAsText(agentModeConfig, sections);
     sections.push('');
   } else {
     sections.push(MODE_INSTRUCTIONS[context.mode]);
@@ -153,10 +199,21 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
 
   // Verification Guide — prefer activation.verification_guide
   const verificationGuide = activation?.verification_guide ?? rawProfile.verification_guide;
-  if (verificationGuide && typeof verificationGuide === 'object') {
+  if (Array.isArray(verificationGuide) && verificationGuide.length) {
     sections.push('## Verification Guide');
+    const items = (verificationGuide as string[]).map((step: string) => `- ${step}`);
+    for (const line of trimList(items)) {
+      sections.push(line);
+    }
+    sections.push('');
+  } else if (verificationGuide && typeof verificationGuide === 'object') {
+    sections.push('## Verification Guide');
+    const items: string[] = [];
     for (const [key, desc] of Object.entries(verificationGuide as Record<string, string>)) {
-      sections.push(`- **${key}**: ${desc}`);
+      items.push(`- **${key}**: ${desc}`);
+    }
+    for (const line of trimList(items)) {
+      sections.push(line);
     }
     sections.push('');
   }
@@ -168,16 +225,19 @@ export function buildAgentSystemPrompt(agentProfile: AgentProfile, context: Agen
     for (const [phase, steps] of Object.entries(executionOrder as Record<string, unknown>)) {
       if (Array.isArray(steps) && steps.length) {
         sections.push(`### ${phase}`);
-        for (const step of steps) {
-          sections.push(`${step}`);
+        for (const line of trimList(steps as string[])) {
+          sections.push(line);
         }
       }
     }
     sections.push('');
   } else if (Array.isArray(executionOrder) && executionOrder.length) {
     sections.push('## Execution Order');
-    for (const step of executionOrder) {
-      sections.push(`1. ${step}`);
+    const items = (executionOrder as string[]).map(
+      (step: string, i: number) => `${i + 1}. ${step}`,
+    );
+    for (const line of trimList(items)) {
+      sections.push(line);
     }
     sections.push('');
   }
