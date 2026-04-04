@@ -113,6 +113,39 @@ class TestOnModeEntry:
         assert state["focus"] is None
         assert state["blockerCount"] == 0
 
+    @pytest.mark.parametrize("mode,expected_phase", [
+        ("PLAN", "planning"),
+        ("ACT", "executing"),
+        ("EVAL", "evaluating"),
+        ("AUTO", "cycling"),
+    ])
+    def test_resets_all_stale_workflow_fields(self, state_file, mode, expected_phase):
+        """Seed ALL workflow fields with non-default values then verify full reset."""
+        from hud_state import update_hud_state
+        update_hud_state(
+            state_file=state_file,
+            currentMode="EVAL",
+            phase="evaluating",
+            focus="old-file.py",
+            blockerCount=5,
+            activeAgent="Security Specialist",
+            executionStrategy="subagent",
+            councilStatus="voting",
+            lastHandoff="Frontend Developer",
+        )
+
+        on_mode_entry(mode, state_file=state_file)
+        state = _read(state_file)
+
+        assert state["currentMode"] == mode
+        assert state["phase"] == expected_phase
+        assert state["focus"] is None
+        assert state["blockerCount"] == 0
+        assert state["activeAgent"] is None
+        assert state["executionStrategy"] is None
+        assert state["councilStatus"] is None
+        assert state["lastHandoff"] is None
+
     def test_unknown_mode_defaults_to_ready(self, state_file):
         on_mode_entry("UNKNOWN", state_file=state_file)
         state = _read(state_file)

@@ -48,6 +48,10 @@ def on_mode_entry(
             "phase": phase,
             "focus": None,
             "blockerCount": 0,
+            "activeAgent": None,
+            "executionStrategy": None,
+            "councilStatus": None,
+            "lastHandoff": None,
         }
         if state_file:
             update_hud_state(state_file=state_file, **kwargs)
