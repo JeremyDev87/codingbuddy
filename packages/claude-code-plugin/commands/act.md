@@ -35,9 +35,9 @@ This command activates ACT mode for the CodingBuddy workflow.
 - Execute implementation steps defined in PLAN
 
 **🔴 Agent Activation (STRICT):**
-- When ACT is triggered, **Frontend Developer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
+- When ACT is triggered, the **default ACT agent** (loaded via parse_mode in MCP mode; Software Engineer in standalone mode) **MUST** be automatically activated
 - The Agent's development philosophy and code quality checklist MUST be followed
-- See agent documentation for complete development framework
+- In MCP mode, the agent framework is loaded via parse_mode. In standalone mode, basic workflow guidance is provided by the mode detection hook.
 
 **Purpose:**
 Execute implementation following TDD cycle, augmented coding principles, and quality standards

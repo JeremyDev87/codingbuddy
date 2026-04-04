@@ -31,9 +31,9 @@ This command activates PLAN mode for the CodingBuddy workflow.
 - After creating plan, user can type `ACT` to execute
 
 **🔴 Agent Activation (STRICT):**
-- When in PLAN mode, **Frontend Developer Agent** (loaded via parse_mode in MCP mode; defaults in standalone mode) **MUST** be automatically activated
+- When in PLAN mode, the **default PLAN agent** (loaded via parse_mode in MCP mode; Technical Planner in standalone mode) **MUST** be automatically activated
 - The Agent's workflow framework and all mandatory requirements MUST be followed
-- See agent documentation for complete development framework
+- In MCP mode, the agent framework is loaded via parse_mode. In standalone mode, basic workflow guidance is provided by the mode detection hook.
 
 **Purpose:**
 Create actionable implementation plans following TDD and augmented coding principles
