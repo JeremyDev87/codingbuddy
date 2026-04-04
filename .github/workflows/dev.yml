@@ -195,6 +195,17 @@ jobs:
       - name: Test with coverage
         run: yarn workspace codingbuddy-claude-plugin test:coverage
 
+  plugin-validate-commands:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup
+
+      - name: Validate commands (collision guardrails)
+        run: yarn workspace codingbuddy-claude-plugin validate:commands
+
   plugin-build:
     needs: install-dependencies
     runs-on: ubuntu-latest
