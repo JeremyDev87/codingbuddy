@@ -31,6 +31,31 @@ export class SkillSchemaError extends Error {
 // ============================================================================
 
 /**
+ * Split a comma-separated allowed-tools string, respecting parenthesized
+ * patterns like `Bash(gh:*, git:*)` where commas inside parens are not
+ * delimiters.
+ */
+function splitAllowedTools(s: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let depth = 0;
+  for (const ch of s) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) {
+      const trimmed = current.trim();
+      if (trimmed) result.push(trimmed);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  const trimmed = current.trim();
+  if (trimmed) result.push(trimmed);
+  return result;
+}
+
+/**
  * Trigger entry schema for SKILL.md frontmatter
  * - pattern: regex pattern string (non-empty)
  * - confidence: high | medium | low
@@ -57,7 +82,9 @@ const SkillFrontmatterSchema = z.object({
   'disable-model-invocation': z.boolean().optional(),
   context: z.string().optional(),
   agent: z.string().optional(),
-  'allowed-tools': z.array(z.string()).optional(),
+  'allowed-tools': z
+    .union([z.array(z.string()), z.string().transform(s => splitAllowedTools(s))])
+    .optional(),
 });
 
 // ============================================================================

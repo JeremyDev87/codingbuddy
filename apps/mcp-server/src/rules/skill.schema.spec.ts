@@ -108,7 +108,7 @@ Content.
       expect(result.agent).toBe('security-specialist');
     });
 
-    it('should parse allowed-tools field', () => {
+    it('should parse allowed-tools field as array', () => {
       const content = `---
 name: tools-skill
 description: Skill with allowed tools
@@ -123,6 +123,48 @@ Content.
       const result = parseSkill(content, 'path');
 
       expect(result.allowedTools).toEqual(['Read', 'Grep', 'Glob']);
+    });
+
+    it('should parse allowed-tools as comma-separated string', () => {
+      const content = `---
+name: tools-skill
+description: Skill with comma-string tools
+allowed-tools: Read, Grep, Glob
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.allowedTools).toEqual(['Read', 'Grep', 'Glob']);
+    });
+
+    it('should parse allowed-tools comma string with parenthesized patterns', () => {
+      const content = `---
+name: tools-skill
+description: Skill with paren patterns
+allowed-tools: "Read, Grep, Glob, Bash(gh:*, git:*)"
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.allowedTools).toEqual(['Read', 'Grep', 'Glob', 'Bash(gh:*, git:*)']);
+    });
+
+    it('should parse allowed-tools empty string as empty array', () => {
+      const content = `---
+name: tools-skill
+description: Skill with empty tools
+allowed-tools: ""
+---
+
+Content.
+`;
+      const result = parseSkill(content, 'path');
+
+      expect(result.allowedTools).toEqual([]);
     });
 
     it('should leave extended fields undefined when not present', () => {
