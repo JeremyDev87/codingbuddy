@@ -774,6 +774,8 @@ AUTO Build a new user authentication feature
    - Success: `Critical = 0 AND High = 0`
    - Failure: Max iterations reached (default: 3)
 
+> **Severity and review-cycle canonical sources:** The `Critical`/`High` levels above are the **Code Review Severity** scale defined in [`../rules/severity-classification.md`](../rules/severity-classification.md#code-review-severity). The PR approval loop (CI gate → review → fix → re-review → approve) is specified in [`../rules/pr-review-cycle.md`](../rules/pr-review-cycle.md). Follow those canonical sources rather than re-deriving severity or approval criteria from this adapter.
+
 ### OpenCode Agent Integration
 
 AUTO mode describes an autonomous PLAN→ACT→EVAL cycle. However, agent switching behavior differs by platform:
