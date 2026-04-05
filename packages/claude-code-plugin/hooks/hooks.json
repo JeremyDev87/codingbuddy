@@ -1,4 +1,5 @@
 {
+  "$comment": "UserPromptSubmit is intentionally absent from this file. The hook is installed globally into ~/.claude/settings.json at session start by hooks/session-start.py (which copies hooks/user-prompt-submit.py into ~/.claude/hooks/). See docs/bootstrap-architecture.md and issue #1380 for the rationale. Do NOT add a UserPromptSubmit entry here without updating bootstrap-architecture.md and the session-start global install logic in the same change.",
   "description": "CodingBuddy plugin hooks — PLAN/ACT/EVAL workflow enforcement, quality gates, and operational tracking",
   "hooks": {
     "SessionStart": [

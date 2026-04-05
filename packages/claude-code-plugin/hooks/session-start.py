@@ -1,14 +1,46 @@
 #!/usr/bin/env python3
 """
-CodingBuddy Session Start Hook
+CodingBuddy Session Start Hook — Bootstrap for global UserPromptSubmit.
 
-Automatically installs the UserPromptSubmit hook for mode detection
-when a Claude Code session starts.
+This file is the **source of truth** for how the CodingBuddy plugin
+installs its ``UserPromptSubmit`` hook into Claude Code.
 
-This hook:
-1. Checks if the mode detection hook is already installed
-2. If not, copies it to ~/.claude/hooks/
-3. Registers it in ~/.claude/settings.json
+Why this file exists
+--------------------
+CodingBuddy uses two distinct hook layers:
+
+1. **Plugin-local** ``hooks/hooks.json`` — registers ``SessionStart``,
+   ``PreToolUse``, ``PostToolUse``, and ``Stop`` hooks that Claude Code
+   loads directly from the plugin package at runtime.
+2. **Global install** (this script) — at every session start, copies
+   ``hooks/user-prompt-submit.py`` into ``~/.claude/hooks/`` and
+   registers a ``UserPromptSubmit`` hook in the user's global
+   ``~/.claude/settings.json``.
+
+``UserPromptSubmit`` is deliberately **not** in ``hooks/hooks.json``.
+The global install is what actually wires up PLAN/ACT/EVAL/AUTO mode
+detection today, and contributors reading ``hooks.json`` first have
+repeatedly mistaken the missing entry for a bug (see #1380).
+
+For the long-form rationale and migration options, see:
+``packages/claude-code-plugin/docs/bootstrap-architecture.md``.
+
+What this hook does on every session start
+-------------------------------------------
+1. Check whether the mode-detection hook file already exists at
+   ``~/.claude/hooks/codingbuddy-mode-detect.py``.
+2. If not, copy ``user-prompt-submit.py`` there (alongside its ``lib/``
+   dependencies).
+3. Ensure ``~/.claude/settings.json`` has a ``UserPromptSubmit`` hook
+   entry pointing at that file, creating the settings file if needed
+   and using file locking on Unix to avoid concurrent writes.
+4. Additionally installs the status line, ``~/.claude/mcp.json`` entry,
+   system-prompt injection, and briefing-recovery suggestions.
+
+Invariant: any change that moves ``UserPromptSubmit`` registration into
+``hooks/hooks.json`` **must** delete the corresponding install logic
+below and update ``docs/bootstrap-architecture.md`` plus
+``tests/test_bootstrap_architecture.py`` in the same change.
 """
 
 import json
@@ -325,15 +357,30 @@ def _read_settings_file(settings_file: Path) -> dict:
 
 def register_hook_in_settings(settings_file: Path) -> bool:
     """
-    Register the UserPromptSubmit hook in settings.json.
+    Register the UserPromptSubmit hook in the user's global settings.json.
 
-    Uses file locking on Unix systems to prevent concurrent write issues.
+    This is the **bootstrap source of truth** for CodingBuddy's
+    UserPromptSubmit registration. The plugin-local ``hooks/hooks.json``
+    intentionally does NOT declare UserPromptSubmit; instead, this
+    function writes the hook entry into ``~/.claude/settings.json`` so
+    it is active for *all* Claude Code sessions, not just sessions
+    inside the CodingBuddy project.
+
+    Why global, not plugin-local? PLAN/ACT/EVAL keyword detection is
+    meant to work from any working directory once the plugin is
+    installed. A plugin-local hook would only fire when
+    ``CLAUDE_PLUGIN_ROOT`` resolves to this package, which is too
+    narrow. See ``docs/bootstrap-architecture.md`` and #1380.
+
+    Uses file locking on Unix systems to prevent concurrent write
+    issues when multiple Claude Code sessions start at the same time.
 
     Args:
-        settings_file: Path to ~/.claude/settings.json
+        settings_file: Path to ``~/.claude/settings.json``.
 
     Returns:
-        True if registered successfully, False if already exists
+        ``True`` if the hook was newly registered, ``False`` if an
+        entry already existed (idempotent).
     """
     settings_file.parent.mkdir(parents=True, exist_ok=True)
 
