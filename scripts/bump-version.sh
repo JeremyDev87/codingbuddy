@@ -111,6 +111,32 @@ echo "🔒 Updating lockfile..."
 yarn install
 echo "  ✅ yarn.lock"
 
+# 9. Verify all version files match
 echo ""
+echo "════════════════════════════════════════════"
+echo "🔍 Verification"
+echo "════════════════════════════════════════════"
+
+ERRORS=0
+
+grep -q "\"version\": \"$NEW_VERSION\"" apps/mcp-server/package.json && echo "  ✅ mcp-server/package.json" || { echo "  ❌ mcp-server/package.json"; ERRORS=$((ERRORS+1)); }
+grep -q "VERSION = '$NEW_VERSION'" apps/mcp-server/src/shared/version.ts && echo "  ✅ version.ts" || { echo "  ❌ version.ts"; ERRORS=$((ERRORS+1)); }
+grep -q "\"version\": \"$NEW_VERSION\"" packages/rules/package.json && echo "  ✅ rules/package.json" || { echo "  ❌ rules/package.json"; ERRORS=$((ERRORS+1)); }
+grep -q "\"version\": \"$NEW_VERSION\"" packages/claude-code-plugin/package.json && echo "  ✅ plugin/package.json" || { echo "  ❌ plugin/package.json"; ERRORS=$((ERRORS+1)); }
+grep -q "\"version\": \"$NEW_VERSION\"" packages/claude-code-plugin/.claude-plugin/plugin.json && echo "  ✅ plugin.json" || { echo "  ❌ plugin.json"; ERRORS=$((ERRORS+1)); }
+grep -q "\"version\": \"$NEW_VERSION\"" .claude-plugin/marketplace.json && echo "  ✅ marketplace.json" || { echo "  ❌ marketplace.json"; ERRORS=$((ERRORS+1)); }
+git diff --quiet yarn.lock && echo "  ✅ yarn.lock clean" || { echo "  ❌ yarn.lock has uncommitted changes"; ERRORS=$((ERRORS+1)); }
+
+echo ""
+if [ "$ERRORS" -gt 0 ]; then
+  echo "❌ Verification failed with $ERRORS error(s). DO NOT commit."
+  exit 1
+fi
+
 echo "✅ All files bumped to v$NEW_VERSION (including yarn.lock)"
-echo "   Next: git commit -am \"chore(release): prepare v$NEW_VERSION\""
+echo ""
+echo "Next steps:"
+echo "  git add -A"
+echo "  git commit -m \"chore: prepare v$NEW_VERSION release\""
+echo "  # Create PR, wait for CI, merge"
+echo "  # Then: git tag v$NEW_VERSION && git push origin v$NEW_VERSION"
