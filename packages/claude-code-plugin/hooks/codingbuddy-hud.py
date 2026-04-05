@@ -132,10 +132,24 @@ def estimate_cost(model_id: str, context_window: dict) -> float:
 
 
 def format_compact_tokens(n: int) -> str:
-    """Format token count compactly for status-bar display.
+    """Format a token count compactly for status-bar display.
 
-    - < 1000 → raw integer (e.g. `532`)
-    - >= 1000 → `Nk` with one decimal trimmed of trailing `.0` (e.g. `1.5k`, `128k`)
+    Used by the cache segment to keep the status line narrow. See the
+    "Cache Segment Semantics" section of docs/status-bar-model.md for
+    the surrounding context.
+
+    Output rules:
+    - value < 1000          → raw integer (e.g. `532`)
+    - value is whole k      → `Nk` with trailing `.0` trimmed (e.g. `1k`, `128k`)
+    - value > 1000 non-whole → `N.Nk` with one decimal (e.g. `1.5k`, `3.5k`)
+
+    Note: values in (1000, 1050) may round to `1.0k` via `.1f` formatting.
+    This is accepted display behavior — the goal is compactness, not
+    lossless round-trip encoding.
+
+    Error fallback: returns `"0"` when `n` is not coercible to int (e.g.
+    `None`, non-numeric string). The function never raises — it is called
+    from the hot status-line path and must degrade gracefully.
     """
     try:
         value = int(n)
@@ -153,17 +167,36 @@ def format_compact_tokens(n: int) -> str:
 def format_cache_segment(context_window: dict) -> str:
     """Render the cache segment as raw tokens from the latest API call.
 
-    IMPORTANT: `context_window.current_usage` from Claude Code stdin reflects
-    **only the most recent API call**, not cumulative session cache usage.
-    This helper therefore renders raw token counts (numerator/denominator)
-    rather than a percentage, which users tend to misread as session-wide
-    cache efficiency (#1355, #1356).
+    IMPORTANT — last-call semantics:
+        `context_window.current_usage` from Claude Code stdin reflects
+        **only the most recent API call**, not cumulative session cache
+        usage. An earlier design rendered this as `Cache:XX%`, which
+        users frequently misread as session-wide cache efficiency
+        (`Cache:100%` → "my whole session is cached", false). Raw token
+        display removes the ambiguity — see #1355, #1356 and the
+        "Cache Segment Semantics" section of docs/status-bar-model.md.
 
-    Numerator   = `cache_read_input_tokens`
-    Denominator = `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`
+    Format:
+        ``♻{cache_read}/{total}``  (e.g. ``♻2k/3.5k``)
 
-    Returns an empty string when usage data is missing so the caller can
-    omit the segment entirely from the status line.
+        - Numerator   = ``cache_read_input_tokens``
+        - Denominator = ``input_tokens + cache_creation_input_tokens
+                        + cache_read_input_tokens``
+        - Both values are passed through ``format_compact_tokens``
+          for narrow status-bar rendering.
+
+    Fallback:
+        Returns an empty string (hide the segment entirely) when:
+        - ``context_window`` is falsy
+        - ``current_usage`` is missing or null
+        - all three token counts sum to 0
+
+        Callers append the return value conditionally so the status
+        line still renders cleanly without a broken slot.
+
+    Contributor caution:
+        Do not reintroduce a percentage-based rendering here. Regression
+        tests in tests/test_hud.py explicitly guard against it.
     """
     usage = context_window.get("current_usage") if context_window else None
     if not usage:

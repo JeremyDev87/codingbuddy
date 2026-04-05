@@ -20,19 +20,46 @@ Displays session metrics computed from stdin data and HUD state.
 **Format:**
 
 ```
-◕‿◕ CB v5.1.1 | PLAN 🟢 | 12m | ~$0.42 | Cache:53% | Ctx:45%
+◕‿◕ CB v5.3.0 | PLAN 🟢 | 12m | ~$0.42 | ♻800/1.5k | Ctx:45%
 ```
 
 | Segment         | Source                          | Description                                |
 | --------------- | ------------------------------- | ------------------------------------------ |
 | `◕‿◕`          | Constant                        | Buddy face                                 |
-| `CB v5.1.1`    | `hud_state.version`             | Plugin version                             |
+| `CB v5.3.0`    | `hud_state.version`             | Plugin version                             |
 | `PLAN`          | `hud_state.currentMode`         | Current workflow mode (PLAN/ACT/EVAL/AUTO) |
 | `🟢`           | Computed from `ctx_pct`          | Health indicator (see below)               |
 | `12m`           | `hud_state.sessionStartTimestamp`| Session duration                           |
 | `~$0.42`       | Computed from stdin token usage  | Estimated session cost                     |
-| `Cache:53%`    | Computed from stdin token usage  | Cache hit rate                             |
+| `♻800/1.5k`    | Computed from stdin token usage  | Cache tokens (last API call, see below)    |
 | `Ctx:45%`      | `stdin.context_window.used_percentage` | Context window usage               |
+
+The segment is omitted entirely when cache usage data is absent — do not assume it is always present.
+
+### Cache Segment Semantics (Last-Call Only)
+
+The cache segment renders raw token counts from **the most recent API call**, not cumulative session cache efficiency. This is a deliberate design choice driven by how Claude Code exposes telemetry (see #1355, #1356).
+
+**Format:** `♻{cache_read_input_tokens}/{total_input_tokens}` — e.g. `♻2k/3.5k`
+
+- **Numerator:** `stdin.context_window.current_usage.cache_read_input_tokens`
+- **Denominator:** `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`
+- **Compact format:** values < 1000 render as integers (`532`), values ≥ 1000 render as `Nk` with trailing `.0` trimmed for whole thousands (`1k`, `1.5k`, `128k`)
+
+**Why not a percentage?**
+
+An earlier design rendered this as `Cache:XX%`. The calculation was mathematically correct but semantically misleading: users frequently saw values like `Cache:100%` and reasonably assumed their entire session was fully cached, even though the number only described the last request. Claude Code's status-line stdin explicitly documents `context_window.current_usage` as **last-call** token counts, not cumulative session totals. Raw token display removes the ambiguity.
+
+**Fallback behavior:**
+
+- `context_window` missing → segment omitted entirely
+- `current_usage` missing or null → segment omitted entirely
+- All three token counts are 0 → segment omitted entirely (no meaningful ratio to show)
+- Any of the three values is `None` → coerced to 0 via `or 0` defensive pattern
+
+**Rendering reference:** see `format_cache_segment()` and `format_compact_tokens()` in `hooks/codingbuddy-hud.py`.
+
+**Contributor caution:** do **not** reintroduce a percentage-based rendering (e.g. `Cache:XX%`). Regression tests in `tests/test_hud.py::TestFormatCacheSegment::test_regression_no_percent_in_output` and `TestFormatStatusLineCacheSegment::test_status_line_no_longer_contains_cache_percent` explicitly guard against this.
 
 ### Health Indicator
 
@@ -124,7 +151,7 @@ Claude Code passes session data as JSON to the statusLine script's stdin:
 }
 ```
 
-**Used for:** model identification, cost estimation, cache rate, context percentage.
+**Used for:** model identification, cost estimation, last-call cache tokens, context percentage.
 
 ### Tier 2: HUD State File
 
@@ -163,35 +190,37 @@ If any exception occurs during rendering, the script outputs a minimal fallback:
 ### PLAN Mode (No Agent)
 
 ```
-◕‿◕ CB v5.1.1 | PLAN 🟢 | 5m | ~$0.12 | Cache:40% | Ctx:22%
+◕‿◕ CB v5.3.0 | PLAN 🟢 | 5m | ~$0.12 | ♻1.2k/3k | Ctx:22%
 ```
 
 ### ACT Mode (With Agent)
 
 ```
-◕‿◕ CB v5.1.1 | ACT 🟢 | 18m | ~$1.05 | Cache:62% | Ctx:48%
+◕‿◕ CB v5.3.0 | ACT 🟢 | 18m | ~$1.05 | ♻8k/13k | Ctx:48%
 🤖 frontend-developer
 ```
 
 ### EVAL Mode (High Context)
 
 ```
-◕‿◕ CB v5.1.1 | EVAL 🟡 | 45m | ~$3.20 | Cache:71% | Ctx:73%
+◕‿◕ CB v5.3.0 | EVAL 🟡 | 45m | ~$3.20 | ♻24k/34k | Ctx:73%
 🤖 security-specialist
 ```
 
 ### AUTO Mode (Critical Context)
 
 ```
-◕‿◕ CB v5.1.1 | AUTO 🔴 | 1h12m | ~$8.50 | Cache:55% | Ctx:91%
+◕‿◕ CB v5.3.0 | AUTO 🔴 | 1h12m | ~$8.50 | ♻95k/172k | Ctx:91%
 🤖 code-quality-specialist
 ```
 
-### No Mode Set (Initial State)
+### No Mode Set (Initial State — Cache Segment Hidden)
 
 ```
-◕‿◕ CB v5.1.1 | Ready 🟢 | 0m | ~$0.00 | Cache:0% | Ctx:0%
+◕‿◕ CB v5.3.0 | Ready 🟢 | 0m | ~$0.00 | Ctx:0%
 ```
+
+> The cache segment is **omitted** in the initial state because no API calls have been made yet — there is no `current_usage` data to render. This is the documented fallback behavior, not a bug.
 
 ## Multiline Behavior
 
