@@ -306,6 +306,69 @@ class TestMcpVsStandaloneOutput:
             assert "mcp__codingbuddy__parse_mode" in result.stdout
 
 
+class TestBackendDiagnosticMarker:
+    """
+    #1384: standalone fallback visibility.
+
+    The hook must emit a `# Backend: ...` marker line so users can tell at
+    a glance whether mode handling is backed by the MCP server or by the
+    self-contained standalone engine. Without this marker users cannot
+    diagnose why enriched instructions are (or are not) being shown.
+    """
+
+    def _run_hook(self, prompt, home_dir, mcp_enabled, cwd=None):
+        import os as _os
+
+        hook_path = Path(__file__).parent / "user-prompt-submit.py"
+        input_data = json.dumps({"prompt": prompt})
+        env = _os.environ.copy()
+        env["HOME"] = str(home_dir)
+        env.pop("CODINGBUDDY_RULES_DIR", None)
+        # Pin CLAUDE_PROJECT_DIR so MCP detection does not depend on cwd.
+        env["CLAUDE_PROJECT_DIR"] = str(home_dir)
+        return subprocess.run(
+            [sys.executable, str(hook_path)],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=cwd or str(home_dir),
+        )
+
+    def test_standalone_backend_marker(self):
+        """Standalone fallback must be clearly labelled in the hook output."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            # No mcp.json anywhere => standalone path.
+
+            result = self._run_hook("PLAN: ship it", tmpdir, mcp_enabled=False)
+            assert result.returncode == 0
+            assert "# Backend: standalone" in result.stdout
+
+    def test_mcp_backend_marker(self):
+        """When MCP is available the marker must say mcp-enhanced."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            mcp_json = claude_dir / "mcp.json"
+            mcp_json.write_text(json.dumps({
+                "mcpServers": {
+                    "codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}
+                }
+            }))
+
+            result = self._run_hook("PLAN: ship it", tmpdir, mcp_enabled=True)
+            assert result.returncode == 0
+            assert "# Backend: mcp-enhanced" in result.stdout
+            # MCP branch must not leak standalone wording.
+            assert "# Backend: standalone" not in result.stdout
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__, "-v"])

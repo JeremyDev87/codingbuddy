@@ -74,18 +74,26 @@ def main():
                 if is_mcp_available(project_dir=project_dir):
                     # MCP mode: minimal output, parse_mode handles the rest
                     print(f"# Mode: {detected_mode}")
+                    print("# Backend: mcp-enhanced")
                     print(
                         "If mcp__codingbuddy__parse_mode is available, "
                         "call it for enhanced features."
                     )
                 else:
-                    # Standalone mode: full enriched instructions
+                    # Standalone mode: full enriched instructions.
+                    # Diagnostic marker (#1384): make it obvious to users that
+                    # the self-contained fallback is active and no MCP server
+                    # is required for mode handling.
+                    print("# Backend: standalone (self-contained, no MCP required)")
                     engine = ModeEngine(cwd=project_dir)
                     instructions = engine.build_instructions(detected_mode)
                     print(instructions)
             except Exception:
-                # Fallback: minimal instruction if imports fail
+                # Fallback: minimal instruction if imports fail.
+                # Still mark this as the standalone-minimal path so it is
+                # diagnosable post-hoc (#1384).
                 print(f"# Mode: {detected_mode}")
+                print("# Backend: standalone-minimal (import failure)")
                 print(
                     "If mcp__codingbuddy__parse_mode is available, "
                     "call it for enhanced features."
