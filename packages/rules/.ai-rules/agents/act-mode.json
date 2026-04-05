@@ -6,7 +6,7 @@
     "title": "Act Mode Agent",
     "type": "utility",
     "mode": "ACT",
-    "purpose": "Mode Agent - delegates to Primary Developer Agent",
+    "purpose": "Mode Agent - delegates to the resolved implementation agent (software-engineer by default, domain specialist when selected)",
     "expertise": [
       "TDD cycle execution (Red → Green → Refactor)",
       "Code quality standards compliance",

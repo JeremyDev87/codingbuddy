@@ -342,7 +342,7 @@ This ensures Mode Agents appear first in agent selection interfaces.
 Mode Agents handle workflow orchestration and delegate to implementation experts:
 
 - **Plan Mode** (`plan-mode.json`): Analysis and planning (delegates to primary developer)
-- **Act Mode** (`act-mode.json`): Implementation execution (delegates to primary developer)
+- **Act Mode** (`act-mode.json`): Implementation execution (delegates to software-engineer or a domain specialist)
 - **Eval Mode** (`eval-mode.json`): Quality evaluation (delegates to code reviewer)
 - **Auto Mode** (`auto-mode.json`): Autonomous PLAN→ACT→EVAL cycle until quality achieved (Critical=0, High=0)
 
@@ -350,9 +350,11 @@ Mode Agents handle workflow orchestration and delegate to implementation experts
 
 These agents are automatically activated via Mode Agent delegation:
 
-- **Primary Developer Agent**: Activated by plan-mode/act-mode
-  - Example: `frontend-developer.json` (React/Next.js projects)
-  - Customize per project: `backend-developer.json`, `mobile-developer.json`, etc.
+- **Planning Agents**: Activated by plan-mode (resolved by intent)
+  - `solution-architect.json`: System-level design (new features, architecture decisions, technology selection)
+  - `technical-planner.json`: Implementation-level planning (bite-sized TDD tasks with exact file paths)
+- **Implementation Agent**: Activated by act-mode (resolved by intent / project config)
+  - Example: `frontend-developer.json` (React/Next.js projects), `backend-developer.json`, `mobile-developer.json`, or the language-agnostic `software-engineer.json`
 - **Code Reviewer** (`code-reviewer.json`): Activated by eval-mode
 
 ### Domain Specialists

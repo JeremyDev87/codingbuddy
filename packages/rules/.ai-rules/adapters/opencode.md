@@ -145,11 +145,13 @@ Update your configuration file (`.opencode.json` or `crush.json`):
 
 | Codingbuddy Agent | OpenCode Agent | Purpose |
 |------------------|----------------|---------|
-| **plan-mode.json** | `plan-mode` | PLAN mode workflow (delegates to frontend-developer) |
-| **act-mode.json** | `act-mode` | ACT mode workflow (delegates to frontend-developer) |
+| **plan-mode.json** | `plan-mode` | PLAN mode workflow (delegates to solution-architect or technical-planner based on task complexity) |
+| **act-mode.json** | `act-mode` | ACT mode workflow (delegates to software-engineer or domain specialist per ACT resolution rules) |
 | **eval-mode.json** | `eval-mode` | EVAL mode workflow (delegates to code-reviewer) |
 | **auto-mode.json** | N/A (keyword-triggered) | AUTO mode workflow (autonomous PLAN→ACT→EVAL cycle) |
-| **frontend-developer.json** | N/A (delegate) | Primary development implementation |
+| **solution-architect.json** | N/A (delegate) | PLAN mode system-level design and architecture |
+| **technical-planner.json** | N/A (delegate) | PLAN mode implementation-level TDD planning |
+| **frontend-developer.json** | N/A (delegate) | ACT mode implementation for frontend projects |
 | **backend-developer.json** | `backend` | Backend development (Node.js, Python, Go, Java, Rust) |
 | **code-reviewer.json** | N/A (delegate) | Code quality evaluation implementation |
 | **architecture-specialist.json** | `architect` | Architecture and design patterns |
@@ -162,7 +164,7 @@ Update your configuration file (`.opencode.json` or `crush.json`):
 
 - **Mode Agents** (`plan-mode`, `act-mode`, `eval-mode`, `auto-mode`): Workflow orchestrators that delegate to appropriate implementation agents
 - **Specialist Agents** (`architect`, `security`, etc.): Domain-specific expertise for specialized tasks
-- **Delegate Agents** (`frontend-developer`, `code-reviewer`): Implementation agents that Mode Agents delegate to
+- **Delegate Agents**: PLAN mode delegates to `solution-architect` or `technical-planner`; ACT mode delegates to `software-engineer` or a domain specialist (e.g., `frontend-developer`, `backend-developer`); EVAL mode delegates to `code-reviewer`
 
 ### 3. MCP Server Integration
 
@@ -292,14 +294,16 @@ The `parse_mode` tool now returns additional Mode Agent information and dynamic 
   "language": "en",
   "languageInstruction": "Always respond in English.",
   "agent": "plan-mode",
-  "delegates_to": "frontend-developer",
+  "delegates_to": "solution-architect",
   "delegate_agent_info": {
-    "name": "Frontend Developer",
-    "description": "React/Next.js expert, TDD and design system experience",
-    "expertise": ["React", "Next.js", "TDD", "TypeScript"]
+    "name": "Solution Architect",
+    "description": "High-level system design and architecture planning specialist",
+    "expertise": ["System Architecture", "Technology Selection", "Integration Patterns", "Scalability Planning"]
   }
 }
 ```
+
+> **Note:** `delegates_to` is resolved dynamically based on prompt intent. System-level design prompts resolve to `solution-architect`; implementation-level planning prompts resolve to `technical-planner`.
 
 **New Fields:**
 - `language`: Language code from codingbuddy.config.json

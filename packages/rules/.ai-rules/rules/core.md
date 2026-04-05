@@ -87,9 +87,11 @@ feat(auth): add token validation with session management
 - After creating plan, user can type `ACT` to execute
 
 **🔴 Agent Activation (STRICT):**
-- When in PLAN mode, **Frontend Developer Agent** (`.ai-rules/agents/frontend-developer.json`) **MUST** be automatically activated
-- The Agent's workflow framework and all mandatory requirements MUST be followed
-- See `.ai-rules/agents/frontend-developer.json` for complete development framework
+- When in PLAN mode, either **Solution Architect** (`.ai-rules/agents/solution-architect.json`) or **Technical Planner** (`.ai-rules/agents/technical-planner.json`) **MUST** be automatically activated based on task complexity
+  - Use **Solution Architect** for system-level design (new features, architecture decisions, technology selection)
+  - Use **Technical Planner** for implementation-level planning (bite-sized TDD tasks with exact file paths)
+- The selected Planning Agent's workflow framework and all mandatory requirements MUST be followed
+- See `.ai-rules/agents/solution-architect.json` and `.ai-rules/agents/technical-planner.json` for complete planning frameworks
 
 **Purpose:**
 Create actionable implementation plans following TDD and augmented coding principles
@@ -219,15 +221,15 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
 
 ---
 
-**What PLAN does (with Primary Developer Agent):**
+**What PLAN does (via Solution Architect or Technical Planner):**
 
-1. **Analyze Requirements** (via Primary Developer Agent)
+1. **Analyze Requirements** (via selected Planning Agent)
    - Understand user requirements
    - Identify core logic vs presentation components
    - Determine TDD (test-first) vs Test-After approach
-   - 🔴 **Required**: Follow Primary Developer Agent's workflow framework
+   - 🔴 **Required**: Follow the selected Planning Agent's workflow framework (Solution Architect for system-level design, Technical Planner for implementation-level plans)
 
-2. **Plan Implementation** (via Primary Developer Agent workflow)
+2. **Plan Implementation** (via selected Planning Agent workflow)
    - 🔴 TDD for core logic (business logic, utilities, data access layers)
    - 🔴 Test-After for presentation (UI components, views)
    - Define file structure (types, constants, utils)
@@ -235,7 +237,7 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
    - Consider framework-specific component patterns
    - 🔴 **Required**: Reference Planning Specialist Agents for comprehensive planning (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 
-3. **Output Structured PLAN** (via Primary Developer Agent)
+3. **Output Structured PLAN** (via selected Planning Agent)
    - Step-by-step implementation plan
    - Clear task breakdown
    - File naming conventions
@@ -243,10 +245,10 @@ See `.ai-rules/rules/clarification-guide.md` for detailed question guidelines.
    - Type safety requirements
    - 🔴 **Required**: Create todo list using `todo_write` tool for all implementation steps
 
-**Output Format (via Primary Developer Agent):**
+**Output Format (via selected Planning Agent):**
 ```
 # Mode: PLAN
-## Agent : [Primary Developer Agent Name]
+## Agent : [Solution Architect | Technical Planner]
 
 ## 📋 Plan Overview
 [High-level summary of what will be implemented]
@@ -405,7 +407,7 @@ To preserve this planning session for future reference:
 ```
 
 **🔴 Required:**
-- All plans must follow the Primary Developer Agent's workflow framework
+- All plans must follow the selected Planning Agent's workflow framework (Solution Architect for system-level design, Technical Planner for implementation-level plans)
 - Respond in the language specified in the agent's communication.language setting
 - Follow framework-specific component patterns as defined in project configuration
 - 🔴 **MUST use `todo_write` tool** to create todo list for all implementation steps
@@ -415,11 +417,11 @@ To preserve this planning session for future reference:
 - Confidence levels: 🟢 High (0.8+), 🟡 Medium (0.5-0.79), 🔴 Low (<0.5)
 
 **Verification:**
-- Agent name should appear as `## Agent : [Primary Developer Agent Name]` in response
+- Agent name should appear as `## Agent : [Solution Architect | Technical Planner]` in response
 - Mode indicator `# Mode: PLAN` should be first line
 - Plan should include structured sections: Plan Overview, Structured Reasoning (COMPLEX only), Todo List (created with todo_write), Implementation Steps, Planning Specialist sections (when applicable), Risk Assessment, File Structure, Quality Checklist
 - Todo list must be created using `todo_write` tool before outputting plan
-- All mandatory checklist items from the Primary Developer Agent should be considered during planning
+- All mandatory checklist items from the selected Planning Agent should be considered during planning
 - Planning Specialist Agents should be referenced when planning respective areas (Architecture, Test Strategy, Performance, Security, Accessibility, SEO, Design System, Documentation, Code Quality)
 - **SRP Verification (COMPLEX tasks):**
   - Structured Reasoning section must be present
@@ -1020,7 +1022,8 @@ Autonomous iterative development - automatically cycling through planning, imple
 | `auto.maxIterations` | 3 | 1-10 | Maximum PLAN→ACT→EVAL cycles before forced exit |
 
 **🔴 Agent Activation (STRICT):**
-- When AUTO mode is triggered, **Primary Developer Agent** (e.g., `.ai-rules/agents/frontend-developer.json`) **MUST** be automatically activated for PLAN and ACT phases
+- When AUTO mode is triggered, the PLAN phase **MUST** activate **Solution Architect** (`.ai-rules/agents/solution-architect.json`) or **Technical Planner** (`.ai-rules/agents/technical-planner.json`) based on task complexity
+- During the ACT phase, the resolved implementation agent (e.g., **Software Engineer** `.ai-rules/agents/software-engineer.json` or a domain specialist) **MUST** be automatically activated per ACT mode resolution rules
 - During EVAL phase, **Code Reviewer Agent** (`.ai-rules/agents/code-reviewer.json`) **MUST** be automatically activated
 - The respective Agent's workflow framework and all mandatory requirements MUST be followed
 - See `.ai-rules/agents/` for complete agent frameworks
@@ -1118,8 +1121,8 @@ Attempted Approaches:
 | Time efficiency | Optimized for quality | Optimized for control |
 
 **🔴 Required:**
-- All PLAN phases must follow the Primary Developer Agent's workflow framework
-- All ACT phases must follow the Primary Developer Agent's code quality checklist
+- All PLAN phases must follow the selected Planning Agent's workflow framework (Solution Architect or Technical Planner)
+- All ACT phases must follow the resolved implementation agent's code quality checklist (Software Engineer or domain specialist)
 - All EVAL phases must follow the Code Reviewer Agent's evaluation framework
 - Respond in the language specified in the agent's communication.language setting
 - Continue iterating automatically until exit conditions are met (Critical = 0 AND High = 0)
@@ -1159,9 +1162,19 @@ Key principles:
 
 Specialized agents available in `.ai-rules/agents/` directory:
 
+**Solution Architect** (`.ai-rules/agents/solution-architect.json`)
+- **Expertise**: System-level architecture, technology selection, integration patterns, scalability planning
+- **Use when**: 🔴 **STRICT**: In PLAN mode for system-level design tasks (new features, architecture decisions, technology selection); activated automatically via intent pattern resolution
+- **Key traits**: Brainstorm-first, multiple options with trade-offs, incremental validation
+
+**Technical Planner** (`.ai-rules/agents/technical-planner.json`)
+- **Expertise**: Implementation planning, TDD strategy, task decomposition, bite-sized tasks with exact file paths
+- **Use when**: 🔴 **STRICT**: In PLAN mode for implementation-level planning (TDD task sequences, concrete code changes); activated automatically via intent pattern resolution
+- **Key traits**: TDD-first, complete-code plans (no placeholders), exact file paths, Red-Green-Refactor-Commit structure
+
 **Frontend Developer** (`.ai-rules/agents/frontend-developer.json`)
 - **Expertise**: Frontend frameworks, component architecture, TDD, design system
-- **Use when**: 🔴 **STRICT**: When in PLAN or ACT mode, this Agent **MUST** be activated automatically (for frontend projects)
+- **Use when**: 🔴 **STRICT**: In ACT mode for frontend projects, this Agent is activated as the resolved implementation agent
 - **Key traits**: Framework best practices, design system priority, accessibility focused
 
 **Code Reviewer** (`.ai-rules/agents/code-reviewer.json`)
@@ -1185,7 +1198,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - **Expertise**: SOLID principles, DRY, complexity analysis, design patterns
 - **Use when**: Code quality framework is referenced within PLAN/ACT/EVAL modes for comprehensive code quality planning/implementation/evaluation
 - **Key traits**: SOLID-focused, DRY enforcement, complexity analysis, design pattern expertise
-- **Integration**: Frontend Developer Agent utilizes Code Quality Specialist modes.planning/implementation during PLAN/ACT modes. Code Reviewer Agent utilizes Code Quality Specialist modes.evaluation during EVAL mode code quality assessment
+- **Integration**: Planning Agents (Solution Architect, Technical Planner) utilize Code Quality Specialist modes.planning during PLAN mode; the resolved implementation agent utilizes modes.implementation during ACT mode. Code Reviewer Agent utilizes Code Quality Specialist modes.evaluation during EVAL mode code quality assessment
 
 **Architecture Specialist** (`.ai-rules/agents/architecture-specialist.json`)
 - **Expertise**: Layer boundaries, dependency direction, type safety, pure/impure separation
@@ -1345,8 +1358,8 @@ Specialized agents available in `.ai-rules/agents/` directory:
 **Code Quality Specialist** (`@.ai-rules/agents/code-quality-specialist.json`)
 
 ✅ **Use for (Integrated with PLAN/ACT/EVAL):**
-- Code quality planning is automatically included in PLAN mode via Primary Developer Agent (modes.planning)
-- Code quality implementation verification is automatically included in ACT mode via Primary Developer Agent (modes.implementation)
+- Code quality planning is automatically included in PLAN mode via the selected Planning Agent (Solution Architect or Technical Planner) (modes.planning)
+- Code quality implementation verification is automatically included in ACT mode via the resolved implementation agent (Software Engineer or domain specialist) (modes.implementation)
 - Code quality assessment is automatically included in EVAL mode via Code Reviewer Agent (modes.evaluation)
 - SOLID principles planning/verification/review
 - DRY strategy planning/verification/review
@@ -1357,7 +1370,7 @@ Specialized agents available in `.ai-rules/agents/` directory:
 - Code quality planning is part of PLAN mode mandatory perspectives
 - Code quality implementation verification is part of ACT mode mandatory perspectives
 - Code quality evaluation is part of EVAL mode mandatory perspectives
-- Primary Developer Agent references Code Quality Specialist modes.planning/implementation during PLAN/ACT modes
+- Planning Agents (Solution Architect, Technical Planner) reference Code Quality Specialist modes.planning during PLAN mode; the resolved implementation agent references modes.implementation during ACT mode
 - Code Reviewer Agent references Code Quality Specialist modes.evaluation during EVAL mode
 - Reference SOLID principles, DRY, complexity metrics
 - Provide specific planning/verification/review recommendations

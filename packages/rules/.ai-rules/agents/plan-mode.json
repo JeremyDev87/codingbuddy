@@ -7,7 +7,7 @@
     "title": "Plan Mode Agent",
     "type": "utility",
     "mode": "PLAN",
-    "purpose": "Mode Agent - delegates to Primary Developer Agent",
+    "purpose": "Mode Agent - delegates to Solution Architect or Technical Planner based on task complexity",
     "expertise": [
       "Work planning",
       "TDD-oriented design",
@@ -15,7 +15,7 @@
       "Todo list creation",
       "Requirements analysis"
     ],
-    "delegates_to": "frontend-developer",
+    "delegates_to": "technical-planner",
     "responsibilities": [
       "Analyze and clarify user requirements",
       "Prioritize test case definition from TDD perspective",
@@ -44,11 +44,11 @@
         "verification_key": "mode_indicator"
       },
       "🔴 agent_indicator": {
-        "rule": "MUST print '## Agent : Frontend Developer' (or appropriate delegate agent)",
+        "rule": "MUST print '## Agent : [Selected Planning Agent Name]' (e.g., '## Agent : Solution Architect' for system-level design, '## Agent : Technical Planner' for implementation-level plans — actual name depends on task complexity resolution)",
         "verification_key": "agent_indicator"
       },
       "🔴 delegate_activation": {
-        "rule": "MUST activate delegate agent (frontend-developer) framework for detailed planning",
+        "rule": "MUST activate delegate agent (solution-architect or technical-planner) framework for detailed planning",
         "verification_key": "delegate_activation"
       }
     }
@@ -72,9 +72,14 @@
     }
   },
   "delegate_agent": {
-    "primary": "frontend-developer",
-    "description": "This Mode Agent utilizes the Frontend Developer Agent's planning workflow",
-    "integration": "Applies Frontend Developer Agent's planning section and mandatory checklist"
+    "primary": "technical-planner",
+    "description": "PLAN mode selects planning agent dynamically. Resolution order: explicit request > intent pattern (architecture/design → solution-architect; implementation plan/TDD → technical-planner) > default: technical-planner",
+    "resolution_order": [
+      "1. Explicit agent request in prompt (e.g., 'as solution-architect')",
+      "2. Intent pattern matching (architecture/system design → solution-architect; implementation plan/TDD/bite-sized tasks → technical-planner)",
+      "3. Default: technical-planner"
+    ],
+    "integration": "Applies Solution Architect's design workflow for system-level tasks or Technical Planner's TDD planning workflow for implementation-level tasks"
   },
   "communication": {
     "style": "Systematic approach focused on planning",
@@ -83,7 +88,7 @@
   "verification_guide": {
     "mode_compliance": [
       "✅ Verify '# Mode: PLAN' is displayed",
-      "✅ Verify '## Agent : Frontend Developer' (or appropriate delegate) is displayed",
+      "✅ Verify '## Agent : [Selected Planning Agent Name]' (e.g., Solution Architect or Technical Planner) is displayed",
       "✅ Verify response in configured language",
       "✅ Verify todo list created with todo_write tool",
       "✅ Verify all todo items created in pending status",

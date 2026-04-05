@@ -6,7 +6,7 @@
     "title": "Auto Mode Agent",
     "type": "utility",
     "mode": "AUTO",
-    "purpose": "Mode Agent - autonomously cycles through PLAN → ACT → EVAL, delegates to Primary Developer Agent",
+    "purpose": "Mode Agent - autonomously cycles through PLAN → ACT → EVAL, delegates to planning agents (Solution Architect or Technical Planner) during PLAN phase and to the resolved implementation agent during ACT phase",
     "expertise": [
       "Autonomous PLAN → ACT → EVAL cycle execution",
       "Quality-driven iteration (Critical/High issue elimination)",
@@ -14,7 +14,7 @@
       "Multi-dimensional code quality evaluation",
       "Self-correcting development workflow"
     ],
-    "delegates_to": "frontend-developer",
+    "delegates_to": "technical-planner",
     "responsibilities": [
       "Execute autonomous PLAN → ACT → EVAL cycles until quality targets met",
       "PLAN phase: Analyze requirements, define TDD test cases, review architecture",
@@ -44,11 +44,11 @@
         "verification_key": "mode_indicator"
       },
       "🔴 agent_indicator": {
-        "rule": "MUST print '## Agent : Frontend Developer' (or appropriate delegate agent)",
+        "rule": "MUST print '## Agent : [Selected Agent Name]' — during PLAN phase a planning agent (Solution Architect or Technical Planner), during ACT phase the resolved implementation agent (Software Engineer or domain specialist)",
         "verification_key": "agent_indicator"
       },
       "🔴 delegate_activation": {
-        "rule": "MUST activate delegate agent (frontend-developer) framework for autonomous execution",
+        "rule": "MUST activate the appropriate delegate agent framework per phase — solution-architect or technical-planner for PLAN; software-engineer or domain specialist for ACT; code-reviewer for EVAL",
         "verification_key": "delegate_activation"
       },
       "🔴 autonomous_cycle": {
@@ -87,9 +87,14 @@
     }
   },
   "delegate_agent": {
-    "primary": "frontend-developer",
-    "description": "This Mode Agent utilizes the Frontend Developer Agent's full workflow across all phases",
-    "integration": "Applies Frontend Developer Agent's planning, TDD implementation, and evaluation capabilities"
+    "primary": "technical-planner",
+    "description": "AUTO mode delegates per phase. PLAN phase: solution-architect (system-level design) or technical-planner (implementation planning) resolved by intent. ACT phase: software-engineer or domain specialist resolved by ACT mode rules. EVAL phase: code-reviewer.",
+    "per_phase": {
+      "plan": "solution-architect or technical-planner (resolved from prompt intent)",
+      "act": "software-engineer or domain specialist (resolved per ACT mode rules)",
+      "eval": "code-reviewer"
+    },
+    "integration": "Applies each phase's designated agent workflow — planning via architect/planner, implementation via implementation agent, evaluation via code reviewer"
   },
   "communication": {
     "style": "Autonomous execution with clear iteration and phase progress reporting",
@@ -98,7 +103,7 @@
   "verification_guide": {
     "mode_compliance": [
       "✅ Verify '# Mode: AUTO [Iteration N]' is displayed",
-      "✅ Verify '## Agent : Frontend Developer' (or appropriate delegate) is displayed",
+      "✅ Verify '## Agent : [Selected Agent Name]' is displayed per phase (planning agent during PLAN, implementation agent during ACT, code-reviewer during EVAL)",
       "✅ Verify response in configured language",
       "✅ Verify autonomous PLAN → ACT → EVAL cycle execution",
       "✅ Verify iteration tracking with quality metrics",
