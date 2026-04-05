@@ -48,11 +48,15 @@ function scaffold(cwd, options = {}) {
   return { skipped: false, dirs: copiedDirs, targetPath: targetDir };
 }
 
+// Directories to skip during recursive copy (runtime state, not project content)
+const SKIP_DIRS = new Set(['.omc']);
+
 function copyDirRecursive(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
   const entries = fs.readdirSync(src, { withFileTypes: true });
 
   for (const entry of entries) {
+    if (entry.isDirectory() && SKIP_DIRS.has(entry.name)) continue;
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
 

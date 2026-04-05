@@ -24,6 +24,7 @@ from hud_helpers import (
     on_tool_start,
     on_tool_end,
     on_session_stop,
+    read_installed_version,
     _detect_focus,
     _detect_strategy,
     _extract_mode_from_parse_mode,
@@ -408,3 +409,42 @@ class TestFullLifecycle:
         assert state["executionStrategy"] is None
         # Session metadata survives
         assert state["sessionId"] == "lifecycle-test"
+
+
+class TestReadInstalledVersion:
+    """Tests for read_installed_version() — reads from installed_plugins.json."""
+
+    def test_returns_version_from_valid_json(self, tmp_path):
+        plugins_json = tmp_path / "installed_plugins.json"
+        plugins_json.write_text(json.dumps({
+            "version": 2,
+            "plugins": {
+                "codingbuddy@jeremydev87": [{
+                    "version": "5.3.0",
+                    "installPath": "/some/path",
+                }]
+            }
+        }))
+        result = read_installed_version(plugins_file=str(plugins_json))
+        assert result == "5.3.0"
+
+    def test_returns_none_when_file_missing(self, tmp_path):
+        result = read_installed_version(plugins_file=str(tmp_path / "nonexistent.json"))
+        assert result is None
+
+    def test_returns_none_when_no_codingbuddy_entry(self, tmp_path):
+        plugins_json = tmp_path / "installed_plugins.json"
+        plugins_json.write_text(json.dumps({
+            "version": 2,
+            "plugins": {
+                "other-plugin@foo": [{"version": "1.0.0"}]
+            }
+        }))
+        result = read_installed_version(plugins_file=str(plugins_json))
+        assert result is None
+
+    def test_returns_none_on_malformed_json(self, tmp_path):
+        plugins_json = tmp_path / "installed_plugins.json"
+        plugins_json.write_text("not valid json{{{")
+        result = read_installed_version(plugins_file=str(plugins_json))
+        assert result is None

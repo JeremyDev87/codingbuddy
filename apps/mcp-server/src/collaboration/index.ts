@@ -33,10 +33,3 @@ export {
   type SpecialistFinding,
   type SpecialistResult,
 } from './opinion-adapter';
-export type {
-  CouncilInput,
-  CouncilSummary,
-  Disagreement,
-  DisagreementPosition,
-} from './council-summary.types';
-export { generateCouncilSummary } from './council-summary.service';

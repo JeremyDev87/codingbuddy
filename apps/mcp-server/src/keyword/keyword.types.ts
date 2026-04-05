@@ -1,6 +1,5 @@
 import type { DiffAnalysisResult } from './diff-analyzer';
 import type { CouncilPreset } from '../agent/council-preset.types';
-import type { CouncilSummary } from '../collaboration/council-summary.types';
 import type { ExecutionPlan } from '../agent/execution-plan.types';
 import type { TeamsCapabilityStatus } from '../agent/teams-capability.types';
 
@@ -518,13 +517,6 @@ export interface ParseModeResult {
    * that form the council for that mode. Absent for ACT/AUTO modes.
    */
   councilPreset?: CouncilPreset;
-  /**
-   * @apiProperty External API - do not rename.
-   * Structured consensus summary from specialist council outputs.
-   * Present only when specialist results have been collected and aggregated.
-   * Clients should treat this as read-only diagnostic data.
-   */
-  councilSummary?: CouncilSummary;
   /**
    * @apiProperty External API - do not rename.
    * Describes the outer execution transport and optional inner coordination layer.

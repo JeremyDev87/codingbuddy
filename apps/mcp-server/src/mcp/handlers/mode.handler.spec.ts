@@ -1347,16 +1347,6 @@ describe('ModeHandler', () => {
       expect(parsed.councilPreset).toBeUndefined();
     });
 
-    it('should not include councilSummary when no specialist results exist', async () => {
-      const result = await handler.handle('parse_mode', {
-        prompt: 'PLAN design feature',
-      });
-
-      expect(result?.isError).toBeFalsy();
-      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
-      expect(parsed.councilSummary).toBeUndefined();
-    });
-
     it('councilPreset should be serializable JSON', async () => {
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design feature',

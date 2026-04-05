@@ -56,4 +56,31 @@ describe('scaffold', () => {
     assert.ok(result.dirs.includes('rules'));
     assert.ok(result.dirs.includes('agents'));
   });
+
+  it('does not copy .omc directories', () => {
+    // Create a temporary source with .omc inside agents/
+    const customSource = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-src-'));
+    const agentsDir = path.join(customSource, 'agents');
+    const omcDir = path.join(agentsDir, '.omc', 'state');
+    fs.mkdirSync(omcDir, { recursive: true });
+    fs.writeFileSync(path.join(omcDir, 'hud-state.json'), '{}');
+    // Also add a normal agent file
+    fs.writeFileSync(path.join(agentsDir, 'test-agent.json'), '{}');
+    // Add rules dir
+    const rulesDir = path.join(customSource, 'rules');
+    fs.mkdirSync(rulesDir, { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'core.md'), '# Core');
+
+    scaffold(tmpDir, { source: customSource });
+
+    // .omc should NOT exist in scaffolded output
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, '.ai-rules', 'agents', '.omc')),
+      '.omc directory should not be copied during scaffold',
+    );
+    // Normal agent file should exist
+    assert.ok(fs.existsSync(path.join(tmpDir, '.ai-rules', 'agents', 'test-agent.json')));
+
+    fs.rmSync(customSource, { recursive: true, force: true });
+  });
 });

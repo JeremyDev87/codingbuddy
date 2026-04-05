@@ -14,10 +14,37 @@ Field ownership:
 
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 from typing import Optional
 
 from hud_state import update_hud_state
+
+_DEFAULT_PLUGINS_FILE = str(
+    Path.home() / ".claude" / "plugins" / "installed_plugins.json"
+)
+
+
+def read_installed_version(
+    plugins_file: str = _DEFAULT_PLUGINS_FILE,
+) -> Optional[str]:
+    """Read codingbuddy version from installed_plugins.json.
+
+    Returns the version string or None if unavailable.
+    Accepts an explicit *plugins_file* path for testing.
+    """
+    try:
+        path = Path(plugins_file)
+        if not path.exists():
+            return None
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for key, entries in data.get("plugins", {}).items():
+            if "codingbuddy" in key and entries:
+                return entries[0].get("version")
+    except Exception:
+        return None
+    return None
 
 # Map mode -> initial phase value
 _MODE_PHASE_MAP = {

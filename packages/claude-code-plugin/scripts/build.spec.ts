@@ -215,12 +215,14 @@ describe('README messaging', () => {
 
   it('includes the Feature Availability table', () => {
     expect(readmeContent).toContain('## Feature Availability');
-    expect(readmeContent).toContain('| Feature | Standalone | With MCP |');
+    expect(readmeContent).toContain('| Feature');
+    expect(readmeContent).toContain('Standalone');
+    expect(readmeContent).toContain('With MCP');
   });
 
   it('shows standalone features in the availability table', () => {
     expect(readmeContent).toContain('PLAN/ACT/EVAL/AUTO keyword triggers');
-    expect(readmeContent).toContain('Slash commands (codingbuddy:*)');
+    expect(readmeContent).toContain('Slash commands');
   });
 });
 

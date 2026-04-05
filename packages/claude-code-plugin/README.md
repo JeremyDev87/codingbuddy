@@ -2,7 +2,7 @@
 
 # CodingBuddy Claude Code Plugin
 
-> Version 5.2.0
+> Version 5.3.0
 
 Multi-AI Rules for consistent coding practices - PLAN/ACT/EVAL workflow, specialist agents, and reusable skills for systematic development.
 
@@ -63,15 +63,17 @@ Reusable workflows for consistent development:
 
 The plugin works standalone with core features. MCP integration unlocks the full experience:
 
-| Feature | Standalone | With MCP |
-|---------|:----------:|:--------:|
-| PLAN/ACT/EVAL/AUTO keyword triggers | ✅ | ✅ |
-| Specialist agent prompts | ✅ | ✅ |
-| Slash commands (codingbuddy:*) | ✅ | ✅ |
-| Dynamic checklists | — | ✅ |
-| Context persistence across modes | — | ✅ |
-| Rule search & impact reports | — | ✅ |
-| Session briefings & recovery | — | ✅ |
+| Feature                              | Standalone | With MCP |
+| ------------------------------------ | :--------: | :------: |
+| PLAN/ACT/EVAL/AUTO keyword triggers  |     ✅     |    ✅    |
+| Specialist agent prompts             |   ⚠️ ¹    |    ✅    |
+| Slash commands (codingbuddy:\*)      |     ✅     |    ✅    |
+| Dynamic checklists                   |     —      |    ✅    |
+| Context persistence across modes     |     —      |    ✅    |
+| Rule search & impact reports         |     —      |    ✅    |
+| Session briefings & recovery         |     —      |    ✅    |
+
+> ¹ Standalone specialist prompts require a local `.ai-rules/` directory. Run `npx codingbuddy-rules init` to scaffold it. See [#1216](https://github.com/JeremyDev87/codingbuddy/issues/1216) for the standalone enhancement roadmap.
 
 ## MCP Integration (Recommended)
 

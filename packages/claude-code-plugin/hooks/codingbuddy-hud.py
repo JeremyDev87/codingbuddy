@@ -329,20 +329,45 @@ def format_badge_line(agent: str, focus: str, blocker_count) -> str:
     return " ".join(badges)
 
 
+def _get_fresh_version(hud_state: dict, *, plugins_file: str = "") -> str:
+    """Return the most current plugin version.
+
+    Prefers installed_plugins.json (authoritative after updates)
+    over the hud-state snapshot written at session start.
+    Pass *plugins_file* explicitly for testing.
+    """
+    try:
+        lib_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib")
+        if lib_dir not in sys.path:
+            sys.path.insert(0, lib_dir)
+        from hud_helpers import read_installed_version
+
+        kwargs = {"plugins_file": plugins_file} if plugins_file else {}
+        fresh = read_installed_version(**kwargs)
+        if fresh:
+            return fresh
+    except Exception:
+        pass
+    return hud_state.get("version", "")
+
+
 def format_status_line(
     stdin_data: dict,
     hud_state: dict,
     active_agent: str = "",
+    *,
+    plugins_file: str = "",
 ) -> str:
     """Format the statusLine output.
 
     Fallback order per field:
+      version  → installed_plugins.json > hud-state.version
       cost     → stdin cost.total_cost_usd  > estimate_cost()
       duration → stdin cost.total_duration_ms > hud-state sessionStartTimestamp
       agent    → stdin agent.name > hud_state.activeAgent > active_agent param
       model    → stdin model.display_name > model.id
     """
-    version = hud_state.get("version", "")
+    version = _get_fresh_version(hud_state, plugins_file=plugins_file)
     mode = hud_state.get("currentMode")
     mode_label = mode if mode else "Ready"
 

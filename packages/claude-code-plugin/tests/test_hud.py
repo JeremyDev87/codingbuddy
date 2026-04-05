@@ -304,6 +304,9 @@ class TestFormatWorktree:
 
 
 class TestFormatStatusLine:
+    # Use a nonexistent plugins_file to isolate from real installed_plugins.json
+    _NO_PLUGINS = "/tmp/_nonexistent_plugins_.json"
+
     def test_full_output_with_mode(self):
         stdin = {
             "model": {"id": "claude-opus-4-6", "display_name": "Opus"},
@@ -322,7 +325,7 @@ class TestFormatStatusLine:
             "sessionStartTimestamp": datetime.now(timezone.utc).isoformat(),
             "currentMode": "PLAN",
         }
-        result = hud.format_status_line(stdin, state)
+        result = hud.format_status_line(stdin, state, plugins_file=self._NO_PLUGINS)
         assert "\u25d5\u203f\u25d5" in result  # ◕‿◕
         assert "PLAN" in result
         assert "5.1.1" in result
