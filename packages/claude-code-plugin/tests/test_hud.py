@@ -96,34 +96,122 @@ class TestEstimateCost:
         assert cost_with < cost_no
 
 
-class TestCacheHitRate:
-    def test_no_cache(self):
-        assert hud.compute_cache_hit_rate({}) == 0.0
+class TestFormatCacheSegment:
+    """Tests for the raw cache token display (#1355).
 
-    def test_zero_tokens(self):
+    The status-bar cache segment reflects the most recent API call only,
+    not session-wide cache efficiency. It must render raw tokens instead
+    of a percentage to avoid misleading users.
+    """
+
+    def test_no_context_window(self):
+        """Empty context window → safe fallback (empty string)."""
+        assert hud.format_cache_segment({}) == ""
+
+    def test_null_current_usage(self):
+        """current_usage missing → safe fallback (empty string)."""
+        assert hud.format_cache_segment({"current_usage": None}) == ""
+        assert hud.format_cache_segment({"current_usage": {}}) == ""
+
+    def test_input_tokens_only_no_cache_read(self):
+        """input_tokens > 0 with no cache read → 0/total."""
         ctx = {"current_usage": {
-            "input_tokens": 0,
+            "input_tokens": 1000,
             "cache_creation_input_tokens": 0,
             "cache_read_input_tokens": 0,
         }}
-        assert hud.compute_cache_hit_rate(ctx) == 0.0
+        result = hud.format_cache_segment(ctx)
+        assert "0/1k" in result
 
-    def test_partial_cache(self):
+    def test_partial_cache_read(self):
+        """Partial cache read → raw numerator/denominator."""
         ctx = {"current_usage": {
             "input_tokens": 500,
             "cache_creation_input_tokens": 200,
             "cache_read_input_tokens": 800,
         }}
-        rate = hud.compute_cache_hit_rate(ctx)
-        assert 53 < rate < 54  # 800/1500 = 53.3%
+        result = hud.format_cache_segment(ctx)
+        # numerator=800, denominator=500+200+800=1500
+        assert "800" in result
+        assert "1500" in result or "1.5k" in result
 
-    def test_full_cache(self):
+    def test_full_cache_read_shows_raw_not_100pct(self):
+        """Full cache read → shows raw tokens, NOT `100%`."""
         ctx = {"current_usage": {
             "input_tokens": 0,
             "cache_creation_input_tokens": 0,
             "cache_read_input_tokens": 1000,
         }}
-        assert hud.compute_cache_hit_rate(ctx) == 100.0
+        result = hud.format_cache_segment(ctx)
+        assert "100%" not in result
+        assert "1k/1k" in result
+
+    def test_large_values_use_k_format(self):
+        """Large values compact as `Nk`."""
+        ctx = {"current_usage": {
+            "input_tokens": 50000,
+            "cache_creation_input_tokens": 78000,
+            "cache_read_input_tokens": 128000,
+        }}
+        result = hud.format_cache_segment(ctx)
+        # numerator=128000 → 128k, denominator=256000 → 256k
+        assert "128k" in result
+        assert "256k" in result
+
+    def test_regression_no_percent_in_output(self):
+        """REGRESSION: Cache segment must never render `%`."""
+        ctx = {"current_usage": {
+            "input_tokens": 500,
+            "cache_creation_input_tokens": 200,
+            "cache_read_input_tokens": 800,
+        }}
+        result = hud.format_cache_segment(ctx)
+        assert "%" not in result
+
+
+class TestFormatStatusLineCacheSegment:
+    """Integration: final status-line output includes raw cache segment (#1354)."""
+
+    _NO_PLUGINS = "/tmp/_nonexistent_plugins_.json"
+
+    def test_status_line_no_longer_contains_cache_percent(self):
+        """REGRESSION: `Cache:XX%` must never appear in format_status_line output."""
+        stdin = {
+            "context_window": {
+                "used_percentage": 45,
+                "current_usage": {
+                    "input_tokens": 1000,
+                    "cache_creation_input_tokens": 500,
+                    "cache_read_input_tokens": 2000,
+                },
+            },
+        }
+        result = hud.format_status_line(stdin, {}, plugins_file=self._NO_PLUGINS)
+        assert "Cache:" not in result
+        assert "%" in result  # Ctx:45% is still a percentage — only cache changes
+
+    def test_status_line_contains_raw_cache_tokens(self):
+        """format_status_line renders raw cache token segment."""
+        stdin = {
+            "context_window": {
+                "used_percentage": 45,
+                "current_usage": {
+                    "input_tokens": 1000,
+                    "cache_creation_input_tokens": 500,
+                    "cache_read_input_tokens": 2000,
+                },
+            },
+        }
+        result = hud.format_status_line(stdin, {}, plugins_file=self._NO_PLUGINS)
+        # cache_read=2000 → 2k, total=3500 → 3.5k
+        assert "2k/3.5k" in result
+
+    def test_status_line_hides_cache_when_usage_absent(self):
+        """Missing current_usage → cache segment is hidden, status line still renders."""
+        stdin = {"context_window": {"used_percentage": 10}}
+        result = hud.format_status_line(stdin, {}, plugins_file=self._NO_PLUGINS)
+        assert "Cache:" not in result
+        assert "Ctx:10%" in result  # other segments still present
 
 
 class TestHealth:

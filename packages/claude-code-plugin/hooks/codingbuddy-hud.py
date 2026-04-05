@@ -131,20 +131,53 @@ def estimate_cost(model_id: str, context_window: dict) -> float:
     return input_cost + cache_write_cost + cache_read_cost + output_cost
 
 
-def compute_cache_hit_rate(context_window: dict) -> float:
-    """Compute cache hit rate as percentage (0-100)."""
-    usage = context_window.get("current_usage", {})
-    if not usage:
-        return 0.0
+def format_compact_tokens(n: int) -> str:
+    """Format token count compactly for status-bar display.
 
-    input_tokens = usage.get("input_tokens", 0)
-    cache_write = usage.get("cache_creation_input_tokens", 0)
-    cache_read = usage.get("cache_read_input_tokens", 0)
+    - < 1000 → raw integer (e.g. `532`)
+    - >= 1000 → `Nk` with one decimal trimmed of trailing `.0` (e.g. `1.5k`, `128k`)
+    """
+    try:
+        value = int(n)
+    except (TypeError, ValueError):
+        return "0"
+    if value < 1000:
+        return str(value)
+    k = value / 1000.0
+    # Trim trailing .0 for whole thousands
+    if k == int(k):
+        return f"{int(k)}k"
+    return f"{k:.1f}k"
+
+
+def format_cache_segment(context_window: dict) -> str:
+    """Render the cache segment as raw tokens from the latest API call.
+
+    IMPORTANT: `context_window.current_usage` from Claude Code stdin reflects
+    **only the most recent API call**, not cumulative session cache usage.
+    This helper therefore renders raw token counts (numerator/denominator)
+    rather than a percentage, which users tend to misread as session-wide
+    cache efficiency (#1355, #1356).
+
+    Numerator   = `cache_read_input_tokens`
+    Denominator = `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`
+
+    Returns an empty string when usage data is missing so the caller can
+    omit the segment entirely from the status line.
+    """
+    usage = context_window.get("current_usage") if context_window else None
+    if not usage:
+        return ""
+
+    input_tokens = usage.get("input_tokens", 0) or 0
+    cache_write = usage.get("cache_creation_input_tokens", 0) or 0
+    cache_read = usage.get("cache_read_input_tokens", 0) or 0
     total = input_tokens + cache_write + cache_read
 
     if total == 0:
-        return 0.0
-    return (cache_read / total) * 100
+        return ""
+
+    return f"\u267b{format_compact_tokens(cache_read)}/{format_compact_tokens(total)}"
 
 
 def get_health(ctx_pct: float) -> str:
@@ -378,7 +411,7 @@ def format_status_line(
     model_id, display_name = resolve_model_label(stdin_data)
     cost, is_exact = resolve_cost(stdin_data, model_id, ctx_window)
     duration = resolve_duration(stdin_data, hud_state)
-    cache = compute_cache_hit_rate(ctx_window)
+    cache_segment = format_cache_segment(ctx_window)
     agent = resolve_agent(stdin_data, hud_state, active_agent)
 
     cost_prefix = "$" if is_exact else "~$"
@@ -390,9 +423,10 @@ def format_status_line(
         f"{mode_label} {health}",
         duration,
         f"{cost_prefix}{cost:.2f}",
-        f"Cache:{cache:.0f}%",
-        f"Ctx:{ctx_pct:.0f}%",
     ]
+    if cache_segment:
+        segments.append(cache_segment)
+    segments.append(f"Ctx:{ctx_pct:.0f}%")
 
     rl = format_rate_limits(stdin_data)
     if rl:
