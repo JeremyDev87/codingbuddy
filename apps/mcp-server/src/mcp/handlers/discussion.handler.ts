@@ -10,11 +10,18 @@ import {
 } from '../../shared/validation.constants';
 import type {
   AgentOpinion,
+  DisabledDiscussionResult,
   DiscussionResult,
+  ExperimentalDiscussionResult,
   OpinionSeverity,
   ConsensusStatus,
 } from './discussion.types';
-import { VALID_SEVERITIES } from './discussion.types';
+import {
+  DISABLED_DISCUSSION_REASON,
+  EXPERIMENTAL_DISCUSSION_ENV,
+  EXPERIMENTAL_DISCUSSION_WARNING,
+  VALID_SEVERITIES,
+} from './discussion.types';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
 
 /**
@@ -37,8 +44,16 @@ const SEVERITY_ORDER: readonly OpinionSeverity[] = ['info', 'low', 'medium', 'hi
 /**
  * Handler for the agent_discussion tool.
  *
- * Collects opinions from multiple specialist agents on a given topic,
- * detects consensus or disagreement, and returns a structured discussion result.
+ * EXPERIMENTAL — disabled by default. Current output is templated synthesis of
+ * specialist opinions rather than real specialist execution, so it does NOT
+ * represent collective intelligence from live agents. The tool returns a
+ * {@link DisabledDiscussionResult} unless the caller explicitly opts in via
+ * `CODINGBUDDY_EXPERIMENTAL_DISCUSSION=1`, in which case it returns an
+ * {@link ExperimentalDiscussionResult} that carries a warning banner so
+ * consumers cannot mistake the output for a real multi-agent debate.
+ *
+ * A follow-up effort should rebuild this on top of real specialist dispatch;
+ * until then callers should prefer `dispatch_agents` for actual expert input.
  */
 @Injectable()
 export class DiscussionHandler extends AbstractHandler {
@@ -67,9 +82,12 @@ export class DiscussionHandler extends AbstractHandler {
       {
         name: 'agent_discussion',
         description:
-          'Conduct a structured discussion among specialist agents on a given topic. ' +
-          'Collects opinions from each specialist, detects consensus or disagreement, ' +
-          'and returns a structured summary with severity assessments.',
+          '[EXPERIMENTAL — disabled by default] Produces templated synthesis of ' +
+          'specialist opinions, not real specialist execution. The output does ' +
+          'not reflect collective intelligence from live agents; treat it as a ' +
+          'placeholder until the rebuild lands. Enable by setting ' +
+          `${EXPERIMENTAL_DISCUSSION_ENV}=1. When disabled, the tool returns ` +
+          '{disabled: true} without invoking synthesis.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -98,6 +116,15 @@ export class DiscussionHandler extends AbstractHandler {
   private async handleAgentDiscussion(
     args: Record<string, unknown> | undefined,
   ): Promise<ToolResponse> {
+    if (!this.isExperimentalEnabled()) {
+      const disabled: DisabledDiscussionResult = {
+        disabled: true,
+        reason: DISABLED_DISCUSSION_REASON,
+        experimentalFlag: EXPERIMENTAL_DISCUSSION_ENV,
+      };
+      return createJsonResponse(disabled);
+    }
+
     const topic = extractRequiredString(args, 'topic');
     if (topic === null) {
       return createErrorResponse('Missing required parameter: topic');
@@ -117,13 +144,19 @@ export class DiscussionHandler extends AbstractHandler {
     const maxSeverity = this.computeMaxSeverity(opinions);
     const summary = this.generateSummary(topic, opinions, consensus);
 
-    const result: DiscussionResult = {
+    const base: DiscussionResult = {
       topic,
       specialists,
       opinions,
       consensus,
       summary,
       maxSeverity,
+    };
+
+    const result: ExperimentalDiscussionResult = {
+      ...base,
+      experimental: true,
+      warning: EXPERIMENTAL_DISCUSSION_WARNING,
     };
 
     try {
@@ -140,6 +173,16 @@ export class DiscussionHandler extends AbstractHandler {
     }
 
     return createJsonResponse(result);
+  }
+
+  /**
+   * Returns true only when the experimental flag env var is set to the
+   * explicit opt-in value "1". Any other value (including "true", "yes",
+   * or unset) leaves the tool disabled so callers cannot accidentally
+   * consume templated synthesis.
+   */
+  private isExperimentalEnabled(): boolean {
+    return process.env[EXPERIMENTAL_DISCUSSION_ENV] === '1';
   }
 
   /**

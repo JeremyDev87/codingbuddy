@@ -60,3 +60,46 @@ export const VALID_SEVERITIES: readonly OpinionSeverity[] = [
   'high',
   'critical',
 ];
+
+/**
+ * Environment variable that enables the experimental agent_discussion tool.
+ *
+ * This tool produces templated synthesis rather than real specialist execution,
+ * so it is disabled by default. Set this env var to '1' to enable it for
+ * experimentation / evaluation, and understand that its output does NOT
+ * reflect real agent collective intelligence.
+ */
+export const EXPERIMENTAL_DISCUSSION_ENV = 'CODINGBUDDY_EXPERIMENTAL_DISCUSSION';
+
+/**
+ * Warning banner attached to any enabled agent_discussion response so callers
+ * cannot mistake templated synthesis for real specialist execution.
+ */
+export const EXPERIMENTAL_DISCUSSION_WARNING =
+  '\u26a0\ufe0f experimental — templated synthesis, not real specialist execution';
+
+/**
+ * Reason surfaced when the tool is disabled (default state).
+ */
+export const DISABLED_DISCUSSION_REASON =
+  'templated synthesis not aligned with collective intelligence promise';
+
+/**
+ * Response returned when the agent_discussion tool is disabled (default).
+ */
+export interface DisabledDiscussionResult {
+  disabled: true;
+  reason: string;
+  experimentalFlag: string;
+}
+
+/**
+ * Response returned when the agent_discussion tool is explicitly enabled
+ * via the experimental env flag. Extends DiscussionResult with a warning
+ * banner that the output is templated synthesis, not real specialist
+ * execution.
+ */
+export interface ExperimentalDiscussionResult extends DiscussionResult {
+  experimental: true;
+  warning: string;
+}
