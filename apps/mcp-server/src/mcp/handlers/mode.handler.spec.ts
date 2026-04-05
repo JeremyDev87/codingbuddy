@@ -1466,4 +1466,185 @@ describe('ModeHandler', () => {
       expect(parsed.teamsCapability.source).toBe('config');
     });
   });
+
+  // ==========================================================================
+  // Clarification Gate (#1371)
+  // ==========================================================================
+  describe('parse_mode Clarification Gate (#1371)', () => {
+    it('includes clarificationNeeded=true for ambiguous PLAN prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: '개선해줘',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN 개선해줘',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(true);
+      expect(parsed.planReady).toBe(false);
+      expect(parsed.nextQuestion).toBeTruthy();
+      expect(Array.isArray(parsed.clarificationTopics)).toBe(true);
+      expect(parsed.clarificationTopics.length).toBeGreaterThan(0);
+      expect(parsed.questionBudget).toBe(2);
+    });
+
+    it('includes planReady=true for clear PLAN prompt with concrete reference', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'add unit tests to apps/mcp-server/src/auth/auth.service.ts',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN add unit tests to apps/mcp-server/src/auth/auth.service.ts',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(false);
+      expect(parsed.planReady).toBe(true);
+      expect(parsed.nextQuestion).toBeUndefined();
+      expect(parsed.clarificationTopics).toBeUndefined();
+      expect(parsed.questionBudget).toBe(3);
+    });
+
+    it('honors override phrases even when prompt is otherwise ambiguous', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it, just do it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it, just do it',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(false);
+      expect(parsed.planReady).toBe(true);
+      expect(parsed.questionBudget).toBe(3);
+      expect(parsed.assumptionNote).toBeUndefined();
+    });
+
+    it('decrements the budget across successive ambiguous calls', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const round1 = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 3,
+      });
+      const parsed1 = JSON.parse((round1?.content[0] as { text: string }).text);
+      expect(parsed1.clarificationNeeded).toBe(true);
+      expect(parsed1.questionBudget).toBe(2);
+
+      const round2 = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 2,
+      });
+      const parsed2 = JSON.parse((round2?.content[0] as { text: string }).text);
+      expect(parsed2.clarificationNeeded).toBe(true);
+      expect(parsed2.questionBudget).toBe(1);
+    });
+
+    it('falls back to assumptions when budget is exhausted', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 0,
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(false);
+      expect(parsed.planReady).toBe(true);
+      expect(parsed.questionBudget).toBe(0);
+      expect(parsed.assumptionNote).toBeTruthy();
+      expect(parsed.assumptionNote).toMatch(/assum/i);
+    });
+
+    it('applies the gate in AUTO mode as well', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: '개선',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO 개선',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(true);
+      expect(parsed.planReady).toBe(false);
+    });
+
+    it('does NOT include clarification fields for ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT improve it',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBeUndefined();
+      expect(parsed.planReady).toBeUndefined();
+      expect(parsed.questionBudget).toBeUndefined();
+      expect(parsed.nextQuestion).toBeUndefined();
+    });
+
+    it('does NOT include clarification fields for EVAL mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL improve it',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBeUndefined();
+      expect(parsed.planReady).toBeUndefined();
+    });
+
+    it('ignores non-numeric question_budget input', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 'not-a-number',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      // Falls back to DEFAULT_QUESTION_BUDGET (3); decremented once → 2
+      expect(parsed.questionBudget).toBe(2);
+    });
+  });
 });

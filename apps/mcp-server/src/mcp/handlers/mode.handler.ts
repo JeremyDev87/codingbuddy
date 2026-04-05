@@ -42,6 +42,7 @@ import {
 import type { ExecutionPlan } from '../../agent/execution-plan.types';
 import { ImpactEventService } from '../../impact';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
+import { evaluateClarification, type ClarificationMetadata } from './clarification-gate';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -151,6 +152,11 @@ export class ModeHandler extends AbstractHandler {
               description:
                 'Control response detail level. minimal: metadata only; standard: truncated content (default); full: complete content',
             },
+            question_budget: {
+              type: 'number',
+              description:
+                'Clarification Gate budget (#1371). Maximum clarification questions remaining in this session. Defaults to 3 on the first call; pass the `questionBudget` returned from the previous PLAN response to decrement across rounds. When 0, the gate proceeds to planning with explicit assumptions.',
+            },
           },
           required: ['prompt'],
         },
@@ -173,6 +179,15 @@ export class ModeHandler extends AbstractHandler {
     // Extract and validate optional verbosity (defaults to 'standard')
     const rawVerbosity = extractRequiredString(args, 'verbosity') ?? 'standard';
     const verbosity = isValidVerbosity(rawVerbosity) ? rawVerbosity : 'standard';
+
+    // Extract optional clarification question budget (#1371).
+    // Accept only finite numbers; ignore malformed input and let the gate
+    // fall back to its DEFAULT_QUESTION_BUDGET.
+    const rawQuestionBudget = args?.['question_budget'];
+    const questionBudget =
+      typeof rawQuestionBudget === 'number' && Number.isFinite(rawQuestionBudget)
+        ? rawQuestionBudget
+        : undefined;
 
     try {
       // Always reload config to ensure fresh language settings
@@ -305,6 +320,15 @@ export class ModeHandler extends AbstractHandler {
         settings?.eco,
       );
 
+      // Clarification Gate (#1371) — only applies to PLAN/AUTO modes where the
+      // response might otherwise produce a plan. ACT and EVAL skip the gate
+      // because they assume PLAN has already set context.
+      const clarification = this.buildClarificationMetadata(
+        result.mode as Mode,
+        result.originalPrompt,
+        questionBudget,
+      );
+
       const response = createJsonResponse({
         ...result,
         language,
@@ -326,6 +350,8 @@ export class ModeHandler extends AbstractHandler {
         ...(executionPlan && { executionPlan: serializeExecutionPlan(executionPlan) }),
         // Include Teams capability status
         ...(teamsCapability && { teamsCapability }),
+        // Include Clarification Gate metadata for PLAN/AUTO modes (#1371)
+        ...(clarification && clarification),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -563,6 +589,29 @@ export class ModeHandler extends AbstractHandler {
       agent: 'plan-reviewer',
       dispatch: 'recommend',
     };
+  }
+
+  /**
+   * Build Clarification Gate metadata for PLAN/AUTO modes (#1371).
+   * Returns undefined for ACT/EVAL modes so the fields are omitted entirely
+   * from the response (additive, backward-compatible).
+   *
+   * The gate runs a conservative ambiguity heuristic on the original prompt
+   * and decrements the caller-provided questionBudget on each ambiguous round
+   * so downstream loops cannot run forever.
+   */
+  private buildClarificationMetadata(
+    mode: Mode,
+    originalPrompt: string,
+    questionBudget?: number,
+  ): ClarificationMetadata | undefined {
+    if (mode !== 'PLAN' && mode !== 'AUTO') {
+      return undefined;
+    }
+
+    return evaluateClarification(originalPrompt, {
+      ...(questionBudget !== undefined && { questionBudget }),
+    });
   }
 
   /**
