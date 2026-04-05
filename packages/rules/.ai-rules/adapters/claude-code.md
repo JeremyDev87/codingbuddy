@@ -770,6 +770,8 @@ AUTO implement user authentication with JWT
 - **Success**: `Critical = 0 AND High = 0` severity issues
 - **Failure**: Max iterations reached (default: 3, configurable via `auto.maxIterations`)
 
+> **Severity and review-cycle canonical sources:** The `Critical`/`High` levels above are the **Code Review Severity** scale defined in [`../rules/severity-classification.md`](../rules/severity-classification.md#code-review-severity). The approval loop Claude Code runs over a PR (CI gate → review → fix → re-review → approve) is specified in [`../rules/pr-review-cycle.md`](../rules/pr-review-cycle.md). Follow those canonical sources rather than re-deriving severity or approval criteria from this adapter.
+
 ### Configuration
 
 Configure AUTO mode in `codingbuddy.config.json`:

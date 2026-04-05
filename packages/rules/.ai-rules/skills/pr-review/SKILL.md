@@ -74,6 +74,8 @@ Security, Correctness, and Test Coverage must ALWAYS be reviewed. No exceptions.
 
 ## Quick Reference
 
+> **Severity source:** The `Critical`/`High`/`Medium`/`Low` levels used below are the **Code Review Severity** scale defined in [`../../rules/severity-classification.md`](../../rules/severity-classification.md#code-review-severity). This skill decides *which dimensions to review at each level*; the canonical file defines *what counts as each level*. Do not conflate these levels with production incident severity (P1-P4).
+
 ### Priority Levels
 
 | Priority | Action | Dimensions |

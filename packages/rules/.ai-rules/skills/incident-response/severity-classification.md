@@ -1,145 +1,19 @@
-# Severity Classification
+# Severity Classification (Incident Operations)
 
-Objective severity classification based on SLO burn rates and business impact.
+> **Canonical source:** P1/P2/P3/P4 severity level **definitions**, impact criteria, and response expectations live in [`packages/rules/.ai-rules/rules/severity-classification.md`](../../rules/severity-classification.md) under *Production Incident Severity*.
+>
+> This file narrows that canonical scale to **operational guidance** for incident response: how to classify in practice, the math behind burn rates, the decision tree, and what to include in an incident report.
 
 ## The Classification Rule
 
 **Classify severity BEFORE taking any action.** Severity determines:
+
 - Response time expectations
 - Who gets notified
 - Resource allocation priority
 - Communication cadence
 
-## Severity Matrix
-
-### P1 - Critical
-
-**SLO Burn Rate:** >14.4x (consuming >2% error budget per hour)
-
-**Impact Criteria (ANY of these):**
-- Complete service outage
-- >50% of users affected
-- Critical business function unavailable
-- Data loss or corruption risk
-- Active security breach
-- Revenue-generating flow completely blocked
-- Compliance/regulatory violation in progress
-
-**Response Expectations:**
-
-| Metric | Target |
-|--------|--------|
-| Acknowledge | Within 5 minutes |
-| First update | Within 15 minutes |
-| War room formed | Within 15 minutes |
-| Executive notification | Within 30 minutes |
-| Customer communication | Within 1 hour |
-| Update cadence | Every 15 minutes |
-
-**Escalation:** Immediate page to on-call, all hands if needed
-
-**Example Incidents:**
-- Production database unreachable
-- Authentication service down
-- Payment processing 100% failure
-- Major cloud region outage affecting services
-- Data breach detected
-
----
-
-### P2 - High
-
-**SLO Burn Rate:** >6x (consuming >5% error budget per 6 hours)
-
-**Impact Criteria (ANY of these):**
-- Major feature unavailable
-- 10-50% of users affected
-- Significant performance degradation (>5x latency)
-- Secondary business function blocked
-- Partial data integrity issues
-- Key integration failing
-
-**Response Expectations:**
-
-| Metric | Target |
-|--------|--------|
-| Acknowledge | Within 15 minutes |
-| First update | Within 30 minutes |
-| Status page update | Within 30 minutes |
-| Stakeholder notification | Within 1 hour |
-| Update cadence | Every 30 minutes |
-
-**Escalation:** Page on-call during business hours, notify team lead
-
-**Example Incidents:**
-- Search functionality completely broken
-- 30% of API requests failing
-- Email notifications not sending
-- Third-party payment provider degraded
-- Mobile app login issues for subset of users
-
----
-
-### P3 - Medium
-
-**SLO Burn Rate:** >3x (consuming >10% error budget per 24 hours)
-
-**Impact Criteria (ANY of these):**
-- Minor feature impacted
-- <10% of users affected
-- Workaround available
-- Non-critical function degraded
-- Cosmetic issues affecting usability
-- Performance slightly degraded
-
-**Response Expectations:**
-
-| Metric | Target |
-|--------|--------|
-| Acknowledge | Within 1 hour |
-| First update | Within 2 hours |
-| Resolution target | Within 8 business hours |
-| Update cadence | At milestones |
-
-**Escalation:** Create ticket, notify team channel
-
-**Example Incidents:**
-- Report generation slow but working
-- Specific browser experiencing issues
-- Non-critical API endpoint intermittent
-- Email formatting broken
-- Search results slightly inaccurate
-
----
-
-### P4 - Low
-
-**SLO Burn Rate:** >1x (projected budget exhaustion within SLO window)
-
-**Impact Criteria (ALL of these):**
-- Minimal or no user impact
-- Edge case or rare scenario
-- Cosmetic only
-- Performance within acceptable range
-- Workaround trivial
-
-**Response Expectations:**
-
-| Metric | Target |
-|--------|--------|
-| Acknowledge | Within 1 business day |
-| Resolution target | Next sprint/release |
-| Update cadence | On resolution |
-
-**Escalation:** Backlog item, routine prioritization
-
-**Example Incidents:**
-- Minor UI misalignment
-- Rare edge case error
-- Documentation inconsistency
-- Non-user-facing optimization opportunity
-
----
+See the canonical severity matrix for P1-P4 definitions, impact criteria, and response expectations. This file does **not** redefine those levels — refer to the canonical document whenever you need the authoritative criteria.
 
 ## Error Budget Integration
 
@@ -170,9 +44,9 @@ Burn Rate = 1.44 / 0.1 = 14.4x (P1!)
 | Tier 2 (Important) | 99.9% | 0.1% | 43.8 minutes |
 | Tier 3 (Standard) | 99.5% | 0.5% | 3.65 hours |
 
----
-
 ## Classification Decision Tree
+
+Use this when an incident is detected and you need to assign severity quickly.
 
 ```
 Is the service completely unavailable?
@@ -208,8 +82,6 @@ Is impact minimal/cosmetic only?
 └── No → Default to P3 (when uncertain)
 ```
 
----
-
 ## When Uncertain, Classify Higher
 
 **Rule:** If you're unsure between two severity levels, classify higher.
@@ -218,29 +90,27 @@ Is impact minimal/cosmetic only?
 - Unsure between P2 and P3? → Classify as P2
 - Unsure between P3 and P4? → Classify as P3
 
-**Rationale:** Over-response is better than under-response. You can always downgrade.
-
----
+**Rationale:** Over-response is better than under-response. You can always downgrade. This rule is also stated in the canonical document; it is repeated here because during an incident you must be able to act without following links.
 
 ## Severity Changes During Incident
 
 Severity can change as you learn more:
 
 **Upgrade when:**
+
 - Impact wider than initially assessed
 - More users affected than thought
 - Business impact greater than estimated
 - Mitigation not working
 
 **Downgrade when:**
+
 - Successful mitigation reduced impact
 - Fewer users affected than thought
 - Workaround discovered
 - Root cause isolated to non-critical path
 
 **Always communicate severity changes** to all stakeholders immediately.
-
----
 
 ## Include in Incident Reports
 
@@ -254,3 +124,9 @@ Impact: [Brief description]
 SLO Status: [Which SLO breaching]
 Error Budget Remaining: [Percentage]
 ```
+
+## Relationship to Code Review Severity
+
+Code review uses a **different** severity scale (`critical`/`high`/`medium`/`low`) for PR approval gating. The two scales are not interchangeable — see [`rules/severity-classification.md`](../../rules/severity-classification.md#mapping-between-scales) for the narrow cases where they correspond (e.g., when a `critical` code review finding that shipped becomes an incident).
+
+Do **not** mix the two scales in incident documents. Use P1-P4 here.

@@ -85,313 +85,72 @@ MY_PANE=$(tmux display-message -p '#{pane_index}')
 
 ## Review Cycle Protocol
 
-워커가 PR을 생성하고 RESULT.json에 `status: "success"`를 기록하면, 리뷰 사이클을 시작한다.
-`status: "approved"`가 될 때까지 반복하며, 승인 시점이 "진짜 완료"가 된다.
+워커가 `RESULT.json`에 `status: "success"`를 기록하면 리뷰 사이클이 시작되고, `status: "approved"`가 될 때까지 반복된다. 승인이 "진짜 완료"다.
 
-> **기본 동작:** 지휘자가 직접 리뷰를 수행한다 (Conductor Review — primary method).
-> Conductor has PLAN context; worker reviewers do not.
-> `--review-pane` 옵션으로 리뷰 에이전트 패널이 설정된 경우에만 리뷰를 위임한다 (아래 [Review Agent Protocol](#review-agent-protocol) 참조).
+> **Canonical source:** 리뷰 사이클 프로토콜의 단일 소스는 [`packages/rules/.ai-rules/rules/pr-review-cycle.md`](../../../packages/rules/.ai-rules/rules/pr-review-cycle.md)이다.
+> 아래 섹션은 taskmaestro 전용 구현 세부사항(tmux 트리거, `taskmaestro-state.json` 구조)만 남기고, 프로토콜 전체는 canonical 문서를 참조한다.
 
-### Trigger
+### Trigger (taskmaestro 관점)
 
-Watch 모드가 RESULT.json을 감지했을 때:
-- `status: "success"` → **리뷰 사이클 시작** (기존처럼 "done"으로 보고하지 않음)
-- `status: "failure"` / `"error"` → 사용자에게 보고 (기존 동작 유지)
-- `status: "review_pending"` → 워커 응답 대기 중 (지휘자 대기)
-- `status: "review_addressed"` → 재리뷰 시작
-- `status: "approved"` → 진짜 완료 ✅
+지휘자의 watch 모드는 `.taskmaestro/wt-N/RESULT.json`의 `status` 필드를 감지한다:
+
+| `status` | 지휘자 동작 |
+|----------|-------------|
+| `success` | 리뷰 사이클 시작 (done으로 보고하지 않음) |
+| `failure` / `error` | 사용자에게 보고, 리뷰 미진행 |
+| `review_pending` | 워커 응답 대기 |
+| `review_addressed` | 재리뷰 시작 |
+| `approved` | 진짜 완료 ✅ |
 
 ### Review Routing
 
-`status: "success"` 또는 `status: "review_addressed"` 감지 시:
+- `review_pane`이 설정되지 않았으면 (기본) → **Conductor Review** 실행
+- `review_pane`이 설정되었으면 → 해당 패널의 **Review Agent**로 위임
 
-1. **상태 파일에서 `review_pane` 확인**
-2. `review_pane`이 없으면 (기본) → **Conductor Review** 실행 (지휘자 직접 리뷰 — primary method)
-3. `review_pane`이 존재하면 → **Review Agent Protocol** 실행 (리뷰 에이전트에 위임)
+두 경우 모두 실행하는 프로토콜(CI gate → local verify → diff → code quality → spec → tests → write review → approve)은 canonical 문서를 따른다. Severity 등급(critical/high/medium/low), approval 조건, commit hygiene(amend + force-with-lease), 최대 3회 사이클 상한도 canonical 문서가 정의한다.
 
-### Conductor Review (Primary — default method)
+> **Conductor Review가 기본 동작인 이유:** 지휘자는 PLAN 컨텍스트를 보유하지만, 워커 리뷰어는 그렇지 않다.
 
-지휘자가 직접 리뷰를 수행한다 (리뷰 에이전트 패널이 설정되지 않은 경우, 기본 동작):
+### taskmaestro 고유: 파일 기반 리뷰 트리거
 
-0. **CI Gate (MUST — BLOCKING)**
-   ```bash
-   gh pr checks <PR_NUMBER>
-   ```
-   ALL checks must pass before proceeding to review.
-   If any check fails → report to user, do NOT approve. Stop review here.
+프로토콜의 "워커에게 리뷰 반영 지시" 단계를 taskmaestro는 **file-based trigger**로 구현한다. 긴 프롬프트를 `send-keys`로 직접 전송하면 잘릴 수 있으므로:
 
-1. **PR diff 읽기**
-   ```bash
-   gh pr diff <PR_NUMBER>
-   ```
+1. `Review Fix TASK.md`를 워커 worktree 루트(`$REPO/.taskmaestro/wt-$PANE_IDX/TASK.md`)에 작성한다. 내용은 아래 Review Fix TASK.md 템플릿을 따른다.
+2. 짧은 트리거만 `send-keys`로 전송한다:
 
-2. **체크리스트 생성**
-   codingbuddy `generate_checklist` MCP 도구로 변경 파일 기반 도메인별 체크리스트를 생성한다.
+    ```bash
+    tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE_IDX" \
+      "Read TASK.md and execute all steps." Enter
+    ```
 
-3. **리뷰 코멘트 작성**
-   변경 내용 + 체크리스트를 기반으로 리뷰를 수행하고 PR에 코멘트를 작성한다:
-   ```bash
-   gh pr review <PR_NUMBER> --comment --body "<리뷰 내용>"
-   ```
+리뷰 에이전트 패널(`$REVIEW_PANE`)에 리뷰 프롬프트를 전송할 때도 동일한 파일 기반 패턴을 사용한다.
 
-4. **RESULT.json 업데이트**
-   지휘자가 RESULT.json을 업데이트한다:
-   ```json
-   {
-     "status": "review_pending",
-     "review_cycle": 1,
-     "review_comments": ["unused import 'FileChangeStats'", "missing error handling", "..."]
-   }
-   ```
+#### Review Fix TASK.md 템플릿
 
-5. **워커에게 리뷰 반영 지시 (file-based)**
-
-   Review Fix TASK.md를 워커 worktree에 작성한 후 짧은 트리거를 전송한다:
-   ```bash
-   # Review Fix TASK.md를 워커 worktree에 작성 (아래 템플릿 참조)
-   cat > "$REPO/.taskmaestro/wt-$PANE_IDX/TASK.md" << TASKEOF
-   # Review Fix Task
-   ... (Review Fix TASK.md Template 섹션 참조)
-   TASKEOF
-
-   # 짧은 트리거만 send-keys로 전송
-   tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$PANE_IDX" \
-     "Read TASK.md and execute all steps." Enter
-   ```
-
-6. **워커 응답**
-   워커가 리뷰에 대응한다:
-   - 수용: 코드 수정 → push
-   - 거부: PR에 반박 코멘트 작성 (사유 포함)
-   - 각 코멘트에 "Resolved: [수행한 작업]" 형태로 회신
-   - 완료 후 RESULT.json 업데이트: `status: "review_addressed"`
-
-7. **재리뷰**
-   지휘자가 `status: "review_addressed"`를 감지하면:
-   - `gh pr diff <PR_NUMBER>` 재확인
-   - 미해결 코멘트 확인
-   - 충분히 개선됐으면 → **승인** (Step 8)
-   - 아직 부족하면 → Step 3부터 반복
-
-8. **최종 승인**
-   ```bash
-   # 자신의 PR이 아닌 경우
-   gh pr review <PR_NUMBER> --approve --body "LGTM - all review comments addressed"
-   # 자신의 PR인 경우 (approve 불가) — 코멘트로 대체
-   gh pr review <PR_NUMBER> --comment --body "✅ Review complete - all comments addressed"
-   ```
-   RESULT.json 업데이트: `status: "approved"`
-
-### Review Fix TASK.md Template
-
-리뷰 코멘트에 대한 수정 지시를 워커에게 전달할 때 사용하는 TASK.md 템플릿이다.
-지휘자 또는 리뷰 에이전트가 워커의 worktree 루트에 이 파일을 작성한다.
+워커 worktree에 작성하는 `TASK.md`의 내용:
 
 ```markdown
 # Review Fix Task
 
-PR #<PR_NUMBER> (issue #<ISSUE_NUMBER>)에 리뷰 코멘트가 달렸습니다.
+See rules/pr-review-cycle.md for the canonical worker response protocol.
 
 ## Steps
 
-1. `gh pr view <PR_NUMBER> --comments` 로 리뷰 코멘트를 확인하세요.
-2. 수용할 부분은 코드를 수정하세요.
-3. 거부할 부분은 PR에 반박 코멘트를 남기세요 (사유 포함).
-4. 각 코멘트에 "Resolved: [수행한 작업]" 형태로 회신하세요.
-5. 수정 완료 후:
-   a. `yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test` — 모두 통과해야 합니다.
-   b. `git add` → `git commit` → `git push`
-6. RESULT.json을 업데이트하세요:
-   ```json
-   {
-     "status": "review_addressed",
-     "review_cycle": <현재_사이클_번호>
-   }
-   ```
+1. `gh pr view <PR_NUMBER> --comments` 로 리뷰 코멘트를 확인한다.
+2. 각 코멘트에 대응: 수용 시 코드 수정, 거부 시 반박 코멘트, `Resolved: ...` 회신.
+3. MANDATORY 사전 체크: `yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test` — 모두 통과해야 push 한다.
+4. 커밋 위생: `git commit --amend --no-edit && git push --force-with-lease` (fix 커밋을 쌓지 말 것).
+5. `RESULT.json`을 업데이트한다: `{ "status": "review_addressed", "review_cycle": <current_cycle> }`
 
-[MANDATORY PRE-PUSH] yarn prettier --write . && yarn lint --fix && yarn type-check && yarn test — ALL must pass before push.
-[CONTINUOUS] DO NOT stop. Complete ALL steps. Only stop AFTER updating RESULT.json to "review_addressed".
+[CONTINUOUS] DO NOT stop. Only stop AFTER updating RESULT.json to "review_addressed".
 ```
 
-> **핵심:** 워커가 리뷰 반영 후 반드시 RESULT.json의 `status`를 `"review_addressed"`로 업데이트해야 watch cron이 재리뷰를 트리거할 수 있다.
+> **핵심:** 워커는 리뷰 반영 후 반드시 `RESULT.json`의 `status`를 `review_addressed`로 업데이트해야 watch cron이 재리뷰를 트리거한다.
 
-### Max Review Cycles
+### taskmaestro 고유: 상태 스키마
 
-- **최대 3회** 리뷰 사이클 (무한 루프 방지)
-- 3회 초과 시 사용자에게 보고:
-  ```
-  ⚠️ 패널 N: 3회 리뷰 후에도 미해결 이슈가 있습니다.
-  PR: #<PR_NUMBER>
-  미해결 코멘트: [목록]
-  사용자 판단이 필요합니다.
-  ```
-- 이후 지휘자는 해당 패널의 리뷰를 중단하고 사용자 지시를 대기한다.
+리뷰 사이클 중 각 패널의 `taskmaestro-state.json` 필드:
 
-### Quality Criteria for Approval
-
-approve할 조건:
-- CI 전체 통과 (`gh pr checks <PR_NUMBER>`)
-- 미사용 변수/import 없음
-- 새 코드에 적절한 테스트 존재
-- 기존 테스트 깨지지 않음
-- 코드 스타일 일관성 유지
-
----
-
-## Review Agent Protocol
-
-리뷰 에이전트 패널이 설정된 경우, 워커 PR 리뷰를 전담한다.
-지휘자는 오케스트레이션만 담당하고, 코드 리뷰는 리뷰 에이전트가 수행한다.
-
-```
-기존: Worker PR → Conductor 리뷰 (품질 낮음)
-변경: Worker PR → Review Agent 리뷰 → Conductor는 결과만 전달
-```
-
-### Trigger
-
-지휘자가 워커의 RESULT.json에서 `status: "success"` 또는 `status: "review_addressed"`를 감지하면,
-리뷰 에이전트 패널에 리뷰 프롬프트를 전송한다.
-
-### Review Agent Checklist (MANDATORY ORDER)
-
-리뷰 에이전트는 반드시 아래 순서대로 수행한다:
-
-1. **CI Gate (MUST)**: `gh pr checks <PR_NUMBER>` — ALL checks must pass. If any fail, STOP and report failure with logs. DO NOT proceed to code review.
-2. **Local Verification**: PR 브랜치에서 `yarn lint` 및 `yarn type-check` 실행하여 CI와 동일한 이슈를 로컬에서 포착
-3. **Code Quality Scan**: `gh pr diff <PR_NUMBER>` — 다음을 검사:
-   - Unused imports/variables
-   - `any` types
-   - Missing error handling
-   - Dead code
-4. **Spec Compliance**: issue 요구사항(`gh issue view <ISSUE_NUMBER>`)과 실제 구현을 대조
-5. **Test Coverage**: 새 코드에 적절한 테스트가 있는지 확인
-6. **Write Review**: `gh pr review --comment`로 구조화된 리뷰 코멘트를 PR에 작성
-
-### Review Agent Prompt Template
-
-지휘자가 리뷰 에이전트 패널에 전송하는 프롬프트:
-
-```
-Review PR #<PR_NUMBER> for issue #<ISSUE_NUMBER>.
-
-MANDATORY REVIEW CHECKLIST (follow in order):
-
-1. CI CHECK (BLOCKING):
-   gh pr checks <PR_NUMBER>
-   If ANY check fails → STOP. Report: "CI FAILED: <job_name> — <log_url>"
-   DO NOT proceed to code review if CI fails.
-
-2. LOCAL VERIFICATION:
-   git fetch origin && git checkout <branch>
-   yarn lint
-   yarn type-check
-   Report any errors.
-
-3. CODE QUALITY (gh pr diff <PR_NUMBER>):
-   - Unused imports/variables?
-   - any types?
-   - Missing error handling?
-   - Dead code?
-
-4. SPEC COMPLIANCE:
-   gh issue view <ISSUE_NUMBER>
-   Compare requirements with implementation. List any gaps.
-
-5. TEST COVERAGE:
-   Are new functions/features tested?
-   Are edge cases covered?
-
-6. WRITE REVIEW:
-   gh pr review <PR_NUMBER> --comment --body "<structured review>"
-
-Format your review as:
-## Review: [APPROVE | CHANGES_REQUESTED]
-### CI Status: [PASS | FAIL]
-### Issues Found:
-- [critical/high/medium/low]: description
-### Recommendation: [APPROVE | REQUEST_CHANGES]
-
-After posting review, write RESULT.json with:
-{
-  "status": "success",
-  "review_result": "approve | changes_requested",
-  "issues_found": <number>,
-  "critical_count": <number>,
-  "high_count": <number>
-}
-```
-
-전송 방식:
-```bash
-tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$REVIEW_PANE" \
-  "$REVIEW_PROMPT" Enter
-```
-
-> **참고:** 프롬프트가 길어 send-keys로 직접 전송 시 잘릴 수 있다. 이 경우 프롬프트를 TASK.md 파일에 저장하고 `send-keys`로 파일 경로를 참조하여 전송한다.
-
-### Review Agent RESULT.json
-
-리뷰 에이전트의 결과 파일은 리뷰 에이전트 패널의 worktree에 기록된다:
-`<repo>/.taskmaestro/wt-<review_pane_idx>/RESULT.json`
-
-```json
-{
-  "status": "success",
-  "review_result": "approve | changes_requested",
-  "issues_found": 3,
-  "critical_count": 0,
-  "high_count": 1
-}
-```
-
-| 필드 | 타입 | 필수 | 설명 |
-|------|------|------|------|
-| `status` | `"success" \| "error"` | ✅ | 리뷰 작업 자체의 성공/실패 |
-| `review_result` | `"approve" \| "changes_requested"` | ✅ | 리뷰 판정 결과 |
-| `issues_found` | `number` | ✅ | 발견된 총 이슈 수 |
-| `critical_count` | `number` | ✅ | Critical severity 이슈 수 |
-| `high_count` | `number` | ✅ | High severity 이슈 수 |
-
-### Conductor Handling of Review Agent Result
-
-지휘자가 리뷰 에이전트의 RESULT.json을 감지하면:
-
-1. **`review_result: "approve"`인 경우:**
-   - 워커의 RESULT.json을 `status: "approved"`로 업데이트
-   - 최종 승인 코멘트를 PR에 작성:
-     ```bash
-     gh pr review <PR_NUMBER> --approve --body "LGTM - review agent approved"
-     # 자신의 PR인 경우:
-     gh pr review <PR_NUMBER> --comment --body "✅ Review complete - review agent approved"
-     ```
-   - 사용자에게 완료 보고
-
-2. **`review_result: "changes_requested"`인 경우:**
-   - 워커의 RESULT.json을 `status: "review_pending"`으로 업데이트 (review_cycle 증가)
-   - 워커에게 리뷰 반영 지시 (file-based):
-     ```bash
-     # Review Fix TASK.md를 워커 worktree에 작성 (아래 템플릿 참조)
-     cat > "$REPO/.taskmaestro/wt-$WORKER_PANE/TASK.md" << TASKEOF
-     # Review Fix Task
-     ... (Review Fix TASK.md Template 섹션 참조)
-     TASKEOF
-
-     # 짧은 트리거만 send-keys로 전송
-     tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$WORKER_PANE" \
-       "Read TASK.md and execute all steps." Enter
-     ```
-
-3. **리뷰 에이전트 초기화:**
-   - 리뷰 에이전트의 RESULT.json 삭제 (다음 리뷰를 위한 준비):
-     ```bash
-     rm -f "$REPO/.taskmaestro/wt-$REVIEW_PANE/RESULT.json"
-     ```
-   - 리뷰 에이전트 패널의 상태를 `"idle"`로 업데이트
-
-### Review Cycle State in taskmaestro-state.json
-
-리뷰 사이클 중 각 패널의 상태 파일 필드:
 ```json
 {
   "index": 1,
@@ -406,26 +165,34 @@ tmux -L "$SOCKET_NAME" send-keys -t "$SESSION:$WIN_IDX.$REVIEW_PANE" \
 }
 ```
 
-리뷰 에이전트 패널의 상태:
+리뷰 에이전트 패널은 `role: "reviewer"`, `status: "reviewing"`을 사용한다. 리뷰 에이전트의 결과 파일(`<repo>/.taskmaestro/wt-<review_pane>/RESULT.json`)은 다음 스키마를 따른다:
+
 ```json
 {
-  "index": 3,
-  "role": "reviewer",
-  "worktree": "...",
-  "branch": "...",
-  "task": "Reviewing PR #42 for issue #767",
-  "status": "reviewing",
-  "result": null
+  "status": "success",
+  "review_result": "approve | changes_requested",
+  "issues_found": 3,
+  "critical_count": 0,
+  "high_count": 1
 }
 ```
 
+Severity 카운트 필드(`critical_count`, `high_count`)는 [`rules/severity-classification.md`](../../../packages/rules/.ai-rules/rules/severity-classification.md)의 Code Review Severity 스케일을 따른다.
+
+지휘자는 리뷰 에이전트 결과를 읽고:
+
+1. `review_result: "approve"` → 워커 `RESULT.json`을 `approved`로 업데이트, 승인 코멘트 게시, 사용자에게 완료 보고
+2. `review_result: "changes_requested"` → 워커 `RESULT.json`을 `review_pending`으로 업데이트하고 `review_cycle` 증가, file-based 리뷰 수정 트리거 전송
+3. 리뷰 에이전트 `RESULT.json`을 삭제해 다음 리뷰를 위해 초기화
+
 `status` 값 매핑:
-- `"working"` → 워커 작업 중
-- `"reviewing"` → 리뷰 에이전트가 PR 리뷰 중 (리뷰어 패널 전용)
-- `"review_pending"` → 리뷰 코멘트 작성 완료, 워커 응답 대기
-- `"review_addressed"` → 워커 리뷰 반영 완료, 재리뷰 대기
-- `"approved"` → 최종 승인 완료 (진짜 done)
-- `"done"` → 리뷰 없이 완료 (failure/error 포함)
+
+- `working` → 워커 작업 중
+- `reviewing` → 리뷰 에이전트가 PR 리뷰 중 (reviewer 패널 전용)
+- `review_pending` → 리뷰 코멘트 작성 완료, 워커 응답 대기
+- `review_addressed` → 워커 리뷰 반영 완료, 재리뷰 대기
+- `approved` → 최종 승인 완료 (진짜 done)
+- `done` → 리뷰 없이 완료 (failure/error)
 
 ---
 
@@ -962,6 +729,7 @@ TaskMaestro 상태 (workspace-1):
 ```
 
 **상태별 아이콘:**
+
 | status | 아이콘 | 설명 |
 |--------|--------|------|
 | `approved` | ✅ | 최종 승인 완료 (진짜 done) |
@@ -1060,6 +828,7 @@ fi
 ```
 
 **RESULT.json status 매핑:**
+
 | status | watch 동작 |
 |--------|-----------|
 | `"success"` | 리뷰 사이클 시작 ("done"이 아님) |
