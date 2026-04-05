@@ -577,6 +577,28 @@ SubAgent dispatch (outer)
 → Collect results via TaskOutput
 ```
 
+**Example 3: TaskMaestro (outer) + SubAgent (inner, within worker)**
+
+```
+TaskMaestro session (outer, conductor)
+├── Pane 1: Worker for Issue #101 (auth feature)
+│   ├── Explore subAgent → researches existing auth patterns
+│   ├── Plan subAgent → drafts TDD test plan
+│   ├── [Worker writes code directly in its own worktree]
+│   └── [Worker commits, pushes, creates PR, writes RESULT.json]
+├── Pane 2: Worker for Issue #102 (dashboard UI)
+│   └── Worker uses sub-agents for component research
+│       (no cross-pane interference because each worker owns its worktree)
+└── Pane 3: Review Agent (from review cycle protocol)
+    └── EVAL mode reviewer for completed PRs
+```
+
+This is the **recommended pattern for complex worker tasks** where parallel research or context protection would benefit the worker. The conductor still uses TaskMaestro for the outer dispatch — only the worker's internal orchestration uses sub-agents.
+
+**Key invariant:** Sub-agents dispatched by a worker operate inside that worker's git worktree. Cross-pane file conflicts are impossible because each pane's worker owns its own isolated worktree.
+
+See [`../rules/parallel-execution.md`](../rules/parallel-execution.md) "Conductor vs Worker Context" section for the authoritative rule.
+
 ### Execution Strategy Selection (MANDATORY)
 
 When `parse_mode` returns `availableStrategies`, select the **outer transport** strategy:

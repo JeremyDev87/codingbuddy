@@ -92,6 +92,33 @@ Implementation tasks (code changes, file modifications, commits) MUST use tmux-b
 
 **Why:** Background sub-agents lack proper git worktree isolation, cannot run pre-push checks reliably, and risk file conflicts when multiple agents write to the same workspace. taskMaestro provides each worker with an isolated worktree, proper shell environment, and full CI toolchain access.
 
+### Conductor vs Worker Context (MANDATORY distinction)
+
+The "Implementation → taskMaestro only" rule applies to the **conductor** (top-level orchestration session). Workers running inside a taskMaestro pane operate under different rules because they already own an isolated worktree.
+
+| Layer | Context | Dispatch Tool | Rationale |
+|-------|---------|---------------|-----------|
+| Conductor → implementation | Outer orchestration session | **taskMaestro only** | Workers need worktree isolation + pre-push checks + visual monitoring |
+| Conductor → read-only research | Outer orchestration session | SubAgent allowed | No file mutations, safe to background |
+| **Worker → internal tasks** | Inside a taskMaestro pane | **SubAgent encouraged** | Worker owns its worktree; file-conflict rationale does not apply. Use Explore/Plan subagents for parallel research or context protection. |
+
+**Why workers can use sub-agents freely:**
+
+1. Each worker operates in an isolated git worktree — no file conflict with other workers
+2. Sub-agents within a worker inherit the worker's worktree, so they share the same isolation boundary
+3. Workers often benefit from parallel read-only research (Explore) or context-protected work before committing
+
+**Examples of good worker-internal sub-agent usage:**
+
+- Dispatch `Explore` sub-agent to survey existing patterns before writing code
+- Dispatch `Plan` sub-agent to draft implementation approach, then act on the plan directly
+- Dispatch multiple read-only sub-agents in parallel to gather context from different parts of the codebase
+
+**What workers still must NOT do:**
+
+- Dispatch sub-agents that modify files in **sibling** worktrees (impossible with proper isolation, but worth stating)
+- Dispatch sub-agents to create PRs on their behalf (the worker owns its PR)
+
 ## Monorepo Path Safety
 
 In monorepo environments, always use absolute paths or `git -C <path>` for git commands to prevent path doubling:
