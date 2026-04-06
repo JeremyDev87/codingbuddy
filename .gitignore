@@ -51,6 +51,7 @@ coverage/
 
 # AI
 .mcp.json
+!packages/claude-code-plugin/.mcp.json
 codingbuddy.config.js
 codingbuddy.config.json
 custom.mdc

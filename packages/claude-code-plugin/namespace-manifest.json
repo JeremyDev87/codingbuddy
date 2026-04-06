@@ -1,0 +1,38 @@
+{
+  "pluginName": "codingbuddy",
+  "namespace": "codingbuddy:",
+  "separator": ":",
+  "commands": [
+    {
+      "file": "commands/act.md",
+      "bare": "act",
+      "namespaced": "codingbuddy:act"
+    },
+    {
+      "file": "commands/auto.md",
+      "bare": "auto",
+      "namespaced": "codingbuddy:auto"
+    },
+    {
+      "file": "commands/buddy.md",
+      "bare": "buddy",
+      "namespaced": "codingbuddy:buddy"
+    },
+    {
+      "file": "commands/checklist.md",
+      "bare": "checklist",
+      "namespaced": "codingbuddy:checklist"
+    },
+    {
+      "file": "commands/eval.md",
+      "bare": "eval",
+      "namespaced": "codingbuddy:eval"
+    },
+    {
+      "file": "commands/plan.md",
+      "bare": "plan",
+      "namespaced": "codingbuddy:plan"
+    }
+  ],
+  "generatedAt": "2026-04-06T09:54:05.647Z"
+}

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "codingbuddy": {
+      "command": "codingbuddy",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}
