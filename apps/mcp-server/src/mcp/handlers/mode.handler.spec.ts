@@ -1798,4 +1798,129 @@ describe('ModeHandler', () => {
       expect(parsed.planningStage.recommendedAgent).toBe('technical-planner');
     });
   });
+
+  // ==========================================================================
+  // Execution Gate (#1378)
+  // ==========================================================================
+  describe('parse_mode Execution Gate (#1378)', () => {
+    it('gates execution for ambiguous PLAN prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: '개선해줘',
+        parallelAgentsRecommendation: {
+          specialists: ['security-specialist', 'performance-specialist'],
+          dispatch: 'recommend',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN 개선해줘',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.executionGate).toBeDefined();
+      expect(parsed.executionGate.gated).toBe(true);
+      expect(parsed.executionGate.reason).toBeTruthy();
+      expect(parsed.executionGate.unblockCondition).toBeTruthy();
+      expect(parsed.executionGate.deferredSpecialists).toEqual([
+        'security-specialist',
+        'performance-specialist',
+      ]);
+    });
+
+    it('does not gate execution for clear PLAN prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'add unit tests to apps/mcp-server/src/auth/auth.service.ts',
+        parallelAgentsRecommendation: {
+          specialists: ['test-strategy-specialist'],
+          dispatch: 'recommend',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN add unit tests to apps/mcp-server/src/auth/auth.service.ts',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.executionGate).toBeDefined();
+      expect(parsed.executionGate.gated).toBe(false);
+      expect(parsed.executionGate.deferredSpecialists).toBeUndefined();
+    });
+
+    it('ungates when budget is exhausted', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 0,
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.executionGate.gated).toBe(false);
+    });
+
+    it('gates in AUTO mode for ambiguous prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: '개선',
+        parallelAgentsRecommendation: {
+          specialists: ['architecture-specialist'],
+          dispatch: 'auto',
+        },
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO 개선',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.executionGate).toBeDefined();
+      expect(parsed.executionGate.gated).toBe(true);
+      expect(parsed.executionGate.deferredSpecialists).toEqual(['architecture-specialist']);
+    });
+
+    it('does NOT include executionGate for ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.executionGate).toBeUndefined();
+    });
+
+    it('does NOT include executionGate for EVAL mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'review code',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL review code',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.executionGate).toBeUndefined();
+    });
+  });
 });

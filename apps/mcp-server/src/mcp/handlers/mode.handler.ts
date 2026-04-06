@@ -44,6 +44,7 @@ import { ImpactEventService } from '../../impact';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
 import { evaluateClarification, type ClarificationMetadata } from './clarification-gate';
 import { resolvePlanningStage, type PlanningStageMetadata } from './planning-stage';
+import { evaluateExecutionGate, type ExecutionGate } from './execution-gate';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -352,6 +353,15 @@ export class ModeHandler extends AbstractHandler {
         planningStageHint,
       );
 
+      // Execution Gate (#1378) — delay expensive specialist dispatch
+      // until clarification is confirmed. Only for PLAN/AUTO modes.
+      const executionGate = this.buildExecutionGate(
+        result.mode as Mode,
+        clarification,
+        planningStage,
+        result.parallelAgentsRecommendation?.specialists,
+      );
+
       const response = createJsonResponse({
         ...result,
         language,
@@ -377,6 +387,8 @@ export class ModeHandler extends AbstractHandler {
         ...(clarification && clarification),
         // Include Planning Stage metadata for PLAN/AUTO modes (#1372)
         ...(planningStage && { planningStage }),
+        // Include Execution Gate metadata for PLAN/AUTO modes (#1378)
+        ...(executionGate && { executionGate }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -636,6 +648,31 @@ export class ModeHandler extends AbstractHandler {
 
     return evaluateClarification(originalPrompt, {
       ...(questionBudget !== undefined && { questionBudget }),
+    });
+  }
+
+  /**
+   * Build Execution Gate metadata for PLAN/AUTO modes (#1378).
+   * Delays specialist dispatch when the request is still ambiguous.
+   * Returns undefined for ACT/EVAL modes.
+   */
+  private buildExecutionGate(
+    mode: Mode,
+    clarification: ClarificationMetadata | undefined,
+    planningStage: PlanningStageMetadata | undefined,
+    specialists?: string[],
+  ): ExecutionGate | undefined {
+    if (mode !== 'PLAN' && mode !== 'AUTO') {
+      return undefined;
+    }
+    if (!clarification) {
+      return undefined;
+    }
+
+    return evaluateExecutionGate({
+      clarification,
+      planningStage,
+      specialists,
     });
   }
 
