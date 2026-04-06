@@ -1647,4 +1647,155 @@ describe('ModeHandler', () => {
       expect(parsed.questionBudget).toBe(2);
     });
   });
+
+  // ==========================================================================
+  // Planning Stage Router (#1372)
+  // ==========================================================================
+  describe('parse_mode Planning Stage (#1372)', () => {
+    it('includes planningStage with discover for ambiguous PLAN prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: '개선해줘',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN 개선해줘',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage).toBeDefined();
+      expect(parsed.planningStage.currentStage).toBe('discover');
+      expect(parsed.planningStage.nextStage).toBe('design');
+      expect(parsed.planningStage.stageTransitionHint).toBeTruthy();
+      expect(parsed.planningStage.recommendedAgent).toBe('solution-architect');
+      expect(parsed.planningStage.recommendedSkill).toBe('brainstorming');
+    });
+
+    it('includes planningStage with plan for clear PLAN prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'add unit tests to apps/mcp-server/src/auth/auth.service.ts',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN add unit tests to apps/mcp-server/src/auth/auth.service.ts',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage).toBeDefined();
+      expect(parsed.planningStage.currentStage).toBe('plan');
+      expect(parsed.planningStage.nextStage).toBeUndefined();
+      expect(parsed.planningStage.stageTransitionHint).toBeUndefined();
+      expect(parsed.planningStage.recommendedAgent).toBe('technical-planner');
+      expect(parsed.planningStage.recommendedSkill).toBe('writing-plans');
+    });
+
+    it('honors explicit planning_stage=design hint', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'implement auth feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN implement auth feature',
+        planning_stage: 'design',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage.currentStage).toBe('design');
+      expect(parsed.planningStage.nextStage).toBe('plan');
+      expect(parsed.planningStage.recommendedAgent).toBe('solution-architect');
+    });
+
+    it('includes planningStage in AUTO mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: '개선',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO 개선',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage).toBeDefined();
+      expect(parsed.planningStage.currentStage).toBe('discover');
+    });
+
+    it('does NOT include planningStage for ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage).toBeUndefined();
+    });
+
+    it('does NOT include planningStage for EVAL mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'review code',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL review code',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage).toBeUndefined();
+    });
+
+    it('ignores invalid planning_stage input', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        planning_stage: 'invalid-stage',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      // Falls back to automatic routing (discover for ambiguous)
+      expect(parsed.planningStage.currentStage).toBe('discover');
+    });
+
+    it('routes budget-exhausted to plan stage', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 0,
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planningStage.currentStage).toBe('plan');
+      expect(parsed.planningStage.recommendedAgent).toBe('technical-planner');
+    });
+  });
 });

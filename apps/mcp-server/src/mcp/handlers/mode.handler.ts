@@ -43,6 +43,7 @@ import type { ExecutionPlan } from '../../agent/execution-plan.types';
 import { ImpactEventService } from '../../impact';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
 import { evaluateClarification, type ClarificationMetadata } from './clarification-gate';
+import { resolvePlanningStage, type PlanningStageMetadata } from './planning-stage';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -157,6 +158,12 @@ export class ModeHandler extends AbstractHandler {
               description:
                 'Clarification Gate budget (#1371). Maximum clarification questions remaining in this session. Defaults to 3 on the first call; pass the `questionBudget` returned from the previous PLAN response to decrement across rounds. When 0, the gate proceeds to planning with explicit assumptions.',
             },
+            planning_stage: {
+              type: 'string',
+              enum: ['discover', 'design', 'plan'],
+              description:
+                'Staged planning hint (#1372). Overrides automatic stage routing when the caller knows which stage to enter. Use "design" after the user confirms direction from Discover, or "plan" after the user confirms the approach from Design.',
+            },
           },
           required: ['prompt'],
         },
@@ -187,6 +194,14 @@ export class ModeHandler extends AbstractHandler {
     const questionBudget =
       typeof rawQuestionBudget === 'number' && Number.isFinite(rawQuestionBudget)
         ? rawQuestionBudget
+        : undefined;
+
+    // Extract optional planning stage hint (#1372).
+    const VALID_STAGES = new Set(['discover', 'design', 'plan']);
+    const rawPlanningStage = extractRequiredString(args, 'planning_stage') ?? undefined;
+    const planningStageHint =
+      rawPlanningStage && VALID_STAGES.has(rawPlanningStage)
+        ? (rawPlanningStage as 'discover' | 'design' | 'plan')
         : undefined;
 
     try {
@@ -329,6 +344,14 @@ export class ModeHandler extends AbstractHandler {
         questionBudget,
       );
 
+      // Planning Stage Router (#1372) — maps clarification output to
+      // discover / design / plan stage. Only for PLAN/AUTO modes.
+      const planningStage = this.buildPlanningStageMetadata(
+        result.mode as Mode,
+        clarification,
+        planningStageHint,
+      );
+
       const response = createJsonResponse({
         ...result,
         language,
@@ -352,6 +375,8 @@ export class ModeHandler extends AbstractHandler {
         ...(teamsCapability && { teamsCapability }),
         // Include Clarification Gate metadata for PLAN/AUTO modes (#1371)
         ...(clarification && clarification),
+        // Include Planning Stage metadata for PLAN/AUTO modes (#1372)
+        ...(planningStage && { planningStage }),
         // Include context document info (mandatory)
         ...contextResult,
         // Include project root warning when auto-detected and config missing
@@ -611,6 +636,30 @@ export class ModeHandler extends AbstractHandler {
 
     return evaluateClarification(originalPrompt, {
       ...(questionBudget !== undefined && { questionBudget }),
+    });
+  }
+
+  /**
+   * Build Planning Stage metadata for PLAN/AUTO modes (#1372).
+   * Returns undefined for ACT/EVAL modes.
+   *
+   * Requires the clarification output to determine whether the request
+   * should start at discover, design, or jump straight to plan.
+   */
+  private buildPlanningStageMetadata(
+    mode: Mode,
+    clarification: ClarificationMetadata | undefined,
+    stageHint?: 'discover' | 'design' | 'plan',
+  ): PlanningStageMetadata | undefined {
+    if (mode !== 'PLAN' && mode !== 'AUTO') {
+      return undefined;
+    }
+    if (!clarification) {
+      return undefined;
+    }
+
+    return resolvePlanningStage(clarification, {
+      ...(stageHint && { stageHint }),
     });
   }
 
