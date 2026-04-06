@@ -842,3 +842,149 @@ module.exports = {
 | Iterations | Single pass per mode | Multiple cycles until quality met |
 | Exit | User decides completion | Quality criteria or max iterations |
 | Intervention | Required for each step | Only when requested or on failure |
+
+## EVAL Review Agent Prompt Template
+
+Canonical template for review agents that evaluate PRs in EVAL mode. Use this when a conductor, review pane, or solo workflow needs to generate a structured review prompt.
+
+### When to Use
+
+- **Conductor review**: The conductor generates this prompt for itself or a dedicated review pane
+- **TaskMaestro review pane**: The review agent receives this prompt as its `TASK.md`
+- **Solo workflow**: A developer enters EVAL mode to review their own PR before requesting human review
+
+### Template
+
+The review agent prompt follows this structure:
+
+```
+EVAL: review PR #<PR_NUMBER> for issue #<ISSUE_NUMBER>
+
+Review the PR against the linked issue's acceptance criteria.
+Use review_pr MCP tool, dispatch recommended specialists, and follow pr-review-cycle.md protocol.
+Approve only when Critical = 0 AND High = 0.
+```
+
+### Step-by-Step Execution
+
+When the review agent receives the prompt above, it MUST execute these steps in order:
+
+#### 1. Enter EVAL Mode
+
+```typescript
+const result = await parse_mode({
+  prompt: "EVAL: review PR #<PR_NUMBER> for issue #<ISSUE_NUMBER>"
+});
+```
+
+This returns:
+- `mode: "EVAL"` with code-reviewer as primary agent
+- `parallelAgentsRecommendation` with EVAL-mode specialists
+- `dispatchReady` (if auto-dispatch is enabled)
+
+#### 2. Fetch Structured Review Data
+
+```typescript
+const reviewData = await review_pr({
+  pr_number: <PR_NUMBER>,
+  issue_number: <ISSUE_NUMBER>  // optional, for spec compliance
+});
+```
+
+The `review_pr` tool returns:
+- PR metadata (title, author, base/head branches)
+- Diff summary and changed files list
+- Auto-generated checklists for changed file domains
+- Recommended specialist agents based on file patterns
+
+#### 3. Dispatch Recommended Specialists
+
+Use the specialists from `parse_mode` or `review_pr` response:
+
+```typescript
+// Option A: Auto-dispatch from parse_mode (preferred)
+if (result.dispatchReady?.parallelAgents) {
+  for (const agent of result.dispatchReady.parallelAgents) {
+    Agent({
+      subagent_type: agent.dispatchParams.subagent_type,
+      prompt: agent.dispatchParams.prompt,
+      description: agent.dispatchParams.description,
+      run_in_background: true,
+    });
+  }
+}
+
+// Option B: Manual dispatch from review_pr recommendations
+const dispatch = await dispatch_agents({
+  mode: "EVAL",
+  specialists: reviewData.recommendedSpecialists,
+  taskDescription: `Review PR #${prNumber}`,
+  targetFiles: reviewData.changedFiles,
+});
+```
+
+Typical EVAL-mode specialists: `security-specialist`, `accessibility-specialist`, `performance-specialist`, `code-quality-specialist`.
+
+#### 4. Collect and Classify Findings
+
+Collect all specialist results and classify each finding using the [Code Review Severity](../rules/severity-classification.md#code-review-severity) scale:
+
+| Severity | Meaning | Merge Gate |
+|----------|---------|------------|
+| `critical` | Blocks approval, must fix | BLOCKED |
+| `high` | Should fix before merge | BLOCKED (unless explicitly deferred) |
+| `medium` | Worth addressing, does not gate merge | APPROVED with comments |
+| `low` | Style/polish suggestions | APPROVED |
+
+#### 5. Write the Review
+
+Post the structured review on the PR:
+
+```bash
+gh pr review <PR_NUMBER> --comment --body "<structured review>"
+```
+
+Review body format (per [`pr-review-cycle.md`](../rules/pr-review-cycle.md)):
+
+```markdown
+## Review: [APPROVE | CHANGES_REQUESTED]
+### CI Status: [PASS | FAIL]
+### Issues Found:
+- [critical]: <description> — <file:line>
+- [high]: <description> — <file:line>
+- [medium]: <description> — <file:line>
+### Recommendation: [APPROVE | REQUEST_CHANGES]
+```
+
+#### 6. Approval Gate
+
+Follow the approval criteria from [`pr-review-cycle.md`](../rules/pr-review-cycle.md):
+
+- **Approve** when: CI green, Critical = 0, High = 0 (or explicitly deferred with ticket)
+- **Request changes** when: any Critical or High finding remains unresolved
+
+```bash
+# Approve (when reviewer is not the PR author)
+gh pr review <PR_NUMBER> --approve --body "LGTM - all review comments addressed"
+
+# Request changes
+gh pr review <PR_NUMBER> --request-changes --body "<structured review>"
+```
+
+### Complete Prompt Example
+
+For a conductor generating a review agent task:
+
+```markdown
+EVAL: review PR #42 for issue #40
+
+Review the PR against the linked issue's acceptance criteria.
+Use review_pr MCP tool, dispatch recommended specialists, and follow pr-review-cycle.md protocol.
+Approve only when Critical = 0 AND High = 0.
+```
+
+### Canonical References
+
+- **Severity scale**: [`severity-classification.md`](../rules/severity-classification.md#code-review-severity) — Critical/High/Medium/Low definitions
+- **Review protocol**: [`pr-review-cycle.md`](../rules/pr-review-cycle.md) — CI gate, review steps, approval criteria, commit hygiene
+- **MCP tool**: `review_pr(pr_number, issue_number?, timeout?)` — structured PR review data
