@@ -183,7 +183,7 @@ export class AgentHandler extends AbstractHandler {
             agentStack: {
               type: 'string',
               description:
-                'Agent stack name to resolve primary + specialists from a preset (e.g., "api-development"). Overrides primaryAgent and specialists when provided.',
+                'Agent stack name to resolve primary + specialists from a preset (e.g., "api-development"). Overrides primaryAgent and specialists when provided. Tip: use the suggestedStack value from parse_mode response to auto-select the best stack for the current context.',
             },
             inlineAgents: {
               type: 'object',

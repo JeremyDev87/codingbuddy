@@ -313,6 +313,10 @@ export interface ParallelAgentRecommendation {
   hint: string;
   /** Dispatch strength: "auto" (must dispatch), "recommend" (suggested), "skip" (do not dispatch) */
   dispatch?: DispatchStrength;
+  /** Matched agent stack name when specialists were resolved from a stack preset */
+  suggestedStack?: string;
+  /** True when specialists were derived from an agent stack rather than hard-coded defaults */
+  stackBased?: boolean;
 }
 
 /**

@@ -10,3 +10,4 @@ export * from './agent-stack.schema';
 export * from './agent-stack.loader';
 export * from './execution-plan';
 export * from './execution-plan.types';
+export * from './stack-matcher';

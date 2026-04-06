@@ -7,6 +7,8 @@ import { SkillModule } from '../skill/skill.module';
 import { SkillRecommendationService } from '../skill/skill-recommendation.service';
 import { AgentModule } from '../agent/agent.module';
 import { AgentService } from '../agent/agent.service';
+import { AgentStackService } from '../agent/agent-stack.service';
+import type { StackMatchInput } from '../agent/stack-matcher';
 import { normalizeAgentName } from '../shared/agent.utils';
 import { resolveClientType } from '../shared/client-type';
 import type { ExplicitPatternsMap } from './explicit-pattern-matcher';
@@ -32,6 +34,7 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
         configService: ConfigService,
         skillRecommendationService: SkillRecommendationService,
         agentService: AgentService,
+        agentStackService: AgentStackService,
       ) => {
         const logger = new Logger('KeywordModule');
 
@@ -194,6 +197,40 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           }
         };
 
+        // Load agent stacks for stack-aware specialist resolution
+        const loadStacks = async (): Promise<StackMatchInput[]> => {
+          try {
+            const summaries = await agentStackService.listStacks();
+            // listStacks returns AgentStackSummary; we need specialist_agents too.
+            // Resolve full stacks to include specialist_agents.
+            const results: StackMatchInput[] = [];
+            for (const summary of summaries) {
+              try {
+                const full = await agentStackService.resolveStack(summary.name);
+                results.push({
+                  name: full.name,
+                  category: full.category,
+                  tags: full.tags,
+                  specialist_agents: full.specialist_agents,
+                });
+              } catch {
+                // Skip stacks that fail to resolve
+                results.push({
+                  name: summary.name,
+                  category: summary.category,
+                  tags: summary.tags ?? [],
+                });
+              }
+            }
+            return results;
+          } catch (error) {
+            logger.debug(
+              `Failed to load agent stacks: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            );
+            return [];
+          }
+        };
+
         // Group optional dependencies in options object
         const options: KeywordServiceOptions = {
           primaryAgentResolver,
@@ -203,11 +240,18 @@ export const KEYWORD_SERVICE = 'KEYWORD_SERVICE';
           loadAgentSystemPromptFn: loadAgentSystemPrompt,
           getMaxIncludedSkillsFn: getMaxIncludedSkills,
           getClientTypeFn: () => resolveClientType(configService.getClientName()),
+          loadStacksFn: loadStacks,
         };
 
         return new KeywordService(loadConfig, loadRule, loadAgent, options);
       },
-      inject: [RulesService, ConfigService, SkillRecommendationService, AgentService],
+      inject: [
+        RulesService,
+        ConfigService,
+        SkillRecommendationService,
+        AgentService,
+        AgentStackService,
+      ],
     },
   ],
   exports: [KEYWORD_SERVICE],

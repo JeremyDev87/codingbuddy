@@ -35,6 +35,7 @@ import { getDefaultModeConfig } from '../shared/keyword-core';
 import { isTaskmaestroAvailable } from './taskmaestro-detector';
 import { type ClientType } from '../shared/client-type';
 import { getDiffFiles, analyzeDiffFiles, type DiffAnalysisResult } from './diff-analyzer';
+import { matchStack, type StackMatchInput, type StackMatchResult } from '../agent/stack-matcher';
 
 /**
  * Options for parseMode method
@@ -80,6 +81,8 @@ export interface KeywordServiceOptions {
   getClientTypeFn?: () => ClientType;
   /** Non-blocking callback to track rule usage for effectiveness analysis */
   trackRuleUsageFn?: (ruleNames: string[]) => void;
+  /** Function to list available agent stacks for stack-aware specialist resolution */
+  loadStacksFn?: () => Promise<StackMatchInput[]>;
 }
 
 /**
@@ -243,6 +246,7 @@ export class KeywordService {
   private readonly getMaxIncludedSkillsFn?: () => Promise<number | null>;
   private readonly getClientTypeFn?: () => ClientType;
   private readonly trackRuleUsageFn?: (ruleNames: string[]) => void;
+  private readonly loadStacksFn?: () => Promise<StackMatchInput[]>;
 
   /**
    * Context-aware specialist patterns for automatic agent recommendation.
@@ -325,6 +329,7 @@ export class KeywordService {
     this.getMaxIncludedSkillsFn = options?.getMaxIncludedSkillsFn;
     this.getClientTypeFn = options?.getClientTypeFn;
     this.trackRuleUsageFn = options?.trackRuleUsageFn;
+    this.loadStacksFn = options?.loadStacksFn;
 
     // Environment-based TTL: 5 minutes for development, 1 hour for production
     this.cacheTTL = process.env.NODE_ENV === 'production' ? 3600000 : 300000;
@@ -494,8 +499,8 @@ export class KeywordService {
     );
     await this.addAgentInfoToResult(result, resolvedAgent);
 
-    // 3. Add parallel agents recommendation
-    this.addParallelAgentsToResult(result, mode, config, originalPrompt);
+    // 3. Add parallel agents recommendation (async for stack resolution)
+    await this.addParallelAgentsToResult(result, mode, config, originalPrompt);
 
     // 4. Add ACT agent recommendation for PLAN mode
     await this.addActRecommendationToResult(result, mode, originalPrompt);
@@ -617,13 +622,13 @@ export class KeywordService {
   /**
    * Add parallel agents recommendation to result.
    */
-  private addParallelAgentsToResult(
+  private async addParallelAgentsToResult(
     result: ParseModeResult,
     mode: Mode,
     config: KeywordModesConfig,
     originalPrompt: string,
-  ): void {
-    const recommendation = this.getParallelAgentsRecommendation(mode, config, originalPrompt);
+  ): Promise<void> {
+    const recommendation = await this.getParallelAgentsRecommendation(mode, config, originalPrompt);
     if (recommendation) {
       result.parallelAgentsRecommendation = recommendation;
     }
@@ -920,15 +925,36 @@ export class KeywordService {
   /**
    * Get recommended parallel agents for a given mode.
    * These specialists can be executed as Claude Code subagents via Task tool.
-   * Now includes context-aware specialist recommendations based on prompt content.
+   * Includes stack-aware resolution: if a matching agent stack is detected,
+   * its specialists replace the hard-coded defaults. Context-aware specialists
+   * are still merged on top.
    */
-  private getParallelAgentsRecommendation(
+  private async getParallelAgentsRecommendation(
     mode: Mode,
     config: KeywordModesConfig,
     prompt?: string,
-  ): ParallelAgentRecommendation | undefined {
+  ): Promise<ParallelAgentRecommendation | undefined> {
     const modeConfig = config.modes[mode];
-    const baseSpecialists = modeConfig?.defaultSpecialists ?? [];
+    const defaultSpecialists = modeConfig?.defaultSpecialists ?? [];
+
+    // Try stack-based resolution first
+    let stackResult: StackMatchResult | null = null;
+    let stackSpecialists: string[] | undefined;
+    if (prompt && this.loadStacksFn) {
+      try {
+        const stacks = await this.loadStacksFn();
+        stackResult = matchStack(prompt, stacks);
+        if (stackResult) {
+          const matched = stacks.find(s => s.name === stackResult!.stackName);
+          stackSpecialists = matched?.specialist_agents;
+        }
+      } catch {
+        // Stack loading failed — fall back to defaults silently
+      }
+    }
+
+    // Determine base specialists: stack overrides defaults when matched and has specialists
+    const baseSpecialists = stackSpecialists?.length ? stackSpecialists : defaultSpecialists;
 
     // Get context-aware specialists based on prompt content
     const contextSpecialists = prompt ? this.getContextAwareSpecialists(prompt) : [];
@@ -950,10 +976,17 @@ export class KeywordService {
       hint = `Use Task tool with subagent_type="general-purpose" and run_in_background=true for each specialist. Call prepare_parallel_agents MCP tool to get ready-to-use prompts.`;
     }
 
-    return {
+    const result: ParallelAgentRecommendation = {
       specialists: allSpecialists,
       hint,
     };
+
+    if (stackResult) {
+      result.suggestedStack = stackResult.stackName;
+      result.stackBased = true;
+    }
+
+    return result;
   }
 
   /**
