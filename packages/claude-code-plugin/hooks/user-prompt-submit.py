@@ -66,9 +66,11 @@ def main():
             if _lib_dir not in sys.path:
                 sys.path.insert(0, _lib_dir)
 
+            council_preset = None
+
             try:
                 from runtime_mode import is_mcp_available
-                from mode_engine import ModeEngine
+                from mode_engine import ModeEngine, COUNCIL_PRESETS
 
                 project_dir = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
                 if is_mcp_available(project_dir=project_dir):
@@ -79,6 +81,8 @@ def main():
                         "If mcp__codingbuddy__parse_mode is available, "
                         "call it for enhanced features."
                     )
+                    # MCP council preset for eligible modes (#1361)
+                    council_preset = COUNCIL_PRESETS.get(detected_mode)
                 else:
                     # Standalone mode: full enriched instructions.
                     # Diagnostic marker (#1384): make it obvious to users that
@@ -88,6 +92,12 @@ def main():
                     engine = ModeEngine(cwd=project_dir)
                     instructions = engine.build_instructions(detected_mode)
                     print(instructions)
+                    # Standalone council preset from Tiny Actor presets (#1361)
+                    try:
+                        from tiny_actor_presets import CAST_PRESETS
+                        council_preset = CAST_PRESETS.get(detected_mode)
+                    except Exception:
+                        council_preset = COUNCIL_PRESETS.get(detected_mode)
             except Exception:
                 # Fallback: minimal instruction if imports fail.
                 # Still mark this as the standalone-minimal path so it is
@@ -99,14 +109,19 @@ def main():
                     "call it for enhanced features."
                 )
 
-            # Update HUD state with detected mode and reset workflow fields (#1090, #1324)
+            # Update HUD state with detected mode, reset workflow fields,
+            # and seed council state for eligible modes (#1090, #1324, #1361)
             try:
                 from hud_helpers import on_mode_entry
                 state_file = os.environ.get("CODINGBUDDY_HUD_STATE_FILE")
                 if state_file:
-                    on_mode_entry(detected_mode, state_file=state_file)
+                    on_mode_entry(
+                        detected_mode,
+                        council_preset=council_preset,
+                        state_file=state_file,
+                    )
                 else:
-                    on_mode_entry(detected_mode)
+                    on_mode_entry(detected_mode, council_preset=council_preset)
             except Exception:
                 pass
 

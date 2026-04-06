@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from hud_state import update_hud_state
 
@@ -55,17 +55,27 @@ _MODE_PHASE_MAP = {
 }
 
 
+# Modes eligible for council state seeding (#1361)
+_COUNCIL_ELIGIBLE_MODES = {"PLAN", "EVAL", "AUTO"}
+
+
 def on_mode_entry(
     mode: str,
     *,
+    council_preset: Optional[Dict] = None,
     state_file: Optional[str] = None,
 ) -> None:
     """Reset workflow fields when a new mode is entered.
 
     Called from UserPromptSubmit after mode keyword detection.
+    When *council_preset* is supplied and the mode is eligible
+    (PLAN/EVAL/AUTO), council state is seeded immediately so
+    downstream surfaces can render a first-scene (#1361).
 
     Args:
         mode: The detected mode (PLAN, ACT, EVAL, AUTO).
+        council_preset: Optional dict with ``primary`` (str) and
+            ``specialists`` (list[str]) keys.  Ignored for ACT mode.
         state_file: Optional explicit path; uses default when None.
     """
     try:
@@ -84,6 +94,16 @@ def on_mode_entry(
             "councilStage": "",
             "councilCast": [],
         }
+
+        # Seed council state for eligible modes (#1361)
+        if council_preset and mode.upper() in _COUNCIL_ELIGIBLE_MODES:
+            primary = council_preset.get("primary", "")
+            specialists = council_preset.get("specialists", [])
+            cast = [primary] + list(specialists) if primary else list(specialists)
+            kwargs["councilActive"] = True
+            kwargs["councilStage"] = "opening"
+            kwargs["councilCast"] = cast
+
         if state_file:
             update_hud_state(state_file=state_file, **kwargs)
         else:

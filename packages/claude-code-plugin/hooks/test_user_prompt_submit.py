@@ -369,6 +369,143 @@ class TestBackendDiagnosticMarker:
             assert "# Backend: standalone" not in result.stdout
 
 
+class TestCouncilStateSeedingIntegration:
+    """#1361: UserPromptSubmit seeds council state for eligible modes."""
+
+    def _run_hook_with_hud(self, prompt, home_dir, mcp_enabled, hud_state_file):
+        """Run hook with a custom HOME and HUD state file."""
+        import os as _os
+
+        hook_path = Path(__file__).parent / "user-prompt-submit.py"
+        input_data = json.dumps({"prompt": prompt})
+        env = _os.environ.copy()
+        env["HOME"] = str(home_dir)
+        env["CLAUDE_PROJECT_DIR"] = str(home_dir)
+        env["CODINGBUDDY_HUD_STATE_FILE"] = str(hud_state_file)
+        env.pop("CODINGBUDDY_RULES_DIR", None)
+        return subprocess.run(
+            [sys.executable, str(hook_path)],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=str(home_dir),
+        )
+
+    def _init_hud_state(self, hud_file):
+        """Create a minimal HUD state file."""
+        import os as _os
+        _hooks_dir = Path(__file__).parent
+        _lib_dir = _hooks_dir / "lib"
+        if str(_lib_dir) not in sys.path:
+            sys.path.insert(0, str(_lib_dir))
+        from hud_state import init_hud_state
+        init_hud_state("test-session", "5.0.0", state_file=str(hud_file))
+
+    def _read_hud(self, hud_file):
+        return json.loads(Path(hud_file).read_text())
+
+    def test_plan_mode_seeds_council_in_standalone(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            hud_file = Path(tmpdir) / "hud-state.json"
+            self._init_hud_state(hud_file)
+
+            result = self._run_hook_with_hud(
+                "PLAN: test", tmpdir, mcp_enabled=False, hud_state_file=hud_file,
+            )
+            assert result.returncode == 0
+
+            state = self._read_hud(hud_file)
+            assert state["councilActive"] is True
+            assert state["councilStage"] == "opening"
+            assert len(state["councilCast"]) > 0
+            assert state["councilCast"][0] == "technical-planner"
+
+    def test_plan_mode_seeds_council_in_mcp(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            mcp_json = claude_dir / "mcp.json"
+            mcp_json.write_text(json.dumps({
+                "mcpServers": {
+                    "codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}
+                }
+            }))
+            hud_file = Path(tmpdir) / "hud-state.json"
+            self._init_hud_state(hud_file)
+
+            result = self._run_hook_with_hud(
+                "PLAN: test", tmpdir, mcp_enabled=True, hud_state_file=hud_file,
+            )
+            assert result.returncode == 0
+
+            state = self._read_hud(hud_file)
+            assert state["councilActive"] is True
+            assert state["councilStage"] == "opening"
+            assert state["councilCast"][0] == "technical-planner"
+
+    def test_act_mode_does_not_seed_council(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            hud_file = Path(tmpdir) / "hud-state.json"
+            self._init_hud_state(hud_file)
+
+            result = self._run_hook_with_hud(
+                "ACT: implement", tmpdir, mcp_enabled=False, hud_state_file=hud_file,
+            )
+            assert result.returncode == 0
+
+            state = self._read_hud(hud_file)
+            assert state["councilActive"] is False
+            assert state["councilCast"] == []
+
+    def test_eval_mode_seeds_council(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            hud_file = Path(tmpdir) / "hud-state.json"
+            self._init_hud_state(hud_file)
+
+            result = self._run_hook_with_hud(
+                "EVAL: review", tmpdir, mcp_enabled=False, hud_state_file=hud_file,
+            )
+            assert result.returncode == 0
+
+            state = self._read_hud(hud_file)
+            assert state["councilActive"] is True
+            assert state["councilStage"] == "opening"
+            assert state["councilCast"][0] == "code-reviewer"
+
+    def test_auto_mode_seeds_council(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            claude_dir = Path(tmpdir) / ".claude"
+            claude_dir.mkdir()
+            hud_file = Path(tmpdir) / "hud-state.json"
+            self._init_hud_state(hud_file)
+
+            result = self._run_hook_with_hud(
+                "AUTO: build", tmpdir, mcp_enabled=False, hud_state_file=hud_file,
+            )
+            assert result.returncode == 0
+
+            state = self._read_hud(hud_file)
+            assert state["councilActive"] is True
+            assert state["councilCast"][0] == "auto-mode"
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__, "-v"])

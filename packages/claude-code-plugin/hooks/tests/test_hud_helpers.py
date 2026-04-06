@@ -430,6 +430,89 @@ class TestOnCouncilUpdate:
 
 # ---- Full lifecycle transition test ----
 
+class TestOnModeEntryCouncilSeeding:
+    """UserPromptSubmit: on_mode_entry seeds council state for eligible modes (#1361)."""
+
+    SAMPLE_PRESET = {
+        "primary": "technical-planner",
+        "specialists": ["architecture-specialist", "security-specialist"],
+    }
+
+    def test_plan_mode_seeds_council_when_preset_provided(self, state_file):
+        on_mode_entry("PLAN", council_preset=self.SAMPLE_PRESET, state_file=state_file)
+        state = _read(state_file)
+        assert state["councilActive"] is True
+        assert state["councilStage"] == "opening"
+        assert state["councilCast"] == [
+            "technical-planner",
+            "architecture-specialist",
+            "security-specialist",
+        ]
+
+    def test_eval_mode_seeds_council_when_preset_provided(self, state_file):
+        preset = {
+            "primary": "code-reviewer",
+            "specialists": ["security-specialist", "performance-specialist"],
+        }
+        on_mode_entry("EVAL", council_preset=preset, state_file=state_file)
+        state = _read(state_file)
+        assert state["councilActive"] is True
+        assert state["councilStage"] == "opening"
+        assert state["councilCast"] == [
+            "code-reviewer",
+            "security-specialist",
+            "performance-specialist",
+        ]
+
+    def test_auto_mode_seeds_council_when_preset_provided(self, state_file):
+        preset = {
+            "primary": "auto-mode",
+            "specialists": ["architecture-specialist", "code-quality-specialist"],
+        }
+        on_mode_entry("AUTO", council_preset=preset, state_file=state_file)
+        state = _read(state_file)
+        assert state["councilActive"] is True
+        assert state["councilStage"] == "opening"
+
+    def test_act_mode_does_not_seed_council_even_with_preset(self, state_file):
+        on_mode_entry("ACT", council_preset=self.SAMPLE_PRESET, state_file=state_file)
+        state = _read(state_file)
+        assert state["councilActive"] is False
+        assert state["councilStage"] == ""
+        assert state["councilCast"] == []
+
+    def test_no_preset_keeps_council_inactive_for_plan(self, state_file):
+        on_mode_entry("PLAN", state_file=state_file)
+        state = _read(state_file)
+        assert state["councilActive"] is False
+        assert state["councilStage"] == ""
+        assert state["councilCast"] == []
+
+    def test_council_cast_includes_primary_and_specialists(self, state_file):
+        on_mode_entry("PLAN", council_preset=self.SAMPLE_PRESET, state_file=state_file)
+        state = _read(state_file)
+        cast = state["councilCast"]
+        assert cast[0] == "technical-planner"  # primary first
+        assert "architecture-specialist" in cast
+        assert "security-specialist" in cast
+        assert len(cast) == 3  # 1 primary + 2 specialists
+
+    def test_mode_entry_resets_then_seeds(self, state_file):
+        """Council fields should be reset first, then seeded from preset."""
+        from hud_state import update_hud_state
+        update_hud_state(
+            state_file=state_file,
+            councilActive=True,
+            councilStage="consensus",
+            councilCast=["old-agent"],
+        )
+        on_mode_entry("PLAN", council_preset=self.SAMPLE_PRESET, state_file=state_file)
+        state = _read(state_file)
+        assert state["councilActive"] is True
+        assert state["councilStage"] == "opening"  # reset to opening, not consensus
+        assert "old-agent" not in state["councilCast"]
+
+
 class TestFullLifecycle:
     """End-to-end test of HUD state through a complete session lifecycle."""
 
