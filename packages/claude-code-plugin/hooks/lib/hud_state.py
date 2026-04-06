@@ -8,7 +8,7 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-# Default values for extended schema fields (#1326).
+# Default values for extended schema fields (#1326, #1364).
 _EXTENDED_DEFAULTS: Dict[str, Any] = {
     "phase": "ready",
     "focus": None,
@@ -16,6 +16,10 @@ _EXTENDED_DEFAULTS: Dict[str, Any] = {
     "councilStatus": None,
     "blockerCount": 0,
     "lastHandoff": None,
+    # Council UX fields (#1364)
+    "councilActive": False,
+    "councilStage": "",
+    "councilCast": [],
 }
 
 try:
@@ -85,6 +89,10 @@ def init_hud_state(
         "councilStatus": None,
         "blockerCount": 0,
         "lastHandoff": None,
+        # Council UX fields (#1364)
+        "councilActive": False,
+        "councilStage": "",
+        "councilCast": [],
         "updatedAt": now,
     }
     _locked_write(state_file, data)

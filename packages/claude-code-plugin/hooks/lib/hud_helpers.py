@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from hud_state import update_hud_state
 
@@ -79,6 +79,10 @@ def on_mode_entry(
             "executionStrategy": None,
             "councilStatus": None,
             "lastHandoff": None,
+            # Council UX reset (#1364)
+            "councilActive": False,
+            "councilStage": "",
+            "councilCast": [],
         }
         if state_file:
             update_hud_state(state_file=state_file, **kwargs)
@@ -194,6 +198,10 @@ def on_session_stop(
             "executionStrategy": None,
             "councilStatus": None,
             "blockerCount": 0,
+            # Council UX reset (#1364)
+            "councilActive": False,
+            "councilStage": "",
+            "councilCast": [],
         }
         if state_file:
             update_hud_state(state_file=state_file, **kwargs)
@@ -236,6 +244,42 @@ def init_baseline(
             update_hud_state(state_file=state_file, **updates)
         else:
             update_hud_state(**updates)
+    except Exception:
+        pass
+
+
+def on_council_update(
+    *,
+    active: Optional[bool] = None,
+    stage: Optional[str] = None,
+    cast: Optional[List[str]] = None,
+    state_file: Optional[str] = None,
+) -> None:
+    """Update council-related HUD fields (#1364).
+
+    Only supplied arguments are written; omitted fields are preserved.
+    Allows callers to start, advance, or end a council session.
+
+    Args:
+        active: Whether a council is currently active.
+        stage: Current council stage (opening, reviewing, consensus, done).
+        cast: List of specialist agent names participating in the council.
+        state_file: Optional explicit path; uses default when None.
+    """
+    try:
+        updates: dict = {}
+        if active is not None:
+            updates["councilActive"] = active
+        if stage is not None:
+            updates["councilStage"] = stage
+        if cast is not None:
+            updates["councilCast"] = cast
+
+        if updates:
+            if state_file:
+                update_hud_state(state_file=state_file, **updates)
+            else:
+                update_hud_state(**updates)
     except Exception:
         pass
 

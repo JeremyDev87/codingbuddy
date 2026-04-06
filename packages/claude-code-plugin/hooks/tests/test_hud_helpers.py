@@ -24,6 +24,7 @@ from hud_helpers import (
     on_tool_start,
     on_tool_end,
     on_session_stop,
+    on_council_update,
     read_installed_version,
     _detect_focus,
     _detect_strategy,
@@ -133,6 +134,9 @@ class TestOnModeEntry:
             executionStrategy="subagent",
             councilStatus="voting",
             lastHandoff="Frontend Developer",
+            councilActive=True,
+            councilStage="reviewing",
+            councilCast=["arch", "security"],
         )
 
         on_mode_entry(mode, state_file=state_file)
@@ -146,6 +150,10 @@ class TestOnModeEntry:
         assert state["executionStrategy"] is None
         assert state["councilStatus"] is None
         assert state["lastHandoff"] is None
+        # Council fields reset (#1364)
+        assert state["councilActive"] is False
+        assert state["councilStage"] == ""
+        assert state["councilCast"] == []
 
     def test_unknown_mode_defaults_to_ready(self, state_file):
         on_mode_entry("UNKNOWN", state_file=state_file)
@@ -259,6 +267,9 @@ class TestOnSessionStop:
             focus="app.tsx",
             executionStrategy="subagent",
             blockerCount=2,
+            councilActive=True,
+            councilStage="reviewing",
+            councilCast=["arch"],
         )
 
         on_session_stop(state_file=state_file)
@@ -270,6 +281,10 @@ class TestOnSessionStop:
         assert state["executionStrategy"] is None
         assert state["councilStatus"] is None
         assert state["blockerCount"] == 0
+        # Council fields cleared (#1364)
+        assert state["councilActive"] is False
+        assert state["councilStage"] == ""
+        assert state["councilCast"] == []
 
     def test_preserves_session_metadata(self, state_file):
         on_session_stop(state_file=state_file)
@@ -355,6 +370,64 @@ class TestExtractModeFromParseMode:
         assert _extract_mode_from_parse_mode({}) is None
 
 
+# ---- on_council_update ----
+
+class TestOnCouncilUpdate:
+    """Council update helper (#1364)."""
+
+    def test_starts_council(self, state_file):
+        on_council_update(
+            active=True,
+            stage="opening",
+            cast=["security-specialist", "arch-specialist"],
+            state_file=state_file,
+        )
+        state = _read(state_file)
+        assert state["councilActive"] is True
+        assert state["councilStage"] == "opening"
+        assert state["councilCast"] == ["security-specialist", "arch-specialist"]
+
+    def test_advances_stage(self, state_file):
+        on_council_update(
+            active=True,
+            stage="opening",
+            cast=["a", "b"],
+            state_file=state_file,
+        )
+        on_council_update(stage="reviewing", state_file=state_file)
+        state = _read(state_file)
+        assert state["councilStage"] == "reviewing"
+        assert state["councilActive"] is True  # preserved
+        assert state["councilCast"] == ["a", "b"]  # preserved
+
+    def test_ends_council(self, state_file):
+        on_council_update(
+            active=True,
+            stage="opening",
+            cast=["a"],
+            state_file=state_file,
+        )
+        on_council_update(
+            active=False,
+            stage="done",
+            cast=[],
+            state_file=state_file,
+        )
+        state = _read(state_file)
+        assert state["councilActive"] is False
+        assert state["councilStage"] == "done"
+        assert state["councilCast"] == []
+
+    def test_noop_when_no_args(self, state_file):
+        """No-op when called with no arguments."""
+        old_state = _read(state_file)
+        on_council_update(state_file=state_file)
+        new_state = _read(state_file)
+        assert new_state["councilActive"] == old_state["councilActive"]
+        assert new_state["councilStage"] == old_state["councilStage"]
+        assert new_state["councilCast"] == old_state["councilCast"]
+
+
 # ---- Full lifecycle transition test ----
 
 class TestFullLifecycle:
@@ -400,13 +473,39 @@ class TestFullLifecycle:
         state = _read(sf)
         assert state["focus"] == "testing"
 
-        # 7. Stop: clear active state
+        # 7. Council activity during session
+        on_council_update(
+            active=True, stage="opening",
+            cast=["security-specialist", "arch-specialist"],
+            state_file=sf,
+        )
+        state = _read(sf)
+        assert state["councilActive"] is True
+        assert state["councilStage"] == "opening"
+        assert state["councilCast"] == ["security-specialist", "arch-specialist"]
+
+        # 8. Council advances
+        on_council_update(stage="consensus", state_file=sf)
+        state = _read(sf)
+        assert state["councilStage"] == "consensus"
+
+        # 9. Mode re-entry resets council
+        on_mode_entry("EVAL", state_file=sf)
+        state = _read(sf)
+        assert state["councilActive"] is False
+        assert state["councilStage"] == ""
+        assert state["councilCast"] == []
+
+        # 10. Stop: clear active state
         on_session_stop(state_file=sf)
         state = _read(sf)
         assert state["activeAgent"] is None
         assert state["phase"] == "completed"
         assert state["focus"] is None
         assert state["executionStrategy"] is None
+        assert state["councilActive"] is False
+        assert state["councilStage"] == ""
+        assert state["councilCast"] == []
         # Session metadata survives
         assert state["sessionId"] == "lifecycle-test"
 
