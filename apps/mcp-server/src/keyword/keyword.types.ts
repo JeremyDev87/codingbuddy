@@ -7,6 +7,47 @@ export const KEYWORDS = ['PLAN', 'ACT', 'EVAL', 'AUTO'] as const;
 
 export type Mode = (typeof KEYWORDS)[number];
 
+// ─── Permission forecasting types (#1377) ─────────────────────────
+
+/**
+ * Classification of permission levels required for execution actions.
+ * Ordered roughly from least to most impactful.
+ */
+export type PermissionClass =
+  | 'read-only' // file reads, grep, git log
+  | 'repo-write' // file edits, git commit, git push
+  | 'network' // API calls, package install
+  | 'destructive' // file deletion, git reset, branch delete
+  | 'external'; // GitHub API (PR create, issue comment)
+
+/**
+ * A group of related actions that share a logical intent and permission
+ * class.  By surfacing bundles *before* execution, users can anticipate
+ * why approval prompts appear later.
+ */
+export interface ApprovalBundle {
+  /** Short human-readable label, e.g. "Ship changes" */
+  name: string;
+  /** Concrete actions in this bundle */
+  actions: string[];
+  /** Dominant permission class */
+  permissionClass: PermissionClass;
+  /** Why this bundle is needed */
+  reason: string;
+}
+
+/**
+ * Permission forecast attached to a parse_mode response.
+ */
+export interface PermissionForecast {
+  /** Expected permission classes for this mode + task */
+  permissionClasses: PermissionClass[];
+  /** Grouped related actions */
+  approvalBundles: ApprovalBundle[];
+  /** One-line human-readable summary */
+  permissionSummary: string;
+}
+
 /** Mode Agent names in priority order */
 export const MODE_AGENTS = ['plan-mode', 'act-mode', 'eval-mode', 'auto-mode'] as const;
 
@@ -546,6 +587,13 @@ export interface ParseModeResult {
    * Reflects environment, config, or default gating from TeamsCapabilityService (#1311).
    */
   teamsCapability?: TeamsCapabilityStatus;
+  /**
+   * @apiProperty External API - do not rename.
+   * Forecasts the permission classes and approval bundles expected during
+   * execution, so users can anticipate upcoming approval prompts.
+   * Present in all modes.
+   */
+  permissionForecast?: PermissionForecast;
 }
 
 /**

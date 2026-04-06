@@ -2932,4 +2932,35 @@ ${'Even more content.\n'.repeat(150)}`;
       expect(result.requiredSkillsEnforced).toBe(true);
     });
   });
+
+  describe('permissionForecast integration', () => {
+    it('includes permissionForecast in PLAN mode response', async () => {
+      const result = await service.parseMode('PLAN design auth feature');
+      expect(result.permissionForecast).toBeDefined();
+      expect(result.permissionForecast!.permissionClasses).toContain('read-only');
+      expect(result.permissionForecast!.permissionSummary).toContain('PLAN');
+    });
+
+    it('includes permissionForecast in ACT mode response', async () => {
+      const result = await service.parseMode('ACT implement login');
+      expect(result.permissionForecast).toBeDefined();
+      expect(result.permissionForecast!.permissionClasses).toContain('repo-write');
+    });
+
+    it('includes ship bundle when prompt mentions shipping', async () => {
+      const result = await service.parseMode('ACT ship the changes');
+      expect(result.permissionForecast).toBeDefined();
+      const ship = result.permissionForecast!.approvalBundles.find(
+        (b: { name: string }) => b.name === 'Ship changes',
+      );
+      expect(ship).toBeDefined();
+      expect(result.permissionForecast!.permissionClasses).toContain('external');
+    });
+
+    it('provides a human-readable summary', async () => {
+      const result = await service.parseMode('EVAL review PR');
+      expect(typeof result.permissionForecast!.permissionSummary).toBe('string');
+      expect(result.permissionForecast!.permissionSummary.length).toBeGreaterThan(0);
+    });
+  });
 });

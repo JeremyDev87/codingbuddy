@@ -31,6 +31,7 @@ import { filterRulesByMode } from './rule-filter';
 import { truncateSkillContent } from '../skill/skill-content.utils';
 import { createAgentSummary } from '../agent/agent-summary.utils';
 import { truncateRuleContent } from '../rules/rules-content.utils';
+import { generatePermissionForecast } from './permission-forecast';
 import { getDefaultModeConfig } from '../shared/keyword-core';
 import { isTaskmaestroAvailable } from './taskmaestro-detector';
 import { type ClientType } from '../shared/client-type';
@@ -538,6 +539,9 @@ export class KeywordService {
 
     // 11. Auto-include release checklist in EVAL mode on version changes (#1085)
     this.addReleaseChecklistIfNeeded(result, mode, originalPrompt);
+
+    // 12. Permission forecasting — predict permission needs and bundle related actions (#1377)
+    result.permissionForecast = generatePermissionForecast(mode, originalPrompt);
 
     return result;
   }
