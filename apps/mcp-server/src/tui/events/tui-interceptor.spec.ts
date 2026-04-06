@@ -265,14 +265,14 @@ describe('TuiInterceptor', () => {
       }));
       await new Promise(resolve => setImmediate(resolve));
 
-      // Second call: ACT with frontend-developer
+      // Second call: ACT with software-engineer
       await interceptor.intercept('parse_mode', { prompt: 'ACT implement feature' }, async () => ({
         content: [
           {
             type: 'text',
             text: JSON.stringify({
               mode: 'ACT',
-              delegates_to: 'frontend-developer',
+              delegates_to: 'software-engineer',
             }),
           },
         ],
@@ -286,11 +286,11 @@ describe('TuiInterceptor', () => {
           reason: 'replaced',
         }),
       );
-      // frontend-developer should be activated
+      // software-engineer should be activated
       expect(activatedHandler).toHaveBeenCalledWith(
         expect.objectContaining({
-          agentId: 'primary:frontend-developer',
-          name: 'frontend-developer',
+          agentId: 'primary:software-engineer',
+          name: 'software-engineer',
           isPrimary: true,
         }),
       );
@@ -618,7 +618,7 @@ describe('TuiInterceptor', () => {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({ mode: 'ACT', delegates_to: 'frontend-developer' }),
+            text: JSON.stringify({ mode: 'ACT', delegates_to: 'software-engineer' }),
           },
         ],
       }));

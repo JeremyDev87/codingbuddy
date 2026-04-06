@@ -21,7 +21,7 @@ const mockConfig: KeywordModesConfig = {
       instructions: 'Design first approach.',
       rules: ['rules/core.md'],
       agent: 'plan-mode',
-      delegates_to: 'frontend-developer',
+      delegates_to: 'solution-architect',
       defaultSpecialists: ['architecture-specialist', 'test-strategy-specialist'],
     },
     ACT: {
@@ -29,7 +29,7 @@ const mockConfig: KeywordModesConfig = {
       instructions: 'Red-Green-Refactor cycle.',
       rules: ['rules/core.md', 'rules/project.md'],
       agent: 'act-mode',
-      delegates_to: 'frontend-developer',
+      delegates_to: 'software-engineer',
       defaultSpecialists: ['code-quality-specialist', 'test-strategy-specialist'],
     },
     EVAL: {
@@ -65,6 +65,20 @@ const mockRulesContent: Record<string, string> = {
 };
 
 const mockAgentData: Record<string, unknown> = {
+  'solution-architect': {
+    name: 'Solution Architect',
+    description: 'High-level system design and architecture planning specialist',
+    role: {
+      expertise: ['Architecture', 'System Design', 'Patterns', 'Scalability'],
+    },
+  },
+  'software-engineer': {
+    name: 'Software Engineer',
+    description: 'General-purpose implementation engineer with TDD focus',
+    role: {
+      expertise: ['TypeScript', 'TDD', 'Clean Architecture', 'Implementation'],
+    },
+  },
   'frontend-developer': {
     name: 'Frontend Developer',
     description: 'React/Next.js specialist with TDD and design system experience',
@@ -115,11 +129,11 @@ describe('KeywordService', () => {
         expect(result.rules[0].name).toBe('rules/core.md');
         expect(result.warnings).toBeUndefined();
         expect(result.agent).toBe('plan-mode');
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
         expect(result.delegate_agent_info).toEqual({
-          name: 'Frontend Developer',
-          description: 'React/Next.js specialist with TDD and design system experience',
-          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+          name: 'Solution Architect',
+          description: 'High-level system design and architecture planning specialist',
+          expertise: ['Architecture', 'System Design', 'Patterns', 'Scalability'],
         });
       });
 
@@ -131,11 +145,11 @@ describe('KeywordService', () => {
         expect(result.instructions).toContain('Red-Green-Refactor cycle.');
         expect(result.rules).toHaveLength(2);
         expect(result.agent).toBe('act-mode');
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('software-engineer');
         expect(result.delegate_agent_info).toEqual({
-          name: 'Frontend Developer',
-          description: 'React/Next.js specialist with TDD and design system experience',
-          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+          name: 'Software Engineer',
+          description: 'General-purpose implementation engineer with TDD focus',
+          expertise: ['TypeScript', 'TDD', 'Clean Architecture', 'Implementation'],
         });
       });
 
@@ -716,13 +730,13 @@ describe('KeywordService', () => {
       it('includes delegate information when delegates_to is configured', async () => {
         const result = await service.parseMode('ACT implement feature');
 
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('software-engineer');
         expect(result.delegate_agent_info).toEqual({
-          name: 'Frontend Developer',
-          description: 'React/Next.js specialist with TDD and design system experience',
-          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+          name: 'Software Engineer',
+          description: 'General-purpose implementation engineer with TDD focus',
+          expertise: ['TypeScript', 'TDD', 'Clean Architecture', 'Implementation'],
         });
-        expect(mockLoadAgentInfo).toHaveBeenCalledWith('frontend-developer');
+        expect(mockLoadAgentInfo).toHaveBeenCalledWith('software-engineer');
       });
 
       it('includes different delegate for EVAL mode', async () => {
@@ -743,7 +757,7 @@ describe('KeywordService', () => {
 
         const result = await service.parseMode('PLAN design feature');
 
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
         expect(result.delegate_agent_info).toBeUndefined();
       });
 
@@ -752,7 +766,7 @@ describe('KeywordService', () => {
 
         const result = await service.parseMode('PLAN design feature');
 
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
         expect(result.delegate_agent_info).toBeUndefined();
       });
 
@@ -781,7 +795,7 @@ describe('KeywordService', () => {
         const result = await service.parseMode('PLAN design feature');
 
         expect(result.delegate_agent_info).toEqual({
-          name: 'frontend-developer',
+          name: 'solution-architect',
           description: 'Test description',
           expertise: ['test'],
         });
@@ -806,8 +820,8 @@ describe('KeywordService', () => {
         expect(result.mode).toBe('PLAN');
         expect(result.originalPrompt).toBe('인증 기능 설계');
         expect(result.agent).toBe('plan-mode');
-        expect(result.delegates_to).toBe('frontend-developer');
-        expect(result.delegate_agent_info?.name).toBe('Frontend Developer');
+        expect(result.delegates_to).toBe('solution-architect');
+        expect(result.delegate_agent_info?.name).toBe('Solution Architect');
       });
 
       it('works with default mode and includes agent information', async () => {
@@ -817,7 +831,7 @@ describe('KeywordService', () => {
         expect(result.originalPrompt).toBe('design auth feature');
         expect(result.warnings).toContain('No keyword found, defaulting to PLAN');
         expect(result.agent).toBe('plan-mode');
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
       });
     });
   });
@@ -1128,7 +1142,7 @@ describe('KeywordService', () => {
       expect(result.activation_message?.activations).toHaveLength(1);
       expect(result.activation_message?.activations[0]).toMatchObject({
         type: 'agent',
-        name: 'frontend-developer',
+        name: 'solution-architect',
         tier: 'primary',
       });
     });
@@ -1139,7 +1153,7 @@ describe('KeywordService', () => {
       expect(result.activation_message).toBeDefined();
       expect(result.activation_message?.activations[0]).toMatchObject({
         type: 'agent',
-        name: 'frontend-developer',
+        name: 'software-engineer',
         tier: 'primary',
       });
     });
@@ -1173,7 +1187,7 @@ describe('KeywordService', () => {
       const result = await service.parseMode('계획 인증 기능 설계');
 
       expect(result.activation_message).toBeDefined();
-      expect(result.activation_message?.activations[0].name).toBe('frontend-developer');
+      expect(result.activation_message?.activations[0].name).toBe('solution-architect');
     });
 
     it('includes activation_message even without keyword (default mode)', async () => {
@@ -1323,10 +1337,10 @@ describe('KeywordService', () => {
     it('falls back to default resolution if no recommendedActAgent provided', async () => {
       const mockResolver = {
         resolve: vi.fn().mockResolvedValue({
-          agentName: 'frontend-developer',
+          agentName: 'backend-developer',
           source: 'default',
           confidence: 1.0,
-          reason: 'ACT mode default: frontend-developer',
+          reason: 'ACT mode default: backend-developer',
         }),
       };
       const serviceWithResolver = new KeywordService(
@@ -1340,7 +1354,7 @@ describe('KeywordService', () => {
 
       const result = await serviceWithResolver.parseMode('ACT implement feature');
 
-      expect(result.delegates_to).toBe('frontend-developer');
+      expect(result.delegates_to).toBe('backend-developer');
       const call = mockResolver.resolve.mock.calls[0];
       expect(call[0]).toBe('ACT');
       expect(call[1]).toBe('implement feature');
@@ -1351,10 +1365,10 @@ describe('KeywordService', () => {
     it('treats empty string recommendedActAgent as undefined', async () => {
       const mockResolver = {
         resolve: vi.fn().mockResolvedValue({
-          agentName: 'frontend-developer',
+          agentName: 'backend-developer',
           source: 'default',
           confidence: 1.0,
-          reason: 'ACT mode default: frontend-developer',
+          reason: 'ACT mode default: backend-developer',
         }),
       };
       const serviceWithResolver = new KeywordService(
@@ -1371,7 +1385,7 @@ describe('KeywordService', () => {
         recommendedActAgent: '',
       });
 
-      expect(result.delegates_to).toBe('frontend-developer');
+      expect(result.delegates_to).toBe('backend-developer');
       // Should be called with undefined, not empty string
       const call = mockResolver.resolve.mock.calls[0];
       expect(call[0]).toBe('ACT');
@@ -1383,10 +1397,10 @@ describe('KeywordService', () => {
     it('treats whitespace-only recommendedActAgent as undefined', async () => {
       const mockResolver = {
         resolve: vi.fn().mockResolvedValue({
-          agentName: 'frontend-developer',
+          agentName: 'backend-developer',
           source: 'default',
           confidence: 1.0,
-          reason: 'ACT mode default: frontend-developer',
+          reason: 'ACT mode default: backend-developer',
         }),
       };
       const serviceWithResolver = new KeywordService(
@@ -1404,7 +1418,7 @@ describe('KeywordService', () => {
         recommendedActAgent: '   ',
       });
 
-      expect(result.delegates_to).toBe('frontend-developer');
+      expect(result.delegates_to).toBe('backend-developer');
     });
   });
 
@@ -2327,9 +2341,9 @@ describe('KeywordService', () => {
         const mockLoadAgentSystemPrompt = vi.fn(
           async (agentName: string, mode: Mode): Promise<AgentSystemPromptInfo | null> => ({
             agentName,
-            displayName: 'Frontend Developer',
+            displayName: 'Solution Architect',
             systemPrompt: `You are a ${agentName} in ${mode} mode. Follow TDD.`,
-            description: 'Frontend development specialist',
+            description: 'Architecture planning specialist',
           }),
         );
 
@@ -2344,9 +2358,9 @@ describe('KeywordService', () => {
 
         expect(result.included_agent).toBeDefined();
         expect(result.included_agent).toMatchObject({
-          name: 'Frontend Developer',
-          systemPrompt: expect.stringContaining('frontend-developer'),
-          expertise: ['React', 'Next.js', 'TDD', 'TypeScript'],
+          name: 'Solution Architect',
+          systemPrompt: expect.stringContaining('solution-architect'),
+          expertise: ['Architecture', 'System Design', 'Patterns', 'Scalability'],
         });
       });
 
@@ -2411,7 +2425,7 @@ describe('KeywordService', () => {
 
         // Should not throw, just skip agent inclusion
         expect(result.mode).toBe('PLAN');
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
         expect(result.included_agent).toBeUndefined();
       });
 
@@ -2509,7 +2523,7 @@ describe('KeywordService', () => {
         const result = await serviceWithNullAgent.parseMode('PLAN test');
 
         // delegates_to should still be set from config, but delegate_agent_info should be undefined
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
         expect(result.delegate_agent_info).toBeUndefined();
       });
 
@@ -2523,7 +2537,7 @@ describe('KeywordService', () => {
 
         const result = await serviceWithStringAgent.parseMode('PLAN test');
 
-        expect(result.delegates_to).toBe('frontend-developer');
+        expect(result.delegates_to).toBe('solution-architect');
         expect(result.delegate_agent_info).toBeUndefined();
       });
     });

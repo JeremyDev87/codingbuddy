@@ -129,11 +129,11 @@ const createMockKeywordService = (): Partial<KeywordService> => ({
         instructions: 'Red-Green-Refactor cycle',
         rules: [{ name: 'rules/core.md', content: 'Some rules' }],
         agent: 'act-mode',
-        delegates_to: 'frontend-developer',
+        delegates_to: 'software-engineer',
         delegate_agent_info: {
-          name: 'Frontend Developer',
-          description: 'React/Next.js frontend specialist',
-          expertise: ['React', 'TypeScript'],
+          name: 'Software Engineer',
+          description: 'General-purpose implementation engineer',
+          expertise: ['TypeScript', 'TDD'],
         },
       };
     } else if (firstWord === 'EVAL') {
@@ -157,11 +157,11 @@ const createMockKeywordService = (): Partial<KeywordService> => ({
         instructions: 'Plan the implementation',
         rules: [{ name: 'rules/core.md', content: 'Some rules' }],
         agent: 'plan-mode',
-        delegates_to: 'frontend-developer',
+        delegates_to: 'solution-architect',
         delegate_agent_info: {
-          name: 'Frontend Developer',
-          description: 'React/Next.js frontend specialist',
-          expertise: ['React', 'TypeScript'],
+          name: 'Solution Architect',
+          description: 'Architecture planning specialist',
+          expertise: ['Architecture', 'System Design'],
         },
       };
     }
@@ -914,11 +914,11 @@ describe('McpService', () => {
       const parsedContent = JSON.parse(result.content[0].text);
       expect(parsedContent.mode).toBe('ACT');
       expect(parsedContent.agent).toBe('act-mode');
-      expect(parsedContent.delegates_to).toBe('frontend-developer');
+      expect(parsedContent.delegates_to).toBe('software-engineer');
       expect(parsedContent.delegate_agent_info).toEqual({
-        name: 'Frontend Developer',
-        description: 'React/Next.js frontend specialist',
-        expertise: ['React', 'TypeScript'],
+        name: 'Software Engineer',
+        description: 'General-purpose implementation engineer',
+        expertise: ['TypeScript', 'TDD'],
       });
     });
 
