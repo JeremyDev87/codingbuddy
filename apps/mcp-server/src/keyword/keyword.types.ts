@@ -519,6 +519,19 @@ export interface ParseModeResult {
   councilPreset?: CouncilPreset;
   /**
    * @apiProperty External API - do not rename.
+   * True when the selected planning agent declared `skills.required` and all
+   * those skills were successfully loaded and included in `included_skills`
+   * with full (un-truncated) content.  Absent when no enforcement was needed.
+   */
+  requiredSkillsEnforced?: boolean;
+  /**
+   * @apiProperty External API - do not rename.
+   * Names of the skills that were enforced as required by the planning agent.
+   * Absent when no enforcement was needed.
+   */
+  requiredSkillNames?: string[];
+  /**
+   * @apiProperty External API - do not rename.
    * Describes the outer execution transport and optional inner coordination layer.
    * Built from the composable execution model (#1309). Present when dispatch is active.
    */

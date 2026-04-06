@@ -515,6 +515,11 @@ export class KeywordService {
     // 8. Auto-include relevant skills (for MCP mode to force AI execution)
     await this.addIncludedSkillsToResult(result, originalPrompt, options);
 
+    // 8.5. Enforce required skills for planning agents (PLAN/AUTO only)
+    if (mode === 'PLAN' || mode === 'AUTO') {
+      await this.enforceRequiredAgentSkills(result, options);
+    }
+
     // 9. Auto-include primary agent system prompt (for MCP mode to force AI execution)
     await this.addIncludedAgentToResult(result, mode, options);
 
@@ -797,6 +802,79 @@ export class KeywordService {
         `Failed to auto-include skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
+  }
+
+  /**
+   * Enforce required skills declared by the selected planning agent.
+   *
+   * When the agent's JSON declares `skills.required`, those skills MUST appear
+   * in `included_skills` with full (un-truncated) content regardless of
+   * verbosity — except in `minimal` mode where only metadata is kept.
+   *
+   * If a required skill was already included (from prompt-based recommendations)
+   * but was truncated by standard verbosity, it gets replaced with full content.
+   */
+  private async enforceRequiredAgentSkills(
+    result: ParseModeResult,
+    options?: ParseModeOptions,
+  ): Promise<void> {
+    if (!this.loadAgentInfoFn || !this.loadSkillContentFn || !result.delegates_to) return;
+
+    try {
+      const agentData = await this.loadAgentInfoFn(result.delegates_to);
+      const requiredSkillNames = this.extractRequiredSkillNames(agentData);
+      if (requiredSkillNames.length === 0) return;
+
+      const verbosity = options?.verbosity ?? 'standard';
+
+      // Ensure included_skills array exists
+      if (!result.included_skills) {
+        result.included_skills = [];
+      }
+
+      for (const skillName of requiredSkillNames) {
+        const existingIndex = result.included_skills.findIndex(s => s.name === skillName);
+        const content = await this.loadSkillContentFn(skillName);
+        if (!content) continue;
+
+        const enforcedSkill: IncludedSkill = {
+          name: content.name,
+          description: content.description,
+          content: verbosity === 'minimal' ? '' : content.content,
+          reason: 'Required by planning agent',
+        };
+
+        if (existingIndex >= 0) {
+          // Replace existing (possibly truncated) entry with enforced version
+          result.included_skills[existingIndex] = enforcedSkill;
+        } else {
+          result.included_skills.push(enforcedSkill);
+        }
+      }
+
+      result.requiredSkillsEnforced = true;
+      result.requiredSkillNames = requiredSkillNames;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to enforce required agent skills: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Extract `skills.required[].name` from raw agent JSON data.
+   */
+  private extractRequiredSkillNames(agentData: unknown): string[] {
+    if (!agentData || typeof agentData !== 'object') return [];
+    const agent = agentData as Record<string, unknown>;
+    const skills = agent.skills as Record<string, unknown> | undefined;
+    if (!skills || typeof skills !== 'object') return [];
+    const required = skills.required;
+    if (!Array.isArray(required)) return [];
+    return required
+      .filter((s): s is Record<string, unknown> => typeof s === 'object' && s !== null)
+      .map(s => s.name)
+      .filter((n): n is string => typeof n === 'string');
   }
 
   /** Get max included skills from config or use default. */

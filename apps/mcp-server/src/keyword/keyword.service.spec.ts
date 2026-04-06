@@ -2741,4 +2741,181 @@ ${'Even more content.\n'.repeat(150)}`;
       expect(releaseWarning).toBeUndefined();
     });
   });
+
+  describe('required skill enforcement for planning agents', () => {
+    // Mock agent data with skills.required declarations
+    const agentDataWithSkills: Record<string, unknown> = {
+      'solution-architect': {
+        name: 'Solution Architect',
+        description: 'High-level system design specialist',
+        role: { expertise: ['Architecture', 'System Design'] },
+        skills: {
+          required: [
+            {
+              name: 'brainstorming',
+              purpose: 'Explore design options',
+              when: 'Starting any new feature',
+            },
+          ],
+        },
+      },
+      'technical-planner': {
+        name: 'Technical Planner',
+        description: 'Implementation planning specialist',
+        role: { expertise: ['Planning', 'TDD'] },
+        skills: {
+          required: [
+            { name: 'writing-plans', purpose: 'Create implementation plans', when: 'Always' },
+          ],
+        },
+      },
+      'frontend-developer': {
+        name: 'Frontend Developer',
+        description: 'React/Next.js specialist',
+        role: { expertise: ['React', 'Next.js'] },
+        // No skills.required — not a planning agent
+      },
+    };
+
+    const mockLoadSkillContentForRequired = vi.fn(
+      async (skillName: string): Promise<SkillContentInfo | null> => {
+        const skills: Record<string, SkillContentInfo> = {
+          brainstorming: {
+            name: 'brainstorming',
+            description: 'Explore design options through collaborative dialogue',
+            content:
+              '# Brainstorming Skill\nFull content here with detailed instructions for brainstorming sessions.',
+          },
+          'writing-plans': {
+            name: 'writing-plans',
+            description: 'Create comprehensive implementation plans',
+            content:
+              '# Writing Plans Skill\nFull content here with detailed instructions for writing plans.',
+          },
+        };
+        return skills[skillName] ?? null;
+      },
+    );
+
+    function createPlanningService(
+      overrideAgentResolver?: PrimaryAgentResolver,
+      verbosity?: 'minimal' | 'standard' | 'full',
+    ) {
+      const loadAgentFn = vi.fn((agentName: string) => {
+        const data = agentDataWithSkills[agentName];
+        return data ? Promise.resolve(data) : Promise.reject(new Error(`Not found: ${agentName}`));
+      });
+
+      const svc = new KeywordService(mockLoadConfig, mockLoadRule, loadAgentFn, {
+        loadSkillContentFn: mockLoadSkillContentForRequired,
+        getSkillRecommendationsFn: () => [],
+        primaryAgentResolver: overrideAgentResolver,
+      });
+      return { svc, loadAgentFn, verbosity };
+    }
+
+    function createResolver(agentName: string): PrimaryAgentResolver {
+      return {
+        resolve: vi.fn().mockResolvedValue({ agentName, source: 'prompt-analysis' }),
+      } as unknown as PrimaryAgentResolver;
+    }
+
+    it('enforces brainstorming skill for solution-architect in PLAN mode', async () => {
+      const { svc } = createPlanningService(createResolver('solution-architect'));
+      const result = await svc.parseMode('PLAN design new auth system');
+
+      expect(result.delegates_to).toBe('solution-architect');
+      expect(result.requiredSkillsEnforced).toBe(true);
+      expect(result.requiredSkillNames).toEqual(['brainstorming']);
+      expect(result.included_skills).toBeDefined();
+      const brainstorming = result.included_skills!.find(s => s.name === 'brainstorming');
+      expect(brainstorming).toBeDefined();
+      expect(brainstorming!.content).toContain('# Brainstorming Skill');
+      expect(brainstorming!.content).toContain('Full content');
+    });
+
+    it('enforces writing-plans skill for technical-planner in PLAN mode', async () => {
+      const { svc } = createPlanningService(createResolver('technical-planner'));
+      const result = await svc.parseMode('PLAN implement user dashboard');
+
+      expect(result.delegates_to).toBe('technical-planner');
+      expect(result.requiredSkillsEnforced).toBe(true);
+      expect(result.requiredSkillNames).toEqual(['writing-plans']);
+      const writingPlans = result.included_skills!.find(s => s.name === 'writing-plans');
+      expect(writingPlans).toBeDefined();
+      expect(writingPlans!.content).toContain('# Writing Plans Skill');
+    });
+
+    it('does not set enforcement fields for agents without required skills', async () => {
+      const { svc } = createPlanningService(createResolver('frontend-developer'));
+      const result = await svc.parseMode('PLAN build a component');
+
+      expect(result.delegates_to).toBe('frontend-developer');
+      expect(result.requiredSkillsEnforced).toBeUndefined();
+      expect(result.requiredSkillNames).toBeUndefined();
+    });
+
+    it('provides full content in standard verbosity for required skills', async () => {
+      const { svc } = createPlanningService(createResolver('solution-architect'));
+      const result = await svc.parseMode('PLAN design API gateway', { verbosity: 'standard' });
+
+      const brainstorming = result.included_skills!.find(s => s.name === 'brainstorming');
+      expect(brainstorming).toBeDefined();
+      // Full content — not truncated
+      expect(brainstorming!.content).toContain('Full content');
+      expect(brainstorming!.content).not.toContain('truncated');
+    });
+
+    it('includes only skill names in minimal verbosity for required skills', async () => {
+      const { svc } = createPlanningService(createResolver('solution-architect'));
+      const result = await svc.parseMode('PLAN design microservices', { verbosity: 'minimal' });
+
+      // Required skills enforcement still signals the names
+      expect(result.requiredSkillsEnforced).toBe(true);
+      expect(result.requiredSkillNames).toEqual(['brainstorming']);
+      // In minimal verbosity, content is empty but skill entry exists
+      const brainstorming = result.included_skills!.find(s => s.name === 'brainstorming');
+      expect(brainstorming).toBeDefined();
+      expect(brainstorming!.content).toBe('');
+    });
+
+    it('does not enforce skills in ACT mode even for planning agents', async () => {
+      const { svc } = createPlanningService(createResolver('solution-architect'));
+      const result = await svc.parseMode('ACT implement the plan');
+
+      // ACT mode — no required skill enforcement
+      expect(result.requiredSkillsEnforced).toBeUndefined();
+    });
+
+    it('merges required skills with prompt-recommended skills without duplicates', async () => {
+      const loadAgentFn = vi.fn((agentName: string) => {
+        const data = agentDataWithSkills[agentName];
+        return data ? Promise.resolve(data) : Promise.reject(new Error(`Not found: ${agentName}`));
+      });
+
+      // Prompt recommendations return brainstorming too (overlap case)
+      const getSkillRecs = vi.fn((): SkillRecommendationInfo[] => [
+        {
+          skillName: 'brainstorming',
+          confidence: 'high',
+          matchedPatterns: ['design'],
+          description: 'Brainstorming',
+        },
+      ]);
+
+      const svc = new KeywordService(mockLoadConfig, mockLoadRule, loadAgentFn, {
+        loadSkillContentFn: mockLoadSkillContentForRequired,
+        getSkillRecommendationsFn: getSkillRecs,
+        primaryAgentResolver: createResolver('solution-architect'),
+      });
+
+      const result = await svc.parseMode('PLAN design new feature');
+      const brainstormingSkills = result.included_skills!.filter(s => s.name === 'brainstorming');
+      // No duplicates
+      expect(brainstormingSkills).toHaveLength(1);
+      // Full content (not truncated by standard verbosity since it's required)
+      expect(brainstormingSkills[0].content).toContain('Full content');
+      expect(result.requiredSkillsEnforced).toBe(true);
+    });
+  });
 });
