@@ -317,6 +317,81 @@ class TestPreToolUseCompactOutput:
         assert ".test.ts" not in ctx
 
 
+class TestPreToolUseCouncilBadge:
+    """Tests for council badge integration in statusMessage (#1367)."""
+
+    def test_council_badge_in_status_when_active(self, monkeypatch, capsys, tmp_path):
+        """Council badge should appear in statusMessage when council is active."""
+        # Set up agent visual
+        agents_dir = tmp_path / ".ai-rules" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "security-specialist.json").write_text(json.dumps({
+            "name": "Security Specialist",
+            "visual": {"eye": "\u25ae", "colorAnsi": "red"},
+        }))
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "security-specialist")
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+        from agent_status import clear_cache
+        clear_cache()
+
+        # Set up HUD state with council active
+        state_file = str(tmp_path / "hud-state.json")
+        with open(state_file, "w") as f:
+            json.dump({
+                "councilActive": True,
+                "activeAgent": "security-specialist",
+                "councilStage": "reviewing",
+                "focus": "auth",
+                "blockerCount": 1,
+            }, f)
+
+        monkeypatch.setenv("CODINGBUDDY_HUD_STATE", state_file)
+
+        result = _run_hook(
+            {"tool_name": "Read", "tool_input": {"file_path": "/foo"}},
+            monkeypatch, capsys,
+        )
+        assert result is not None
+        status = result["hookSpecificOutput"]["statusMessage"]
+        # Should contain both agent status AND council badge
+        assert "security-specialist" in status
+        assert "secu" in status     # short name in badge
+        assert "\u25ae" in status   # eye char
+        assert "auth" in status     # focus
+
+    def test_no_council_badge_when_inactive(self, monkeypatch, capsys, tmp_path):
+        """No council badge when council is not active."""
+        agents_dir = tmp_path / ".ai-rules" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "test-agent.json").write_text(json.dumps({
+            "name": "Test Agent",
+            "visual": {"eye": "\u2605", "colorAnsi": "yellow"},
+        }))
+        monkeypatch.setenv("CODINGBUDDY_ACTIVE_AGENT", "test-agent")
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+        from agent_status import clear_cache
+        clear_cache()
+
+        # HUD state with council INactive
+        state_file = str(tmp_path / "hud-state.json")
+        with open(state_file, "w") as f:
+            json.dump({"councilActive": False, "activeAgent": "test-agent"}, f)
+        monkeypatch.setenv("CODINGBUDDY_HUD_STATE", state_file)
+
+        result = _run_hook(
+            {"tool_name": "Read", "tool_input": {"file_path": "/foo"}},
+            monkeypatch, capsys,
+        )
+        assert result is not None
+        status = result["hookSpecificOutput"]["statusMessage"]
+        # Should have agent status but NO council badge markers
+        assert "test-agent" in status
+        assert "[\u2713]" not in status
+        assert "[\u26a0" not in status
+
+
 class TestPreToolUseStatusMessage:
     """Tests for agent statusMessage in hook output (#974)."""
 

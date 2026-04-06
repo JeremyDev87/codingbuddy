@@ -201,6 +201,19 @@ def _handle(data: dict) -> Optional[dict]:
         else:
             status_msg = tdd_indicator
 
+    # Append compact council badge when council is active (#1367)
+    try:
+        from council_badge import build_council_badge
+
+        badge = build_council_badge()
+        if badge:
+            if status_msg:
+                status_msg = f"{status_msg} {badge}"
+            else:
+                status_msg = badge
+    except Exception:
+        pass
+
     tool_name = data.get("tool_name", "")
     contexts = []
 
