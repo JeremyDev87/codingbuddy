@@ -163,6 +163,12 @@ export { ResumeHandler } from './resume.handler';
 export { RuleImpactHandler } from './rule-impact.handler';
 
 /**
+ * Handler for PR review tools (review_pr)
+ * @see {@link ReviewPrHandler}
+ */
+export { ReviewPrHandler } from './review-pr.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to
