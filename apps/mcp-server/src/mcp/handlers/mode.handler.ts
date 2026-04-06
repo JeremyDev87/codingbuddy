@@ -25,6 +25,7 @@ import {
   type DispatchStrength,
   type IncludedAgent,
   type ParallelAgentRecommendation,
+  type ReviewContext,
 } from '../../keyword/keyword.types';
 import { buildVisualData, type AgentVisualInput } from '../../keyword/visual-data.builder';
 import { isValidVerbosity } from '../../shared/verbosity.types';
@@ -321,6 +322,9 @@ export class ModeHandler extends AbstractHandler {
         settings?.ai?.agentDiscussion,
       );
 
+      // Build review context for EVAL mode when PR reference detected (#1411)
+      const reviewContext = this.buildReviewContext(result.mode as Mode, result.originalPrompt);
+
       // Resolve council preset for PLAN/EVAL modes
       const councilPreset =
         this.councilPresetService.resolvePreset(result.mode as Mode) ?? undefined;
@@ -387,6 +391,8 @@ export class ModeHandler extends AbstractHandler {
         ...(planReviewGate && { planReviewGate }),
         // Include agent discussion config for EVAL mode
         ...(agentDiscussion && { agentDiscussion }),
+        // Include review context for EVAL mode PR reviews (#1411)
+        ...(reviewContext && { reviewContext }),
         // Include visual data for agent visualization
         ...(visual && { visual }),
         // Include council preset for PLAN/EVAL modes
@@ -732,6 +738,43 @@ export class ModeHandler extends AbstractHandler {
       enabled,
       format: 'structured',
       includeConsensus: true,
+    };
+  }
+
+  /**
+   * Build review context for EVAL mode when the prompt contains a PR reference (#1411).
+   * Extracts PR number and optional issue number to guide the reviewing agent.
+   * Returns undefined for non-EVAL modes or when no PR reference is detected.
+   */
+  private buildReviewContext(mode: Mode, originalPrompt: string): ReviewContext | undefined {
+    if (mode !== 'EVAL') {
+      return undefined;
+    }
+
+    // Detect PR reference: "PR #N", "PR N", or "pull request #N"
+    const prMatch = originalPrompt.match(/(?:PR\s*#?(\d+)|pull\s*request\s*#?(\d+))/i);
+    if (!prMatch) {
+      return undefined;
+    }
+
+    const prNumber = parseInt(prMatch[1] ?? prMatch[2], 10);
+    if (isNaN(prNumber)) {
+      return undefined;
+    }
+
+    // Detect optional issue reference: "issue #N" or "#N" after PR reference
+    const issueMatch = originalPrompt.match(/issue\s*#?(\d+)/i);
+    const issueNumber = issueMatch ? parseInt(issueMatch[1], 10) : undefined;
+
+    const hintParams = issueNumber
+      ? `pr_number: ${prNumber}, issue_number: ${issueNumber}`
+      : `pr_number: ${prNumber}`;
+
+    return {
+      detected: true,
+      pr_number: prNumber,
+      ...(issueNumber && { issue_number: issueNumber }),
+      hint: `Call review_pr({ ${hintParams} }) to get structured review data including diff, checklists, and specialist recommendations.`,
     };
   }
 

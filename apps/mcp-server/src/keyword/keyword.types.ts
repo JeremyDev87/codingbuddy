@@ -671,6 +671,21 @@ export interface VisualData {
 /** Re-export DiffAnalysisResult for consumers */
 export type { DiffAnalysisResult, DiffAgentScore } from './diff-analyzer';
 
+/**
+ * Review context detected from EVAL mode prompts containing PR references.
+ * Included in parse_mode response to guide the reviewing agent to call review_pr.
+ */
+export interface ReviewContext {
+  /** Whether a PR review context was detected in the prompt */
+  detected: boolean;
+  /** Extracted PR number from the prompt */
+  pr_number: number;
+  /** Optional linked issue number extracted from the prompt */
+  issue_number?: number;
+  /** Hint for the AI agent to call review_pr tool */
+  hint: string;
+}
+
 export interface ModeConfig {
   description: string;
   instructions: string;

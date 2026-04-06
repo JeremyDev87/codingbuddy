@@ -2036,4 +2036,133 @@ describe('ModeHandler', () => {
       expect(JSON.parse(reserialized)).toEqual(parsed.councilScene);
     });
   });
+
+  describe('reviewContext (#1411)', () => {
+    it('should include reviewContext when EVAL prompt contains PR #N', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'EVAL: review PR #42',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL: review PR #42',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toEqual({
+        detected: true,
+        pr_number: 42,
+        hint: 'Call review_pr({ pr_number: 42 }) to get structured review data including diff, checklists, and specialist recommendations.',
+      });
+    });
+
+    it('should include reviewContext when EVAL prompt contains PR N (no hash)', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'EVAL: review PR 100',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL: review PR 100',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toEqual({
+        detected: true,
+        pr_number: 100,
+        hint: 'Call review_pr({ pr_number: 100 }) to get structured review data including diff, checklists, and specialist recommendations.',
+      });
+    });
+
+    it('should include reviewContext with issue_number when prompt contains both PR and issue', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'EVAL: review PR #42 issue #1364',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL: review PR #42 issue #1364',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toEqual({
+        detected: true,
+        pr_number: 42,
+        issue_number: 1364,
+        hint: 'Call review_pr({ pr_number: 42, issue_number: 1364 }) to get structured review data including diff, checklists, and specialist recommendations.',
+      });
+    });
+
+    it('should include reviewContext when prompt contains "pull request"', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'EVAL: review pull request #55',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL: review pull request #55',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toBeDefined();
+      expect(parsed.reviewContext.detected).toBe(true);
+      expect(parsed.reviewContext.pr_number).toBe(55);
+    });
+
+    it('should NOT include reviewContext when EVAL prompt has no PR reference', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'EVAL: evaluate implementation quality',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL: evaluate implementation quality',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toBeUndefined();
+    });
+
+    it('should NOT include reviewContext for non-EVAL modes even with PR reference', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'PLAN: design PR #42 review feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN: design PR #42 review feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toBeUndefined();
+    });
+
+    it('should handle malformed PR reference gracefully', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'EVAL: review PR abc',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL: review PR abc',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.reviewContext).toBeUndefined();
+    });
+  });
 });
