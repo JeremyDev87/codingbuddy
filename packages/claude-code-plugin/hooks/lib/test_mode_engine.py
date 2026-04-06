@@ -5,7 +5,15 @@ import os
 import tempfile
 import unittest
 
-from mode_engine import ModeEngine, _resolve_rules_dir, DEFAULT_AGENTS, MODE_TEMPLATES, CHAR_LIMIT
+from mode_engine import (
+    ModeEngine,
+    _resolve_rules_dir,
+    DEFAULT_AGENTS,
+    MODE_TEMPLATES,
+    CHAR_LIMIT,
+    COUNCIL_PRESETS,
+    MODERATOR_COPY,
+)
 
 
 class TestResolveRulesDir(unittest.TestCase):
@@ -365,6 +373,74 @@ class TestBuildInstructionsEnriched(unittest.TestCase):
             for mode in ["PLAN", "ACT", "EVAL", "AUTO"]:
                 result = engine.build_instructions(mode)
                 self.assertLessEqual(len(result), CHAR_LIMIT)
+
+
+class TestCouncilScene(unittest.TestCase):
+    """Test council scene contract generation (#1366)."""
+
+    def setUp(self):
+        self.engine = ModeEngine(rules_dir=None)
+
+    def test_plan_returns_council_scene(self):
+        scene = self.engine.build_council_scene("PLAN")
+        self.assertIsNotNone(scene)
+        self.assertTrue(scene["enabled"])
+        self.assertEqual(scene["format"], "tiny-actor-grid")
+        self.assertIn("design this together", scene["moderatorCopy"])
+
+    def test_eval_returns_council_scene(self):
+        scene = self.engine.build_council_scene("EVAL")
+        self.assertIsNotNone(scene)
+        self.assertTrue(scene["enabled"])
+        self.assertIn("Review council", scene["moderatorCopy"])
+
+    def test_auto_returns_council_scene(self):
+        scene = self.engine.build_council_scene("AUTO")
+        self.assertIsNotNone(scene)
+        self.assertTrue(scene["enabled"])
+        self.assertIn("Autonomous council", scene["moderatorCopy"])
+
+    def test_act_returns_none(self):
+        scene = self.engine.build_council_scene("ACT")
+        self.assertIsNone(scene)
+
+    def test_cast_has_one_primary(self):
+        scene = self.engine.build_council_scene("PLAN")
+        primaries = [m for m in scene["cast"] if m["role"] == "primary"]
+        self.assertEqual(len(primaries), 1)
+
+    def test_cast_members_have_required_fields(self):
+        scene = self.engine.build_council_scene("PLAN")
+        for member in scene["cast"]:
+            self.assertIn("name", member)
+            self.assertIn("role", member)
+            self.assertIn("face", member)
+            self.assertIn(member["role"], ("primary", "specialist"))
+
+    def test_plan_cast_matches_preset(self):
+        scene = self.engine.build_council_scene("PLAN")
+        preset = COUNCIL_PRESETS["PLAN"]
+        self.assertEqual(scene["cast"][0]["name"], preset["primary"])
+        specialist_names = [m["name"] for m in scene["cast"][1:]]
+        self.assertEqual(specialist_names, preset["specialists"])
+
+    def test_case_insensitive(self):
+        scene = self.engine.build_council_scene("plan")
+        self.assertIsNotNone(scene)
+
+    def test_council_scene_in_build_instructions(self):
+        result = self.engine.build_instructions("PLAN")
+        self.assertIn("Council Scene:", result)
+        self.assertIn("technical-planner", result)
+
+    def test_no_council_scene_in_act_instructions(self):
+        result = self.engine.build_instructions("ACT")
+        self.assertNotIn("Council Scene:", result)
+
+    def test_serializable_json(self):
+        scene = self.engine.build_council_scene("PLAN")
+        roundtripped = json.loads(json.dumps(scene))
+        self.assertEqual(roundtripped, scene)
 
 
 class TestModeEngineGracefulFallback(unittest.TestCase):

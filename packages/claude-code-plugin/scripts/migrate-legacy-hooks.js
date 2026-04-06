@@ -224,7 +224,7 @@ function migrateLegacyHooks(opts = {}) {
   if (!fs.existsSync(claudeDir)) return result;
 
   const hooksDir = path.join(claudeDir, 'hooks');
-  const log = (line) => logger(line);
+  const log = line => logger(line);
 
   if (fs.existsSync(hooksDir)) {
     migrateStaleScript({ hooksDir, dryRun, log, result });

@@ -1923,4 +1923,117 @@ describe('ModeHandler', () => {
       expect(parsed.executionGate).toBeUndefined();
     });
   });
+
+  describe('councilScene contract', () => {
+    it('should include councilScene with enabled=true in PLAN mode', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design auth feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilScene).toBeDefined();
+      expect(parsed.councilScene.enabled).toBe(true);
+      expect(parsed.councilScene.format).toBe('tiny-actor-grid');
+      expect(parsed.councilScene.moderatorCopy).toEqual(expect.any(String));
+      expect(parsed.councilScene.moderatorCopy.length).toBeGreaterThan(0);
+      expect(parsed.councilScene.cast).toEqual(expect.any(Array));
+      expect(parsed.councilScene.cast.length).toBeGreaterThan(0);
+    });
+
+    it('should include councilScene with enabled=true in EVAL mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        originalPrompt: 'evaluate implementation',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilScene).toBeDefined();
+      expect(parsed.councilScene.enabled).toBe(true);
+      expect(parsed.councilScene.format).toBe('tiny-actor-grid');
+      expect(parsed.councilScene.cast).toEqual(expect.any(Array));
+      expect(parsed.councilScene.cast.length).toBeGreaterThan(0);
+    });
+
+    it('should include councilScene with enabled=true in AUTO mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: 'implement dashboard',
+        delegates_to: 'agent-architect',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO implement dashboard',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilScene).toBeDefined();
+      expect(parsed.councilScene.enabled).toBe(true);
+      expect(parsed.councilScene.format).toBe('tiny-actor-grid');
+    });
+
+    it('should NOT include councilScene in ACT mode', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilScene).toBeUndefined();
+    });
+
+    it('councilScene cast members should have name, role, and face', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.councilScene).toBeDefined();
+
+      for (const member of parsed.councilScene.cast) {
+        expect(member.name).toEqual(expect.any(String));
+        expect(member.role).toMatch(/^(primary|specialist)$/);
+        expect(member.face).toEqual(expect.any(String));
+      }
+    });
+
+    it('councilScene cast should have exactly one primary in PLAN mode', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      const primaries = parsed.councilScene.cast.filter(
+        (m: { role: string }) => m.role === 'primary',
+      );
+      expect(primaries).toHaveLength(1);
+    });
+
+    it('councilScene should be serializable JSON', async () => {
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      const reserialized = JSON.stringify(parsed.councilScene);
+      expect(JSON.parse(reserialized)).toEqual(parsed.councilScene);
+    });
+  });
 });

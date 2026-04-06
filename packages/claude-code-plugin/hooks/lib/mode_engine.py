@@ -15,6 +15,43 @@ from typing import Optional
 CHAR_LIMIT = 2000
 
 
+# Council presets per eligible mode (mirrors MCP server CouncilPresetService)
+COUNCIL_PRESETS = {
+    "PLAN": {
+        "primary": "technical-planner",
+        "specialists": [
+            "architecture-specialist",
+            "test-strategy-specialist",
+            "code-quality-specialist",
+            "security-specialist",
+        ],
+    },
+    "EVAL": {
+        "primary": "code-reviewer",
+        "specialists": [
+            "security-specialist",
+            "performance-specialist",
+            "accessibility-specialist",
+        ],
+    },
+    "AUTO": {
+        "primary": "auto-mode",
+        "specialists": [
+            "architecture-specialist",
+            "test-strategy-specialist",
+            "security-specialist",
+            "code-quality-specialist",
+        ],
+    },
+}
+
+# Mode-specific moderator opening lines (mirrors MCP server council-scene.builder)
+MODERATOR_COPY = {
+    "PLAN": "Council assembled — let us design this together.",
+    "EVAL": "Review council convened — specialists are ready.",
+    "AUTO": "Autonomous council activated — full cycle begins.",
+}
+
 # Default agents per mode
 DEFAULT_AGENTS = {
     "PLAN": {"name": "technical-planner", "title": "Technical Planner"},
@@ -216,6 +253,43 @@ class ModeEngine:
         except (OSError, json.JSONDecodeError, ValueError):
             return None
 
+    def build_council_scene(self, mode: str) -> Optional[dict]:
+        """
+        Build council scene contract for eligible modes.
+
+        Mirrors the MCP server's ``buildCouncilScene`` output so that
+        standalone mode produces an equivalent first-response contract.
+
+        Args:
+            mode: Mode name (PLAN, ACT, EVAL, AUTO)
+
+        Returns:
+            Dict matching the councilScene JSON schema, or None for ACT mode.
+        """
+        mode_upper = mode.upper()
+        if mode_upper == "ACT":
+            return None
+
+        preset = COUNCIL_PRESETS.get(mode_upper)
+        moderator = MODERATOR_COPY.get(mode_upper)
+        if not preset or not moderator:
+            return None
+
+        cast = [
+            {"name": preset["primary"], "role": "primary", "face": "●‿●"}
+        ]
+        for specialist in preset["specialists"]:
+            cast.append(
+                {"name": specialist, "role": "specialist", "face": "●‿●"}
+            )
+
+        return {
+            "enabled": True,
+            "cast": cast,
+            "moderatorCopy": moderator,
+            "format": "tiny-actor-grid",
+        }
+
     def build_instructions(self, mode: str) -> str:
         """
         Build complete mode instructions for hook output.
@@ -235,6 +309,12 @@ class ModeEngine:
         template = MODE_TEMPLATES.get(mode_upper, MODE_TEMPLATES["ACT"])
 
         instructions = template.format(agent_name=agent["name"])
+
+        # Council scene contract for eligible modes (#1366)
+        council = self.build_council_scene(mode_upper)
+        if council:
+            names = ", ".join(m["name"] for m in council["cast"])
+            instructions += f"\n\nCouncil Scene: {council['moderatorCopy']}\nCast: {names}"
 
         # Enrich with .ai-rules data
         enrichment = self._build_rules_snippet(mode_upper, agent["name"])

@@ -45,6 +45,7 @@ import { RuleEventCollector } from '../../rules/rule-event-collector';
 import { evaluateClarification, type ClarificationMetadata } from './clarification-gate';
 import { resolvePlanningStage, type PlanningStageMetadata } from './planning-stage';
 import { evaluateExecutionGate, type ExecutionGate } from './execution-gate';
+import { buildCouncilScene } from './council-scene.builder';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -336,6 +337,17 @@ export class ModeHandler extends AbstractHandler {
         settings?.eco,
       );
 
+      // Council Scene contract (#1366) — opening scene for PLAN/EVAL/AUTO modes
+      const councilScene = buildCouncilScene(
+        result.mode as Mode,
+        councilPreset ?? undefined,
+        visual,
+        {
+          delegatesTo: result.delegates_to,
+          specialists: result.parallelAgentsRecommendation?.specialists,
+        },
+      );
+
       // Clarification Gate (#1371) — only applies to PLAN/AUTO modes where the
       // response might otherwise produce a plan. ACT and EVAL skip the gate
       // because they assume PLAN has already set context.
@@ -379,6 +391,8 @@ export class ModeHandler extends AbstractHandler {
         ...(visual && { visual }),
         // Include council preset for PLAN/EVAL modes
         ...(councilPreset && { councilPreset }),
+        // Include council scene contract for PLAN/EVAL/AUTO modes (#1366)
+        ...(councilScene && { councilScene }),
         // Include execution plan metadata when dispatch is active
         ...(executionPlan && { executionPlan: serializeExecutionPlan(executionPlan) }),
         // Include Teams capability status
