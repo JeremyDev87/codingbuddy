@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { buildCouncilScene } from './council-scene.builder';
+import { buildCouncilScene, buildCouncilSceneInstructions } from './council-scene.builder';
 import type { CouncilPreset } from '../../agent/council-preset.types';
 import type { VisualData } from '../../keyword/keyword.types';
+import type { CouncilScene } from './council-scene.types';
 
 describe('buildCouncilScene', () => {
   const planPreset: CouncilPreset = {
@@ -109,5 +110,89 @@ describe('buildCouncilScene', () => {
     expect(scene).toBeDefined();
     const roundTripped = JSON.parse(JSON.stringify(scene));
     expect(roundTripped).toEqual(scene);
+  });
+});
+
+describe('buildCouncilSceneInstructions', () => {
+  it('returns undefined when councilScene is undefined', () => {
+    expect(buildCouncilSceneInstructions(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when councilScene has enabled=false', () => {
+    const scene: CouncilScene = {
+      enabled: false,
+      cast: [{ name: 'test', role: 'primary', face: '●‿●' }],
+      moderatorCopy: 'test copy',
+      format: 'tiny-actor-grid',
+    };
+    expect(buildCouncilSceneInstructions(scene)).toBeUndefined();
+  });
+
+  it('returns undefined when cast is empty', () => {
+    const scene: CouncilScene = {
+      enabled: true,
+      cast: [],
+      moderatorCopy: 'test copy',
+      format: 'tiny-actor-grid',
+    };
+    expect(buildCouncilSceneInstructions(scene)).toBeUndefined();
+  });
+
+  it('returns instruction text for a valid PLAN scene', () => {
+    const scene: CouncilScene = {
+      enabled: true,
+      cast: [
+        { name: 'technical-planner', role: 'primary', face: '◇‿◇' },
+        { name: 'architecture-specialist', role: 'specialist', face: '⬡‿⬡' },
+        { name: 'security-specialist', role: 'specialist', face: '◮‿◮' },
+      ],
+      moderatorCopy: 'Council assembled — let us design this together.',
+      format: 'tiny-actor-grid',
+    };
+
+    const result = buildCouncilSceneInstructions(scene);
+    expect(result).toBeDefined();
+    expect(result).toContain('COUNCIL SCENE');
+    expect(result).toContain('Council assembled');
+  });
+
+  it('includes all cast faces, names, and roles', () => {
+    const scene: CouncilScene = {
+      enabled: true,
+      cast: [
+        { name: 'technical-planner', role: 'primary', face: '◇‿◇' },
+        { name: 'security-specialist', role: 'specialist', face: '◮‿◮' },
+      ],
+      moderatorCopy: 'Council assembled.',
+      format: 'tiny-actor-grid',
+    };
+
+    const result = buildCouncilSceneInstructions(scene)!;
+    expect(result).toContain('◇‿◇ technical-planner [primary]');
+    expect(result).toContain('◮‿◮ security-specialist [specialist]');
+  });
+
+  it('includes moderatorCopy in the output', () => {
+    const scene: CouncilScene = {
+      enabled: true,
+      cast: [{ name: 'code-reviewer', role: 'primary', face: '●‿●' }],
+      moderatorCopy: 'Review council convened — specialists are ready.',
+      format: 'tiny-actor-grid',
+    };
+
+    const result = buildCouncilSceneInstructions(scene)!;
+    expect(result).toContain('Review council convened — specialists are ready.');
+  });
+
+  it('includes format hint in the output', () => {
+    const scene: CouncilScene = {
+      enabled: true,
+      cast: [{ name: 'test', role: 'primary', face: '●‿●' }],
+      moderatorCopy: 'test copy',
+      format: 'tiny-actor-grid',
+    };
+
+    const result = buildCouncilSceneInstructions(scene)!;
+    expect(result).toContain('tiny-actor-grid');
   });
 });

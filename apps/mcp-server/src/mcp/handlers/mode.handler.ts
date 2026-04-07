@@ -50,7 +50,7 @@ import {
   suppressDispatchWhileGated,
   type ExecutionGate,
 } from './execution-gate';
-import { buildCouncilScene } from './council-scene.builder';
+import { buildCouncilScene, buildCouncilSceneInstructions } from './council-scene.builder';
 
 /** Maximum length for context title slug generation */
 const CONTEXT_TITLE_MAX_LENGTH = 50;
@@ -355,6 +355,15 @@ export class ModeHandler extends AbstractHandler {
           specialists: result.parallelAgentsRecommendation?.specialists,
         },
       );
+
+      // Council Scene rendering instructions (#1421) — append to instructions
+      // so the AI client renders the opening scene in its first response.
+      // Must come before clarification override since clarification replaces
+      // instructions entirely when the request is ambiguous.
+      const councilRenderInstructions = buildCouncilSceneInstructions(councilScene);
+      if (councilRenderInstructions) {
+        result.instructions += councilRenderInstructions;
+      }
 
       // Clarification Gate (#1371) — only applies to PLAN/AUTO modes where the
       // response might otherwise produce a plan. ACT and EVAL skip the gate

@@ -430,12 +430,26 @@ class TestCouncilScene(unittest.TestCase):
 
     def test_council_scene_in_build_instructions(self):
         result = self.engine.build_instructions("PLAN")
-        self.assertIn("Council Scene:", result)
+        self.assertIn("COUNCIL SCENE", result)
         self.assertIn("technical-planner", result)
 
     def test_no_council_scene_in_act_instructions(self):
         result = self.engine.build_instructions("ACT")
-        self.assertNotIn("Council Scene:", result)
+        self.assertNotIn("COUNCIL SCENE", result)
+
+    def test_council_scene_includes_face_name_role(self):
+        result = self.engine.build_instructions("PLAN")
+        self.assertIn("●‿● technical-planner [primary]", result)
+        self.assertIn("[specialist]", result)
+
+    def test_council_scene_includes_moderator_copy(self):
+        result = self.engine.build_instructions("PLAN")
+        self.assertIn("Council assembled", result)
+
+    def test_eval_council_scene_rendering(self):
+        result = self.engine.build_instructions("EVAL")
+        self.assertIn("COUNCIL SCENE", result)
+        self.assertIn("Review council convened", result)
 
     def test_serializable_json(self):
         scene = self.engine.build_council_scene("PLAN")

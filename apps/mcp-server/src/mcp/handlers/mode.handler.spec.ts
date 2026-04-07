@@ -2184,6 +2184,58 @@ describe('ModeHandler', () => {
       const reserialized = JSON.stringify(parsed.councilScene);
       expect(JSON.parse(reserialized)).toEqual(parsed.councilScene);
     });
+
+    it('PLAN mode instructions should include council scene rendering block', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        instructions: 'Base PLAN instructions',
+        originalPrompt:
+          'PLAN implement password reset endpoint that sends an email with a reset link',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN implement password reset endpoint that sends an email with a reset link',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.instructions).toContain('COUNCIL SCENE');
+    });
+
+    it('ACT mode instructions should NOT include council scene rendering block', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'ACT',
+        instructions: 'Base ACT instructions',
+        originalPrompt: 'implement feature',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'ACT implement feature',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.instructions).not.toContain('COUNCIL SCENE');
+    });
+
+    it('EVAL mode instructions should include council scene rendering block', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'EVAL',
+        instructions: 'Base EVAL instructions',
+        originalPrompt: 'evaluate implementation',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'EVAL evaluate implementation',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.instructions).toContain('COUNCIL SCENE');
+    });
   });
 
   describe('reviewContext (#1411)', () => {

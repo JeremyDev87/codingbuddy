@@ -454,11 +454,19 @@ class ModeEngine:
 
         instructions = template.format(agent_name=agent["name"])
 
-        # Council scene contract for eligible modes (#1366)
+        # Council scene rendering instructions for eligible modes (#1366, #1421)
         council = self.build_council_scene(mode_upper)
         if council:
-            names = ", ".join(m["name"] for m in council["cast"])
-            instructions += f"\n\nCouncil Scene: {council['moderatorCopy']}\nCast: {names}"
+            cast_lines = "\n".join(
+                f"{m.get('face', '●‿●')} {m['name']} [{m['role']}]"
+                for m in council["cast"]
+            )
+            instructions += (
+                f"\n\n📋 COUNCIL SCENE — Render this at the start of your "
+                f"first response, right after the mode header:\n\n"
+                f"{council['moderatorCopy']}\n{cast_lines}\n\n"
+                f"Then proceed with your normal mode response."
+            )
 
         # Enrich with .ai-rules data
         enrichment = self._build_rules_snippet(mode_upper, agent["name"])

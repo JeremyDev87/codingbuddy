@@ -28,6 +28,25 @@ export interface CouncilSceneFallback {
 }
 
 /**
+ * Build first-response rendering instructions for the council scene.
+ * Returns instruction text to append to the mode instructions, or undefined if no scene.
+ */
+export function buildCouncilSceneInstructions(councilScene?: CouncilScene): string | undefined {
+  if (!councilScene?.enabled || !councilScene.cast?.length) {
+    return undefined;
+  }
+
+  const castLines = councilScene.cast.map(m => `${m.face} ${m.name} [${m.role}]`).join('\n');
+
+  return (
+    `\n\n📋 COUNCIL SCENE — Render this at the start of your first response, ` +
+    `right after the mode header:\n\n` +
+    `${councilScene.moderatorCopy}\n${castLines}\n\n` +
+    `Then proceed with your normal ${councilScene.format || 'standard'} mode response.`
+  );
+}
+
+/**
  * Build a CouncilScene for the given mode, or return undefined for ACT mode.
  *
  * Resolution strategy:
