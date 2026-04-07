@@ -535,6 +535,36 @@ class TestStandaloneClarificationGate(unittest.TestCase):
         self.assertIn("CLARIFICATION REQUIRED", result)
         self.assertIn("concrete change", result)
 
+    def test_budget_exhausted_skips_gate(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN improve it", question_budget=0
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("# Mode: PLAN", result)
+
+    def test_budget_decrements_in_directive(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN improve it", question_budget=2
+        )
+        self.assertIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("Remaining question budget: 1", result)
+
+    def test_default_budget_is_three(self):
+        result = self.engine.build_instructions("PLAN", prompt="PLAN improve it")
+        self.assertIn("Remaining question budget: 2", result)
+
+    def test_snake_case_regex_ignores_short_fragments(self):
+        """snake_case pattern requires >=2 chars on each side of underscore."""
+        result = self.engine.build_instructions("PLAN", prompt="PLAN a_b")
+        # 'a_b' is too short for the tightened regex; prompt is also short
+        self.assertIn("CLARIFICATION REQUIRED", result)
+
+    def test_snake_case_regex_matches_real_identifiers(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN fix the parse_mode function"
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+
 
 if __name__ == "__main__":
     unittest.main()
