@@ -153,7 +153,7 @@ _TECH_REFERENCE_PATTERNS = [
     re.compile(r"\b[a-zA-Z_][\w]*\("),
     re.compile(r"\b[A-Z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]+\b"),
     re.compile(r"\b[a-z][a-z0-9]+[A-Z][a-zA-Z0-9]+\b"),
-    re.compile(r"\b[a-z]+_[a-z][a-z0-9_]*\b"),
+    re.compile(r"\b[a-z]{3,}_[a-z]{3,}[a-z0-9_]*\b"),
     re.compile(r"`[^`]+`"),
 ]
 
@@ -164,15 +164,32 @@ _MODE_KEYWORD_RE = re.compile(
 )
 
 
-def evaluate_clarification_standalone(prompt: str) -> Optional[str]:
+DEFAULT_QUESTION_BUDGET = 3
+
+
+def evaluate_clarification_standalone(
+    prompt: str, question_budget: Optional[int] = None
+) -> Optional[str]:
     """
     Standalone clarification gate (#1423).
 
     Returns a clarification-first directive string when the prompt is
     ambiguous, or ``None`` when the request is clear enough to plan.
+
+    Args:
+        prompt: Raw user prompt including mode keyword.
+        question_budget: Remaining clarification rounds.  Defaults to
+            ``DEFAULT_QUESTION_BUDGET``.  When 0 the gate falls back
+            to planning with explicit assumptions.
     """
+    budget = question_budget if question_budget is not None else DEFAULT_QUESTION_BUDGET
+
     trimmed = prompt.strip()
     if not trimmed:
+        return None
+
+    # Budget exhausted — proceed with explicit assumptions.
+    if budget <= 0:
         return None
 
     # Strip mode keyword prefix before evaluating content
@@ -192,6 +209,8 @@ def evaluate_clarification_standalone(prompt: str) -> Optional[str]:
     if not is_vague and not is_short:
         return None
 
+    remaining = budget - 1
+
     if is_vague:
         question = (
             "What concrete change are you targeting — "
@@ -210,6 +229,7 @@ def evaluate_clarification_standalone(prompt: str) -> Optional[str]:
         "2. Do NOT output any implementation plan, architecture, or code.\n"
         "3. Wait for the user's response before continuing.\n\n"
         f'❓ Ask this: "{question}"\n\n'
+        f"Remaining question budget: {remaining}\n\n"
         "After the user answers, re-invoke the mode with the clarified prompt."
     )
 
@@ -396,7 +416,12 @@ class ModeEngine:
             "format": "tiny-actor-grid",
         }
 
-    def build_instructions(self, mode: str, prompt: Optional[str] = None) -> str:
+    def build_instructions(
+        self,
+        mode: str,
+        prompt: Optional[str] = None,
+        question_budget: Optional[int] = None,
+    ) -> str:
         """
         Build complete mode instructions for hook output.
 
@@ -420,7 +445,7 @@ class ModeEngine:
 
         # Clarification gate for PLAN/AUTO modes (#1423)
         if prompt and mode_upper in ("PLAN", "AUTO"):
-            directive = evaluate_clarification_standalone(prompt)
+            directive = evaluate_clarification_standalone(prompt, question_budget)
             if directive:
                 return directive
 

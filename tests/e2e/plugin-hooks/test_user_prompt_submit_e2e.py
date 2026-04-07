@@ -45,10 +45,10 @@ class TestEnglishModeKeywords:
     """Detect English mode keywords: PLAN, ACT, EVAL, AUTO."""
 
     @pytest.mark.parametrize("keyword,mode", [
-        ("PLAN design auth feature", "PLAN"),
-        ("ACT implement the changes", "ACT"),
-        ("EVAL review the code", "EVAL"),
-        ("AUTO implement user dashboard", "AUTO"),
+        ("PLAN design auth feature for login.ts", "PLAN"),
+        ("ACT implement the auth changes in login.ts", "ACT"),
+        ("EVAL review the auth.ts implementation", "EVAL"),
+        ("AUTO implement user dashboard in dashboard.tsx", "AUTO"),
     ])
     def test_detects_english_keyword(self, mock_env, keyword, mode):
         result = run_hook(
@@ -73,10 +73,10 @@ class TestKoreanModeKeywords:
     """Detect Korean mode keywords."""
 
     @pytest.mark.parametrize("keyword,mode", [
-        ("계획 인증 기능 설계", "PLAN"),
-        ("실행 변경 사항 구현", "ACT"),
-        ("평가 코드 리뷰", "EVAL"),
-        ("자동 대시보드 구현", "AUTO"),
+        ("계획 login.ts 인증 기능 설계", "PLAN"),
+        ("실행 auth.ts 인증 변경 사항 구현", "ACT"),
+        ("평가 login.ts 인증 코드 리뷰", "EVAL"),
+        ("자동 dashboard.tsx 대시보드 구현", "AUTO"),
     ])
     def test_detects_korean_keyword(self, mock_env, keyword, mode):
         result = run_hook(
@@ -92,10 +92,10 @@ class TestJapaneseModeKeywords:
     """Detect Japanese mode keywords."""
 
     @pytest.mark.parametrize("keyword,mode", [
-        ("計画 認証機能の設計", "PLAN"),
-        ("実行 変更の実装", "ACT"),
-        ("評価 コードレビュー", "EVAL"),
-        ("自動 ダッシュボード実装", "AUTO"),
+        ("計画 auth.ts 認証機能の設計", "PLAN"),
+        ("実行 auth.ts 変更の実装", "ACT"),
+        ("評価 login.ts コードレビュー", "EVAL"),
+        ("自動 dashboard.tsx ダッシュボード実装", "AUTO"),
     ])
     def test_detects_japanese_keyword(self, mock_env, keyword, mode):
         result = run_hook(
@@ -111,10 +111,10 @@ class TestChineseModeKeywords:
     """Detect Chinese mode keywords."""
 
     @pytest.mark.parametrize("keyword,mode", [
-        ("计划 设计认证功能", "PLAN"),
-        ("执行 实施变更", "ACT"),
-        ("评估 代码审查", "EVAL"),
-        ("自动 实现仪表板", "AUTO"),
+        ("计划 auth.ts 设计认证功能", "PLAN"),
+        ("执行 auth.ts 实施认证变更", "ACT"),
+        ("评估 login.ts 代码审查", "EVAL"),
+        ("自动 dashboard.tsx 实现仪表板", "AUTO"),
     ])
     def test_detects_chinese_keyword(self, mock_env, keyword, mode):
         result = run_hook(
@@ -130,10 +130,10 @@ class TestSpanishModeKeywords:
     """Detect Spanish mode keywords."""
 
     @pytest.mark.parametrize("keyword,mode", [
-        ("PLANIFICAR diseñar autenticación", "PLAN"),
-        ("ACTUAR implementar cambios", "ACT"),
-        ("EVALUAR revisar código", "EVAL"),
-        ("AUTOMÁTICO implementar dashboard", "AUTO"),
+        ("PLANIFICAR diseñar autenticación en auth.ts", "PLAN"),
+        ("ACTUAR implementar cambios en login.ts", "ACT"),
+        ("EVALUAR revisar código en auth.ts", "EVAL"),
+        ("AUTOMÁTICO implementar dashboard en dashboard.tsx", "AUTO"),
     ])
     def test_detects_spanish_keyword(self, mock_env, keyword, mode):
         result = run_hook(
@@ -160,7 +160,7 @@ class TestContextInjection:
     def test_context_contains_agent_name(self, mock_env):
         result = run_hook(
             "user-prompt-submit.py",
-            input_data={"prompt": "AUTO implement feature"},
+            input_data={"prompt": "AUTO implement feature in auth.ts"},
             env=mock_env,
         )
         assert "# Mode: AUTO" in result.stdout
@@ -169,7 +169,7 @@ class TestContextInjection:
         """Keywords should be detected case-insensitively."""
         result = run_hook(
             "user-prompt-submit.py",
-            input_data={"prompt": "plan design something"},
+            input_data={"prompt": "plan design something for auth.ts"},
             env=mock_env,
         )
         assert result.succeeded
