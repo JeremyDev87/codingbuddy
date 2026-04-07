@@ -100,21 +100,17 @@ Start coding with `PLAN`, `ACT`, `EVAL`, or `AUTO` keywords.
 
 ---
 
-## What's New in v5.2.0
+## What's New in v5.4.0
 
-**PR Guardian** — `pr_quality_report` MCP tool runs specialist agents on changed files, integrated with `/ship` quality gate for automated PR quality checks.
+**Question-First Planning** — Codingbuddy now asks before it plans. Ambiguous prompts trigger a clarifying question, and clear prompts walk through Discover→Design→Plan stages with explicit user confirmation at each step.
 
-**Context Rescue** — `create_briefing` and `resume_session` tools enable cross-session recovery, preserving decisions and context across conversation boundaries.
+**Council Scene** — PLAN, EVAL, and AUTO modes open with a visible council scene showing which specialist agents are assembled and ready to collaborate.
 
-**Session Intelligence** — SessionAnalyzer generates Intelligence Reports in the stop hook, providing actionable insights from every coding session.
+**Permission Forecast** — Before execution, codingbuddy surfaces what permission classes (repo-write, network, external) will be needed, so you can prepare approval bundles in advance.
 
-**Rule Impact Dashboard** — Event tracking, stats writer, and impact reporting measure which rules actually prevent issues — proving your AI coding is improving.
+**Execution Gate** — When the planning stage hasn't advanced past discovery, specialist dispatch is suppressed to avoid premature work.
 
-**Plugin Marketplace** — Full plugin lifecycle with `install`, `search`, `update`, `plugins`, and `uninstall` CLI commands, plus registry resolver for discovering community plugins.
-
-**Skill Discovery** — Filesystem-based `list_skills` with `triggers` frontmatter in SKILL.md for automatic skill activation based on context.
-
-**TUI** — Single multi-session model with manual `codingbuddy tui` launch. Auto-open removed for cleaner MCP server startup.
+**Council State Pipeline** — Real-time council badges show agent handoffs, stage transitions, and blockers as they happen during tool execution.
 
 ---
 

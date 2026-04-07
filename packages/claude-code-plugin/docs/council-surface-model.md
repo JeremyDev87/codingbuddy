@@ -146,7 +146,7 @@ Refreshed continuously by Claude Code.
 
 ```
 Line 1 (always):
-◕‿◕ CB v5.3.0 | PLAN 🟢 | 12m | ~$0.42 | ♻800/1.5k | Ctx:45%
+◕‿◕ CB v5.4.0 | PLAN 🟢 | 12m | ~$0.42 | ♻800/1.5k | Ctx:45%
 
 Line 2 (conditional — only when agent is active):
 [◮ secu] [auth flow] [✓]
@@ -157,7 +157,7 @@ Line 2 (conditional — only when agent is active):
 | Segment | Source | Example |
 |---------|--------|---------|
 | Buddy face | Constant | `◕‿◕` |
-| Version | `installed_plugins.json` / HUD state | `CB v5.3.0` |
+| Version | `installed_plugins.json` / HUD state | `CB v5.4.0` |
 | Mode | `hud-state.currentMode` | `PLAN` |
 | Health | Context usage thresholds | `🟢` (<60%), `🟡` (60-85%), `🔴` (>85%) |
 | Duration | stdin `cost.total_duration_ms` / HUD state | `12m` |

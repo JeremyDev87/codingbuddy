@@ -250,17 +250,21 @@ npx codingbuddy mcp --tui
 
 ---
 
-## Novedades en v5.1.2
+## Novedades en v5.4.0
 
-**StatusLine HUD** — Métricas de sesión en tiempo real en la UI de Claude Code: modo, costo, tasa de caché, uso de contexto.
+**Planificación con preguntas primero** — Codingbuddy ahora pregunta antes de planificar. Los prompts ambiguos activan una pregunta de clarificación, y los prompts claros avanzan por las etapas Discover→Design→Plan con confirmación del usuario en cada paso.
+
+**Escena del consejo** — Los modos PLAN, EVAL y AUTO comienzan con una escena de apertura que muestra qué agentes especialistas están ensamblados y listos para colaborar.
+
+**Pronóstico de permisos** — Antes de la ejecución, se muestran las clases de permisos necesarias (repo-write, network, external) para preparar los paquetes de aprobación con anticipación.
+
+**Puerta de ejecución** — Cuando la etapa de planificación no ha avanzado más allá del descubrimiento, se suprime el despacho de especialistas para evitar trabajo prematuro.
+
+**Pipeline de estado del consejo** — Insignias en tiempo real muestran transferencias de agentes, transiciones de etapa y bloqueadores durante la ejecución de herramientas.
 
 ```
-◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
+◕‿◕ CB v5.4.0 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
 ```
-
-**Barra lateral tmux** — Ejecute Claude Code dentro de tmux y obtenga un panel TUI automático como barra lateral.
-
-**Validación de lanzamiento** — Nuevas herramientas MCP: `validate_plugin_manifest` y `pre_release_check`.
 
 ---
 

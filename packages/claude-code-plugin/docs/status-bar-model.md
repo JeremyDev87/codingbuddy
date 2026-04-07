@@ -20,13 +20,13 @@ Displays session metrics computed from stdin data and HUD state.
 **Format:**
 
 ```
-◕‿◕ CB v5.3.0 | PLAN 🟢 | 12m | ~$0.42 | ♻800/1.5k | Ctx:45%
+◕‿◕ CB v5.4.0 | PLAN 🟢 | 12m | ~$0.42 | ♻800/1.5k | Ctx:45%
 ```
 
 | Segment         | Source                          | Description                                |
 | --------------- | ------------------------------- | ------------------------------------------ |
 | `◕‿◕`          | Constant                        | Buddy face                                 |
-| `CB v5.3.0`    | `hud_state.version`             | Plugin version                             |
+| `CB v5.4.0`    | `hud_state.version`             | Plugin version                             |
 | `PLAN`          | `hud_state.currentMode`         | Current workflow mode (PLAN/ACT/EVAL/AUTO) |
 | `🟢`           | Computed from `ctx_pct`          | Health indicator (see below)               |
 | `12m`           | `hud_state.sessionStartTimestamp`| Session duration                           |
@@ -190,34 +190,34 @@ If any exception occurs during rendering, the script outputs a minimal fallback:
 ### PLAN Mode (No Agent)
 
 ```
-◕‿◕ CB v5.3.0 | PLAN 🟢 | 5m | ~$0.12 | ♻1.2k/3k | Ctx:22%
+◕‿◕ CB v5.4.0 | PLAN 🟢 | 5m | ~$0.12 | ♻1.2k/3k | Ctx:22%
 ```
 
 ### ACT Mode (With Agent)
 
 ```
-◕‿◕ CB v5.3.0 | ACT 🟢 | 18m | ~$1.05 | ♻8k/13k | Ctx:48%
+◕‿◕ CB v5.4.0 | ACT 🟢 | 18m | ~$1.05 | ♻8k/13k | Ctx:48%
 🤖 frontend-developer
 ```
 
 ### EVAL Mode (High Context)
 
 ```
-◕‿◕ CB v5.3.0 | EVAL 🟡 | 45m | ~$3.20 | ♻24k/34k | Ctx:73%
+◕‿◕ CB v5.4.0 | EVAL 🟡 | 45m | ~$3.20 | ♻24k/34k | Ctx:73%
 🤖 security-specialist
 ```
 
 ### AUTO Mode (Critical Context)
 
 ```
-◕‿◕ CB v5.3.0 | AUTO 🔴 | 1h12m | ~$8.50 | ♻95k/172k | Ctx:91%
+◕‿◕ CB v5.4.0 | AUTO 🔴 | 1h12m | ~$8.50 | ♻95k/172k | Ctx:91%
 🤖 code-quality-specialist
 ```
 
 ### No Mode Set (Initial State — Cache Segment Hidden)
 
 ```
-◕‿◕ CB v5.3.0 | Ready 🟢 | 0m | ~$0.00 | Ctx:0%
+◕‿◕ CB v5.4.0 | Ready 🟢 | 0m | ~$0.00 | Ctx:0%
 ```
 
 > The cache segment is **omitted** in the initial state because no API calls have been made yet — there is no `current_usage` data to render. This is the documented fallback behavior, not a bug.

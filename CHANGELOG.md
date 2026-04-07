@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.0] - 2026-04-07
+
+### Added
+
+#### Question-First Planning (Epic #1424)
+- Clarification Gate — ambiguous prompts trigger one clarifying question before planning (#1423)
+- Staged Planning — Discover→Design→Plan becomes the real default workflow (#1420)
+- Planning Agent Guidance — question-first contract survives standard verbosity (#1419)
+- Council Scene Rendering — real opening council scene in first response for PLAN/EVAL/AUTO (#1421)
+- Permission Forecast — display upcoming permission classes before execution (#1418)
+- Execution Gate — suppress dispatch-ready while planning is gated (#1422)
+
+#### Council State Pipeline (#1361, #1367, #1368)
+- Seed request-level council state from UserPromptSubmit (#1361)
+- Compact live council badges in PreToolUse statusMessage (#1367)
+- Council handoff, stage, and blocker state from PostToolUse (#1368)
+
+#### EVAL Review Integration
+- `review_pr` MCP tool for EVAL-mode PR review
+- EVAL-mode review agent prompt template in adapter docs
+- Integrated `review_pr` into parse_mode EVAL dispatch
+
+### Fixed
+- Vite 7.3.1→8.0.5 security bump (GHSA-p9ff-h696-f583)
+
 ## [5.2.0] - 2026-04-03
 
 ### Added

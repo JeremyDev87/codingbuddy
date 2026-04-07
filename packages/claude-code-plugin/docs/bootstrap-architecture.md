@@ -1,6 +1,6 @@
 # Plugin Hook Bootstrap Architecture
 
-> **Status:** current as of `codingbuddy-claude-plugin` v5.3.0
+> **Status:** current as of `codingbuddy-claude-plugin` v5.4.0
 > **Related issues:** [#1380](https://github.com/JeremyDev87/codingbuddy/issues/1380) (this document), [#1376](https://github.com/JeremyDev87/codingbuddy/issues/1376) (parent), [#1381](https://github.com/JeremyDev87/codingbuddy/issues/1381) (stale legacy hook migration)
 
 This document explains **how** and **where** the CodingBuddy Claude Code plugin registers its hooks — and in particular, why `UserPromptSubmit` is nowhere to be found in `hooks/hooks.json`.

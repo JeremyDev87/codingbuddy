@@ -250,17 +250,21 @@ npx codingbuddy mcp --tui
 
 ---
 
-## v5.1.2 新功能
+## v5.4.0 新功能
 
-**StatusLine HUD** — 在Claude Code UI中实时显示会话指标：模式、成本、缓存率、上下文使用量。
+**问题优先规划** — Codingbuddy 现在在规划之前先提问。模糊的提示会触发澄清问题，清晰的提示会通过 Discover→Design→Plan 阶段逐步推进，每步都需用户确认。
+
+**议会场景** — PLAN、EVAL 和 AUTO 模式以展示哪些专家代理已组建的开场场景开始。
+
+**权限预测** — 执行前显示即将需要的权限类别（repo-write、network、external），便于提前准备审批。
+
+**执行门控** — 当规划阶段尚未进入设计阶段时，抑制专家调度以避免过早执行。
+
+**议会状态管道** — 在工具执行期间，实时徽章显示代理交接、阶段转换和阻塞器。
 
 ```
-◕‿◕ CB v5.1.2 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
+◕‿◕ CB v5.4.0 | PLAN 🟢 | 12m | ~$0.23 | Cache:87% | Ctx:45%
 ```
-
-**tmux侧边栏** — 在tmux中运行Claude Code时，自动配置TUI仪表板侧边栏。
-
-**发布验证** — 新增`validate_plugin_manifest`和`pre_release_check` MCP工具。
 
 ---
 
