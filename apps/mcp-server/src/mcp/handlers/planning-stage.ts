@@ -25,6 +25,16 @@ import type { ClarificationMetadata } from './clarification-gate';
 /** The three stages of the planning flow. */
 export type PlanningStage = 'discover' | 'design' | 'plan';
 
+/** Progression tracking across the three planning stages. */
+export interface StageProgression {
+  /** Stages already completed before the current one. */
+  completedStages: PlanningStage[];
+  /** The stage currently active. */
+  currentStage: PlanningStage;
+  /** Stages remaining after the current one. */
+  remainingStages: PlanningStage[];
+}
+
 /** Metadata emitted alongside the clarification fields in the PLAN response. */
 export interface PlanningStageMetadata {
   /** Current planning stage. */
@@ -39,6 +49,8 @@ export interface PlanningStageMetadata {
   recommendedAgent?: string;
   /** Recommended supporting skill for this stage. */
   recommendedSkill?: string;
+  /** Progression metadata showing completed / current / remaining stages. */
+  stageProgression?: StageProgression;
 }
 
 /** Options to override automatic stage resolution. */
@@ -90,9 +102,12 @@ const STAGE_SKILLS: Record<PlanningStage, string | undefined> = {
  * Routing rules (evaluated in order):
  * 1. If `stageHint` is provided → use it directly (caller knows best).
  * 2. If `clarification.clarificationNeeded === true` → `discover`.
- * 3. If `clarification.planReady === true` and no stageHint → `plan`
- *    (clear prompt — skip discover and design).
- * 4. Otherwise → `design` (clarification resolved, approach not yet confirmed).
+ * 3. Default → `discover` (staged default — always start at discover).
+ *
+ * The user advances through stages by passing `planning_stage` parameter:
+ *   First call (no hint) → discover
+ *   User confirms direction → passes `planning_stage: "design"` → design
+ *   User confirms approach → passes `planning_stage: "plan"` → plan
  */
 export function resolvePlanningStage(
   clarification: ClarificationMetadata,
@@ -109,6 +124,7 @@ export function resolvePlanningStage(
     }),
     recommendedAgent: STAGE_AGENTS[stage],
     ...(STAGE_SKILLS[stage] && { recommendedSkill: STAGE_SKILLS[stage] }),
+    stageProgression: buildStageProgression(stage),
   };
 }
 
@@ -130,15 +146,27 @@ function resolveStage(
     return 'discover';
   }
 
-  // 3. Clear / plan-ready → plan (skip discover+design)
-  if (clarification.planReady) {
-    return 'plan';
-  }
-
-  // 4. Fallback: clarification resolved but approach not confirmed → design
-  return 'design';
+  // 3. Staged default — always start at discover regardless of planReady.
+  //    The user advances through stages via the planning_stage parameter.
+  return 'discover';
 }
 
 function getNextStage(stage: 'discover' | 'design'): 'design' | 'plan' {
   return stage === 'discover' ? 'design' : 'plan';
+}
+
+/** Canonical ordered list of all planning stages. */
+const ALL_STAGES: readonly PlanningStage[] = ['discover', 'design', 'plan'];
+
+/**
+ * Build stage progression metadata showing which stages are completed,
+ * which is current, and which remain.
+ */
+function buildStageProgression(currentStage: PlanningStage): StageProgression {
+  const currentIndex = ALL_STAGES.indexOf(currentStage);
+  return {
+    completedStages: ALL_STAGES.slice(0, currentIndex) as PlanningStage[],
+    currentStage,
+    remainingStages: ALL_STAGES.slice(currentIndex + 1) as PlanningStage[],
+  };
 }

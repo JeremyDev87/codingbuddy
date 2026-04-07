@@ -54,16 +54,16 @@ describe('planning-stage', () => {
         expect(result.currentStage).toBe('discover');
       });
 
-      it('routes clear prompt directly to plan (skip discover + design)', () => {
+      it('routes clear prompt to discover (staged default, no skip)', () => {
         const result = resolvePlanningStage(clearClarification());
 
-        expect(result.currentStage).toBe('plan');
+        expect(result.currentStage).toBe('discover');
       });
 
-      it('routes budget-exhausted prompt to plan', () => {
+      it('routes budget-exhausted prompt to discover (staged default)', () => {
         const result = resolvePlanningStage(budgetExhaustedClarification());
 
-        expect(result.currentStage).toBe('plan');
+        expect(result.currentStage).toBe('discover');
       });
 
       it('routes explicit stageHint=design to design', () => {
@@ -113,7 +113,9 @@ describe('planning-stage', () => {
       });
 
       it('has a description for plan stage', () => {
-        const result = resolvePlanningStage(clearClarification());
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
 
         expect(result.stageDescription).toContain('Plan');
         expect(result.stageDescription).toContain('implementation');
@@ -140,7 +142,9 @@ describe('planning-stage', () => {
       });
 
       it('plan → nextStage is undefined (terminal)', () => {
-        const result = resolvePlanningStage(clearClarification());
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
 
         expect(result.nextStage).toBeUndefined();
       });
@@ -168,7 +172,9 @@ describe('planning-stage', () => {
       });
 
       it('has no transition hint for plan stage (terminal)', () => {
-        const result = resolvePlanningStage(clearClarification());
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
 
         expect(result.stageTransitionHint).toBeUndefined();
       });
@@ -194,7 +200,9 @@ describe('planning-stage', () => {
       });
 
       it('recommends technical-planner for plan', () => {
-        const result = resolvePlanningStage(clearClarification());
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
 
         expect(result.recommendedAgent).toBe('technical-planner');
       });
@@ -220,24 +228,45 @@ describe('planning-stage', () => {
       });
 
       it('recommends writing-plans skill for plan', () => {
-        const result = resolvePlanningStage(clearClarification());
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
 
         expect(result.recommendedSkill).toBe('writing-plans');
       });
     });
 
     // ------------------------------------------------------------------
-    // Backward compatibility
+    // Staged default behavior
     // ------------------------------------------------------------------
 
-    describe('backward compatibility', () => {
-      it('clear prompt produces planReady + plan stage with no intermediate steps', () => {
+    describe('staged default behavior', () => {
+      it('clear prompt starts at discover with design as next stage', () => {
         const clarification = clearClarification();
         const result = resolvePlanningStage(clarification);
+
+        expect(result.currentStage).toBe('discover');
+        expect(result.nextStage).toBe('design');
+        expect(result.stageTransitionHint).toBeTruthy();
+      });
+
+      it('stageHint=plan still jumps directly to plan (caller override)', () => {
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
 
         expect(result.currentStage).toBe('plan');
         expect(result.nextStage).toBeUndefined();
         expect(result.stageTransitionHint).toBeUndefined();
+      });
+
+      it('stageHint=design advances to design (caller override)', () => {
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'design',
+        });
+
+        expect(result.currentStage).toBe('design');
+        expect(result.nextStage).toBe('plan');
       });
 
       it('all fields are present in the return type', () => {
@@ -249,6 +278,46 @@ describe('planning-stage', () => {
         expect(result).toHaveProperty('stageTransitionHint');
         expect(result).toHaveProperty('recommendedAgent');
         expect(result).toHaveProperty('recommendedSkill');
+      });
+    });
+
+    // ------------------------------------------------------------------
+    // Stage progression metadata
+    // ------------------------------------------------------------------
+
+    describe('stageProgression', () => {
+      it('discover stage shows no completed, discover current, design+plan remaining', () => {
+        const result = resolvePlanningStage(ambiguousClarification());
+
+        expect(result.stageProgression).toEqual({
+          completedStages: [],
+          currentStage: 'discover',
+          remainingStages: ['design', 'plan'],
+        });
+      });
+
+      it('design stage shows discover completed, design current, plan remaining', () => {
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'design',
+        });
+
+        expect(result.stageProgression).toEqual({
+          completedStages: ['discover'],
+          currentStage: 'design',
+          remainingStages: ['plan'],
+        });
+      });
+
+      it('plan stage shows discover+design completed, plan current, no remaining', () => {
+        const result = resolvePlanningStage(clearClarification(), {
+          stageHint: 'plan',
+        });
+
+        expect(result.stageProgression).toEqual({
+          completedStages: ['discover', 'design'],
+          currentStage: 'plan',
+          remainingStages: [],
+        });
       });
     });
   });

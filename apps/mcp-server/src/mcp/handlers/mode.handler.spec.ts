@@ -1817,7 +1817,7 @@ describe('ModeHandler', () => {
       expect(parsed.planningStage.recommendedSkill).toBe('brainstorming');
     });
 
-    it('includes planningStage with plan for clear PLAN prompt', async () => {
+    it('includes planningStage with discover for clear PLAN prompt (staged default)', async () => {
       mockKeywordService.parseMode = vi.fn().mockResolvedValue({
         ...mockParseModeResult,
         mode: 'PLAN',
@@ -1831,11 +1831,16 @@ describe('ModeHandler', () => {
       expect(result?.isError).toBeFalsy();
       const parsed = JSON.parse((result?.content[0] as { text: string }).text);
       expect(parsed.planningStage).toBeDefined();
-      expect(parsed.planningStage.currentStage).toBe('plan');
-      expect(parsed.planningStage.nextStage).toBeUndefined();
-      expect(parsed.planningStage.stageTransitionHint).toBeUndefined();
-      expect(parsed.planningStage.recommendedAgent).toBe('technical-planner');
-      expect(parsed.planningStage.recommendedSkill).toBe('writing-plans');
+      expect(parsed.planningStage.currentStage).toBe('discover');
+      expect(parsed.planningStage.nextStage).toBe('design');
+      expect(parsed.planningStage.stageTransitionHint).toBeTruthy();
+      expect(parsed.planningStage.recommendedAgent).toBe('solution-architect');
+      expect(parsed.planningStage.recommendedSkill).toBe('brainstorming');
+      expect(parsed.planningStage.stageProgression).toEqual({
+        completedStages: [],
+        currentStage: 'discover',
+        remainingStages: ['design', 'plan'],
+      });
     });
 
     it('honors explicit planning_stage=design hint', async () => {
@@ -1924,7 +1929,7 @@ describe('ModeHandler', () => {
       expect(parsed.planningStage.currentStage).toBe('discover');
     });
 
-    it('routes budget-exhausted to plan stage', async () => {
+    it('routes budget-exhausted to discover stage (staged default)', async () => {
       mockKeywordService.parseMode = vi.fn().mockResolvedValue({
         ...mockParseModeResult,
         mode: 'PLAN',
@@ -1938,8 +1943,8 @@ describe('ModeHandler', () => {
 
       expect(result?.isError).toBeFalsy();
       const parsed = JSON.parse((result?.content[0] as { text: string }).text);
-      expect(parsed.planningStage.currentStage).toBe('plan');
-      expect(parsed.planningStage.recommendedAgent).toBe('technical-planner');
+      expect(parsed.planningStage.currentStage).toBe('discover');
+      expect(parsed.planningStage.recommendedAgent).toBe('solution-architect');
     });
   });
 
