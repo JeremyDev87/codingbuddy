@@ -37,6 +37,7 @@ import { isTaskmaestroAvailable } from './taskmaestro-detector';
 import { type ClientType } from '../shared/client-type';
 import { getDiffFiles, analyzeDiffFiles, type DiffAnalysisResult } from './diff-analyzer';
 import { matchStack, type StackMatchInput, type StackMatchResult } from '../agent/stack-matcher';
+import { resolvePlanningContract } from '../mcp/handlers/planning-contract';
 
 /**
  * Options for parseMode method
@@ -990,6 +991,12 @@ export class KeywordService {
           systemPrompt: summary.primaryFocus, // Truncated primary focus instead of full prompt
           expertise: summary.expertise, // Top 5 expertise items
         };
+      }
+
+      // Attach planning contract regardless of verbosity level
+      const planningContract = resolvePlanningContract(mode, result.delegates_to);
+      if (planningContract) {
+        result.included_agent.planningContract = [...planningContract];
       }
 
       this.logger.log(`Auto-included agent: ${agentPrompt.displayName} (verbosity: ${verbosity})`);

@@ -388,6 +388,8 @@ export interface IncludedAgent {
   systemPrompt: string;
   /** Agent's areas of expertise */
   expertise: string[];
+  /** Core planning behavior rules that survive all verbosity levels. */
+  planningContract?: string[];
 }
 
 /** Source of Primary Agent selection */
