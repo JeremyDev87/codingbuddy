@@ -16,10 +16,35 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from hud_state import update_hud_state
+from hud_state import read_hud_state, update_hud_state
+
+# Council lifecycle stages — forward-only progression (#1368)
+COUNCIL_STAGES = ("opening", "reviewing", "consensus", "done")
+
+# Tool completions that signal specialist analysis is underway
+_SPECIALIST_SIGNAL_TOOLS = frozenset({
+    "Agent",
+    "mcp__codingbuddy__analyze_task",
+    "mcp__codingbuddy__prepare_parallel_agents",
+    "mcp__codingbuddy__dispatch_agents",
+    "mcp__codingbuddy__generate_checklist",
+})
+
+# Tool completions that signal the council is converging on decisions
+_CONSENSUS_SIGNAL_TOOLS = frozenset({
+    "Edit",
+    "Write",
+    "mcp__codingbuddy__update_context",
+})
+
+# Quality-check command patterns for blocker detection
+_TEST_CMD_PATTERNS = ("pytest", "vitest", "jest", "yarn test", "npm test")
+_TYPECHECK_CMD_PATTERNS = ("tsc", "type-check", "typecheck")
+_LINT_CMD_PATTERNS = ("eslint", "prettier --check", "yarn lint", "npm run lint")
 
 _DEFAULT_PLUGINS_FILE = str(
     Path.home() / ".claude" / "plugins" / "installed_plugins.json"
@@ -164,8 +189,9 @@ def on_tool_end(
 ) -> None:
     """Record stable post-action state after a tool completes.
 
-    Called from PostToolUse.  Captures agent handoffs and phase
-    transitions that are evident from tool outputs.
+    Called from PostToolUse.  Captures agent handoffs, phase
+    transitions, council stage advancement, and blocker counts
+    evident from tool outputs (#1368).
 
     Args:
         tool_name: Name of the completed tool.
@@ -189,6 +215,25 @@ def on_tool_end(
                 phase = _MODE_PHASE_MAP.get(mode, "ready")
                 updates["currentMode"] = mode
                 updates["phase"] = phase
+
+        # Council stage advancement (#1368) — only read state when the
+        # tool could actually trigger a transition, avoiding disk I/O
+        # on every Read/Grep/Glob call.
+        _council_tools = _SPECIALIST_SIGNAL_TOOLS | _CONSENSUS_SIGNAL_TOOLS | {"mcp__codingbuddy__parse_mode"}
+        if tool_name in _council_tools:
+            sf_kwargs = {"state_file": state_file} if state_file else {}
+            state = read_hud_state(fill_defaults=True, **sf_kwargs)
+
+            if state.get("councilActive"):
+                current_stage = state.get("councilStage", "")
+                next_stage = _infer_council_advance(tool_name, current_stage)
+                if next_stage:
+                    updates["councilStage"] = next_stage
+
+        # Blocker detection (#1368)
+        blocker_count = _detect_blocker_count(tool_name, tool_input, tool_output)
+        if blocker_count is not None:
+            updates["blockerCount"] = blocker_count
 
         if updates:
             if state_file:
@@ -305,6 +350,80 @@ def on_council_update(
 
 
 # ---- private helpers ----
+
+
+def _infer_council_advance(
+    tool_name: str,
+    current_stage: str,
+) -> Optional[str]:
+    """Infer the next council stage from a completed tool.
+
+    Stage transitions are forward-only:
+        opening → reviewing → consensus → done
+
+    Returns the new stage name, or None if no transition applies.
+    """
+    if not current_stage or current_stage not in COUNCIL_STAGES:
+        return None
+
+    if current_stage == "done":
+        return None
+
+    if current_stage == "opening" and tool_name in _SPECIALIST_SIGNAL_TOOLS:
+        return "reviewing"
+
+    if current_stage == "reviewing" and tool_name in _CONSENSUS_SIGNAL_TOOLS:
+        return "consensus"
+
+    if current_stage == "consensus" and tool_name == "mcp__codingbuddy__parse_mode":
+        return "done"
+
+    return None
+
+
+def _detect_blocker_count(
+    tool_name: str,
+    tool_input: dict,
+    tool_output: str,
+) -> Optional[int]:
+    """Detect blocker count from quality-check Bash output.
+
+    Returns:
+        int >= 0 when the tool is a quality-check command
+            (0 means all checks passed — clear blockers).
+        None for non-quality tools (meaning "don't touch blockerCount").
+    """
+    if tool_name != "Bash":
+        return None
+
+    cmd = tool_input.get("command", "")
+    output = (tool_output or "").lower()
+
+    # Test runner
+    if any(p in cmd for p in _TEST_CMD_PATTERNS):
+        match = re.search(r"(\d+)\s+failed", output)
+        if match:
+            return int(match.group(1))
+        if "failed" in output or "fail" in output:
+            return 1
+        return 0
+
+    # Type checker
+    if any(p in cmd for p in _TYPECHECK_CMD_PATTERNS):
+        errors = re.findall(r"error ts\d+", output)
+        if errors:
+            return len(errors)
+        if "error" in output:
+            return 1
+        return 0
+
+    # Linter
+    if any(p in cmd for p in _LINT_CMD_PATTERNS):
+        if "error" in output:
+            return 1
+        return 0
+
+    return None
 
 
 def _detect_focus(tool_name: str, tool_input: dict) -> Optional[str]:
