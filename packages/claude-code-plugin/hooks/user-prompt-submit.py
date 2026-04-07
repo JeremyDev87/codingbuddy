@@ -71,6 +71,7 @@ def main():
             try:
                 from runtime_mode import is_mcp_available
                 from mode_engine import ModeEngine, COUNCIL_PRESETS
+                from permission_forecast import generate_standalone_forecast
 
                 project_dir = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
                 if is_mcp_available(project_dir=project_dir):
@@ -81,6 +82,11 @@ def main():
                         "If mcp__codingbuddy__parse_mode is available, "
                         "call it for enhanced features."
                     )
+                    # Permission forecast hint (#1418): show standalone
+                    # forecast as a preview; parse_mode will refine it.
+                    forecast_line = generate_standalone_forecast(detected_mode)
+                    if forecast_line:
+                        print(forecast_line)
                     # MCP council preset for eligible modes (#1361)
                     council_preset = COUNCIL_PRESETS.get(detected_mode)
                 else:
@@ -94,6 +100,10 @@ def main():
                         detected_mode, prompt=prompt
                     )
                     print(instructions)
+                    # Permission forecast for standalone mode (#1418)
+                    forecast_line = generate_standalone_forecast(detected_mode)
+                    if forecast_line:
+                        print(forecast_line)
                     # Standalone council preset from Tiny Actor presets (#1361)
                     try:
                         from tiny_actor_presets import CAST_PRESETS

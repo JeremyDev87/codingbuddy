@@ -506,6 +506,114 @@ class TestCouncilStateSeedingIntegration:
             assert state["councilCast"][0] == "auto-mode"
 
 
+class TestPermissionForecastIntegration:
+    """#1418: Permission forecast display in hook output."""
+
+    def _run_hook(self, prompt, home_dir, mcp_enabled=False):
+        import os as _os
+
+        hook_path = Path(__file__).parent / "user-prompt-submit.py"
+        input_data = json.dumps({"prompt": prompt})
+        env = _os.environ.copy()
+        env["HOME"] = str(home_dir)
+        env["CLAUDE_PROJECT_DIR"] = str(home_dir)
+        env.pop("CODINGBUDDY_RULES_DIR", None)
+        env.pop("CODINGBUDDY_HUD_STATE_FILE", None)
+
+        if mcp_enabled:
+            claude_dir = Path(home_dir) / ".claude"
+            claude_dir.mkdir(exist_ok=True)
+            mcp_json = claude_dir / "mcp.json"
+            mcp_json.write_text(json.dumps({
+                "mcpServers": {
+                    "codingbuddy": {"command": "codingbuddy", "args": ["mcp"]}
+                }
+            }))
+
+        return subprocess.run(
+            [sys.executable, str(hook_path)],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=str(home_dir),
+        )
+
+    def test_act_mode_shows_forecast_standalone(self):
+        """ACT mode in standalone should show repo-write permission forecast."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, ".claude").mkdir()
+            result = self._run_hook("ACT: implement the feature", tmpdir)
+            assert result.returncode == 0
+            assert "Permissions:" in result.stdout
+            assert "repo-write" in result.stdout
+
+    def test_act_mode_shows_forecast_mcp(self):
+        """ACT mode in MCP should show repo-write permission forecast."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = self._run_hook(
+                "ACT: implement the feature", tmpdir, mcp_enabled=True
+            )
+            assert result.returncode == 0
+            assert "Permissions:" in result.stdout
+            assert "repo-write" in result.stdout
+
+    def test_plan_mode_no_forecast(self):
+        """PLAN mode is read-only, no permission forecast needed."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = self._run_hook(
+                "PLAN: design the architecture for the auth module",
+                tmpdir,
+                mcp_enabled=True,
+            )
+            assert result.returncode == 0
+            assert "Permissions:" not in result.stdout
+
+    def test_eval_mode_no_forecast(self):
+        """EVAL mode is read-only, no permission forecast needed."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = self._run_hook(
+                "EVAL: review the code quality of the auth module",
+                tmpdir,
+                mcp_enabled=True,
+            )
+            assert result.returncode == 0
+            assert "Permissions:" not in result.stdout
+
+    def test_auto_mode_shows_forecast(self):
+        """AUTO mode should show repo-write and external permissions."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = self._run_hook(
+                "AUTO: build the complete user dashboard feature",
+                tmpdir,
+                mcp_enabled=True,
+            )
+            assert result.returncode == 0
+            assert "Permissions:" in result.stdout
+            assert "repo-write" in result.stdout
+            assert "external" in result.stdout
+
+    def test_no_keyword_no_forecast(self):
+        """Regular messages should not show any forecast."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, ".claude").mkdir()
+            result = self._run_hook("Hello world", tmpdir)
+            assert result.returncode == 0
+            assert "Permissions:" not in result.stdout
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__, "-v"])
