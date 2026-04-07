@@ -100,6 +100,76 @@ export function evaluateExecutionGate(input: ExecutionGateInput): ExecutionGate 
 }
 
 // ---------------------------------------------------------------------------
+// Response suppression (#1422)
+// ---------------------------------------------------------------------------
+
+/** Minimal parallel-agent recommendation shape for gating. */
+interface GatedParallelRecommendation {
+  specialists: string[];
+  hint: string;
+  dispatch?: string;
+  suggestedStack?: string;
+  stackBased?: boolean;
+}
+
+/**
+ * Fields from the parse_mode response that may need suppression while gated.
+ * Uses a generic for dispatchReady and executionPlan so the caller can pass
+ * the concrete types from keyword.types without coupling this module to them.
+ */
+export interface GatedResponseFields<D = unknown, E = unknown> {
+  dispatchReady?: D;
+  parallelAgentsRecommendation?: GatedParallelRecommendation;
+  executionPlan?: E;
+}
+
+/** Return type mirrors the input but with suppressed fields. */
+export type SuppressedResponseFields<D = unknown, E = unknown> = GatedResponseFields<D, E>;
+
+/**
+ * Suppress or downgrade dispatch-ready metadata when the execution gate
+ * is active (#1422).
+ *
+ * When `gate.gated === true`:
+ * - `dispatchReady` is removed (no Task-tool-ready params leak).
+ * - `executionPlan` is removed (no execution plan metadata leaks).
+ * - `parallelAgentsRecommendation.dispatch` is downgraded to `"deferred"`.
+ * - Specialist names and hint are preserved for transparency.
+ *
+ * When `gate` is undefined or ungated, all fields pass through unchanged.
+ *
+ * This function is pure and does NOT mutate its inputs.
+ */
+export function suppressDispatchWhileGated<D, E>(
+  gate: ExecutionGate | undefined,
+  fields: GatedResponseFields<D, E>,
+): SuppressedResponseFields<D, E> {
+  // No gate or ungated → pass through
+  if (!gate || !gate.gated) {
+    return fields;
+  }
+
+  // Gated → suppress expensive dispatch metadata
+  const result: SuppressedResponseFields<D, E> = {};
+
+  // dispatchReady: fully removed (no dispatch params should leak)
+  // result.dispatchReady stays undefined
+
+  // executionPlan: fully removed
+  // result.executionPlan stays undefined
+
+  // parallelAgentsRecommendation: keep specialist names, downgrade dispatch
+  if (fields.parallelAgentsRecommendation) {
+    result.parallelAgentsRecommendation = {
+      ...fields.parallelAgentsRecommendation,
+      dispatch: 'deferred',
+    };
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 

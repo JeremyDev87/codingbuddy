@@ -326,6 +326,7 @@ describe('ModeHandler', () => {
 
         const result = await handler.handle('parse_mode', {
           prompt: 'PLAN test',
+          question_budget: 0, // bypass clarification gate (#1422)
         });
 
         expect(result?.isError).toBeFalsy();
@@ -705,6 +706,7 @@ describe('ModeHandler', () => {
 
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design auth feature',
+        question_budget: 0, // bypass clarification gate (#1422)
       });
 
       expect(result?.isError).toBeFalsy();
@@ -747,6 +749,7 @@ describe('ModeHandler', () => {
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design auth feature',
         verbosity: 'full',
+        question_budget: 0, // bypass clarification gate (#1422)
       });
 
       expect(result?.isError).toBeFalsy();
@@ -806,6 +809,7 @@ describe('ModeHandler', () => {
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design auth feature',
         verbosity: 'full',
+        question_budget: 0, // bypass clarification gate (#1422)
       });
 
       // Should not fail the whole operation
@@ -902,7 +906,10 @@ describe('ModeHandler', () => {
         },
       });
 
-      const result = await handler.handle('parse_mode', { prompt: 'PLAN design feature' });
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+        question_budget: 0, // bypass clarification gate (#1422)
+      });
 
       expect(result?.isError).toBeFalsy();
       const parsed = JSON.parse(result!.content[0].text as string);
@@ -940,7 +947,10 @@ describe('ModeHandler', () => {
         ai: { dispatchStrength: 'skip' },
       });
 
-      const result = await handler.handle('parse_mode', { prompt: 'PLAN design feature' });
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN design feature',
+        question_budget: 0, // bypass clarification gate (#1422)
+      });
 
       expect(result?.isError).toBeFalsy();
       const parsed = JSON.parse(result!.content[0].text as string);
@@ -1386,6 +1396,7 @@ describe('ModeHandler', () => {
 
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design auth feature',
+        question_budget: 0, // bypass clarification gate (#1422)
       });
 
       expect(result?.isError).toBeFalsy();
@@ -1414,6 +1425,7 @@ describe('ModeHandler', () => {
 
       const result = await handler.handle('parse_mode', {
         prompt: 'PLAN design auth feature',
+        question_budget: 0, // bypass clarification gate (#1422)
       });
 
       expect(result?.isError).toBeFalsy();

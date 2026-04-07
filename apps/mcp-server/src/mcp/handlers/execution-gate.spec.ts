@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateExecutionGate, type ExecutionGateInput } from './execution-gate';
+import {
+  evaluateExecutionGate,
+  suppressDispatchWhileGated,
+  type ExecutionGateInput,
+  type ExecutionGate,
+  type GatedResponseFields,
+} from './execution-gate';
 import type { ClarificationMetadata } from './clarification-gate';
 import type { PlanningStageMetadata } from './planning-stage';
 
@@ -270,6 +276,242 @@ describe('execution-gate', () => {
 
         expect(result.deferredSpecialists).toEqual(['a', 'b', 'c']);
         expect(result.deferredSpecialists).not.toBe(specialists); // different reference
+      });
+    });
+  });
+
+  // ====================================================================
+  // suppressDispatchWhileGated (#1422)
+  // ====================================================================
+
+  describe('suppressDispatchWhileGated', () => {
+    const sampleDispatchReady = {
+      primaryAgent: {
+        name: 'software-engineer',
+        displayName: 'Software Engineer',
+        description: 'Software Engineer - PLAN mode',
+        dispatchParams: {
+          subagent_type: 'general-purpose' as const,
+          prompt: 'You are a software engineer...',
+          description: 'Software Engineer - PLAN mode',
+        },
+      },
+      parallelAgents: [
+        {
+          name: 'security-specialist',
+          displayName: 'Security Specialist',
+          description: 'Security specialist',
+          dispatchParams: {
+            subagent_type: 'general-purpose' as const,
+            prompt: 'You are a security specialist...',
+            description: 'Security specialist',
+            run_in_background: true as const,
+          },
+        },
+        {
+          name: 'performance-specialist',
+          displayName: 'Performance Specialist',
+          description: 'Performance specialist',
+          dispatchParams: {
+            subagent_type: 'general-purpose' as const,
+            prompt: 'You are a performance specialist...',
+            description: 'Performance specialist',
+            run_in_background: true as const,
+          },
+        },
+      ],
+    };
+
+    const sampleParallelRecommendation = {
+      specialists: ['security-specialist', 'performance-specialist'],
+      hint: 'Dispatch specialists for review',
+      dispatch: 'auto' as const,
+      suggestedStack: 'review',
+      stackBased: true,
+    };
+
+    // ------------------------------------------------------------------
+    // Gated: suppression
+    // ------------------------------------------------------------------
+
+    describe('when gated=true', () => {
+      const gatedGate: ExecutionGate = {
+        gated: true,
+        reason: 'Request is ambiguous',
+        unblockCondition: 'Resolve clarification',
+        deferredSpecialists: ['security-specialist', 'performance-specialist'],
+      };
+
+      it('removes dispatchReady entirely', () => {
+        const fields: GatedResponseFields = {
+          dispatchReady: sampleDispatchReady,
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.dispatchReady).toBeUndefined();
+      });
+
+      it('downgrades parallelAgentsRecommendation.dispatch to "deferred"', () => {
+        const fields: GatedResponseFields = {
+          parallelAgentsRecommendation: { ...sampleParallelRecommendation, dispatch: 'auto' },
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.parallelAgentsRecommendation?.dispatch).toBe('deferred');
+      });
+
+      it('preserves specialist names in parallelAgentsRecommendation for transparency', () => {
+        const fields: GatedResponseFields = {
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.parallelAgentsRecommendation?.specialists).toEqual([
+          'security-specialist',
+          'performance-specialist',
+        ]);
+      });
+
+      it('preserves hint in parallelAgentsRecommendation', () => {
+        const fields: GatedResponseFields = {
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.parallelAgentsRecommendation?.hint).toBe('Dispatch specialists for review');
+      });
+
+      it('removes executionPlan when gated', () => {
+        const fields: GatedResponseFields = {
+          dispatchReady: sampleDispatchReady,
+          executionPlan: { strategy: 'subagent', layers: [] },
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.executionPlan).toBeUndefined();
+      });
+
+      it('handles missing dispatchReady gracefully', () => {
+        const fields: GatedResponseFields = {
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.dispatchReady).toBeUndefined();
+        expect(result.parallelAgentsRecommendation?.dispatch).toBe('deferred');
+      });
+
+      it('handles missing parallelAgentsRecommendation gracefully', () => {
+        const fields: GatedResponseFields = {
+          dispatchReady: sampleDispatchReady,
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.dispatchReady).toBeUndefined();
+        expect(result.parallelAgentsRecommendation).toBeUndefined();
+      });
+
+      it('handles all fields missing gracefully', () => {
+        const fields: GatedResponseFields = {};
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.dispatchReady).toBeUndefined();
+        expect(result.parallelAgentsRecommendation).toBeUndefined();
+        expect(result.executionPlan).toBeUndefined();
+      });
+
+      it('does not mutate the original fields object', () => {
+        const fields: GatedResponseFields = {
+          dispatchReady: sampleDispatchReady,
+          parallelAgentsRecommendation: { ...sampleParallelRecommendation },
+        };
+        const originalDispatch = fields.parallelAgentsRecommendation?.dispatch;
+
+        suppressDispatchWhileGated(gatedGate, fields);
+
+        // Original should be untouched
+        expect(fields.dispatchReady).toBe(sampleDispatchReady);
+        expect(fields.parallelAgentsRecommendation?.dispatch).toBe(originalDispatch);
+      });
+
+      it('downgrades "recommend" dispatch to "deferred"', () => {
+        const fields: GatedResponseFields = {
+          parallelAgentsRecommendation: { ...sampleParallelRecommendation, dispatch: 'recommend' },
+        };
+
+        const result = suppressDispatchWhileGated(gatedGate, fields);
+
+        expect(result.parallelAgentsRecommendation?.dispatch).toBe('deferred');
+      });
+    });
+
+    // ------------------------------------------------------------------
+    // Ungated: pass-through
+    // ------------------------------------------------------------------
+
+    describe('when gated=false', () => {
+      const ungatedGate: ExecutionGate = {
+        gated: false,
+        reason: 'Request is clear',
+      };
+
+      it('preserves dispatchReady unchanged', () => {
+        const fields: GatedResponseFields = {
+          dispatchReady: sampleDispatchReady,
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(ungatedGate, fields);
+
+        expect(result.dispatchReady).toBe(sampleDispatchReady);
+      });
+
+      it('preserves parallelAgentsRecommendation unchanged', () => {
+        const fields: GatedResponseFields = {
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(ungatedGate, fields);
+
+        expect(result.parallelAgentsRecommendation).toBe(sampleParallelRecommendation);
+      });
+
+      it('preserves executionPlan unchanged', () => {
+        const executionPlan = { strategy: 'subagent', layers: [] };
+        const fields: GatedResponseFields = {
+          executionPlan,
+        };
+
+        const result = suppressDispatchWhileGated(ungatedGate, fields);
+
+        expect(result.executionPlan).toBe(executionPlan);
+      });
+    });
+
+    // ------------------------------------------------------------------
+    // Edge: undefined gate
+    // ------------------------------------------------------------------
+
+    describe('when gate is undefined', () => {
+      it('passes through all fields unchanged', () => {
+        const fields: GatedResponseFields = {
+          dispatchReady: sampleDispatchReady,
+          parallelAgentsRecommendation: sampleParallelRecommendation,
+        };
+
+        const result = suppressDispatchWhileGated(undefined, fields);
+
+        expect(result.dispatchReady).toBe(sampleDispatchReady);
+        expect(result.parallelAgentsRecommendation).toBe(sampleParallelRecommendation);
       });
     });
   });

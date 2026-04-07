@@ -45,7 +45,11 @@ import { ImpactEventService } from '../../impact';
 import { RuleEventCollector } from '../../rules/rule-event-collector';
 import { evaluateClarification, type ClarificationMetadata } from './clarification-gate';
 import { resolvePlanningStage, type PlanningStageMetadata } from './planning-stage';
-import { evaluateExecutionGate, type ExecutionGate } from './execution-gate';
+import {
+  evaluateExecutionGate,
+  suppressDispatchWhileGated,
+  type ExecutionGate,
+} from './execution-gate';
 import { buildCouncilScene } from './council-scene.builder';
 
 /** Maximum length for context title slug generation */
@@ -385,6 +389,18 @@ export class ModeHandler extends AbstractHandler {
         result.parallelAgentsRecommendation?.specialists,
       );
 
+      // Execution Gate suppression (#1422) — when gated, suppress dispatch-ready
+      // metadata and downgrade parallelAgentsRecommendation so clients cannot
+      // proceed with expensive specialist execution while clarification is needed.
+      const serializedExecutionPlan = executionPlan
+        ? serializeExecutionPlan(executionPlan)
+        : undefined;
+      const gatedFields = suppressDispatchWhileGated(executionGate, {
+        dispatchReady,
+        parallelAgentsRecommendation: result.parallelAgentsRecommendation,
+        executionPlan: serializedExecutionPlan,
+      });
+
       const response = createJsonResponse({
         ...result,
         // Clarification-first instruction override (#1423) — applied AFTER
@@ -393,8 +409,13 @@ export class ModeHandler extends AbstractHandler {
         language,
         languageInstruction: languageInstructionResult.instruction,
         resolvedModel,
-        // Include dispatch-ready data when available
-        ...(dispatchReady && { dispatchReady }),
+        // Override parallelAgentsRecommendation with gated version (#1422)
+        // Applied AFTER spreading result so it wins over the original field.
+        ...(gatedFields.parallelAgentsRecommendation !== undefined && {
+          parallelAgentsRecommendation: gatedFields.parallelAgentsRecommendation,
+        }),
+        // Include dispatch-ready data when available (suppressed when gated #1422)
+        ...(gatedFields.dispatchReady && { dispatchReady: gatedFields.dispatchReady }),
         // Include deep thinking instructions for PLAN/AUTO modes
         ...(deepThinkingInstructions && { deepThinkingInstructions }),
         // Include plan review gate for PLAN/AUTO modes
@@ -409,8 +430,8 @@ export class ModeHandler extends AbstractHandler {
         ...(councilPreset && { councilPreset }),
         // Include council scene contract for PLAN/EVAL/AUTO modes (#1366)
         ...(councilScene && { councilScene }),
-        // Include execution plan metadata when dispatch is active
-        ...(executionPlan && { executionPlan: serializeExecutionPlan(executionPlan) }),
+        // Include execution plan metadata when dispatch is active (suppressed when gated #1422)
+        ...(gatedFields.executionPlan && { executionPlan: gatedFields.executionPlan }),
         // Include Teams capability status
         ...(teamsCapability && { teamsCapability }),
         // Include Clarification Gate metadata for PLAN/AUTO modes (#1371)
