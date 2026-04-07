@@ -1649,6 +1649,138 @@ describe('ModeHandler', () => {
   });
 
   // ==========================================================================
+  // Clarification-First Directive (#1423)
+  // ==========================================================================
+  describe('parse_mode Clarification-First Directive (#1423)', () => {
+    it('overrides instructions with clarification-first directive for ambiguous PLAN prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: '개선해줘',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN 개선해줘',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(true);
+      expect(parsed.instructions).toContain('CLARIFICATION REQUIRED');
+      expect(parsed.instructions).toContain('DO NOT PLAN');
+      expect(parsed.instructions).toContain('Ask EXACTLY the question below and STOP');
+      expect(parsed.instructions).not.toContain('CONTEXT: Check contextDocument');
+    });
+
+    it('includes nextQuestion text in overridden instructions', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(true);
+      // The nextQuestion should appear in the instructions
+      expect(parsed.instructions).toContain(parsed.nextQuestion);
+    });
+
+    it('includes remaining questionBudget in overridden instructions', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 2,
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(true);
+      expect(parsed.instructions).toContain('question_budget=1');
+    });
+
+    it('does NOT override instructions when planReady=true', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'add tests to src/auth.ts',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN add tests to src/auth.ts',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.planReady).toBe(true);
+      expect(parsed.instructions).not.toContain('CLARIFICATION REQUIRED');
+    });
+
+    it('applies directive in AUTO mode for ambiguous prompt', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'AUTO',
+        originalPrompt: '개선',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'AUTO 개선',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(true);
+      expect(parsed.instructions).toContain('CLARIFICATION REQUIRED');
+      expect(parsed.instructions).toContain('DO NOT PLAN');
+    });
+
+    it('does NOT apply directive when budget is exhausted', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it',
+        question_budget: 0,
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(false);
+      expect(parsed.planReady).toBe(true);
+      expect(parsed.instructions).not.toContain('CLARIFICATION REQUIRED');
+    });
+
+    it('does NOT apply directive when override phrase is present', async () => {
+      mockKeywordService.parseMode = vi.fn().mockResolvedValue({
+        ...mockParseModeResult,
+        mode: 'PLAN',
+        originalPrompt: 'improve it, just do it',
+      });
+
+      const result = await handler.handle('parse_mode', {
+        prompt: 'PLAN improve it, just do it',
+      });
+
+      expect(result?.isError).toBeFalsy();
+      const parsed = JSON.parse((result?.content[0] as { text: string }).text);
+      expect(parsed.clarificationNeeded).toBe(false);
+      expect(parsed.instructions).not.toContain('CLARIFICATION REQUIRED');
+    });
+  });
+
+  // ==========================================================================
   // Planning Stage Router (#1372)
   // ==========================================================================
   describe('parse_mode Planning Stage (#1372)', () => {

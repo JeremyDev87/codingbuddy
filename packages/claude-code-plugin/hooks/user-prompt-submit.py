@@ -90,7 +90,9 @@ def main():
                     # is required for mode handling.
                     print("# Backend: standalone (self-contained, no MCP required)")
                     engine = ModeEngine(cwd=project_dir)
-                    instructions = engine.build_instructions(detected_mode)
+                    instructions = engine.build_instructions(
+                        detected_mode, prompt=prompt
+                    )
                     print(instructions)
                     # Standalone council preset from Tiny Actor presets (#1361)
                     try:

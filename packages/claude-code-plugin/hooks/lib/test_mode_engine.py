@@ -462,5 +462,79 @@ class TestModeEngineGracefulFallback(unittest.TestCase):
                 self.assertTrue(len(result) > 0, f"{mode} produced empty output")
 
 
+class TestStandaloneClarificationGate(unittest.TestCase):
+    """Test standalone clarification gate (#1423)."""
+
+    def setUp(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.engine = ModeEngine(rules_dir=tmpdir)
+
+    def test_ambiguous_plan_returns_clarification_directive(self):
+        result = self.engine.build_instructions("PLAN", prompt="PLAN improve the UI")
+        self.assertIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("DO NOT PLAN", result)
+        self.assertIn("Ask EXACTLY the question below and STOP", result)
+
+    def test_ambiguous_auto_returns_clarification_directive(self):
+        result = self.engine.build_instructions("AUTO", prompt="AUTO 개선해줘")
+        self.assertIn("CLARIFICATION REQUIRED", result)
+
+    def test_clear_plan_with_file_path_returns_normal_instructions(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN add tests to src/auth.ts"
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("# Mode: PLAN", result)
+
+    def test_clear_plan_with_function_ref_returns_normal_instructions(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN refactor parseMode() to handle localized keywords"
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+
+    def test_override_phrase_bypasses_gate(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN improve it, just do it"
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("# Mode: PLAN", result)
+
+    def test_korean_override_phrase_bypasses_gate(self):
+        result = self.engine.build_instructions(
+            "PLAN", prompt="PLAN 개선해줘 알아서 해"
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+
+    def test_short_prompt_without_tech_ref_triggers_gate(self):
+        result = self.engine.build_instructions("PLAN", prompt="PLAN fix it")
+        self.assertIn("CLARIFICATION REQUIRED", result)
+
+    def test_act_mode_skips_clarification(self):
+        result = self.engine.build_instructions("ACT", prompt="ACT improve it")
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("# Mode: ACT", result)
+
+    def test_eval_mode_skips_clarification(self):
+        result = self.engine.build_instructions("EVAL", prompt="EVAL improve it")
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+
+    def test_no_prompt_skips_clarification(self):
+        result = self.engine.build_instructions("PLAN")
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("# Mode: PLAN", result)
+
+    def test_well_specified_long_prompt_skips_gate(self):
+        result = self.engine.build_instructions(
+            "PLAN",
+            prompt="PLAN implement password reset endpoint that sends an email with a reset link",
+        )
+        self.assertNotIn("CLARIFICATION REQUIRED", result)
+
+    def test_vague_intent_question_content(self):
+        result = self.engine.build_instructions("PLAN", prompt="PLAN refactor this")
+        self.assertIn("CLARIFICATION REQUIRED", result)
+        self.assertIn("concrete change", result)
+
+
 if __name__ == "__main__":
     unittest.main()

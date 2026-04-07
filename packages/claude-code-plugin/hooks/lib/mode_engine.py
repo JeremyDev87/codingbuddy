@@ -108,6 +108,112 @@ Report progress at each cycle iteration.""",
 }
 
 
+# ---------------------------------------------------------------------------
+# Standalone Clarification Gate (#1423)
+# Mirrors MCP server clarification-gate.ts heuristics so standalone mode
+# also asks before planning when the request is ambiguous.
+# ---------------------------------------------------------------------------
+
+MIN_PROMPT_LENGTH = 20
+
+_OVERRIDE_PATTERNS = [
+    re.compile(r"\bjust\s+do\s+it\b", re.I),
+    re.compile(r"\buse\s+your\s+(?:judg(?:e)?ment|best\s+guess|discretion)\b", re.I),
+    re.compile(r"\bgo\s+ahead\b", re.I),
+    re.compile(r"\bmake\s+assumptions?\b", re.I),
+    re.compile(r"\bassume\s+(?:whatever|defaults?|reasonable)\b", re.I),
+    re.compile(r"알아서\s*(?:해|진행|처리)"),
+    re.compile(r"그냥\s*(?:해|진행)"),
+    re.compile(r"임의로\s*(?:해|진행)"),
+]
+
+_VAGUE_INTENT_PATTERNS = [
+    re.compile(r"\bimprove\b", re.I),
+    re.compile(r"\b(?:make\s+it\s+)?better\b", re.I),
+    re.compile(r"\benhance\b", re.I),
+    re.compile(r"\boptimi[sz]e\b", re.I),
+    re.compile(r"\brefactor\b", re.I),
+    re.compile(r"\bclean\s*up\b", re.I),
+    re.compile(r"\btweak\b", re.I),
+    re.compile(r"\bfix\s+(?:stuff|things|issues?)\b", re.I),
+    re.compile(r"개선"),
+    re.compile(r"향상"),
+    re.compile(r"최적화"),
+    re.compile(r"정리"),
+    re.compile(r"개량"),
+]
+
+_TECH_REFERENCE_PATTERNS = [
+    re.compile(
+        r"\.(?:ts|tsx|js|jsx|py|go|rs|java|kt|swift|rb|php|c|cpp|cs|md"
+        r"|json|ya?ml|toml|sql|sh)\b",
+        re.I,
+    ),
+    re.compile(r"(?:^|[\s([`\"'])[\w.-]+/[\w.\-/]+"),
+    re.compile(r"\b[a-zA-Z_][\w]*\("),
+    re.compile(r"\b[A-Z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]+\b"),
+    re.compile(r"\b[a-z][a-z0-9]+[A-Z][a-zA-Z0-9]+\b"),
+    re.compile(r"\b[a-z]+_[a-z][a-z0-9_]*\b"),
+    re.compile(r"`[^`]+`"),
+]
+
+_MODE_KEYWORD_RE = re.compile(
+    r"^(PLAN|ACT|EVAL|AUTO|계획|실행|평가|자동|計画|実行|評価|自動"
+    r"|计划|执行|评估|自动|PLANIFICAR|ACTUAR|EVALUAR|AUTOMÁTICO)\s*[:\s]*",
+    re.I,
+)
+
+
+def evaluate_clarification_standalone(prompt: str) -> Optional[str]:
+    """
+    Standalone clarification gate (#1423).
+
+    Returns a clarification-first directive string when the prompt is
+    ambiguous, or ``None`` when the request is clear enough to plan.
+    """
+    trimmed = prompt.strip()
+    if not trimmed:
+        return None
+
+    # Strip mode keyword prefix before evaluating content
+    stripped = _MODE_KEYWORD_RE.sub("", trimmed).strip()
+    if not stripped:
+        return None
+
+    if any(p.search(stripped) for p in _OVERRIDE_PATTERNS):
+        return None
+
+    if any(p.search(stripped) for p in _TECH_REFERENCE_PATTERNS):
+        return None
+
+    is_vague = any(p.search(stripped) for p in _VAGUE_INTENT_PATTERNS)
+    is_short = 0 < len(stripped) < MIN_PROMPT_LENGTH
+
+    if not is_vague and not is_short:
+        return None
+
+    if is_vague:
+        question = (
+            "What concrete change are you targeting — "
+            "which behavior, file, or metric should differ after this task?"
+        )
+    else:
+        question = (
+            "Can you describe the goal, inputs, and expected outcome "
+            "in a bit more detail?"
+        )
+
+    return (
+        "🔴 CLARIFICATION REQUIRED — DO NOT PLAN.\n\n"
+        "The request is ambiguous. You MUST:\n"
+        "1. Ask EXACTLY the question below and STOP.\n"
+        "2. Do NOT output any implementation plan, architecture, or code.\n"
+        "3. Wait for the user's response before continuing.\n\n"
+        f'❓ Ask this: "{question}"\n\n'
+        "After the user answers, re-invoke the mode with the clarified prompt."
+    )
+
+
 def _resolve_rules_dir(cwd: Optional[str] = None) -> Optional[str]:
     """
     Resolve path to .ai-rules/ directory.
@@ -290,7 +396,7 @@ class ModeEngine:
             "format": "tiny-actor-grid",
         }
 
-    def build_instructions(self, mode: str) -> str:
+    def build_instructions(self, mode: str, prompt: Optional[str] = None) -> str:
         """
         Build complete mode instructions for hook output.
 
@@ -298,13 +404,26 @@ class ModeEngine:
         available and enforces the ``CHAR_LIMIT`` (2000) ceiling.  Falls
         back to the minimal template when ``.ai-rules/`` is absent.
 
+        When *prompt* is provided for PLAN/AUTO modes the standalone
+        Clarification Gate (#1423) is evaluated first.  If the request is
+        ambiguous a clarification-first directive is returned instead of
+        the normal planning instructions.
+
         Args:
             mode: Mode name (PLAN, ACT, EVAL, AUTO)
+            prompt: Optional raw user prompt for clarification evaluation.
 
         Returns:
             Complete mode instructions string (≤ 2000 chars).
         """
         mode_upper = mode.upper()
+
+        # Clarification gate for PLAN/AUTO modes (#1423)
+        if prompt and mode_upper in ("PLAN", "AUTO"):
+            directive = evaluate_clarification_standalone(prompt)
+            if directive:
+                return directive
+
         agent = self.get_default_agent(mode_upper)
         template = MODE_TEMPLATES.get(mode_upper, MODE_TEMPLATES["ACT"])
 

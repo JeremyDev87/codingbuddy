@@ -361,6 +361,13 @@ export class ModeHandler extends AbstractHandler {
         questionBudget,
       );
 
+      // Clarification-first directive (#1423): when the gate determines the
+      // request is ambiguous, build an instruction override so the AI client
+      // asks the next question and STOPS before generating any plan.
+      // We intentionally do NOT mutate `result` — the override is applied
+      // later in the response spread to avoid side-effects on shared objects.
+      const clarificationInstructions = this.buildClarificationFirstInstructions(clarification);
+
       // Planning Stage Router (#1372) — maps clarification output to
       // discover / design / plan stage. Only for PLAN/AUTO modes.
       const planningStage = this.buildPlanningStageMetadata(
@@ -380,6 +387,9 @@ export class ModeHandler extends AbstractHandler {
 
       const response = createJsonResponse({
         ...result,
+        // Clarification-first instruction override (#1423) — applied AFTER
+        // spreading result so it wins over the original instructions field.
+        ...(clarificationInstructions !== undefined && { instructions: clarificationInstructions }),
         language,
         languageInstruction: languageInstructionResult.instruction,
         resolvedModel,
@@ -694,6 +704,39 @@ export class ModeHandler extends AbstractHandler {
       planningStage,
       specialists,
     });
+  }
+
+  /**
+   * Build a clarification-first instruction string (#1423).
+   *
+   * Returns the directive text when the Clarification Gate determines the
+   * request is ambiguous, or `undefined` when the request is clear.
+   * The caller spreads the result into the response so the original
+   * `result` object is never mutated (avoids shared-reference side-effects).
+   */
+  private buildClarificationFirstInstructions(
+    clarification: ClarificationMetadata | undefined,
+  ): string | undefined {
+    if (!clarification?.clarificationNeeded) {
+      return undefined;
+    }
+
+    const question =
+      clarification.nextQuestion ??
+      'Can you clarify the scope and success criteria of this request?';
+    const budget = clarification.questionBudget ?? 0;
+
+    return (
+      '🔴 CLARIFICATION REQUIRED — DO NOT PLAN.\n\n' +
+      'The request is ambiguous. You MUST:\n' +
+      '1. Ask EXACTLY the question below and STOP.\n' +
+      '2. Do NOT output any implementation plan, architecture, or code.\n' +
+      "3. Wait for the user's response before continuing.\n\n" +
+      `❓ Ask this: "${question}"\n\n` +
+      `Remaining question budget: ${budget}\n\n` +
+      'After the user answers, call parse_mode again with the clarified prompt ' +
+      `and question_budget=${budget} to continue.`
+    );
   }
 
   /**
