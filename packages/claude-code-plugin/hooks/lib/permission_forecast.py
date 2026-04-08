@@ -8,7 +8,43 @@ All public functions are pure — no I/O, no side effects.
 
 from __future__ import annotations
 
+import re
 from typing import Dict, List, Optional, Sequence
+
+
+# ─── Prompt-signal patterns (mirrors MCP permission-forecast.ts) ─────
+
+_SHIP_RE = re.compile(
+    r"\b(ship|deploy|push|pr\b|pull\s*request|merge|release)\b", re.I
+)
+_TEST_RE = re.compile(
+    r"\b(tests?|lint|typecheck|format|check|verify|coverage)\b", re.I
+)
+_INSTALL_RE = re.compile(
+    r"\b(install|add\s+package|add\s+dependency|yarn\s+add|npm\s+install)\b", re.I
+)
+_DELETE_RE = re.compile(
+    r"\b(delete|remove|drop|reset|clean|destroy)\b", re.I
+)
+_REVIEW_RE = re.compile(
+    r"\b(review|comment|approve|feedback|pr\b|pull\s*request)\b", re.I
+)
+
+# Pre-defined bundles (mirrors MCP permission-forecast.ts)
+_SHIP_BUNDLE: Dict[str, str] = {"name": "Ship changes", "permissionClass": "external"}
+_TEST_BUNDLE: Dict[str, str] = {"name": "Run checks", "permissionClass": "read-only"}
+_INSTALL_BUNDLE: Dict[str, str] = {
+    "name": "Install dependencies",
+    "permissionClass": "network",
+}
+_DELETE_BUNDLE: Dict[str, str] = {
+    "name": "Delete files",
+    "permissionClass": "destructive",
+}
+_REVIEW_BUNDLE: Dict[str, str] = {"name": "Review PR", "permissionClass": "external"}
+
+# Canonical sort order for permission classes
+_CLASS_ORDER = ["read-only", "repo-write", "network", "destructive", "external"]
 
 
 # ─── Permission class definitions ────────────────────────────────────
@@ -119,20 +155,46 @@ def format_permission_forecast_from_mcp(
     return format_permission_forecast(classes, bundles if bundles else None)
 
 
-def generate_standalone_forecast(mode: str) -> str:
-    """Generate a permission forecast for standalone (non-MCP) mode.
+def generate_standalone_forecast(mode: str, prompt: Optional[str] = None) -> str:
+    """Generate a permission forecast with optional prompt-aware analysis.
 
-    Uses the same base permission classes as the MCP server to keep
-    the display consistent regardless of backend.
+    When *prompt* is provided, analyzes it for task signals (install,
+    test, ship, delete, review) and enriches the forecast beyond the
+    static mode defaults — mirroring MCP ``permission-forecast.ts``.
 
     Args:
         mode: Mode name (PLAN, ACT, EVAL, AUTO).
+        prompt: Optional raw user prompt for pattern analysis.
 
     Returns:
         Compact status line string, or empty string for read-only modes.
     """
     mode_upper = mode.upper()
-    classes = MODE_BASE_CLASSES.get(mode_upper, [])
-    bundles = MODE_DEFAULT_BUNDLES.get(mode_upper, [])
+    classes = set(MODE_BASE_CLASSES.get(mode_upper, []))
+    bundles: list[Dict[str, str]] = []
 
-    return format_permission_forecast(classes, bundles if bundles else None)
+    if prompt:
+        if _SHIP_RE.search(prompt):
+            classes.add("repo-write")
+            classes.add("external")
+            bundles.append(_SHIP_BUNDLE)
+        if _TEST_RE.search(prompt):
+            bundles.append(_TEST_BUNDLE)
+        if _INSTALL_RE.search(prompt):
+            classes.add("network")
+            bundles.append(_INSTALL_BUNDLE)
+        if _DELETE_RE.search(prompt):
+            classes.add("destructive")
+            bundles.append(_DELETE_BUNDLE)
+        if _REVIEW_RE.search(prompt) and mode_upper == "EVAL":
+            classes.add("external")
+            bundles.append(_REVIEW_BUNDLE)
+
+    # ACT mode implicit bundle when no explicit bundles matched
+    if mode_upper == "ACT" and not bundles:
+        bundles = list(MODE_DEFAULT_BUNDLES.get("ACT", []))
+
+    # Sort classes canonically
+    sorted_classes = sorted(classes, key=lambda c: _CLASS_ORDER.index(c) if c in _CLASS_ORDER else 99)
+
+    return format_permission_forecast(sorted_classes, bundles if bundles else None)

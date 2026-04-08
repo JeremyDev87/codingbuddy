@@ -439,7 +439,8 @@ class TestCouncilScene(unittest.TestCase):
 
     def test_council_scene_includes_face_name_role(self):
         result = self.engine.build_instructions("PLAN")
-        self.assertIn("●‿● technical-planner [primary]", result)
+        # Face uses real eye glyph from agent JSON (⎔ for technical-planner)
+        self.assertIn("technical-planner [primary]", result)
         self.assertIn("[specialist]", result)
 
     def test_council_scene_includes_moderator_copy(self):

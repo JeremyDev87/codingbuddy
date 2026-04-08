@@ -20,6 +20,8 @@ _EXTENDED_DEFAULTS: Dict[str, Any] = {
     "councilActive": False,
     "councilStage": "",
     "councilCast": [],
+    # Clarification budget (#1371) — persisted across rounds
+    "questionBudget": 3,
 }
 
 try:
@@ -93,6 +95,8 @@ def init_hud_state(
         "councilActive": False,
         "councilStage": "",
         "councilCast": [],
+        # Clarification budget (#1371)
+        "questionBudget": 3,
         "updatedAt": now,
     }
     _locked_write(state_file, data)

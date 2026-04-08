@@ -65,20 +65,23 @@ MODE_TEMPLATES = {
     "PLAN": """# Mode: PLAN
 ## Agent: {agent_name}
 
-You are in PLAN mode. Design the implementation approach.
+You are in PLAN mode. Follow the staged planning flow.
+
+Stages: Discover → Design → Plan
+1. DISCOVER: Surface questions, constraints, option space
+2. DESIGN: Candidate approaches, trade-offs, risks
+3. PLAN: Concrete step-by-step implementation plan
 
 Rules:
-- Define test cases first (TDD perspective)
-- Review architecture before implementation
-- Output full plan in every response
-- Do NOT auto-proceed to ACT — wait for user
+- Start at Discover — ask before solutioning
+- Advance stages only after user confirms direction
 - Consider alternatives for non-trivial decisions
+- Do NOT auto-proceed to ACT — wait for user
 
 Checklist:
-- [ ] Problem decomposed into sub-problems
-- [ ] File paths identified
-- [ ] TDD strategy defined
-- [ ] Alternatives considered""",
+- [ ] Questions and constraints surfaced (Discover)
+- [ ] Approaches compared with trade-offs (Design)
+- [ ] File paths identified, TDD strategy defined (Plan)""",
     "ACT": """# Mode: ACT
 ## Agent: {agent_name}
 
@@ -281,6 +284,7 @@ class ModeEngine:
             cwd: Working directory for resolution. Defaults to os.getcwd().
         """
         self.rules_dir = rules_dir or _resolve_rules_dir(cwd)
+        self._agent_json_cache: dict = {}
 
     def load_mode_rules(self, mode: str) -> Optional[str]:
         """
@@ -350,34 +354,61 @@ class ModeEngine:
         mode_upper = mode.upper()
         return DEFAULT_AGENTS.get(mode_upper, DEFAULT_AGENTS["ACT"])
 
-    def _load_agent_details(self, agent_name: str) -> Optional[dict]:
-        """
-        Load agent profile from ``.ai-rules/agents/{agent_name}.json``.
+    def _read_agent_json(self, agent_name: str) -> Optional[dict]:
+        """Read and cache an agent JSON file from ``.ai-rules/agents/``.
 
-        Args:
-            agent_name: Agent file stem (e.g. ``technical-planner``).
+        Shared by ``_load_agent_details`` and ``_load_agent_eye`` to
+        avoid duplicate file reads (DRY) and N+1 I/O in council scene.
 
-        Returns:
-            Dict with ``name``, ``description``, ``expertise`` keys,
-            or None if the file is missing / unreadable.
+        Applies ``os.path.basename`` to the slug for path-traversal safety.
         """
+        if agent_name in self._agent_json_cache:
+            return self._agent_json_cache[agent_name]
+
         if not self.rules_dir:
+            self._agent_json_cache[agent_name] = None
             return None
 
-        agent_path = os.path.join(self.rules_dir, "agents", f"{agent_name}.json")
+        slug = agent_name.lower().replace(" ", "-").replace("_", "-")
+        slug = os.path.basename(slug)  # path-traversal safety
+        agent_path = os.path.join(self.rules_dir, "agents", f"{slug}.json")
         if not os.path.isfile(agent_path):
+            self._agent_json_cache[agent_name] = None
             return None
 
         try:
             with open(agent_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            return {
-                "name": data.get("name", agent_name),
-                "description": data.get("description", ""),
-                "expertise": data.get("role", {}).get("expertise", []),
-            }
+            self._agent_json_cache[agent_name] = data
+            return data
         except (OSError, json.JSONDecodeError, ValueError):
+            self._agent_json_cache[agent_name] = None
             return None
+
+    def _load_agent_details(self, agent_name: str) -> Optional[dict]:
+        """Load agent profile from ``.ai-rules/agents/{agent_name}.json``."""
+        data = self._read_agent_json(agent_name)
+        if not data:
+            return None
+        return {
+            "name": data.get("name", agent_name),
+            "description": data.get("description", ""),
+            "expertise": data.get("role", {}).get("expertise", []),
+        }
+
+    def _load_agent_eye(self, agent_name: str) -> Optional[str]:
+        """Load the ``eye`` glyph from an agent JSON definition."""
+        data = self._read_agent_json(agent_name)
+        if not data:
+            return None
+        return data.get("visual", {}).get("eye")
+
+    def _make_face(self, agent_name: str) -> str:
+        """Build a face string from the agent eye glyph, or fall back to ●‿●."""
+        eye = self._load_agent_eye(agent_name)
+        if eye:
+            return f"{eye}‿{eye}"
+        return "●‿●"
 
     def build_council_scene(self, mode: str) -> Optional[dict]:
         """
@@ -385,6 +416,7 @@ class ModeEngine:
 
         Mirrors the MCP server's ``buildCouncilScene`` output so that
         standalone mode produces an equivalent first-response contract.
+        Loads real agent eye glyphs from ``.ai-rules/agents/*.json``.
 
         Args:
             mode: Mode name (PLAN, ACT, EVAL, AUTO)
@@ -402,11 +434,13 @@ class ModeEngine:
             return None
 
         cast = [
-            {"name": preset["primary"], "role": "primary", "face": "●‿●"}
+            {"name": preset["primary"], "role": "primary",
+             "face": self._make_face(preset["primary"])}
         ]
         for specialist in preset["specialists"]:
             cast.append(
-                {"name": specialist, "role": "specialist", "face": "●‿●"}
+                {"name": specialist, "role": "specialist",
+                 "face": self._make_face(specialist)}
             )
 
         return {

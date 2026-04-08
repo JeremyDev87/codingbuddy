@@ -84,7 +84,7 @@ def main():
                     )
                     # Permission forecast hint (#1418): show standalone
                     # forecast as a preview; parse_mode will refine it.
-                    forecast_line = generate_standalone_forecast(detected_mode)
+                    forecast_line = generate_standalone_forecast(detected_mode, prompt=prompt)
                     if forecast_line:
                         print(forecast_line)
                     # MCP council preset for eligible modes (#1361)
@@ -95,13 +95,34 @@ def main():
                     # the self-contained fallback is active and no MCP server
                     # is required for mode handling.
                     print("# Backend: standalone (self-contained, no MCP required)")
+                    # Read persisted question budget from HUD state (#1371)
+                    _question_budget = None
+                    try:
+                        from hud_state import read_hud_state
+                        _hud = read_hud_state(fill_defaults=True)
+                        _question_budget = _hud.get("questionBudget")
+                    except Exception:
+                        pass
                     engine = ModeEngine(cwd=project_dir)
                     instructions = engine.build_instructions(
-                        detected_mode, prompt=prompt
+                        detected_mode, prompt=prompt,
+                        question_budget=_question_budget,
                     )
                     print(instructions)
+                    # Persist decremented budget back to HUD state (#1371)
+                    # Detect clarification via build_instructions output
+                    # (avoids duplicate evaluate_clarification_standalone call)
+                    try:
+                        from hud_state import update_hud_state
+                        if (_question_budget is not None
+                                and detected_mode in ("PLAN", "AUTO")
+                                and "CLARIFICATION REQUIRED" in instructions):
+                            new_budget = max((_question_budget - 1), 0)
+                            update_hud_state(questionBudget=new_budget)
+                    except Exception:
+                        pass
                     # Permission forecast for standalone mode (#1418)
-                    forecast_line = generate_standalone_forecast(detected_mode)
+                    forecast_line = generate_standalone_forecast(detected_mode, prompt=prompt)
                     if forecast_line:
                         print(forecast_line)
                     # Standalone council preset from Tiny Actor presets (#1361)
