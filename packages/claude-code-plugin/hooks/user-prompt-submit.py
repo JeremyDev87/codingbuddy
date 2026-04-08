@@ -95,11 +95,15 @@ def main():
                     # the self-contained fallback is active and no MCP server
                     # is required for mode handling.
                     print("# Backend: standalone (self-contained, no MCP required)")
-                    # Read persisted question budget from HUD state (#1371)
+                    # Read persisted question budget from HUD state (#1371, #1433)
                     _question_budget = None
+                    _hud_file = os.environ.get("CODINGBUDDY_HUD_STATE_FILE")
                     try:
                         from hud_state import read_hud_state
-                        _hud = read_hud_state(fill_defaults=True)
+                        _hud_kw = {"fill_defaults": True}
+                        if _hud_file:
+                            _hud_kw["state_file"] = _hud_file
+                        _hud = read_hud_state(**_hud_kw)
                         _question_budget = _hud.get("questionBudget")
                     except Exception:
                         pass
@@ -118,7 +122,10 @@ def main():
                                 and detected_mode in ("PLAN", "AUTO")
                                 and "CLARIFICATION REQUIRED" in instructions):
                             new_budget = max((_question_budget - 1), 0)
-                            update_hud_state(questionBudget=new_budget)
+                            _upd_kw = {"questionBudget": new_budget}
+                            if _hud_file:
+                                _upd_kw["state_file"] = _hud_file
+                            update_hud_state(**_upd_kw)
                     except Exception:
                         pass
                     # Permission forecast for standalone mode (#1418)

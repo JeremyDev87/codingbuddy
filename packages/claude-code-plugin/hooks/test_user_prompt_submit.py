@@ -614,6 +614,96 @@ class TestPermissionForecastIntegration:
             assert "Permissions:" not in result.stdout
 
 
+class TestClarificationBudgetHudFile:
+    """Regression tests for #1433: CODINGBUDDY_HUD_STATE_FILE must be honored
+    when persisting standalone clarification question budget."""
+
+    def _run_hook(self, prompt, home_dir, hud_state_file):
+        import os as _os
+
+        hook_path = Path(__file__).parent / "user-prompt-submit.py"
+        input_data = json.dumps({"prompt": prompt})
+        env = _os.environ.copy()
+        env["HOME"] = str(home_dir)
+        env["CLAUDE_PROJECT_DIR"] = str(home_dir)
+        env["CODINGBUDDY_HUD_STATE_FILE"] = str(hud_state_file)
+        env.pop("CODINGBUDDY_RULES_DIR", None)
+        return subprocess.run(
+            [sys.executable, str(hook_path)],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=str(home_dir),
+        )
+
+    def _init_hud(self, hud_file):
+        _lib_dir = Path(__file__).parent / "lib"
+        if str(_lib_dir) not in sys.path:
+            sys.path.insert(0, str(_lib_dir))
+        from hud_state import init_hud_state
+        init_hud_state("test-session", "5.0.0", state_file=str(hud_file))
+
+    def _read_hud(self, hud_file):
+        return json.loads(Path(hud_file).read_text())
+
+    def test_custom_hud_file_budget_decrements(self):
+        """Ambiguous prompt twice with custom HUD file: budget goes 3→2→1."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, ".claude").mkdir()
+            hud_file = Path(tmpdir) / "custom-hud.json"
+            self._init_hud(hud_file)
+
+            # First run: budget 3 → 2
+            r1 = self._run_hook("PLAN: improve auth flow", tmpdir, hud_file)
+            assert r1.returncode == 0
+            assert "CLARIFICATION REQUIRED" in r1.stdout
+            state1 = self._read_hud(hud_file)
+            assert state1["questionBudget"] == 2
+
+            # Second run: budget 2 → 1
+            r2 = self._run_hook("PLAN: improve auth flow", tmpdir, hud_file)
+            assert r2.returncode == 0
+            state2 = self._read_hud(hud_file)
+            assert state2["questionBudget"] == 1
+
+    def test_default_path_still_works(self):
+        """Without CODINGBUDDY_HUD_STATE_FILE, default path behavior unchanged."""
+        import tempfile
+        import os as _os
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, ".claude").mkdir()
+            # Use default path under custom HOME
+            codingbuddy_dir = Path(tmpdir) / ".codingbuddy"
+            codingbuddy_dir.mkdir()
+            hud_file = codingbuddy_dir / "hud-state.json"
+            self._init_hud(hud_file)
+
+            hook_path = Path(__file__).parent / "user-prompt-submit.py"
+            input_data = json.dumps({"prompt": "PLAN: fix something"})
+            env = _os.environ.copy()
+            env["HOME"] = str(tmpdir)
+            env["CLAUDE_PROJECT_DIR"] = str(tmpdir)
+            env.pop("CODINGBUDDY_HUD_STATE_FILE", None)
+            env.pop("CODINGBUDDY_RULES_DIR", None)
+
+            result = subprocess.run(
+                [sys.executable, str(hook_path)],
+                input=input_data,
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=str(tmpdir),
+            )
+            assert result.returncode == 0
+            assert "CLARIFICATION REQUIRED" in result.stdout
+            state = self._read_hud(hud_file)
+            assert state["questionBudget"] == 2
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__, "-v"])
