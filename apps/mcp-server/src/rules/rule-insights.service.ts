@@ -1,6 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import type { RuleStats } from './rule-tracker';
 
+export interface EffectivenessScore {
+  ruleName: string;
+  baselineFailureRate: number;
+  currentFailureRate: number;
+  reductionPercent: number;
+  verdict: 'effective' | 'needs-review' | 'ineffective';
+}
+
 export interface RuleInsight {
   generatedAt: number;
   summary: {
@@ -22,6 +30,7 @@ export interface RuleInsight {
     emerging: string[];
   };
   suggestions: string[];
+  effectivenessScores: EffectivenessScore[];
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -29,6 +38,10 @@ const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 const TOP_RULES_LIMIT = 10;
 const EMERGING_THRESHOLD = 3;
 const SUGGESTION_UNUSED_PREVIEW = 5;
+
+/** Thresholds for effectiveness verdict */
+const EFFECTIVE_THRESHOLD = 50;
+const NEEDS_REVIEW_THRESHOLD = 10;
 
 @Injectable()
 export class RuleInsightsService {
@@ -52,6 +65,7 @@ export class RuleInsightsService {
       trends.declining,
       entries.length,
     );
+    const effectivenessScores = this.computeEffectivenessScores(entries);
 
     return {
       generatedAt: now,
@@ -65,6 +79,7 @@ export class RuleInsightsService {
       unusedRules,
       trends,
       suggestions,
+      effectivenessScores,
     };
   }
 
@@ -118,6 +133,48 @@ export class RuleInsightsService {
       .map(([name]) => name);
 
     return { recentlyActive, declining, emerging };
+  }
+
+  private computeEffectivenessScores(entries: Array<[string, RuleStats]>): EffectivenessScore[] {
+    const scores: EffectivenessScore[] = [];
+
+    for (const [name, stat] of entries) {
+      const extended = stat as RuleStats & {
+        generatedRule?: boolean;
+        baselineFailureRate?: number;
+        currentFailureRate?: number;
+      };
+
+      if (!extended.generatedRule) continue;
+      if (
+        typeof extended.baselineFailureRate !== 'number' ||
+        typeof extended.currentFailureRate !== 'number'
+      )
+        continue;
+
+      const baseline = extended.baselineFailureRate;
+      const current = extended.currentFailureRate;
+      const reductionPercent = baseline > 0 ? ((baseline - current) / baseline) * 100 : 0;
+
+      let verdict: EffectivenessScore['verdict'];
+      if (reductionPercent >= EFFECTIVE_THRESHOLD) {
+        verdict = 'effective';
+      } else if (reductionPercent >= NEEDS_REVIEW_THRESHOLD) {
+        verdict = 'needs-review';
+      } else {
+        verdict = 'ineffective';
+      }
+
+      scores.push({
+        ruleName: name,
+        baselineFailureRate: baseline,
+        currentFailureRate: current,
+        reductionPercent: Math.round(reductionPercent * 10) / 10,
+        verdict,
+      });
+    }
+
+    return scores;
   }
 
   private generateSuggestions(

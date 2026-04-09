@@ -44,6 +44,7 @@ import {
   ResumeHandler,
   RuleImpactHandler,
   ActivateHandler,
+  SuggestRulesHandler,
 } from './handlers';
 
 const handlers = [
@@ -70,6 +71,7 @@ const handlers = [
   ResumeHandler,
   RuleImpactHandler,
   ActivateHandler,
+  SuggestRulesHandler,
 ];
 
 @Module({

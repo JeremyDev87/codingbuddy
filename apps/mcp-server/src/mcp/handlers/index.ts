@@ -175,6 +175,12 @@ export { ReviewPrHandler } from './review-pr.handler';
 export { ActivateHandler } from './activate.handler';
 
 /**
+ * Handler for suggest_rules tool (self-evolving rules pipeline)
+ * @see {@link SuggestRulesHandler}
+ */
+export { SuggestRulesHandler } from './suggest-rules.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

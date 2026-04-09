@@ -35,6 +35,7 @@ describe('RuleImpactHandler', () => {
       emerging: ['security'],
     },
     suggestions: ['Some suggestion about high-frequency rules'],
+    effectivenessScores: [],
   };
 
   beforeEach(() => {
@@ -140,6 +141,7 @@ describe('RuleImpactHandler', () => {
         suggestions: [
           'No tracking data available yet — use parse_mode to start collecting rule usage data',
         ],
+        effectivenessScores: [],
       };
       (mockInsightsService.generateInsights as ReturnType<typeof vi.fn>).mockReturnValue(
         emptyInsight,

@@ -205,5 +205,72 @@ describe('RuleInsightsService', () => {
         expect(result.suggestions.some(s => s.includes('No tracking data'))).toBe(true);
       });
     });
+
+    describe('effectiveness scoring', () => {
+      it('should compute effectiveness score for rules with declining failure rates', () => {
+        const stats: Record<string, RuleStats> = {
+          'auto-bash-guard': {
+            count: 8,
+            lastUsed: NOW - DAY_MS,
+            generatedRule: true,
+            baselineFailureRate: 0.25,
+            currentFailureRate: 0.05,
+          } as unknown as RuleStats,
+        };
+
+        const result = service.generateInsights(stats, [], NOW);
+
+        expect(result.effectivenessScores).toBeDefined();
+        expect(result.effectivenessScores).toHaveLength(1);
+        expect(result.effectivenessScores[0].ruleName).toBe('auto-bash-guard');
+        expect(result.effectivenessScores[0].reductionPercent).toBe(80);
+        expect(result.effectivenessScores[0].verdict).toBe('effective');
+      });
+
+      it('should classify rules with no improvement as ineffective', () => {
+        const stats: Record<string, RuleStats> = {
+          'auto-read-guard': {
+            count: 3,
+            lastUsed: NOW - DAY_MS,
+            generatedRule: true,
+            baselineFailureRate: 0.2,
+            currentFailureRate: 0.22,
+          } as unknown as RuleStats,
+        };
+
+        const result = service.generateInsights(stats, [], NOW);
+
+        expect(result.effectivenessScores).toHaveLength(1);
+        expect(result.effectivenessScores[0].verdict).toBe('ineffective');
+      });
+
+      it('should classify rules with moderate improvement as needs-review', () => {
+        const stats: Record<string, RuleStats> = {
+          'auto-write-guard': {
+            count: 5,
+            lastUsed: NOW - DAY_MS,
+            generatedRule: true,
+            baselineFailureRate: 0.3,
+            currentFailureRate: 0.2,
+          } as unknown as RuleStats,
+        };
+
+        const result = service.generateInsights(stats, [], NOW);
+
+        expect(result.effectivenessScores).toHaveLength(1);
+        expect(result.effectivenessScores[0].reductionPercent).toBeCloseTo(33.3, 0);
+        expect(result.effectivenessScores[0].verdict).toBe('needs-review');
+      });
+
+      it('should return empty effectivenessScores when no generated rules exist', () => {
+        const stats: Record<string, RuleStats> = {
+          core: { count: 10, lastUsed: NOW - DAY_MS },
+        };
+
+        const result = service.generateInsights(stats, [], NOW);
+
+        expect(result.effectivenessScores).toEqual([]);
+      });
+    });
   });
 });
