@@ -5,7 +5,7 @@ an interactive 3-step tour introducing core features.
 """
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from buddy_renderer import (
     ANSI_COLORS,
@@ -164,6 +164,275 @@ TOUR_HEADER: Dict[str, str] = {
 _STEP_NUMBERS = {1: "\u2460", 2: "\u2461", 3: "\u2462"}
 
 
+# ── Suggestion Templates (i18n) ───────────────────────────────────
+
+_SUGGESTION_TEMPLATES: Dict[str, Dict[str, Dict[str, str]]] = {
+    "low_coverage": {
+        "en": {
+            "mode": "AUTO",
+            "prompt": "AUTO improve test coverage",
+            "reason": "Test coverage is {coverage}%",
+        },
+        "ko": {
+            "mode": "AUTO",
+            "prompt": "AUTO 테스트 커버리지 개선",
+            "reason": "테스트 커버리지가 {coverage}%입니다",
+        },
+        "ja": {
+            "mode": "AUTO",
+            "prompt": "AUTO テストカバレッジを改善",
+            "reason": "テストカバレッジは{coverage}%です",
+        },
+        "zh": {
+            "mode": "AUTO",
+            "prompt": "AUTO 提高测试覆盖率",
+            "reason": "测试覆盖率为{coverage}%",
+        },
+        "es": {
+            "mode": "AUTO",
+            "prompt": "AUTO mejorar cobertura de tests",
+            "reason": "Cobertura de tests es {coverage}%",
+        },
+    },
+    "no_coverage_with_files": {
+        "en": {
+            "mode": "PLAN",
+            "prompt": "PLAN add test coverage for the project",
+            "reason": "{file_count} source files with no test coverage data",
+        },
+        "ko": {
+            "mode": "PLAN",
+            "prompt": "PLAN 프로젝트 테스트 커버리지 추가",
+            "reason": "{file_count}개 소스 파일에 테스트 커버리지 데이터 없음",
+        },
+        "ja": {
+            "mode": "PLAN",
+            "prompt": "PLAN プロジェクトのテストカバレッジを追加",
+            "reason": "{file_count}個のソースファイルにテストカバレッジデータなし",
+        },
+        "zh": {
+            "mode": "PLAN",
+            "prompt": "PLAN 添加项目测试覆盖率",
+            "reason": "{file_count}个源文件没有测试覆盖率数据",
+        },
+        "es": {
+            "mode": "PLAN",
+            "prompt": "PLAN agregar cobertura de tests al proyecto",
+            "reason": "{file_count} archivos fuente sin datos de cobertura",
+        },
+    },
+    "api_endpoints": {
+        "en": {
+            "mode": "EVAL",
+            "prompt": "EVAL review API security",
+            "reason": "{api_endpoints} API endpoint(s) to review",
+        },
+        "ko": {
+            "mode": "EVAL",
+            "prompt": "EVAL API 보안 검토",
+            "reason": "{api_endpoints}개 API 엔드포인트 검토 필요",
+        },
+        "ja": {
+            "mode": "EVAL",
+            "prompt": "EVAL APIセキュリティをレビュー",
+            "reason": "{api_endpoints}個のAPIエンドポイントをレビュー",
+        },
+        "zh": {
+            "mode": "EVAL",
+            "prompt": "EVAL 审查API安全",
+            "reason": "{api_endpoints}个API端点需要审查",
+        },
+        "es": {
+            "mode": "EVAL",
+            "prompt": "EVAL revisar seguridad de API",
+            "reason": "{api_endpoints} endpoint(s) de API para revisar",
+        },
+    },
+}
+
+# Framework-specific suggestion templates
+_FRAMEWORK_SUGGESTIONS: Dict[str, Dict[str, Dict[str, str]]] = {
+    "Next.js": {
+        "en": {
+            "prompt": "PLAN add Server Components optimization",
+            "reason": "Next.js project detected",
+        },
+        "ko": {
+            "prompt": "PLAN Server Components 최적화 추가",
+            "reason": "Next.js 프로젝트 감지됨",
+        },
+        "ja": {
+            "prompt": "PLAN Server Components最適化を追加",
+            "reason": "Next.jsプロジェクトを検出",
+        },
+        "zh": {
+            "prompt": "PLAN 添加Server Components优化",
+            "reason": "检测到Next.js项目",
+        },
+        "es": {
+            "prompt": "PLAN agregar optimizacion de Server Components",
+            "reason": "Proyecto Next.js detectado",
+        },
+    },
+    "NestJS": {
+        "en": {
+            "prompt": "PLAN add API validation with class-validator",
+            "reason": "NestJS project detected",
+        },
+        "ko": {
+            "prompt": "PLAN class-validator로 API 유효성 검증 추가",
+            "reason": "NestJS 프로젝트 감지됨",
+        },
+        "ja": {
+            "prompt": "PLAN class-validatorでAPIバリデーションを追加",
+            "reason": "NestJSプロジェクトを検出",
+        },
+        "zh": {
+            "prompt": "PLAN 使用class-validator添加API验证",
+            "reason": "检测到NestJS项目",
+        },
+        "es": {
+            "prompt": "PLAN agregar validacion de API con class-validator",
+            "reason": "Proyecto NestJS detectado",
+        },
+    },
+    "Vue": {
+        "en": {
+            "prompt": "PLAN add Composition API refactoring",
+            "reason": "Vue project detected",
+        },
+        "ko": {
+            "prompt": "PLAN Composition API 리팩토링 추가",
+            "reason": "Vue 프로젝트 감지됨",
+        },
+        "ja": {
+            "prompt": "PLAN Composition APIリファクタリングを追加",
+            "reason": "Vueプロジェクトを検出",
+        },
+        "zh": {
+            "prompt": "PLAN 添加Composition API重构",
+            "reason": "检测到Vue项目",
+        },
+        "es": {
+            "prompt": "PLAN agregar refactorizacion de Composition API",
+            "reason": "Proyecto Vue detectado",
+        },
+    },
+    "React": {
+        "en": {
+            "prompt": "PLAN optimize React component performance",
+            "reason": "React project detected",
+        },
+        "ko": {
+            "prompt": "PLAN React 컴포넌트 성능 최적화",
+            "reason": "React 프로젝트 감지됨",
+        },
+        "ja": {
+            "prompt": "PLAN Reactコンポーネントパフォーマンスを最適化",
+            "reason": "Reactプロジェクトを検出",
+        },
+        "zh": {
+            "prompt": "PLAN 优化React组件性能",
+            "reason": "检测到React项目",
+        },
+        "es": {
+            "prompt": "PLAN optimizar rendimiento de componentes React",
+            "reason": "Proyecto React detectado",
+        },
+    },
+}
+
+_GENERIC_FALLBACK: Dict[str, List[Dict[str, str]]] = {
+    "en": [
+        {"mode": "PLAN", "prompt": "PLAN add user authentication", "reason": "Common starting point for new projects"},
+    ],
+    "ko": [
+        {"mode": "PLAN", "prompt": "PLAN 사용자 인증 추가", "reason": "새 프로젝트의 일반적인 시작점"},
+    ],
+    "ja": [
+        {"mode": "PLAN", "prompt": "PLAN ユーザー認証を追加", "reason": "新規プロジェクトの一般的な出発点"},
+    ],
+    "zh": [
+        {"mode": "PLAN", "prompt": "PLAN 添加用户认证", "reason": "新项目的常见起点"},
+    ],
+    "es": [
+        {"mode": "PLAN", "prompt": "PLAN agregar autenticacion de usuario", "reason": "Punto de partida comun para nuevos proyectos"},
+    ],
+}
+
+
+def generate_suggestions(
+    scan_result: Dict[str, Any],
+    language: str = "en",
+) -> List[Dict[str, str]]:
+    """Generate project-specific prompt suggestions from scan data.
+
+    Maps scanner findings (coverage, framework, endpoints, file count)
+    to mode-specific prompt templates. Falls back to generic suggestions
+    when scan data is insufficient.
+
+    Args:
+        scan_result: Output from project_scanner.scan_project().
+        language: Language code (en, ko, ja, zh, es).
+
+    Returns:
+        List of suggestion dicts, each with keys: mode, prompt, reason.
+    """
+    suggestions: List[Dict[str, str]] = []
+    lang = language if language in ("en", "ko", "ja", "zh", "es") else "en"
+
+    coverage = scan_result.get("coverage")
+    framework = scan_result.get("framework", "")
+    api_endpoints = scan_result.get("api_endpoints", 0)
+    file_count = scan_result.get("file_count", 0)
+
+    # Low coverage → AUTO improve
+    if coverage is not None and coverage < 80:
+        tpl = _SUGGESTION_TEMPLATES["low_coverage"].get(lang, _SUGGESTION_TEMPLATES["low_coverage"]["en"])
+        suggestions.append({
+            "mode": tpl["mode"],
+            "prompt": tpl["prompt"],
+            "reason": tpl["reason"].format(coverage=coverage),
+        })
+
+    # Files exist but no coverage data → suggest adding tests
+    if coverage is None and file_count > 0:
+        tpl = _SUGGESTION_TEMPLATES["no_coverage_with_files"].get(lang, _SUGGESTION_TEMPLATES["no_coverage_with_files"]["en"])
+        suggestions.append({
+            "mode": tpl["mode"],
+            "prompt": tpl["prompt"],
+            "reason": tpl["reason"].format(file_count=file_count),
+        })
+
+    # Framework detected → PLAN framework-specific feature
+    if framework:
+        for fw_key, fw_tpl in _FRAMEWORK_SUGGESTIONS.items():
+            if fw_key in framework:
+                tpl = fw_tpl.get(lang, fw_tpl["en"])
+                suggestions.append({
+                    "mode": "PLAN",
+                    "prompt": tpl["prompt"],
+                    "reason": tpl["reason"],
+                })
+                break
+
+    # API endpoints → EVAL security review
+    if api_endpoints > 0:
+        tpl = _SUGGESTION_TEMPLATES["api_endpoints"].get(lang, _SUGGESTION_TEMPLATES["api_endpoints"]["en"])
+        suggestions.append({
+            "mode": tpl["mode"],
+            "prompt": tpl["prompt"],
+            "reason": tpl["reason"].format(api_endpoints=api_endpoints),
+        })
+
+    # Fallback to generic if no project-specific suggestions
+    if not suggestions:
+        fallback = _GENERIC_FALLBACK.get(lang, _GENERIC_FALLBACK["en"])
+        suggestions.extend(fallback)
+
+    return suggestions
+
+
 def _get_text(mapping: Dict[str, str], language: str) -> str:
     """Get localized text with English fallback."""
     return mapping.get(language, mapping.get("en", ""))
@@ -178,12 +447,17 @@ def _get_step(step_num: int, language: str) -> Dict[str, str]:
 def render_onboarding_tour(
     language: str = "en",
     buddy_config: Optional[Dict[str, str]] = None,
+    scan_result: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Render the complete onboarding tour output.
+
+    When scan_result is provided, step examples are replaced with
+    project-specific prompt suggestions from generate_suggestions().
 
     Args:
         language: Language code (en, ko, ja, zh, es).
         buddy_config: Optional buddy customization from get_buddy_config().
+        scan_result: Optional project scan data for context-aware suggestions.
 
     Returns:
         Formatted onboarding tour string.
@@ -197,6 +471,9 @@ def render_onboarding_tour(
     green = ANSI_COLORS["green"]
     magenta = ANSI_COLORS["magenta"]
     reset = ANSI_COLORS["reset"]
+
+    # Generate project-specific suggestions if scan data available
+    suggestions = generate_suggestions(scan_result, language) if scan_result else []
 
     lines = [
         *render_face_banner(face, f"{cyan}{welcome}{reset}"),
@@ -212,6 +489,14 @@ def render_onboarding_tour(
         title = step.get("title", "")
         body = step.get("body", "")
         example = step.get("example", "")
+
+        # Replace example with project-specific suggestion if available
+        suggestion_idx = step_num - 1
+        if suggestions and suggestion_idx < len(suggestions):
+            s = suggestions[suggestion_idx]
+            example = s["prompt"]
+            body_suffix = f" ({s['reason']})"
+            body = body + body_suffix
 
         lines.append(f"")
         lines.append(f"  {yellow}{circled}{reset} {green}{title}{reset}")
