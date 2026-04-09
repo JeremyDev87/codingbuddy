@@ -131,6 +131,9 @@ export class RuleImpactHandler extends AbstractHandler {
     // Domain Coverage
     this.appendDomainCoverage(lines, insights);
 
+    // Effectiveness Scores
+    this.appendEffectivenessScores(lines, insights);
+
     // Unused Rules
     this.appendUnusedRules(lines, insights);
 
@@ -212,6 +215,28 @@ export class RuleImpactHandler extends AbstractHandler {
     const sorted = [...domainMap.entries()].sort((a, b) => b[1].checks - a[1].checks);
     for (const [domain, data] of sorted) {
       lines.push(`| ${domain} | ${data.checks} | ${data.rules.join(', ')} |`);
+    }
+    lines.push('');
+  }
+
+  private appendEffectivenessScores(lines: string[], insights: RuleInsight): void {
+    const scores = insights.effectivenessScores;
+    if (!scores || scores.length === 0) return;
+
+    lines.push('## Auto-Generated Rule Effectiveness');
+    lines.push('');
+    lines.push('| Rule | Baseline | Current | Reduction | Verdict |');
+    lines.push('| --- | ---: | ---: | ---: | --- |');
+    for (const score of scores) {
+      const verdictBadge =
+        score.verdict === 'effective'
+          ? '**EFFECTIVE**'
+          : score.verdict === 'needs-review'
+            ? 'needs-review'
+            : '_ineffective_';
+      lines.push(
+        `| ${score.ruleName} | ${(score.baselineFailureRate * 100).toFixed(1)}% | ${(score.currentFailureRate * 100).toFixed(1)}% | ${score.reductionPercent}% | ${verdictBadge} |`,
+      );
     }
     lines.push('');
   }

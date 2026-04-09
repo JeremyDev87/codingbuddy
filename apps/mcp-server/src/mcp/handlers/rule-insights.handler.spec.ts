@@ -27,6 +27,7 @@ describe('RuleInsightsHandler', () => {
       emerging: ['new-rule'],
     },
     suggestions: ['Some suggestion'],
+    effectivenessScores: [],
   };
 
   beforeEach(() => {
