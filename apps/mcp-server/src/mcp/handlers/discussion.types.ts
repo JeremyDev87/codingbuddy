@@ -72,17 +72,20 @@ export const VALID_SEVERITIES: readonly OpinionSeverity[] = [
 export const EXPERIMENTAL_DISCUSSION_ENV = 'CODINGBUDDY_EXPERIMENTAL_DISCUSSION';
 
 /**
- * Warning banner attached to any enabled agent_discussion response so callers
- * cannot mistake templated synthesis for real specialist execution.
+ * Warning banner attached to any enabled agent_discussion response.
+ * Indicates that results are from built-in synthesis, not live agent execution.
+ * For real specialist debate, use activate + Claude native Teams.
  */
 export const EXPERIMENTAL_DISCUSSION_WARNING =
-  '\u26a0\ufe0f experimental — templated synthesis, not real specialist execution';
+  'Built-in synthesis — for real specialist debate, use activate + Claude native Teams';
 
 /**
  * Reason surfaced when the tool is disabled (default state).
+ * Guides users toward activate + Claude native Teams for real specialist execution.
  */
 export const DISABLED_DISCUSSION_REASON =
-  'templated synthesis not aligned with collective intelligence promise';
+  'Use the `activate` tool with Claude native Teams for real specialist debate. ' +
+  'Set CODINGBUDDY_EXPERIMENTAL_DISCUSSION=1 to enable built-in synthesis as an alternative.';
 
 /**
  * Response returned when the agent_discussion tool is disabled (default).

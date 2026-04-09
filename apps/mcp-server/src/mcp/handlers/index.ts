@@ -169,6 +169,12 @@ export { RuleImpactHandler } from './rule-impact.handler';
 export { ReviewPrHandler } from './review-pr.handler';
 
 /**
+ * Handler for activate tool (one-shot collective intelligence entry point)
+ * @see {@link ActivateHandler}
+ */
+export { ActivateHandler } from './activate.handler';
+
+/**
  * Injection token for the array of all tool handlers.
  *
  * Use this token to inject all handlers into a service that needs to

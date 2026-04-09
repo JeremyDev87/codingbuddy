@@ -47,7 +47,8 @@ export class ResumeHandler extends AbstractHandler {
     return [
       {
         name: 'resume_session',
-        description: 'Load a previous session briefing to restore context and continue work',
+        description:
+          '[DEPRECATED — Use Claude Code Memory for session resume] Load a previous session briefing to restore context and continue work.',
         inputSchema: {
           type: 'object',
           properties: {

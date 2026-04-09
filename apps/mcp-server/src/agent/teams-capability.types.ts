@@ -17,4 +17,5 @@ export interface TeamsCapabilityStatus {
 export type TeamsCapabilitySource =
   | 'config' // experimental.teamsCoordination in codingbuddy.config.json
   | 'environment' // CODINGBUDDY_TEAMS_ENABLED env var
+  | 'claude-native' // Auto-detected Claude Code environment with native Teams support
   | 'default'; // no explicit signal, default to disabled

@@ -1,73 +1,79 @@
-# Tool Priority: codingbuddy vs oh-my-claudecode (OMC)
+# Tool Priority: Claude Code Native > codingbuddy > OMC
 
 ## Core Principle
 
-**codingbuddy FIRST** — Use codingbuddy tools for all workflow management, agent dispatch, and quality control.
-**OMC for unique features only** — Use OMC tools when they provide capabilities codingbuddy does not.
+1. **Claude Code native FIRST** — Memory, Teams, Plan mode, /dream, /loop handle orchestration natively
+2. **codingbuddy for unique value** — Rules, agents, checklists, quality reports are codingbuddy's core
+3. **OMC for dev tools** — LSP, AST grep, REPL, git-master when needed
 
 ---
 
-## codingbuddy FIRST
+## Layer 1: Claude Code Native (highest priority)
 
-Always reach for these codingbuddy tools before any OMC equivalent:
+These features are built into Claude Code and should be used instead of codingbuddy equivalents:
+
+| Native Feature | Purpose | Replaces |
+|----------------|---------|----------|
+| **Claude Code Memory** | Cross-session context persistence | `update_context`, `create_briefing`, `resume_session` |
+| **Claude native Teams** | Run specialist agents as teammates for real-time debate | `dispatch_agents` subagent strategy |
+| **EnterPlanMode** | Structured planning with user approval | `parse_mode` planning stage routing |
+| **/dream** | Autonomous task exploration and analysis | `analyze_task` |
+| **/loop** | Recurring execution on interval | `parse_mode` AUTO mode repetition |
+| **AskUserQuestion** | Clarification from user | `parse_mode` clarification gate |
+
+---
+
+## Layer 2: codingbuddy (unique value)
+
+Use codingbuddy tools for capabilities Claude Code does not provide natively:
 
 | Tool | Purpose |
 |------|---------|
-| `parse_mode` | Mode management (PLAN/ACT/EVAL/AUTO), agent activation, context init |
-| `dispatch_agents` | Agent dispatch with Task tool-ready params |
-| `analyze_task` | Pre-planning task analysis, risk assessment, specialist recommendations |
-| `update_context` | Context persistence across PLAN → ACT → EVAL modes |
-| `generate_checklist` | Contextual checklists (security, a11y, performance, testing) |
+| `activate` | **One-shot entry point**: rules + primary agent + specialists + discussion format |
+| `parse_mode` | Legacy mode entry (for non-Claude Code hosts: Cursor, Codex, etc.) |
 | `search_rules` | Query project rules and guidelines |
 | `get_agent_details` | Agent profile and expertise lookup |
+| `generate_checklist` | Contextual checklists (security, a11y, performance, testing) |
 | `get_project_config` | Tech stack, architecture, language settings |
-| `prepare_parallel_agents` | Ready-to-use prompts for parallel specialist agents |
 | `pr_quality_report` | Run specialist agents on changed files for PR quality |
-| `create_briefing` | Capture session state for cross-session recovery |
-| `resume_session` | Load previous session briefing |
 | `get_rule_impact_report` | Rule effectiveness analytics |
 
 ---
 
-## OMC Only
+## Layer 3: OMC (dev tools)
 
-Use these OMC tools when the capability is not available in codingbuddy:
+Use OMC tools for capabilities neither Claude Code nor codingbuddy provide:
 
 | Tool / Skill | Purpose |
 |--------------|---------|
 | LSP tools (`lsp_hover`, `lsp_goto_definition`, `lsp_find_references`, etc.) | Language server protocol — type info, definitions, references |
 | AST grep (`ast_grep_search`, `ast_grep_replace`) | Structural code search and refactoring |
 | Python REPL (`python_repl`) | Interactive data analysis and computation |
-| State tools (`state_read`, `state_write`, `state_clear`) | Mode state persistence for autopilot/ralph/ultrawork |
-| Notepad tools (`notepad_read`, `notepad_write_*`) | Session notes and compaction-resilient memory |
-| Project memory (`project_memory_*`) | Long-term project knowledge persistence |
 | `/git-master` | Atomic commits, rebasing, history management |
 | `/build-fix` | Build and TypeScript error resolution |
 | `/deepsearch` | Thorough multi-pass codebase search |
-| `/team`, `/swarm` | Multi-agent coordination with shared task lists |
-| `/ultrawork`, `/autopilot`, `/ralph` | Autonomous execution loops |
-| `/pipeline` | Sequential/branching agent workflows |
 
 ---
 
-## Overlap Matrix
-
-When both tools could apply, codingbuddy wins:
+## Quick Decision Matrix
 
 | Use Case | Use This | Not This |
 |----------|----------|----------|
-| Starting PLAN/ACT/EVAL mode | `parse_mode` | OMC mode state tools |
-| Dispatching specialist agents | `dispatch_agents` | OMC `/team` or `/swarm` |
-| Code/security review | codingbuddy `search_rules` + specialists | OMC `/code-review`, `/security-review` |
-| Context across sessions | `update_context` | OMC notepad/project memory |
-| Task analysis before planning | `analyze_task` | Ad-hoc OMC tools |
-| Checklists (security, a11y) | `generate_checklist` | Manual OMC review |
+| Starting a workflow | `activate` | `parse_mode` (in Claude Code) |
+| Running specialist council | Claude native Teams | subagent dispatch |
+| Cross-session context | Claude Code Memory | `update_context` / `create_briefing` |
+| Task analysis | `/dream` | `analyze_task` |
+| Repeated execution | `/loop` | AUTO mode cycle |
+| Clarification | AskUserQuestion | clarification gate |
+| Rules & checklists | codingbuddy `search_rules`, `generate_checklist` | — |
+| Code review quality | codingbuddy `pr_quality_report` | OMC `/code-review` |
+| Type info & references | OMC LSP tools | — |
 
 ---
 
 ## Decision Rationale
 
-- codingbuddy tools are project-aware and integrate with the PLAN/ACT/EVAL workflow
-- OMC tools are general-purpose developer tools without project context
-- Using codingbuddy first ensures consistent quality gates and audit trail via `docs/codingbuddy/context.md`
-- OMC's unique capabilities (LSP, AST, REPL) complement codingbuddy; they do not replace it
+- Claude Code native features handle orchestration (memory, teams, planning, loops) better than MCP tools
+- codingbuddy's unique value is **rules, agents, and checklists** — domain knowledge, not orchestration
+- OMC's unique value is **dev tooling** (LSP, AST, REPL) — code intelligence, not workflow
+- `parse_mode` remains available for backward compatibility with non-Claude Code hosts

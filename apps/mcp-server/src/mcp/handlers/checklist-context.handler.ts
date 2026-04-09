@@ -99,7 +99,7 @@ export class ChecklistContextHandler extends AbstractHandler {
       {
         name: 'analyze_task',
         description:
-          'Analyze a task to provide contextual recommendations including risk assessment, relevant checklists, specialist recommendations, and workflow suggestions. Use this at the start of PLAN mode to get comprehensive task analysis.',
+          '[DEPRECATED — Use activate + /dream instead] Analyze a task to provide contextual recommendations including risk assessment, relevant checklists, specialist recommendations, and workflow suggestions.',
         inputSchema: {
           type: 'object',
           properties: {

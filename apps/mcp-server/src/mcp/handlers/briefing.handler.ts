@@ -52,7 +52,7 @@ export class BriefingHandler extends AbstractHandler {
       {
         name: 'create_briefing',
         description:
-          'Capture current session state into a briefing document for cross-session recovery',
+          '[DEPRECATED — Use Claude Code Memory for cross-session context] Capture current session state into a briefing document for cross-session recovery.',
         inputSchema: {
           type: 'object',
           properties: {

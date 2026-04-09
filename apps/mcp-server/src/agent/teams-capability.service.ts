@@ -49,10 +49,21 @@ export class TeamsCapabilityService {
       return status;
     }
 
-    // 3. Default: disabled
+    // 3. Auto-detect Claude Code environment (native Teams support)
+    if (this.isClaudeCodeEnvironment()) {
+      const status: TeamsCapabilityStatus = {
+        available: true,
+        reason: 'Auto-enabled: Claude Code environment detected with native Teams support',
+        source: 'claude-native',
+      };
+      this.logger.debug(`Teams capability: ${status.reason}`);
+      return status;
+    }
+
+    // 4. Default: disabled for non-Claude Code hosts
     const status: TeamsCapabilityStatus = {
       available: false,
-      reason: 'Teams coordination is experimental and disabled by default',
+      reason: 'Teams coordination disabled by default for non-Claude Code hosts',
       source: 'default',
     };
     this.logger.debug(`Teams capability: ${status.reason}`);
@@ -65,6 +76,18 @@ export class TeamsCapabilityService {
   async isAvailable(): Promise<boolean> {
     const status = await this.getStatus();
     return status.available;
+  }
+
+  /**
+   * Detect whether running inside a Claude Code environment.
+   * Claude Code sets specific env vars that distinguish it from other hosts.
+   */
+  private isClaudeCodeEnvironment(): boolean {
+    return (
+      process.env.CLAUDE_CODE === '1' ||
+      process.env.CLAUDE_CODE_ENTRYPOINT !== undefined ||
+      this.configService.getClientName() === 'claude-code'
+    );
   }
 
   /**
