@@ -929,6 +929,7 @@ def main():
                 if is_first_run() and not previous_session:
                     tour_output = render_onboarding_tour(
                         language=language, buddy_config=buddy_cfg,
+                        scan_result=scan_data if scan_data else None,
                     )
                     if tour_output:
                         print(tour_output, file=sys.stderr)
