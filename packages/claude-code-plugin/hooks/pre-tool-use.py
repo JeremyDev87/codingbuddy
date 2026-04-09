@@ -26,6 +26,8 @@ from config import get_config
 from agent_status import build_status_message
 from adaptive_perf import get_monitor
 from tdd_progress import build_tdd_indicator
+from rule_checker import RuleChecker
+from violation_renderer import ViolationRenderer
 
 # Pattern to detect git commit in a command string
 _GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
@@ -215,11 +217,24 @@ def _handle(data: dict) -> Optional[dict]:
         pass
 
     tool_name = data.get("tool_name", "")
+    tool_input = data.get("tool_input", {})
     contexts = []
 
     # Initialize adaptive performance monitor (#1002)
     perf_config = _get_hook_config()
     perf_monitor = get_monitor(perf_config)
+
+    # Live AI Guardrails — intercept Edit/Write for rule violations (#1439)
+    if tool_name in ("Edit", "Write"):
+        try:
+            checker = RuleChecker()
+            if checker.level != "off":
+                violations = checker.check_tool_input(tool_name, tool_input)
+                if violations:
+                    renderer = ViolationRenderer()
+                    contexts.append(renderer.render_for_hook(violations))
+        except Exception:
+            pass
 
     # Bash-specific checks
     if tool_name == "Bash":
@@ -229,7 +244,7 @@ def _handle(data: dict) -> Optional[dict]:
             if file_change_msg:
                 contexts.append(file_change_msg)
 
-        command = data.get("tool_input", {}).get("command", "")
+        command = tool_input.get("command", "")
 
         # Check git commit quality gates and smart test suggestion (#944)
         if _is_git_commit(command):
@@ -254,7 +269,7 @@ def _handle(data: dict) -> Optional[dict]:
     try:
         from hud_helpers import on_tool_start
 
-        on_tool_start(tool_name, data.get("tool_input", {}))
+        on_tool_start(tool_name, tool_input)
     except Exception:
         pass
 
