@@ -2,18 +2,28 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { TeamsCapabilityService } from './teams-capability.service';
 import type { ConfigService } from '../config/config.service';
 
-function createMockConfigService(experimental?: { teamsCoordination?: boolean }): ConfigService {
+function createMockConfigService(
+  experimental?: { teamsCoordination?: boolean },
+  clientName?: string,
+): ConfigService {
   return {
     getSettings: vi.fn().mockResolvedValue({ experimental }),
+    getClientName: vi.fn().mockReturnValue(clientName),
   } as unknown as ConfigService;
 }
 
 describe('TeamsCapabilityService', () => {
   let originalEnv: string | undefined;
+  let originalClaudeCode: string | undefined;
+  let originalClaudeEntrypoint: string | undefined;
 
   beforeEach(() => {
     originalEnv = process.env.CODINGBUDDY_TEAMS_ENABLED;
+    originalClaudeCode = process.env.CLAUDE_CODE;
+    originalClaudeEntrypoint = process.env.CLAUDE_CODE_ENTRYPOINT;
     delete process.env.CODINGBUDDY_TEAMS_ENABLED;
+    delete process.env.CLAUDE_CODE;
+    delete process.env.CLAUDE_CODE_ENTRYPOINT;
   });
 
   afterEach(() => {
@@ -21,6 +31,16 @@ describe('TeamsCapabilityService', () => {
       process.env.CODINGBUDDY_TEAMS_ENABLED = originalEnv;
     } else {
       delete process.env.CODINGBUDDY_TEAMS_ENABLED;
+    }
+    if (originalClaudeCode !== undefined) {
+      process.env.CLAUDE_CODE = originalClaudeCode;
+    } else {
+      delete process.env.CLAUDE_CODE;
+    }
+    if (originalClaudeEntrypoint !== undefined) {
+      process.env.CLAUDE_CODE_ENTRYPOINT = originalClaudeEntrypoint;
+    } else {
+      delete process.env.CLAUDE_CODE_ENTRYPOINT;
     }
   });
 
@@ -125,6 +145,43 @@ describe('TeamsCapabilityService', () => {
     });
   });
 
+  describe('Claude Code auto-detection', () => {
+    it('should auto-enable when CLAUDE_CODE=1 is set', async () => {
+      process.env.CLAUDE_CODE = '1';
+      const service = new TeamsCapabilityService(createMockConfigService());
+      const status = await service.getStatus();
+
+      expect(status.available).toBe(true);
+      expect(status.source).toBe('claude-native');
+      expect(status.reason).toContain('Claude Code');
+    });
+
+    it('should auto-enable when CLAUDE_CODE_ENTRYPOINT is set', async () => {
+      process.env.CLAUDE_CODE_ENTRYPOINT = '/some/path';
+      const service = new TeamsCapabilityService(createMockConfigService());
+      const status = await service.getStatus();
+
+      expect(status.available).toBe(true);
+      expect(status.source).toBe('claude-native');
+    });
+
+    it('should auto-enable when clientName is claude-code', async () => {
+      const service = new TeamsCapabilityService(createMockConfigService(undefined, 'claude-code'));
+      const status = await service.getStatus();
+
+      expect(status.available).toBe(true);
+      expect(status.source).toBe('claude-native');
+    });
+
+    it('should not auto-enable for other clients', async () => {
+      const service = new TeamsCapabilityService(createMockConfigService(undefined, 'cursor'));
+      const status = await service.getStatus();
+
+      expect(status.available).toBe(false);
+      expect(status.source).toBe('default');
+    });
+  });
+
   describe('readEnvFlag', () => {
     it('should return undefined when env var is not set', () => {
       const service = new TeamsCapabilityService(createMockConfigService());
@@ -166,7 +223,7 @@ describe('TeamsCapabilityService', () => {
       expect(status).toHaveProperty('source');
       expect(typeof status.available).toBe('boolean');
       expect(typeof status.reason).toBe('string');
-      expect(['config', 'environment', 'default']).toContain(status.source);
+      expect(['config', 'environment', 'claude-native', 'default']).toContain(status.source);
     });
   });
 });

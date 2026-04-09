@@ -6,6 +6,52 @@ This guide explains how to use the common AI rules (`.ai-rules/`) in Claude Code
 
 Claude Code uses the `.claude/` directory for project-specific custom instructions, referencing the common rules from `.ai-rules/`.
 
+## Collective Intelligence with `activate` + Claude Native Teams
+
+### The `activate` Tool (Recommended Entry Point)
+
+The `activate` MCP tool is the **one-shot entry point** for collective intelligence workflows in Claude Code. It replaces the multi-step `parse_mode` + `dispatch_agents` ceremony with a single call.
+
+```
+activate({ prompt: "design auth feature", mode: "PLAN" })
+```
+
+**Returns:**
+- `mode` — resolved workflow mode
+- `rules` — loaded rules for the mode
+- `primaryAgent` — agent name + full system prompt
+- `specialists` — recommended specialists with full prompts
+- `discussion` — format guide for approve/concern/reject consensus
+- `nativeIntegration` — guidance for Teams, Memory, orchestration
+
+### Running a Specialist Council via Claude Native Teams
+
+When `activate` returns specialists, use Claude native Teams for real-time debate:
+
+```
+1. activate({ prompt }) → get specialists
+2. TeamCreate({ team_name: "plan-council" })
+3. For each specialist: Agent({ team_name, name: specialist.name, prompt: specialist.prompt })
+4. Specialists analyze independently → cross-review → consensus
+5. Collect findings → summarize to user
+```
+
+### Claude Code Native Feature Mapping
+
+Use Claude Code native features instead of legacy codingbuddy tools:
+
+| Need | Use This | Instead of |
+|------|----------|------------|
+| Workflow entry | `activate` | `parse_mode` + `dispatch_agents` |
+| Cross-session context | Claude Code Memory | `update_context` / `create_briefing` / `resume_session` |
+| Specialist execution | Claude native Teams | subagent dispatch |
+| Task exploration | `/dream` | `analyze_task` |
+| Planning approval | `EnterPlanMode` | planning stage routing |
+| Repeated execution | `/loop` | AUTO mode repetition |
+| Clarification | `AskUserQuestion` | clarification gate |
+
+> **Note**: `parse_mode` remains available for non-Claude Code hosts (Cursor, Codex, etc.).
+
 ## 🆕 Code Conventions Support
 
 CodingBuddy now automatically enforces project code conventions from config files:
@@ -325,9 +371,13 @@ AI assistants should display the `activation_message.formatted` field at the sta
 
 CodingBuddy supports parallel execution of multiple specialist agents for comprehensive analysis.
 
-### When to Use Parallel Execution
+### Recommended: Claude Native Teams (Primary Strategy)
 
-Parallel execution is recommended when `parse_mode` returns a `parallelAgentsRecommendation` field:
+In Claude Code environments, use **Claude native Teams** as the primary execution strategy for specialist councils. The `activate` tool returns specialist prompts ready for Teams execution. See the "Collective Intelligence with `activate`" section above for the full workflow.
+
+### Legacy: SubAgent / TaskMaestro Strategies
+
+For non-Claude Code hosts or when Teams is not available, parallel execution is recommended when `parse_mode` returns a `parallelAgentsRecommendation` field:
 
 | Mode | Default Specialists | Use Case |
 |------|---------------------|----------|

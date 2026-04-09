@@ -123,125 +123,50 @@ Even if plan separates TDD into individual steps (e.g., Step 1: Write test, Step
 
 <CODINGBUDDY_CRITICAL_RULE>
 
-**When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized: Korean 계획/실행/평가/자동, Japanese 計画/実行/評価/自動, Chinese 计划/执行/评估/自动, Spanish PLANIFICAR/ACTUAR/EVALUAR/AUTOMÁTICO):**
+**When user message starts with PLAN, ACT, EVAL, or AUTO keyword (or localized equivalents):**
 
-1. **IMMEDIATELY** call `parse_mode` MCP tool with the user's prompt
-2. Follow the returned `instructions` **EXACTLY**
-3. Apply the returned `rules` as context
-4. If `warnings` are present, inform the user
-
-**This is MANDATORY, not optional.**
-
-Failure to call `parse_mode` when these keywords are present will result in:
-- Missed critical checklists (Devil's Advocate Analysis, Impact Radius Analysis)
-- Incomplete evaluations
-- Quality issues not caught before deployment
-
-**Red Flags** (STOP if you think these):
-| Thought | Reality |
-|---------|---------|
-| "I can handle EVAL myself" | NO. Call parse_mode FIRST. |
-| "The rules are similar anyway" | NO. Each mode has specific checklists. |
-| "I'll save a tool call" | NO. parse_mode MUST be called FIRST. |
-| "I already know what to do" | NO. Rules may have been updated. |
+1. Call `activate` MCP tool with the user's prompt (preferred in Claude Code)
+2. **Fallback**: Call `parse_mode` if `activate` is unavailable
+3. Follow the returned `rules` as context
+4. Use returned `specialists` to run a council via Claude native Teams
 
 </CODINGBUDDY_CRITICAL_RULE>
 
-Examples:
-- `PLAN design auth feature` → **immediately** call parse_mode → work in PLAN mode
-- `AUTO implement user dashboard` → **immediately** call parse_mode → autonomous PLAN→ACT→EVAL cycle
+## 🔴 MANDATORY: Specialist Council Execution
 
-## 🔴 MANDATORY: Parallel Specialist Agent Execution
+<SPECIALIST_COUNCIL_RULE>
 
-<PARALLEL_EXECUTION_MANDATORY_RULE>
+**When `activate` returns specialists, run them as a council via Claude native Teams.**
 
-**When `parse_mode` returns `dispatchReady`, use it directly with the Task tool — no extra calls needed.**
+### Workflow
 
-**Outer Transport Selection (before dispatch):**
-- [ ] Check `availableStrategies` in `parse_mode` response (outer transport options)
-- [ ] If `["subagent", "taskmaestro"]` → AskUserQuestion to choose outer strategy
-- [ ] If `taskmaestroInstallHint` present and user wants taskmaestro → guide installation
-- [ ] Pass chosen strategy to `dispatch_agents(executionStrategy: ...)`
-- [ ] Teams (inner coordination, experimental) may be used within a session if APIs are available
+1. Call `activate({ prompt })` → get rules, primaryAgent, specialists
+2. Create a Claude native Team with the returned specialists as teammates
+3. Each specialist independently analyzes the task
+4. Specialists cross-review each other's findings
+5. Collect consensus: approve | concern | reject
+6. Summarize all findings to user
 
-**Quick Checklist (Auto-Dispatch - Preferred):**
-- [ ] Check `dispatchReady` in `parse_mode` response
-- [ ] Use `dispatchReady.primaryAgent.dispatchParams` with Task tool
-- [ ] Use `dispatchReady.parallelAgents[].dispatchParams` with Task tool (`run_in_background: true`)
-- [ ] Collect results with `TaskOutput`
-- [ ] Summarize all findings
+### Fallback (non-Teams environments)
 
-**Fallback (if `dispatchReady` is not present):**
-- [ ] Call `dispatch_agents` or `prepare_parallel_agents` with recommended specialists
-- [ ] Execute each agent via Task tool (`subagent_type: "general-purpose"`, `run_in_background: true`)
-- [ ] Display activation status
-- [ ] Collect results with `TaskOutput`
-- [ ] Summarize all findings
+If Teams is not available, dispatch specialists as parallel subagents:
+- Use `Agent` tool with `run_in_background: true` for each specialist
+- Collect results and synthesize
 
-**Mode-specific Specialists:**
+</SPECIALIST_COUNCIL_RULE>
 
-| Mode | Specialists |
-|------|-------------|
-| **PLAN** | 🏛️ architecture, 🧪 test-strategy, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
-| **ACT** | 📏 code-quality, 🧪 test-strategy, 📨 event-architecture, 🔗 integration |
-| **EVAL** | 🔒 security, ♿ accessibility, ⚡ performance, 📏 code-quality, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
-| **AUTO** | 🏛️ architecture, 🧪 test-strategy, 🔒 security, 📏 code-quality, 📨 event-architecture, 🔗 integration, 📊 observability, 🔄 migration |
+## Claude Code Native Feature Mapping
 
-> **Note:** SubAgent and TaskMaestro are **outer transport** strategies (one per invocation, user choice).
-> Teams is an **inner coordination** layer (experimental) that can optionally run within either outer strategy.
-> See the [Execution Model](../../packages/rules/.ai-rules/adapters/claude-code.md#execution-model-outer-transport-vs-inner-coordination) for details.
+Use Claude Code native features instead of codingbuddy equivalents:
 
-**📖 Full Guide:** [Parallel Specialist Agents Execution](../../packages/rules/.ai-rules/adapters/claude-code.md#parallel-specialist-agents-execution)
-
-</PARALLEL_EXECUTION_MANDATORY_RULE>
-
-## 🔴 MANDATORY: Auto-Dispatch Enforcement
-
-<AUTO_DISPATCH_ENFORCEMENT_RULE>
-
-**When `parse_mode` returns `dispatch="auto"`, you MUST dispatch all recommended specialists. No exceptions.**
-
-### Core Rule
-
-If the `parse_mode` response contains `dispatch="auto"` or `dispatchReady` with specialist agents:
-1. **MUST** dispatch every listed specialist — skipping any is a protocol violation
-2. Use the selected **outer transport** (SubAgent or TaskMaestro) to dispatch specialists
-3. **Optionally** use Teams as inner coordination within a session (experimental, requires runtime API availability)
-4. **Report results** via the dispatch mechanism (TaskOutput for SubAgent, SendMessage for Teams)
-
-### Red Flags (STOP if you think these)
-
-| Thought | Reality |
-|---------|---------|
-| "I can handle this analysis myself" | NO. Specialists have domain expertise you lack. Dispatch them. |
-| "It's just a small change, no need for specialists" | NO. dispatch="auto" means the system determined specialists are needed. |
-| "I'll save time by skipping dispatch" | NO. Skipping specialists causes missed issues that cost more time later. |
-| "The specialists will just repeat what I already know" | NO. Specialists catch domain-specific issues you would miss. |
-| "I'll dispatch them later after I look at the code" | NO. Dispatch IMMEDIATELY when dispatch="auto" is returned. |
-
-</AUTO_DISPATCH_ENFORCEMENT_RULE>
-
-## 🔴 MANDATORY: Context Document Management
-
-<CONTEXT_DOCUMENT_RULE>
-
-**Fixed file `docs/codingbuddy/context.md` persists PLAN → ACT → EVAL context across context compaction.**
-
-### How It Works
-
-`parse_mode` **automatically** manages the context document:
-
-- **PLAN/AUTO mode**: Resets (deletes and recreates) the context document
-- **ACT/EVAL mode**: Appends a new section to the existing document
-
-### Required Workflow
-
-**In ALL modes:**
-1. `parse_mode` automatically reads/creates context
-2. Review `contextDocument` for previous decisions and notes
-3. Before completing: `update_context` to persist current work
-
-</CONTEXT_DOCUMENT_RULE>
+| Need | Native Feature | Instead of |
+|------|----------------|------------|
+| Cross-session context | **Claude Code Memory** | `update_context` / `create_briefing` / `resume_session` |
+| Specialist debate | **Claude native Teams** | `dispatch_agents` subagent strategy |
+| Task exploration | **/dream** | `analyze_task` |
+| Planning with approval | **EnterPlanMode** | `parse_mode` planning stage |
+| Repeated execution | **/loop** | AUTO mode repetition |
+| Clarification | **AskUserQuestion** | clarification gate |
 
 ## Claude Code Specific
 
@@ -250,7 +175,6 @@ If the `parse_mode` response contains `dispatch="auto"` or `dispatchReady` with 
 - Provide clear, actionable feedback
 - Reference project context from `packages/rules/.ai-rules/rules/project.md`
 - Follow PLAN → ACT → EVAL workflow when appropriate
-- Use AUTO mode for autonomous quality-driven development cycles
 
 ## Full Documentation
 

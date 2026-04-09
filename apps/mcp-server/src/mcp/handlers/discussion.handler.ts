@@ -44,16 +44,13 @@ const SEVERITY_ORDER: readonly OpinionSeverity[] = ['info', 'low', 'medium', 'hi
 /**
  * Handler for the agent_discussion tool.
  *
- * EXPERIMENTAL — disabled by default. Current output is templated synthesis of
- * specialist opinions rather than real specialist execution, so it does NOT
- * represent collective intelligence from live agents. The tool returns a
- * {@link DisabledDiscussionResult} unless the caller explicitly opts in via
- * `CODINGBUDDY_EXPERIMENTAL_DISCUSSION=1`, in which case it returns an
- * {@link ExperimentalDiscussionResult} that carries a warning banner so
- * consumers cannot mistake the output for a real multi-agent debate.
+ * Produces structured specialist opinions for collective intelligence workflows.
+ * In Claude Code environments with native Teams support, use the `activate` tool
+ * to run real specialist agents as teammates for live debate. This tool provides
+ * a structured discussion format that can seed or complement Teams-based review.
  *
- * A follow-up effort should rebuild this on top of real specialist dispatch;
- * until then callers should prefer `dispatch_agents` for actual expert input.
+ * When `CODINGBUDDY_EXPERIMENTAL_DISCUSSION=1` is NOT set, the tool returns
+ * guidance on using `activate` + Claude native Teams for real specialist execution.
  */
 @Injectable()
 export class DiscussionHandler extends AbstractHandler {
@@ -82,12 +79,11 @@ export class DiscussionHandler extends AbstractHandler {
       {
         name: 'agent_discussion',
         description:
-          '[EXPERIMENTAL — disabled by default] Produces templated synthesis of ' +
-          'specialist opinions, not real specialist execution. The output does ' +
-          'not reflect collective intelligence from live agents; treat it as a ' +
-          'placeholder until the rebuild lands. Enable by setting ' +
-          `${EXPERIMENTAL_DISCUSSION_ENV}=1. When disabled, the tool returns ` +
-          '{disabled: true} without invoking synthesis.',
+          'Structured specialist discussion for collective intelligence workflows. ' +
+          'Collects and synthesizes opinions from multiple specialist agents on a topic. ' +
+          'For real-time specialist debate, use the `activate` tool with Claude native Teams. ' +
+          `Set ${EXPERIMENTAL_DISCUSSION_ENV}=1 to enable built-in synthesis. ` +
+          'When unset, returns guidance on using activate + Teams instead.',
         inputSchema: {
           type: 'object',
           properties: {

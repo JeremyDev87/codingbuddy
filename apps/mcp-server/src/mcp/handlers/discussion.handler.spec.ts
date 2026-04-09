@@ -112,9 +112,8 @@ describe('DiscussionHandler', () => {
         const data = JSON.parse(result!.content[0].text) as ExperimentalDiscussionResult;
         expect(data.experimental).toBe(true);
         expect(data.warning).toBe(EXPERIMENTAL_DISCUSSION_WARNING);
-        expect(data.warning).toContain('experimental');
-        expect(data.warning).toContain('templated synthesis');
-        expect(data.warning).toContain('not real specialist execution');
+        expect(data.warning).toContain('synthesis');
+        expect(data.warning).toContain('activate');
       });
 
       it('should return error for missing topic', async () => {
@@ -300,12 +299,12 @@ describe('DiscussionHandler', () => {
       expect(definitions[0].name).toBe('agent_discussion');
     });
 
-    it('should mark tool description as experimental', () => {
+    it('should describe collective intelligence and activation guidance', () => {
       const definitions = handler.getToolDefinitions();
       const description = definitions[0].description.toLowerCase();
 
-      expect(description).toContain('experimental');
-      expect(description).toContain('templated synthesis');
+      expect(description).toContain('specialist');
+      expect(description).toContain('activate');
       expect(description).toContain(EXPERIMENTAL_DISCUSSION_ENV.toLowerCase());
     });
 

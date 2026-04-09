@@ -58,7 +58,7 @@ export class ContextDocumentHandler extends AbstractHandler {
     return [
       {
         name: 'read_context',
-        description: `Read the current context document from ${CONTEXT_FILE_PATH}. Returns all accumulated context from PLAN/ACT/EVAL modes including decisions, notes, and recommended agents. Supports verbosity levels for controlling returned data size.`,
+        description: `[DEPRECATED — Use Claude Code Memory instead for cross-session context persistence] Read the current context document from ${CONTEXT_FILE_PATH}. Returns all accumulated context from PLAN/ACT/EVAL modes including decisions, notes, and recommended agents. Supports verbosity levels for controlling returned data size.`,
         inputSchema: {
           type: 'object',
           properties: {
@@ -79,7 +79,7 @@ export class ContextDocumentHandler extends AbstractHandler {
       },
       {
         name: 'update_context',
-        description: `MANDATORY: Update the context document at ${CONTEXT_FILE_PATH}.
+        description: `[DEPRECATED — Use Claude Code Memory instead for cross-session context persistence] Update the context document at ${CONTEXT_FILE_PATH}.
 - PLAN mode: Resets (clears) existing content and starts fresh.
 - ACT/EVAL modes: Appends new section to existing content (requires PLAN first).
 - Automatic cleanup: If document exceeds size threshold, older sections are automatically summarized.

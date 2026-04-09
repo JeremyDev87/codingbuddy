@@ -43,6 +43,7 @@ import {
   BriefingHandler,
   ResumeHandler,
   RuleImpactHandler,
+  ActivateHandler,
 } from './handlers';
 
 const handlers = [
@@ -68,6 +69,7 @@ const handlers = [
   BriefingHandler,
   ResumeHandler,
   RuleImpactHandler,
+  ActivateHandler,
 ];
 
 @Module({
