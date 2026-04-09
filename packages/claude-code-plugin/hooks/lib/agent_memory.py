@@ -80,6 +80,34 @@ class AgentMemory:
                 parts.append(f"- {json.dumps(p, ensure_ascii=False)}")
         return "\n".join(parts)
 
+    def get_council_context(self, agent_names: list) -> str:
+        """Get combined context prompts for a list of specialists (#1435).
+
+        Returns a formatted block suitable for hook output injection.
+        Only includes agents that have prior findings.
+
+        Args:
+            agent_names: List of specialist agent names.
+
+        Returns:
+            Formatted markdown with memory context, or empty string.
+        """
+        sections = []
+        returning = []
+        for name in agent_names:
+            prompt = self.get_context_prompt(name)
+            if prompt:
+                returning.append(name)
+                sections.append(f"### {name} (returning)\n{prompt}")
+        if not sections:
+            return ""
+        header = (
+            f"# Agent Council Memory\n"
+            f"The following {len(returning)} specialist(s) have prior findings "
+            f"from previous sessions. Include this context when dispatching them.\n"
+        )
+        return header + "\n\n".join(sections)
+
     def clear(self, agent_name: str) -> None:
         filepath = self._filepath(agent_name)
         if os.path.isfile(filepath):

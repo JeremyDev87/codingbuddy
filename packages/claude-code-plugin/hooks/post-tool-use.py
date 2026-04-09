@@ -68,6 +68,27 @@ def handle_post_tool_use(data: dict):
     except Exception:
         pass  # Never block tool execution
 
+    # Micro-achievement: detect parallel agent dispatch (#1436)
+    try:
+        tool_name = data.get("tool_name", "")
+        if tool_name == "Agent" and data.get("tool_input", {}).get("run_in_background"):
+            from achievement_tracker import (
+                AchievementTracker,
+                render_batch_celebration,
+            )
+
+            tracker = AchievementTracker()
+            tracker.record_multi_agent_dispatch()
+            newly_unlocked = tracker.check_achievements()
+            if newly_unlocked:
+                import sys as _sys
+
+                celebration = render_batch_celebration(newly_unlocked)
+                if celebration:
+                    print(celebration, file=_sys.stderr)
+    except Exception:
+        pass  # Never block tool execution
+
     return None
 
 

@@ -66,6 +66,70 @@ ACHIEVEMENT_DEFINITIONS: List[Dict[str, Any]] = [
         "icon": "\U0001f525",  # fire
         "face": "\u2666\u203f\u2666",  # diamond eyes
     },
+    # Micro-achievements: first-5-minute wins (#1436)
+    {
+        "id": "first_plan",
+        "name": "Planner!",
+        "description": "Enter PLAN mode for the first time",
+        "metric": "plan_entries",
+        "threshold": 1,
+        "icon": "\U0001f4dd",  # memo
+        "face": "\u25c7\u203f\u25c7",  # thin diamond eyes
+    },
+    {
+        "id": "first_act",
+        "name": "Builder!",
+        "description": "Enter ACT mode for the first time",
+        "metric": "act_entries",
+        "threshold": 1,
+        "icon": "\U0001f528",  # hammer
+        "face": "\u25a0\u203f\u25a0",  # square eyes
+    },
+    {
+        "id": "first_eval",
+        "name": "Critic!",
+        "description": "Enter EVAL mode for the first time",
+        "metric": "eval_entries",
+        "threshold": 1,
+        "icon": "\U0001f50d",  # magnifying glass
+        "face": "\u25cb\u203f\u25cb",  # circle eyes
+    },
+    {
+        "id": "first_auto",
+        "name": "Autopilot!",
+        "description": "Enter AUTO mode for the first time",
+        "metric": "auto_entries",
+        "threshold": 1,
+        "icon": "\U0001f680",  # rocket
+        "face": "\u25b7\u203f\u25b7",  # triangle eyes
+    },
+    {
+        "id": "council_summon",
+        "name": "Council Summoner",
+        "description": "Summon a specialist council for the first time",
+        "metric": "council_summons",
+        "threshold": 1,
+        "icon": "\U0001f451",  # crown
+        "face": "\u2726\u203f\u2726",  # four-pointed star eyes
+    },
+    {
+        "id": "tdd_first",
+        "name": "Test First!",
+        "description": "Complete your first TDD cycle",
+        "metric": "tdd_cycles",
+        "threshold": 1,
+        "icon": "\u2705",  # check mark
+        "face": "\u2713\u203f\u2713",  # checkmark eyes
+    },
+    {
+        "id": "multi_agent",
+        "name": "Orchestrator!",
+        "description": "Dispatch parallel specialist agents for the first time",
+        "metric": "multi_agent_dispatches",
+        "threshold": 1,
+        "icon": "\U0001f3af",  # bullseye
+        "face": "\u29bf\u203f\u29bf",  # circled bullet eyes
+    },
 ]
 
 # Celebration messages by language
@@ -162,6 +226,13 @@ class AchievementTracker:
             "commit_timestamps": [],
             "session_dates": [],
             "max_streak_days": 0,
+            # Micro-achievement counters (#1436)
+            "plan_entries": 0,
+            "act_entries": 0,
+            "eval_entries": 0,
+            "auto_entries": 0,
+            "council_summons": 0,
+            "multi_agent_dispatches": 0,
         }
 
     def get_progress(self) -> Dict[str, Any]:
@@ -179,6 +250,29 @@ class AchievementTracker:
             List of unlocked achievement records.
         """
         return self._locked_read(self.unlocked_file, [])
+
+    def record_mode_entry(self, mode: str) -> None:
+        """Record a mode entry for micro-achievement tracking (#1436).
+
+        Args:
+            mode: The mode entered (PLAN, ACT, EVAL, AUTO).
+        """
+        key = f"{mode.lower()}_entries"
+        progress = self.get_progress()
+        progress[key] = progress.get(key, 0) + 1
+        self._locked_write(self.progress_file, progress)
+
+    def record_council_summon(self) -> None:
+        """Record a council scene render for micro-achievement tracking (#1436)."""
+        progress = self.get_progress()
+        progress["council_summons"] = progress.get("council_summons", 0) + 1
+        self._locked_write(self.progress_file, progress)
+
+    def record_multi_agent_dispatch(self) -> None:
+        """Record a parallel agent dispatch for micro-achievement tracking (#1436)."""
+        progress = self.get_progress()
+        progress["multi_agent_dispatches"] = progress.get("multi_agent_dispatches", 0) + 1
+        self._locked_write(self.progress_file, progress)
 
     def record_tdd_cycle(self) -> None:
         """Record a completed TDD cycle."""
