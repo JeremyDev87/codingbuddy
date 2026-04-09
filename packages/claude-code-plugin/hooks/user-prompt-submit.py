@@ -165,6 +165,44 @@ def main():
             except Exception:
                 pass
 
+            # Agent Council Memory: inject prior findings for specialists (#1435)
+            try:
+                from agent_memory import AgentMemory
+
+                _council_agents = []
+                if council_preset and isinstance(council_preset, dict):
+                    # Extract specialist names from council preset
+                    _council_agents = council_preset.get("specialists", [])
+                    _primary = council_preset.get("primary")
+                    if _primary:
+                        _council_agents = [_primary] + list(_council_agents)
+                if _council_agents:
+                    mem = AgentMemory()
+                    memory_context = mem.get_council_context(_council_agents)
+                    if memory_context:
+                        print(memory_context)
+            except Exception:
+                pass  # Never block prompt submission
+
+            # Micro-achievement: record mode entry (#1436)
+            try:
+                from achievement_tracker import (
+                    AchievementTracker,
+                    render_batch_celebration,
+                )
+
+                tracker = AchievementTracker()
+                tracker.record_mode_entry(detected_mode)
+                if council_preset:
+                    tracker.record_council_summon()
+                newly_unlocked = tracker.check_achievements()
+                if newly_unlocked:
+                    celebration = render_batch_celebration(newly_unlocked)
+                    if celebration:
+                        print(celebration, file=sys.stderr)
+            except Exception:
+                pass  # Never block prompt submission
+
         # Exit successfully (exit code 0 = success, output added as context)
         sys.exit(0)
 

@@ -41,15 +41,15 @@ class TestAchievementDefinitions:
 
     def test_get_all_definitions(self):
         defs = get_achievement_definitions()
-        assert len(defs) == 5
+        assert len(defs) == 12  # 5 original + 7 micro-achievements (#1436)
         ids = {d["id"] for d in defs}
-        assert ids == {
+        assert {
             "tdd_champion",
             "agent_master",
             "quality_guard",
             "speed_coder",
             "streak",
-        }
+        }.issubset(ids)
 
     def test_get_by_id_found(self):
         defn = get_achievement_by_id("tdd_champion")
@@ -199,8 +199,9 @@ class TestCheckAchievements:
         tracker._locked_write(tracker.progress_file, progress)
 
         newly = tracker.check_achievements()
-        assert len(newly) == 1
-        assert newly[0]["id"] == "tdd_champion"
+        ids = [a["id"] for a in newly]
+        assert "tdd_champion" in ids
+        assert "tdd_first" in ids  # threshold=1 also triggers
 
     def test_agent_master_unlock(self, tracker):
         progress = tracker.get_progress()
@@ -240,7 +241,8 @@ class TestCheckAchievements:
         tracker._locked_write(tracker.progress_file, progress)
 
         first = tracker.check_achievements()
-        assert len(first) == 1
+        first_ids = {a["id"] for a in first}
+        assert "tdd_champion" in first_ids
 
         second = tracker.check_achievements()
         assert second == []
@@ -254,8 +256,9 @@ class TestCheckAchievements:
         # New tracker instance reads persisted data
         tracker2 = AchievementTracker(data_dir=tmp_data_dir)
         unlocked = tracker2.get_unlocked()
-        assert len(unlocked) == 1
-        assert unlocked[0]["id"] == "tdd_champion"
+        unlocked_ids = {u["id"] for u in unlocked}
+        assert "tdd_champion" in unlocked_ids
+        assert "tdd_first" in unlocked_ids
 
 
 class TestStreakCalculation:
@@ -402,3 +405,99 @@ class TestRenderBatchCelebration:
         result = render_batch_celebration(achievements, "en")
         assert "Alpha" in result
         assert "+1 more achievements unlocked!" in result
+
+
+class TestMicroAchievements:
+    """Tests for micro-achievement definitions and triggers (#1436)."""
+
+    def test_micro_achievement_definitions_exist(self):
+        """All 7 micro-achievements should be defined."""
+        micro_ids = {
+            "first_plan", "first_act", "first_eval", "first_auto",
+            "council_summon", "tdd_first", "multi_agent",
+        }
+        defined_ids = {d["id"] for d in ACHIEVEMENT_DEFINITIONS}
+        assert micro_ids.issubset(defined_ids)
+
+    def test_micro_achievements_have_threshold_1(self):
+        """Micro-achievements should trigger on first occurrence."""
+        micro_ids = {
+            "first_plan", "first_act", "first_eval", "first_auto",
+            "council_summon", "tdd_first", "multi_agent",
+        }
+        for defn in ACHIEVEMENT_DEFINITIONS:
+            if defn["id"] in micro_ids:
+                assert defn["threshold"] == 1, f"{defn['id']} should have threshold=1"
+
+    def test_record_mode_entry_plan(self, tmp_data_dir):
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("PLAN")
+        progress = tracker.get_progress()
+        assert progress["plan_entries"] == 1
+
+    def test_record_mode_entry_act(self, tmp_data_dir):
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("ACT")
+        progress = tracker.get_progress()
+        assert progress["act_entries"] == 1
+
+    def test_record_mode_entry_eval(self, tmp_data_dir):
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("EVAL")
+        progress = tracker.get_progress()
+        assert progress["eval_entries"] == 1
+
+    def test_record_mode_entry_auto(self, tmp_data_dir):
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("AUTO")
+        progress = tracker.get_progress()
+        assert progress["auto_entries"] == 1
+
+    def test_record_council_summon(self, tmp_data_dir):
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_council_summon()
+        progress = tracker.get_progress()
+        assert progress["council_summons"] == 1
+
+    def test_record_multi_agent_dispatch(self, tmp_data_dir):
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_multi_agent_dispatch()
+        progress = tracker.get_progress()
+        assert progress["multi_agent_dispatches"] == 1
+
+    def test_first_plan_unlocks_achievement(self, tmp_data_dir):
+        """First PLAN entry should unlock 'Planner!' achievement."""
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("PLAN")
+        newly = tracker.check_achievements()
+        ids = [a["id"] for a in newly]
+        assert "first_plan" in ids
+
+    def test_first_tdd_unlocks_both(self, tmp_data_dir):
+        """First TDD cycle should unlock both 'tdd_first' (threshold=1)."""
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_tdd_cycle()
+        newly = tracker.check_achievements()
+        ids = [a["id"] for a in newly]
+        assert "tdd_first" in ids
+
+    def test_micro_achievement_fires_only_once(self, tmp_data_dir):
+        """Achievement should not fire again on second mode entry."""
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("PLAN")
+        first = tracker.check_achievements()
+        assert any(a["id"] == "first_plan" for a in first)
+
+        tracker.record_mode_entry("PLAN")
+        second = tracker.check_achievements()
+        assert not any(a["id"] == "first_plan" for a in second)
+
+    def test_multiple_modes_unlock_independently(self, tmp_data_dir):
+        """Each mode entry unlocks its own achievement."""
+        tracker = AchievementTracker(data_dir=tmp_data_dir)
+        tracker.record_mode_entry("PLAN")
+        tracker.record_mode_entry("ACT")
+        newly = tracker.check_achievements()
+        ids = [a["id"] for a in newly]
+        assert "first_plan" in ids
+        assert "first_act" in ids

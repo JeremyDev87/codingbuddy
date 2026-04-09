@@ -171,3 +171,46 @@ class TestListAgents:
         mem.save("agent-b", {"findings": [], "patterns": [], "preferences": []})
         agents = mem.list_agents()
         assert sorted(agents) == ["agent-a", "agent-b"]
+
+
+class TestGetCouncilContext:
+    """Tests for batch council context generation (#1435)."""
+
+    def test_empty_when_no_agents(self, mem):
+        result = mem.get_council_context([])
+        assert result == ""
+
+    def test_empty_when_agents_have_no_memory(self, mem):
+        result = mem.get_council_context(["security-specialist", "architecture-specialist"])
+        assert result == ""
+
+    def test_returns_context_for_agents_with_findings(self, mem):
+        mem.add_finding("security-specialist", {"issue": "XSS in login form"})
+        result = mem.get_council_context(["security-specialist", "architecture-specialist"])
+        assert "Agent Council Memory" in result
+        assert "security-specialist (returning)" in result
+        assert "XSS in login form" in result
+        assert "architecture-specialist" not in result
+
+    def test_includes_multiple_returning_agents(self, mem):
+        mem.add_finding("security-specialist", {"issue": "XSS"})
+        mem.add_pattern("architecture-specialist", {"pattern": "layered arch"})
+        result = mem.get_council_context(["security-specialist", "architecture-specialist"])
+        assert "2 specialist(s)" in result
+        assert "security-specialist (returning)" in result
+        assert "architecture-specialist (returning)" in result
+
+    def test_includes_all_categories(self, mem):
+        mem.add_finding("agent-a", {"finding": "f1"})
+        mem.add_pattern("agent-a", {"pattern": "p1"})
+        mem.add_preference("agent-a", {"pref": "pr1"})
+        result = mem.get_council_context(["agent-a"])
+        assert "Previous Findings" in result
+        assert "Recognized Patterns" in result
+        assert "Agent Preferences" in result
+
+    def test_skips_agents_not_in_list(self, mem):
+        mem.add_finding("security-specialist", {"issue": "XSS"})
+        mem.add_finding("other-agent", {"issue": "unrelated"})
+        result = mem.get_council_context(["security-specialist"])
+        assert "other-agent" not in result
