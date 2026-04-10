@@ -18,6 +18,18 @@ Codingbuddy is a multi-AI MCP server that orchestrates 37 specialist agents acro
 
 ---
 
+## What's New in v5.5.0 — Wow Experience
+
+- **Agent Council Memory** — specialists now remember prior findings and build on each other's context across sessions.
+- **Live AI Guardrails** — real-time rule violation interception on Edit/Write with pattern detection (SQL injection, XSS, hardcoded secrets, eval/exec).
+- **Self-Evolving Rules** — `suggest_rules` MCP tool analyzes failure patterns and proposes draft rules for human review.
+- **Smart First Prompt** — context-aware onboarding that reads your project and suggests the next best mode.
+- **Team Bootstrap** — `codingbuddy init --team` auto-detects installed AI tools (Cursor, Claude Code, Codex, Antigravity, Q, Kiro) and generates matching adapters in one command.
+- **Micro-Achievements** — unlockable milestones for mode entries, council summons, and TDD cycles.
+- **Council Assembly Animation** — dramatic staggered specialist arrival effect on mode entry.
+
+---
+
 ## Session Impact Report
 
 At the end of every session, codingbuddy shows you what actually happened:

@@ -24,6 +24,18 @@
 
 ---
 
+## v5.5.0 の新機能 — Wow Experience
+
+- **Agent Council Memory** — スペシャリストが以前の分析結果を記憶し、セッションをまたいで互いのコンテキストを積み重ねます。
+- **Live AI Guardrails** — Edit/Write 時のリアルタイムルール違反インターセプトとパターン検出（SQL injection、XSS、ハードコードされたシークレット、eval/exec）。
+- **Self-Evolving Rules** — `suggest_rules` MCP ツールが失敗パターンを分析し、人間によるレビュー用のルール草案を提案します。
+- **Smart First Prompt** — プロジェクトを読み取り、次の最適なモードを提案するコンテキスト対応のオンボーディング。
+- **Team Bootstrap** — `codingbuddy init --team` がインストール済みの AI ツール（Cursor、Claude Code、Codex、Antigravity、Q、Kiro）を自動検出し、1 つのコマンドで対応するアダプターを生成します。
+- **Micro-Achievements** — モード開始、協議会召喚、TDD サイクルのためのアンロック可能なマイルストーン。
+- **Council Assembly Animation** — モード開始時にスペシャリストが段階的に到着する劇的な演出。
+
+---
+
 ## ビジョン
 
 ### 問題
