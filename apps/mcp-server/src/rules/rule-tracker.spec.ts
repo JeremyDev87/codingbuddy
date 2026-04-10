@@ -189,4 +189,94 @@ describe('RuleTracker', () => {
       expect(loaded.getStats()).toEqual({});
     });
   });
+
+  describe('markRuleAsGenerated (#1444)', () => {
+    it('should tag an existing rule as auto-generated', () => {
+      tracker.trackRuleUsage(['auto-bash-guard']);
+      tracker.markRuleAsGenerated('auto-bash-guard');
+
+      const stats = tracker.getStats();
+      expect(stats['auto-bash-guard'].generatedRule).toBe(true);
+    });
+
+    it('should create a fresh stat entry when marking an unseen rule', () => {
+      tracker.markRuleAsGenerated('fresh-rule');
+
+      const stats = tracker.getStats();
+      expect(stats['fresh-rule']).toBeDefined();
+      expect(stats['fresh-rule'].generatedRule).toBe(true);
+      expect(stats['fresh-rule'].count).toBe(0);
+    });
+
+    it('should ignore empty rule name', () => {
+      tracker.markRuleAsGenerated('');
+
+      expect(tracker.getStats()).toEqual({});
+    });
+
+    it('should not wipe generatedRule flag on subsequent trackRuleUsage', () => {
+      tracker.markRuleAsGenerated('auto-rule');
+      tracker.trackRuleUsage(['auto-rule']);
+      tracker.trackRuleUsage(['auto-rule']);
+
+      const stats = tracker.getStats();
+      expect(stats['auto-rule'].generatedRule).toBe(true);
+      expect(stats['auto-rule'].count).toBe(2);
+    });
+  });
+
+  describe('recordFailureRate (#1444)', () => {
+    it('should record baseline failure rate for a generated rule', () => {
+      tracker.markRuleAsGenerated('auto-rule');
+      tracker.recordFailureRate('auto-rule', 0.25, 'baseline');
+
+      const stats = tracker.getStats();
+      expect(stats['auto-rule'].baselineFailureRate).toBe(0.25);
+    });
+
+    it('should record current failure rate for a generated rule', () => {
+      tracker.markRuleAsGenerated('auto-rule');
+      tracker.recordFailureRate('auto-rule', 0.05, 'current');
+
+      const stats = tracker.getStats();
+      expect(stats['auto-rule'].currentFailureRate).toBe(0.05);
+    });
+
+    it('should overwrite current failure rate on repeat calls', () => {
+      tracker.markRuleAsGenerated('auto-rule');
+      tracker.recordFailureRate('auto-rule', 0.2, 'current');
+      tracker.recordFailureRate('auto-rule', 0.1, 'current');
+
+      const stats = tracker.getStats();
+      expect(stats['auto-rule'].currentFailureRate).toBe(0.1);
+    });
+
+    it('should be a no-op for rules not marked as generated', () => {
+      tracker.trackRuleUsage(['manual-rule']);
+      tracker.recordFailureRate('manual-rule', 0.5, 'baseline');
+
+      const stats = tracker.getStats();
+      expect(stats['manual-rule'].baselineFailureRate).toBeUndefined();
+    });
+
+    it('should be a no-op for unknown rules', () => {
+      tracker.recordFailureRate('unknown-rule', 0.5, 'baseline');
+
+      expect(tracker.getStats()).toEqual({});
+    });
+
+    it('should persist failure rates through save/load cycle', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+      tracker.markRuleAsGenerated('auto-rule');
+      tracker.recordFailureRate('auto-rule', 0.3, 'baseline');
+      tracker.recordFailureRate('auto-rule', 0.05, 'current');
+
+      await tracker.save();
+
+      const written = JSON.parse(vi.mocked(fs.writeFile).mock.calls[0][1] as string);
+      expect(written['auto-rule'].generatedRule).toBe(true);
+      expect(written['auto-rule'].baselineFailureRate).toBe(0.3);
+      expect(written['auto-rule'].currentFailureRate).toBe(0.05);
+    });
+  });
 });

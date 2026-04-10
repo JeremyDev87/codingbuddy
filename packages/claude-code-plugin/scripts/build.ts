@@ -119,6 +119,10 @@ The plugin works standalone with core features. MCP integration unlocks the full
 | Feature                              | Standalone | With MCP |
 | ------------------------------------ | :--------: | :------: |
 | PLAN/ACT/EVAL/AUTO keyword triggers  |     ✅     |    ✅    |
+| Staged planning (Discover→Design→Plan) |   ✅     |    ✅    |
+| Clarification gate (ambiguous prompts) |   ✅     |    ✅    |
+| Permission forecast (prompt-aware)   |     ✅     |    ✅    |
+| Council scene (agent eye glyphs)     |   ✅ ¹    |    ✅    |
 | Specialist agent prompts             |   ⚠️ ¹    |    ✅    |
 | Slash commands (codingbuddy:\\*)      |     ✅     |    ✅    |
 | Dynamic checklists                   |     —      |    ✅    |
@@ -126,7 +130,7 @@ The plugin works standalone with core features. MCP integration unlocks the full
 | Rule search & impact reports         |     —      |    ✅    |
 | Session briefings & recovery         |     —      |    ✅    |
 
-> ¹ Standalone specialist prompts require a local \`.ai-rules/\` directory. Run \`npx codingbuddy-rules init\` to scaffold it. See [#1216](https://github.com/JeremyDev87/codingbuddy/issues/1216) for the standalone enhancement roadmap.
+> ¹ Standalone features that read agent definitions require a local \`.ai-rules/\` directory. Run \`npx codingbuddy-rules init\` to scaffold it. See [#1216](https://github.com/JeremyDev87/codingbuddy/issues/1216) for the standalone enhancement roadmap.
 
 ## MCP Integration (Recommended)
 

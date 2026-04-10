@@ -215,7 +215,7 @@ describe('RuleInsightsService', () => {
             generatedRule: true,
             baselineFailureRate: 0.25,
             currentFailureRate: 0.05,
-          } as unknown as RuleStats,
+          },
         };
 
         const result = service.generateInsights(stats, [], NOW);
@@ -235,7 +235,7 @@ describe('RuleInsightsService', () => {
             generatedRule: true,
             baselineFailureRate: 0.2,
             currentFailureRate: 0.22,
-          } as unknown as RuleStats,
+          },
         };
 
         const result = service.generateInsights(stats, [], NOW);
@@ -252,7 +252,7 @@ describe('RuleInsightsService', () => {
             generatedRule: true,
             baselineFailureRate: 0.3,
             currentFailureRate: 0.2,
-          } as unknown as RuleStats,
+          },
         };
 
         const result = service.generateInsights(stats, [], NOW);

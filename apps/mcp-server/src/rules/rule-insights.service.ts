@@ -139,21 +139,15 @@ export class RuleInsightsService {
     const scores: EffectivenessScore[] = [];
 
     for (const [name, stat] of entries) {
-      const extended = stat as RuleStats & {
-        generatedRule?: boolean;
-        baselineFailureRate?: number;
-        currentFailureRate?: number;
-      };
-
-      if (!extended.generatedRule) continue;
+      if (!stat.generatedRule) continue;
       if (
-        typeof extended.baselineFailureRate !== 'number' ||
-        typeof extended.currentFailureRate !== 'number'
+        typeof stat.baselineFailureRate !== 'number' ||
+        typeof stat.currentFailureRate !== 'number'
       )
         continue;
 
-      const baseline = extended.baselineFailureRate;
-      const current = extended.currentFailureRate;
+      const baseline = stat.baselineFailureRate;
+      const current = stat.currentFailureRate;
       const reductionPercent = baseline > 0 ? ((baseline - current) / baseline) * 100 : 0;
 
       let verdict: EffectivenessScore['verdict'];
