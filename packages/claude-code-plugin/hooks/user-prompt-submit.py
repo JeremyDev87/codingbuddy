@@ -165,6 +165,21 @@ def main():
             except Exception:
                 pass
 
+            # Council Assembly Animation: staggered specialist arrival (#1441)
+            try:
+                if council_preset and isinstance(council_preset, dict):
+                    from council_animator import animate_council_assembly
+
+                    animate_council_assembly(
+                        primary=council_preset.get("primary", ""),
+                        specialists=council_preset.get("specialists", []),
+                        moderator_copy=council_preset.get(
+                            "moderator_copy", "Council assembled."
+                        ),
+                    )
+            except Exception:
+                pass  # Never block prompt submission
+
             # Agent Council Memory: inject prior findings for specialists (#1435)
             try:
                 from agent_memory import AgentMemory
