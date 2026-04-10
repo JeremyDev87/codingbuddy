@@ -71,3 +71,6 @@ TASK.md
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# codingbuddy init --team backups
+.codingbuddy-backup/
