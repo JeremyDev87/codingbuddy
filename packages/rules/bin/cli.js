@@ -16,13 +16,16 @@ Usage:
   codingbuddy <command> [options]
 
 Commands:
-  init          Initialize .ai-rules in the current project
-  validate      Validate .ai-rules structure (agents JSON, rules markdown)
-  list-agents   List available specialist agents
+  init              Initialize .ai-rules in the current project
+  init --team       Detect AI tools and generate adapter configs for all
+  validate          Validate .ai-rules structure (agents JSON, rules markdown)
+  list-agents       List available specialist agents
 
 Options:
-  --help, -h    Show this help message
-  --version, -v Show version
+  --help, -h        Show this help message
+  --version, -v     Show version
+  --dry-run         Preview changes without writing (init --team)
+  --force           Overwrite without backup (init --team)
 `.trim(),
   );
 }
@@ -130,12 +133,23 @@ function validate() {
   console.log('\nAll validations passed');
 }
 
-function init() {
-  const { run } = require('../lib/init');
-  run().catch(err => {
-    console.error('Error:', err.message);
-    process.exit(1);
-  });
+function init(flags) {
+  if (flags.team) {
+    const { runTeam } = require('../lib/init/team');
+    runTeam(process.cwd(), {
+      dryRun: flags.dryRun,
+      force: flags.force,
+    }).catch(err => {
+      console.error('Error:', err.message);
+      process.exit(1);
+    });
+  } else {
+    const { run } = require('../lib/init');
+    run().catch(err => {
+      console.error('Error:', err.message);
+      process.exit(1);
+    });
+  }
 }
 
 // --- Main ---
@@ -153,9 +167,15 @@ if (command === '--version' || command === '-v') {
   process.exit(0);
 }
 
+const flags = {
+  team: args.includes('--team'),
+  dryRun: args.includes('--dry-run'),
+  force: args.includes('--force'),
+};
+
 switch (command) {
   case 'init':
-    init();
+    init(flags);
     break;
   case 'validate':
     validate();
