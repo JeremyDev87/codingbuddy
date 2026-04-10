@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.0] - 2026-04-10
+
+### Added
+
+#### Wow Experience Wave 1 — Memory & Rewards
+- Agent Council Memory (#1435) — specialists now recall prior council decisions and inject them into new sessions for continuity across conversations
+- Micro-Achievements (#1436) — badge-style reward system surfaces small wins (first council, first rule suggestion, first team bootstrap) to reinforce good habits
+
+#### Wow Experience Wave 2 — Intelligence Layer
+- Self-Evolving Rules + `suggest_rules` MCP tool (#1437) — PatternDetector → RuleSuggester pipeline analyzes repeated failure patterns and proposes draft rules for human review (never auto-applied)
+- Smart First Prompt / Context-Aware Onboarding (#1438) — project-specific suggestions driven by tech stack detection replace generic first-run hints
+- Live AI Guardrails (#1439) — real-time rule violation interception during tool use prevents drift before it hits disk
+
+#### Wow Experience Wave 3 — Team Bootstrap
+- `codingbuddy init --team` CLI (#1440) — multi-AI tool adapter auto-detection and generation (Cursor, Claude Code, Codex, Antigravity, Q, Kiro) with sub-issues #1449, #1450, #1451
+
+#### Dramatic Polish
+- Council Assembly Animation (#1441) — staggered specialist arrival effect during council scene rendering for a more cinematic council experience
+
+#### Redesign
+- `activate` MCP tool — one-shot entry point returning rules + primary agent + specialists + discussion format, replacing the multi-step `parse_mode` + `dispatch_agents` ceremony
+- Promoted Claude native Teams as the primary specialist execution strategy; subagent dispatch remains as a fallback for non-Teams environments
+
+### Changed
+- RuleTracker: first-class support for `generatedRule`, `baselineFailureRate`, and `currentFailureRate` fields (#1444)
+- Plugin README template now includes standalone Wave feature rows (scripts/build.ts)
+
+### Fixed
+- Effectiveness scoring write-path wiring for self-evolving rules (#1444)
+- Plugin README build drift — `yarn build` now preserves manual surface additions
+
+### Closed Sub-issues
+- #1442, #1443, #1445, #1446, #1447, #1448 — already implemented, closed with SHA references
+
 ## [5.4.1] - 2026-04-08
 
 ### Added

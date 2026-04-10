@@ -24,6 +24,18 @@
 
 ---
 
+## v5.5.0의 새로운 기능 — Wow Experience
+
+- **Agent Council Memory** — 전문가들이 이전 분석 결과를 기억하고 세션 간에 서로의 컨텍스트를 기반으로 발전합니다.
+- **Live AI Guardrails** — Edit/Write 시 실시간 규칙 위반 감지 및 패턴 탐지 (SQL injection, XSS, 하드코딩된 시크릿, eval/exec).
+- **Self-Evolving Rules** — `suggest_rules` MCP 도구가 실패 패턴을 분석하고 사람이 검토할 규칙 초안을 제안합니다.
+- **Smart First Prompt** — 프로젝트를 읽고 다음에 가장 적합한 모드를 제안하는 컨텍스트 인식 온보딩.
+- **Team Bootstrap** — `codingbuddy init --team`이 설치된 AI 도구(Cursor, Claude Code, Codex, Antigravity, Q, Kiro)를 자동으로 감지하고 한 번에 매칭되는 어댑터를 생성합니다.
+- **Micro-Achievements** — 모드 진입, 협의회 소환, TDD 사이클에 대한 잠금 해제 가능한 마일스톤.
+- **Council Assembly Animation** — 모드 진입 시 전문가가 순차적으로 도착하는 극적인 연출.
+
+---
+
 ## 비전
 
 ### 문제점

@@ -24,6 +24,18 @@ Una sola IA no puede ser experta en todo. Codingbuddy crea un equipo de desarrol
 
 ---
 
+## Novedades en v5.5.0 — Wow Experience
+
+- **Agent Council Memory** — los especialistas ahora recuerdan hallazgos previos y se basan en el contexto de los demás entre sesiones.
+- **Live AI Guardrails** — interceptación en tiempo real de violaciones de reglas en Edit/Write con detección de patrones (SQL injection, XSS, secretos hardcodeados, eval/exec).
+- **Self-Evolving Rules** — la herramienta MCP `suggest_rules` analiza patrones de fallos y propone borradores de reglas para revisión humana.
+- **Smart First Prompt** — onboarding contextual que lee tu proyecto y sugiere el mejor modo a seguir.
+- **Team Bootstrap** — `codingbuddy init --team` detecta automáticamente las herramientas de IA instaladas (Cursor, Claude Code, Codex, Antigravity, Q, Kiro) y genera los adaptadores correspondientes con un solo comando.
+- **Micro-Achievements** — hitos desbloqueables para entradas de modo, convocatorias del consejo y ciclos TDD.
+- **Council Assembly Animation** — efecto dramático de llegada escalonada de especialistas al entrar en un modo.
+
+---
+
 ## La Visión
 
 ### El Problema

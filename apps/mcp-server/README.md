@@ -20,6 +20,7 @@ npx codingbuddy init
 | Command | Description |
 |---------|-------------|
 | `codingbuddy init` | Analyze project and generate configuration |
+| `codingbuddy init --team` | Auto-detect installed AI tools and generate adapter configs |
 | `codingbuddy mcp` | Start MCP server (stdio mode by default) |
 | `codingbuddy install <source>` | Install plugin from git URL or registry |
 | `codingbuddy search <query>` | Search plugins in registry |
@@ -42,6 +43,8 @@ npx codingbuddy init
 
 | Tool | Description |
 |------|-------------|
+| `activate` | One-shot entry point returning rules, primary agent, specialists, and discussion format for a prompt. Preferred over `parse_mode` in Claude Code |
+| `suggest_rules` | Analyze execution history for repeated failure patterns and generate draft rule suggestions. Proposed for human review — never auto-applied |
 | `get_project_config` | Get project configuration settings |
 | `search_rules` | Search through rules and guidelines |
 | `get_agent_details` | Get detailed profile of a specialist agent |
