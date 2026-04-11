@@ -24,15 +24,15 @@
 
 ---
 
-## v5.5.0 の新機能 — Wow Experience
+## v5.6.0 の新機能 — HUD Statusbar Wave
 
-- **Agent Council Memory** — スペシャリストが以前の分析結果を記憶し、セッションをまたいで互いのコンテキストを積み重ねます。
-- **Live AI Guardrails** — Edit/Write 時のリアルタイムルール違反インターセプトとパターン検出（SQL injection、XSS、ハードコードされたシークレット、eval/exec）。
-- **Self-Evolving Rules** — `suggest_rules` MCP ツールが失敗パターンを分析し、人間によるレビュー用のルール草案を提案します。
-- **Smart First Prompt** — プロジェクトを読み取り、次の最適なモードを提案するコンテキスト対応のオンボーディング。
-- **Team Bootstrap** — `codingbuddy init --team` がインストール済みの AI ツール（Cursor、Claude Code、Codex、Antigravity、Q、Kiro）を自動検出し、1 つのコマンドで対応するアダプターを生成します。
-- **Micro-Achievements** — モード開始、協議会召喚、TDD サイクルのためのアンロック可能なマイルストーン。
-- **Council Assembly Animation** — モード開始時にスペシャリストが段階的に到着する劇的な演出。
+- **Breathing Buddy Face** — Buddy の表情がセッションのフェーズ（アイドル / 思考中 / 実行中 / ブロック / 完了）に反応し、ステータスバーに生命感を与えます。
+- **Cost Velocity Indicator** — 🔥 / ↗ / → / 💤 のトレンドグリフ付きセッション支出レートバッジが、ゆっくりとした計画パスか熱いリファクタリングかを教えてくれます。
+- **Cache Savings Badge** — プロンプトキャッシュの割引額を `💰$N.NN saved` として数値化し、キャッシュの価値をリアルタイムで可視化します。
+- **Mode Rainbow Coloring** — モード別の ANSI トゥルーカラーグラデーション（PLAN ◇ / ACT ◆ / EVAL ◈ / AUTO ◊）に加え、CI・グレースケール端末向けの `NO_COLOR` 環境変数サポート。
+- **Smart Context Bar** — 視覚的な `[████░░░░░░] 42%` プログレスバーが、警告および危険閾値とともに `Ctx:42%` テキストを置き換えます。
+- **Adaptive Layout Engine** — `fit_segments` 適応的切り詰めにより、狭い端末でも HUD が美しく収まります。
+- **Rate-limit Severity Icons** — API レート制限に近づいたときに視覚的な警告を表示します。
 
 ---
 

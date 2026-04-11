@@ -24,15 +24,15 @@ Una sola IA no puede ser experta en todo. Codingbuddy crea un equipo de desarrol
 
 ---
 
-## Novedades en v5.5.0 — Wow Experience
+## Novedades en v5.6.0 — HUD Statusbar Wave
 
-- **Agent Council Memory** — los especialistas ahora recuerdan hallazgos previos y se basan en el contexto de los demás entre sesiones.
-- **Live AI Guardrails** — interceptación en tiempo real de violaciones de reglas en Edit/Write con detección de patrones (SQL injection, XSS, secretos hardcodeados, eval/exec).
-- **Self-Evolving Rules** — la herramienta MCP `suggest_rules` analiza patrones de fallos y propone borradores de reglas para revisión humana.
-- **Smart First Prompt** — onboarding contextual que lee tu proyecto y sugiere el mejor modo a seguir.
-- **Team Bootstrap** — `codingbuddy init --team` detecta automáticamente las herramientas de IA instaladas (Cursor, Claude Code, Codex, Antigravity, Q, Kiro) y genera los adaptadores correspondientes con un solo comando.
-- **Micro-Achievements** — hitos desbloqueables para entradas de modo, convocatorias del consejo y ciclos TDD.
-- **Council Assembly Animation** — efecto dramático de llegada escalonada de especialistas al entrar en un modo.
+- **Breathing Buddy Face** — el rostro del Buddy reacciona a la fase de tu sesión (inactivo / pensando / activo / bloqueado / victoria) para que la barra de estado se sienta viva.
+- **Cost Velocity Indicator** — un badge de ritmo de gasto de sesión con glifos 🔥 / ↗ / → / 💤 te dice si estás en una pasada de planificación lenta o en una refactorización intensa.
+- **Cache Savings Badge** — cuantifica los descuentos de caché de prompts como `💰$N.NN saved` para que veas el valor del caché en tiempo real.
+- **Mode Rainbow Coloring** — gradientes ANSI truecolor por modo (PLAN ◇ / ACT ◆ / EVAL ◈ / AUTO ◊) con soporte para la variable de entorno `NO_COLOR` en CI y terminales en escala de grises.
+- **Smart Context Bar** — una barra de progreso visual `[████░░░░░░] 42%` reemplaza el texto plano `Ctx:42%` con umbrales de advertencia y peligro.
+- **Adaptive Layout Engine** — el HUD se adapta con elegancia a terminales estrechos mediante el truncado adaptativo `fit_segments`.
+- **Rate-limit Severity Icons** — advertencias visuales cuando te acercas a los límites de velocidad de la API.
 
 ---
 

@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.6.0] - 2026-04-11
+
+### Added
+
+#### HUD Statusbar Wave — Visual Intelligence Layer
+- Breathing Buddy Face (Wave 2-A, #1464) — buddy face reacts to HUD phase (idle/thinking/active/blocked/victory) so the status bar feels alive
+- Cost Velocity Indicator (Wave 2-B, #1464) — session spend-rate badge with 🔥/↗/→/💤 trend glyphs (e.g. `$1.23↗$0.08/m`)
+- Cache Savings Badge (Wave 2-C, #1464) — quantifies prompt-cache savings as `💰$N.NN saved` appended to the cost segment
+- Mode Rainbow Coloring (Wave 2-D, #1464) — per-mode ANSI truecolor gradients (PLAN ◇ blue, ACT ◆ green, EVAL ◈ purple, AUTO ◊ rainbow), NO_COLOR env honored
+- Smart Context Bar (Wave 2-E, #1464) — visual `[████░░░░░░] 42%` progress bar replaces plain `Ctx:42%` with warning/danger thresholds and ⚠ glyph
+- Adaptive Layout Engine (Wave 1-D, #1464) — `fit_segments` adaptive truncation for narrow terminals
+- Rate-limit Severity Icons (Wave 1-C, #1464) — visual rate-limit warnings in the status line
+
+#### HUD Statusbar Wave — Infrastructure
+- Wave 3 Integrator (#1464) — Wave 2-B velocity and Wave 2-C cache savings wired into `format_status_line` with defensive `try/except` imports
+- 9 Modular Lib Extraction (#1464) — `lib/hud_*` modules enable parallel statusbar feature work
+
+### Changed
+- HUD status line: defensive `try/except` imports ensure graceful degradation when optional modules fail
+- Plugin statusline: hoisted `_format_velocity_segment` / `_format_cache_savings` to module top (~0.47μs saved per render, perf-1485 H1)
+
+### Fixed
+- Session self-heal (Wave 1-B, #1468) — stale HUD state detection and recovery
+- Version resolution fallback (Wave 1-A, #1466) — plugin.json fallback when package.json unavailable
+- Narrow exception handling (qual-1465 HIGH-1) — `ImportError` instead of bare `Exception` in 3 fallback import blocks so real bugs (SyntaxError, NameError, AttributeError) surface immediately
+- Signature drift elimination (qual-1465 HIGH-2) — removed inline stub functions for `format_rate_limits` and `_get_fresh_version`
+
+### Security
+- next 16.2.3 bump — GHSA-q4gf-8mx6-v5v3 landing-page fix, `eslint-config-next` aligned
+
+### Test Coverage
+- 381/381 tests pass across the 9 Wave-level test suites and the Wave 3 integration harness (Wave 1-B +24, Wave 2-B +33, Wave 2-C +26, Wave 2-D +35, Wave 2-E +29)
+
 ## [5.5.0] - 2026-04-10
 
 ### Added
