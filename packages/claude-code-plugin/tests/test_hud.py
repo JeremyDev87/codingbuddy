@@ -366,7 +366,9 @@ class TestFormatRateLimits:
 
     def test_five_hour_only(self):
         stdin = {"rate_limits": {"five_hour": {"used_percentage": 23.5}}}
-        assert hud.format_rate_limits(stdin) == "RL:5h:24%"
+        # Wave 1-C: severity icon replaces colon separator
+        # 23.5% ≤ 60 → U+2591 ░ (low)
+        assert hud.format_rate_limits(stdin) == "RL:5h\u259124%"
 
     def test_both_limits(self):
         stdin = {"rate_limits": {
@@ -374,8 +376,9 @@ class TestFormatRateLimits:
             "seven_day": {"used_percentage": 40},
         }}
         result = hud.format_rate_limits(stdin)
-        assert "5h:10%" in result
-        assert "7d:40%" in result
+        # Wave 1-C: severity icon replaces colon; space replaces comma
+        assert "5h\u259110%" in result
+        assert "7d\u259140%" in result
 
 
 class TestFormatWorktree:
@@ -543,7 +546,8 @@ class TestFormatStatusLine:
         }}
         result = hud.format_status_line(stdin, {})
         assert "RL:" in result
-        assert "5h:50%" in result
+        # Wave 1-C: severity icon replaces colon (50% ≤ 60 → ░ low)
+        assert "5h\u259150%" in result
 
     def test_worktree_shown(self):
         stdin = {"worktree": {"name": "feat-x"}}
