@@ -211,7 +211,9 @@ class TestFormatStatusLineCacheSegment:
         stdin = {"context_window": {"used_percentage": 10}}
         result = hud.format_status_line(stdin, {}, plugins_file=self._NO_PLUGINS)
         assert "Cache:" not in result
-        assert "Ctx:10%" in result  # other segments still present
+        # Wave 2-E: context segment renders as "[bar] 10%" rather than "Ctx:10%"
+        assert "10%" in result
+        assert "[" in result and "]" in result
 
 
 class TestHealth:
@@ -475,7 +477,9 @@ class TestFormatStatusLine:
         assert "PLAN" in result
         assert "5.1.1" in result
         assert "~$" in result  # estimated (no cost.total_cost_usd)
-        assert "Ctx:45%" in result
+        # Wave 2-E: context bar replaces "Ctx:45%" with "[bar] 45%"
+        assert "45%" in result
+        assert "[" in result and "]" in result
         assert "Opus" in result  # display_name shown
 
     def test_exact_cost_prefix(self):
@@ -608,8 +612,13 @@ class TestFormatStatusLine:
         result = hud.format_status_line(stdin, {})
         assert "WT:feat-x" in result
 
-    def test_full_telemetry(self):
+    def test_full_telemetry(self, monkeypatch):
         """All exact stdin fields present — full telemetry line + badge line."""
+        # Wave 1-D adaptive layout drops low-priority segments (worktree,
+        # rate_limits) on narrow terminals. Force a wide width so this
+        # "all telemetry renders" assertion is not flaky against the
+        # pytest default of 80 columns.
+        monkeypatch.setenv("COLUMNS", "300")
         stdin = {
             "model": {"id": "claude-opus-4-6", "display_name": "Opus"},
             "cost": {"total_cost_usd": 2.50, "total_duration_ms": 4_980_000},
@@ -760,7 +769,9 @@ class TestIntegration:
         )
         assert result.returncode == 0
         assert "\u25d5\u203f\u25d5" in result.stdout  # ◕‿◕
-        assert "Ctx:45%" in result.stdout
+        # Wave 2-E: context segment renders as "[bar] 45%" rather than "Ctx:45%"
+        assert "45%" in result.stdout
+        assert "[" in result.stdout and "]" in result.stdout
         assert "$0.05" in result.stdout  # exact cost
 
     def test_pipe_stdin_estimated_cost(self):
@@ -891,3 +902,221 @@ class TestWave3Integration:
         import hud_session  # noqa: F401
         import hud_version  # noqa: F401
         import hud_rate_limits  # noqa: F401
+
+
+# ============================================================================
+# Wave 3b integration tests (Wave 1-D / 2-A / 2-D / 2-E wired into
+# format_status_line). These close the gap left by commit bd78195 which
+# only integrated Wave 2-B/2-C. See docs/codingbuddy/plan/ for the rollout.
+# ============================================================================
+
+
+class TestWave2ABreathingFaceIntegration:
+    """Wave 2-A: format_status_line picks the buddy face from hud_state.phase."""
+
+    _NO_PLUGINS = "/tmp/codingbuddy-wave3b-test-nonexistent-plugins.json"
+
+    def test_planning_phase_shows_thinking_face(self):
+        state = {
+            "sessionId": "s1",
+            "phase": "planning",
+            "currentMode": "PLAN",
+        }
+        result = hud.format_status_line(
+            {"session_id": "s1"}, state, plugins_file=self._NO_PLUGINS
+        )
+        # FACE_THINKING = ◔‿◔
+        assert "\u25d4\u203f\u25d4" in result
+
+    def test_executing_phase_shows_active_face(self):
+        state = {
+            "sessionId": "s1",
+            "phase": "executing",
+            "currentMode": "ACT",
+        }
+        result = hud.format_status_line(
+            {"session_id": "s1"}, state, plugins_file=self._NO_PLUGINS
+        )
+        # FACE_ACTIVE = ◕◡◕
+        assert "\u25d5\u25e1\u25d5" in result
+
+    def test_blockers_show_error_face(self):
+        state = {
+            "sessionId": "s1",
+            "phase": "executing",
+            "blockerCount": 2,
+        }
+        result = hud.format_status_line(
+            {"session_id": "s1"}, state, plugins_file=self._NO_PLUGINS
+        )
+        # FACE_ERROR = ◕︵◕
+        assert "\u25d5\ufe35\u25d5" in result
+
+    def test_ready_phase_preserves_idle_face(self):
+        """Default/idle phase must not change the canonical glyph."""
+        state = {"sessionId": "s1", "phase": "ready"}
+        result = hud.format_status_line(
+            {"session_id": "s1"}, state, plugins_file=self._NO_PLUGINS
+        )
+        # FACE_IDLE = ◕‿◕
+        assert "\u25d5\u203f\u25d5" in result
+
+
+class TestWave2EContextBarIntegration:
+    """Wave 2-E: Ctx:% segment replaced with visual progress bar."""
+
+    _NO_PLUGINS = "/tmp/codingbuddy-wave3b-test-nonexistent-plugins.json"
+
+    def test_context_bar_replaces_ctx_text(self):
+        stdin = {
+            "session_id": "s1",
+            "context_window": {"used_percentage": 42},
+        }
+        result = hud.format_status_line(
+            stdin, {"sessionId": "s1"}, plugins_file=self._NO_PLUGINS
+        )
+        # Context bar uses block-drawing glyph and brackets
+        assert "[" in result
+        assert "]" in result
+        assert "\u2588" in result or "\u2591" in result  # █ or ░
+        assert "42%" in result
+        # Old "Ctx:" prefix must not leak back in
+        assert "Ctx:" not in result
+
+    def test_warning_symbol_above_80_percent(self):
+        stdin = {
+            "session_id": "s1",
+            "context_window": {"used_percentage": 88},
+        }
+        result = hud.format_status_line(
+            stdin, {"sessionId": "s1"}, plugins_file=self._NO_PLUGINS
+        )
+        assert "\u26a0" in result  # ⚠
+
+    def test_context_absent_falls_back_to_legacy_text(self):
+        """Missing context_window should still render something percentage-shaped."""
+        result = hud.format_status_line(
+            {"session_id": "s1"}, {"sessionId": "s1"}, plugins_file=self._NO_PLUGINS
+        )
+        assert "0%" in result  # either legacy "Ctx:0%" or bar "[...] 0%"
+
+
+class TestWave2DRainbowIntegration:
+    """Wave 2-D: opt-in ANSI mode coloring via CODINGBUDDY_HUD_RAINBOW."""
+
+    _NO_PLUGINS = "/tmp/codingbuddy-wave3b-test-nonexistent-plugins.json"
+
+    def test_rainbow_disabled_by_default(self, monkeypatch):
+        """Default: no ANSI escapes in status line output."""
+        monkeypatch.delenv("CODINGBUDDY_HUD_RAINBOW", raising=False)
+        monkeypatch.delenv("NO_COLOR", raising=False)
+        stdin = {"session_id": "s1"}
+        state = {"sessionId": "s1", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        assert "\x1b[" not in result  # No ANSI escapes
+        assert "PLAN" in result  # Mode label still present
+
+    def test_rainbow_opt_in_emits_ansi(self, monkeypatch):
+        """CODINGBUDDY_HUD_RAINBOW=1 activates ANSI coloring for known modes."""
+        monkeypatch.setenv("CODINGBUDDY_HUD_RAINBOW", "1")
+        monkeypatch.delenv("NO_COLOR", raising=False)
+        stdin = {"session_id": "s1"}
+        state = {"sessionId": "s1", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        assert "\x1b[" in result
+        assert "\x1b[0m" in result  # RESET present
+        assert "PLAN" in result  # Label substring survives
+
+    def test_no_color_overrides_opt_in(self, monkeypatch):
+        """NO_COLOR=1 always wins, even with CODINGBUDDY_HUD_RAINBOW=1."""
+        monkeypatch.setenv("CODINGBUDDY_HUD_RAINBOW", "1")
+        monkeypatch.setenv("NO_COLOR", "1")
+        stdin = {"session_id": "s1"}
+        state = {"sessionId": "s1", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        assert "\x1b[" not in result
+
+    def test_rainbow_preserves_ready_label_for_no_mode(self, monkeypatch):
+        """No currentMode → 'Ready' label must remain plain (not uppercased)."""
+        monkeypatch.setenv("CODINGBUDDY_HUD_RAINBOW", "1")
+        stdin = {"session_id": "s1"}
+        state = {"sessionId": "s1"}  # no currentMode
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        assert "Ready" in result
+        assert "READY" not in result.replace("Ready", "")
+
+
+class TestWave1DAdaptiveLayoutIntegration:
+    """Wave 1-D: fit_segments drops low-priority segments on narrow terminals."""
+
+    _NO_PLUGINS = "/tmp/codingbuddy-wave3b-test-nonexistent-plugins.json"
+
+    def test_narrow_terminal_fits_within_width(self, monkeypatch):
+        """With COLUMNS=60, the status line line1 should not exceed 60 cols."""
+        from hud_layout import visible_len
+
+        monkeypatch.setenv("COLUMNS", "60")
+        stdin = {
+            "session_id": "s1",
+            "model": {"id": "claude-opus-4-6", "display_name": "Opus 4.6 (1M context)"},
+            "cost": {"total_cost_usd": 1.23, "total_duration_ms": 600000},
+            "context_window": {
+                "used_percentage": 45,
+                "current_usage": {
+                    "input_tokens": 1000,
+                    "cache_creation_input_tokens": 500,
+                    "cache_read_input_tokens": 2000,
+                },
+            },
+            "rate_limits": {
+                "five_hour": {"used_percentage": 55},
+                "seven_day": {"used_percentage": 70},
+            },
+        }
+        state = {"sessionId": "s1", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        line1 = result.split("\n")[0]
+        assert visible_len(line1) <= 60, (
+            f"line1 visible width {visible_len(line1)} > 60: {line1!r}"
+        )
+
+    def test_sacred_segments_survive_narrow_width(self, monkeypatch):
+        """Even on ultra-narrow widths, face_version and mode_health remain."""
+        monkeypatch.setenv("COLUMNS", "30")
+        stdin = {"session_id": "s1", "context_window": {"used_percentage": 10}}
+        state = {"sessionId": "s1", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        line1 = result.split("\n")[0]
+        assert "CB" in line1  # face_version sacred
+        assert "PLAN" in line1 or "Ready" in line1  # mode_health sacred
+
+    def test_wide_terminal_keeps_all_segments(self, monkeypatch):
+        """With plenty of width, no segments are dropped."""
+        monkeypatch.setenv("COLUMNS", "300")
+        stdin = {
+            "session_id": "s1",
+            "model": {"id": "claude-opus-4-6", "display_name": "Opus 4.6"},
+            "cost": {"total_cost_usd": 1.23, "total_duration_ms": 600000},
+            "context_window": {"used_percentage": 45},
+        }
+        state = {"sessionId": "s1", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        line1 = result.split("\n")[0]
+        # All normal segments present
+        assert "Opus 4.6" in line1
+        assert "$1.23" in line1
+        assert "10m" in line1 or "$" in line1  # duration present
