@@ -15,7 +15,36 @@ import os
 import sys
 from datetime import datetime, timezone
 
-BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
+# --- lib import bootstrap ---
+# statusLine entry script: sys.path insertion here is intentional so
+# lib/* imports work when Claude Code invokes `python codingbuddy-hud.py`.
+_LIB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib")
+if _LIB_DIR not in sys.path:
+    sys.path.insert(0, _LIB_DIR)
+
+# === test_hud.py compatibility re-exports — DO NOT REMOVE without coordinated test update ===
+# Defensive fallback: statusLine is a hot path invoked by Claude Code on
+# every render. If any lib module is temporarily broken (e.g. mid-wave
+# refactor), fall back to minimal inline implementations so the status
+# bar still renders instead of crashing the Claude Code subprocess.
+try:
+    from hud_buddy import BUDDY_FACE  # canonical SSoT via tiny_actor_presets
+except Exception:  # pragma: no cover - defensive
+    BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
+
+try:
+    from hud_rate_limits import format_rate_limits
+except Exception:  # pragma: no cover - defensive
+    def format_rate_limits(stdin_data: dict) -> str:  # type: ignore[misc]
+        return ""
+
+try:
+    from hud_version import get_fresh_version as _get_fresh_version  # backcompat alias
+except Exception:  # pragma: no cover - defensive
+    def _get_fresh_version(  # type: ignore[misc]
+        hud_state: dict, *, plugins_file: str = ""
+    ) -> str:
+        return hud_state.get("version", "")
 
 # Agent eye glyphs from .ai-rules agent definitions.
 AGENT_GLYPHS = {
@@ -303,25 +332,6 @@ def resolve_model_label(stdin_data: dict) -> tuple:
     return (model_id, display_name)
 
 
-def format_rate_limits(stdin_data: dict) -> str:
-    """Format rate-limit info if present. Returns '' when absent."""
-    rl = stdin_data.get("rate_limits")
-    if not rl:
-        return ""
-    parts = []
-    five = rl.get("five_hour")
-    if five:
-        pct = five.get("used_percentage", 0)
-        parts.append(f"5h:{pct:.0f}%")
-    seven = rl.get("seven_day")
-    if seven:
-        pct = seven.get("used_percentage", 0)
-        parts.append(f"7d:{pct:.0f}%")
-    if not parts:
-        return ""
-    return "RL:" + ",".join(parts)
-
-
 def format_worktree(stdin_data: dict) -> str:
     """Format worktree name if present. Returns '' when absent."""
     wt = stdin_data.get("worktree")
@@ -393,28 +403,6 @@ def format_badge_line(agent: str, focus: str, blocker_count) -> str:
         badges.append(fb)
     badges.append(format_state_badge(blocker_count))
     return " ".join(badges)
-
-
-def _get_fresh_version(hud_state: dict, *, plugins_file: str = "") -> str:
-    """Return the most current plugin version.
-
-    Prefers installed_plugins.json (authoritative after updates)
-    over the hud-state snapshot written at session start.
-    Pass *plugins_file* explicitly for testing.
-    """
-    try:
-        lib_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib")
-        if lib_dir not in sys.path:
-            sys.path.insert(0, lib_dir)
-        from hud_helpers import read_installed_version
-
-        kwargs = {"plugins_file": plugins_file} if plugins_file else {}
-        fresh = read_installed_version(**kwargs)
-        if fresh:
-            return fresh
-    except Exception:
-        pass
-    return hud_state.get("version", "")
 
 
 def format_status_line(
