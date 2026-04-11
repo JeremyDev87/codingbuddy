@@ -247,10 +247,112 @@ class HealthChecker:
         return _result("standalone_readiness", "WARN", f"Standalone not ready: {', '.join(issues)}")
 
     # ------------------------------------------------------------------
+    # Check 11: HUD asset installation (#1490 prevention)
+    # ------------------------------------------------------------------
+    def check_hud_installation(self) -> Dict[str, str]:
+        """Verify HUD asset installation integrity.
+
+        Detects the v5.6.0/v5.6.1 failure mode where ``~/.claude/hud/lib``
+        is missing or stale and the statusLine renders only the
+        fallback ``◕‿◕ CodingBuddy`` face.
+
+        Performs three layers of verification:
+          1. Script presence at ``~/.claude/hud/codingbuddy-hud.py``
+          2. Lib directory presence + the seven critical modules:
+             ``hud_buddy``, ``hud_state``, ``hud_helpers``,
+             ``tiny_actor_presets``, ``hud_version``, ``hud_rate_limits``,
+             ``hud_layout``
+          3. A subprocess render smoke test that catches the case where
+             everything looks present but imports still fail at runtime
+             (e.g. permission issues, partial copy)
+        """
+        import subprocess
+
+        hud_dir = os.path.join(self._claude_dir, "hud")
+        script = os.path.join(hud_dir, "codingbuddy-hud.py")
+        lib = os.path.join(hud_dir, "lib")
+        stamp = os.path.join(hud_dir, ".version")
+
+        if not os.path.isfile(script):
+            return _result(
+                "hud_installation",
+                "FAIL",
+                "HUD script missing at ~/.claude/hud/codingbuddy-hud.py",
+            )
+
+        if not os.path.isdir(lib):
+            return _result(
+                "hud_installation",
+                "FAIL",
+                "HUD lib/ directory missing — statusLine renders fallback only",
+            )
+
+        required_modules = [
+            "hud_buddy.py",
+            "hud_state.py",
+            "hud_helpers.py",
+            "tiny_actor_presets.py",
+            "hud_version.py",
+            "hud_rate_limits.py",
+            "hud_layout.py",
+        ]
+        missing = [
+            m for m in required_modules if not os.path.isfile(os.path.join(lib, m))
+        ]
+        if missing:
+            return _result(
+                "hud_installation",
+                "FAIL",
+                f"HUD lib missing modules: {', '.join(missing)}",
+            )
+
+        # Subprocess render smoke — catches runtime import failures.
+        try:
+            r = subprocess.run(
+                ["python3", script],
+                input='{"session_id":"healthcheck","model":{"display_name":"Test"}}',
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if r.stdout.strip() == "◕‿◕ CodingBuddy":
+                return _result(
+                    "hud_installation",
+                    "FAIL",
+                    "HUD smoke test produced fallback face — lib import failing at runtime",
+                )
+        except subprocess.TimeoutExpired:
+            return _result(
+                "hud_installation",
+                "WARN",
+                "HUD smoke test timed out (5s)",
+            )
+        except Exception as e:
+            return _result(
+                "hud_installation",
+                "WARN",
+                f"HUD smoke test crashed: {e}",
+            )
+
+        version_msg = ""
+        if os.path.isfile(stamp):
+            try:
+                with open(stamp, "r", encoding="utf-8") as f:
+                    version_msg = f" (v{f.read().strip()})"
+            except OSError:
+                pass
+
+        return _result(
+            "hud_installation",
+            "PASS",
+            f"HUD assets installed and rendering full status line{version_msg}",
+        )
+
+    # ------------------------------------------------------------------
     # Aggregate
     # ------------------------------------------------------------------
     def run_all(self) -> List[Dict[str, str]]:
-        """Run all 10 diagnostic checks and return results."""
+        """Run all 11 diagnostic checks and return results."""
         return [
             self.check_hooks_json(),
             self.check_hook_files(),
@@ -262,6 +364,7 @@ class HealthChecker:
             self.check_mcp_connection(),
             self.check_runtime_mode(),
             self.check_standalone_readiness(),
+            self.check_hud_installation(),
         ]
 
     @staticmethod

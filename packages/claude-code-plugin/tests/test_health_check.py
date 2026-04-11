@@ -310,10 +310,10 @@ class TestCheckStandaloneReadiness:
 class TestRunAll:
     """run_all() returns all 10 check results."""
 
-    def test_returns_10_results(self, env):
+    def test_returns_11_results(self, env):
         checker = _make_checker(env)
         results = checker.run_all()
-        assert len(results) == 10
+        assert len(results) == 11  # bumped from 10 in v5.6.2 (#1490)
 
     def test_each_check_has_required_keys(self, env):
         checker = _make_checker(env)
@@ -342,3 +342,111 @@ class TestFormatReport:
         results = checker.run_all()
         report = checker.format_report(results)
         assert "FAIL" in report
+
+
+# ============================================================================
+# v5.6.2 (#1490) — check_hud_installation diagnostic
+# ============================================================================
+
+
+HUD_REQUIRED_LIB_MODULES = [
+    "hud_buddy.py",
+    "hud_state.py",
+    "hud_helpers.py",
+    "tiny_actor_presets.py",
+    "hud_version.py",
+    "hud_rate_limits.py",
+    "hud_layout.py",
+]
+
+
+def _populate_minimal_hud(home: "os.PathLike", lib_modules=None) -> None:
+    """Populate ~/.claude/hud with a stub script and (optionally) lib stubs.
+
+    The stub script always prints the fallback face so the smoke test
+    has predictable output. Pass lib_modules=None to omit the lib dir.
+    """
+    from pathlib import Path
+    h = Path(home) / ".claude" / "hud"
+    h.mkdir(parents=True, exist_ok=True)
+    (h / "codingbuddy-hud.py").write_text(
+        "#!/usr/bin/env python3\nprint('\u25d5\u203f\u25d5 CodingBuddy')\n"
+    )
+    os.chmod(str(h / "codingbuddy-hud.py"), 0o755)
+    if lib_modules is not None:
+        lib = h / "lib"
+        lib.mkdir(exist_ok=True)
+        for name in lib_modules:
+            (lib / name).write_text(f"# {name} stub")
+
+
+class TestCheckHudInstallation:
+    """Check 11: HUD asset installation integrity (#1490)."""
+
+    def test_fail_when_script_missing(self, env):
+        checker = _make_checker(env)
+        # env fixture creates ~/.claude but no hud/ dir
+        result = checker.check_hud_installation()
+        assert result["status"] == "FAIL"
+        assert "script missing" in result["message"].lower()
+
+    def test_fail_when_lib_directory_missing(self, env):
+        _populate_minimal_hud(env, lib_modules=None)  # script only
+        checker = _make_checker(env)
+        result = checker.check_hud_installation()
+        assert result["status"] == "FAIL"
+        assert "lib/" in result["message"] or "lib" in result["message"].lower()
+
+    def test_fail_when_required_modules_missing(self, env):
+        # Create lib but only with a subset of modules
+        _populate_minimal_hud(env, lib_modules=["hud_buddy.py", "hud_state.py"])
+        checker = _make_checker(env)
+        result = checker.check_hud_installation()
+        assert result["status"] == "FAIL"
+        assert "missing modules" in result["message"]
+        # The specific missing names must be reported
+        assert "tiny_actor_presets.py" in result["message"]
+
+    def test_fail_when_smoke_test_returns_fallback(self, env):
+        # Populate everything but stub script always prints fallback
+        _populate_minimal_hud(env, lib_modules=HUD_REQUIRED_LIB_MODULES)
+        checker = _make_checker(env)
+        result = checker.check_hud_installation()
+        assert result["status"] == "FAIL"
+        assert "fallback" in result["message"].lower()
+
+    def test_pass_with_real_plugin_install(self, env, monkeypatch):
+        """End-to-end: install real HUD via _install_statusline, then check.
+
+        This is the green-path regression gate — if check_hud_installation
+        ever stops returning PASS for a freshly-installed real plugin,
+        we know either the installer or the diagnostic regressed.
+        """
+        from pathlib import Path
+        import importlib.util as importutil
+
+        # Bootstrap session-start.py import
+        repo_hooks = Path(__file__).resolve().parents[1] / "hooks"
+        real_hud_source = repo_hooks / "codingbuddy-hud.py"
+        if not real_hud_source.exists():
+            pytest.skip(f"real HUD source not found at {real_hud_source}")
+
+        spec = importutil.spec_from_file_location(
+            "session_start_for_health", str(repo_hooks / "session-start.py")
+        )
+        session_start = importutil.module_from_spec(spec)
+        spec.loader.exec_module(session_start)
+
+        # Force the installer to use the real source
+        monkeypatch.setattr(
+            session_start, "_find_hud_source", lambda: real_hud_source
+        )
+        settings_file = env / ".claude" / "settings.json"
+        session_start._install_statusline(env, settings_file)
+
+        checker = _make_checker(env)
+        result = checker.check_hud_installation()
+        assert result["status"] == "PASS", (
+            f"expected PASS, got {result}"
+        )
+        assert "rendering full status line" in result["message"]
