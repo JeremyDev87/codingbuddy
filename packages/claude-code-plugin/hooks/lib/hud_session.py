@@ -103,18 +103,36 @@ def heal_stale_state(state: Dict[str, Any]) -> Dict[str, Any]:
 
     Cleared fields (so the HUD renders a safe default):
 
-    - ``currentMode`` → ``None`` (statusLine shows "Ready")
-    - ``version``     → ``""`` (hud_version falls back to plugin.json)
-    - ``activeAgent`` → ``None``
-    - ``phase``       → ``"ready"``
-    - ``focus``       → ``None``
-    - ``blockerCount``→ ``0``
+    - ``currentMode``             → ``None`` (statusLine shows "Ready")
+    - ``version``                 → ``""`` (hud_version falls back to plugin.json)
+    - ``activeAgent``             → ``None``
+    - ``phase``                   → ``"ready"``
+    - ``focus``                   → ``None``
+    - ``blockerCount``            → ``0``
+    - ``sessionStartTimestamp``   → ``""`` (Wave 1-B duration-leak fix)
 
     Preserved fields:
 
     - ``sessionId`` (so debugging can see what was there)
-    - ``sessionStartTimestamp`` (for audit / forensics)
     - Any other field not listed above
+
+    Forensics field (Wave 1-B fix — #1326):
+
+    - ``_healedFromSessionStartTimestamp`` — retains the original
+      ``sessionStartTimestamp`` value when one was present. Earlier
+      revisions preserved ``sessionStartTimestamp`` in place for
+      "audit / forensics", but ``resolve_duration`` in
+      codingbuddy-hud.py uses that same field as a fallback when
+      stdin lacks ``total_duration_ms``. A stale timestamp therefore
+      rendered huge durations like ``322h52m`` for brand-new
+      sessions. Relocating into a ``_healed…`` field keeps the
+      debug value while pulling the render-path fallback out of
+      the line of fire.
+
+    Idempotence: re-healing an already-healed state keeps the
+    forensics field stable — we only move a non-empty timestamp,
+    so the second pass sees ``sessionStartTimestamp == ""`` and
+    leaves ``_healedFromSessionStartTimestamp`` alone.
     """
     healed: Dict[str, Any] = dict(state)
     healed["currentMode"] = None
@@ -123,6 +141,16 @@ def heal_stale_state(state: Dict[str, Any]) -> Dict[str, Any]:
     healed["phase"] = "ready"
     healed["focus"] = None
     healed["blockerCount"] = 0
+
+    # Wave 1-B fix: move sessionStartTimestamp out of the render
+    # fallback path and into a forensics field. Only capture a
+    # non-empty value so repeated heals do not overwrite a
+    # previously preserved forensic timestamp with "".
+    original_ts = healed.get("sessionStartTimestamp", "") or ""
+    if original_ts:
+        healed["_healedFromSessionStartTimestamp"] = original_ts
+    healed["sessionStartTimestamp"] = ""
+
     return healed
 
 

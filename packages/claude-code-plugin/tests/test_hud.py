@@ -314,6 +314,60 @@ class TestResolveDuration:
         assert hud.resolve_duration({}, {}) == "0m"
 
 
+class TestHealedStateDurationDoesNotLeak:
+    """Wave 1-B regression (#1326): format_status_line must not render a
+    stale ``sessionStartTimestamp`` as duration after a self-heal.
+
+    Prior bug reproduction:
+        echo '{}' | python3 codingbuddy-hud.py
+        → ◕‿◕ CB v5.6.0 | Ready 🟢 | 322h52m | ~$0.00 | Ctx:0%
+
+    Root cause: ``heal_stale_state`` preserved ``sessionStartTimestamp``
+    for "audit / forensics", but ``resolve_duration`` read the same
+    field as a fallback when stdin had no ``total_duration_ms``.
+    Fix: timestamp is relocated into ``_healedFromSessionStartTimestamp``.
+    """
+
+    _NO_PLUGINS = "/tmp/codingbuddy-heal-test-nonexistent-plugins.json"
+
+    def test_healed_state_renders_0m_duration(self):
+        # Simulate the on-disk stale state that triggered the bug:
+        # a manual-fix repair marker with a weeks-old timestamp.
+        stale = {
+            "sessionId": "manual-fix",
+            "sessionStartTimestamp": "2026-03-29T04:10:47+00:00",
+            "currentMode": "ACT",
+            "version": "5.2.0",
+        }
+        from hud_session import heal_stale_state  # noqa: E402
+        healed = heal_stale_state(stale)
+
+        # stdin has no total_duration_ms, so resolve_duration must
+        # NOT fall back onto the old sessionStartTimestamp.
+        output = hud.format_status_line(
+            {"session_id": "brand-new"},
+            healed,
+            plugins_file=self._NO_PLUGINS,
+        )
+
+        assert "322h" not in output, (
+            f"healed state leaked stale duration into output: {output!r}"
+        )
+        assert " 0m " in output or output.endswith(" 0m") or "| 0m |" in output, (
+            f"healed state should render '0m' duration, got: {output!r}"
+        )
+
+    def test_healed_state_preserves_forensics_field(self):
+        # The forensics field is the mechanism we rely on — guard it
+        # with a direct assertion so a regression here is caught here,
+        # not in test_hud_session.py only.
+        from hud_session import heal_stale_state  # noqa: E402
+        stale = {"sessionId": "manual-fix", "sessionStartTimestamp": "2026-03-29T04:10:47+00:00"}
+        healed = heal_stale_state(stale)
+        assert healed["sessionStartTimestamp"] == ""
+        assert healed["_healedFromSessionStartTimestamp"] == "2026-03-29T04:10:47+00:00"
+
+
 class TestResolveAgent:
     def test_stdin_agent_preferred(self):
         stdin = {"agent": {"name": "security-reviewer"}}
