@@ -362,6 +362,35 @@ class TestHudInstallE2ERegressionGate:
         settings_file.parent.mkdir(parents=True)
         settings_file.write_text("{}")
 
+        # Mimic Claude Code's plugin manifest so the installed HUD's
+        # tier-1 version lookup (hud_version.get_fresh_version →
+        # ~/.claude/plugins/installed_plugins.json) resolves to the
+        # in-tree plugin version. Without this, CI environments (which
+        # have no prior install) leave the version segment empty and
+        # the `"CB v" in out` assertion below fails. This mirrors the
+        # behavior Claude Code performs after /plugin update on real
+        # user machines.
+        plugin_root = real_plugin_hud_source.parents[1]
+        plugin_json_path = plugin_root / ".claude-plugin" / "plugin.json"
+        expected_version = json.loads(plugin_json_path.read_text())["version"]
+        plugins_dir = home / ".claude" / "plugins"
+        plugins_dir.mkdir(parents=True, exist_ok=True)
+        (plugins_dir / "installed_plugins.json").write_text(
+            json.dumps(
+                {
+                    "plugins": {
+                        "codingbuddy@jeremydev87": [
+                            {
+                                "scope": "user",
+                                "installPath": str(plugin_root),
+                                "version": expected_version,
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
         hud_dir = home / ".claude" / "hud"
 
         if scenario == "partial":
@@ -405,7 +434,10 @@ class TestHudInstallE2ERegressionGate:
         if scenario == "stale":
             assert not (installed_lib / "hud_obsolete_v5_5.py").exists()
 
-        # 🔴 The render gate
+        # 🔴 The render gate — run the installed script as a real
+        # subprocess with an isolated HOME so tier-1 version lookup
+        # reads the fake installed_plugins.json we wrote above instead
+        # of leaking the developer/CI runner's real home directory.
         stdin_payload = json.dumps(
             {
                 "session_id": "regression-gate",
@@ -416,12 +448,19 @@ class TestHudInstallE2ERegressionGate:
                 },
             }
         )
+        isolated_env = {
+            "HOME": str(home),
+            "PATH": os.environ.get("PATH", ""),
+            "LANG": os.environ.get("LANG", ""),
+            "LC_ALL": os.environ.get("LC_ALL", ""),
+        }
         result = subprocess.run(
             ["python3", str(installed_script)],
             input=stdin_payload,
             capture_output=True,
             text=True,
             timeout=10,
+            env=isolated_env,
         )
         assert result.returncode == 0, (
             f"scenario={scenario} crashed: stderr={result.stderr!r}"
@@ -436,6 +475,16 @@ class TestHudInstallE2ERegressionGate:
             f"{sorted(p.name for p in installed_lib.iterdir())}"
         )
 
-        assert "CB v" in out, f"version segment missing: {out!r}"
+        # Exact version assertion — auto-tracks bump-version.sh so
+        # every release gates on a fully-populated version segment.
+        assert f"CB v{expected_version}" in out, (
+            f"version segment missing/wrong: {out!r} "
+            f"(expected 'CB v{expected_version}')"
+        )
         assert "Opus 4.6" in out, f"model segment missing: {out!r}"
         assert "$0.42" in out, f"cost segment missing: {out!r}"
+
+        # Stamp file assertion
+        stamp = hud_dir / ".version"
+        assert stamp.exists(), f"scenario={scenario}: .version stamp missing"
+        assert stamp.read_text(encoding="utf-8").strip() == expected_version

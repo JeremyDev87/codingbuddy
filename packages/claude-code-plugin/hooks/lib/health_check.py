@@ -306,7 +306,20 @@ class HealthChecker:
                 f"HUD lib missing modules: {', '.join(missing)}",
             )
 
-        # Subprocess render smoke — catches runtime import failures.
+        # Subprocess render smoke — catches runtime import failures
+        # AND partially-rendered status lines (e.g. empty version
+        # segment when hud_version's 3-tier fallback all fail).
+        # HOME is pinned to self._home_dir so the subprocess's
+        # tier-1 version lookup (~/.claude/plugins/installed_plugins.json)
+        # resolves against the same environment the diagnostic was
+        # configured with, rather than leaking the CI runner's real
+        # home.
+        isolated_env = {
+            "HOME": self._home_dir,
+            "PATH": os.environ.get("PATH", ""),
+            "LANG": os.environ.get("LANG", ""),
+            "LC_ALL": os.environ.get("LC_ALL", ""),
+        }
         try:
             r = subprocess.run(
                 ["python3", script],
@@ -314,12 +327,25 @@ class HealthChecker:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=isolated_env,
             )
-            if r.stdout.strip() == "◕‿◕ CodingBuddy":
+            rendered = r.stdout.strip()
+            if rendered == "◕‿◕ CodingBuddy":
                 return _result(
                     "hud_installation",
                     "FAIL",
                     "HUD smoke test produced fallback face — lib import failing at runtime",
+                )
+            # Version segment must not be empty. ``CB `` without the
+            # trailing ``v`` indicates all three version-resolution
+            # tiers (installed_plugins.json, plugin.json, hud_state)
+            # returned the empty string — a silent half-broken state
+            # that would otherwise ship unnoticed.
+            if "CB " in rendered and "CB v" not in rendered:
+                return _result(
+                    "hud_installation",
+                    "FAIL",
+                    "HUD rendered empty version segment — hud_version fallback chain broken",
                 )
         except subprocess.TimeoutExpired:
             return _result(
