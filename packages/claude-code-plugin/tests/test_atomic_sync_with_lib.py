@@ -199,3 +199,66 @@ class TestAtomicSyncWithLib:
         target_lib = target_dir / "lib"
         assert (target_lib / "mod_a.py").is_file()
         assert not (target_lib / "shared_helper.py").exists()
+
+    def test_no_staging_leftovers_after_success(
+        self, fake_source_with_lib, target_dir
+    ):
+        """Staging/archive directories must be cleaned up on success.
+
+        Regression gate for the v5.6.2 atomic-swap refactor: after a
+        successful sync, the parent directory must NOT contain any
+        stray ``.lib.staging-*`` or ``.lib.old-*`` entries, or the
+        next session-start would race on them.
+        """
+        session_start._atomic_sync_with_lib(fake_source_with_lib, target_dir)
+        leftover_staging = list(target_dir.glob(".lib.staging-*"))
+        leftover_old = list(target_dir.glob(".lib.old-*"))
+        assert leftover_staging == [], (
+            f"staging directories leaked: {leftover_staging}"
+        )
+        assert leftover_old == [], (
+            f"archive directories leaked: {leftover_old}"
+        )
+        assert (target_dir / "lib" / "mod_a.py").is_file()
+
+    def test_rollback_preserves_old_lib_when_copytree_fails(
+        self, tmp_path, monkeypatch
+    ):
+        """If copytree fails mid-sync, the existing lib must survive.
+
+        Simulates a source lib whose copytree raises partway through
+        and asserts that the pre-existing target_lib is NOT lost.
+        Protects users from losing a working HUD install if a future
+        plugin ships a broken source tree or the disk fills up.
+        """
+        src_hooks = tmp_path / "src_hooks"
+        src_hooks.mkdir()
+        (src_hooks / "script.py").write_text("# src")
+        src_lib = src_hooks / "lib"
+        src_lib.mkdir()
+        (src_lib / "mod_a.py").write_text("VAL_A = 1")
+
+        target = tmp_path / "target"
+        target.mkdir()
+        target_lib = target / "lib"
+        target_lib.mkdir()
+        (target_lib / "prior_mod.py").write_text("# survivor")
+
+        real_copytree = shutil.copytree
+
+        def flaky_copytree(*args, **kwargs):
+            raise OSError("simulated disk full")
+
+        monkeypatch.setattr(session_start.shutil, "copytree", flaky_copytree)
+
+        with pytest.raises(OSError, match="simulated disk full"):
+            session_start._atomic_sync_with_lib(
+                src_hooks / "script.py", target
+            )
+
+        # Old lib must survive
+        assert target_lib.exists()
+        assert (target_lib / "prior_mod.py").read_text() == "# survivor"
+        # No leaked staging or archive dirs
+        assert list(target.glob(".lib.staging-*")) == []
+        assert list(target.glob(".lib.old-*")) == []

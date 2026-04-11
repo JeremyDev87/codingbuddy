@@ -426,29 +426,51 @@ def _atomic_sync_with_lib(
     (#1490) where renamed/removed modules from prior plugin versions
     remained in the target directory and caused import failures.
 
-    Behavior:
+    Behavior (3-phase, near-atomic lib swap):
       1. ``mkdir -p target_dir``
       2. Copy ``source_script`` to ``target_dir/<source_script.name>``
-         and ``chmod 0o755``
-      3. If ``source_script.parent / "lib"`` exists, **rmtree** any
-         existing ``target_dir/lib`` and then ``copytree`` the source
-         lib so renamed modules cannot linger.
+         and ``chmod 0o755``.
+      3. If ``source_script.parent / "lib"`` exists:
+         a. Copy it into a staging directory ``.lib.staging-<uuid>``
+         b. Rename the existing ``lib`` aside to ``.lib.old-<uuid>``
+         c. Rename the staging directory to ``lib`` (POSIX ``rename``
+            is atomic, so the window during which importers see no
+            lib is bounded by two ``rename`` syscalls — microseconds)
+         d. ``rmtree`` the archived old lib
 
-    Why rmtree-then-copytree (and not ``dirs_exist_ok=True``):
-      ``dirs_exist_ok=True`` only writes; it does not remove files
-      that existed before but are gone now. A renamed module
+    Why staging instead of rmtree-then-copytree:
+      The naive pattern ``rmtree(target_lib); copytree(source_lib, target_lib)``
+      leaves the target empty for the duration of ``copytree`` (which
+      can be hundreds of milliseconds for a multi-megabyte lib). Any
+      concurrent HUD subprocess that statted the script during that
+      window would see import failures and render the fallback face.
+      The staging/rename pattern shrinks the window from ``O(copytree)``
+      to ``O(rename)`` — effectively atomic. It also tolerates
+      concurrent installers from multiple simultaneous Claude Code
+      sessions because each uses a uuid-scoped staging directory.
+
+    Why not ``dirs_exist_ok=True`` on its own:
+      That mode only writes; it does not remove files that existed
+      before but are gone now. A renamed module
       (e.g. ``hud_old.py`` → ``hud_new.py``) would remain in the
       target lib and could be imported first, causing subtle
-      regressions. session-start runs once per Claude Code session,
-      so the cost of the additional rmtree is negligible.
+      regressions. The staging pattern gives the same stale-safety
+      guarantees with atomicity on top.
 
     Args:
         source_script: Path to the script file to install. Its parent
             directory is searched for a sibling ``lib/`` to mirror.
         target_dir: Destination directory. Created if missing.
         extra_ignore: Additional ignore-pattern tuple appended to the
-            shared :data:`_HUD_SYNC_IGNORE_PATTERNS` list.
+            shared :data:`_HUD_SYNC_IGNORE_PATTERNS` list. Reserved for
+            future wave-specific excludes; both production callers
+            currently pass ``None``. Runtime lib modules are assumed
+            to follow the ``hud_*`` / ``tiny_actor_*`` naming
+            convention — do NOT add runtime helpers named
+            ``test_*.py`` or the ignore filter will drop them.
     """
+    import uuid
+
     target_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Script
@@ -456,20 +478,47 @@ def _atomic_sync_with_lib(
     shutil.copy(source_script, target_script)
     target_script.chmod(0o755)
 
-    # 2. Lib (atomic replace)
+    # 2. Lib — staging/rename pattern for near-atomic swap
     source_lib = source_script.parent / "lib"
-    if source_lib.is_dir():
-        target_lib = target_dir / "lib"
-        if target_lib.exists():
-            shutil.rmtree(target_lib)
-        ignore_patterns = _HUD_SYNC_IGNORE_PATTERNS
-        if extra_ignore:
-            ignore_patterns = ignore_patterns + tuple(extra_ignore)
+    if not source_lib.is_dir():
+        return
+
+    target_lib = target_dir / "lib"
+    ignore_patterns = _HUD_SYNC_IGNORE_PATTERNS
+    if extra_ignore:
+        ignore_patterns = ignore_patterns + tuple(extra_ignore)
+
+    suffix = uuid.uuid4().hex[:8]
+    staging_lib = target_dir / f".lib.staging-{suffix}"
+    archive_lib = target_dir / f".lib.old-{suffix}"
+
+    try:
         shutil.copytree(
             source_lib,
-            target_lib,
+            staging_lib,
             ignore=shutil.ignore_patterns(*ignore_patterns),
         )
+        # Atomic archive + promote. Each rename is a single syscall,
+        # so the window during which ``target_lib`` does not exist is
+        # bounded by one ``rename`` (~microseconds).
+        if target_lib.exists():
+            os.rename(str(target_lib), str(archive_lib))
+        os.rename(str(staging_lib), str(target_lib))
+    except Exception:
+        # Leave target_lib in the best recoverable state: prefer the
+        # old lib (from archive) over nothing. Staging is always
+        # disposable.
+        if staging_lib.exists():
+            shutil.rmtree(staging_lib, ignore_errors=True)
+        if archive_lib.exists() and not target_lib.exists():
+            try:
+                os.rename(str(archive_lib), str(target_lib))
+            except OSError:
+                pass
+        raise
+    finally:
+        if archive_lib.exists():
+            shutil.rmtree(archive_lib, ignore_errors=True)
 
 
 def _install_hook_with_lib(
@@ -484,6 +533,13 @@ def _install_hook_with_lib(
     that canonical name (``codingbuddy-mode-detect.py``) rather than
     the source name (``user-prompt-submit.py``).
 
+    Note on permission bits: ``_atomic_sync_with_lib`` has already
+    chmod'd the synced script to ``0o755`` before we rename it, and
+    POSIX ``rename`` preserves permission bits across the move. We
+    therefore do not re-chmod after the rename; a redundant ``chmod``
+    there would trigger an unnecessary silent failure path on
+    filesystems that reject mode changes (NFS, read-only mounts).
+
     Args:
         source_file: Path to the source hook script.
         hooks_dir: Target directory (e.g. ``~/.claude/hooks/``).
@@ -495,7 +551,8 @@ def _install_hook_with_lib(
         if target_file.exists():
             target_file.unlink()
         synced.rename(target_file)
-        target_file.chmod(0o755)
+        # No chmod here: _atomic_sync_with_lib already set 0o755 on
+        # ``synced`` and ``rename`` preserves mode.
 
 
 CODINGBUDDY_MCP_ENTRY = {
