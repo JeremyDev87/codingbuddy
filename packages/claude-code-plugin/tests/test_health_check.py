@@ -415,6 +415,33 @@ class TestCheckHudInstallation:
         assert result["status"] == "FAIL"
         assert "fallback" in result["message"].lower()
 
+    def test_fail_when_version_segment_is_empty(self, env):
+        """v5.6.2 regression gate: empty version segment must FAIL.
+
+        Stubs a script that renders a partial status line without a
+        ``CB v<version>`` prefix — mimics the v5.6.0/v5.6.1 runtime
+        where hud_version's 3-tier fallback all returned empty
+        strings and the rendered line read ``CB | Ready 🟢 | ...``.
+        The smoke test must detect this silent half-broken state.
+        """
+        from pathlib import Path
+        h = Path(env) / ".claude" / "hud"
+        h.mkdir(parents=True, exist_ok=True)
+        (h / "codingbuddy-hud.py").write_text(
+            "#!/usr/bin/env python3\n"
+            "print('\u25d5\u203f\u25d5 CB | Ready \U0001f7e2 | Opus 4.6')\n"
+        )
+        os.chmod(str(h / "codingbuddy-hud.py"), 0o755)
+        lib = h / "lib"
+        lib.mkdir(exist_ok=True)
+        for name in HUD_REQUIRED_LIB_MODULES:
+            (lib / name).write_text(f"# {name} stub")
+
+        checker = _make_checker(env)
+        result = checker.check_hud_installation()
+        assert result["status"] == "FAIL"
+        assert "empty version segment" in result["message"].lower()
+
     def test_pass_with_real_plugin_install(self, env, monkeypatch):
         """End-to-end: install real HUD via _install_statusline, then check.
 
@@ -422,6 +449,7 @@ class TestCheckHudInstallation:
         ever stops returning PASS for a freshly-installed real plugin,
         we know either the installer or the diagnostic regressed.
         """
+        import json as _json
         from pathlib import Path
         import importlib.util as importutil
 
@@ -437,6 +465,32 @@ class TestCheckHudInstallation:
         session_start = importutil.module_from_spec(spec)
         spec.loader.exec_module(session_start)
 
+        # Mimic Claude Code's plugin manifest so check_hud_installation's
+        # subprocess (HOME=self._home_dir=env) can resolve the plugin
+        # version via tier-1 lookup. Without this, CI environments
+        # produce an empty version segment and the new version-segment
+        # validation correctly FAILs the check.
+        plugin_root = repo_hooks.parent
+        plugin_json = plugin_root / ".claude-plugin" / "plugin.json"
+        expected_version = _json.loads(plugin_json.read_text())["version"]
+        plugins_dir = env / ".claude" / "plugins"
+        plugins_dir.mkdir(parents=True, exist_ok=True)
+        (plugins_dir / "installed_plugins.json").write_text(
+            _json.dumps(
+                {
+                    "plugins": {
+                        "codingbuddy@jeremydev87": [
+                            {
+                                "scope": "user",
+                                "installPath": str(plugin_root),
+                                "version": expected_version,
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
         # Force the installer to use the real source
         monkeypatch.setattr(
             session_start, "_find_hud_source", lambda: real_hud_source
@@ -450,3 +504,4 @@ class TestCheckHudInstallation:
             f"expected PASS, got {result}"
         )
         assert "rendering full status line" in result["message"]
+        assert expected_version in result["message"]
