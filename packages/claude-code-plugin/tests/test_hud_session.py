@@ -154,8 +154,21 @@ def test_heal_clears_ephemeral_fields():
     assert healed["blockerCount"] == 0
 
 
-def test_heal_preserves_session_id_and_timestamp():
-    """heal_stale_state keeps sessionId and sessionStartTimestamp intact."""
+def test_heal_preserves_session_id_and_moves_timestamp_to_forensics():
+    """heal_stale_state keeps sessionId but relocates sessionStartTimestamp.
+
+    Historical note: an earlier version of this function preserved
+    ``sessionStartTimestamp`` verbatim for "audit / forensics". That
+    caused the Wave 1-B duration-leak bug — ``resolve_duration`` in
+    codingbuddy-hud.py uses ``sessionStartTimestamp`` as a fallback
+    when stdin has no ``total_duration_ms``, so a healed (but
+    timestamp-retaining) state rendered enormous durations
+    (e.g., ``322h52m``) for brand-new sessions.
+
+    The fix: relocate the timestamp into ``_healedFromSessionStartTimestamp``
+    so forensic value is preserved for debuggers/tests while the render
+    fallback path no longer sees it.
+    """
     state = {
         "sessionId": "abc-123",
         "sessionStartTimestamp": "2026-04-01T00:00:00+00:00",
@@ -163,7 +176,35 @@ def test_heal_preserves_session_id_and_timestamp():
     }
     healed = hud_session.heal_stale_state(state)
     assert healed["sessionId"] == "abc-123"
-    assert healed["sessionStartTimestamp"] == "2026-04-01T00:00:00+00:00"
+    # Render fallback path must not see the stale timestamp
+    assert healed["sessionStartTimestamp"] == ""
+    # Forensic value is preserved for post-mortem debugging
+    assert healed["_healedFromSessionStartTimestamp"] == "2026-04-01T00:00:00+00:00"
+
+
+def test_heal_without_timestamp_does_not_add_forensics_field():
+    """If there is no sessionStartTimestamp to heal, no forensics field is added."""
+    state = {"sessionId": "abc-123", "currentMode": "ACT"}
+    healed = hud_session.heal_stale_state(state)
+    assert healed["sessionStartTimestamp"] == ""
+    assert "_healedFromSessionStartTimestamp" not in healed
+
+
+def test_heal_is_idempotent_on_forensics_field():
+    """Re-healing a healed state preserves the forensics timestamp stably.
+
+    Guards against a naive implementation that would overwrite
+    ``_healedFromSessionStartTimestamp`` with the empty string on
+    the second pass, losing the original value.
+    """
+    stale = {
+        "sessionId": "manual-fix",
+        "sessionStartTimestamp": "2026-03-29T04:10:47+00:00",
+    }
+    once = hud_session.heal_stale_state(stale)
+    twice = hud_session.heal_stale_state(once)
+    assert twice["_healedFromSessionStartTimestamp"] == "2026-03-29T04:10:47+00:00"
+    assert twice["sessionStartTimestamp"] == ""
 
 
 def test_heal_does_not_mutate_input():
