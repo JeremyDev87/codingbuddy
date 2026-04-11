@@ -23,28 +23,40 @@ if _LIB_DIR not in sys.path:
     sys.path.insert(0, _LIB_DIR)
 
 # === test_hud.py compatibility re-exports — DO NOT REMOVE without coordinated test update ===
-# Defensive fallback: statusLine is a hot path invoked by Claude Code on
-# every render. If any lib module is temporarily broken (e.g. mid-wave
-# refactor), fall back to minimal inline implementations so the status
-# bar still renders instead of crashing the Claude Code subprocess.
+# Narrow the fallback to ImportError only: real logic bugs in lib modules
+# (SyntaxError, NameError, AttributeError) must surface immediately instead
+# of being silently swallowed by a catch-all. If a lib module fails to import
+# entirely, the outer main() try/except at the bottom of this file still
+# emits the minimal safe output via the BUDDY_FACE constant.
 try:
     from hud_buddy import BUDDY_FACE  # canonical SSoT via tiny_actor_presets
-except Exception:  # pragma: no cover - defensive
-    BUDDY_FACE = "\u25d5\u203f\u25d5"  # ◕‿◕
+except ImportError:  # pragma: no cover - defensive
+    BUDDY_FACE = "◕‿◕"  # minimal constant for safe-output path
 
 try:
-    from hud_rate_limits import format_rate_limits
-except Exception:  # pragma: no cover - defensive
-    def format_rate_limits(stdin_data: dict) -> str:  # type: ignore[misc]
-        return ""
+    from hud_rate_limits import format_rate_limits  # noqa: F401 re-exported for test_hud.py
+except ImportError:  # pragma: no cover - defensive
+    pass  # main() catch-all handles absence
 
 try:
     from hud_version import get_fresh_version as _get_fresh_version  # backcompat alias
-except Exception:  # pragma: no cover - defensive
-    def _get_fresh_version(  # type: ignore[misc]
-        hud_state: dict, *, plugins_file: str = ""
-    ) -> str:
-        return hud_state.get("version", "")
+except ImportError:  # pragma: no cover - defensive
+    pass  # main() catch-all handles absence
+
+# Wave 2-B velocity + Wave 2-C cache savings hot-path suffixes for the cost segment.
+# Hoisted to module top per perf-1485 H1 so format_status_line avoids a
+# sys.modules lookup on every render (~0.47μs saved per call).
+try:
+    from hud_velocity import format_velocity_segment as _format_velocity_segment
+except ImportError:  # pragma: no cover - defensive
+    def _format_velocity_segment(stdin_data, hud_state=None):  # type: ignore[misc]
+        return ""
+
+try:
+    from hud_cache_savings import format_cache_savings as _format_cache_savings
+except ImportError:  # pragma: no cover - defensive
+    def _format_cache_savings(stdin_data):  # type: ignore[misc]
+        return ""
 
 # Agent eye glyphs from .ai-rules agent definitions.
 AGENT_GLYPHS = {
