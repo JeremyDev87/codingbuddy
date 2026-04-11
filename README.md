@@ -18,15 +18,15 @@ Codingbuddy is a multi-AI MCP server that orchestrates 37 specialist agents acro
 
 ---
 
-## What's New in v5.5.0 — Wow Experience
+## What's New in v5.6.0 — HUD Statusbar Wave
 
-- **Agent Council Memory** — specialists now remember prior findings and build on each other's context across sessions.
-- **Live AI Guardrails** — real-time rule violation interception on Edit/Write with pattern detection (SQL injection, XSS, hardcoded secrets, eval/exec).
-- **Self-Evolving Rules** — `suggest_rules` MCP tool analyzes failure patterns and proposes draft rules for human review.
-- **Smart First Prompt** — context-aware onboarding that reads your project and suggests the next best mode.
-- **Team Bootstrap** — `codingbuddy init --team` auto-detects installed AI tools (Cursor, Claude Code, Codex, Antigravity, Q, Kiro) and generates matching adapters in one command.
-- **Micro-Achievements** — unlockable milestones for mode entries, council summons, and TDD cycles.
-- **Council Assembly Animation** — dramatic staggered specialist arrival effect on mode entry.
+- **Breathing Buddy Face** — the buddy face reacts to your session phase (idle / thinking / active / blocked / victory) so the status bar feels alive.
+- **Cost Velocity Indicator** — session spend-rate badge with 🔥 / ↗ / → / 💤 trend glyphs tells you whether you're on a slow planning pass or a hot refactor burn.
+- **Cache Savings Badge** — quantifies prompt-cache discounts as `💰$N.NN saved` so you see the value of caching in real time.
+- **Mode Rainbow Coloring** — per-mode ANSI truecolor gradients (PLAN ◇ / ACT ◆ / EVAL ◈ / AUTO ◊) with `NO_COLOR` env support for CI and greyscale terminals.
+- **Smart Context Bar** — visual `[████░░░░░░] 42%` progress bar replaces plain `Ctx:42%` text with warning and danger thresholds.
+- **Adaptive Layout Engine** — HUD fits narrow terminals gracefully with `fit_segments` adaptive truncation.
+- **Rate-limit Severity Icons** — visual warnings when you approach API rate limits.
 
 ---
 

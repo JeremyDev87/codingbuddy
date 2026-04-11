@@ -24,15 +24,15 @@
 
 ---
 
-## v5.5.0의 새로운 기능 — Wow Experience
+## v5.6.0의 새로운 기능 — HUD Statusbar Wave
 
-- **Agent Council Memory** — 전문가들이 이전 분석 결과를 기억하고 세션 간에 서로의 컨텍스트를 기반으로 발전합니다.
-- **Live AI Guardrails** — Edit/Write 시 실시간 규칙 위반 감지 및 패턴 탐지 (SQL injection, XSS, 하드코딩된 시크릿, eval/exec).
-- **Self-Evolving Rules** — `suggest_rules` MCP 도구가 실패 패턴을 분석하고 사람이 검토할 규칙 초안을 제안합니다.
-- **Smart First Prompt** — 프로젝트를 읽고 다음에 가장 적합한 모드를 제안하는 컨텍스트 인식 온보딩.
-- **Team Bootstrap** — `codingbuddy init --team`이 설치된 AI 도구(Cursor, Claude Code, Codex, Antigravity, Q, Kiro)를 자동으로 감지하고 한 번에 매칭되는 어댑터를 생성합니다.
-- **Micro-Achievements** — 모드 진입, 협의회 소환, TDD 사이클에 대한 잠금 해제 가능한 마일스톤.
-- **Council Assembly Animation** — 모드 진입 시 전문가가 순차적으로 도착하는 극적인 연출.
+- **Breathing Buddy Face** — 버디 페이스가 세션 단계(유휴 / 사고 중 / 실행 중 / 차단됨 / 완료)에 반응하여 상태 바가 살아 있는 느낌을 줍니다.
+- **Cost Velocity Indicator** — 🔥 / ↗ / → / 💤 트렌드 글리프가 포함된 세션 지출 속도 배지가 천천히 기획 중인지 뜨겁게 리팩토링 중인지 알려줍니다.
+- **Cache Savings Badge** — 프롬프트 캐시 할인을 `💰$N.NN saved`로 수치화하여 캐싱의 가치를 실시간으로 보여줍니다.
+- **Mode Rainbow Coloring** — 모드별 ANSI 트루컬러 그라디언트(PLAN ◇ / ACT ◆ / EVAL ◈ / AUTO ◊)와 CI·그레이스케일 터미널을 위한 `NO_COLOR` 환경변수 지원.
+- **Smart Context Bar** — 시각적 `[████░░░░░░] 42%` 진행 바가 단순한 `Ctx:42%` 텍스트를 경고/위험 임계값과 함께 대체합니다.
+- **Adaptive Layout Engine** — `fit_segments` 적응형 잘라내기로 좁은 터미널에서도 HUD가 우아하게 맞춰집니다.
+- **Rate-limit Severity Icons** — API 속도 제한에 근접할 때 시각적 경고를 표시합니다.
 
 ---
 
