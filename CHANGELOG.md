@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.6.1] - 2026-04-11
+
+Hotfix closing the remaining gaps in the v5.6.0 HUD Statusbar Wave cycle:
+a stale-timestamp leak in the self-heal path, plus the four Wave modules
+that shipped as dead code in v5.6.0 (imported but never wired into
+`format_status_line`).
+
+### Fixed
+- HUD heal timestamp leak (Wave 1-B, [#1487](https://github.com/JeremyDev87/codingbuddy/pull/1487)) — `heal_stale_state` preserved `sessionStartTimestamp` for "audit / forensics", but `resolve_duration` read the same field as a fallback when stdin lacked `total_duration_ms`. A manual-fix marker + stale timestamp therefore rendered enormous durations like `322h52m` for brand-new sessions. The timestamp is now relocated into `_healedFromSessionStartTimestamp` so forensic/debug value is preserved while the render fallback path no longer sees it. Idempotent — re-healing an already-healed state keeps the forensics field stable.
+
+### Added
+- Wave 3b — Complete Wave 3 integration ([#1488](https://github.com/JeremyDev87/codingbuddy/pull/1488)) — commit `bd78195` ("integrate Wave 2-B/2-C in `format_status_line`") wired velocity and cache-savings into the cost segment but left four sibling Wave modules as dead code: `hud_buddy`, `hud_rainbow`, `hud_context_bar`, and `hud_layout`. Their unit tests passed, but `format_status_line` never called them. This hotfix hoists all four modules as top-level imports and refactors `format_status_line` to build `(name, priority, text)` segments consumed by `fit_segments`:
+  - **Wave 2-A — Breathing Buddy Face** now actually breathes: the buddy face reflects `hud_state.phase` / `blockerCount` (`ready` → ◕‿◕ idle, `planning` → ◔‿◔ thinking, `executing` → ◕◡◕ active, blockers → ◕︵◕ error, `lastEvent=victory` → ◕ᴗ◕).
+  - **Wave 2-D — Mode Rainbow Coloring** now actually colors: opt-in via `CODINGBUDDY_HUD_RAINBOW=1` because Claude Code statusLine ANSI support is environment-dependent. Default OFF keeps existing terminals clean. Transitively honours the `NO_COLOR` standard (https://no-color.org). Only real modes (PLAN/ACT/EVAL/AUTO) are colored — the "Ready" fallback label stays plain. Coloring is applied post-`fit_segments` so ANSI escapes don't break layout width accounting.
+  - **Wave 2-E — Smart Context Bar** now actually renders: `Ctx:NN%` is replaced with `[████░░░░░░] 42%`. Dark shade `▓` marks the trailing full block above the danger threshold (85%) and a `⚠` suffix is appended above the warning threshold (80%).
+  - **Wave 1-D — Adaptive Layout** now actually adapts: the final `" | ".join(segments)` is replaced with `fit_segments(layout_segments, terminal_width())`. Low-priority segments (`worktree`, `rate_limits`, `model`, `cache`, `ctx`) drop first on narrow terminals; `face_version` and `mode_health` are sacred and always render. `shorten_model_label` trims the `"(1M context)"` suffix so Opus display names fit mid-width terminals without being dropped.
+
+### Test Coverage
+- 17 new Wave 3b integration tests across four classes (`TestWave2ABreathingFaceIntegration`, `TestWave2EContextBarIntegration`, `TestWave2DRainbowIntegration`, `TestWave1DAdaptiveLayoutIntegration`)
+- 5 new Wave 1-B regression tests guarding the heal-timestamp contract
+- 3 existing tests updated for the Wave 2-E `[bar] NN%` format; `test_full_telemetry` hardened with `COLUMNS=300` so the "all segments render" assertion no longer flakes against the pytest 80-col default now that adaptive layout actually runs
+- Plugin test suite: 1077+ passed locally
+
 ## [5.6.0] - 2026-04-11
 
 ### Added

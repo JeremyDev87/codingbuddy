@@ -5735,7 +5735,7 @@ __metadata:
     typescript: "npm:5.9.3"
     vitest: "npm:4.0.17"
   peerDependencies:
-    codingbuddy: ^5.6.0
+    codingbuddy: ^5.6.1
   peerDependenciesMeta:
     codingbuddy:
       optional: true
