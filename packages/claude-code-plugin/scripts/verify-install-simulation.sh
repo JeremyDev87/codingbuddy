@@ -65,6 +65,32 @@ settings_file = home / ".claude" / "settings.json"
 settings_file.parent.mkdir(parents=True, exist_ok=True)
 settings_file.write_text("{}")
 
+plugin_root_path = Path(plugin_root)
+
+# Mimic Claude Code's plugin manifest so the installed HUD's tier-1
+# version lookup (read_installed_version → ~/.claude/plugins/installed_plugins.json)
+# resolves to the version we are about to ship. Without this the
+# isolated tmpdir has no installed_plugins.json and the version
+# segment renders empty.
+plugin_json = plugin_root_path / ".claude-plugin" / "plugin.json"
+import json as _json
+expected_version = _json.loads(plugin_json.read_text())["version"]
+plugins_dir = home / ".claude" / "plugins"
+plugins_dir.mkdir(parents=True, exist_ok=True)
+(plugins_dir / "installed_plugins.json").write_text(
+    _json.dumps({
+        "plugins": {
+            "codingbuddy@jeremydev87": [
+                {
+                    "scope": "user",
+                    "installPath": str(plugin_root_path),
+                    "version": expected_version,
+                }
+            ]
+        }
+    })
+)
+
 # Run the installer the same way session-start hook would
 try:
     session_start._install_statusline(home, settings_file)
@@ -103,12 +129,24 @@ payload = json.dumps({
     "model": {"display_name": "Opus 4.6"},
     "cost": {"total_cost_usd": 0.42, "total_duration_ms": 120000},
 })
+# Isolate HOME so the installed script reads the tmpdir installation
+# instead of leaking the developer's real ~/.claude/plugins/installed_plugins.json.
+# Without this, hud_version.get_fresh_version's tier-1 lookup picks up
+# the real machine's plugin version and the assertion below cannot
+# verify that the v5.6.2 prep actually flows through the install path.
+isolated_env = {
+    "HOME": str(home),
+    "PATH": os.environ.get("PATH", ""),
+    "LANG": os.environ.get("LANG", ""),
+    "LC_ALL": os.environ.get("LC_ALL", ""),
+}
 result = subprocess.run(
     ["python3", str(installed_script)],
     input=payload,
     capture_output=True,
     text=True,
     timeout=10,
+    env=isolated_env,
 )
 out = result.stdout
 print(f"[verify-install-simulation] stdout={out!r}")
@@ -129,7 +167,13 @@ if out.strip() == "\u25d5\u203f\u25d5 CodingBuddy":
     )
     sys.exit(1)
 
-required_tokens = ["CB v", "Opus 4.6", "$0.42"]
+# expected_version was resolved earlier from plugin.json so the
+# assertion auto-tracks bump-version.sh.
+required_tokens = [
+    f"CB v{expected_version}",  # version exactly matches plugin.json
+    "Opus 4.6",
+    "$0.42",
+]
 for token in required_tokens:
     if token not in out:
         print(
@@ -138,5 +182,19 @@ for token in required_tokens:
         )
         sys.exit(1)
 
-print("[verify-install-simulation] PASS: full status line rendered")
+# Verify version stamp file
+stamp = home / ".claude" / "hud" / ".version"
+if not stamp.exists():
+    print("[verify-install-simulation] FAIL: .version stamp not written", file=sys.stderr)
+    sys.exit(1)
+stamp_value = stamp.read_text(encoding="utf-8").strip()
+if stamp_value != expected_version:
+    print(
+        f"[verify-install-simulation] FAIL: stamp {stamp_value!r} != "
+        f"plugin.json version {expected_version!r}",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+print(f"[verify-install-simulation] PASS: full status line rendered (v{expected_version})")
 PYEOF
