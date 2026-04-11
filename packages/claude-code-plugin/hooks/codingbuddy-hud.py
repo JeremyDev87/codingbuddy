@@ -14,6 +14,7 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
+from typing import Optional
 
 # --- lib import bootstrap ---
 # statusLine entry script: sys.path insertion here is intentional so
@@ -42,8 +43,15 @@ try:
     from hud_version import get_fresh_version as _get_fresh_version  # backcompat alias
 except Exception:  # pragma: no cover - defensive
     def _get_fresh_version(  # type: ignore[misc]
-        hud_state: dict, *, plugins_file: str = ""
+        hud_state: dict,
+        *,
+        plugins_file: str = "",
+        plugin_json_file: Optional[str] = None,
     ) -> str:
+        # Signature must stay in sync with hud_version.get_fresh_version
+        # (see Wave 1-A PR #1467 review — HIGH finding H1). When this
+        # stub is active, hud_version is unavailable so tier-2 cannot
+        # be honoured regardless of the kwarg value; accept and ignore.
         return hud_state.get("version", "")
 
 # Agent eye glyphs from .ai-rules agent definitions.
@@ -411,17 +419,30 @@ def format_status_line(
     active_agent: str = "",
     *,
     plugins_file: str = "",
+    plugin_json_file: Optional[str] = None,
 ) -> str:
     """Format the statusLine output.
 
     Fallback order per field:
-      version  → installed_plugins.json > hud-state.version
+      version  → installed_plugins.json > plugin.json > hud-state.version
       cost     → stdin cost.total_cost_usd  > estimate_cost()
       duration → stdin cost.total_duration_ms > hud-state sessionStartTimestamp
       agent    → stdin agent.name > hud_state.activeAgent > active_agent param
       model    → stdin model.display_name > model.id
+
+    Args:
+        plugin_json_file: Wave 1-A control for the local ``plugin.json``
+            fallback. ``None`` (default) disables tier-2 — matches the
+            hud_version contract for backwards compatibility. ``""``
+            enables the dev-install default path. A non-empty string
+            overrides the path for tests. ``main()`` passes ``""`` in
+            production so statusLine always reflects a fresh version.
     """
-    version = _get_fresh_version(hud_state, plugins_file=plugins_file)
+    version = _get_fresh_version(
+        hud_state,
+        plugins_file=plugins_file,
+        plugin_json_file=plugin_json_file,
+    )
     mode = hud_state.get("currentMode")
     mode_label = mode if mode else "Ready"
 
@@ -482,7 +503,12 @@ def main():
 
         env_agent = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
 
-        output = format_status_line(stdin_data, hud_state, env_agent)
+        # Pass plugin_json_file="" to enable Wave 1-A dev-install
+        # plugin.json fallback. Tests opt out by omitting this kwarg
+        # and relying on the Optional[str]=None default.
+        output = format_status_line(
+            stdin_data, hud_state, env_agent, plugin_json_file=""
+        )
         print(output)
     except Exception:
         print(f"{BUDDY_FACE} CodingBuddy")
