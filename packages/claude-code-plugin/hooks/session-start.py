@@ -397,33 +397,105 @@ def register_hook_in_settings(settings_file: Path) -> bool:
     return True
 
 
+# Asset sync ignore patterns shared by both installers (#1490).
+# Why these patterns:
+#   __pycache__ / *.pyc / *.pyo  — compiled artifacts; never needed at runtime
+#   .pytest_cache                 — local test runner state; can pollute sys.path
+#   test_*.py                     — test files must not enter the runtime lib
+#   *.egg-info                    — packaging metadata
+_HUD_SYNC_IGNORE_PATTERNS: Tuple[str, ...] = (
+    "__pycache__",
+    "*.pyc",
+    "*.pyo",
+    ".pytest_cache",
+    "test_*.py",
+    "*.egg-info",
+)
+
+
+def _atomic_sync_with_lib(
+    source_script: Path,
+    target_dir: Path,
+    extra_ignore: Optional[Tuple[str, ...]] = None,
+) -> None:
+    """Atomically install a script + its sibling ``lib/`` directory.
+
+    Replaces the prior pattern of ``shutil.copy`` (script-only) and
+    ``shutil.copytree(dirs_exist_ok=True)`` (additive lib copy). Both
+    were vulnerable to the v5.6.0/v5.6.1 HUD installer regression
+    (#1490) where renamed/removed modules from prior plugin versions
+    remained in the target directory and caused import failures.
+
+    Behavior:
+      1. ``mkdir -p target_dir``
+      2. Copy ``source_script`` to ``target_dir/<source_script.name>``
+         and ``chmod 0o755``
+      3. If ``source_script.parent / "lib"`` exists, **rmtree** any
+         existing ``target_dir/lib`` and then ``copytree`` the source
+         lib so renamed modules cannot linger.
+
+    Why rmtree-then-copytree (and not ``dirs_exist_ok=True``):
+      ``dirs_exist_ok=True`` only writes; it does not remove files
+      that existed before but are gone now. A renamed module
+      (e.g. ``hud_old.py`` → ``hud_new.py``) would remain in the
+      target lib and could be imported first, causing subtle
+      regressions. session-start runs once per Claude Code session,
+      so the cost of the additional rmtree is negligible.
+
+    Args:
+        source_script: Path to the script file to install. Its parent
+            directory is searched for a sibling ``lib/`` to mirror.
+        target_dir: Destination directory. Created if missing.
+        extra_ignore: Additional ignore-pattern tuple appended to the
+            shared :data:`_HUD_SYNC_IGNORE_PATTERNS` list.
+    """
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Script
+    target_script = target_dir / source_script.name
+    shutil.copy(source_script, target_script)
+    target_script.chmod(0o755)
+
+    # 2. Lib (atomic replace)
+    source_lib = source_script.parent / "lib"
+    if source_lib.is_dir():
+        target_lib = target_dir / "lib"
+        if target_lib.exists():
+            shutil.rmtree(target_lib)
+        ignore_patterns = _HUD_SYNC_IGNORE_PATTERNS
+        if extra_ignore:
+            ignore_patterns = ignore_patterns + tuple(extra_ignore)
+        shutil.copytree(
+            source_lib,
+            target_lib,
+            ignore=shutil.ignore_patterns(*ignore_patterns),
+        )
+
+
 def _install_hook_with_lib(
     source_file: Path, hooks_dir: Path, target_file: Path
 ) -> None:
     """Copy hook file AND its lib/ dependencies to the target hooks directory.
 
-    Copies the hook script and, if present, the sibling lib/ directory
-    so that runtime imports (e.g. hud_state) work from ~/.claude/hooks/.
+    v5.6.2 (#1490): now delegates to :func:`_atomic_sync_with_lib` so
+    renamed/removed modules from prior plugin versions are purged on
+    every sync. The hook script is then renamed in place to
+    ``HOOK_FILENAME`` because Claude Code's settings.json points at
+    that canonical name (``codingbuddy-mode-detect.py``) rather than
+    the source name (``user-prompt-submit.py``).
 
     Args:
         source_file: Path to the source hook script.
-        hooks_dir: Target directory (e.g. ~/.claude/hooks/).
+        hooks_dir: Target directory (e.g. ``~/.claude/hooks/``).
         target_file: Full target path for the hook script.
     """
-    hooks_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy(source_file, target_file)
-    target_file.chmod(0o755)
-
-    # Copy lib/ directory alongside the hook (#1102)
-    source_lib = source_file.parent / "lib"
-    if source_lib.is_dir():
-        target_lib = hooks_dir / "lib"
-        shutil.copytree(
-            source_lib,
-            target_lib,
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-        )
+    _atomic_sync_with_lib(source_file, hooks_dir)
+    synced = hooks_dir / source_file.name
+    if synced != target_file:
+        if target_file.exists():
+            target_file.unlink()
+        synced.rename(target_file)
+        target_file.chmod(0o755)
 
 
 CODINGBUDDY_MCP_ENTRY = {
