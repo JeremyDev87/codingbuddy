@@ -743,3 +743,97 @@ class TestIntegration:
         )
         assert result.returncode == 0
         assert "\u25d5\u203f\u25d5" in result.stdout
+
+
+# ========================= Wave 3 Integration Tests ========================
+
+
+class TestWave3Integration:
+    """End-to-end integration regression for Wave 2-B/2-C cost suffixes."""
+
+    _NO_PLUGINS = "/tmp/_nonexistent_plugins_wave3.json"
+
+    def test_velocity_suffix_present_when_cost_and_duration_available(self):
+        """Wave 2-B velocity suffix appears after the cost segment."""
+        stdin = {
+            "cost": {"total_cost_usd": 1.0, "total_duration_ms": 60_000},
+            "model": {"id": "claude-sonnet", "display_name": "Sonnet"},
+            "context_window": {"used_percentage": 5},
+        }
+        state = {
+            "version": "5.5.0",
+            "sessionStartTimestamp": datetime.now(timezone.utc).isoformat(),
+            "currentMode": "PLAN",
+        }
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        # $1.00 over 60s → $1.00/m (hot burn tier)
+        assert "$1.00" in result
+        assert "/m" in result
+
+    def test_savings_suffix_present_when_cache_reads_exist(self):
+        """Wave 2-C cache savings suffix appears after the cost segment."""
+        stdin = {
+            "cost": {"total_cost_usd": 1.0, "total_duration_ms": 60_000},
+            "model": {"id": "claude-opus"},
+            "context_window": {
+                "used_percentage": 50,
+                "current_usage": {
+                    "input_tokens": 1000,
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 1_000_000,
+                },
+            },
+        }
+        state = {
+            "version": "5.5.0",
+            "sessionStartTimestamp": datetime.now(timezone.utc).isoformat(),
+            "currentMode": "PLAN",
+        }
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        # 1M cache_read on opus → $13.50 saved
+        assert "saved" in result
+        assert "\U0001f4b0" in result  # 💰
+
+    def test_no_velocity_when_cost_missing(self):
+        """Velocity suffix is omitted when the cost payload is absent."""
+        stdin = {"context_window": {"used_percentage": 5}}
+        state = {"version": "5.5.0", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        assert "/m" not in result
+
+    def test_no_savings_when_cache_reads_zero(self):
+        """Savings suffix is omitted when there are no cache reads."""
+        stdin = {
+            "cost": {"total_cost_usd": 1.0, "total_duration_ms": 60_000},
+            "context_window": {
+                "used_percentage": 5,
+                "current_usage": {
+                    "input_tokens": 1000,
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 0,
+                },
+            },
+        }
+        state = {"version": "5.5.0", "currentMode": "PLAN"}
+        result = hud.format_status_line(
+            stdin, state, plugins_file=self._NO_PLUGINS
+        )
+        assert "saved" not in result
+
+    def test_all_wave_modules_importable(self):
+        """Sanity: every Wave 2 module is importable through lib/."""
+        import hud_buddy  # noqa: F401
+        import hud_velocity  # noqa: F401
+        import hud_cache_savings  # noqa: F401
+        import hud_rainbow  # noqa: F401
+        import hud_context_bar  # noqa: F401
+        import hud_layout  # noqa: F401
+        import hud_session  # noqa: F401
+        import hud_version  # noqa: F401
+        import hud_rate_limits  # noqa: F401

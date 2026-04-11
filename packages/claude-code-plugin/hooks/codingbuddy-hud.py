@@ -458,13 +458,30 @@ def format_status_line(
 
     cost_prefix = "$" if is_exact else "~$"
 
+    # Wave 3 integration: append optional Wave 2-B velocity and
+    # Wave 2-C cache-savings suffixes to the cost segment. Both
+    # helpers return empty string when they have nothing to show,
+    # so the downstream segment renders unchanged in the common case.
+    velocity_suffix = ""
+    savings_suffix = ""
+    try:
+        from hud_velocity import format_velocity_segment
+        velocity_suffix = format_velocity_segment(stdin_data, hud_state) or ""
+    except Exception:  # pragma: no cover - defensive
+        pass
+    try:
+        from hud_cache_savings import format_cache_savings
+        savings_suffix = format_cache_savings(stdin_data) or ""
+    except Exception:  # pragma: no cover - defensive
+        pass
+
     ver_str = f" v{version}" if version else ""
 
     segments = [
         f"{BUDDY_FACE} CB{ver_str}",
         f"{mode_label} {health}",
         duration,
-        f"{cost_prefix}{cost:.2f}",
+        f"{cost_prefix}{cost:.2f}{velocity_suffix}{savings_suffix}",
     ]
     if cache_segment:
         segments.append(cache_segment)
