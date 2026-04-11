@@ -8,7 +8,7 @@ describe('Next.js 16 Project Setup', () => {
   });
 
   test('Next.js 16.x is installed and locked', () => {
-    expect(pkg.dependencies.next).toBe('16.1.6');
+    expect(pkg.dependencies.next).toBe('16.2.3');
   });
 
   test('React 19.x is installed and locked', () => {
