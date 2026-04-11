@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.6.2] - 2026-04-12
+
+Critical hotfix for the v5.6.0 / v5.6.1 HUD statusLine installer
+regression. Every user who upgraded to v5.6.0 or v5.6.1 saw only the
+fallback face `◕‿◕ CodingBuddy` instead of the full Wave 1/2/3 status
+line, regardless of how many statusbar features had shipped, because
+the installer never copied the `hooks/lib/` modules the script
+depends on.
+
+### Fixed
+- **HUD installer never synced `hooks/lib/`** ([#1490](https://github.com/JeremyDev87/codingbuddy/issues/1490)) — `_install_statusline` only ran `shutil.copy` on `codingbuddy-hud.py` and never touched the sibling `lib/` directory. The v5.6.0 refactor (`b0fb332`) extracted 11 `hud_*.py` modules + `tiny_actor_presets.py` to `hooks/lib/`, so every upgraded user ended up with `~/.claude/hud/codingbuddy-hud.py` present and `~/.claude/hud/lib/` missing. The script's `try: from hud_buddy import BUDDY_FACE` failed on the missing module and the outer `try/except` printed only the bare fallback `◕‿◕ CodingBuddy`. Every Wave 1-A version, Wave 1-B heal, Wave 1-C rate limit icons, Wave 1-D adaptive layout, Wave 2-A breathing face, Wave 2-B velocity, Wave 2-C cache savings, Wave 2-D rainbow, Wave 2-E smart context bar, and Wave 3 / 3b integration was therefore invisible. Fixed by routing the install through a new `_atomic_sync_with_lib` helper that copies the script and atomically replaces the entire `lib/` directory (rmtree + copytree).
+- **Sister bug in `_install_hook_with_lib`** — the UserPromptSubmit hook installer used `shutil.copytree(dirs_exist_ok=True)`, which writes new files but never removes files that existed before but are gone now. A renamed module from a prior version would have lingered in `~/.claude/hooks/lib/` and could be imported first by Python's import system. Now also routes through `_atomic_sync_with_lib` so renamed/removed modules are purged on every sync.
+
+### Added
+- **`_atomic_sync_with_lib(source_script, target_dir, extra_ignore)`** — canonical install primitive used by both `_install_statusline` and `_install_hook_with_lib`. Performs an atomic `rmtree + copytree` on the lib directory and excludes `__pycache__`, `*.pyc`, `*.pyo`, `.pytest_cache`, `test_*.py`, `*.egg-info` so the runtime `sys.path` stays clean. Optional `CODINGBUDDY_HUD_DEBUG=1` env var surfaces install errors on stderr (default still silent so session start is never blocked).
+- **`~/.claude/hud/.version` stamp** — `_install_statusline` now writes the plugin version it just installed so `health_check.check_hud_installation` can detect drift and the user can confirm which release they are running.
+- **`HealthChecker.check_hud_installation` (check #11)** — new diagnostic verifies `~/.claude/hud/codingbuddy-hud.py` exists, `~/.claude/hud/lib/` contains the seven critical modules, and a subprocess render smoke test does not return the fallback face. Detects all known failure modes of #1490 from the user's existing health-check workflow.
+- **`scripts/verify-install-simulation.sh`** — pre-release shell gate that simulates a fresh user receiving cache 5.6.x and starting Claude Code. Runs `_install_statusline` against the in-tree source in an isolated tmpdir, then executes the installed script as a real subprocess and asserts the output is the full status line. Run locally before pushing release branches; invoked from CI in `e2e-plugin.yml` and `canary.yml`.
+
+### Test Coverage
+- **9 new tests** in `tests/test_atomic_sync_with_lib.py` covering script copy, executable bit, lib copy, no-lib silent skip, ignore patterns, stale module replacement, idempotent re-invocation, and `extra_ignore` arg.
+- **14 new tests** in `tests/test_session_start_hud.py`:
+  - 8 unit cases (`TestSyncHudAssets`) — copies all 12 required modules, excludes pollutants, replaces stale modules, idempotent, writes version stamp, gracefully skips when lib absent, preserves settings.json update.
+  - 4 parametrized E2E cases (`TestHudInstallE2ERegressionGate`) — runs the installed script as a real subprocess across `clean`, `partial`, `stale`, and `fresh` starting states and asserts the output is **not** `◕‿◕ CodingBuddy`. This is the single regression gate that would have caught the v5.6.0 / v5.6.1 ship.
+- **4 new tests** in `tests/test_install_hook_with_lib.py` — sister-bug regression gate for `_install_hook_with_lib` (stale module replacement, ignore patterns, source-name rename, idempotency).
+- **5 new tests** in `tests/test_health_check.py::TestCheckHudInstallation` — script missing, lib missing, modules missing, smoke test fallback detection, end-to-end PASS with real `_install_statusline` invocation.
+- **CI gates** — both `e2e-plugin.yml` (PR-level) and `canary.yml` (post-merge) now run all four pytest suites and `verify-install-simulation.sh` so a broken installer cannot reach release.
+
 ## [5.6.1] - 2026-04-11
 
 Hotfix closing the remaining gaps in the v5.6.0 HUD Statusbar Wave cycle:
