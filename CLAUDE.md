@@ -32,12 +32,13 @@ codingbuddy/
 
 ## Tool Priority
 
-**Principle:** codingbuddy first, OMC for unique features only.
+**Layered priority**: Claude Code native → codingbuddy → OMC.
 
-- **codingbuddy FIRST**: `parse_mode`, `dispatch_agents`, `analyze_task`, `update_context`, `generate_checklist`, `search_rules`, `pr_quality_report`, `create_briefing`, `resume_session`, `get_rule_impact_report`
-- **OMC only**: LSP tools, AST grep, Python REPL, state/notepad, git-master, build-fix, deepsearch, team/swarm
+See [`.claude/rules/tool-priority.md`](.claude/rules/tool-priority.md) for the full decision matrix.
 
-See [`.claude/rules/tool-priority.md`](.claude/rules/tool-priority.md) for full details.
+## Permission Presets
+
+See [`docs/claude-code/permission-presets.md`](docs/claude-code/permission-presets.md) for parallel-execution and development preset definitions.
 
 ## Commands
 
