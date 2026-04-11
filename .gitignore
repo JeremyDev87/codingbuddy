@@ -48,6 +48,10 @@ coverage/
 
 # Worktrees
 .worktrees/
+.claude/worktrees/
+
+# Local backup snapshots (never committed)
+.local-backups/
 
 # AI
 .mcp.json
