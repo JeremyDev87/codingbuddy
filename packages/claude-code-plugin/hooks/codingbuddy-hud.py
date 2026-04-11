@@ -59,6 +59,59 @@ except ImportError:  # pragma: no cover - defensive
     def _format_cache_savings(stdin_data):  # type: ignore[misc]
         return ""
 
+# Wave 3b integration: hoist Wave 1-D/2-A/2-D/2-E entry points so
+# format_status_line does not pay a sys.modules lookup on every render.
+# Each import is guarded separately with a defensive fallback so a
+# single broken lib module can never take down the whole status line —
+# the outer main() catch-all still emits the minimal safe output.
+
+# Wave 2-A — breathing buddy face
+try:
+    from hud_buddy import select_face_from_state as _select_face_from_state
+except ImportError:  # pragma: no cover - defensive
+    def _select_face_from_state(hud_state):  # type: ignore[misc]
+        return BUDDY_FACE
+
+# Wave 2-D — mode rainbow ANSI coloring (opt-in via CODINGBUDDY_HUD_RAINBOW)
+try:
+    from hud_rainbow import (
+        is_color_enabled as _rainbow_color_enabled,
+        render_mode_rainbow as _render_mode_rainbow,
+    )
+except ImportError:  # pragma: no cover - defensive
+    def _rainbow_color_enabled(env=None):  # type: ignore[misc]
+        return False
+
+    def _render_mode_rainbow(mode, *, enabled=None, env=None):  # type: ignore[misc]
+        return mode
+
+# Wave 2-E — smart context bar visualization
+try:
+    from hud_context_bar import format_context_bar_segment as _format_context_bar
+except ImportError:  # pragma: no cover - defensive
+    def _format_context_bar(stdin_data):  # type: ignore[misc]
+        return ""
+
+# Wave 1-D — adaptive layout engine
+try:
+    from hud_layout import (
+        fit_segments as _fit_segments,
+        terminal_width as _terminal_width,
+        shorten_model_label as _shorten_model_label,
+        DEFAULT_SEPARATOR as _LAYOUT_SEP,
+    )
+except ImportError:  # pragma: no cover - defensive
+    _LAYOUT_SEP = " | "
+
+    def _terminal_width(*, fallback=120):  # type: ignore[misc]
+        return fallback
+
+    def _shorten_model_label(name, *, compact=False):  # type: ignore[misc]
+        return name
+
+    def _fit_segments(segments, width, *, separator=_LAYOUT_SEP):  # type: ignore[misc]
+        return separator.join(t for _, _, t in segments if t)
+
 # Agent eye glyphs from .ai-rules agent definitions.
 AGENT_GLYPHS = {
     "act-mode": "\u25c6",            # ◆
@@ -474,28 +527,78 @@ def format_status_line(
 
     ver_str = f" v{version}" if version else ""
 
-    segments = [
-        f"{BUDDY_FACE} CB{ver_str}",
-        f"{mode_label} {health}",
-        duration,
-        f"{cost_prefix}{cost:.2f}{velocity_suffix}{savings_suffix}",
+    # Wave 2-A: dynamic buddy face from hud_state phase/blockerCount.
+    # Falls back to canonical BUDDY_FACE when hud_state is empty.
+    buddy_face = _select_face_from_state(hud_state) or BUDDY_FACE
+
+    # Wave 2-E: render context as a visual bar instead of "Ctx:NN%".
+    # format_context_bar_segment returns "" when context_window is
+    # absent — keep the legacy text segment as a fallback in that
+    # case so a stripped-down stdin still shows a percentage.
+    ctx_segment = _format_context_bar(stdin_data) or f"{ctx_pct:.0f}%"
+
+    # Wave 2-E helper returns e.g. "[██░░░░░░░░] 20%" — the block
+    # glyphs widen the segment, so assign a dedicated priority slot
+    # (see SEGMENT_PRIORITY in hud_layout) so adaptive layout can
+    # drop it first when terminal is tight.
+
+    # Plain-text mode label for layout width calculation. Rainbow
+    # coloring is applied to the FINAL string after fit_segments
+    # has assembled it (see below) — injecting ANSI into segments
+    # would break visible_len accounting.
+    mode_health_plain = f"{mode_label} {health}"
+
+    # Compact model label: trim the "(1M context)" suffix so the
+    # segment can fit into mid-width terminals without being dropped
+    # by fit_segments.
+    model_segment = _shorten_model_label(display_name) if display_name else ""
+
+    # Build the (name, priority, text) segments consumed by
+    # hud_layout.fit_segments. Priorities mirror SEGMENT_PRIORITY —
+    # face_version (0) and mode_health (1) are sacred.
+    layout_segments = [
+        ("face_version", 0, f"{buddy_face} CB{ver_str}"),
+        ("mode_health", 1, mode_health_plain),
+        ("cost", 2, f"{cost_prefix}{cost:.2f}{velocity_suffix}{savings_suffix}"),
+        ("duration", 3, duration),
+        ("ctx", 4, ctx_segment),
     ]
     if cache_segment:
-        segments.append(cache_segment)
-    segments.append(f"Ctx:{ctx_pct:.0f}%")
-
+        layout_segments.append(("cache", 5, cache_segment))
+    if model_segment:
+        layout_segments.append(("model", 6, model_segment))
     rl = format_rate_limits(stdin_data)
     if rl:
-        segments.append(rl)
-
+        layout_segments.append(("rate_limits", 7, rl))
     wt = format_worktree(stdin_data)
     if wt:
-        segments.append(wt)
+        layout_segments.append(("worktree", 8, wt))
 
-    if display_name:
-        segments.append(display_name)
+    # Wave 1-D: priority-driven adaptive layout. fit_segments drops
+    # the highest-priority-number segments first until the line fits
+    # within the terminal width. Sacred segments (priority ≤ 1) are
+    # never dropped; the face_version + mode_health pair therefore
+    # always renders even in an 80-col terminal.
+    line1 = _fit_segments(layout_segments, _terminal_width())
 
-    line1 = " | ".join(segments)
+    # Wave 2-D: opt-in ANSI rainbow coloring for the mode label.
+    # Gated on ``CODINGBUDDY_HUD_RAINBOW=1`` because Claude Code's
+    # statusLine renderer's support for ANSI is environment-dependent
+    # — default OFF keeps existing terminals clean. NO_COLOR (per the
+    # https://no-color.org standard) is honoured transitively via
+    # hud_rainbow.is_color_enabled even when the opt-in flag is set.
+    # Only real modes (PLAN/ACT/EVAL/AUTO) are colored — the "Ready"
+    # fallback label stays plain so existing tests and logs don't
+    # see it uppercased.
+    if (
+        mode
+        and os.environ.get("CODINGBUDDY_HUD_RAINBOW", "") == "1"
+        and _rainbow_color_enabled()
+        and mode_health_plain in line1
+    ):
+        colored_mode = _render_mode_rainbow(mode, enabled=True)
+        rainbow_mode_health = f"{colored_mode} {health}"
+        line1 = line1.replace(mode_health_plain, rainbow_mode_health, 1)
 
     focus = hud_state.get("focus") or ""
     blocker_count = hud_state.get("blockerCount", 0) or 0
