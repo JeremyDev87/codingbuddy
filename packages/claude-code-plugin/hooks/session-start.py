@@ -620,19 +620,45 @@ def _find_hud_source() -> Optional[Path]:
 
 
 def _install_statusline(home: Path, settings_file: Path) -> None:
-    """Install codingbuddy statusLine (#1089)."""
-    # 1. Find and copy HUD script
+    """Install codingbuddy statusLine (#1089, fix #1490).
+
+    v5.6.2: now syncs ``hooks/lib`` alongside the script via
+    :func:`_atomic_sync_with_lib`. Previous versions only copied the
+    single ``codingbuddy-hud.py`` file, leaving ``~/.claude/hud/lib``
+    empty or stale. Once Wave 1/2/3 modules were extracted to
+    ``hooks/lib`` in v5.6.0 every statusLine import failed and the
+    outer ``try/except`` in ``codingbuddy-hud.py`` rendered only
+    ``◕‿◕ CodingBuddy``.
+
+    Set ``CODINGBUDDY_HUD_DEBUG=1`` to surface install errors on
+    stderr; without the env var, errors bubble to ``main()``'s outer
+    silent except so session start is never blocked.
+    """
+    # 1. Find HUD source
     source = _find_hud_source()
     if not source:
+        if os.environ.get("CODINGBUDDY_HUD_DEBUG"):
+            print("[hud] _install_statusline: source not found", file=sys.stderr)
         return
 
     hud_dir = home / ".claude" / "hud"
-    hud_dir.mkdir(parents=True, exist_ok=True)
-    target = hud_dir / HUD_FILENAME
-    shutil.copy(source, target)
-    target.chmod(0o755)
 
-    # 2. Update settings.json
+    # 2. Atomic sync (script + lib/) — replaces previous shutil.copy-only path
+    try:
+        _atomic_sync_with_lib(source, hud_dir)
+    except Exception as exc:
+        if os.environ.get("CODINGBUDDY_HUD_DEBUG"):
+            print(f"[hud] _atomic_sync_with_lib failed: {exc}", file=sys.stderr)
+        raise  # bubble to main()'s outer except
+
+    # 3. Write version stamp for health_check / diagnostics
+    try:
+        version = _get_plugin_version()
+        (hud_dir / ".version").write_text(version, encoding="utf-8")
+    except Exception:
+        pass  # stamp is best-effort
+
+    # 4. Update settings.json
     settings = _read_settings_file(settings_file) if settings_file.exists() else {}
 
     current_sl = settings.get("statusLine", {}).get("command", "")
