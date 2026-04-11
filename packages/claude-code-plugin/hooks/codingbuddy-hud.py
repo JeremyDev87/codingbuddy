@@ -501,6 +501,21 @@ def main():
         state_file = os.environ.get("CODINGBUDDY_HUD_STATE_FILE", DEFAULT_STATE_FILE)
         hud_state = read_state(state_file)
 
+        # Wave 1-B: self-heal stale state (e.g. manual-fix marker,
+        # old timestamp, stdin session mismatch) before rendering so
+        # the HUD never shows leftover fields from a prior session.
+        try:
+            from hud_session import detect_stale_session, heal_stale_state
+            stdin_session_id = (
+                stdin_data.get("session_id") if stdin_data else ""
+            ) or ""
+            if detect_stale_session(
+                hud_state, stdin_session_id=stdin_session_id
+            ):
+                hud_state = heal_stale_state(hud_state)
+        except Exception:
+            pass  # never block rendering on self-heal failure
+
         env_agent = os.environ.get("CODINGBUDDY_ACTIVE_AGENT", "")
 
         # Pass plugin_json_file="" to enable Wave 1-A dev-install
