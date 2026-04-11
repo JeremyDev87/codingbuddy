@@ -7,6 +7,8 @@ on:
       - stag-**
     paths:
       - 'packages/claude-code-plugin/hooks/**'
+      - 'packages/claude-code-plugin/tests/**'
+      - 'packages/claude-code-plugin/scripts/verify-install-simulation.sh'
       - 'tests/e2e/plugin-hooks/**'
       - .github/workflows/e2e-plugin.yml
 
@@ -49,6 +51,19 @@ jobs:
 
       - name: Run E2E plugin hook tests
         run: python3 -m pytest tests/e2e/plugin-hooks/ -v --timeout=30 --tb=short
+
+      - name: Plugin hook unit/E2E regression suites (#1490)
+        working-directory: packages/claude-code-plugin
+        run: |
+          python3 -m pytest \
+            tests/test_atomic_sync_with_lib.py \
+            tests/test_session_start_hud.py \
+            tests/test_install_hook_with_lib.py \
+            tests/test_health_check.py \
+            -v --tb=short
+
+      - name: HUD install simulation (#1490 end-to-end gate)
+        run: bash packages/claude-code-plugin/scripts/verify-install-simulation.sh
 
   e2e-plugin-docker:
     if: github.repository == 'JeremyDev87/codingbuddy'
