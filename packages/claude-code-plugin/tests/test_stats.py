@@ -337,6 +337,55 @@ class TestHookTimingIntegration:
         assert "⏱" not in summary
 
 
+class TestConcurrentFlush:
+    """Regression test for race condition in flush() (#1493).
+
+    Multiple processes calling record_tool_call() + flush() against the
+    same session/data_dir must not lose updates.
+    """
+
+    @staticmethod
+    def _worker(data_dir: str, session_id: str, n: int) -> None:
+        """Worker that records n tool calls and flushes each one."""
+        import sys as _sys
+        _lib = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "hooks", "lib")
+        if _lib not in _sys.path:
+            _sys.path.insert(0, _lib)
+        from stats import SessionStats as _SS
+        s = _SS(session_id=session_id, data_dir=data_dir, flush_interval=10)
+        for _ in range(n):
+            s.record_tool_call("Bash")
+            s.flush()
+
+    def test_concurrent_flush_no_lost_updates(self, data_dir):
+        """8 processes x 100 calls = 800 total. Final disk count must be 800."""
+        import multiprocessing as mp
+
+        session_id = "race-test"
+        num_workers = 8
+        calls_per_worker = 100
+        expected = num_workers * calls_per_worker
+
+        # Seed the stats file
+        SessionStats(session_id=session_id, data_dir=data_dir)
+
+        procs = [
+            mp.Process(target=self._worker, args=(data_dir, session_id, calls_per_worker))
+            for _ in range(num_workers)
+        ]
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join()
+
+        s = SessionStats(session_id=session_id, data_dir=data_dir)
+        on_disk = s._locked_read()
+        assert on_disk["tool_count"] == expected, (
+            f"Expected {expected}, got {on_disk['tool_count']} — lost updates detected"
+        )
+        assert on_disk["tool_names"]["Bash"] == expected
+
+
 class TestCleanup:
     def test_cleanup_stale_removes_old_files(self, data_dir):
         # Create a stale file

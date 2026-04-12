@@ -148,24 +148,38 @@ class SessionStats:
             self.flush()
 
     def flush(self) -> None:
-        """Flush accumulated in-memory stats to disk."""
+        """Flush accumulated in-memory stats to disk.
+
+        Uses _locked_modify to perform atomic read-modify-write inside a
+        single LOCK_EX window, preventing lost updates from concurrent
+        processes (#1493).
+        """
         if self._pending_count == 0:
             return
-        data = self._locked_read()
-        data["tool_count"] = data.get("tool_count", 0) + self._mem_tool_count
-        data["error_count"] = data.get("error_count", 0) + self._mem_error_count
-        tool_names = data.get("tool_names", {})
-        for name, count in self._mem_tool_names.items():
-            tool_names[name] = tool_names.get(name, 0) + count
-        data["tool_names"] = tool_names
-        # Merge hook timings
-        hook_timings = data.get("hook_timings", {})
-        for name, times in self._mem_hook_timings.items():
-            if name not in hook_timings:
-                hook_timings[name] = []
-            hook_timings[name].extend(times)
-        data["hook_timings"] = hook_timings
-        self._locked_write(data)
+
+        # Capture deltas before entering critical section
+        delta_tool_count = self._mem_tool_count
+        delta_error_count = self._mem_error_count
+        delta_tool_names = dict(self._mem_tool_names)
+        delta_hook_timings = {k: list(v) for k, v in self._mem_hook_timings.items()}
+
+        def apply_deltas(data: Dict[str, Any]) -> Dict[str, Any]:
+            data["tool_count"] = data.get("tool_count", 0) + delta_tool_count
+            data["error_count"] = data.get("error_count", 0) + delta_error_count
+            tool_names = data.get("tool_names", {})
+            for name, count in delta_tool_names.items():
+                tool_names[name] = tool_names.get(name, 0) + count
+            data["tool_names"] = tool_names
+            hook_timings = data.get("hook_timings", {})
+            for name, times in delta_hook_timings.items():
+                if name not in hook_timings:
+                    hook_timings[name] = []
+                hook_timings[name].extend(times)
+            data["hook_timings"] = hook_timings
+            return data
+
+        self._locked_modify(apply_deltas)
+
         # Reset in-memory accumulators
         self._mem_tool_count = 0
         self._mem_error_count = 0
@@ -294,6 +308,47 @@ class SessionStats:
                     os.remove(filepath)
                 except OSError:
                     pass
+
+    def _locked_modify(self, mutator: Any) -> None:
+        """Atomic read-modify-write inside a single LOCK_EX window (#1493).
+
+        Opens the stats file with exclusive lock, reads current data,
+        applies *mutator(data) -> data*, then writes back — all without
+        releasing the lock.  This prevents the lost-update race where
+        concurrent processes each read the same baseline.
+
+        Args:
+            mutator: Callable (Dict -> Dict) that transforms the data
+                     dict in place or returns the updated dict.
+
+        Note: When HAS_FCNTL is False (non-Unix platforms), locking is
+        skipped entirely.  Concurrent flushes on such platforms may lose
+        updates — this is a known limitation documented here for
+        visibility.
+        """
+        seed: Dict[str, Any] = {
+            "session_id": self.session_id,
+            "started_at": time.time(),
+            "tool_count": 0,
+            "error_count": 0,
+            "tool_names": {},
+            "hook_timings": {},
+        }
+        try:
+            fd = os.open(self.stats_file, os.O_RDWR | os.O_CREAT)
+            with os.fdopen(fd, "r+", encoding="utf-8") as f:
+                if HAS_FCNTL:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                raw = f.read()
+                data = json.loads(raw) if raw else dict(seed)
+                data = mutator(data)
+                f.seek(0)
+                f.truncate()
+                json.dump(data, f)
+        except (json.JSONDecodeError, OSError):
+            # File corrupted or missing — write seed with deltas applied
+            data = mutator(dict(seed))
+            self._locked_write(data)
 
     def _locked_read(self) -> Dict[str, Any]:
         """Read stats file with file locking."""
