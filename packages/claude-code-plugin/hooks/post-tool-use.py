@@ -26,6 +26,13 @@ def handle_post_tool_use(data: dict):
     Records tool call stats (#825).
     Future: history tracking (#827).
     """
+    from hook_runtime import time_hook
+    with time_hook("PostToolUse"):
+        return _handle_post_tool_use(data)
+
+
+def _handle_post_tool_use(data: dict):
+    """Core PostToolUse logic, wrapped by time_hook."""
     try:
         from stats import SessionStats
 

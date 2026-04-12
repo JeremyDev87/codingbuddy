@@ -887,6 +887,14 @@ def _check_briefing_recovery() -> None:
 
 def main():
     """Main entry point for the session start hook."""
+    _ensure_lib_path()
+    from hook_runtime import time_hook
+    with time_hook("SessionStart"):
+        return _main_inner()
+
+
+def _main_inner():
+    """Core session-start logic, wrapped by time_hook."""
     try:
         home = Path.home()
         hooks_dir = home / ".claude" / "hooks"

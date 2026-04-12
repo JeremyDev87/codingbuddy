@@ -51,6 +51,18 @@ def detect_mode(prompt: str) -> Optional[str]:
 
 def main():
     """Main entry point for the hook."""
+    # Ensure hooks/lib is importable for time_hook
+    _hooks_dir = os.path.dirname(os.path.abspath(__file__))
+    _lib_dir = os.path.join(_hooks_dir, "lib")
+    if _lib_dir not in sys.path:
+        sys.path.insert(0, _lib_dir)
+    from hook_runtime import time_hook
+    with time_hook("UserPromptSubmit"):
+        return _main_inner()
+
+
+def _main_inner():
+    """Core UserPromptSubmit logic, wrapped by time_hook."""
     try:
         # Read input from stdin
         input_data = json.load(sys.stdin)

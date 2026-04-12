@@ -23,6 +23,13 @@ def handle_stop(data: dict):
 
     Finalizes session stats and returns a systemMessage summary.
     """
+    from hook_runtime import time_hook
+    with time_hook("Stop"):
+        return _handle_stop(data)
+
+
+def _handle_stop(data: dict):
+    """Core Stop logic, wrapped by time_hook."""
     try:
         from stats import SessionStats
 
