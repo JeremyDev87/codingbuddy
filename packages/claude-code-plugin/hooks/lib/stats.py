@@ -2,10 +2,25 @@
 
 Tracks tool call count, tool names, errors, and session duration.
 Uses fcntl.flock() for file-level locking on every IO operation.
+
+Short-lived hook processes (e.g. PostToolUse) typically create a
+SessionStats, call record_tool_call() once, then exit. Because the
+default flush_interval is 10, that single call would never reach disk.
+Two safety nets cover this:
+
+1. Callers in short-lived processes SHOULD call ``flush()`` explicitly
+   right after recording, for immediate visibility (statusline, Stop
+   hook summary, etc.).
+2. As a fallback, every live SessionStats instance is tracked in a
+   module-level WeakSet and flushed once at interpreter exit by a single
+   atexit handler. This avoids leaking a per-instance atexit handler and
+   keeps GC behavior unchanged.
 """
+import atexit
 import json
 import os
 import time
+import weakref
 from typing import Any, Dict, List, Optional
 
 try:
@@ -17,8 +32,38 @@ except ImportError:
 DEFAULT_DATA_DIR = os.path.join(os.path.expanduser("~"), ".codingbuddy")
 
 
+# Track every live SessionStats instance with weak references so they
+# can be flushed at interpreter exit without preventing garbage
+# collection. Using a WeakSet means dead instances are removed
+# automatically; using a single module-level atexit handler avoids the
+# per-instance handler leak that would otherwise accumulate when many
+# SessionStats are created in one process.
+_live_instances: "weakref.WeakSet[SessionStats]" = weakref.WeakSet()
+
+
+def _flush_all_pending() -> None:
+    """Flush every live SessionStats instance.
+
+    Registered as a single atexit handler at module load time. Iterates
+    a snapshot of the WeakSet so concurrent GC during iteration is safe.
+    All exceptions are swallowed because atexit handlers must not raise
+    during interpreter shutdown.
+    """
+    for inst in list(_live_instances):
+        try:
+            inst.flush()
+        except Exception:
+            pass
+
+
+atexit.register(_flush_all_pending)
+
+
 class SessionStats:
-    """Track operational metrics for a Claude Code session."""
+    """Track operational metrics for a Claude Code session.
+
+    See module docstring for the short-lived process pattern.
+    """
 
     def __init__(self, session_id: str, data_dir: Optional[str] = None, flush_interval: int = 10):
         """Initialize stats tracker.
@@ -66,6 +111,13 @@ class SessionStats:
         self._mem_error_count = 0
         self._mem_tool_names: Dict[str, int] = {}
         self._mem_hook_timings: Dict[str, List[float]] = {}
+
+        # Add to the module-level WeakSet so the single atexit handler
+        # can flush this instance on interpreter exit. WeakSet does not
+        # prevent garbage collection; once the caller drops its last
+        # reference (and finalize() has cleared mem state), the instance
+        # disappears from the set automatically.
+        _live_instances.add(self)
 
     def record_hook_timing(self, hook_name: str, elapsed_ms: float) -> None:
         """Record a hook execution timing in memory.
@@ -204,6 +256,10 @@ class SessionStats:
             os.remove(self.stats_file)
         except OSError:
             pass
+
+        # Remove from the live set so the atexit flush does not resurrect
+        # the file we just removed.
+        _live_instances.discard(self)
 
         return data
 

@@ -34,6 +34,13 @@ def handle_post_tool_use(data: dict):
         stats = SessionStats(session_id=session_id)
         tool_name = data.get("tool_name", "unknown")
         stats.record_tool_call(tool_name, success=True)
+        # PostToolUse runs in a fresh short-lived process per call. The
+        # default flush_interval (10) means a single record_tool_call would
+        # never reach disk. Flush immediately so subsequent reads (statusline,
+        # Stop hook summary) see accurate counts. atexit in SessionStats is a
+        # safety net, but explicit flush keeps the disk state observable
+        # right after this hook exits.
+        stats.flush()
     except Exception:
         pass  # Never block tool execution
 
