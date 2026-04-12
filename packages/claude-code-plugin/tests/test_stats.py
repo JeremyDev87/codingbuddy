@@ -299,6 +299,57 @@ class TestConcurrentFlush:
         assert on_disk["tool_names"]["Bash"] == expected
 
 
+class TestHookTimingWiring:
+    """Regression test: hook scripts record timing via time_hook context manager (#1494)."""
+
+    def test_time_hook_records_timing(self, data_dir):
+        """time_hook should record elapsed_ms to disk hook_timings."""
+        from hook_runtime import time_hook
+
+        session_id = "timing-test"
+        SessionStats(session_id=session_id, data_dir=data_dir)
+
+        with time_hook("PostToolUse", session_id=session_id, data_dir=data_dir):
+            time.sleep(0.01)
+
+        s = SessionStats(session_id=session_id, data_dir=data_dir)
+        data = s._locked_read()
+        assert "PostToolUse" in data["hook_timings"]
+        assert len(data["hook_timings"]["PostToolUse"]) >= 1
+        assert data["hook_timings"]["PostToolUse"][0] >= 5  # at least ~5ms
+
+    def test_time_hook_records_even_on_inner_exception(self, data_dir):
+        """Timing is recorded even when inner code raises."""
+        from hook_runtime import time_hook
+
+        session_id = "exc-test"
+        SessionStats(session_id=session_id, data_dir=data_dir)
+
+        with pytest.raises(ValueError):
+            with time_hook("PostToolUse", session_id=session_id, data_dir=data_dir):
+                raise ValueError("intentional error inside hook")
+
+        s = SessionStats(session_id=session_id, data_dir=data_dir)
+        data = s._locked_read()
+        assert "PostToolUse" in data["hook_timings"]
+        assert len(data["hook_timings"]["PostToolUse"]) >= 1
+
+    def test_time_hook_records_multiple(self, data_dir):
+        """Multiple time_hook invocations accumulate timings."""
+        from hook_runtime import time_hook
+
+        session_id = "multi-timing"
+        SessionStats(session_id=session_id, data_dir=data_dir)
+
+        for _ in range(3):
+            with time_hook("PreToolUse", session_id=session_id, data_dir=data_dir):
+                pass
+
+        s = SessionStats(session_id=session_id, data_dir=data_dir)
+        data = s._locked_read()
+        assert len(data["hook_timings"]["PreToolUse"]) == 3
+
+
 class TestCleanup:
     def test_cleanup_stale_removes_old_files(self, data_dir):
         # Create a stale file

@@ -289,7 +289,9 @@ def _handle(data: dict) -> Optional[dict]:
 @safe_main
 def handle_pre_tool_use(data: dict) -> Optional[dict]:
     """Entry point for PreToolUse hook."""
-    return _handle(data)
+    from hook_runtime import time_hook
+    with time_hook("PreToolUse"):
+        return _handle(data)
 
 
 if __name__ == "__main__":
