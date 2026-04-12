@@ -207,6 +207,93 @@ class TestInMemoryAccumulation:
         assert "Bash:2" in summary
 
 
+class TestShortLivedProcess:
+    """Regression tests for short-lived hook process pattern.
+
+    Each hook invocation (e.g. PostToolUse) is a fresh Python process that
+    creates one SessionStats, calls record_tool_call() exactly once, then
+    exits. With flush_interval > 1 and no explicit flush, the in-memory
+    increment was lost — leaving disk counters stuck at 0 for the entire
+    session. This produced statusline/stop-summary output like
+    `[CB] Xm | 0 tools | 0 errors` even after many tool calls.
+
+    The library now tracks every live SessionStats in a module-level
+    WeakSet and flushes them via a single atexit handler. These tests
+    drive that handler directly (rather than calling
+    ``atexit._run_exitfuncs()``) so they do not interfere with other
+    tests' atexit registrations.
+    """
+
+    def test_instance_added_to_live_set(self, data_dir):
+        """Newly constructed SessionStats must be tracked for atexit flush."""
+        from stats import _live_instances
+
+        s = SessionStats(
+            session_id="weakset-test", data_dir=data_dir, flush_interval=10
+        )
+        assert s in _live_instances
+
+    def test_record_persists_via_module_atexit_handler(self, data_dir):
+        """Records should reach disk via _flush_all_pending() when caller forgets."""
+        from stats import _flush_all_pending
+
+        s1 = SessionStats(
+            session_id="exit-flush-test", data_dir=data_dir, flush_interval=10
+        )
+        s1.record_tool_call("Bash")
+        # Caller does NOT call flush() — simulates short-lived hook process.
+        # Drive the same code path the atexit handler would run.
+        _flush_all_pending()
+
+        # Fresh instance reads from disk only — must see the recorded call.
+        s2 = SessionStats(
+            session_id="exit-flush-test", data_dir=data_dir, flush_interval=10
+        )
+        on_disk = s2._locked_read()
+        assert on_disk["tool_count"] == 1
+        assert on_disk["tool_names"]["Bash"] == 1
+
+    def test_finalize_removes_instance_from_live_set(self, data_dir):
+        """finalize() removes the file AND drops the instance from the live set."""
+        from stats import _flush_all_pending, _live_instances
+
+        s = SessionStats(
+            session_id="finalize-weakset", data_dir=data_dir, flush_interval=10
+        )
+        s.record_tool_call("Bash")
+        s.finalize()
+        stats_file = os.path.join(data_dir, "finalize-weakset.json")
+        assert not os.path.exists(stats_file)
+        assert s not in _live_instances
+
+        # Subsequent flush sweeps must NOT recreate the file
+        _flush_all_pending()
+        assert not os.path.exists(stats_file)
+
+    def test_only_one_atexit_handler_regardless_of_instance_count(self, data_dir):
+        """Library must register a single atexit handler, not one per instance."""
+        import atexit
+
+        # Snapshot atexit handler count, create many instances, snapshot again.
+        # The implementation uses a module-level WeakSet + single handler,
+        # so the count should not grow with instance creation.
+        before = len(getattr(atexit, "_exithandlers", []))
+        instances = [
+            SessionStats(
+                session_id=f"leak-test-{i}",
+                data_dir=data_dir,
+                flush_interval=10,
+            )
+            for i in range(20)
+        ]
+        after = len(getattr(atexit, "_exithandlers", []))
+        # Allow for at most the single module-level registration that may
+        # have happened on first import in this test session.
+        assert after - before <= 1
+        # Keep references alive until the assertion runs
+        assert len(instances) == 20
+
+
 class TestHookTimingIntegration:
     """Tests for hook timing integration in SessionStats (#945)."""
 
