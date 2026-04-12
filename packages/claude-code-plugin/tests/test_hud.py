@@ -743,6 +743,14 @@ class TestFormatBadgeLine:
 
 
 class TestIntegration:
+    # Isolate HUD state so tests don't read the real session file.
+    # Without this, select_face_from_state picks up the live session's
+    # mode (e.g. PLAN → ◔‿◔) instead of returning the idle face (◕‿◕).
+    _ISOLATED_ENV = {
+        **os.environ,
+        "CODINGBUDDY_HUD_STATE_FILE": "/tmp/_test_hud_nonexistent_state.json",
+    }
+
     def test_pipe_stdin(self):
         """Run the script as a subprocess with piped stdin."""
         script = os.path.join(_hooks_dir, "codingbuddy-hud.py")
@@ -766,6 +774,7 @@ class TestIntegration:
             input=stdin_data,
             capture_output=True,
             text=True,
+            env=self._ISOLATED_ENV,
         )
         assert result.returncode == 0
         assert "\u25d5\u203f\u25d5" in result.stdout  # ◕‿◕
@@ -793,6 +802,7 @@ class TestIntegration:
             input=stdin_data,
             capture_output=True,
             text=True,
+            env=self._ISOLATED_ENV,
         )
         assert result.returncode == 0
         assert "~$" in result.stdout
@@ -805,6 +815,7 @@ class TestIntegration:
             input="",
             capture_output=True,
             text=True,
+            env=self._ISOLATED_ENV,
         )
         assert result.returncode == 0
         assert "\u25d5\u203f\u25d5" in result.stdout
