@@ -12,7 +12,7 @@ describe('CTAFooter', () => {
   it('should render CTA heading', async () => {
     render(await CTAFooter({ locale: 'en' }));
     expect(
-      screen.getByRole('heading', { level: 2, name: /Ready to unify your AI coding/i }),
+      screen.getByRole('heading', { level: 2, name: /Ready to prove your AI coding works/i }),
     ).toBeInTheDocument();
   });
 
@@ -45,7 +45,7 @@ describe('CTAFooter', () => {
 
   it('should render made for developers text', async () => {
     render(await CTAFooter({ locale: 'en' }));
-    expect(screen.getByText(/Made for developers who ship with AI/)).toBeInTheDocument();
+    expect(screen.getByText(/37 agents\. 9 tools\. 50 skills\. One command\./)).toBeInTheDocument();
   });
 
   it('should have CTA section with data-testid', async () => {

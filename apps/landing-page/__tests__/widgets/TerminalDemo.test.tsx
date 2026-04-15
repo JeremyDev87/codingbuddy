@@ -7,14 +7,18 @@ const mockMessages: TerminalMessages = {
   terminalCmd: 'npx codingbuddy init',
   terminalInstalling: 'Installing codingbuddy...',
   terminalRulesSynced: 'Rules synced',
-  terminalAgents: '35 agents loaded',
+  terminalAgents: '37 agents loaded',
   terminalWorkflow: 'PLAN → ACT → EVAL workflow ready',
+  terminalSkills: '50 built-in skills loaded',
   terminalCursorrules: '.cursorrules',
   terminalClaudeMd: 'CLAUDE.md',
   terminalCodex: '.codex/',
   terminalAntigravity: '.antigravity/',
   terminalQ: '.q/',
   terminalKiro: '.kiro/',
+  terminalWindsurf: '.windsurfrules',
+  terminalAider: '.aider.conf.yml',
+  terminalOpenCode: '.opencode/',
   terminalReady: 'Ready to code!',
 };
 
@@ -33,8 +37,9 @@ describe('TerminalDemo', () => {
     render(<TerminalDemo messages={mockMessages} />);
     expect(screen.getByText('Installing codingbuddy...')).toBeInTheDocument();
     expect(screen.getByText('Rules synced')).toBeInTheDocument();
-    expect(screen.getByText('35 agents loaded')).toBeInTheDocument();
+    expect(screen.getByText('37 agents loaded')).toBeInTheDocument();
     expect(screen.getByText('PLAN → ACT → EVAL workflow ready')).toBeInTheDocument();
+    expect(screen.getByText('50 built-in skills loaded')).toBeInTheDocument();
   });
 
   it('should render tool file list', () => {
@@ -45,6 +50,9 @@ describe('TerminalDemo', () => {
     expect(screen.getByText('.antigravity/')).toBeInTheDocument();
     expect(screen.getByText('.q/')).toBeInTheDocument();
     expect(screen.getByText('.kiro/')).toBeInTheDocument();
+    expect(screen.getByText('.windsurfrules')).toBeInTheDocument();
+    expect(screen.getByText('.aider.conf.yml')).toBeInTheDocument();
+    expect(screen.getByText('.opencode/')).toBeInTheDocument();
   });
 
   it('should have appropriate aria attributes', () => {

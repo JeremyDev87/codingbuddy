@@ -48,11 +48,15 @@ describe('i18n request config logic', () => {
       expect(messages).toBeDefined();
       expect(Object.keys(messages)).toEqual([
         'hero',
+        'socialProof',
         'beforeAfter',
         'features',
+        'workflowDemo',
         'supportedTools',
+        'hudShowcase',
         'tuiDashboard',
         'agents',
+        'skillsLibrary',
         'quickStart',
         'ctaFooter',
         'header',

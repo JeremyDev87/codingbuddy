@@ -1,5 +1,14 @@
 import { getTranslations } from 'next-intl/server';
-import { RefreshCw, Bot, ClipboardList, TestTube, Globe, Zap } from 'lucide-react';
+import {
+  RefreshCw,
+  Bot,
+  ClipboardList,
+  TestTube,
+  BarChart3,
+  Sparkles,
+  Wrench,
+  Zap,
+} from 'lucide-react';
 import type { WidgetProps } from '@/types';
 
 const features = [
@@ -7,7 +16,9 @@ const features = [
   { key: 'agents', icon: Bot },
   { key: 'workflow', icon: ClipboardList },
   { key: 'quality', icon: TestTube },
-  { key: 'mcp', icon: Globe },
+  { key: 'impact', icon: BarChart3 },
+  { key: 'selfEvolving', icon: Sparkles },
+  { key: 'skills', icon: Wrench },
   { key: 'zeroConfig', icon: Zap },
 ] as const;
 
@@ -30,7 +41,7 @@ export const Features = async ({ locale }: WidgetProps) => {
           {t('title')}
         </h2>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map(({ key, icon: Icon }) => (
             <div
               key={key}

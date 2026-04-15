@@ -1,28 +1,39 @@
 {
   "hero": {
-    "title": "Multi-AI Rules for Consistent Coding",
-    "subtitle": "One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.",
+    "title": "Prove Your AI Coding Is Actually Improving",
+    "subtitle": "One command. 9 AI tools. Measurable impact on every session.",
     "cta": "Get Started",
     "github": "Star on GitHub",
     "terminalTitle": "~/your-project",
     "terminalCmd": "npx codingbuddy init",
     "terminalInstalling": "Installing codingbuddy-rules...",
-    "terminalRulesSynced": "Rules synced to 6 AI tools",
-    "terminalAgents": "35 specialist agents activated",
+    "terminalRulesSynced": "Rules synced to 9 AI tools",
+    "terminalAgents": "37 specialist agents activated",
     "terminalWorkflow": "PLAN → ACT → EVAL workflow ready",
+    "terminalSkills": "50 built-in skills loaded",
     "terminalCursorrules": ".cursorrules",
     "terminalClaudeMd": "CLAUDE.md",
     "terminalCodex": ".codex/",
     "terminalAntigravity": ".antigravity/",
     "terminalQ": ".q/",
     "terminalKiro": ".kiro/",
+    "terminalWindsurf": ".windsurfrules",
+    "terminalAider": ".aider.conf.yml",
+    "terminalOpenCode": ".opencode/",
     "terminalReady": "Ready! One source, all tools."
+  },
+  "socialProof": {
+    "agents": "37 Agents",
+    "tools": "9 AI Tools",
+    "skills": "50 Skills",
+    "checklists": "9 Checklists",
+    "languages": "8 Languages"
   },
   "beforeAfter": {
     "title": "The Problem & Solution",
     "beforeLabel": "Before",
     "afterLabel": "After",
-    "beforeFiles": "6 config files. Always out of sync.",
+    "beforeFiles": "9 config files. Always out of sync.",
     "afterFiles": "Single source. Auto-synced to all tools.",
     "cursorrules": ".cursorrules",
     "claudeMd": "CLAUDE.md",
@@ -30,24 +41,56 @@
     "antigravityRules": ".antigravity/rules.md",
     "qRules": ".q/rules.md",
     "kiroRules": ".kiro/rules.md",
+    "windsurfRules": ".windsurfrules",
+    "aiderRules": ".aider.conf.yml",
+    "opencodeRules": ".opencode/rules.md",
     "singleSource": "codingbuddy-rules/.ai-rules/",
     "autoSynced": "Auto-synced",
-    "alwaysCurrent": "Always current"
+    "alwaysCurrent": "Always current",
+    "impactTracked": "Impact tracked"
   },
   "features": {
     "title": "What You Get",
     "universalRulesTitle": "Universal Rules",
-    "universalRulesDesc": "One source of truth automatically applied to all 6 AI coding tools.",
-    "agentsTitle": "35 AI Agents",
-    "agentsDesc": "Specialist agents for architecture, security, testing, performance, and accessibility.",
+    "universalRulesDesc": "One source of truth automatically applied to all 9 AI coding tools.",
+    "agentsTitle": "37 Specialist Agents",
+    "agentsDesc": "Domain experts for architecture, security, testing, performance, and accessibility.",
     "workflowTitle": "Structured Workflow",
     "workflowDesc": "PLAN → ACT → EVAL cycle ensures consistent quality across all development.",
     "qualityTitle": "Quality Built-in",
     "qualityDesc": "TDD, SOLID principles, and 90%+ test coverage enforced as standard practice.",
-    "mcpTitle": "MCP Protocol",
-    "mcpDesc": "Standard Model Context Protocol for seamless AI tool integration.",
+    "impactTitle": "Session Impact Reports",
+    "impactDesc": "Measurable proof that AI coding is improving — issues prevented, agents dispatched, rules enforced.",
+    "selfEvolvingTitle": "Self-Evolving Rules",
+    "selfEvolvingDesc": "Rules that learn from repeated failure patterns and suggest improvements automatically.",
+    "skillsTitle": "50 Built-in Skills",
+    "skillsDesc": "Reusable workflows for TDD, shipping, code review, debugging, and more.",
     "zeroConfigTitle": "Zero Config",
     "zeroConfigDesc": "One command to install. Works out of the box with all supported tools."
+  },
+  "workflowDemo": {
+    "title": "Your AI Coding Workflow, Supercharged",
+    "subtitle": "Four modes that take AI-assisted development from chaos to production-ready.",
+    "planTitle": "PLAN",
+    "planDesc": "Question-first planning with intelligent clarification. Specialists recommend architecture before a single line of code.",
+    "planDetail1": "Clarification gate catches ambiguity",
+    "planDetail2": "Specialists recommend architecture",
+    "planDetail3": "Permission forecast before execution",
+    "actTitle": "ACT",
+    "actDesc": "Execute with TDD discipline. Real-time rule enforcement prevents drift. Quality gates block bad patterns.",
+    "actDetail1": "TDD Red → Green → Refactor cycle",
+    "actDetail2": "Live rule enforcement",
+    "actDetail3": "Dynamic checklists per domain",
+    "evalTitle": "EVAL",
+    "evalDesc": "Specialist council independently reviews. Cross-review findings. Consensus-driven approval.",
+    "evalDetail1": "Parallel specialist review",
+    "evalDetail2": "Cross-review and debate",
+    "evalDetail3": "Consensus: approve / concern / reject",
+    "autoTitle": "AUTO",
+    "autoDesc": "Fully autonomous cycle. Iterates PLAN → ACT → EVAL until zero critical issues. Ship with confidence.",
+    "autoDetail1": "Autonomous iteration",
+    "autoDetail2": "Quality gate: Critical=0, High=0",
+    "autoDetail3": "Production-ready guarantee"
   },
   "supportedTools": {
     "title": "Works with your favorite AI tools",
@@ -57,7 +100,25 @@
     "codex": "Codex",
     "antigravity": "Antigravity",
     "amazonQ": "Amazon Q",
-    "kiro": "Kiro"
+    "kiro": "Kiro",
+    "windsurf": "Windsurf",
+    "aider": "Aider",
+    "opencode": "OpenCode"
+  },
+  "hudShowcase": {
+    "title": "Intelligence at a Glance",
+    "subtitle": "A living statusbar that breathes with your session — cost tracking, cache savings, and mode awareness built in.",
+    "buddyTitle": "Breathing Buddy",
+    "buddyDesc": "Animated avatar reacts to session phase — idle, thinking, active, blocked, victory.",
+    "costTitle": "Cost Velocity",
+    "costDesc": "Real-time spend-rate tracking with trend indicators so you never get a billing surprise.",
+    "cacheTitle": "Cache Savings",
+    "cacheDesc": "See exactly how much prompt caching saves you per session.",
+    "modeTitle": "Mode Rainbow",
+    "modeDesc": "Per-mode color gradients — blue for PLAN, green for ACT, purple for EVAL, rainbow for AUTO.",
+    "contextTitle": "Context Bar",
+    "contextDesc": "Visual progress bar shows context window usage with warning thresholds.",
+    "screenshotAlt": "Codingbuddy HUD Statusbar showing buddy face, cost velocity, cache savings, and mode indicator"
   },
   "tuiDashboard": {
     "title": "Real-Time Agent Dashboard",
@@ -76,7 +137,7 @@
     "multiSession": "Multiple Claude Code sessions share a single TUI window via IPC"
   },
   "agents": {
-    "title": "35 Specialist Agents",
+    "title": "37 Specialist Agents",
     "subtitle": "Focused expertise for every aspect of development",
     "filter": "Filter by category",
     "allCategories": "All",
@@ -90,7 +151,29 @@
       "Security": "Security",
       "UX": "UX"
     },
-    "count": "{count} agents"
+    "count": "{count} agents",
+    "stacks": "Agent Stacks",
+    "stacksSubtitle": "Pre-built teams for common workflows",
+    "fullStack": "Full-Stack",
+    "apiDev": "API Development",
+    "dataPipeline": "Data Pipeline",
+    "frontendPolish": "Frontend Polish",
+    "mlInfra": "ML Infrastructure",
+    "securityAudit": "Security Audit"
+  },
+  "skillsLibrary": {
+    "title": "50 Built-in Skills",
+    "subtitle": "Reusable workflows that codify best practices into repeatable actions",
+    "development": "Development",
+    "teamGit": "Team & Git",
+    "review": "Review & Code",
+    "intelligence": "Intelligence",
+    "specialized": "Specialized",
+    "developmentSkills": "TDD, Refactoring, Debugging, Performance Optimization, Brainstorming, Legacy Modernization, Database Migration, API Design, Frontend Design, MCP Builder",
+    "teamGitSkills": "Ship, Git Master, Worktrees, Parallel Agents, Subagent Dev, Cross-Repo Issues",
+    "reviewSkills": "PR Review, PR All-in-One, Code Review, Code Explanation, Error Analysis, Build Fix, Verification",
+    "intelligenceSkills": "Retrospective, Security Audit, Tech Debt, Rule Authoring, Skill Creator, Prompt Engineering",
+    "specializedSkills": "Incident Response, Onboard, Deployment Checklist, Cost Budget, Widget Architecture, Agent Design"
   },
   "quickStart": {
     "title": "Quick Start",
@@ -102,17 +185,20 @@
     "step3": "Code",
     "step3Desc": "Use PLAN, ACT, EVAL modes with specialist agents",
     "copy": "Copy",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "tab_claude": "Claude Code",
+    "tab_cursor": "Cursor",
+    "tab_codex": "Codex"
   },
   "ctaFooter": {
-    "title": "Ready to unify your AI coding?",
+    "title": "Ready to prove your AI coding works?",
     "command": "npx codingbuddy init",
     "github": "Star on GitHub",
     "docs": "Documentation",
     "copy": "Copy",
     "copied": "Copied!",
     "copyright": "© {year} Codingbuddy. MIT License.",
-    "madeWith": "Made for developers, by developers."
+    "madeWith": "37 agents. 9 tools. 50 skills. One command."
   },
   "header": {
     "nav": {
@@ -151,8 +237,8 @@
     "decline": "Decline"
   },
   "metadata": {
-    "title": "Codingbuddy - Multi-AI Rules for Consistent Coding",
-    "description": "One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro. Consistent AI-assisted coding across all your tools."
+    "title": "Codingbuddy - Prove Your AI Coding Is Actually Improving",
+    "description": "One command for 9 AI tools. 37 specialist agents. Measurable impact on every session. Works with Cursor, Claude Code, Codex, Windsurf, and more."
   },
   "i18n": {}
 }

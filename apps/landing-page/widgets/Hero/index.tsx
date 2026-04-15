@@ -14,12 +14,16 @@ export const Hero = async ({ locale }: WidgetProps) => {
     terminalRulesSynced: t('terminalRulesSynced'),
     terminalAgents: t('terminalAgents'),
     terminalWorkflow: t('terminalWorkflow'),
+    terminalSkills: t('terminalSkills'),
     terminalCursorrules: t('terminalCursorrules'),
     terminalClaudeMd: t('terminalClaudeMd'),
     terminalCodex: t('terminalCodex'),
     terminalAntigravity: t('terminalAntigravity'),
     terminalQ: t('terminalQ'),
     terminalKiro: t('terminalKiro'),
+    terminalWindsurf: t('terminalWindsurf'),
+    terminalAider: t('terminalAider'),
+    terminalOpenCode: t('terminalOpenCode'),
     terminalReady: t('terminalReady'),
   };
 

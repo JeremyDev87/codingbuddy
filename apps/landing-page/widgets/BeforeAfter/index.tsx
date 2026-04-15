@@ -9,6 +9,9 @@ const beforeFiles = [
   'antigravityRules',
   'qRules',
   'kiroRules',
+  'windsurfRules',
+  'aiderRules',
+  'opencodeRules',
 ] as const;
 
 export const BeforeAfter = async ({ locale }: WidgetProps) => {
@@ -78,6 +81,10 @@ export const BeforeAfter = async ({ locale }: WidgetProps) => {
               <div className="flex items-center gap-2 font-mono text-xs text-terminal-green/80">
                 <Check className="size-3" aria-hidden="true" />
                 <span>{t('alwaysCurrent')}</span>
+              </div>
+              <div className="flex items-center gap-2 font-mono text-xs text-terminal-green/80">
+                <Check className="size-3" aria-hidden="true" />
+                <span>{t('impactTracked')}</span>
               </div>
             </div>
             <p className="mt-4 font-mono text-xs text-terminal-green/80">{t('afterFiles')}</p>
