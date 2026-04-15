@@ -31,23 +31,25 @@ describe('Features', () => {
     expect(section).toHaveAttribute('id', 'features');
   });
 
-  it('should render 6 feature cards', async () => {
+  it('should render 8 feature cards', async () => {
     render(await Features({ locale: 'en' }));
     expect(screen.getByText('Universal Rules')).toBeInTheDocument();
-    expect(screen.getByText('35 AI Agents')).toBeInTheDocument();
+    expect(screen.getByText('37 Specialist Agents')).toBeInTheDocument();
     expect(screen.getByText('Structured Workflow')).toBeInTheDocument();
     expect(screen.getByText('Quality Built-in')).toBeInTheDocument();
-    expect(screen.getByText('MCP Protocol')).toBeInTheDocument();
+    expect(screen.getByText('Session Impact Reports')).toBeInTheDocument();
+    expect(screen.getByText('Self-Evolving Rules')).toBeInTheDocument();
+    expect(screen.getByText('50 Built-in Skills')).toBeInTheDocument();
     expect(screen.getByText('Zero Config')).toBeInTheDocument();
   });
 
   it('should render feature descriptions', async () => {
     render(await Features({ locale: 'en' }));
     expect(screen.getByText(/One source of truth automatically applied/)).toBeInTheDocument();
-    expect(screen.getByText(/Specialist agents for architecture/)).toBeInTheDocument();
+    expect(screen.getByText(/Domain experts for architecture/)).toBeInTheDocument();
     expect(screen.getByText(/PLAN → ACT → EVAL cycle/)).toBeInTheDocument();
     expect(screen.getByText(/TDD, SOLID principles/)).toBeInTheDocument();
-    expect(screen.getByText(/Standard Model Context Protocol/)).toBeInTheDocument();
+    expect(screen.getByText(/Measurable proof that AI coding/)).toBeInTheDocument();
     expect(screen.getByText(/One command to install/)).toBeInTheDocument();
   });
 });

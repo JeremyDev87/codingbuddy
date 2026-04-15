@@ -1,28 +1,39 @@
 {
   "hero": {
-    "title": "Reglas Multi-IA para Codificación Consistente",
-    "subtitle": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro.",
+    "title": "Demuestra que tu codificación con IA realmente mejora",
+    "subtitle": "Un comando. 9 herramientas IA. Impacto medible en cada sesión.",
     "cta": "Comenzar",
     "github": "Star en GitHub",
     "terminalTitle": "~/your-project",
     "terminalCmd": "npx codingbuddy init",
     "terminalInstalling": "Instalando codingbuddy-rules...",
-    "terminalRulesSynced": "Reglas sincronizadas en 6 herramientas IA",
-    "terminalAgents": "35 agentes especialistas activados",
+    "terminalRulesSynced": "Reglas sincronizadas en 9 herramientas IA",
+    "terminalAgents": "37 agentes especialistas activados",
     "terminalWorkflow": "Flujo PLAN → ACT → EVAL listo",
+    "terminalSkills": "50 habilidades integradas cargadas",
     "terminalCursorrules": ".cursorrules",
     "terminalClaudeMd": "CLAUDE.md",
     "terminalCodex": ".codex/",
     "terminalAntigravity": ".antigravity/",
     "terminalQ": ".q/",
     "terminalKiro": ".kiro/",
+    "terminalWindsurf": ".windsurfrules",
+    "terminalAider": ".aider.conf.yml",
+    "terminalOpenCode": ".opencode/",
     "terminalReady": "¡Listo! Una fuente, todas las herramientas."
+  },
+  "socialProof": {
+    "agents": "37 Agentes",
+    "tools": "9 Herramientas IA",
+    "skills": "50 Habilidades",
+    "checklists": "9 Listas de verificación",
+    "languages": "8 Idiomas"
   },
   "beforeAfter": {
     "title": "El Problema y la Solución",
     "beforeLabel": "Antes",
     "afterLabel": "Después",
-    "beforeFiles": "6 archivos de configuración. Siempre desincronizados.",
+    "beforeFiles": "9 archivos de configuración. Siempre desincronizados.",
     "afterFiles": "Una sola fuente. Auto-sincronizada con todas las herramientas.",
     "cursorrules": ".cursorrules",
     "claudeMd": "CLAUDE.md",
@@ -30,24 +41,56 @@
     "antigravityRules": ".antigravity/rules.md",
     "qRules": ".q/rules.md",
     "kiroRules": ".kiro/rules.md",
+    "windsurfRules": ".windsurfrules",
+    "aiderRules": ".aider.conf.yml",
+    "opencodeRules": ".opencode/rules.md",
     "singleSource": "codingbuddy-rules/.ai-rules/",
     "autoSynced": "Auto-sincronizado",
-    "alwaysCurrent": "Siempre actualizado"
+    "alwaysCurrent": "Siempre actualizado",
+    "impactTracked": "Impacto rastreado"
   },
   "features": {
     "title": "Lo Que Obtienes",
     "universalRulesTitle": "Reglas Universales",
-    "universalRulesDesc": "Una fuente de verdad aplicada automáticamente a las 6 herramientas de codificación IA.",
-    "agentsTitle": "35 Agentes IA",
-    "agentsDesc": "Agentes especialistas en arquitectura, seguridad, testing, rendimiento y accesibilidad.",
+    "universalRulesDesc": "Una fuente de verdad aplicada automáticamente a las 9 herramientas de codificación IA.",
+    "agentsTitle": "37 Agentes Especialistas",
+    "agentsDesc": "Expertos de dominio en arquitectura, seguridad, testing, rendimiento y accesibilidad.",
     "workflowTitle": "Flujo de Trabajo Estructurado",
     "workflowDesc": "El ciclo PLAN → ACT → EVAL asegura calidad consistente en todo el desarrollo.",
     "qualityTitle": "Calidad Incorporada",
     "qualityDesc": "TDD, principios SOLID y cobertura de tests del 90%+ aplicados como práctica estándar.",
-    "mcpTitle": "Protocolo MCP",
-    "mcpDesc": "Model Context Protocol estándar para integración fluida de herramientas IA.",
+    "impactTitle": "Informes de Impacto de Sesión",
+    "impactDesc": "Evidencia medible de que la codificación IA está mejorando — problemas prevenidos, agentes desplegados, reglas aplicadas.",
+    "selfEvolvingTitle": "Reglas Auto-evolutivas",
+    "selfEvolvingDesc": "Reglas que aprenden de patrones de fallo repetidos y sugieren mejoras automáticamente.",
+    "skillsTitle": "50 Habilidades Integradas",
+    "skillsDesc": "Flujos de trabajo reutilizables para TDD, despliegue, revisión de código, depuración y más.",
     "zeroConfigTitle": "Sin Configuración",
     "zeroConfigDesc": "Un comando para instalar. Funciona de inmediato con todas las herramientas compatibles."
+  },
+  "workflowDemo": {
+    "title": "Tu flujo de trabajo IA, potenciado",
+    "subtitle": "Cuatro modos que llevan el desarrollo asistido por IA del caos a producción.",
+    "planTitle": "PLAN",
+    "planDesc": "Planificación con preguntas primero y aclaración inteligente. Los especialistas recomiendan arquitectura antes de una línea de código.",
+    "planDetail1": "La puerta de aclaración detecta ambigüedad",
+    "planDetail2": "Los especialistas recomiendan arquitectura",
+    "planDetail3": "Previsión de permisos antes de la ejecución",
+    "actTitle": "ACT",
+    "actDesc": "Ejecución con disciplina TDD. Aplicación de reglas en tiempo real previene desviaciones. Las puertas de calidad bloquean malos patrones.",
+    "actDetail1": "Ciclo TDD Red → Green → Refactor",
+    "actDetail2": "Aplicación de reglas en tiempo real",
+    "actDetail3": "Listas de verificación dinámicas por dominio",
+    "evalTitle": "EVAL",
+    "evalDesc": "El consejo de especialistas revisa independientemente. Revisión cruzada de hallazgos. Aprobación basada en consenso.",
+    "evalDetail1": "Revisión paralela de especialistas",
+    "evalDetail2": "Revisión cruzada y debate",
+    "evalDetail3": "Consenso: aprobar / preocupación / rechazar",
+    "autoTitle": "AUTO",
+    "autoDesc": "Ciclo totalmente autónomo. Itera PLAN → ACT → EVAL hasta cero problemas críticos. Despliega con confianza.",
+    "autoDetail1": "Iteración autónoma",
+    "autoDetail2": "Puerta de calidad: Critical=0, High=0",
+    "autoDetail3": "Garantía de producción"
   },
   "supportedTools": {
     "title": "Compatible con tus herramientas IA favoritas",
@@ -57,7 +100,25 @@
     "codex": "Codex",
     "antigravity": "Antigravity",
     "amazonQ": "Amazon Q",
-    "kiro": "Kiro"
+    "kiro": "Kiro",
+    "windsurf": "Windsurf",
+    "aider": "Aider",
+    "opencode": "OpenCode"
+  },
+  "hudShowcase": {
+    "title": "Inteligencia de un vistazo",
+    "subtitle": "Una barra de estado viva que respira con tu sesión — seguimiento de costos, ahorro de caché y reconocimiento de modo integrados.",
+    "buddyTitle": "Compañero Respirante",
+    "buddyDesc": "Avatar animado que reacciona a la fase de la sesión — inactivo, pensando, activo, bloqueado, victoria.",
+    "costTitle": "Velocidad de Costo",
+    "costDesc": "Seguimiento de tasa de gasto en tiempo real con indicadores de tendencia para evitar sorpresas en la facturación.",
+    "cacheTitle": "Ahorro de Caché",
+    "cacheDesc": "Ve exactamente cuánto te ahorra el caché de prompts por sesión.",
+    "modeTitle": "Arcoíris de Modo",
+    "modeDesc": "Gradientes de color por modo — azul para PLAN, verde para ACT, púrpura para EVAL, arcoíris para AUTO.",
+    "contextTitle": "Barra de Contexto",
+    "contextDesc": "Barra de progreso visual que muestra el uso de la ventana de contexto con umbrales de advertencia.",
+    "screenshotAlt": "Barra de estado HUD de Codingbuddy mostrando cara del compañero, velocidad de costo, ahorro de caché e indicador de modo"
   },
   "tuiDashboard": {
     "title": "Panel de Agentes en Tiempo Real",
@@ -76,7 +137,7 @@
     "multiSession": "Múltiples sesiones de Claude Code comparten una sola ventana TUI a través de IPC"
   },
   "agents": {
-    "title": "35 Agentes Especialistas",
+    "title": "37 Agentes Especialistas",
     "subtitle": "Experiencia enfocada para cada aspecto del desarrollo",
     "filter": "Filtrar por categoría",
     "allCategories": "Todos",
@@ -90,7 +151,29 @@
       "Security": "Seguridad",
       "UX": "UX"
     },
-    "count": "{count} agentes"
+    "count": "{count} agentes",
+    "stacks": "Stacks de Agentes",
+    "stacksSubtitle": "Equipos preconstruidos para flujos de trabajo comunes",
+    "fullStack": "Full-Stack",
+    "apiDev": "Desarrollo API",
+    "dataPipeline": "Pipeline de Datos",
+    "frontendPolish": "Pulido Frontend",
+    "mlInfra": "Infraestructura ML",
+    "securityAudit": "Auditoría de Seguridad"
+  },
+  "skillsLibrary": {
+    "title": "50 Habilidades Integradas",
+    "subtitle": "Flujos de trabajo reutilizables que codifican las mejores prácticas en acciones repetibles",
+    "development": "Desarrollo",
+    "teamGit": "Equipo & Git",
+    "review": "Revisión & Código",
+    "intelligence": "Inteligencia",
+    "specialized": "Especializado",
+    "developmentSkills": "TDD, Refactorización, Depuración, Optimización de Rendimiento, Lluvia de Ideas, Modernización Legacy, Migración DB, Diseño API, Diseño Frontend, Constructor MCP",
+    "teamGitSkills": "Ship, Git Master, Worktrees, Agentes Paralelos, Desarrollo Subagente, Issues Cross-Repo",
+    "reviewSkills": "Revisión PR, PR Todo-en-Uno, Revisión de Código, Explicación de Código, Análisis de Errores, Corrección de Build, Verificación",
+    "intelligenceSkills": "Retrospectiva, Auditoría de Seguridad, Deuda Técnica, Autoría de Reglas, Creador de Skills, Ingeniería de Prompts",
+    "specializedSkills": "Respuesta a Incidentes, Onboarding, Lista de Despliegue, Presupuesto de Costos, Arquitectura de Widgets, Diseño de Agentes"
   },
   "quickStart": {
     "title": "Inicio Rápido",
@@ -102,17 +185,20 @@
     "step3": "Codificar",
     "step3Desc": "Usa los modos PLAN, ACT, EVAL con agentes especialistas",
     "copy": "Copiar",
-    "copied": "¡Copiado!"
+    "copied": "¡Copiado!",
+    "tab_claude": "Claude Code",
+    "tab_cursor": "Cursor",
+    "tab_codex": "Codex"
   },
   "ctaFooter": {
-    "title": "¿Listo para unificar tu codificación IA?",
+    "title": "¿Listo para demostrar que tu codificación IA funciona?",
     "command": "npx codingbuddy init",
     "github": "Star en GitHub",
     "docs": "Documentación",
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "copyright": "© {year} Codingbuddy. Licencia MIT.",
-    "madeWith": "Hecho para desarrolladores, por desarrolladores."
+    "madeWith": "37 agentes. 9 herramientas. 50 habilidades. Un comando."
   },
   "header": {
     "nav": {
@@ -151,8 +237,8 @@
     "decline": "Rechazar"
   },
   "metadata": {
-    "title": "Codingbuddy - Reglas Multi-IA para Codificación Consistente",
-    "description": "Un conjunto de reglas para Cursor, Claude Code, Codex, Antigravity, Q y Kiro. Codificación asistida por IA consistente en todas tus herramientas."
+    "title": "Codingbuddy - Demuestra que tu codificación con IA realmente mejora",
+    "description": "Un comando para 9 herramientas IA. 37 agentes especialistas. Impacto medible en cada sesión. Funciona con Cursor, Claude Code, Codex, Windsurf y más."
   },
   "i18n": {}
 }

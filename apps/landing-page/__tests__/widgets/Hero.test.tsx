@@ -17,7 +17,7 @@ describe('Hero', () => {
   it('should display h1 heading', async () => {
     render(await Hero({ locale: 'en' }));
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Multi-AI Rules for Consistent Coding',
+      'Prove Your AI Coding Is Actually Improving',
     );
   });
 
@@ -30,7 +30,7 @@ describe('Hero', () => {
   it('should display subtitle', async () => {
     render(await Hero({ locale: 'en' }));
     expect(
-      screen.getByText('One ruleset for Cursor, Claude Code, Codex, Antigravity, Q, and Kiro.'),
+      screen.getByText('One command. 9 AI tools. Measurable impact on every session.'),
     ).toBeInTheDocument();
   });
 

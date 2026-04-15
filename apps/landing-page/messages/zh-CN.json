@@ -1,28 +1,39 @@
 {
   "hero": {
-    "title": "统一 AI 编码规则",
-    "subtitle": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。",
+    "title": "证明你的 AI 编码确实在改进",
+    "subtitle": "一条命令。9 个 AI 工具。每次会话可衡量的影响。",
     "cta": "开始使用",
     "github": "在 GitHub 上 Star",
     "terminalTitle": "~/your-project",
     "terminalCmd": "npx codingbuddy init",
     "terminalInstalling": "正在安装 codingbuddy-rules...",
-    "terminalRulesSynced": "规则已同步到 6 个 AI 工具",
-    "terminalAgents": "35 个专家代理已激活",
+    "terminalRulesSynced": "规则已同步到 9 个 AI 工具",
+    "terminalAgents": "37 个专家代理已激活",
     "terminalWorkflow": "PLAN → ACT → EVAL 工作流已就绪",
+    "terminalSkills": "50 个内置技能已加载",
     "terminalCursorrules": ".cursorrules",
     "terminalClaudeMd": "CLAUDE.md",
     "terminalCodex": ".codex/",
     "terminalAntigravity": ".antigravity/",
     "terminalQ": ".q/",
     "terminalKiro": ".kiro/",
+    "terminalWindsurf": ".windsurfrules",
+    "terminalAider": ".aider.conf.yml",
+    "terminalOpenCode": ".opencode/",
     "terminalReady": "准备就绪！一个源头，所有工具。"
+  },
+  "socialProof": {
+    "agents": "37 个代理",
+    "tools": "9 个 AI 工具",
+    "skills": "50 个技能",
+    "checklists": "9 个检查清单",
+    "languages": "8 种语言"
   },
   "beforeAfter": {
     "title": "问题与解决方案",
     "beforeLabel": "之前",
     "afterLabel": "之后",
-    "beforeFiles": "6 个配置文件，始终不同步。",
+    "beforeFiles": "9 个配置文件，始终不同步。",
     "afterFiles": "单一源头，自动同步到所有工具。",
     "cursorrules": ".cursorrules",
     "claudeMd": "CLAUDE.md",
@@ -30,24 +41,56 @@
     "antigravityRules": ".antigravity/rules.md",
     "qRules": ".q/rules.md",
     "kiroRules": ".kiro/rules.md",
+    "windsurfRules": ".windsurfrules",
+    "aiderRules": ".aider.conf.yml",
+    "opencodeRules": ".opencode/rules.md",
     "singleSource": "codingbuddy-rules/.ai-rules/",
     "autoSynced": "自动同步",
-    "alwaysCurrent": "始终最新"
+    "alwaysCurrent": "始终最新",
+    "impactTracked": "影响追踪"
   },
   "features": {
     "title": "您将获得",
     "universalRulesTitle": "统一规则",
-    "universalRulesDesc": "一个真实来源自动应用于所有 6 个 AI 编码工具。",
-    "agentsTitle": "35 个 AI 代理",
-    "agentsDesc": "为架构、安全、测试、性能和可访问性提供专业代理。",
+    "universalRulesDesc": "一个真实来源自动应用于所有 9 个 AI 编码工具。",
+    "agentsTitle": "37 个专家代理",
+    "agentsDesc": "为架构、安全、测试、性能和可访问性提供的领域专家。",
     "workflowTitle": "结构化工作流",
     "workflowDesc": "PLAN → ACT → EVAL 循环确保所有开发中的一致质量。",
     "qualityTitle": "内置质量标准",
     "qualityDesc": "TDD、SOLID 原则和 90% 以上测试覆盖率作为标准实践执行。",
-    "mcpTitle": "MCP 协议",
-    "mcpDesc": "标准 Model Context Protocol，实现无缝 AI 工具集成。",
+    "impactTitle": "会话影响报告",
+    "impactDesc": "AI 编码正在改进的可衡量证据 — 预防的问题、投入的代理、执行的规则。",
+    "selfEvolvingTitle": "自进化规则",
+    "selfEvolvingDesc": "从重复失败模式中学习并自动建议改进的规则。",
+    "skillsTitle": "50 个内置技能",
+    "skillsDesc": "用于 TDD、部署、代码审查、调试等的可重用工作流。",
     "zeroConfigTitle": "零配置",
     "zeroConfigDesc": "一条命令即可安装。所有支持的工具开箱即用。"
+  },
+  "workflowDemo": {
+    "title": "AI 编码工作流，全面增强",
+    "subtitle": "四种模式将 AI 辅助开发从混乱变为生产就绪。",
+    "planTitle": "PLAN",
+    "planDesc": "问题优先的规划和智能澄清。一行代码之前，专家推荐架构。",
+    "planDetail1": "澄清门控捕获歧义",
+    "planDetail2": "专家推荐架构",
+    "planDetail3": "执行前权限预测",
+    "actTitle": "ACT",
+    "actDesc": "以 TDD 纪律执行。实时规则执行防止偏移。质量门控阻止不良模式。",
+    "actDetail1": "TDD Red → Green → Refactor 循环",
+    "actDetail2": "实时规则执行",
+    "actDetail3": "按领域动态检查清单",
+    "evalTitle": "EVAL",
+    "evalDesc": "专家委员会独立审查。交叉审查发现。共识驱动的批准。",
+    "evalDetail1": "并行专家审查",
+    "evalDetail2": "交叉审查和讨论",
+    "evalDetail3": "共识：批准 / 关注 / 拒绝",
+    "autoTitle": "AUTO",
+    "autoDesc": "完全自主循环。迭代 PLAN → ACT → EVAL 直到零关键问题。自信地部署。",
+    "autoDetail1": "自主迭代",
+    "autoDetail2": "质量门控：Critical=0, High=0",
+    "autoDetail3": "生产就绪保证"
   },
   "supportedTools": {
     "title": "支持您喜爱的 AI 工具",
@@ -57,26 +100,44 @@
     "codex": "Codex",
     "antigravity": "Antigravity",
     "amazonQ": "Amazon Q",
-    "kiro": "Kiro"
+    "kiro": "Kiro",
+    "windsurf": "Windsurf",
+    "aider": "Aider",
+    "opencode": "OpenCode"
+  },
+  "hudShowcase": {
+    "title": "一目了然的智能",
+    "subtitle": "与会话一起呼吸的活状态栏 — 内置成本追踪、缓存节省和模式感知。",
+    "buddyTitle": "呼吸伙伴",
+    "buddyDesc": "根据会话阶段反应的动画头像 — 空闲、思考、活跃、阻塞、胜利。",
+    "costTitle": "成本速度",
+    "costDesc": "实时支出率追踪和趋势指标，防止账单惊喜。",
+    "cacheTitle": "缓存节省",
+    "cacheDesc": "准确查看每次会话的提示缓存节省金额。",
+    "modeTitle": "模式彩虹",
+    "modeDesc": "按模式的颜色渐变 — PLAN 蓝色、ACT 绿色、EVAL 紫色、AUTO 彩虹。",
+    "contextTitle": "上下文栏",
+    "contextDesc": "带警告阈值的可视进度条显示上下文窗口使用情况。",
+    "screenshotAlt": "显示伙伴头像、成本速度、缓存节省和模式指示器的 Codingbuddy HUD 状态栏"
   },
   "tuiDashboard": {
     "title": "实时代理仪表板",
-    "subtitle": "通过内置终端UI实时监控AI代理的工作状态。",
-    "screenshotAlt": "显示代理流水线、活动图表和任务进度的Codingbuddy TUI仪表板",
+    "subtitle": "通过内置终端 UI 实时监控 AI 代理的工作状态。",
+    "screenshotAlt": "显示代理流水线、活动图表和任务进度的 Codingbuddy TUI 仪表板",
     "feature1Title": "FlowMap",
     "feature1Desc": "显示活跃代理、阶段和实时进度的可视化流水线",
     "feature2Title": "Focused Agent",
     "feature2Desc": "带有迷你活动图和进度条的活跃代理实时视图",
     "feature3Title": "Checklist",
-    "feature3Desc": "与PLAN/ACT/EVAL上下文同步的任务完成跟踪",
+    "feature3Desc": "与 PLAN/ACT/EVAL 上下文同步的任务完成跟踪",
     "feature4Title": "Activity Chart",
     "feature4Desc": "代理工作时实时更新的工具调用条形图",
     "command": "npx codingbuddy tui",
     "commandLabel": "在单独终端中启动",
-    "multiSession": "多个Claude Code会话通过IPC共享同一个TUI窗口"
+    "multiSession": "多个 Claude Code 会话通过 IPC 共享同一个 TUI 窗口"
   },
   "agents": {
-    "title": "35 个专家代理",
+    "title": "37 个专家代理",
     "subtitle": "为开发的各个方面提供专业知识",
     "filter": "按类别筛选",
     "allCategories": "全部",
@@ -90,7 +151,29 @@
       "Security": "安全",
       "UX": "用户体验"
     },
-    "count": "{count} 个代理"
+    "count": "{count} 个代理",
+    "stacks": "代理栈",
+    "stacksSubtitle": "常见工作流的预构建团队",
+    "fullStack": "全栈",
+    "apiDev": "API 开发",
+    "dataPipeline": "数据管道",
+    "frontendPolish": "前端打磨",
+    "mlInfra": "ML 基础设施",
+    "securityAudit": "安全审计"
+  },
+  "skillsLibrary": {
+    "title": "50 个内置技能",
+    "subtitle": "将最佳实践体系化为可重复操作的可重用工作流",
+    "development": "开发",
+    "teamGit": "团队 & Git",
+    "review": "审查 & 代码",
+    "intelligence": "智能",
+    "specialized": "专业领域",
+    "developmentSkills": "TDD, 重构, 调试, 性能优化, 头脑风暴, 遗留系统现代化, 数据库迁移, API 设计, 前端设计, MCP 构建器",
+    "teamGitSkills": "Ship, Git Master, 工作树, 并行代理, 子代理开发, 跨仓库问题",
+    "reviewSkills": "PR 审查, PR 一体化, 代码审查, 代码说明, 错误分析, 构建修复, 验证",
+    "intelligenceSkills": "回顾, 安全审计, 技术债务, 规则编写, 技能创建器, 提示工程",
+    "specializedSkills": "事件响应, 入职, 部署检查清单, 成本预算, 组件架构, 代理设计"
   },
   "quickStart": {
     "title": "快速入门",
@@ -102,17 +185,20 @@
     "step3": "编码",
     "step3Desc": "使用 PLAN、ACT、EVAL 模式和专业代理",
     "copy": "复制",
-    "copied": "已复制！"
+    "copied": "已复制！",
+    "tab_claude": "Claude Code",
+    "tab_cursor": "Cursor",
+    "tab_codex": "Codex"
   },
   "ctaFooter": {
-    "title": "准备好统一您的 AI 编码了吗？",
+    "title": "准备好证明你的 AI 编码有效了吗？",
     "command": "npx codingbuddy init",
     "github": "在 GitHub 上 Star",
     "docs": "文档",
     "copy": "复制",
     "copied": "已复制！",
     "copyright": "© {year} Codingbuddy. MIT 许可证。",
-    "madeWith": "为开发者打造，由开发者创建。"
+    "madeWith": "37 个代理。9 个工具。50 个技能。一条命令。"
   },
   "header": {
     "nav": {
@@ -151,8 +237,8 @@
     "decline": "拒绝"
   },
   "metadata": {
-    "title": "Codingbuddy - 统一 AI 编码规则",
-    "description": "一套规则适用于 Cursor、Claude Code、Codex、Antigravity、Q 和 Kiro。所有工具中一致的 AI 辅助编码。"
+    "title": "Codingbuddy - 证明你的 AI 编码确实在改进",
+    "description": "一条命令适配 9 个 AI 工具。37 个专家代理。每次会话可衡量的影响。支持 Cursor、Claude Code、Codex、Windsurf 等。"
   },
   "i18n": {}
 }

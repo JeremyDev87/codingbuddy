@@ -9,12 +9,16 @@ interface TerminalMessages {
   terminalRulesSynced: string;
   terminalAgents: string;
   terminalWorkflow: string;
+  terminalSkills: string;
   terminalCursorrules: string;
   terminalClaudeMd: string;
   terminalCodex: string;
   terminalAntigravity: string;
   terminalQ: string;
   terminalKiro: string;
+  terminalWindsurf: string;
+  terminalAider: string;
+  terminalOpenCode: string;
   terminalReady: string;
 }
 
@@ -29,6 +33,9 @@ const toolFiles = [
   'terminalAntigravity',
   'terminalQ',
   'terminalKiro',
+  'terminalWindsurf',
+  'terminalAider',
+  'terminalOpenCode',
 ] as const;
 
 export const TerminalDemo = ({ messages }: TerminalDemoProps) => (
@@ -55,11 +62,12 @@ export const TerminalDemo = ({ messages }: TerminalDemoProps) => (
       <TerminalLine prefix="✓" text={messages.terminalRulesSynced} color="green" />
       <TerminalLine prefix="✓" text={messages.terminalAgents} color="green" />
       <TerminalLine prefix="✓" text={messages.terminalWorkflow} color="green" />
+      <TerminalLine prefix="✓" text={messages.terminalSkills} color="green" />
 
       <div className="h-2" aria-hidden="true" />
 
       {/* Tool files box */}
-      <div className="ml-4 space-y-0.5 rounded border border-terminal-border/50 p-2">
+      <div className="ml-4 grid grid-cols-3 gap-x-4 gap-y-0.5 rounded border border-terminal-border/50 p-2">
         {toolFiles.map(key => (
           <div key={key} className="flex items-center gap-2 font-mono text-xs">
             <span className="text-terminal-text">{messages[key]}</span>

@@ -1,28 +1,39 @@
 {
   "hero": {
-    "title": "일관된 코딩을 위한 멀티 AI 규칙",
-    "subtitle": "Cursor, Claude Code, Codex, Antigravity, Q, Kiro를 위한 하나의 규칙 세트.",
+    "title": "AI 코딩이 진짜 나아지고 있다는 걸 증명하세요",
+    "subtitle": "하나의 명령어. 9개 AI 도구. 매 세션마다 측정 가능한 임팩트.",
     "cta": "시작하기",
     "github": "GitHub에서 Star",
     "terminalTitle": "~/your-project",
     "terminalCmd": "npx codingbuddy init",
     "terminalInstalling": "codingbuddy-rules 설치 중...",
-    "terminalRulesSynced": "6개 AI 도구에 규칙 동기화 완료",
-    "terminalAgents": "35개 전문 에이전트 활성화",
+    "terminalRulesSynced": "9개 AI 도구에 규칙 동기화 완료",
+    "terminalAgents": "37개 전문 에이전트 활성화",
     "terminalWorkflow": "PLAN → ACT → EVAL 워크플로우 준비 완료",
+    "terminalSkills": "50개 내장 스킬 로드 완료",
     "terminalCursorrules": ".cursorrules",
     "terminalClaudeMd": "CLAUDE.md",
     "terminalCodex": ".codex/",
     "terminalAntigravity": ".antigravity/",
     "terminalQ": ".q/",
     "terminalKiro": ".kiro/",
+    "terminalWindsurf": ".windsurfrules",
+    "terminalAider": ".aider.conf.yml",
+    "terminalOpenCode": ".opencode/",
     "terminalReady": "준비 완료! 하나의 소스, 모든 도구."
+  },
+  "socialProof": {
+    "agents": "37개 에이전트",
+    "tools": "9개 AI 도구",
+    "skills": "50개 스킬",
+    "checklists": "9개 체크리스트",
+    "languages": "8개 언어"
   },
   "beforeAfter": {
     "title": "문제와 해결책",
     "beforeLabel": "이전",
     "afterLabel": "이후",
-    "beforeFiles": "6개의 설정 파일. 항상 동기화되지 않음.",
+    "beforeFiles": "9개의 설정 파일. 항상 동기화되지 않음.",
     "afterFiles": "단일 소스. 모든 도구에 자동 동기화.",
     "cursorrules": ".cursorrules",
     "claudeMd": "CLAUDE.md",
@@ -30,24 +41,56 @@
     "antigravityRules": ".antigravity/rules.md",
     "qRules": ".q/rules.md",
     "kiroRules": ".kiro/rules.md",
+    "windsurfRules": ".windsurfrules",
+    "aiderRules": ".aider.conf.yml",
+    "opencodeRules": ".opencode/rules.md",
     "singleSource": "codingbuddy-rules/.ai-rules/",
     "autoSynced": "자동 동기화",
-    "alwaysCurrent": "항상 최신"
+    "alwaysCurrent": "항상 최신",
+    "impactTracked": "임팩트 추적"
   },
   "features": {
     "title": "제공하는 기능",
     "universalRulesTitle": "통합 규칙",
-    "universalRulesDesc": "하나의 진실 공급원이 6개 AI 코딩 도구에 자동으로 적용됩니다.",
-    "agentsTitle": "35개 AI 에이전트",
-    "agentsDesc": "아키텍처, 보안, 테스팅, 성능, 접근성을 위한 전문 에이전트.",
+    "universalRulesDesc": "하나의 진실 공급원이 9개 AI 코딩 도구에 자동으로 적용됩니다.",
+    "agentsTitle": "37개 전문 에이전트",
+    "agentsDesc": "아키텍처, 보안, 테스팅, 성능, 접근성을 위한 도메인 전문가.",
     "workflowTitle": "구조화된 워크플로우",
     "workflowDesc": "PLAN → ACT → EVAL 사이클로 모든 개발에서 일관된 품질을 보장합니다.",
     "qualityTitle": "내장된 품질 기준",
     "qualityDesc": "TDD, SOLID 원칙, 90% 이상 테스트 커버리지가 표준 관행으로 적용됩니다.",
-    "mcpTitle": "MCP 프로토콜",
-    "mcpDesc": "원활한 AI 도구 통합을 위한 표준 Model Context Protocol.",
+    "impactTitle": "세션 임팩트 리포트",
+    "impactDesc": "AI 코딩이 개선되고 있다는 측정 가능한 증거 — 방지된 이슈, 투입된 에이전트, 적용된 규칙.",
+    "selfEvolvingTitle": "자기 진화 규칙",
+    "selfEvolvingDesc": "반복되는 실패 패턴을 학습하고 자동으로 개선을 제안하는 규칙.",
+    "skillsTitle": "50개 내장 스킬",
+    "skillsDesc": "TDD, 배포, 코드 리뷰, 디버깅 등을 위한 재사용 가능한 워크플로우.",
     "zeroConfigTitle": "설정 불필요",
     "zeroConfigDesc": "하나의 명령어로 설치. 지원하는 모든 도구에서 바로 사용 가능."
+  },
+  "workflowDemo": {
+    "title": "AI 코딩 워크플로우, 슈퍼차지",
+    "subtitle": "AI 지원 개발을 혼돈에서 프로덕션 레디로 만드는 네 가지 모드.",
+    "planTitle": "PLAN",
+    "planDesc": "질문 우선 기획과 지능형 명확화. 코드 한 줄 쓰기 전에 전문가가 아키텍처를 추천합니다.",
+    "planDetail1": "명확화 게이트가 모호성을 잡아냄",
+    "planDetail2": "전문가가 아키텍처 추천",
+    "planDetail3": "실행 전 권한 예측",
+    "actTitle": "ACT",
+    "actDesc": "TDD 규율로 실행. 실시간 규칙 적용이 드리프트를 방지. 품질 게이트가 나쁜 패턴을 차단.",
+    "actDetail1": "TDD Red → Green → Refactor 사이클",
+    "actDetail2": "실시간 규칙 적용",
+    "actDetail3": "도메인별 동적 체크리스트",
+    "evalTitle": "EVAL",
+    "evalDesc": "전문가 위원회가 독립적으로 리뷰. 교차 리뷰. 합의 기반 승인.",
+    "evalDetail1": "병렬 전문가 리뷰",
+    "evalDetail2": "교차 리뷰 및 토론",
+    "evalDetail3": "합의: 승인 / 우려 / 거부",
+    "autoTitle": "AUTO",
+    "autoDesc": "완전 자율 사이클. Critical 이슈 0이 될 때까지 PLAN → ACT → EVAL 반복. 확신을 갖고 배포.",
+    "autoDetail1": "자율 반복",
+    "autoDetail2": "품질 게이트: Critical=0, High=0",
+    "autoDetail3": "프로덕션 레디 보장"
   },
   "supportedTools": {
     "title": "즐겨 사용하는 AI 도구와 함께 작동합니다",
@@ -57,7 +100,25 @@
     "codex": "Codex",
     "antigravity": "Antigravity",
     "amazonQ": "Amazon Q",
-    "kiro": "Kiro"
+    "kiro": "Kiro",
+    "windsurf": "Windsurf",
+    "aider": "Aider",
+    "opencode": "OpenCode"
+  },
+  "hudShowcase": {
+    "title": "한눈에 보는 인텔리전스",
+    "subtitle": "세션과 함께 숨쉬는 살아있는 상태바 — 비용 추적, 캐시 절감, 모드 인식이 내장되어 있습니다.",
+    "buddyTitle": "브리딩 버디",
+    "buddyDesc": "세션 단계에 따라 반응하는 애니메이션 아바타 — 대기, 사고, 활성, 차단, 승리.",
+    "costTitle": "비용 속도",
+    "costDesc": "실시간 지출률 추적과 트렌드 지표로 빌링 서프라이즈를 방지합니다.",
+    "cacheTitle": "캐시 절감",
+    "cacheDesc": "세션별 프롬프트 캐싱 절감액을 정확히 확인합니다.",
+    "modeTitle": "모드 레인보우",
+    "modeDesc": "모드별 컬러 그라데이션 — PLAN은 파랑, ACT는 초록, EVAL은 보라, AUTO는 레인보우.",
+    "contextTitle": "컨텍스트 바",
+    "contextDesc": "경고 임계값이 있는 시각적 프로그레스 바로 컨텍스트 윈도우 사용량을 표시합니다.",
+    "screenshotAlt": "버디 페이스, 비용 속도, 캐시 절감, 모드 인디케이터를 보여주는 Codingbuddy HUD 상태바"
   },
   "tuiDashboard": {
     "title": "실시간 에이전트 대시보드",
@@ -76,7 +137,7 @@
     "multiSession": "여러 Claude Code 세션이 IPC를 통해 하나의 TUI 창을 공유합니다"
   },
   "agents": {
-    "title": "35개 전문 에이전트",
+    "title": "37개 전문 에이전트",
     "subtitle": "개발의 모든 측면을 위한 전문 지식",
     "filter": "카테고리별 필터",
     "allCategories": "전체",
@@ -90,7 +151,29 @@
       "Security": "보안",
       "UX": "UX"
     },
-    "count": "{count}개 에이전트"
+    "count": "{count}개 에이전트",
+    "stacks": "에이전트 스택",
+    "stacksSubtitle": "일반적인 워크플로우를 위한 사전 구성 팀",
+    "fullStack": "풀스택",
+    "apiDev": "API 개발",
+    "dataPipeline": "데이터 파이프라인",
+    "frontendPolish": "프론트엔드 폴리시",
+    "mlInfra": "ML 인프라",
+    "securityAudit": "보안 감사"
+  },
+  "skillsLibrary": {
+    "title": "50개 내장 스킬",
+    "subtitle": "모범 사례를 반복 가능한 액션으로 체계화한 재사용 워크플로우",
+    "development": "개발",
+    "teamGit": "팀 & Git",
+    "review": "리뷰 & 코드",
+    "intelligence": "인텔리전스",
+    "specialized": "전문 분야",
+    "developmentSkills": "TDD, 리팩토링, 디버깅, 성능 최적화, 브레인스토밍, 레거시 모더나이제이션, DB 마이그레이션, API 디자인, 프론트엔드 디자인, MCP 빌더",
+    "teamGitSkills": "Ship, Git Master, 워크트리, 병렬 에이전트, 서브에이전트 개발, 크로스 레포 이슈",
+    "reviewSkills": "PR 리뷰, PR 올인원, 코드 리뷰, 코드 설명, 에러 분석, 빌드 픽스, 검증",
+    "intelligenceSkills": "회고, 보안 감사, 기술 부채, 규칙 작성, 스킬 크리에이터, 프롬프트 엔지니어링",
+    "specializedSkills": "인시던트 대응, 온보딩, 배포 체크리스트, 비용 예산, 위젯 아키텍처, 에이전트 디자인"
   },
   "quickStart": {
     "title": "빠른 시작",
@@ -102,17 +185,20 @@
     "step3": "코딩",
     "step3Desc": "전문 에이전트와 함께 PLAN, ACT, EVAL 모드를 사용하세요",
     "copy": "복사",
-    "copied": "복사 완료!"
+    "copied": "복사 완료!",
+    "tab_claude": "Claude Code",
+    "tab_cursor": "Cursor",
+    "tab_codex": "Codex"
   },
   "ctaFooter": {
-    "title": "AI 코딩을 통합할 준비가 되셨나요?",
+    "title": "AI 코딩이 효과가 있다는 걸 증명할 준비가 되셨나요?",
     "command": "npx codingbuddy init",
     "github": "GitHub에서 Star",
     "docs": "문서",
     "copy": "복사",
     "copied": "복사 완료!",
     "copyright": "© {year} Codingbuddy. MIT 라이선스.",
-    "madeWith": "개발자를 위해, 개발자가 만들었습니다."
+    "madeWith": "37개 에이전트. 9개 도구. 50개 스킬. 하나의 명령어."
   },
   "header": {
     "nav": {
@@ -151,8 +237,8 @@
     "decline": "거부"
   },
   "metadata": {
-    "title": "Codingbuddy - 일관된 코딩을 위한 멀티 AI 규칙",
-    "description": "Cursor, Claude Code, Codex, Antigravity, Q, Kiro를 위한 하나의 규칙 세트. 모든 도구에서 일관된 AI 지원 코딩."
+    "title": "Codingbuddy - AI 코딩이 진짜 나아지고 있다는 걸 증명하세요",
+    "description": "하나의 명령어로 9개 AI 도구. 37개 전문 에이전트. 매 세션마다 측정 가능한 임팩트. Cursor, Claude Code, Codex, Windsurf 등과 함께."
   },
   "i18n": {}
 }

@@ -1,7 +1,7 @@
 import type { Agent } from '@/types';
 
 export const agents: Agent[] = [
-  // === Planning (5) ===
+  // === Planning (6) ===
   {
     id: 'plan-mode',
     name: 'Plan Mode Agent',
@@ -47,8 +47,17 @@ export const agents: Agent[] = [
     tags: ['Migration', 'Modernization'],
     expertise: ['Legacy Migration', 'Framework Upgrades', 'Data Migration'],
   },
+  {
+    id: 'plan-reviewer',
+    name: 'Plan Reviewer',
+    description: 'Reviews and validates implementation plans before execution',
+    category: 'Planning',
+    icon: '📐',
+    tags: ['Review', 'Validation'],
+    expertise: ['Plan Review', 'Risk Assessment', 'Feasibility Analysis'],
+  },
 
-  // === Development (12) ===
+  // === Development (15) ===
   {
     id: 'act-mode',
     name: 'Act Mode Agent',
@@ -57,6 +66,15 @@ export const agents: Agent[] = [
     icon: '⚡',
     tags: ['Implementation', 'Execution'],
     expertise: ['Code Implementation', 'TDD Execution'],
+  },
+  {
+    id: 'auto-mode',
+    name: 'Auto Mode Agent',
+    description: 'Autonomous PLAN → ACT → EVAL cycling until quality targets met',
+    category: 'Development',
+    icon: '🔁',
+    tags: ['Autonomous', 'Full Cycle'],
+    expertise: ['Autonomous Execution', 'Quality Gates', 'Iteration'],
   },
   {
     id: 'frontend-developer',
@@ -86,6 +104,24 @@ export const agents: Agent[] = [
     expertise: ['React Native', 'Flutter', 'iOS', 'Android'],
   },
   {
+    id: 'software-engineer',
+    name: 'Software Engineer',
+    description: 'Full-stack generalist for end-to-end feature implementation',
+    category: 'Development',
+    icon: '💻',
+    tags: ['Full-Stack', 'Generalist'],
+    expertise: ['Full-Stack Development', 'System Design', 'Code Quality'],
+  },
+  {
+    id: 'systems-developer',
+    name: 'Systems Developer',
+    description: 'Low-level systems programming and infrastructure specialist',
+    category: 'Development',
+    icon: '🔩',
+    tags: ['Systems', 'Infrastructure'],
+    expertise: ['Systems Programming', 'Performance', 'Infrastructure'],
+  },
+  {
     id: 'data-engineer',
     name: 'Data Engineer',
     description: 'Data specialist focused on database design, schema optimization, and migrations',
@@ -93,6 +129,15 @@ export const agents: Agent[] = [
     icon: '🗄️',
     tags: ['Database', 'Schema', 'Migration'],
     expertise: ['Database Design', 'Schema Optimization', 'Data Migration'],
+  },
+  {
+    id: 'data-scientist',
+    name: 'Data Scientist',
+    description: 'Statistical analysis, data modeling, and visualization specialist',
+    category: 'Development',
+    icon: '📈',
+    tags: ['Data', 'Analytics', 'Visualization'],
+    expertise: ['Statistical Analysis', 'Data Modeling', 'Visualization'],
   },
   {
     id: 'devops-engineer',
@@ -157,8 +202,17 @@ export const agents: Agent[] = [
     tags: ['API', 'Integration', 'Third-Party'],
     expertise: ['API Integration', 'Third-Party Services', 'OAuth'],
   },
+  {
+    id: 'parallel-orchestrator',
+    name: 'Parallel Orchestrator',
+    description: 'Coordinates parallel agent execution with file-overlap validation',
+    category: 'Development',
+    icon: '🎛️',
+    tags: ['Parallel', 'Orchestration'],
+    expertise: ['Parallel Execution', 'Task Distribution', 'Conflict Prevention'],
+  },
 
-  // === Review (5) ===
+  // === Review (6) ===
   {
     id: 'eval-mode',
     name: 'Eval Mode Agent',
@@ -196,6 +250,15 @@ export const agents: Agent[] = [
     expertise: ['Test Strategy', 'TDD', 'Integration Testing'],
   },
   {
+    id: 'test-engineer',
+    name: 'Test Engineer',
+    description: 'Hands-on test implementation specialist for unit, integration, and e2e testing',
+    category: 'Review',
+    icon: '🧬',
+    tags: ['Testing', 'Implementation', 'E2E'],
+    expertise: ['Test Implementation', 'E2E Testing', 'Test Automation'],
+  },
+  {
     id: 'documentation-specialist',
     name: 'Documentation Specialist',
     description: 'Documentation expert for technical writing and API docs',
@@ -205,7 +268,7 @@ export const agents: Agent[] = [
     expertise: ['Technical Writing', 'API Documentation', 'README'],
   },
 
-  // === Security (2) ===
+  // === Security (3) ===
   {
     id: 'security-specialist',
     name: 'Security Specialist',
@@ -214,6 +277,15 @@ export const agents: Agent[] = [
     icon: '🔒',
     tags: ['Security', 'OWASP', 'Audit'],
     expertise: ['Security Audit', 'OWASP', 'Secure Coding'],
+  },
+  {
+    id: 'security-engineer',
+    name: 'Security Engineer',
+    description: 'Hands-on security implementation specialist for auth, encryption, and hardening',
+    category: 'Security',
+    icon: '🛡️',
+    tags: ['Auth', 'Encryption', 'Hardening'],
+    expertise: ['Authentication', 'Encryption', 'Security Hardening'],
   },
   {
     id: 'observability-specialist',

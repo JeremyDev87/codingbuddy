@@ -12,7 +12,11 @@ interface SlotErrorProps {
     | 'features'
     | 'supported tools'
     | 'tui-dashboard'
-    | 'footer';
+    | 'footer'
+    | 'social-proof'
+    | 'workflow-demo'
+    | 'hud-showcase'
+    | 'skills-library';
 }
 
 export const SlotError = ({ reset, slotName }: SlotErrorProps) => {

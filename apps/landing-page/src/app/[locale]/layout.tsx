@@ -28,7 +28,14 @@ const jetbrainsMono = JetBrains_Mono({
   adjustFontFallback: true,
 });
 
-const CLIENT_NAMESPACES = ['header', 'cookieConsent', 'agents', 'quickStart'] as const;
+const CLIENT_NAMESPACES = [
+  'header',
+  'cookieConsent',
+  'agents',
+  'quickStart',
+  'workflowDemo',
+  'skillsLibrary',
+] as const;
 
 const pickClientMessages = (messages: AbstractIntlMessages): AbstractIntlMessages =>
   Object.fromEntries(CLIENT_NAMESPACES.filter(ns => ns in messages).map(ns => [ns, messages[ns]]));
@@ -69,11 +76,15 @@ export const generateMetadata = async ({
 interface LocaleLayoutProps {
   children: ReactNode;
   hero: ReactNode;
+  social_proof: ReactNode;
   before_after: ReactNode;
   features: ReactNode;
+  workflow_demo: ReactNode;
   supported_tools: ReactNode;
+  hud_showcase: ReactNode;
   tui_dashboard: ReactNode;
   agents: ReactNode;
+  skills_library: ReactNode;
   quick_start: ReactNode;
   cta_footer: ReactNode;
   params: Promise<{ locale: string }>;
@@ -82,11 +93,15 @@ interface LocaleLayoutProps {
 const LocaleLayout = async ({
   children,
   hero,
+  social_proof,
   before_after,
   features,
+  workflow_demo,
   supported_tools,
+  hud_showcase,
   tui_dashboard,
   agents,
+  skills_library,
   quick_start,
   cta_footer,
   params,
@@ -132,11 +147,15 @@ const LocaleLayout = async ({
             <main id="main-content" className="flex min-h-screen flex-col">
               {children}
               {hero}
+              {social_proof}
               {before_after}
               {features}
+              {workflow_demo}
               {supported_tools}
+              {hud_showcase}
               {tui_dashboard}
               {agents}
+              {skills_library}
               {quick_start}
             </main>
             {cta_footer}

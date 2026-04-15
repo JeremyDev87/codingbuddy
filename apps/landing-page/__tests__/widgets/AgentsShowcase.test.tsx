@@ -21,7 +21,7 @@ describe('AgentsShowcase', () => {
 
   it('should display section heading', () => {
     render(<AgentsShowcase locale="en" />);
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('35 Specialist Agents');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('37 Specialist Agents');
   });
 
   it('should have id attribute for anchor navigation', () => {
@@ -42,8 +42,8 @@ describe('AgentsShowcase', () => {
 
   it('should render agent cards up to max 8', () => {
     render(<AgentsShowcase locale="en" />);
-    // Total agents is 29, but only 8 should be visible
-    expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
+    // Total agents is 37, but only 8 should be visible
+    expect(screen.getByText('Plan Mode Agent')).toBeInTheDocument();
     // Count visible agent cards (each has role="img" for the emoji)
     const agentIcons = screen.getAllByRole('img', { hidden: true });
     expect(agentIcons.length).toBeLessThanOrEqual(8);
@@ -51,7 +51,7 @@ describe('AgentsShowcase', () => {
 
   it('should display agent count for all agents', () => {
     render(<AgentsShowcase locale="en" />);
-    expect(screen.getByText('29 agents')).toBeInTheDocument();
+    expect(screen.getByText('37 agents')).toBeInTheDocument();
   });
 
   it('should not render a search input', () => {
