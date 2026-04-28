@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/jeremydev87-codingbuddy-badge.png)](https://mseep.ai/app/jeremydev87-codingbuddy)
+
 <p align="center">
   <a href="README.md">English</a> |
   <a href="README.ko.md">한국어</a> |
